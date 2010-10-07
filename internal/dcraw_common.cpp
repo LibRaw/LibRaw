@@ -4136,6 +4136,7 @@ void CLASS ahd_interpolate()
   ushort (*rgb)[TS][TS][3];
   short (*lab)[TS][TS][3];
   char (*homo)[TS][2];
+  int terminate_flag = 0;
 
   if(dcraw_cbrt[0]<-0.1){
       for (i=0; i < 0x10000; i++) {
@@ -4161,7 +4162,7 @@ void CLASS ahd_interpolate()
 
 #ifdef LIBRAW_LIBRARY_BUILD
 #ifdef _OPENMP
-#pragma omp parallel private(buffer,rgb,lab,homo,top,left,i,j,k) shared(xyz_cam)
+#pragma omp parallel private(buffer,rgb,lab,homo,top,left,i,j,k) shared(xyz_cam,terminate_flag)
 #endif
 #endif
   {
@@ -4176,17 +4177,28 @@ void CLASS ahd_interpolate()
 #endif
     for (top=2; top < height-5; top += TS-6){
 #ifdef LIBRAW_LIBRARY_BUILD
-      RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE,top-2,height-7);
+#ifdef _OPENMP
+        if(0== omp_get_thread_num())
 #endif
-      for (left=2; left < width-5; left += TS-6) {
-        ahd_interpolate_green_h_and_v(top, left, rgb);
-        ahd_interpolate_r_and_b_and_convert_to_cielab(top, left, rgb, lab, xyz_cam);
-        ahd_interpolate_build_homogeneity_map(top, left, lab, homo);
-        ahd_interpolate_combine_homogeneous_pixels(top, left, rgb, homo);
+           if(callbacks.progress_cb) {                                     
+               int rr = (*callbacks.progress_cb)(callbacks.progresscb_data,LIBRAW_PROGRESS_INTERPOLATE,top-2,height-7);
+               if(rr)
+                   terminate_flag = 1;
+           }
+#endif
+        for (left=2; !terminate_flag && (left < width-5); left += TS-6) {
+            ahd_interpolate_green_h_and_v(top, left, rgb);
+            ahd_interpolate_r_and_b_and_convert_to_cielab(top, left, rgb, lab, xyz_cam);
+            ahd_interpolate_build_homogeneity_map(top, left, lab, homo);
+            ahd_interpolate_combine_homogeneous_pixels(top, left, rgb, homo);
       }
     }
     free (buffer);
   }
+#ifdef LIBRAW_LIBRARY_BUILD 
+  if(terminate_flag)
+      throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
+#endif
 }
 
 
@@ -4378,7 +4390,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 5482 "dcraw/dcraw.c"
+#line 5494 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -4927,7 +4939,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 6035 "dcraw/dcraw.c"
+#line 6047 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6157,7 +6169,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 7366 "dcraw/dcraw.c"
+#line 7378 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -6742,7 +6754,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7954 "dcraw/dcraw.c"
+#line 7966 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8517,7 +8529,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9820 "dcraw/dcraw.c"
+#line 9832 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8736,7 +8748,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 10063 "dcraw/dcraw.c"
+#line 10075 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

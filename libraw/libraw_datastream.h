@@ -35,87 +35,170 @@ struct LibRaw_abstract_datastream;
 
 #include "libraw_const.h"
 #include "libraw_types.h"
-
-class LibRaw_buffer_datastream;
+#include <fstream>
+#include <memory>
 
 class LibRaw_abstract_datastream
 {
-  public:
-    LibRaw_abstract_datastream(){substream=0;};
-    virtual             ~LibRaw_abstract_datastream(void){if(substream) delete substream;}
-    virtual int         valid(){return 0;}
-    virtual int         read(void *,size_t, size_t ){ return -1;}
-    virtual int         seek(INT64 , int ){return -1;}
-    virtual INT64       tell(){return -1;}
-    virtual int         get_char(){return -1;}
-    virtual char*       gets(char *, int){ return NULL;}
-    virtual int         scanf_one(const char *, void *){return -1;}
-    virtual int         eof(){return -1;}
+  protected:
+    std::auto_ptr<std::streambuf> f; /* will close() automatically through dtor */
+    std::auto_ptr<std::streambuf> saved_f; /* when *f is a subfile, *saved_f is the master file */
+    const char *filename;
 
-    virtual const char* fname(){ return NULL;};
-    virtual int         subfile_open(const char*){ return EINVAL;}
-    virtual void        subfile_close(){}
-    virtual int		tempbuffer_open(void*, size_t);
-    virtual void	tempbuffer_close()
+  public:
+    LibRaw_abstract_datastream(const char *filename)
+      :filename(filename)
     {
-        if(substream) delete substream;
-        substream = NULL;
     }
 
-  protected:
-    LibRaw_abstract_datastream *substream;
-};
+    int valid() { return f.get() ? 1 : 0; }
+#define CHK() do {if(!f.get()) throw LIBRAW_EXCEPTION_IO_EOF;}while(0)
+    int read(void * ptr,size_t size, size_t nmemb) 
+    { 
+        CHK(); 
 
+        return f->sgetn(static_cast<char*>(ptr), nmemb * size) / size;
+    }
+    int eof() 
+    { 
+        CHK(); 
+        return f->sgetc() == EOF;
+    }
+    int seek(INT64 o, int whence) 
+    { 
+        CHK(); 
+
+        std::ios_base::seekdir dir;
+        switch (whence) {
+        case SEEK_SET: dir = std::ios_base::beg; break;
+        case SEEK_CUR: dir = std::ios_base::cur; break;
+        case SEEK_END: dir = std::ios_base::end; break;
+        default: dir = std::ios_base::beg;
+        }
+        return f->pubseekoff(o, dir);
+    }
+    INT64 tell() 
+    { 
+        CHK(); 
+
+        return f->pubseekoff(0, std::ios_base::cur);
+    }
+    int get_char() 
+    { 
+        CHK(); 
+        return f->sbumpc();
+    }
+    char* gets(char *str, int sz) 
+    { 
+        CHK(); 
+
+        std::istream is(f.get());
+        is.getline(str, sz);
+        if (is.fail()) return 0;
+        return str;
+    }
+    virtual int scanf_one(const char *fmt, void*val) 
+    { 
+        CHK(); 
+
+        std::istream is(f.get());
+
+        /* HUGE ASSUMPTION: *fmt is either "%d" or "%f" */
+        if (strcmp(fmt, "%d") == 0) {
+          int d;
+          is >> d;
+          if (is.fail()) return EOF;
+          *(static_cast<int*>(val)) = d;
+        } else {
+          float f;
+          is >> f;
+          if (is.fail()) return EOF;
+          *(static_cast<float*>(val)) = f;
+        }
+
+        return 1;
+    }
+    const char* fname() { return filename; }
+    /* You can't have a "subfile" and a "tempfile" at the same time. */
+    int subfile_open(const char *fn)
+    {
+      CHK();
+
+      if (saved_f.get()) return EBUSY;
+
+      saved_f = f;
+
+      std::auto_ptr<std::filebuf> buf(new std::filebuf());
+
+      buf->open(fn, std::ios_base::in | std::ios_base::binary);
+      if (!buf->is_open()) {
+        f = saved_f;
+        return ENOENT;
+      } else {
+        f = buf;
+      }
+
+      return 0;
+    }
+    void subfile_close()
+    {
+        if (!saved_f.get()) return;
+        f = saved_f;
+    }
+    int tempbuffer_open(void* buf, size_t size)
+    {
+      CHK();
+
+      if (saved_f.get()) return EBUSY;
+
+      saved_f = f;
+
+      f.reset(new std::filebuf());
+
+      if (!f.get()) {
+        f = saved_f;
+        return ENOMEM;
+      }
+
+      f->pubsetbuf(static_cast<char*>(buf), size);
+
+      return 0;
+    }
+    void	tempbuffer_close()
+    {
+      if (!saved_f.get()) return;
+      f = saved_f;
+    }
+};
+#undef CHK
+#undef GETBUF
 
 class LibRaw_file_datastream : public LibRaw_abstract_datastream
 {
   public:
-                        LibRaw_file_datastream(const char *fname); 
-    virtual             ~LibRaw_file_datastream();
-    virtual int         valid() { return f?1:0;}
-
-    virtual int         read(void * ptr,size_t size, size_t nmemb); 
-    virtual int         eof(); 
-    virtual int         seek(INT64 o, int whence); 
-    virtual INT64       tell(); 
-    virtual int         get_char(); 
-    virtual char* gets(char *str, int sz);
-    virtual int scanf_one(const char *fmt, void*val); 
-    virtual const char *fname() { return filename; }
-    virtual int subfile_open(const char *fn);
-    virtual void subfile_close();
-
-  private:
-    FILE *f,*sav;
-    const char *filename;
+    LibRaw_file_datastream(const char *filename) 
+      : LibRaw_abstract_datastream(filename)
+    { 
+      if (filename) {
+        std::auto_ptr<std::filebuf> buf(new std::filebuf());
+        buf->open(filename, std::ios_base::in | std::ios_base::binary);
+        if (buf->is_open()) {
+          f = buf;
+        }
+      }
+    }
 };
 
 class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
 {
   public:
-    LibRaw_buffer_datastream(void *buffer, size_t bsize);
-    virtual ~LibRaw_buffer_datastream(){}
-    virtual int valid() { return buf?1:0;}
-    virtual int read(void * ptr,size_t sz, size_t nmemb); 
-    virtual int eof(); 
-    virtual int seek(INT64 o, int whence); 
-    virtual INT64 tell(); 
-    virtual int get_char(); 
-    virtual char* gets(char *s, int sz); 
-    virtual int scanf_one(const char *fmt, void* val); 
-
-  private:
-    unsigned char *buf;
-    size_t   streampos,streamsize;
+    LibRaw_buffer_datastream(void* buffer, size_t size)
+      : LibRaw_abstract_datastream(0)
+    {
+      f.reset(new std::filebuf());
+      f->pubsetbuf(static_cast<char*>(buffer), size);
+    }
 };
-
-inline int LibRaw_abstract_datastream::tempbuffer_open(void  *buf, size_t size)
-{
-    if(substream) return EBUSY;
-    substream = new LibRaw_buffer_datastream(buf,size);
-    return substream?0:EINVAL;
-}
-
 
 #endif
 

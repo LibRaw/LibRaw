@@ -5233,6 +5233,7 @@ void CLASS ahd_interpolate()
   ushort (*rgb)[TS][TS][3];
   short (*lab)[TS][TS][3];
   char (*homo)[TS][2];
+  int terminate_flag = 0;
 
   if(dcraw_cbrt[0]<-0.1){
       for (i=0; i < 0x10000; i++) {
@@ -5258,7 +5259,7 @@ void CLASS ahd_interpolate()
 
 #ifdef LIBRAW_LIBRARY_BUILD
 #ifdef _OPENMP
-#pragma omp parallel private(buffer,rgb,lab,homo,top,left,i,j,k) shared(xyz_cam)
+#pragma omp parallel private(buffer,rgb,lab,homo,top,left,i,j,k) shared(xyz_cam,terminate_flag)
 #endif
 #endif
   {
@@ -5273,17 +5274,28 @@ void CLASS ahd_interpolate()
 #endif
     for (top=2; top < height-5; top += TS-6){
 #ifdef LIBRAW_LIBRARY_BUILD
-      RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE,top-2,height-7);
+#ifdef _OPENMP
+        if(0== omp_get_thread_num())
 #endif
-      for (left=2; left < width-5; left += TS-6) {
-        ahd_interpolate_green_h_and_v(top, left, rgb);
-        ahd_interpolate_r_and_b_and_convert_to_cielab(top, left, rgb, lab, xyz_cam);
-        ahd_interpolate_build_homogeneity_map(top, left, lab, homo);
-        ahd_interpolate_combine_homogeneous_pixels(top, left, rgb, homo);
+           if(callbacks.progress_cb) {                                     
+               int rr = (*callbacks.progress_cb)(callbacks.progresscb_data,LIBRAW_PROGRESS_INTERPOLATE,top-2,height-7);
+               if(rr)
+                   terminate_flag = 1;
+           }
+#endif
+        for (left=2; !terminate_flag && (left < width-5); left += TS-6) {
+            ahd_interpolate_green_h_and_v(top, left, rgb);
+            ahd_interpolate_r_and_b_and_convert_to_cielab(top, left, rgb, lab, xyz_cam);
+            ahd_interpolate_build_homogeneity_map(top, left, lab, homo);
+            ahd_interpolate_combine_homogeneous_pixels(top, left, rgb, homo);
       }
     }
     free (buffer);
   }
+#ifdef LIBRAW_LIBRARY_BUILD 
+  if(terminate_flag)
+      throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
+#endif
 }
 
 

@@ -177,6 +177,7 @@ it under the terms of the one of three licenses as you choose:
 #endif
 #define getc(stream)		 stream->get_char()
 #define fgetc(stream)		 stream->get_char()
+#define fgetcb(stream)		 stream->get_char_buf()
 #define fgets(str,n,stream)	 stream->gets(str,n)
 #define fscanf(stream,fmt,ptr)	 stream->scanf_one(fmt,ptr)
 #endif
