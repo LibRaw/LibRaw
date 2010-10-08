@@ -52,21 +52,21 @@ class LibRaw_abstract_datastream
     }
 
     int valid() { return f.get() ? 1 : 0; }
-#define CHK() do {if(!f.get()) throw LIBRAW_EXCEPTION_IO_EOF;}while(0)
+#define LR_STREAM_CHK() do {if(!f.get()) throw LIBRAW_EXCEPTION_IO_EOF;}while(0)
     int read(void * ptr,size_t size, size_t nmemb) 
     { 
-        CHK(); 
+        LR_STREAM_CHK(); 
 
         return f->sgetn(static_cast<char*>(ptr), nmemb * size) / size;
     }
     int eof() 
     { 
-        CHK(); 
+        LR_STREAM_CHK(); 
         return f->sgetc() == EOF;
     }
     int seek(INT64 o, int whence) 
     { 
-        CHK(); 
+        LR_STREAM_CHK(); 
 
         std::ios_base::seekdir dir;
         switch (whence) {
@@ -79,18 +79,18 @@ class LibRaw_abstract_datastream
     }
     INT64 tell() 
     { 
-        CHK(); 
+        LR_STREAM_CHK(); 
 
         return f->pubseekoff(0, std::ios_base::cur);
     }
     int get_char() 
     { 
-        CHK(); 
+        LR_STREAM_CHK(); 
         return f->sbumpc();
     }
     char* gets(char *str, int sz) 
     { 
-        CHK(); 
+        LR_STREAM_CHK(); 
 
         std::istream is(f.get());
         is.getline(str, sz);
@@ -99,7 +99,7 @@ class LibRaw_abstract_datastream
     }
     virtual int scanf_one(const char *fmt, void*val) 
     { 
-        CHK(); 
+        LR_STREAM_CHK(); 
 
         std::istream is(f.get());
 
@@ -122,7 +122,7 @@ class LibRaw_abstract_datastream
     /* You can't have a "subfile" and a "tempfile" at the same time. */
     int subfile_open(const char *fn)
     {
-      CHK();
+      LR_STREAM_CHK();
 
       if (saved_f.get()) return EBUSY;
 
@@ -147,7 +147,7 @@ class LibRaw_abstract_datastream
     }
     int tempbuffer_open(void* buf, size_t size)
     {
-      CHK();
+      LR_STREAM_CHK();
 
       if (saved_f.get()) return EBUSY;
 
@@ -170,8 +170,7 @@ class LibRaw_abstract_datastream
       f = saved_f;
     }
 };
-#undef CHK
-#undef GETBUF
+#undef LR_STREAM_CHK
 
 class LibRaw_file_datastream : public LibRaw_abstract_datastream
 {

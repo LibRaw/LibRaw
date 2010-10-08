@@ -1,3 +1,17 @@
+2010-10-08 Alex Tutubalin <lexa@lexa.ru>
+           * Fixed bug in exception handling in OpenMP sections in 
+             AHD interpolation code.
+
+           * LibRaw_datastreams are now C++ iostreams based instead of old
+             plain FILE* calls.
+             LibRaw::open_file() in multithreaded programs are WAY faster
+             on many OSes (Linux, Windows, MacOSX) because of no extra locks.
+
+           * all client code should be recompiled due to internals change.
+
+            * LibRaw 0.11-Beta4
+
+
 2010-10-01 Alex Tutubalin <lexa@lexa.ru>
            * Fixed bug in LibRaw::dcraw_process() code: for half_size
              processing, params.four_color_rgb was set to 1 internally

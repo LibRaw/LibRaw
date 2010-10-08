@@ -1,3 +1,15 @@
+2010-10-08 Alex Tutubalin <lexa@lexa.ru>
+           * Исправлена ошибка порождения C++ exceptions внутри OpenMP-секции
+             в AHD-интерполяции
+
+           * LibRaw_datastreams переведены с FILE* I/O на C++ iostreams
+             Многопоточные программы на многих ОС стали читать RAW гораздо
+             быстрее.
+
+           * Структуры данных изменены, требуется перекомпиляция всех приложений.
+
+            * LibRaw 0.11-Beta4
+
 2010-10-01 Alex Tutubalin <lexa@lexa.ru>
            * Исправлена ошибка в dcraw_process:
               params.half_size выставляла params.four_color_rgb 
