@@ -9,7 +9,7 @@
 
            * all client code should be recompiled due to internals change.
 
-            * LibRaw 0.11-Beta4
+           * LibRaw 0.11-Beta4
 
 
 2010-10-01 Alex Tutubalin <lexa@lexa.ru>
@@ -17,14 +17,14 @@
              processing, params.four_color_rgb was set to 1 internally
              and not returned back after postprocessing.
 
-            * Several Visual Studio 2003 compatibility fixes
+           * Several Visual Studio 2003 compatibility fixes
 
-            * AHD interpolation refactored. Now it is about 10% faster than
-              dcraw in single-process mode and up to 1.5 times faster on
-              4-core and OpenMP (total execution time counted, not AHD itself)
-              Thanks to Adam Hooper
+           * AHD interpolation refactored. Now it is about 10% faster than
+             dcraw in single-process mode and up to 1.5 times faster on
+             4-core and OpenMP (total execution time counted, not AHD itself)
+             Thanks to Adam Hooper
               
-            * LibRaw 0.11-Beta3
+           * LibRaw 0.11-Beta3
 
 2010-09-07 Alex Tutubalin <lexa@lexa.ru>
            * Phase One files: LibRaw::unpack() sets colordata.black to
