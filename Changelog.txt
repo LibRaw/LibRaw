@@ -22,7 +22,7 @@
             * AHD interpolation refactored. Now it is about 10% faster than
               dcraw in single-process mode and up to 1.5 times faster on
               4-core and OpenMP (total execution time counted, not AHD itself)
-              Thanks Adam Hooper
+              Thanks to Adam Hooper
               
             * LibRaw 0.11-Beta3
 
