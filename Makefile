@@ -8,7 +8,7 @@ CXX=g++
 #CFLAGS=-O4 -march=core2 -march=core2 -mtune=core2 -fomit-frame-pointer -ffast-math -fstrict-aliasing -funsafe-math-optimizations -mfpmath=sse -msse2 -I. 
 #CFLAGS=-g -Wall -I.
 #CFLAGS=-g -I. -Wall
-CFLAGS=-g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8
+CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8
 
 # GCC 4.4 section
 # CC=gcc44
@@ -94,16 +94,16 @@ lib/libraw_r.a: ${DCRAW_LIB_MT_OBJECTS}
 	ar crv lib/libraw_r.a ${DCRAW_LIB_MT_OBJECTS}
 	ranlib lib/libraw_r.a
 
-object/dcraw_common_mt.o: internal/dcraw_common.cpp
+object/dcraw_common_mt.o: internal/dcraw_common.cpp ${LR_INCLUDES}
 	$(CXX) -c -pthread ${LCMS_DEF} ${CFLAGS} -o object/dcraw_common_mt.o internal/dcraw_common.cpp
 
-object/dcraw_fileio_mt.o: internal/dcraw_fileio.cpp
+object/dcraw_fileio_mt.o: internal/dcraw_fileio.cpp ${LR_INCLUDES}
 	$(CXX)  -c -pthread ${LCMS_DEF} ${CFLAGS} -o object/dcraw_fileio_mt.o internal/dcraw_fileio.cpp
 
-object/libraw_cxx_mt.o: src/libraw_cxx.cpp
+object/libraw_cxx_mt.o: src/libraw_cxx.cpp ${LR_INCLUDES}
 	$(CXX) -c ${LCMS_DEF} -pthread ${CFLAGS} -o object/libraw_cxx_mt.o src/libraw_cxx.cpp
 
-object/libraw_c_api_mt.o: src/libraw_c_api.cpp
+object/libraw_c_api_mt.o: src/libraw_c_api.cpp ${LR_INCLUDES}
 	$(CXX) -c ${LCMS_DEF} -pthread ${CFLAGS} -o object/libraw_c_api_mt.o src/libraw_c_api.cpp
 
 clean:

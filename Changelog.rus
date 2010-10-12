@@ -1,3 +1,11 @@
+2010-10-12 Alex Tutubalin <lexa@lexa.ru>
+           * Обновление интерфейса чтения данных. Реализованы следующие классы
+             LibRaw_*_datastream:
+               + LibRaw_buffer_datastream - чтение из буфера в памяти
+               + LibRaw_file_datastream - чтение из файла через iostreams
+                 (быстрое чтение, но файл буферизуется в памяти целиком)
+
+
 2010-10-08 Alex Tutubalin <lexa@lexa.ru>
            * Исправлена ошибка порождения C++ exceptions внутри OpenMP-секции
              в AHD-интерполяции

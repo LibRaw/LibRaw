@@ -24,6 +24,7 @@ it under the terms of the one of three licenses as you choose:
 #include <math.h>
 #include <new>
 #ifndef WIN32
+#include <sys/stat.h>
 #include <netinet/in.h>
 #else
 #include <winsock2.h>
@@ -547,13 +548,24 @@ int LibRaw::add_masked_borders_to_bitmap()
     return LIBRAW_SUCCESS;
 }
 
-int LibRaw::open_file(const char *fname)
+int LibRaw::open_file(const char *fname, INT64 max_buf_size)
 {
-    // this stream will close on recycle()
-    LibRaw_file_datastream *stream;
+
+    struct stat st;
+    if(stat(fname,&st))
+        return LIBRAW_IO_ERROR;
+
+    int big = (st.st_size > max_buf_size)?1:0;
+
+
+    LibRaw_abstract_datastream *stream;
     try {
+        if(big)
+         stream = new LibRaw_bigfile_datastream(fname);
+        else
          stream = new LibRaw_file_datastream(fname);
     }
+
     catch (std::bad_alloc)
         {
             recycle();
@@ -2107,4 +2119,8 @@ const char * LibRaw::strprogress(enum LibRaw_progress p)
             return "Some strange things";
         }
 }
+
+
+
+
 

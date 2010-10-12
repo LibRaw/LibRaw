@@ -77,6 +77,8 @@ void usage(const char *prog)
 "-g pow ts Set gamma curve to gamma pow and toe slope ts (default = 2.222 4.5)\n"
 "-T        Write TIFF instead of PPM\n"
 "-G        Use green_matching() filter\n"
+"-B <x y w h> use cropbox\n"
+"-F        Use FILE I/O instead of streambuf API\n"
 #ifndef WIN32
 "-E        Use mmap()-ed buffer instead of plain FILE I/O\n"
 #endif
@@ -113,7 +115,7 @@ int main(int argc, char *argv[])
     LibRaw RawProcessor;
     int i,arg,c,ret;
     char opm,opt,*cp,*sp;
-    int use_mmap=0, msize;
+    int use_mmap=0, msize,use_bigfile=0;
     void *iobuffer;
 
 #define OUT RawProcessor.imgdata.params
@@ -183,6 +185,7 @@ int main(int argc, char *argv[])
               case 'T':  OUT.output_tiff       = 1;  break;
               case '4':  OUT.gamm[0] = OUT.gamm[1] =  OUT.no_auto_bright    = 1; /* no break here! */
               case '6':  OUT.output_bps = 16;  break;
+              case 'F':  use_bigfile=1; break;
 #ifndef WIN32
               case 'E':  use_mmap              = 1;  break;
 #endif
@@ -247,7 +250,12 @@ int main(int argc, char *argv[])
             else
 #endif
                 {
-                    if( (ret = RawProcessor.open_file(argv[arg])) != LIBRAW_SUCCESS)
+                    if(use_bigfile)
+                        ret = RawProcessor.open_file(argv[arg],1);
+                    else
+                        ret = RawProcessor.open_file(argv[arg]);
+                        
+                    if( ret  != LIBRAW_SUCCESS)
                         {
                             fprintf(stderr,"Cannot open %s: %s\n",argv[arg],libraw_strerror(ret));
                             continue; // no recycle b/c open_file will recycle itself
