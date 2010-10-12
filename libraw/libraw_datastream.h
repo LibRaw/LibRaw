@@ -153,6 +153,7 @@ class LibRaw_abstract_datastream
 class LibRaw_file_datastream : public LibRaw_abstract_datastream
 {
   public:
+    virtual ~LibRaw_file_datastream(){}
     LibRaw_file_datastream(const char *filename) 
       : LibRaw_abstract_datastream(filename)
         { 
@@ -169,12 +170,14 @@ class LibRaw_file_datastream : public LibRaw_abstract_datastream
 class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
 {
   public:
+    virtual ~LibRaw_buffer_datastream(){}
     LibRaw_buffer_datastream(void* buffer, size_t size)
       : LibRaw_abstract_datastream(0)
         {
             f.reset(new std::filebuf());
             f->pubsetbuf(static_cast<char*>(buffer), size);
         }
+        
 };
 
 #endif
