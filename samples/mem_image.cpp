@@ -104,8 +104,7 @@ int main(int ac, char *av[])
                 "\t-6 - output 16-bit PPM\n"
                 "\t-4 - linear 16-bit data\n"
                 "\t-e - extract thumbnails (same as dcraw -e in separate run)\n",
-                "\t-h - use half_size\n",
-                av[0]);
+                "\t-h - use half_size\n");
             return 0;
         }
 

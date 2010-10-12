@@ -1,20 +1,19 @@
 #!/usr/bin/perl
  
 # File: preprocess.pl
-# Copyright 2008-2009 Alex Tutubalin <lexa@lexa.ru>
+# Copyright 2008-2010 Alex Tutubalin <lexa@lexa.ru>
 # Created: Sat Mar  8, 2008
 # LibRaw preprocessor for dcraw source
 #
 
 use strict;
 use Getopt::Std;
-use Data::Dumper;
 
 my %opts;
-getopts('D:',\%opts);
-#print Dumper \%opts;
-#exit 0;
+getopts('D:N',\%opts);
 my $tag = $opts{D};
+my $nolines = $opts{N};
+
 die 'use -DTAG option to specify tags, use __ALL__ tag to out all @out sections' unless $tag;
 
 process_file($_) foreach @ARGV;
@@ -44,8 +43,11 @@ it under the terms of the one of three licenses as you choose:
    (See file LICENSE.LibRaw.pdf provided in LibRaw distribution archive for details).
 
    This file is generated from Dave Coffin's dcraw.c
-   Look into original file (probably http://cybercom.net/~dcoffin/dcraw/dcraw.c)
-   for copyright information.
+   dcraw.c -- Dave Coffin's raw photo decoder
+   Copyright 1997-2010 by Dave Coffin, dcoffin a cybercom o net
+
+   Look into dcraw homepage (probably http://cybercom.net/~dcoffin/dcraw/)
+   for more information
 */
 
 EOM
@@ -66,7 +68,7 @@ EOM
                 if ($t eq $tag)
                   {
                     $out = 1;
-                    print "#line ".($lno+1)." \"$file\"\n";
+                    print "#line ".($lno+1)." \"$file\"\n" unless $nolines;
                     last;
                   }
               }

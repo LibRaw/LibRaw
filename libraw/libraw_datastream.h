@@ -51,52 +51,40 @@ class LibRaw_abstract_datastream
     {
     }
 
-    int valid() { return f.get() ? 1 : 0; }
+    virtual int valid() { return f.get() ? 1 : 0; }
+
 #define LR_STREAM_CHK() do {if(!f.get()) throw LIBRAW_EXCEPTION_IO_EOF;}while(0)
-    int read(void * ptr,size_t size, size_t nmemb) 
-    { 
-        LR_STREAM_CHK(); 
 
-        return f->sgetn(static_cast<char*>(ptr), nmemb * size) / size;
-    }
-    int eof() 
-    { 
-        LR_STREAM_CHK(); 
-        return f->sgetc() == EOF;
-    }
-    int seek(INT64 o, int whence) 
-    { 
-        LR_STREAM_CHK(); 
+    virtual int read(void * ptr,size_t size, size_t nmemb){LR_STREAM_CHK(); return f->sgetn(static_cast<char*>(ptr), nmemb * size) / size; }
 
+    virtual int eof() { LR_STREAM_CHK(); return f->sgetc() == EOF; }
+
+    virtual int seek(INT64 o, int whence) 
+    { 
+        LR_STREAM_CHK(); 
         std::ios_base::seekdir dir;
-        switch (whence) {
-        case SEEK_SET: dir = std::ios_base::beg; break;
-        case SEEK_CUR: dir = std::ios_base::cur; break;
-        case SEEK_END: dir = std::ios_base::end; break;
-        default: dir = std::ios_base::beg;
-        }
+        switch (whence) 
+            {
+            case SEEK_SET: dir = std::ios_base::beg; break;
+            case SEEK_CUR: dir = std::ios_base::cur; break;
+            case SEEK_END: dir = std::ios_base::end; break;
+            default: dir = std::ios_base::beg;
+            }
         return f->pubseekoff(o, dir);
     }
-    INT64 tell() 
-    { 
-        LR_STREAM_CHK(); 
 
-        return f->pubseekoff(0, std::ios_base::cur);
-    }
-    int get_char() 
-    { 
-        LR_STREAM_CHK(); 
-        return f->sbumpc();
-    }
-    char* gets(char *str, int sz) 
-    { 
-        LR_STREAM_CHK(); 
+    virtual INT64 tell()     { LR_STREAM_CHK(); return f->pubseekoff(0, std::ios_base::cur);  }
 
+    virtual int get_char() { LR_STREAM_CHK();  return f->sbumpc();  }
+    virtual char* gets(char *str, int sz) 
+    { 
+        LR_STREAM_CHK(); 
         std::istream is(f.get());
         is.getline(str, sz);
         if (is.fail()) return 0;
         return str;
     }
+
     virtual int scanf_one(const char *fmt, void*val) 
     { 
         LR_STREAM_CHK(); 
@@ -118,56 +106,46 @@ class LibRaw_abstract_datastream
 
         return 1;
     }
-    const char* fname() { return filename; }
+    virtual const char* fname() { return filename; }
     /* You can't have a "subfile" and a "tempfile" at the same time. */
-    int subfile_open(const char *fn)
+    virtual int subfile_open(const char *fn)
     {
-      LR_STREAM_CHK();
+        LR_STREAM_CHK();
+        if (saved_f.get()) return EBUSY;
+        saved_f = f;
+        std::auto_ptr<std::filebuf> buf(new std::filebuf());
+        
+        buf->open(fn, std::ios_base::in | std::ios_base::binary);
+        if (!buf->is_open()) {
+            f = saved_f;
+            return ENOENT;
+        } else {
+            f = buf;
+        }
 
-      if (saved_f.get()) return EBUSY;
-
-      saved_f = f;
-
-      std::auto_ptr<std::filebuf> buf(new std::filebuf());
-
-      buf->open(fn, std::ios_base::in | std::ios_base::binary);
-      if (!buf->is_open()) {
-        f = saved_f;
-        return ENOENT;
-      } else {
-        f = buf;
-      }
-
-      return 0;
+        return 0;
     }
-    void subfile_close()
+    
+    virtual void subfile_close()    { if (!saved_f.get()) return; f = saved_f;   }
+    virtual int tempbuffer_open(void* buf, size_t size)
+    {
+        LR_STREAM_CHK();
+        if (saved_f.get()) return EBUSY;
+        saved_f = f;
+        
+        f.reset(new std::filebuf());
+        if (!f.get()) {
+            f = saved_f;
+            return ENOMEM;
+        }
+        f->pubsetbuf(static_cast<char*>(buf), size);
+        return 0;
+    }
+    
+    virtual void	tempbuffer_close()
     {
         if (!saved_f.get()) return;
         f = saved_f;
-    }
-    int tempbuffer_open(void* buf, size_t size)
-    {
-      LR_STREAM_CHK();
-
-      if (saved_f.get()) return EBUSY;
-
-      saved_f = f;
-
-      f.reset(new std::filebuf());
-
-      if (!f.get()) {
-        f = saved_f;
-        return ENOMEM;
-      }
-
-      f->pubsetbuf(static_cast<char*>(buf), size);
-
-      return 0;
-    }
-    void	tempbuffer_close()
-    {
-      if (!saved_f.get()) return;
-      f = saved_f;
     }
 };
 #undef LR_STREAM_CHK
@@ -177,15 +155,15 @@ class LibRaw_file_datastream : public LibRaw_abstract_datastream
   public:
     LibRaw_file_datastream(const char *filename) 
       : LibRaw_abstract_datastream(filename)
-    { 
-      if (filename) {
-        std::auto_ptr<std::filebuf> buf(new std::filebuf());
-        buf->open(filename, std::ios_base::in | std::ios_base::binary);
-        if (buf->is_open()) {
-          f = buf;
+        { 
+            if (filename) {
+                std::auto_ptr<std::filebuf> buf(new std::filebuf());
+                buf->open(filename, std::ios_base::in | std::ios_base::binary);
+                if (buf->is_open()) {
+                    f = buf;
+                }
+            }
         }
-      }
-    }
 };
 
 class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
@@ -193,10 +171,10 @@ class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
   public:
     LibRaw_buffer_datastream(void* buffer, size_t size)
       : LibRaw_abstract_datastream(0)
-    {
-      f.reset(new std::filebuf());
-      f->pubsetbuf(static_cast<char*>(buffer), size);
-    }
+        {
+            f.reset(new std::filebuf());
+            f->pubsetbuf(static_cast<char*>(buffer), size);
+        }
 };
 
 #endif

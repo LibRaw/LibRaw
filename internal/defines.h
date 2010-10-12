@@ -14,8 +14,11 @@ it under the terms of the one of three licenses as you choose:
    (See file LICENSE.LibRaw.pdf provided in LibRaw distribution archive for details).
 
    This file is generated from Dave Coffin's dcraw.c
-   Look into original file (probably http://cybercom.net/~dcoffin/dcraw/dcraw.c)
-   for copyright information.
+   dcraw.c -- Dave Coffin's raw photo decoder
+   Copyright 1997-2010 by Dave Coffin, dcoffin a cybercom o net
+
+   Look into dcraw homepage (probably http://cybercom.net/~dcoffin/dcraw/)
+   for more information
 */
 
 #line 27 "dcraw/dcraw.c"
