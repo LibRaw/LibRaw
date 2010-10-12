@@ -21,6 +21,11 @@ it under the terms of the one of three licenses as you choose:
 
 
  */
+#ifdef WIN32
+// suppress sprintf-related warning. sprintf() is permitted in sample code
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -115,8 +120,11 @@ int main(int argc, char *argv[])
     LibRaw RawProcessor;
     int i,arg,c,ret;
     char opm,opt,*cp,*sp;
-    int use_mmap=0, msize,use_bigfile=0;
+    int use_mmap=0, use_bigfile=0;
+#ifndef WIN32
+	int msize;
     void *iobuffer;
+#endif
 
 #define OUT RawProcessor.imgdata.params
     
@@ -135,15 +143,15 @@ int main(int argc, char *argv[])
               {
               case 'v':  verbosity++;  break;
               case 'G':  OUT.green_matching = 1; break;
-              case 'c':  OUT.adjust_maximum_thr   = atof(argv[arg++]);  break;
-              case 'U':  OUT.auto_bright_thr   = atof(argv[arg++]);  break;
-              case 'n':  OUT.threshold   = atof(argv[arg++]);  break;
-              case 'b':  OUT.bright      = atof(argv[arg++]);  break;
+              case 'c':  OUT.adjust_maximum_thr   = (float)atof(argv[arg++]);  break;
+              case 'U':  OUT.auto_bright_thr   = (float)atof(argv[arg++]);  break;
+              case 'n':  OUT.threshold   = (float)atof(argv[arg++]);  break;
+              case 'b':  OUT.bright      = (float)atof(argv[arg++]);  break;
               case 'P':  OUT.bad_pixels  = argv[arg++];        break;
               case 'K':  OUT.dark_frame  = argv[arg++];        break;
               case 'r':
                   for(c=0;c<4;c++) 
-                      OUT.user_mul[c] = atof(argv[arg++]);  
+                      OUT.user_mul[c] = (float)atof(argv[arg++]);  
                   break;
               case 'C':  
                   OUT.aber[0] = 1 / atof(argv[arg++]);
@@ -194,7 +202,11 @@ int main(int argc, char *argv[])
                   return 1;
               }
       }
+#ifndef WIN32
   putenv ((char*)"TZ=UTC"); // dcraw compatibility, affects TIFF datestamp field
+#else
+  _putenv ((char*)"TZ=UTC"); // dcraw compatibility, affects TIFF datestamp field
+#endif
   OUT.filtering_mode = LIBRAW_FILTERING_AUTOMATIC;
 #define P1 RawProcessor.imgdata.idata
 #define S RawProcessor.imgdata.sizes

@@ -116,7 +116,7 @@ class LibRaw_streams_datastream: public LibRaw_abstract_datastream
             case SEEK_END: dir = std::ios_base::end; break;
             default: dir = std::ios_base::beg;
             }
-        return f->pubseekoff(o, dir);
+        return f->pubseekoff((long)o, dir);
     }
 
     virtual INT64 tell()     { LR_STREAM_CHK(); return f->pubseekoff(0, std::ios_base::cur);  }
@@ -428,7 +428,11 @@ class LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
     virtual int         get_char()
     { 
         LR_BF_CHK(); 
+#ifndef WIN32
         return substream?substream->get_char():getc_unlocked(f);
+#else
+        return substream?substream->get_char():fgetc(f);
+#endif
     }
         
     virtual char* gets(char *str, int sz)

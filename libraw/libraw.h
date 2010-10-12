@@ -28,7 +28,7 @@ it under the terms of the one of three licenses as you choose:
 #endif
 
 // maximum file size to use LibRaw_file_datastream (fully buffered) I/O
-#define LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE (250*1024L*1024L*1024L)
+#define LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE (250*1024L*1024L)
 
 
 #include <limits.h>

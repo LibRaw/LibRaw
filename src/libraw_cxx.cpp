@@ -23,8 +23,9 @@ it under the terms of the one of three licenses as you choose:
 #include <float.h>
 #include <math.h>
 #include <new>
-#ifndef WIN32
+#include <sys/types.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <netinet/in.h>
 #else
 #include <winsock2.h>
@@ -550,13 +551,17 @@ int LibRaw::add_masked_borders_to_bitmap()
 
 int LibRaw::open_file(const char *fname, INT64 max_buf_size)
 {
-
+#ifndef WIN32
     struct stat st;
     if(stat(fname,&st))
         return LIBRAW_IO_ERROR;
-
     int big = (st.st_size > max_buf_size)?1:0;
-
+#else
+	struct _stati64 st;
+    if(_stati64(fname,&st))	
+        return LIBRAW_IO_ERROR;
+    int big = (st.st_size > max_buf_size)?1:0;
+#endif
 
     LibRaw_abstract_datastream *stream;
     try {
@@ -647,7 +652,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
             {
                 IO.fwidth = S.width;
                 IO.fheight = S.height;
-                S.iwidth = S.width = IO.fuji_width << !libraw_internal_data.unpacker_data.fuji_layout;
+                S.iwidth = S.width = IO.fuji_width << (int)(!libraw_internal_data.unpacker_data.fuji_layout);
                 S.iheight = S.height = S.raw_height;
                 S.raw_height += 2*S.top_margin;
             }
