@@ -36,6 +36,7 @@ it under the terms of the one of three licenses as you choose:
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/time.h>
 #endif
 
 #include "libraw/libraw.h"
@@ -112,6 +113,21 @@ int my_progress_callback(void *d,enum LibRaw_progress p,int iteration, int expec
     return 0; // always return 0 to continue processing
 }
 
+// timer
+static struct timeval start,end;
+
+void timerstart(void)
+{
+    gettimeofday(&start,NULL);
+}
+
+void timerprint(const char *msg,const char *filename)
+{
+    gettimeofday(&end,NULL);
+    float msec = (end.tv_sec - start.tv_sec)*1000.0f + (end.tv_usec - start.tv_usec)/1000.0f;
+    printf("Timing: %s/%s: %6.3f msec\n",filename,msg,msec);
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -122,8 +138,8 @@ int main(int argc, char *argv[])
     char opm,opt,*cp,*sp;
     int use_mmap=0, use_bigfile=0;
 #ifndef WIN32
-	int msize;
-    void *iobuffer;
+    int msize = 0;
+    void *iobuffer=0;
 #endif
 
 #define OUT RawProcessor.imgdata.params
@@ -226,6 +242,9 @@ int main(int argc, char *argv[])
             char outfn[1024];
 
             if(verbosity) printf("Processing file %s\n",argv[arg]);
+            
+            timerstart();
+            
 #ifndef WIN32
             if(use_mmap)
                 {
@@ -244,13 +263,14 @@ int main(int argc, char *argv[])
                         }
                     int pgsz = getpagesize();
                     msize = ((st.st_size+pgsz-1)/pgsz)*pgsz;
-                    iobuffer = mmap(NULL,msize,PROT_READ,MAP_PRIVATE,file,0);
+                    iobuffer = mmap(NULL,msize,PROT_READ,MAP_PRIVATE|MAP_NOSYNC|MAP_NOCORE,file,0);
                     if(!iobuffer)
                         {
                             fprintf(stderr,"Cannot mmap %s: %s\n",argv[arg],strerror(errno));
                             close(file);
                             continue;
                         }
+                    madvise(iobuffer,msize,MADV_NOSYNC| MADV_WILLNEED);
                     close(file);
                     if( (ret = RawProcessor.open_buffer(iobuffer,st.st_size) != LIBRAW_SUCCESS))
                         {
@@ -263,6 +283,7 @@ int main(int argc, char *argv[])
 #endif
                 {
                     if(use_bigfile)
+                        // force open_file switch to bigfile processing
                         ret = RawProcessor.open_file(argv[arg],1);
                     else
                         ret = RawProcessor.open_file(argv[arg]);
@@ -273,17 +294,32 @@ int main(int argc, char *argv[])
                             continue; // no recycle b/c open_file will recycle itself
                         }
                 }
+
+            if(verbosity)
+                timerprint("LibRaw::open_file()",argv[arg]);
+
+
+            timerstart();
             if( (ret = RawProcessor.unpack() ) != LIBRAW_SUCCESS)
                 {
                     fprintf(stderr,"Cannot unpack %s: %s\n",argv[arg],libraw_strerror(ret));
                     continue;
                 }
+
+            gettimeofday(&end,NULL);
+            if(verbosity)
+                timerprint("LibRaw::unpack()",argv[arg]);
+
+            timerstart();
             if (LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_process()))
                 {
                     fprintf(stderr,"Cannot do postpocessing on %s: %s\n",argv[arg],libraw_strerror(ret));
                     if(LIBRAW_FATAL_ERROR(ret))
                         continue; 
                 }
+            if(verbosity)
+                timerprint("LibRaw::dcraw_process()",argv[arg]);
+
             snprintf(outfn,sizeof(outfn),
                      "%s.%s",
                      argv[arg], OUT.output_tiff ? "tiff" : (P1.colors>1?"ppm":"pgm"));

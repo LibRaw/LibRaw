@@ -47,8 +47,11 @@ int my_progress_callback(void *unused_data,enum LibRaw_progress state,int iter, 
 
 int main(int ac, char *av[])
 {
-    int  i, ret, verbose=0, output_thumbs=0,use_mmap=0,msize;
-    void *file_buffer;
+    int  i, ret, verbose=0, output_thumbs=0;
+#ifndef WIN32
+    int use_mmap=0,msize=0;
+    void *file_buffer=0;
+#endif
 
     // don't use fixed size buffers in real apps!
     char outfn[1024],thumbfn[1024]; 
@@ -57,7 +60,7 @@ int main(int ac, char *av[])
     if(ac<2) 
         {
             printf(
-                "simple_dcraw - LibRaw %s sample. Emulates dcraw [-D] [-T] [-v] [-e] [-B]\n"
+                "simple_dcraw - LibRaw %s sample. Emulates dcraw [-D] [-T] [-v] [-e] [-E]\n"
                 " %d cameras supported\n"
                 "Usage: %s [-D] [-T] [-v] [-e] raw-files....\n"
                 "\t-D - document mode emulation\n"
@@ -65,7 +68,7 @@ int main(int ac, char *av[])
                 "\t-v - verbose output\n"
                 "\t-T - output TIFF files instead of .pgm/ppm\n"
 #ifndef WIN32
-                "\t-B - use mmap()-ed I/O (Unix only)\n"
+                "\t-E - use mmap()-ed I/O (Unix only)\n"
 #endif
                 "\t-e - extract thumbnails (same as dcraw -e in separate run)\n",LibRaw::version(),
                 LibRaw::cameraCount(),
@@ -95,7 +98,7 @@ int main(int ac, char *av[])
                         output_thumbs++;
                     if(av[i][1]=='D' && av[i][2]==0)
                         OUT.document_mode=2;
-                    if(av[i][1]=='B' && av[i][2]==0)
+                    if(av[i][1]=='E' && av[i][2]==0)
                         use_mmap=1;
                     if(av[i][1]=='4' && av[i][2]==0)
                         OUT.output_bps=16;

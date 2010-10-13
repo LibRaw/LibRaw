@@ -77,9 +77,7 @@ class LibRaw_abstract_datastream
     LibRaw_abstract_datastream *substream;
 };
 
-
-
-class LibRaw_streams_datastream: public LibRaw_abstract_datastream
+class LibRaw_file_datastream: public LibRaw_abstract_datastream
 {
   protected:
     std::auto_ptr<std::streambuf> f; /* will close() automatically through dtor */
@@ -87,10 +85,17 @@ class LibRaw_streams_datastream: public LibRaw_abstract_datastream
     const char *filename;
 
   public:
-    virtual ~LibRaw_streams_datastream(){}
-    LibRaw_streams_datastream(const char *filename)
-      :filename(filename)
+    virtual ~LibRaw_file_datastream(){}
+    LibRaw_file_datastream(const char *fname)
+      :filename(fname)
     {
+        if (filename) {
+            std::auto_ptr<std::filebuf> buf(new std::filebuf());
+            buf->open(filename, std::ios_base::in | std::ios_base::binary);
+            if (buf->is_open()) {
+                f = buf;
+            }
+        }
     }
 
     virtual int valid() { return f.get() ? 1 : 0; }
@@ -196,22 +201,6 @@ class LibRaw_streams_datastream: public LibRaw_abstract_datastream
 };
 #undef LR_STREAM_CHK
 
-class LibRaw_file_datastream : public LibRaw_streams_datastream
-{
-  public:
-    virtual ~LibRaw_file_datastream(){}
-    LibRaw_file_datastream(const char *filename) 
-      : LibRaw_streams_datastream(filename)
-        { 
-            if (filename) {
-                std::auto_ptr<std::filebuf> buf(new std::filebuf());
-                buf->open(filename, std::ios_base::in | std::ios_base::binary);
-                if (buf->is_open()) {
-                    f = buf;
-                }
-            }
-        }
-};
 
 class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
 {
@@ -483,7 +472,7 @@ class LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
     FILE *f,*sav;
     const char *filename;
 };
-
+#undef LR_BF_CHK
 
 #endif
 

@@ -15,7 +15,7 @@
       <li><a  href="#dataload">Methods Loading Data from a File</a>
         <ul>
           <li><a href="#open_datastream">int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)</a></li>
-          <li><a  href="#open_file">int LibRaw::open_file(const char *rawfile)</a></li>
+          <li><a  href="#open_file">int LibRaw::open_file(const char *rawfile[,INT64 bigfile_size])</a></li>
           <li><a  href="#open_buffer">int LibRaw::open_buffer(void *buffer, size_t bufsize)</a></li>
           <li><a  href="#unpack">int LibRaw::unpack(void)</a></li>
           <li><a  href="#unpack_thumb">int LibRaw::unpack_thumb(void)</a></li>
@@ -96,6 +96,8 @@
           <li><a href="#datastream_derived">Derived input classes included in LibRaw</a>
             <ul>
               <li><a href="#file_datastream">class LibRaw_file_datastream - file input interface</a></li>
+              <li><a href="#bigfile_datastream">class LibRaw_file_datastream - file input interface for large files</a></li>
+              <li><a href="#buffer_datastream">class LibRaw_buffer_datastream - input from memory buffer</a></li>
             </ul>
           </li>
           <li><a href="#own_datastreams">Own datastream derived classes</a>
@@ -174,13 +176,16 @@ are processed in the batch mode, there is no need to call recycle() at the end o
       after use.
     </p>
     <a name=open_file></a>
-    <h3>int LibRaw::open_file(const char *filename)</h3>
+    <h3>int LibRaw::open_file(const char *filename[,INT64 bigfile_size])</h3>
     <p>
       Creates an <a href="#file_datastream">LibRaw_file_datastream</a> object, calls 
       <a href="#open_datastream">open_datastream()</a>. If succeed, sets internal flag which signals
       to destroy internal datastream object on <a href="#recycle">recycle()</a>. On failure,
       just created file_datastream destroyed immediately.
     </p>
+    <p>
+      Second optional parameter <b>bigfile_size</b> controls background I/O interface used for file operations. For
+      files smaller than bigfile_size the <a href="#file_datastream">LibRaw_file_datastream</a> will be used and the <a href="#bigfile_datastream">LibRaw_bigfile_datastream</a> otherwise.
     <p>The function returns an integer number in accordance with the 
       <a href=API-notes-eng.html#errors>return code convention</a>: positive if any system call has returned an error, negative
       (from the  <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
@@ -748,10 +753,11 @@ LibRaw.
     <a name="datastream_derived"></a>
     <h3>Derived input classes included in LibRaw</h3>
     <p>
-       There is two "standard" input classes in LibRaw distribution:
+       There is three "standard" input classes in LibRaw distribution:
     </p>
     <ul>
       <li><a href="#file_datastream">LibRaw_file_datastream</a> implements input from file (in filesystem).</li>
+      <li><a href="#bigfile_datastream">LibRaw_bigfile_datastream</a> slower I/O, but files larger than 2Gb are supported.</li>
       <li><a href="#buffer_datastream">LibRaw_buffer_datastream</a> implements input from memory buffer.</li>
     </ul>
     <p>
@@ -773,6 +779,27 @@ LibRaw.
         object is created as non-valid (valid() call returns zero).
       </dd>
     </dl>
+    <p>
+      All other class methods are <a href="#datastream_methods">described above</a>.<br/>
+      This class implements all possble methods, including fname() and subfile_open().
+    </p>
+    <a name="bigfile_datastream"></a>
+    <h4>class LibRaw_bigfile_datastream - file input interface</h4>
+    <p>
+      This class implements input from file.
+    </p>
+    <p><b>Class methods:</b></p>
+    <dl>
+      <dt><b> LibRaw_bigfile_datastream(const char *fname) </b></dt>
+      <dd>
+        This constructor creates <b>LibRaw_bigfile_datastream</b> object from file <b>fname</b>.<br/>
+        Unfortunately, C++ constructor cannot return an error. So if bad filename passed (e.g. nonexistent file)
+        object is created as non-valid (valid() call returns zero).
+      </dd>
+    </dl>
+    <p>The difference between <b>file</b> and <b>bigfile</b> datastreams are obvious from class name: bigfile one
+      supports large files (more than 2Gb) on all supported systems. File one uses streambuf interface which is
+      limited to 2Gb on many systems.
     <p>
       All other class methods are <a href="#datastream_methods">described above</a>.<br/>
       This class implements all possble methods, including fname() and subfile_open().
@@ -828,7 +855,7 @@ LibRaw.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Tue Sep  7 17:24:17 MSD 2010
+Last modified: Tue Oct 12 21:41:13 MSD 2010
 <!-- hhmts end -->
   </body>
 </html>
