@@ -285,14 +285,13 @@ int main(int argc, char *argv[])
                         }
                     int pgsz = getpagesize();
                     msize = ((st.st_size+pgsz-1)/pgsz)*pgsz;
-                    iobuffer = mmap(NULL,msize,PROT_READ,MAP_PRIVATE|MAP_NOSYNC|MAP_NOCORE,file,0);
+                    iobuffer = mmap(NULL,msize,PROT_READ,MAP_PRIVATE,file,0);
                     if(!iobuffer)
                         {
                             fprintf(stderr,"Cannot mmap %s: %s\n",argv[arg],strerror(errno));
                             close(file);
                             continue;
                         }
-                    madvise(iobuffer,msize,MADV_NOSYNC| MADV_WILLNEED);
                     close(file);
                     if( (ret = RawProcessor.open_buffer(iobuffer,st.st_size) != LIBRAW_SUCCESS))
                         {
