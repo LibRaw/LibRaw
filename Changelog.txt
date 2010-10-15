@@ -1,3 +1,32 @@
+2010-10-15 Alex Tutubalin <lexa@lexa.ru>
+
+           * New changes to I/O layer. Three LibRaw_*datastream clasees are
+             exists: 
+               + LibRaw_buffer_datastream - buffer reaging
+               + LibRaw_file_datastream - file reading using iostreams
+                 (large files are no supported on some systems)
+               + LibRaw_bigfile_datastream - FILE*-based file I/O
+
+           *  file/bigfile_datastream is selected automatically by
+              LibRaw::open_file based on input file size.
+              By default, files larger than 250Mb are opened using
+              bigfile interface, you may change this behaviour
+              by using second optional parameter of open_file()
+               + ≈сли параметр не задан, то он равен 250 мегабайтам.
+
+           * There is no way to use default parameter values in C API,
+             so new call libraw_open_file_ex added with two parameters
+             (file name and minimal file size for bigfile_datastream use).
+
+           * all client code should be recompiled due to internals change.
+
+           * All LibRaw_abstract_datastream functions are virtual again. You may
+             (again) use your own I/O layer.
+
+           * new -d key for dcraw_emu sample: print timings of processing stages
+
+            * LibRaw 0.11-Beta5
+
 2010-10-08 Alex Tutubalin <lexa@lexa.ru>
            * Fixed bug in exception handling in OpenMP sections in 
              AHD interpolation code.

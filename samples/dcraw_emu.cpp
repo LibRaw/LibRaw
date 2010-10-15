@@ -85,6 +85,7 @@ void usage(const char *prog)
 "-G        Use green_matching() filter\n"
 "-B <x y w h> use cropbox\n"
 "-F        Use FILE I/O instead of streambuf API\n"
+"-d        Detailed timing report\n"
 #ifndef WIN32
 "-E        Use mmap()-ed buffer instead of plain FILE I/O\n"
 #endif
@@ -136,9 +137,9 @@ int main(int argc, char *argv[])
     LibRaw RawProcessor;
     int i,arg,c,ret;
     char opm,opt,*cp,*sp;
-    int use_mmap=0, use_bigfile=0;
+    int use_bigfile=0, use_timing=0;
 #ifndef WIN32
-    int msize = 0;
+    int msize = 0,use_mmap=0;
     void *iobuffer=0;
 #endif
 
@@ -210,6 +211,7 @@ int main(int argc, char *argv[])
               case '4':  OUT.gamm[0] = OUT.gamm[1] =  OUT.no_auto_bright    = 1; /* no break here! */
               case '6':  OUT.output_bps = 16;  break;
               case 'F':  use_bigfile=1; break;
+              case 'd':  use_timing=1; break;
 #ifndef WIN32
               case 'E':  use_mmap              = 1;  break;
 #endif
@@ -295,7 +297,7 @@ int main(int argc, char *argv[])
                         }
                 }
 
-            if(verbosity)
+            if(use_timing)
                 timerprint("LibRaw::open_file()",argv[arg]);
 
 
@@ -306,8 +308,7 @@ int main(int argc, char *argv[])
                     continue;
                 }
 
-            gettimeofday(&end,NULL);
-            if(verbosity)
+            if(use_timing)
                 timerprint("LibRaw::unpack()",argv[arg]);
 
             timerstart();
@@ -317,7 +318,7 @@ int main(int argc, char *argv[])
                     if(LIBRAW_FATAL_ERROR(ret))
                         continue; 
                 }
-            if(verbosity)
+            if(use_timing)
                 timerprint("LibRaw::dcraw_process()",argv[arg]);
 
             snprintf(outfn,sizeof(outfn),

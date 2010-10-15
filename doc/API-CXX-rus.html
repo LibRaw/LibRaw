@@ -15,7 +15,7 @@
       <li><a  href="#dataload">Методы, загружающие данные из файла</a>
         <ul>
           <li><a href="#open_datastream">int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)</a>
-          <li><a  href="#open_file">int LibRaw::open_file(const char *rawfile)</a></li>
+          <li><a  href="#open_file">int LibRaw::open_file(const char *rawfile[,INT64 bigfile_size])</a></li>
           <li><a href="#open_buffer">int LibRaw::open_buffer(void *buffer, size_t bufsize)<a></li>
           <li><a  href="#unpack">int LibRaw::unpack(void)</a></li>
           <li><a  href="#unpack_thumb">int LibRaw::unpack_thumb(void)</a></li>
@@ -94,6 +94,8 @@
           <li><a href="#datastream_derived">Производные классы, входящие в LibRaw</a> <!-- h3 -->
             <ul>
               <li><a href="#file_datastream">class LibRaw_file_datastream - интерфейс чтения RAW-данных из файла</a></li>
+              <li><a href="#bigfile_datastream">class LibRaw_bigfile_datastream - интерфейс чтения RAW-данных из файла
+                для больших файлов</a></li>
               <li><a href="#buffer_datastream">class LibRaw_buffer_datastream - интерфейс чтения RAW-данных из буфера в памяти</a></li>
             </ul>
           </li>
@@ -173,13 +175,17 @@
       приложении.
     </p>
     <a name=open_file></a>
-    <h3>int LibRaw::open_file(const char *filename)</h3>
+    <h3>int LibRaw::open_file(const char *filename[,INT64 bigfile_size])</h3>
     <p>
-      Создает объект <a href="#file_datastream">LibRaw_file_datastream</a>, вызывает <a
+      Создает объект <a href="#file_datastream">LibRaw_file_datastream</a> или <a
+        href="#bigfile_datastream">LibRaw_bigfile_datastream</a>,  вызывает <a
         href="#open_datastream">open_datastream()</a>,  при успехе выставляет внутренний флаг, сигнализирующий о том,
       что созданный объект должен быть уничтожен при <a href="#recycle">recycle()</a>, при неуспехе открытия -
       уничтожает только что созданный объект. 
     </p>
+    <p>Необязательный Параметр bigfle_size задает размер входного файла, начиная с которого происходит 
+      использование <a href="#bigfile_datastream">LibRaw_bigfile_datastream</a>. По-умолчанию, этот размер равен 250
+      Мб. 
     <p>Функция возвращает целое число в соответствии с <a href=API-notes-rus.html#errors>соглашением о кодах
         возврата</a>: положительное число, если какой-то из системных вызовов вернул ошибку, отрицательное число (из
       <a href=API-datastruct-rus.html#LibRaw_errors>списка ошибок LibRaw</a>) при ошибочной ситуации
@@ -759,6 +765,8 @@ int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int ex
     </p>
     <ul>
       <li><a href="#file_datastream">LibRaw_file_datastream</a> реализует ввод из файла в файловой системе.</li>
+      <li><a href="#bigfile_datastream">LibRaw_bigfile_datastream</a> реализует ввод из файла в файловой системе для
+        больших файлов.</li>
       <li><a href="#buffer_datastream">LibRaw_buffer_datastream</a> реализует ввод из буфера в памяти.</li>
     </ul>
     <p>
@@ -766,15 +774,17 @@ int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int ex
       метод <a href="#open_datastream">LibRaw::open_datastream</a>, требования и особенности реализации описаны ниже.
     </p>
     <a name="file_datastream"></a>
+    <a name="bigfile_datastream"></a>
     <h4>class LibRaw_file_datastream - интерфейс чтения RAW-данных из файла</h4>
+    <h4>class LibRaw_bigfile_datastream - интерфейс чтения RAW-данных из файла</h4>
     <p>
-      Данный класс реализует ввод данных из файла.
+      Данные классы реализуют ввод данных из файла.
     </p>
     <p><b>Методы класса:</b></p>
     <dl>
-      <dt><b>    LibRaw_file_datastream(const char *fname) </b></dt>
+      <dt><b>    LibRaw_(big)file_datastream(const char *fname) </b></dt>
       <dd>
-        Конструктор: создает объект <b>LibRaw_file_datastream</b> для файла <b>fname</b>.<br/>
+        Конструктор: создает объект <b>LibRaw_(big)file_datastream</b> для файла <b>fname</b>.<br/>
         К сожалению, в C++ нельзя не создать объект в конструкторе, поэтому может быть создан невалидный объект (для
         несуществующего файла). Работоспособность объекта проверяется методом <b>valid()</b>, описанным выше.
       </dd>
@@ -833,7 +843,7 @@ int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int ex
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Tue Sep  7 17:26:08 MSD 2010
+Last modified: Fri Oct 15 12:01:53 MSD 2010
 <!-- hhmts end -->
   </body>
 </html>

@@ -11,9 +11,9 @@ CXX=g++
 CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8
 
 # GCC 4.4 section
-# CC=gcc44
-# CXX=g++44
-# CFLAGS= -O4 -march=core2 -I. -pedantic  -Wno-long-long -msse2 -mfpmath=sse  -fopenmp
+ CC=gcc44
+ CXX=g++44
+ CFLAGS= -O4 -march=core2 -I. -pedantic  -Wno-long-long -msse2 -mfpmath=sse  -fopenmp
 
 # LCMS support
 #LCMS_DEF=-DUSE_LCMS -I/usr/local/include

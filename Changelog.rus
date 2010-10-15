@@ -1,9 +1,8 @@
-2010-10-12 Alex Tutubalin <lexa@lexa.ru>
+2010-10-15 Alex Tutubalin <lexa@lexa.ru>
            * Обновление интерфейса чтения данных. Реализованы следующие классы
              LibRaw_*_datastream:
                + LibRaw_buffer_datastream - чтение из буфера в памяти
                + LibRaw_file_datastream - чтение из файла через iostreams
-                 (быстро, но файлы >2Gb поддерживаются не на всех системах)
                + LibRaw_bigfile_datastream - чтение из файла через FILE*
            *  Выбор среди двух методов чтения файлов производится 
               LibRaw::open_file() в зависимости от размера файла:
@@ -19,12 +18,14 @@
 
            * И это не последнее изменение I/O Layer
 
+           * Все методы LibRaw_abstract_datastream опять виртуальные.
+
            * Структуры данных изменены, требуется перекомпиляция всех приложений.
 
-           * Пример dcraw_emu с ключом -v печатает времена исполнения 
+           * Пример dcraw_emu с ключом -d печатает времена исполнения 
              отдельных операций.
 
-            * LibRaw 0.11-Beta4
+            * LibRaw 0.11-Beta5
 
 2010-10-08 Alex Tutubalin <lexa@lexa.ru>
            * Исправлена ошибка порождения C++ exceptions внутри OpenMP-секции
