@@ -25,7 +25,9 @@
 
            * new -d key for dcraw_emu sample: print timings of processing stages
 
-            * LibRaw 0.11-Beta5
+           * simple_dcraw sample simplified: no mmap code
+
+           * LibRaw 0.11-Beta5
 
 2010-10-08 Alex Tutubalin <lexa@lexa.ru>
            * Fixed bug in exception handling in OpenMP sections in 

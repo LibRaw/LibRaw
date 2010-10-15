@@ -25,7 +25,10 @@
            * Пример dcraw_emu с ключом -d печатает времена исполнения 
              отдельных операций.
 
-            * LibRaw 0.11-Beta5
+           * Пример simple_dcraw еще упрощен, убран код работы с mmap()
+             (в dcraw_emu он остался)
+
+           * LibRaw 0.11-Beta5
 
 2010-10-08 Alex Tutubalin <lexa@lexa.ru>
            * Исправлена ошибка порождения C++ exceptions внутри OpenMP-секции
