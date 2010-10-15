@@ -158,13 +158,6 @@ int main(int ac, char *av[])
             if( LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_ppm_tiff_writer(outfn)))
                 fprintf(stderr,"Cannot write %s: %s\n",outfn,libraw_strerror(ret));
 
-#ifndef WIN32            
-            if(use_mmap && file_buffer)
-                {
-                    munmap(file_buffer,msize);
-                    file_buffer=0;
-                }
-#endif
             RawProcessor.recycle(); // just for show this call
         }
     return 0;
