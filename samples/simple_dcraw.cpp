@@ -98,8 +98,10 @@ int main(int ac, char *av[])
                         output_thumbs++;
                     if(av[i][1]=='D' && av[i][2]==0)
                         OUT.document_mode=2;
+#ifndef WIN32
                     if(av[i][1]=='E' && av[i][2]==0)
                         use_mmap=1;
+#endif
                     if(av[i][1]=='4' && av[i][2]==0)
                         OUT.output_bps=16;
                     if(av[i][1]=='C' && av[i][2]==0)

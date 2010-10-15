@@ -42,6 +42,7 @@ it under the terms of the one of three licenses as you choose:
 #include "libraw/libraw.h"
 #ifdef WIN32
 #define snprintf _snprintf
+#include <windows.h>
 #endif
 
 
@@ -115,20 +116,35 @@ int my_progress_callback(void *d,enum LibRaw_progress p,int iteration, int expec
 }
 
 // timer
+#ifndef WIN32
 static struct timeval start,end;
-
 void timerstart(void)
 {
     gettimeofday(&start,NULL);
 }
-
 void timerprint(const char *msg,const char *filename)
 {
     gettimeofday(&end,NULL);
     float msec = (end.tv_sec - start.tv_sec)*1000.0f + (end.tv_usec - start.tv_usec)/1000.0f;
     printf("Timing: %s/%s: %6.3f msec\n",filename,msg,msec);
 }
+#else
+LARGE_INTEGER start;
+void timerstart(void)
+{
+	QueryPerformanceCounter(&start);
+}
+void timerprint(const char *msg, const char *filename)
+{
+	LARGE_INTEGER unit,end;
+	QueryPerformanceCounter(&end);
+	QueryPerformanceFrequency(&unit);
+	float msec = (float)(end.QuadPart - start.QuadPart);
+	msec /= (float)unit.QuadPart/1000.0f;
+	printf("Timing: %s/%s: %6.3f msec\n",filename,msg,msec);
+}
 
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -141,6 +157,10 @@ int main(int argc, char *argv[])
 #ifndef WIN32
     int msize = 0,use_mmap=0;
     void *iobuffer=0;
+#endif
+
+#ifdef OUT
+#undef OUT
 #endif
 
 #define OUT RawProcessor.imgdata.params

@@ -50,7 +50,7 @@ class LibRaw_buffer_datastream;
 class LibRaw_abstract_datastream
 {
   public:
-    LibRaw_abstract_datastream(){};
+    LibRaw_abstract_datastream(){ substream=0;};
     virtual             ~LibRaw_abstract_datastream(void){if(substream) delete substream;}
     virtual int         valid() = 0;
     virtual int         read(void *,size_t, size_t ) = 0;
