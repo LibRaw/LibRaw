@@ -13,6 +13,7 @@ else
     rm -f internal/preprocess.pl clist2c.pl
     rm doc/*.psd
     mv Makefile.dist Makefile
+    rm DEVELOPER-NOTES
     rm mkdist.sh
   else
    echo 'Wrong directory or mkdist.sh already executed'
