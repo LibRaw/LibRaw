@@ -1,3 +1,8 @@
+2010-10-16 Alex Tutubalin <lexa@lexa.ru>
+           * internal/dcraw_fileio.c can be compiled with -DDCRAW_VERBOSE again
+           * fixed comment style in libraw_datastream.h
+           * LibRaw 0.11-Beta5
+
 2010-10-15 Alex Tutubalin <lexa@lexa.ru>
 
            * New changes to I/O layer. Three LibRaw_*datastream clasees are

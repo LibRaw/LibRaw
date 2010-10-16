@@ -38,7 +38,7 @@ it under the terms of the one of three licenses as you choose:
 #include <memory>
 
 #if defined (WIN32)
-// MSVS 2008 and above...
+/* MSVS 2008 and above... */
 #if _MSC_VER >= 1500
 #define WIN32SECURECALLS
 #endif
@@ -61,7 +61,7 @@ class LibRaw_abstract_datastream
     virtual int         scanf_one(const char *, void *) = 0;
     virtual int         eof() = 0;
 
-    // subfile parsing not implemented
+    /* subfile parsing not implemented in base class */
     virtual const char* fname(){ return NULL;};
     virtual int         subfile_open(const char*) { return -1;}
     virtual void        subfile_close() { }

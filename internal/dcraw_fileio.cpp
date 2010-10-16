@@ -43,6 +43,9 @@ void CLASS bad_pixels (const char *cfname)
 #else
   char *cp, line[128];
   int time, row, col, r, c, rad, tot, n;
+#ifdef DCRAW_VERBOSE
+  int fixed = 0;
+#endif
 #endif
 
   if (!filters) return;
@@ -51,7 +54,7 @@ void CLASS bad_pixels (const char *cfname)
 #endif
   if (cfname)
     fp = fopen (cfname, "r");
-#line 3350 "dcraw/dcraw.c"
+#line 3353 "dcraw/dcraw.c"
   if (!fp) 
       {
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -149,7 +152,7 @@ void CLASS subtract (const char *fname)
   RUN_CALLBACK(LIBRAW_PROGRESS_DARK_FRAME,1,2);
 #endif
 }
-#line 8980 "dcraw/dcraw.c"
+#line 8983 "dcraw/dcraw.c"
 
 #ifndef NO_LCMS
 void CLASS apply_profile (const char *input, const char *output)

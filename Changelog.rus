@@ -1,3 +1,8 @@
+2010-10-16 Alex Tutubalin <lexa@lexa.ru>
+           * internal/dcraw_fileio.c опять компилируется с -DDCRAW_VERBOSE
+           * исправлен стиль комментариев (С++ -> C) в libraw_datastream.h
+           * LibRaw 0.11-Beta5
+
 2010-10-15 Alex Tutubalin <lexa@lexa.ru>
            * Обновление интерфейса чтения данных. Реализованы следующие классы
              LibRaw_*_datastream:
