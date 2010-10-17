@@ -1,6 +1,14 @@
 
 === Notes for LibRaw contributor ===
 
+0. Repository
+   LibRaw public repository is located on GitHub
+   URL: 
+    http://github.com/LibRaw/LibRaw - main page
+    git://github.com/LibRaw/LibRaw.git - git URL
+
+If you wish to participate in LibRaw development please use GitHub fork.
+
 1. Some files in internal/ folder are generated from dcraw/dcraw.c file
    by simple preprocessor internal/preprocess.pl (you need perl to run it)
 
@@ -21,10 +29,9 @@
      - removes .PSD files from doc/
      - removes itself
 
-3. ./configure script generates ./Makefile from ./Makefile.in and command line options.
-   Do not use ./configure in development enviroment, it is for distribution only.
+3. ./configure script generates ./Makefile from ./Makefile.in and command line 
+options.
+Do not use ./configure in development enviroment, it is for distribution only.
 
-     
-
-Feel free to contact us (info@libraw.org or Contact form on www.libraw.org) if you have
-any questions or suggestions.
+Feel free to contact us (info@libraw.org or Contact form on www.libraw.org) if
+you have any questions or suggestions.
