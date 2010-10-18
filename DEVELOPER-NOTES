@@ -30,7 +30,9 @@ If you wish to participate in LibRaw development please use GitHub fork.
      - removes itself
 
 3. ./configure script generates ./Makefile from ./Makefile.in and command line 
-options.  Do not use ./configure in development enviroment, it is for 
+options.  
+
+Do not use ./configure in development enviroment, it is for 
 distribution archive only.
 
 Feel free to contact us (info@libraw.org or Contact form on www.libraw.org) if
