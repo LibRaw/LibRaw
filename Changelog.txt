@@ -1,3 +1,8 @@
+2010-10-18 Alex Tutubalin <lexa@lexa.ru>
+           * Disabled OpenMP for wavelet_denoise under Mac OS X
+           * More Visual C++ 2003 warnings cleaned in libraw/*h files
+           * LibRaw 0.11-Beta7
+
 2010-10-16 Alex Tutubalin <lexa@lexa.ru>
            * internal/dcraw_fileio.c can be compiled with -DDCRAW_VERBOSE again
            * fixed comment style in libraw_datastream.h
