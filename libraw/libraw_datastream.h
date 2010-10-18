@@ -351,6 +351,9 @@ inline int LibRaw_abstract_datastream::tempbuffer_open(void  *buf, size_t size)
     return substream?0:EINVAL;
 }
 
+#define LR_BF_CHK() do {if(!f) throw LIBRAW_EXCEPTION_IO_EOF;}while(0)
+
+
 class LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
 {
   public:
@@ -373,8 +376,6 @@ class LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
 
     virtual             ~LibRaw_bigfile_datastream() {if(f)fclose(f); if(sav)fclose(sav);}
     virtual int         valid() { return f?1:0;}
-
-#define LR_BF_CHK() do {if(!f) throw LIBRAW_EXCEPTION_IO_EOF;}while(0)
 
     virtual int         read(void * ptr,size_t size, size_t nmemb) 
     { 

@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
   for (arg=1; (((opm = argv[arg][0]) - 2) | 2) == '+'; ) 
       {
           opt = argv[arg++][1];
-          if ((cp = strchr (sp=(char*)"cnbrkStqmHABCgU", opt)))
+          if ((cp = strchr (sp=(char*)"cnbrkStqmHABCgU", opt))!=0)
               for (i=0; i < "111411111142"[cp-sp]-'0'; i++)
                   if (!isdigit(argv[arg+i][0])) 
                       {
