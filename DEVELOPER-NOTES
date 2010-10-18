@@ -12,7 +12,7 @@ If you wish to participate in LibRaw development please use GitHub fork.
 1. Some files in internal/ folder are generated from dcraw/dcraw.c file
    by simple preprocessor internal/preprocess.pl (you need perl to run it)
 
- . dcraw/dcraw.c is a *patched* dcraw (and foveon processng code is removed
+   dcraw/dcraw.c is a *patched* dcraw (and foveon processng code is removed
    due to copyright).
 
    'Official' dcraw.c changes are tracked by LibRaw team and merged to 
@@ -30,8 +30,8 @@ If you wish to participate in LibRaw development please use GitHub fork.
      - removes itself
 
 3. ./configure script generates ./Makefile from ./Makefile.in and command line 
-options.
-Do not use ./configure in development enviroment, it is for distribution only.
+options.  Do not use ./configure in development enviroment, it is for 
+distribution archive only.
 
 Feel free to contact us (info@libraw.org or Contact form on www.libraw.org) if
 you have any questions or suggestions.
