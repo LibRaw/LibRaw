@@ -102,10 +102,11 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
 
 #define LR_STREAM_CHK() do {if(!f.get()) throw LIBRAW_EXCEPTION_IO_EOF;}while(0)
 
-#ifndef WIN32SECURECALLS
-	virtual int read(void * ptr,size_t size, size_t nmemb){LR_STREAM_CHK(); return int(f->sgetn(static_cast<char*>(ptr), std::streamsize(nmemb * size)) / size); }
+// Visual Studio 2008 marks sgetn as insecure, but VS2010 does not. 
+#if defined(WIN32SECURECALLS) && (_MSC_VER < 1600)
+	virtual int read(void * ptr,size_t size, size_t nmemb){LR_STREAM_CHK(); return int(f->_Sgetn_s(static_cast<char*>(ptr), nmemb * size,nmemb * size) / size); }
 #else
-    virtual int read(void * ptr,size_t size, size_t nmemb){LR_STREAM_CHK(); return int(f->_Sgetn_s(static_cast<char*>(ptr), nmemb * size,nmemb * size) / size); }
+    virtual int read(void * ptr,size_t size, size_t nmemb){LR_STREAM_CHK(); return int(f->sgetn(static_cast<char*>(ptr), std::streamsize(nmemb * size)) / size); }
 #endif
 
     virtual int eof() { LR_STREAM_CHK(); return f->sgetc() == EOF; }
@@ -121,7 +122,7 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
             case SEEK_END: dir = std::ios_base::end; break;
             default: dir = std::ios_base::beg;
             }
-        return f->pubseekoff((long)o, dir);
+        return (int)f->pubseekoff((long)o, dir);
     }
 
     virtual INT64 tell()     { LR_STREAM_CHK(); return f->pubseekoff(0, std::ios_base::cur);  }
