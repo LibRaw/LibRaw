@@ -102,7 +102,7 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
 
 #define LR_STREAM_CHK() do {if(!f.get()) throw LIBRAW_EXCEPTION_IO_EOF;}while(0)
 
-// Visual Studio 2008 marks sgetn as insecure, but VS2010 does not. 
+/* Visual Studio 2008 marks sgetn as insecure, but VS2010 does not. */
 #if defined(WIN32SECURECALLS) && (_MSC_VER < 1600)
 	virtual int read(void * ptr,size_t size, size_t nmemb){LR_STREAM_CHK(); return int(f->_Sgetn_s(static_cast<char*>(ptr), nmemb * size,nmemb * size) / size); }
 #else
