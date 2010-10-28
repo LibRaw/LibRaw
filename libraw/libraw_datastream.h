@@ -122,11 +122,7 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
             case SEEK_END: dir = std::ios_base::end; break;
             default: dir = std::ios_base::beg;
             }
-<<<<<<< HEAD
         return (int)f->pubseekoff((long)o, dir);
-=======
-        return f->pubseekoff((long)o, dir);
->>>>>>> a1c2c561ed36295bb3594b19dba399403ee174b4
     }
 
     virtual INT64 tell()     { LR_STREAM_CHK(); return f->pubseekoff(0, std::ios_base::cur);  }
