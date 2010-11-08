@@ -1,3 +1,8 @@
+2010-11-08 Alex Tutubalin <lexa@lexa.ru>
+	* Fixes for Sun Studio compiler compatibility
+	* Fixes for Visual Studio 2010 compatibility
+	* LibRaw 0.11.0-Release
+
 2010-10-18 Alex Tutubalin <lexa@lexa.ru>
            * Disabled OpenMP for wavelet_denoise under Mac OS X
            * More Visual C++ 2003 warnings cleaned in libraw/*h files
