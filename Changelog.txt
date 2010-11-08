@@ -1,6 +1,10 @@
 2010-11-08 Alex Tutubalin <lexa@lexa.ru>
 	* Fixes for Sun Studio compiler compatibility
 	* Fixes for Visual Studio 2010 compatibility
+<<<<<<< HEAD
+=======
+	* All russian-language files are converted to UTF-8
+>>>>>>> e81f75109a77dd0c41f71e046f078247d53c6883
 	* LibRaw 0.11.0-Release
 
 2010-10-18 Alex Tutubalin <lexa@lexa.ru>
