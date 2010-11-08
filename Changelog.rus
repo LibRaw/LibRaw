@@ -2,7 +2,7 @@
 	* Исправления для совместимости с компилятором Sun Studio
 	* Исправления для совместимости с Visual Studio 2010
 	* Исправления с #ifndef/defined
-	* Changelog.rus перекодирован в UTF-8
+	* Все русские файлы перекодированы в UTF-8
 	* LibRaw 0.11.0-Release
 
 2010-10-18 Alex Tutubalin <lexa@lexa.ru>
