@@ -1,811 +1,905 @@
-2010-11-08 Alex Tutubalin <lexa@lexa.ru>
-	* Fixes for Sun Studio compiler compatibility
-	* Fixes for Visual Studio 2010 compatibility
-	* All russian-language files are converted to UTF-8
+﻿2010-11-08 Alex Tutubalin <lexa@lexa.ru>
+	* Исправления для совместимости с компилятором Sun Studio
+	* Исправления для совместимости с Visual Studio 2010
+	* Исправления с #ifndef/defined
+	* Все русские файлы перекодированы в UTF-8
 	* LibRaw 0.11.0-Release
 
 2010-10-18 Alex Tutubalin <lexa@lexa.ru>
-           * Disabled OpenMP for wavelet_denoise under Mac OS X
-           * More Visual C++ 2003 warnings cleaned in libraw/*h files
-           * LibRaw 0.11-Beta7
+        * Mac OS X: Выключено OpenMP для wavelet_denoise
+        * Почищены предупреждения Visual C++ 2003 в include-файлах
+        * LibRaw 0.11-Beta7
 
 2010-10-16 Alex Tutubalin <lexa@lexa.ru>
-           * internal/dcraw_fileio.c can be compiled with -DDCRAW_VERBOSE again
-           * fixed comment style in libraw_datastream.h
-           * LibRaw 0.11-Beta6
+        * internal/dcraw_fileio.c опять компилируется с -DDCRAW_VERBOSE
+        * исправлен стиль комментариев (С++ -> C) в libraw_datastream.h
+        * LibRaw 0.11-Beta6
 
 2010-10-15 Alex Tutubalin <lexa@lexa.ru>
+        * Обновление интерфейса чтения данных. Реализованы следующие классы
+          LibRaw_*_datastream:
+            + LibRaw_buffer_datastream - чтение из буфера в памяти
+            + LibRaw_file_datastream - чтение из файла через iostreams
+            + LibRaw_bigfile_datastream - чтение из файла через FILE*
+        *  Выбор среди двух методов чтения файлов производится 
+           LibRaw::open_file() в зависимости от размера файла:
+            + добавлен необязательный второй параметр у open_file():
+              если размер файла (в байтах) больше этого значения,
+              то будет использован LibRaw_bigfile_datastream
+            + Если параметр не задан, то он равен 250 мегабайтам.
 
-           * New changes to I/O layer. Three LibRaw_*datastream clasees are
-             exists: 
-               + LibRaw_buffer_datastream - buffer reaging
-               + LibRaw_file_datastream - file reading using iostreams
-                 (large files are no supported on some systems)
-               + LibRaw_bigfile_datastream - FILE*-based file I/O
+        * C API не позволяет задать параметры функции по умолчанию,
+          поэтому в этом API добавлен второй вызов libraw_open_file_ex()
+          второй параметр которого - значение размера файла, начиная с 
+          которого начинается использование LibRaw_bigfile_datastream()
 
-           *  file/bigfile_datastream is selected automatically by
-              LibRaw::open_file based on input file size.
-              By default, files larger than 250Mb are opened using
-              bigfile interface, you may change this behaviour
-              by using second optional parameter of open_file()
+        * И это не последнее изменение I/O Layer
 
-           * There is no way to use default parameter values in C API,
-             so new call libraw_open_file_ex added with two parameters
-             (file name and minimal file size for bigfile_datastream use).
+        * Все методы LibRaw_abstract_datastream опять виртуальные.
 
-           * all client code should be recompiled due to internals change.
+        * Структуры данных изменены, требуется перекомпиляция всех приложений.
 
-           * All LibRaw_abstract_datastream functions are virtual again. You may
-             (again) use your own I/O layer.
+        * Пример dcraw_emu с ключом -d печатает времена исполнения 
+          отдельных операций.
 
-           * new -d key for dcraw_emu sample: print timings of processing stages
+        * Пример simple_dcraw еще упрощен, убран код работы с mmap()
+             (в dcraw_emu он остался)
 
-           * simple_dcraw sample simplified: no mmap code
-
-           * LibRaw 0.11-Beta5
+        * LibRaw 0.11-Beta5
 
 2010-10-08 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed bug in exception handling in OpenMP sections in 
-             AHD interpolation code.
+           * Исправлена ошибка порождения C++ exceptions внутри OpenMP-секции
+             в AHD-интерполяции
 
-           * LibRaw_datastreams are now C++ iostreams based instead of old
-             plain FILE* calls.
-             LibRaw::open_file() in multithreaded programs are WAY faster
-             on many OSes (Linux, Windows, MacOSX) because of no extra locks.
+           * LibRaw_datastreams переведены с FILE* I/O на C++ iostreams
+             Многопоточные программы на многих ОС стали читать RAW гораздо
+             быстрее.
 
-           * all client code should be recompiled due to internals change.
+           * Структуры данных изменены, требуется перекомпиляция всех приложений.
 
-           * LibRaw 0.11-Beta4
-
+            * LibRaw 0.11-Beta4
 
 2010-10-01 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed bug in LibRaw::dcraw_process() code: for half_size
-             processing, params.four_color_rgb was set to 1 internally
-             and not returned back after postprocessing.
+           * Исправлена ошибка в dcraw_process:
+              params.half_size выставляла params.four_color_rgb 
+              и не возвращала обратно.
 
-           * Several Visual Studio 2003 compatibility fixes
+            * Исправления для совместимости с Visual Studio 2003
 
-            * AHD interpolation refactored. Now it is about 10% faster than
-              dcraw in single-process mode and up to 1.5 times faster on
-              4-core and OpenMP (total execution time counted, not AHD itself)
-              Thanks to Adam Hooper
-           * AHD interpolation refactored. Now it is about 10% faster than
-             dcraw in single-process mode and up to 1.5 times faster on
-             4-core and OpenMP (total execution time counted, not AHD itself)
-             Thanks to Adam Hooper
+            + Оптимизации AHD, теперь работа быстрее стандартной dcraw
+              на 10% в однопоточном режиме и до полутора раз для OpenMP
+              на четырех ядрах.
+              Спасибо Adam Hooper
               
-           * LibRaw 0.11-Beta3
+            + LibRaw 0.11-Beta3
 
 2010-09-07 Alex Tutubalin <lexa@lexa.ru>
-           * Phase One files: LibRaw::unpack() sets colordata.black to
-             approximately correct value. 
+           * Файлы Phase One: LibRaw::unpack() устанавливает уровень
+             черного (colordata.black) в приблизительно корректное значение
+             (точная установка black/cblack невозомжна т.к. у PhaseOne
+             другой набор данных о точке черного, чем у обычных камер).
 
-           * Fixed minor error in setting colordata.maximum value
-             for Phase One files.
+           * Исправлена ошибка в установке colordata.maximum для файлов
+             Phase One.
 
-           * LibRaw::subtract_black() sets colordata.black and
-             colordata.cblack[] to zero to preserve data integrity.
+           * LibRaw::subtract_black() обнуляет colordata.black и
+             colordata.cblack[] при своей работе, таким образом значения
+             этих полей всегда консистентны реальному состоянию данных.
 
            * LibRaw 0.11-Beta2
-             
 
 2010-09-04 Alex Tutubalin <lexa@lexa.ru>
 
-           * It is now possible to crop output image on postprocessing
-            stage (dcraw_process). Coordinates and size of the output box
-            are set via imgdata.params.cropbox[4] parameter. Look into
-            LibRaw documentation for more details.
+         * Возможность обрезать (crop) выходное изображение на этапе
+           постпроцессинга (dcraw_process). Координаты и размер выходного
+           изображения задаются через поле imgdata.params.cropbox[4],
+           подробное описание приведено в документации.
+            + Новый код ошибки LIBRAW_BAD_CROP
+            + новый параметр вызова примера dcraw_emu: -B x y w h
+              (задает cropbox)
+            + Ввод-вывод через mmap у примера dcraw_emu включается
+              теперь параметром -E
+           Спасибо Патрику и Яну за патч.
 
-              + New fatal error code LIBRAW_BAD_CROP
+          * Изменена последовательность шагов при распаковке и обработке
+            изображений: на этапе распаковки не производится вычитание
+            уровня черного. Это вычитание делается либо автоматически 
+            на этапе постпроцессинга (dcraw_process), либо явным
+            вызовом:
+             + Новый вызов LibRaw::subtract_black() (C++ API) и
+               libraw_subtract_black (C API). Если вы используете
+               dcraw_process(), то пользоваться этим вызовом НЕ НУЖНО.
+             + Флаг распаковки RAW-данных LIBRAW_FILTERING_NOBLACKS
+               более не существует.
 
-              + New dcraw_emu sample command line switch: -B x y w h
-                (sets cropbox)
+           * Добавлен простой скрипт ./configure позволяющий задать 
+             используемый компилятор и ряд других параметров. 
+             Используйте ./configure -h  для получения справки.
+             Спасибо Siddhesh Poyarekar
 
-             Thanks to Patrick and Jan.
+           * Новые вызовы: static LibRaw::dcraw_clear_mem() (C++) и 
+             libraw_dcraw_clear_mem(..) (C API).
+             Предназначены для освобождения памяти, выделенной 
+             dcraw_make_mem_image() и dcraw_make_mem_thumb() в случае, когда в 
+             библиотеке и в вызывающем приложении используются разные 
+             аллокаторы (например, при сборке отладочного Windows-приложения 
+             с релизным Libraw.dll).
+             На Unix-системах можно продолжать пользоваться системным free().
 
-            * Processing pipeline has changed: the black level is subtracted
-              from data on postprocessing stage either automatically 
-              (on dcraw_process() stage) or by special LibRaw API call:
+           * LibRaw::free() опять стала private вместо public (это было 
+             временное решение в версии 0.10, используйте dcraw_clear_mem).
 
-               + New API calls:  LibRaw::subtract_black() (C++ API) and
-                 libraw_subtract_black (C API). 
-                 If you use dcraw_process() or dcraw_document_mode_processing()
-                 calls YOU DON'T NEED to call subtract_black() directly.
-               
-               + The raw preprocessing mode LIBRAW_FILTERING_NOBLACKS
-                 is deprecated and removed from LibRaw.
-
-             * New ./configure script.
-               Use ./configure -h for usage details.
-               Thanks to Siddhesh Poyarekar
-
-             * New API cals static LibRaw::dcraw_clear_mem() (C++ API)
-               and libraw_dcraw_clear_mem(..) (C API).
-               This calls are used to free memory, allocated by
-               dcraw_make_mem_image() and dcraw_make_mem_thumb() instead
-               of free() call.
-
-               In some cases LibRaw and calling process have different
-               memory managers, so free() of make_mem_image() data 
-               results to program crash (especially in Win32/VisualStudio
-               enviroment).
-
-             * LibRaw::free() is now private instead of public (again).
-
-             * Minor changes and bugfixes:
-
-               + Memory allocation exceptions (std::bad_alloc) are caught,
-                 so LibRaw API calls will return reasonable error codes
-                 instead of C++ exception (possibly unhandled).
-                 This problem is very unlikely to see in wild: if application
-                 cannot allocate small data for internal structure, it will 
-                 always fail on allocation for RAW image data.
-
-               + WIN32/VisualStudio 2008/2010: fopen,fscanf and sscanf calls
-                 in Libraw_datastream code are changed to *_s (secure) ones.
-
-               + Debug print removed from fatal error handler.
-
-               + Mmaped I/O for dcraw_emu sample is turned on via -E switch
-                 now (because old -B switch is used for settng cropbox).
-
-           * all client code should be recompiled due to structures size change
+           * Мелкие изменения и багфиксы:
+             + возможные исключения (exceptions) по нехватке памяти 
+               перехватываются, вызовы в которых они могут возникнуть
+               возвращают теперь правильный код ошибки.
+               (в реальности эта проблема невероятна - если не хватило
+               памяти на структуры данных, то ее не хватит и на 
+               память под изображение).
+             + WIN32/VisualStudio 2008/2010: вызовы fopen,fscanf и sscanf в
+               Libraw_datastream заменены на соответствующие _s (secure)
+               варианты.
+             + удален отладочный fprintf(stderr,..) из обработчика 
+               исключительных ситуаций (фатальных ошибок).
+           * Структуры данных изменены, требуется перекомпиляция всех приложений.
            
            * LibRaw 0.11-Beta1
 
-
 2010-07-31 Alex Tutubalin <lexa@lexa.ru>
-           * dcraw 9.04 (1.438) imported: changes in tiff metadata parser,
-            fixed a typo in Canon A720 model name
-           * small patch in Sony ARW2 unpacking code to make valgrind happy
+           * Импортирована dcraw 9.04 (1.438): изменения в разборе метаданных TIFF
+           * Небольшое исправление в коде разбора файлов Sony ARW2, не ошибка, но
+             для счастья проверки valgrind.
            * LibRaw 0.10.0-Beta3.
 
 2010-07-05 Alex Tutubalin <lexa@lexa.ru>
-           * dcraw 9.03 (1.437) imported:
-             + New cameras: Canon SX20, Nikon D3s, Olympus E-P2, Panasoni DMC-GF1,
+           * Импортирована dcraw 9.03 (1.437)
+             + Новые камеры: Canon SX20, Nikon D3s, Olympus E-P2, Panasoni DMC-GF1,
                Samsung EX1, Sony A450
-             + Color data changed for some cameras
+             + Изменены цветовые данные для некоторых камер
 
            * LibRaw 0.10.0-Beta2.
-
 2010-06-06 Alex Tutubalin <lexa@lexa.ru>
-           * dcraw 9.01 (1.434) imported:
-             + Separate black levels for each color channel.
-             + New cameras: Canon 550D, Casio EX-Z1050, Fuji HS10/HS11,
-               Kodak Z981, Panasonic G2 and G10, Phase One P65, 
-               Samsung NX-10 and WB550, Sony NEX-3 and NEX-5.
-             + Fixed file descriptor leak in dark frame subtraction processing
+           * Импортирована dcraw 9.01 (1.434):
+             + отдельные минимумы данных по 4-м каналам (color.cblack[8],
+               первые 4 значения - усредненные минимумы, вторые - счетчики 
+               черных пикселов)
+             + Новые камеры: Canon 550D, Casio EX-Z1050, Fuji HS10/HS11,
+               Kodak Z981, Panasonic G2 и G10, Phase One P65, 
+               Samsung NX-10 и WB550, Sony NEX-3 и NEX-5.
+             + Исправлена ошибка с незакрытием файла с dark frame
 
-           * Fixed dcraw 9.01's bug in DNG black level processing
+           * Исправлена привнесенная dcraw 9.01 ошибка в расчете уровня черного
+             для DNG-файлов
 
-           * Preliminary support for Sony A450 camera.
+           * Предварительная поддержка для Sony A450
 
-           * New command-line switch -h in mem_image sample (half_size support)
+           * добавлен свитч -h к примеру mem_image (поддержка half_size)
 
-           * Some patches by Johannes Hanika (darktable author):
-              + OpenMP speedup  for PPG-interpolation
-              + green_matching  - suppress of 'color maze' on cameras with
-              different green channel sensitivity. This option is turns on
-              by  filed with same name in imgdata.params
+           * Добавлено несколько патчей от Johannes Hanika (автор darktable):
+              + PPG-интерполяция поддерживает ускорение посредством OpenMP
+              + green_matching  - подавление разбаланса зеленых каналов,
+               включается одноименной опцией в imgdata.params.
             
-           * all client code should be recompiled due to structures size 
-             change
+           * Структуры данных изменены, требуется перекомпиляция всех приложений.
 
-           * LibRaw::free() is now public instead of private.
+           * LibRaw::free() стала public вместо private.
 
            * LibRaw 0.10.0-Beta1.
 
 2010-05-15 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed bug in 8-bit RAW processing code
+           * Исправлена ошибка в коде распаковки 8-битных RAW.
            * LibRaw 0.9.1-Release
 
 2010-04-26 Alex Tutubalin <lexa@lexa.ru>
-           * OpenMP support: OpenMP is possible under MinGW (untested)
+           * OpenMP возможна (не запрещена) компиляция c OpenMP под MinGW 
+              (не тестировалось)
            * LibRaw 0.9.0-Release
 
 2010-04-21 Alex Tutubalin <lexa@lexa.ru>
-           * Finally fixed inconsistency in Fuji files processing
-           * New COLOR(row,col) call to get bayer color index in image[] array
-           * Old FC() call is deprecated and will be removed in future releases
-           * unprocessed_raw sample switched to COLOR() call
+           * Окончательно удалены неудобства при работе с RAW-файлами Fuji
+             из пользовательских приложений
+
+           * Новый вызов COLOR(row,col) возвращает индекс в массиве image[],
+             соответствующий цвету данного байеровского пиксела. Вызов заменяет
+             FC(row,col), который будет спрятан в следующих версиях.
+
+           * Пример unprocessed_raw переведен на вызов COLOR()
+
            * LibRaw 0.9.0-Beta5
 
-
 2010-04-10 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed bug in unpacking DNG files made from Fuji RAFs.
+           * Исправлена ошибка в обработке DNG-файлов, сконвертированных из
+             RAF-файлов Fuji.
            * LibRaw 0.9.0-Beta4
 
 2010-04-09 Alex Tutubalin <lexa@lexa.ru>
-
-           * Fixed typecast error (problem reported only on gcc 4.2.1/32bit)
-            in CRW files processing.
-
-           * C++ API call LibRaw::adjust_maximum() is now deprecated and
-             de-documented, use params.adjust_maximum_thr instead (on by default)
-
-           *  C-API call libraw_adjust_maximum() removed.
-
-           * New postprocessing parameter params.adjust_maximum_thr
-             This parameter replaces LibRaw::adjust_maximum(), but more flexible
-             Defaults are reasonable (0.75, same as in old adjust_maximum),
-             look into documentation for more details.
-
-           * Removed last OpenMP warning
-
-           * dcraw_emu's -c parameter now wants numeric (float) argument. This value
-             is assigned to params.adjust_maximum_thr.
-             Use -c 0.0 for dcraw compatibility.
-
-           * all client code should be recompiled due to structures size 
-             change
-
+           * Исправлена ошибка в обработке .CRW-файлов, проявлявшаяся
+             на некоторых версиях gcc 4.4
+           * Вызов LibRaw::adjust_maximum() де-документирован, авто-коррекция
+             максимума сейчас включена по-умолчанию.
+           * Вызов C-API libraw_adjust_maximum() удален.
+           * Новое поле в параметрах пост-обработки: params.adjust_maximum_thr
+             позволяет более гибко (чем старый интерфейс LibRaw::adjust_maximum)
+             управлять авто-коррекцией максимума.
+           * Убрана последняя OpenMP warning, возникавшие при компиляции приложений,
+             использующих LibRaw.
+           * Параметр -c у примера dcraw_emu принимает числовое значение и 
+             устанавливает params.adjust_maximum_thr. Для совместимости с dcraw
+             используйте -c 0
+           * Структуры данных изменены, требуется перекомпиляция всех приложений.
            * LibRaw 0.9.0-Beta3
-
+             
 
 2010-03-29 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed a bug in channel_maximum[] calculation for
-             Panasonic cameras.
-           * channel_maximum[] data now calculated for ALL cameras.
-           * OpenMP warnings suppressed.
-           * Documented the -c command-line switch for dcraw_emu sample.
-           * Removed extra messages from dcraw_emu sample.
+           * Исправлена ошибка в расчете channel_maximum для камер
+             Panasonic.
+           * channel_maximum[] рассчитывается для всех камер
+           * Убраны OpenMP warnings, возникавшие при компиляции приложений,
+             использующих LibRaw.
+           * Документирован ключ -c у примера dcraw_emu
+           * Убрана излишняя разговорчивость у примера dcraw_emu
            * LibRaw 0.9.0-Beta2
 
 2010-03-28 Alex Tutubalin <lexa@lexa.ru>
-           
-           New licensing:
 
-           * Triple licensing (selected by LibRaw user):
+         Смена лицензирования:
 
+           * Тройное лицензирование:
               + LGPL 2.1 (http://www.gnu.org/licenses/lgpl-2.1.html)
               + CDDL 1.0 (http://www.opensource.org/licenses/cddl1.txt)
               + LibRaw Software License (27 March 2010 version)
                (http://www.libraw.org/data/LICENSE.LibRaw.pdf)
 
-           * There is no separate LibRaw-Lite and LibRaw-Commercial versions,
-             only single LibRaw.
-             Current LibRaw-Lite and LibRaw-Commercial users should switch
-             to LibRaw without loss of functionality.
-             It is possible to change licensig too (e.g. from LGPL to CDDL
-             for LibRaw-Lite users and from LibRaw License to LGPL or CDDL
-             for LibRaw-Commercial users).
+           * Отдельные LibRaw-Lite и LibRaw-Commercial более не существуют, 
+             есть единая библиотека LibRaw. Пользователям LibRaw-Commercial
+             следует переключиться на LibRaw (потери функциональности не будет)
+             при этом возможна и смена лицензии.
 
-           * No Foveon support :(
-             It is not possible to get good color from Foveon sensors with
-             *any* converter. So, there is no need to support these cameras.
-             Dcraw's Foveon-processing code is too strict licensed (GPL),
-             so we choose to drop it.
+           * Удалена поддержка Foveon: на этих камерах невозможно нормальное
+             цветовоспроизведение (ни один из конверторов его не дает), 
+             соответствующий код из dcraw (с проблемами цвета) лицензирован
+             по GPL, что создает проблемы.
              
-           New Features:
+           Новые возможности:
 
-           * New data field  colordata.channel_maximum[4] - per channel data
-            maximum (calculated for most cameras, 0 for others).
+           * Добавлено поле colordata.channel_maximum[4] - поканальные максимумы
+             RAW-значений
 
-           * New call LibRaw::adjust_maximum() (and libraw_adjust_maximum() in C API).
-             This call changes hardcoded colordata.maximum value to calculated
-             at unpack stage. This helps suppress false color in highlights
-             (magenta clouds and so).
+           * Добавлен вызов adjust_maximum (libraw_adjust_maximum), меняющий поле
+             maximum на вычисленное (max(color_maximum[]), что позволяет избавиться
+             от паразитных тонов в светах при постпроцессинге.
 
-           * New command line parameter -c for dcraw_emu sample. Calls adjust_maximum()
-             for each processed file.
+           * Новый параметр командной строки -c у пример dcraw_emu. При задании этого
+             параметра adjust_maximum() вызывается при обработке входного файла.
 
-           * all client code should be recompiled due to structures size 
-             change
+           * Структуры данных изменены, требуется перекомпиляция всех приложений.
 
            * LibRaw 0.9.0-Beta1
 
 2010-02-06 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed ambiguity in pow/sqrt calls (to make Sun C++ compiler happy)
-           * OpenMP is not supported under MS Visual Studio
-           * Masked a bug in RIFF format parser 
+           * Исправлена двусмысленность в вызовах pow/sqrt
+             (проявляется с компилятором Sun).
+           * OpenMP не поддерживается с компилятором MS Visual Studio
+           * Замаскирована ошибка при разборе (поврежденных?) RIFF-файлов
            * LibRaw 0.8.6
 
 2009-12-30 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed bug in simple_dcraw sample parameters processing
-           * Imported dcraw 8.99 (1.432):
-             + New cameras: Canon:  1D mk IV, Canon S90; Casio Z750, 
+           * Исправлена ошибка в разборе параметров примера simple_dcraw
+           * Импортирована dcraw 8.99 (1.432):
+             + Поддержка новых камер: Canon:  1D mk IV, Canon S90; Casio Z750, 
                Nikon D3S, Pentax K-x, Sony A-500/550, Fuji S200EXR
-             + New color data for Canon G11 and Sony A850
-             + Changes in Canon sRAW processing
-             + Changes in Kodak metadata processing
-             + Changes in uncompressed Fuji files processing (FinePix S5xxx)
+             + Цветовые данные для Canon G11, Sony A850
+             + Изменения в разборе Canon sRAW
+             + Изменения в разборе метаданных Kodak
+             + Изменения в поддержке несжатых файлов Fuji (FinePix S5xxx)
            * LibRaw 0.8.5
 
 2009-11-21 Alex Tutubalin <lexa@lexa.ru>
-           + Fixed a bug in processing of uncompressed Phase One files 
+           + Исправлена ошибка в обработке некомпрессированных файлов Phase One
            * LibRaw 0.8.4
 
 2009-10-24 Alex Tutubalin <lexa@lexa.ru>
-           + Imported dcraw 8.98/1.431:
-             * New Cameras: Canon 7D, Panasonic GF1, Sony A850 and A380, 
-             Casio Z850, Nikon D300s
-           + changes in libraw_datastream.h to make compilers more happy
+           + Импортирована dcraw 8.98/1.431:
+             * Новые камеры: Canon 7D, Panasonic GF1, Sony A850 и A380, Casio Z850,
+               Nikon D300s
+           + Изменения в заголовочных файлах для подавления предупреждений компилятора
            * LibRaw 0.8.3
 
 2009-09-02 Alex Tutubalin <lexa@lexa.ru>
-           + Fixed bug in Hasselblad .3FR unpacking code
-           * Imported dcraw 8.97/1.428: Nikon D3000 image width fix
+           + Исправлена ошибка в коде распаковки Hasselblad .3FR
+           * Импортирована dcraw 8.97/1.428: исправлена ошибка определения
+             ширины изображения для Nikon D3000
            * LibRaw 0.8.2
-           
+
 2009-08-31 Alex Tutubalin <lexa@lexa.ru>
-           + Enum LibRaw_thumbnail_formats (LIBRAW_IMAGE_*) values changed to
-             match values in  enum LibRaw_image_formats (LIBRAW_THUMBNAIL_*).
-             You need to recompile all sources using these constants.
+           + Значения Enum LibRaw_thumbnail_formats (LIBRAW_IMAGE_*) изменены,
+             чтобы соответствовать значениям в enum LibRaw_image_formats
+             (LIBRAW_THUMBNAIL_*).
+             Если вы используете упомянутые символьные константы, вам необходимо
+             перекомпилировать ваш код.
 
 2009-08-30 Alex Tutubalin <lexa@lexa.ru>
-           * Imported dcraw 8.97/1.427:
-             + new cameras: Canon A470, Canon G11 (without color data),
+           * Импортирована dcraw 8.97/1.427:
+             + Новые камеры: Canon A470, Canon G11,
                 Nikon D3000, Olympus E-P1, Panasonic DMC-FZ35/FZ38
-             + some changes in decoding code.
-            * Fixes for Microsoft Visual C++ 6.0 compatibility
-            * C-API dcraw_make_mem_thumb() call finally exported in API
+            * Исправления для совместимости с Microsoft Visual C++ 6.0
+            * Вызов C-API dcraw_make_mem_thumb() экспортируется в DLL
            * LibRaw 0.8.1
 
 2009-08-24 Alex Tutubalin <lexa@lexa.ru>
-           * Imported dcraw 8.96/1.426
-             + New cameras: Casio EX-Z60 and EX-Z75, Kodak Z980,
+           * Импортирована  dcraw 8.86/1.426
+             + Новые камеры: Casio EX-Z60 and EX-Z75, Kodak Z980,
                Nikon D5000,  Olympus X200, D560Z,C350Z,E620,
                Pentax K7, Sony A330.
-             + New color data for many cameras
-             + Generalized unpacker code for Canon and Casio P&S cameras
+             + Новые цветовые данные для многих камер
+             + Более общий код для распаковки данных P&S камер Canon и Casio
            * LibRaw 0.8.0-Release
 
 2009-08-13 Alex Tutubalin <lexa@lexa.ru>
-           * RAW files larger than 2Gb are supported on:
-              - Unix (all supported: FreeBSD, MacOS X, Linux)
-              - Windows (with C runtime version  >= 8.0)
-           * bzero replaced with memset to make Solaris users happy
-           * All applications on 32-bit systems should be recompiled
-             due to data structures size changes.
-           * Minor fixes in windows makefile
+           * Поддержка RAW-файлов размером более 2Gb
+              - Unix (все варианты)
+              - Windows (для систем с версией C runtime >= 8.0)
+           * bzero более не используется, ибо есть не везде.
+           * на всех 32-битных системах требуется полная перекомиляция 
+             приложений
            * LibRaw 0.8.0-Beta5
 
 2009-07-21 Alex Tutubalin <lexa@lexa.ru>
-           * Imported dcraw 8.95 (1.425):
-             + new huffman tree code
-             + New cameras supported: AGFAPHOTO DC-833m, Casio EX-S20,
+           * Импортирована dcraw 8.95 (1.425):
+             + Новый код для распаковки  huffman tree
+             + Добавлена поддержка камер: AGFAPHOTO DC-833m, Casio EX-S20,
                 Phase One P65, Samsung S850
-             + Removed hardcoded white-balance data for many P&S cameras.
-               It is recommended to set params.use_camera_wb to 1 for 
-               safe WB.
-           * Fixes for Nikon D5000 files: no pink stripe at 
-             right side of frame
-           * C-wrapper: added missed calls
-               libraw_dcraw_make_mem_image
-               libraw_dcraw_ make_mem_thumb
-           * Minor fixes to make non-gcc compilers more happy
-           * Internal structures changed, full recompilation of all client 
-             code is needed.
+             + Удалены стандартные значения коэффициентов баланса белого для 
+               ряда P&S камер.
+               Для стандартной обработки рекомендуется устанавливать 
+               params.use_camera_wb=1, что даст разумные умолчания для баланса
+               белого.
+           * Исправление: на файлах Nikon D5000 больше нет розовой полосы 
+             справа
+           * C-интерфейс: добавлены пропущенные ранее вызовы
+               libraw_dcraw_make_mem_image()
+               libraw_dcraw_ make_mem_thumb()
+           * Внутренние структуры данных изменены, требуется перекомпиляция 
+             всего клиентского кода.
+           * Мелкие исправления для беспроблемной компиляции на компиляторах,
+             отличных от gcc
            * LibRaw 0.8.0-Beta4
-                
+
 2009-06-08 Alex Tutubalin <lexa@lexa.ru>
-           * Fixes: gamma  curve processing was not performed in 
+           * Исправление: гамма-кривая не накладывалась в функции
               dcraw_write_mem_image()
-           * Fixes: gamma curve processing was not performed for 
-              Kodak thumbnails
+           * Исправление: гамма-кривая не накладывалась при обработке
+             preview некоторых камер Kodak
            * LibRaw 0.8.0-Beta3
 
 2009-06-05 Alex Tutubalin <lexa@lexa.ru>
-           * Fixes in documentation: params.gamm[] described more precisely
-           * Fixes in version number, 0.8-beta1 was mistakenly 0.0.0-beta1
+           * Поправки в документации: params.gamm[] описан более точно
+           * Поправки в номере версии, 0.8-beta1 has version 0.0.0-beta2
            * LibRaw 0.8.0-Beta2
 
 2009-06-04 Alex Tutubalin <lexa@lexa.ru>
-           * Imported dcraw 8.94 (1.423):
-             + New camera support:
+           * Импортирована  dcraw 8.94 (1.423):
+             + Поддержка новых камер:
                  Canon: SX1, 500D/Rebel T1i, A570, A590, SX110
                  Kodak Z1015, Motorola PIXL, Olympus E30, Panasonic DMC-GH1
-             + Improved color data for Nikon D3X
-             + New gamma curve model
-             + Many changes in RAW unpacking code
-             + Canon cameras: black level is not subtracted if set 
-               params.document_mode > 1
+             + Улучшены цветовые данные для камеры Nikon D3X
+             + Новая схема работы с гамма-кривой
+             + множество изменений в коде распаковки
+             + Для камер Canon: вычитание уровня черного не производится, если
+               через параметры установлена params.document_mode > 1
 
-           * API changed: params.gamma_16bit field removed. Gamma curve is
-             set via params.gamm[0]/gamm[1] values (see documentation and 
-             samples for details)
-           * LibRaw::identify() splitted to avoid MS VS2008 bug (too many 
-             nested blocks)
-
-           * Samples: dcraw_emu and mem_image samples supports new dcraw 
+           * Изменения API: параметра params.gamma_16bit field более не 
+             существует.
+             Параметры гамма-кривой задаются через поля params.gamm[0]/gamm[1] 
+             (см. документацию и исходные тексты примеров).
+           * Функция LibRaw::identify() разделена на две для обхода ошибки в MS 
+             VS2008 bug 
+           * Изменения в примерах: примеры dcraw_emu и mem_image поддерживают 
+             новые ключи командной строки dcraw:
               16bit/gamma semantics:
-                -6: set 16 bit output
-                -4: set 16 bit output and linear gamma curve and no auto 
-                   brighness
+                -6 16-битный вывод (гамма-корректированный)
+                -4 16-бит, линейная гамма-кривая и выключено автоматическое 
+                   повышение яркости
            *  LibRaw 0.8.0-Beta1
 
 2009-04-28 Alex Tutubalin <lexa@lexa.ru>
-           * Identify sample renamed to raw-identify (name conflict 
-             with ImageMagic)
-           * Copyright notice changes
-           * Many compiler warnings removed
+           * Пример identify переименован в raw-identify (конфликт с ImageMagic)
+           * Исправлены копирайты
+           * Удалено множество предупреждений компилятора
 
 2009-04-07 Alex Tutubalin <lexa@lexa.ru>
-           * More accurate types conversion in libraw_datastream.h 
-           * New postprocessing parameter auto_bright_thr: set portion of 
-             clipped pixels for auto brightening code (instead of 
-             dcraw-derived hardcoded 1%)
-           * -U  option for dcraw_emu sample sets auto_bright_thr parameter
-           * all client code should be recompiled due to structures size 
-             change
+           * Более аккуратное преобразование типов в libraw_datastream.h
+             (подавление warnings при компиляции сторонних приложений с -Wall) 
+           * Новый параметр пост-обработки  imgdata.params.auto_bright_thr 
+             - задает долю насыщенных пикселов при использовании 
+               авто-установки яркости (вместо забитого ранее в код 1%)
+           * Параметр -U у примера dcraw_emu: устанавливает параметр 
+              auto_bright_thr
+           * Все клиентские приложения должны быть перекомпилированы из-за 
+             смены размеров структур данных.
            * LibRaw 0.7.2-Release
 
 2009-03-22 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed typo in OpenMP support code
-           * MinGW support 
-           * dcraw source is included in distribution
+           * Исправлена опечатка в коде поддержки OpenMP
+           * Поддержан MinGW
+           * В поставку включен исходный текст dcraw.c
            * LibRaw 0.7.1-Release
 
 2009-03-15 Alex Tutubalin <lexa@lexa.ru>
-           * Fuji SuperCCD RAWs: color channels unshuffled on RAW
-             read stage (moved from postprocessing stage)
-
+           * Цветовые каналы для файлов Fuji SuperCCD упорядочиваются на этапе
+             распаковки RAW (а не на этапе постпроцессинга, как ранее)
            * LibRaw 0.7.0-Release
-
+             
 2009-03-13 Alex Tutubalin <lexa@lexa.ru>
-           * dcraw 8.93/1.421 imported:
-             + more accurate pentax dSLR support
-             + fixes in Kodak 620x/720x identification
-             + faster identification procedure for some formats.
+           * Импортирована dcraw 8.93/1.421
+             + более общая поддержка Pentax PEF
+             + правки в идентификации файлов Kodak DSC620X/720X
+             + более быстрая идентификация для ряда форматов.
            * LibRaw 0.7.0-Beta5
 
-
 2009-03-08 Alex Tutubalin <lexa@lexa.ru>
-           * dcraw 8.92/1.420 imported:
-             + user-specified gamma curve
-             + Pentax K2000/Km support
-             + Changes in Canon sRAW processing (support for 5D2 fw 1.07)
+           * Импортирована dcraw 8.92/1.420
+             + возможность задания пользовательской гамма-кривой
+             + поддержка Pentax K2000/Km
+             + изменения в обработке в Canon sRAW
 
-           * all client code should be recompiled
+           * требуется перекомпиляция всего клиентского кода
 
            * LibRaw 0.7.0-Beta4
 
 2009-02-13 Alex Tutubalin <lexa@lexa.ru>
-           * bugfix: 4channels sample finally subtracts black by default
+           * bugfix: Пример 4channels вычитает уровень черного по-умолчанию
+
            * dcraw 8.91/1.419 imported:
-              + fixes in RIFF files parsing
+              + правки в разборе файлов RIFF
 
            * LibRaw 0.7.0-Beta3
 
 2009-02-12 Alex Tutubalin <lexa@lexa.ru>
-           * Black level was not calculated for Canon RAWs in
-             some filtering modes
+           * Для камер кэнон не рассчитывался уровень черного для ряда режимов
+             фильтрации RAW
 
-           * 4channels sample prints calculated black level
-             (scaled if autoscaling used). 
-             Also output file names for this sample now includes 
-             color channel name (R/G/B/G2 or C/M/Y/G)
+           * Пример 4channels теперь печатает уровень черного (масштабированный
+             если используется автомасштабирование), имена порождаемых
+             файлов теперь содержат название цветового канала.
 
            * LibRaw 0.7.0-Beta2
 
 2009-02-09 Alex Tutubalin <lexa@lexa.ru>
-           * New sample 4channels: splits RAW color channels into four 
-             separate TIFFs
+           * Новый пример 4channels: сохраняет каналы файла в отдельных
+             tiff-файлах
 
            * LibRaw 0.7.0-Beta1
 
 2009-02-07 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed bug in external jpeg metadata reading code.
+           * Исправлена ошибка в обработке чтения метаданных из
+             внешних JPEG-файлов
+           * Устранены некоторые предупреждения компилятора С++
 
-           * Cleaned some C++ warnings
+           * Импортирована dcraw 8.91/1.418
+             + Поддержка Hasselblad V96C
 
-           * dcraw 8.91/1.418 imported
-             + Hasselblad V96C support
-
-           * You need to clean and recompile client code which
-             uses LibRaw_*_datastream classes.
+           * Если ваш код использует потоки ввода LibRaw, то вам
+             следует его перекомпилировать
 
            * LibRaw 0.7.0-Alpha6
 
 2009-01-30  Alex Tutubalin <lexa@lexa.ru>
-
-           * New data input framework is created. It is possible now to
-             easyly implement your own data input interface for LibRaw
-             (e.g. for reading RAW data from network data stream)
+           * Реализован полностью новый framework ввода, допускающий
+             легкое переопределение функций чтения RAW-файлов пользователем
+             библиотеки.
              
-           * All older programs using previous LibRaw versions are
-	     compatible at source code level.
+           * Все программы, написанные для старых версий LibRaw полностью
+             совместимы с данной на уровне исходных текстов 
 
-           * LibRaw can read RAW data from memory buffer via
-             new LibRaw::open_buffer() API call (implemented on top of
-             new input framework). 
-             This call used in sample application dcraw_emu and simple_dcraw
-             (with -B command-line switch) to test new API.
+           * На базе новой  input framework реализован интерфейс ввода данных
+             из буфера в памяти LibRaw::open_buffer(). Примеры dcraw_emu
+             и simple_dcraw используют этот интерфейс если задан ключ -B
 
-           * Error handling callback functions now can be called with
-             NULL filename passed (if underlying data stream object
-             does not know file name).
-             So, client error handling callbacks should work with NULL
-             filename.
+           * Функциям - уведомителям об ошибках может быть передано
+             нулевое (NULL) имя обрабатываемого файла, если поток ввода
+             не ассоциирован с файлом. Эта ситуация должна корректно 
+             обрабатываться клиентским кодом, если он ставит свои уведомители
+             об ошибках.
 
-           * All client code should be recompiled
+           * Требуется полная перекомпиляция клиентского кода
 
-           * Imported dcraw 8.90/1.417:
-              + Support for loading White Balance data from
-                Sony ARW files edited with Sony IDC software.
+           * Импортирована dcraw 8.90/1.417:
+              + Поддержка загрузки баланса белого из файлов
+               Sony ARW, редактированных конвертором Sony IDC.
 
            * LibRaw 0.7.0-Alpha5
 
 2009-01-17 Alex Tutubalin <lexa@lexa.ru>
-           * Raw filtering mode LIBRAW_FILTERING_NOPOSTPROCESS has renamed
-            to LIBRAW_FILTERING_NORAWCURVE for better reflect its purpose.
-            This filtering_mode bit turns off tone curve applying on
-            RAW data on bayer-pattern cameras with raw tone curve:
-              + Adobe DNG (only RAW with bayer pattern)
+           * LIBRAW_FILTERING_NOPOSTPROCESS переименована 
+             LIBRAW_FILTERING_NORAWCURVE, что означает "не пропускать
+             RAW-данные через тоновую кривую" (для PhaseOne это
+             отключает и весь прочий постпроцессинг RAW данных)
+
+           * Режим фильтрации NORAWCURVE реализован для всех 
+             релевантных камер с байеровской матрицей:
+              + Adobe DNG (только RAW-данные с байеровской матрицы)
               + Nikon compressed NEF
-              + Some Kodak cameras
-              + Sony A700/A900 (tone curve applied to 8-bit raws)
+              + Ряд камер Kodak
+              + Sony A700/A900 (только 8-битные RAW-файлы)
 
-           * unprocessed_raw sample: added command-line key -N, this key
-             turns on LIBRAW_FILTERING_NORAWCURVE filtering mode.
-
-           * New scheme of Fuji RAW processing (introduced in 0.7-Alpha3)
-             supports DNG files generated from Fuji RAF.
+           * Реализована распаковка без поворота для  DNG-файлов 
+             сконвертированных  из Fuji RAF (SuperCCD)
            
-           * Imported dcraw 8.90/1.416:
-              + better support for Samsung S85
-              + fixed possible integer overflow in wavelet denoising code
+           * Пример unprocessed_raw: добавлен ключ -N, включающий
+             режим LIBRAW_FILTERING_NORAWCURVE
+
+           * Импортирована dcraw 8.90/1.416:
+              + улучшена поддержка камеры Samsung S85
+              + исправлено возможное переполнение целого в
+                wavelet-шумопонижении
 
            * LibRaw 0.7.0-Alpha4
 
 
 2009-01-14 Alex Tutubalin <lexa@lexa.ru>
-           * Black mask extraction supported for all files with bayer data
-            (one component per pixel). Black mask data not avaliable
-            for multi-component data (Foveon, Canon sRAW, Sinar 4-shot,
-            Kodak YCC/YRGB).
+           * Извлечение черной рамки теперь работает для всех камер с 
+             одноцветными данными (добавлена поддержка для Fuji и PhaseOne).
+             Все еще не  работает для многоцветных данных: Foveon, Canon sRAW,
+             Sinar 4-shot, Kodak YRGB и YCbCr
+           * Режим невычитания черного работает для всех камер с одноцветными
+             данными (добавилась поддержка PhaseOne backs)
 
-           * Black level subtraction can be turned off for all bayer
-            cameras (added support for PhaseOne backs).
+           * Изменения в обработке данных камер FujiFilm:
+              + исходное RAW-изображение извлекается без поворота на 45 градусов
+              + поворот происходит на стадии постобработки
+              + вызывающая программа может сделать поворот (и для ряда камер -
+                двойное сжатие по длинной стороне) самостоятельно, вызовом 
+                rotate_fuji_raw()
 
-           * Fujifilm camera processing model changed:
-              + RAW data is extracted without 45-degree rotation
-              + dcraw-compatible rotation is performed on postptocessing stage
-              + it is possible to rotate RAW data without postprocessing
-                by LibRaw::rotate_fuji_raw() call.
+           * Новый бит в настройках filtering_mode: 
+              LIBRAW_FILTERING_NOPOSTPROCESS
+             Отключает постпроцессинг, который делается на основании считанных
+             из RAW метаданных. В настоящий момент функциональность поддержана
+             только для PhaseOne (планируется поддержка для всех релевантных 
+             камер)
 
-           * New filtering mode setting: LIBRAW_FILTERING_NOPOSTPROCESS
-             This bits turns off RAW tone curve processing based on tone curve
-             readed from RAW metadata.
-             This mode supported only for PhaseOne backs now (to be supported
-             on all relevant cameras in nearest future releases)
+           * Для камер PhaseOne помимо черной рамки хранятся данные о точке 
+             черного, считанные из данных файла.
 
-           * Black level data (got from RAW data) are stored for PhaseOne backs.
+           * Исправлена имеющаяся в dcraw ошибка с расчетом уровня черного
+             для камер PhaseOne, результаты работы для этих задников бинарно
+             не совпадают со стандартной dcraw.
 
-           * Black level subtraction bug (derived from dcraw) fixed
-             for PhaseOne files.
-
-           * Fixed processing of -s parameter for dcraw_emu sample
+           * Исправлена ошибка в обработке параметра -s в примере dcraw_emu
            
-           * Parameter  -s N (select shot number) added to 
-             unprocessed_raw sample.
+           * Добавлен параметр -s N в пример unprocessed_raw, позволяющий 
+             задать номер изображения для извлечения.           
 
-           * Imported dcraw 8.90/1.414:
-              + changes in QuickTake 100 metadata processing
-              + changes in external jpeg processing code
-              + Samsung S85 support
+           * Импортирована dcraw 8.90/1.414:
+              + изменения в обработке внешних jpeg с метаданными (Diag RAW)
+              + Поддержка Samsung S85
+              + изменения в обработке файлов QuickTake 100
 
-           * All client code should be recompiled
+           * Требуется полная перекомпиляция всего клиентского кода
 
-           * LibRaw 0.7.0-Alpha3 released
+           * LibRaw 0.7.0-Alpha3
+
 
 2009-01-10 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed bug in add_masked_borders: crash if output dimensions
-            is already larger than raw dimensions
-            * Fixed out of bounds in samples/unprocessed_raw.cpp for files
-            with non-square pixels
+           * Исправлена ошибка в add_masked_borders(): все портилось, если
+             размер выходного изображения был больше, чем размер RAW-данных
+            * Исправлена ошибка в samples/unprocessed_raw.cpp проявлявшаяся на
+             файлов с камер с неквадратными пикселами
 
            * LibRaw 0.7.0-Alpha2 released
-           
+
 2009-01-08 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed bug in  0.7.0-a0: black frame size has not reset, 
-             so in batch processing there is an error in black frame
-             size for files without black frame.
+           * исправлена ошибка 0.7.0-a0 - размеры рамки не обнулялись, 
+             проявлялось при батч-обработке, если у следующего файла была рамка
+             нулевого размера.
 
-           * Implemented reading of black/masked pixels data for 
-             near all cameras with masked pixels, exclding:
-              + Canon sRAW, Leaf (MOS), Sinar 4-shot - more than one 
-                color component in black frame (redesign of black frame
-                data structures required).
-              + Fuji SuperCCD: need to design right methods of extraction 
-                (should we rotate and resize black pixels as active ones??)
+           * Чтение черной рамки сделано практически для всех камер, где это имеет
+             смысл (имеется рамка). Исключения:
+             + Canon sRAW, Leaf (MOS), Sinar 4-shot - форматы в которых больше
+               одного компонента в рамке (в Leaf: потенциально, в остальных - всегда),
+               требуется смена формата данных хранения рамки.
+             + Fuji SuperCCD: пока не принято решение, как совместить хранение рамки
+                и поворот изображение (со сменой масштаба)
+            Тестирование извлечение рамки неполное: для 9 форматов паковки (из 21
+            для которых поддержано извлечение черной рамки) пока нет примеров данных.
+            Правда 7 из этих 9 - это старые P&S камеры.
 
-            * Tested for most dSLR data formats with masked pixels: 7 of 9
-              untested formats are from old P&S cameras.
+           * Новые параметры у примера identify: 
+                  -u - печатать имя  функции-распаковщика,
+                  -f - печатать размеры черной рамки у изображения.
+             Работают только если identify запущена без -v
 
-           * New call LibRaw::unpack_function_name() returns unpack function name
-             (useful for testers only)
+           * новый вызов unpack_function_name(), возвращает имя функции-распаковщика
 
-           * New identify sample parameters (useful for test-suite builders
-             to check test coverage):
-                  -u - print unpack function name
-                  -f - print masked frame size
-             These parameters works only for identify run without -v parameter
+           * Импортирована dcraw 8.89/1.411
+             + исправления в разборе файлов Panasonic FZ50
 
-           * Imported dcraw 8.89/1.411
-             + changes in Panasonic FZ50 files parsing
-
-           * LibRaw 0.7.0-Alpha1 released
-
+           * LibRaw 0.7.0-Alpha1
 
 2009-01-05 Alex Tutubalin <lexa@lexa.ru>
-           * It is possible to turn off RAW data filtration (black level 
-             subtraction,              zero pixels averaging):
-                + supported on all cameras except Foveon and Phase One
-                + filtraction controlled by new parameter "filtering_mode"
-                + it is possible to expand API by filtering procedures 
-                  built for specific camera model.
-
-           * Black border (masked pixels) extraction:
-                + API (data structures) for storing black mask.
-                + Black mask extraction supported only for limited list of
-                  data formats: 
-                       - Canon .CRW, .CR2 (with exception of sRAW),A600, A5
-                       - Adobe DNG (both converted RAW and native DNG)
-                       - Nikon NEF (compressed only)
-                  this list to be expanded in future LibRaw versions
-           * New call add_masked_borders_to_bitmap makes full bitmap
-             'masked border' + image
-           * Usage sample for functionality listed above: 
-              samples/unprocessed_raw 
-           * Imported dcraw 8.89/1.410:
-              + fixed bugs in Hasselblad .fff decoding
-              + fixes in Imacon metadata decoding
-           * Documentation changes
-           * All client code should be recompiled
+           * Возможность отключения фильтрации RAW-данных (вычитание уровня черного,
+            замазывание пикселов с нулевыми значениями):
+                + поддержано на всех камерах кроме камер Foveon и Phase One
+                + управление фильтрацией параметром filtering_mode
+                + возможность расширения API процедурами фильтрации, специализированными 
+                  для конкретной модели камеры
+           * Извлечение данных черной рамки
+                + API для хранения данных черной рамки
+                + Процедуры извлечения данных рамки для форматов .CRW, .CR2 (кроме sRAW),
+                  DNG, NEF, Canon A600 и Canon A5
+           * Вызов add_masked_borders_to_bitmap для построения общего битмэпа 
+             маскированная рамка + RAW-данные.
+           * Пример использования вышеописанной функциональности: samples/unprocessed_raw 
+           * Импортирована новая редакция dcraw 8.89 (версия 1.410)
+              + исправления в разборе файлов Hasselblad
+              + исправления в разборе файлов Imacon
+           * Изменения в документации
+           * Требуется полная перекомпиляция всего клиентского кода
            * LibRaw 0.7.0-Alpha0
 
-
 2009-01-01 Alex Tutubalin <lexa@lexa.ru>
-           * Fixed a bug (filedescriptor and buffer memory leak)  in thumbnail 
-             extraction when called before metadata analysis. 
+           * Исправлена ошибка (filedescriptor and buffer memory leak) в коде извлечения
+             preview, если извлечение preview вызывалось до открытия RAW-файла.
              Thanks to Albert Astalis Cid.
            * LibRaw 0.6.4 Release
 
 2008-12-11 Alex Tutubalin <lexa@lexa.ru>
-           * Imported new edition of dcraw 8.89 (version 1.409)
-           * Nikon NEF decoding changed
+           * Импортирована новая редакция dcraw 8.89 (версия 1.409)
+           * Изменено раскодирование NEF-файлов (лучше обрабатывается переполнение)
            * LibRaw 0.6.3 Release
-           
-2008-12-03 Alex Tutubalin <lexa@lexa.ru>
-           * fixed bug in Panasonic .RW2 processing (only for thread-safe version,
-             single-threaded version was not affected)
-           * All client code should be recompiled
+
+2008-12-04 Alex Tutubalin <lexa@lexa.ru>
+           *  Исправлена ошибка в обработке файлов .RW2 (Panasonic). Ошибка проявлялась
+           только в thread-safe режиме, single-threaded вариант не был затронут.
+           * Требуется полная перекомпиляция всего клиентского кода
            * LibRaw 0.6.2 Release
 
 2008-12-03 Alex Tutubalin <lexa@lexa.ru>
-           * Imported  dcraw 8.89 (version 1.407)
-           * New cameras:
-               Canon G10 & 5D Mk2, Leaf AFi 7, Leica D-LUX4, Panasonic FX150 & G1, 
-               Fujifilm IS Pro,
-           * Changed camera support (color conversion tables):
+           * Импортирована dcraw 8.89
+           * Поддержка новых камер
+               Canon G10 и 5D Mk2, Leaf AFi 7, Leica D-LUX4, Panasonic FX150 и G1, Fujifilm IS Pro
+           * Изменена поддержка камер (цветовые таблицы), поддержаных в предыдущей версии
                Canon 50D, Nikon D90 & P6000, Panasonic LX3 & FZ28, Sony A900
            * LibRaw 0.6.2 beta
 
+Добавлено поле float LibRaw::imgdata.color.cam_xyz[4][3] - таблица 
+             преобразования из камерного     RGB в XYZ. Эта таблица - константна
+             для каждой камеры (и константна в коде)
+           * Требуется полная перекомпиляция всего клиентского кода
+           * LibRaw 0.6.1 Release
+
 2008-09-25 Alex Tutubalin <lexa@lexa.ru>
-           * Added new data field  float LibRaw::imgdata.color.cam_xyz[4][3]. 
-           This field contains constant table (different for each camera) for
-           Camera RGB->XYZ conversion.
-           * All client code should be recompiled
+           * Добавлено поле float LibRaw::imgdata.color.cam_xyz[4][3] - таблица 
+             преобразования из камерного     RGB в XYZ. Эта таблица - константна
+             для каждой камеры (и константна в коде)
+           * Требуется полная перекомпиляция всего клиентского кода
            * LibRaw 0.6.1 Release
 
 2008-09-18 Alex Tutubalin <lexa@lexa.ru>
-           * dcraw 8.88 imported:
-              - new cameras (Canon 50D, Sony A900, Nikon D90 & P6000,
+           * импорт  dcraw 8.88:
+              - поддержка новых камер (Canon 50D, Sony A900, Nikon D90 & P6000,
                 Panasonic LX3 FZ28)
-              - new method of black point subtraction for Canon cameras, 
-                preliminary banding supression.
-            * Stack memory usage lowered (some thread data moved to dynamic
-            memory) 
-            * some patches for MSVC compatibility
+              - новая обработка точки черного на камерах Canon: борьба с бэндингом
+                (очень приблизительная)
+            * Уменьшение требований по памяти на стеке для объекта LibRaw
+            (локальные данные thread перенесены в динамическую память)
+            * патчи для совместимости с MS Visual C++
             * LibRaw 0.6.0 Release
 
 2008-09-16 Alex Tutubalin <lexa@lexa.ru>
-           * Enum definitions changed to make gcc -pedantic happy
-           * Compiler/preprocessor flags does not affects LibRaw class field set
-           (i.e. structure for thread local storage is always allocated)                   
-           * Default library compilation mode (i.e. sources imported in another
-             project) is thread-safe 
+           * Изменения в определении констант, чтобы сделать gcc -pedantic счастливым
+           * Флаги компиляции не влияют на содержимое полей класса LibRaw 
+           * При компиляции по-умолчанию компилируется thread-safe версия, хранящая
+           статические данные распаковщиков в объекте LibRaw
 
 2008-09-14 Alex Tutubalin <lexa@lexa.ru>
-           * OpenMP support for most CPU consuming steps of processing:
+           * параллелизация через OpenMP наиболее ресурсоемких этапов обработки
              ahd_interpolation. wavelet_denoise
-             10-30% speed-up of full processing pipe on 2-core CPU 
-             OpenMP supported only on gcc (Linux/FreeBSD and Mac OS X)
+             Поддержка OpenMP работает только на Unix (Linux/FreeBSD) и Mac OS X
 
            * LibRaw 0.6.0-Beta-1
-
+ 
 2008-09-10 Alex Tutubalin <lexa@lexa.ru>
-           *  All set_**handler accepts additional void* pointer, which should point to
-            callback private data. This pointer passed to user callback when it called.
+           *  При установке callbacks сохраняется дополнительный void* - указатель,
+            указывающий на приватные данные callback (для использования нескольких
+            LibRaw instances)
 
            * LibRaw 0.6.0-alpha5
 
-           * All client code should be recompiled
+           * Требуется полная перекомпиляция всего клиентского кода
 
 2008-09-10 Alex Tutubalin <lexa@lexa.ru>
-           * New processing stages in enum LibRaw_progress: 
-             LIBRAW_PROGRESS_BAD_PIXELS LIBRAW_PROGRESS_DARK_FRAME
-            (reserved stages LIBRAW_PROGRESS_RESERVED_PRE1-PRE2 has removed)
-           * libraw_strprogress() - convert progress code into string
+           * Добавлены стадии обработки LIBRAW_PROGRESS_BAD_PIXELS и 
+             LIBRAW_PROGRESS_DARK_FRAME
+            (удалены LIBRAW_PROGRESS_RESERVED_PRE1-LIBRAW_PROGRESS_RESERVED_PRE2)
 
-           * Added progress/cancellation user callbacks
-             + new fatal error code: CANCELLED_BY_CALLBACK
-             + sample usage in samples/dcraw_emu.cpp (try run it with -v -v -v opts)
+           * Добавлена поддержка user callbacks на промежуточных стадиях обработки
+
+           * libraw_strprogress call
+
+           * новая фатальная ошибка 'CANCELLED_BY_CALLBACK'
+
+           * пример использования callback в примере dcraw_emu (запустить с 
+           ключами -v -v -v)
 
            * LibRaw 0.6.0-alpha4
 
-           * All client code should be recompiled
+           * Требуется полная перекомпиляция всего клиентского кода
+
 
 2008-09-08 Alex Tutubalin <lexa@lexa.ru>
-           * ICC-profiles support (same as in dcraw)
-             + input/output profiles (specified as path to 'icc' file or 'embed' for 
-               embedded input profile)
-             + additional warnings
-             + LCMS library used
+           * Поддержка ICC-профилей, аналогичная поддержке в dcraw
+             + возможность задать профиль камеры (включая embedded) и выходной 
+             профиль после конверсии
+             + дополнительные предупреждения, если заданы неверные профили
+             + используется библиотека LCMS
 
-           * support of bad pixel map (caller should specify path to bad pixel file 
-              in dcraw-compatible format)
+           * поддержка карты плохих пикселей (задается путь к файлу, формат 
+            аналогичен dcraw)
 
-           * dark frame subtraction support (caller should supply path to 16-bit PGM 
-              map). samples/simple_dcraw.cpp - -4 option added for dark frame file 
-              generation
+           * поддержка вычитания dark frame ([задается путь к 16-бит PGM) 
+             samples/simple_dcraw.cpp - добавлен ключ -4 для генерации dark frame file
 
-           * support of bad pixeld map (dcraw-compatible format)
+           * поддержка карты плохих пикселов (в формате dcraw)
 
-           * the dcraw_emu sample supports all new features (ICC, dark frame, bad 
-              pixels)
+           * пример dcraw_emu поддерживает всю новую функциональность 
+           (ICC, dark frame, bad pixels)
 
-           * libraw/libraw_version.h, defines, calls and macros for version checks:
+           * libraw/libraw_version.h, вызовы и макросы для  проверки версии
               + LibRaw::version(), LibRaw::versionNumber(), LIBRAW_CHECK_VERSION()
 
-           * List of supported cameras:
+           * выдается список поддерживаемых камер:
               + LibRaw::cameraCount()
               + LibRaw::cameraList()
 
-           * fixed error in adjust_sizes_info_only
+           * исправлена ошибка в вызове adjust_sizes_info_only
 
-           * documentation changes
+           * изменения в документации
 
            * LibRaw 0.6.0-alpha3
 
 2008-09-07 Alex Tutubalin <lexa@lexa.ru>
-           * samples/mem_image.c - bitwise equal output with dcraw -4
-             (PPMs outputted with network byte order)
+           * samples/mem_image.c - вывод 16-битных данных теперь одинаков с dcraw -4
+             (вывод PPM производится в network byte order)
+
            * LibRaw 0.6.0-alpha2
            
 2008-09-06 Alex Tutubalin <lexa@lexa.ru>
-           * Added calls dcraw_make_mem_image and dcraw_make_mem_image:
-             + functions (and supporting code)
-             + documentation changed
-             + new sample code samples/mem_image.cpp
-           * Added processing parameter  LibRaw::imgdata.params.gamma_16bit 
-              (set to 1 to make gamma correction for 16-bit output)
+           * Добавлены функции dcraw_make_mem_image и dcraw_make_mem_image:
+             + реализация функций
+             + изменения в документации
+             + новый пример samples/mem_image.cpp
+           * Добавлен параметр LibRaw::imgdata.params.gamma_16bit 
+              (если он установлен в 1, то вывод в  TIFF/память 16-битных данных  
+              будет с гамма-коррекцией)
            * LibRaw 0.6.0-alpha1
 
 2008-08-28 Alex Tutubalin <lexa@lexa.ru>
-           * dcraw 1.404 (8.87) imported:
-             - 6 new cameras supported (Canon 1000D, A720, SD300; 
+           * Импорт dcraw 1.404 (8.87):
+             - новые камеры (Canon 1000D, A720, SD300; 
                 Nikon D700, Oly E-520,Kodak C603)
-           * Licensing changed to GPL v2
+           * Лицензирование изменено на GPL v2
 
-2008-05-02  Alex Tutubalin <lexa@lexa.ru>
-            * mmap/malloc+read IO-layer removed due to no performance gain.
-              FILE I/O returned
+2008-05-02 Alex Tutubalin <lexa@lexa.ru>
+           * Удален io layer, как не дающий существенного выигрыша 
+           в производительности,  возвращен FILE I/O
+           
+2008-05-02 Alex Tutubalin <lexa@lexa.ru>
+           * Импорт dcraw 1.403
+             - изменения в распаковке ljpeg: индекс в кривой
+             обрезается до 12 бит (ранее не было)
+             - изменения в обработке картинок с foveon с 
+             jpeg thumbnail: обрабатывается случай, когда
+             заявленная длина thumbnail больше, чем есть места
+           * LibRaw 0.5.3 released
 
-2008-05-02  Alex Tutubalin <lexa@lexa.ru>
-            * dcraw 1.403 imported
-              - changes in ljpeg decompression (index values cut to 12 bit)
-              - changes in parse_foveon() jpeg thumbnail extraction	
-            * LibRaw 0.5.3 released
+2008-04-24 Alex Tutubalin <lexa@lexa.ru>
+           * Редактирование английской документации
+           * поправлена сборка примера identify под Linux
+           * LibRaw 0.5.2 released
 
-2008-04-24  Alex Tutubalin <lexa@lexa.ru>
-            * Linux build of samples/identify fixed
-            * documentation editorial
-            * LibRaw 0.5.2 released
+2008-04-21 Alex Tutubalin <lexa@lexa.ru>
+           * Окончательный перевод документации на английский
+           * Микро-исправлени (путь до include) в samples/half-mt
+           * LibRaw 0.5.1 released
 
-2008-04-21  Alex Tutubalin <lexa@lexa.ru>
-            * All documentation translated to English
-            * English changelog started :)
-            * minor bug (include path) fixed in samples/half_mt 
-            * LibRaw 0.5.1 released
+2008-04-20 Alex Tutubalin <lexa@lexa.ru>
+           * Добавлена и задокументирована установка под Unix
+           * добавлена вторая порция английской документации
+           * импортирована dcraw 1.402 (8.86)
+           * LibRaw 0.5.0 released
+
+2008-04-18 Alex Tutubalin <lexa@lexa.ru>
+           * правка опечаток в русской документации
+           * добавлена первая порция английской документации
+
+2008-04-11 Alex Tutubalin <lexa@lexa.ru>
+           * Импортирована  dcraw 1.401 (8.85)
+
+2008-04-06 Alex Tutubalin <lexa@lexa.ru>
+           * Импортирована  dcraw 1.400 (8.84)
+
+2008-04-03 Alex Tutubalin <lexa@lexa.ru>
+           * Добавлена сборка DLL для Win32
+           * LibRaw 0.4.9 released
+
+2008-04-03 Alex Tutubalin <lexa@lexa.ru>
+           * Добавлена (и задокументирована) сборка под Win32
+           * Добавлен ключ -T к half_mt (вывод в Tiff)
+           * пример half_mt переписан под Win32 (тамошний threads interface)
+           * LibRaw 0.4.8 released
+
+2008-03-24 Alex Tutubalin <lexa@lexa.ru>
+           * Исправлена ошибка в проверке на OUT_OF_ORDER calls
+           * Исправлены проблемы c thread safety (Coffin static variables)
+           * добавлен пример half_mt
+           * Добавлены warnings и все что с этим связано.
+
+2008-03-23 Alex Tutubalin <lexa@lexa.ru>
+           * шлифовка Why-LibRaw-rus
+           * open_file() теперь извлекает ICC-профиль (если он есть в файле)
+           * удалена поддержка bad_pixels и dark_frame
+           * исправлена ошибка в open_file(): params.use_camera_wb не копировался в 
+             params.use_camera_matrix если у последнего было значение по умолчанию.
+           * Пример samples/dcraw_emu.cpp - полная эмуляция режимов dcraw (кроме 
+           ключей    -i -e -D -d -P -K).
+           * Поведение "-h implies -f" hardcoded в dcraw_process() 
+           * C API (сделано, документировано)
+           * пример  dcraw_half (использование C API)
+
+2008-03-22 Alex Tutubalin <lexa@lexa.ru>
+           * добавлена char *libraw_strerror(int errcode);
+           * добавлен макрос LIBRAW_FATAL_ERROR
+           * обработка ошибок в примерах приведена к современным веяниям
+           * Примеры переименованы и изменены
+             - dcraw_main -  удален, запутывает картину
+             - identify_cxx => identify 
+             - docmode_cxx => simple_dcraw, добавлен "эмулятор" dcraw без
+               параметров (все - defaults)
+           * переупорядочено расположение исходных текстов
+           * io.h => libraw_io.h
+           * запрограммирована dcraw_process()
+           * шлифовка документации
+           * LibRaw 0.3.0 released
+           
+2008-03-20 Alex Tutubalin <lexa@lexa.ru>
+           * все переменные _offset спрятаны из зоны видимости
+           * удалена обработка ошибки нехватки памяти на longjmp (все равно
+             не работала), заменена на C++ exceptions. 
+
+           * память под гистограмму теперь аллоцируется динамически
+           * Изменения в обработке preview для камер Kodak (повлекшие
+             за собой массированные изменения в интерфейсе):
+                - kodak thumbnails сразу гамма-корректируются и применяется 
+                  внутрикамерный баланс белого  (аналогично dcraw -e)
+                - Удалена функция int LibRaw::dcraw_ppm_tiff_writer (т.к. 
+                  все bitmap-превью теперь в одинаковом формате, то она 
+                  не нужна) 
+                - удалены константы формата thumbnail:
+                          LIBRAW_THUMBNAIL_FOVEON
+                          LIBRAW_THUMBNAIL_KODAK
+                          LIBRAW_THUMBNAIL_PPM
+                  вместо них теперь
+                          LIBRAW_THUMBNAIL_BITMAP
+	
+            * имплементированы пользовательские callbacks на ошибочные
+              состояния "нехватка памяти" и "ошибка при чтении данных"
+	
+            * имплементирован менеджер памяти и автоматическое освобождение
+              всего аллоцированного по recycle()
+        
+            * При возникновении исключительной ситуации при записи во
+              внешний файл - файл закрывается.  
+
+            * Добавлены новые коды ошибок
+                        LIBRAW_UNSUFFICIENT_MEMORY
+                        LIBRAW_DATA_ERROR
+                        LIBRAW_IO_ERROR
+              При возникновении этих ошибок делается recycle() и объект
+              LibRaw переходит в исходное (стартовое) состояние
+	
+            * Добавлено новое состояние источника цветовых данных:
+              LIBRAW_COLORSTATE_INIT 
+
+            * LibRaw 0.3.0 released
