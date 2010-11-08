@@ -1,44 +1,49 @@
+2010-11-08 Alex Tutubalin <lexa@lexa.ru>
+	* Исправления для совместимости с компилятором Sun Studio
+	* Исправления для совместимости с Visual Studio 2010
+	* LibRaw 0.11.0-Release
+
 2010-10-18 Alex Tutubalin <lexa@lexa.ru>
-           * Mac OS X: Выключено OpenMP для wavelet_denoise
-           * Почищены предупреждения Visual C++ 2003 в include-файлах
-           * LibRaw 0.11-Beta7
+        * Mac OS X: Выключено OpenMP для wavelet_denoise
+        * Почищены предупреждения Visual C++ 2003 в include-файлах
+        * LibRaw 0.11-Beta7
 
 2010-10-16 Alex Tutubalin <lexa@lexa.ru>
-           * internal/dcraw_fileio.c опять компилируется с -DDCRAW_VERBOSE
-           * исправлен стиль комментариев (С++ -> C) в libraw_datastream.h
-           * LibRaw 0.11-Beta6
+        * internal/dcraw_fileio.c опять компилируется с -DDCRAW_VERBOSE
+        * исправлен стиль комментариев (С++ -> C) в libraw_datastream.h
+        * LibRaw 0.11-Beta6
 
 2010-10-15 Alex Tutubalin <lexa@lexa.ru>
-           * Обновление интерфейса чтения данных. Реализованы следующие классы
-             LibRaw_*_datastream:
-               + LibRaw_buffer_datastream - чтение из буфера в памяти
-               + LibRaw_file_datastream - чтение из файла через iostreams
-               + LibRaw_bigfile_datastream - чтение из файла через FILE*
-           *  Выбор среди двух методов чтения файлов производится 
-              LibRaw::open_file() в зависимости от размера файла:
-               + добавлен необязательный второй параметр у open_file():
-                 если размер файла (в байтах) больше этого значения,
-                 то будет использован LibRaw_bigfile_datastream
-               + Если параметр не задан, то он равен 250 мегабайтам.
+        * Обновление интерфейса чтения данных. Реализованы следующие классы
+          LibRaw_*_datastream:
+            + LibRaw_buffer_datastream - чтение из буфера в памяти
+            + LibRaw_file_datastream - чтение из файла через iostreams
+            + LibRaw_bigfile_datastream - чтение из файла через FILE*
+        *  Выбор среди двух методов чтения файлов производится 
+           LibRaw::open_file() в зависимости от размера файла:
+            + добавлен необязательный второй параметр у open_file():
+              если размер файла (в байтах) больше этого значения,
+              то будет использован LibRaw_bigfile_datastream
+            + Если параметр не задан, то он равен 250 мегабайтам.
 
-           * C API не позволяет задать параметры функции по умолчанию,
-             поэтому в этом API добавлен второй вызов libraw_open_file_ex()
-             второй параметр которого - значение размера файла, начиная с 
-             которого начинается использование LibRaw_bigfile_datastream()
+        * C API не позволяет задать параметры функции по умолчанию,
+          поэтому в этом API добавлен второй вызов libraw_open_file_ex()
+          второй параметр которого - значение размера файла, начиная с 
+          которого начинается использование LibRaw_bigfile_datastream()
 
-           * И это не последнее изменение I/O Layer
+        * И это не последнее изменение I/O Layer
 
-           * Все методы LibRaw_abstract_datastream опять виртуальные.
+        * Все методы LibRaw_abstract_datastream опять виртуальные.
 
-           * Структуры данных изменены, требуется перекомпиляция всех приложений.
+        * Структуры данных изменены, требуется перекомпиляция всех приложений.
 
-           * Пример dcraw_emu с ключом -d печатает времена исполнения 
-             отдельных операций.
+        * Пример dcraw_emu с ключом -d печатает времена исполнения 
+          отдельных операций.
 
-           * Пример simple_dcraw еще упрощен, убран код работы с mmap()
+        * Пример simple_dcraw еще упрощен, убран код работы с mmap()
              (в dcraw_emu он остался)
 
-           * LibRaw 0.11-Beta5
+        * LibRaw 0.11-Beta5
 
 2010-10-08 Alex Tutubalin <lexa@lexa.ru>
            * Исправлена ошибка порождения C++ exceptions внутри OpenMP-секции
