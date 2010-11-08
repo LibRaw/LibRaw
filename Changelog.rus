@@ -901,8 +901,4 @@
             * Добавлено новое состояние источника цветовых данных:
               LIBRAW_COLORSTATE_INIT 
 
-<<<<<<< HEAD
             * LibRaw 0.3.0 released
-=======
-            * LibRaw 0.3.0 released
->>>>>>> e3985e211515852da5215871fcf21aeed0e6ff97
