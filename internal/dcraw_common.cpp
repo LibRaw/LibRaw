@@ -3209,7 +3209,7 @@ void CLASS hat_transform (float *temp, float *base, int st, int size, int sc)
     temp[i] = 2*base[st*i] + base[st*(i-sc)] + base[st*(2*size-2-(i+sc))];
 }
 
-#ifndef _OPENMP
+#if !defined(_OPENMP) || defined(__APPLE__) || defined(__MACOSX__)
 void CLASS wavelet_denoise()
 {
   float *fimg=0, *temp, thold, mul[2], avg, diff;
@@ -8907,3 +8907,4 @@ void CLASS write_ppm_tiff()
   }
   free (ppm);
 }
+
