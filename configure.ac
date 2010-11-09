@@ -56,7 +56,7 @@ AC_ARG_ENABLE([examples],
 		yes) 	examples=true ;;
 		no)		examples=false ;;
 		*)		AC_MSG_ERROR([bad value ${enableval} for --enable-examples]) ;;
-	esac],[examples=false])
+	esac],[examples=true])
 AM_CONDITIONAL([EXAMPLES], [test x$examples = xtrue])
 
 AC_OUTPUT
