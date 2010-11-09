@@ -19,15 +19,17 @@ If you wish to participate in LibRaw development please use GitHub fork.
    head revision at regular basis.
 
    So, if you want to change code in internal/*.cpp files you need to change
-   dcraw/dcraw.c (and run make -f Makefile.devel)
+   dcraw/dcraw.c (and run make)
 
-2. For developer's work use Makefile.devel. It contains rules to re-generate
+2. For developer's work use Makefile from GitHub 
+   It contains rules to re-generate
    internal/*cpp from dcraw/dcraw.c
 
-2. LibRaw distribution files are prepared by ./mkdist.sh script
+3. LibRaw distribution files are prepared by ./mkdist.sh script
    This script
      - regenerates internal/*cpp without #line directives
      - generates ./configure script from autotools stuff
+     - removes developer Makefile
      - fetches 'Official' dcraw.c from Dave Coffin's site
      - removes .PSD files from doc/
      - removes itself
