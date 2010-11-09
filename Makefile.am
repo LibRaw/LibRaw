@@ -1,6 +1,6 @@
 # autoconf macros
 ACLOCAL_AMFLAGS = -I m4
-AUTOMAKE_CONFIG=subdir-object
+AUTOMAKE_OPTIONS=subdir-objects
 
 # Headers
 nobase_include_HEADERS = 	libraw/libraw.h \
