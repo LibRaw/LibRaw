@@ -1,5 +1,5 @@
 # Initialization
-AC_INIT([LibRaw], [0.10.0-beta3], [info@libraw.org], [], [http://www.libraw.org])
+AC_INIT([LibRaw], [0.12.0-alpha0], [info@libraw.org], [], [http://www.libraw.org])
 AM_INIT_AUTOMAKE([foreign no-define])
 AM_SILENT_RULES([yes])
 
