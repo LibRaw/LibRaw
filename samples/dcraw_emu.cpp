@@ -220,8 +220,8 @@ int main(int argc, char *argv[])
               case 'f':  
                   OUT.four_color_rgb    = 1;  
                   break;
-              case 'A':  for(c=0; c<4;c++) OUT.greybox[c]  = atoi(argv[arg++]);
-              case 'B':  for(c=0; c<4;c++) OUT.cropbox[c]  = atoi(argv[arg++]);
+              case 'A':  for(c=0; c<4;c++) OUT.greybox[c]  = atoi(argv[arg++]); break;
+              case 'B':  for(c=0; c<4;c++) OUT.cropbox[c]  = atoi(argv[arg++]); break;
               case 'a':  OUT.use_auto_wb       = 1;  break;
               case 'w':  OUT.use_camera_wb     = 1;  break;
               case 'M':  OUT.use_camera_matrix = (opm == '+');  break;
