@@ -9,6 +9,8 @@
               Panasonic: FZ40, FZ100, LX5,
               Pentax: K-r, K-5, 645D,
               Samsung GX20, WB2000
+	* LibRaw 0.12-alpha1
+
 2010-11-08 Alex Tutubalin <lexa@lexa.ru>
 	* Исправления для совместимости с компилятором Sun Studio
 	* Исправления для совместимости с Visual Studio 2010
