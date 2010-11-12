@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
 
   if(verbosity>1)
           RawProcessor.set_progress_handler(my_progress_callback,(void*)"Sample data passed");
-#ifdef _OPENMP
+#ifdef LIBRAW_USE_OPENMP
   if(verbosity)
           printf ("Using %d threads\n", omp_get_max_threads());
 #endif

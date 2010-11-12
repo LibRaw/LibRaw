@@ -1,6 +1,14 @@
 ﻿2010-11-11 Alex Tutubalin <lexa@lexa.ru>
-	* Исправлена обработка параметров командной строки в примере dcraw_emu
-	
+        * Импортированы изменения ветки 0.11:
+	  + Исправлена обработка параметров командной строки в примере dcraw_emu
+          + OpenMP выключен на MacOS X если библиотека собирается с -pthread
+          + Импортирована dcraw 9.05 (1.439), поддержка новых камер:
+              Canon: G12, SX120, 60D,
+              Hasselblad H4D, Nokia X2, Olympus E-5,
+              Nikon: D3100, D7000, P7000,
+              Panasonic: FZ40, FZ100, LX5,
+              Pentax: K-r, K-5, 645D,
+              Samsung GX20, WB2000
 2010-11-08 Alex Tutubalin <lexa@lexa.ru>
 	* Исправления для совместимости с компилятором Sun Studio
 	* Исправления для совместимости с Visual Studio 2010
