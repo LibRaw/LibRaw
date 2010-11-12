@@ -3,7 +3,7 @@
 
 0. Repository
    LibRaw public repository is located on GitHub
-   URL: 
+   URLs: 
     http://github.com/LibRaw/LibRaw - main page
     git://github.com/LibRaw/LibRaw.git - git URL
 
@@ -13,7 +13,7 @@ If you wish to participate in LibRaw development please use GitHub fork.
    by simple preprocessor internal/preprocess.pl (you need perl to run it)
 
    dcraw/dcraw.c is a *patched* dcraw (and foveon processng code is removed
-   due to copyright).
+   due to copyright restrictions).
 
    'Official' dcraw.c changes are tracked by LibRaw team and merged to 
    head revision at regular basis.
@@ -22,8 +22,7 @@ If you wish to participate in LibRaw development please use GitHub fork.
    dcraw/dcraw.c (and run make)
 
 2. For developer's work use Makefile from GitHub 
-   It contains rules to re-generate
-   internal/*cpp from dcraw/dcraw.c
+   It contains rules to re-generate internal/*cpp from dcraw/dcraw.c
 
 3. LibRaw distribution files are prepared by ./mkdist.sh script
    This script
