@@ -8,7 +8,7 @@ CXX=g++
 #CFLAGS=-O4 -march=core2 -march=core2 -mtune=core2 -fomit-frame-pointer -ffast-math -fstrict-aliasing -funsafe-math-optimizations -mfpmath=sse -msse2 -I. 
 #CFLAGS=-g -Wall -I.
 #CFLAGS=-g -I. -Wall
-CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8
+CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
 
 # GCC 4.4 section
 # CC=gcc44

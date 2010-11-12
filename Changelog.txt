@@ -1,3 +1,15 @@
+2010-11-11 Alex Tutubalin <lexa@lexa.ru>
+        * OpenMP is completely disabled on MacOS X if compiled with -pthread
+          due to well-known MacOS problem.
+        * dcraw 9.05 (1.439) imported, many new cameras supported:
+            Canon: G12, SX120, 60D,
+            Hasselblad H4D, Nokia X2, Olympus E-5,
+            Nikon: D3100, D7000, P7000,
+            Panasonic: FZ40, FZ100, LX5,
+            Pentax: K-r, K-5, 645D,
+            Samsung GX20, WB2000
+	* LibRaw 0.11.2
+
 2010-11-10 Alex Tutubalin <lexa@lexa.ru>
 	* Fixes in dcraw_emu sample command line options processing
 	* LibRaw 0.11.1
