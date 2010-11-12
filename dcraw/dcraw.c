@@ -19,8 +19,8 @@
    *If you have not modified dcraw.c in any way, a link to my
    homepage qualifies as "full source code".
 
-   $Revision$
-   $Date$
+   $Revision: 672 $
+   $Date: 2010-11-08 14:46:27 +0300 (пн, 08 ноя 2010) $
  */
 
 /*@out DEFINES
