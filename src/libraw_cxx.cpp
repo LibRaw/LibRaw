@@ -1550,6 +1550,8 @@ int LibRaw::dcraw_process(void)
 {
     int quality,i;
 
+    int iterations=-1, dcb_enhance=1, noiserd=0;
+    int eeci_refine_fl=0, es_med_passes_fl=0;
 
     CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
     CHECK_ORDER_HIGH(LIBRAW_PROGRESS_PRE_INTERPOLATE);
@@ -1614,16 +1616,51 @@ int LibRaw::dcraw_process(void)
 
         SET_PROC_FLAG(LIBRAW_PROGRESS_PRE_INTERPOLATE);
 
+        if (O.dcb_iterations >= 0) iterations = O.dcb_iterations;
+        if (O.dcb_enhance_fl >=0 ) dcb_enhance = O.dcb_enhance_fl;
+        if (O.fbdd_noiserd >=0 ) noiserd = O.fbdd_noiserd;
+        if (O.eeci_refine >=0 ) eeci_refine_fl = O.eeci_refine;
+        if (O.es_med_passes >0 ) es_med_passes_fl = O.es_med_passes;
+
+// LIBRAW_DEMOSAIC_PACK_GPL3
+        if (quality == 10 && O.amaze_ca_refine >0 ) {CA_correct_RT();}
+
         if (P1.filters && !O.document_mode) 
             {
+                if (noiserd>0) fbdd(noiserd);
+
                 if (quality == 0)
                     lin_interpolate();
                 else if (quality == 1 || P1.colors > 3)
                     vng_interpolate();
                 else if (quality == 2)
                     ppg_interpolate();
-                else 
+
+                else if (quality == 3) 
+                    ahd_interpolate(); // really don't need it here due to fallback op
+
+                else if (quality == 4)
+                    dcb(iterations, dcb_enhance);
+
+//  LIBRAW_DEMOSAIC_PACK_GPL2                
+                else if (quality == 5)
+                    ahd_interpolate_mod();
+                else if (quality == 6)
+                    afd_interpolate_pl(5,0);
+                else if (quality == 7)
+                    vcd_interpolate(0);
+                else if (quality == 8)
+                    vcd_interpolate(12);
+                else if (quality == 9)
+                    lmmse_interpolate(1);
+
+// LIBRAW_DEMOSAIC_PACK_GPL3
+                else if (quality == 10)
+                    amaze_demosaic_RT();
+ // fallback to AHD
+                else
                     ahd_interpolate();
+                
                 SET_PROC_FLAG(LIBRAW_PROGRESS_INTERPOLATE);
             }
         if (IO.mix_green)
@@ -1635,7 +1672,16 @@ int LibRaw::dcraw_process(void)
 
         if (P1.colors == 3) 
             {
-                median_filter();
+
+                if (quality == 8) 
+                    {
+                        if (eeci_refine_fl == 1) refinement();
+                        if (O.med_passes > 0)    median_filter_new();
+                        if (es_med_passes_fl > 0) es_median_filter();
+                    } 
+                else {
+                    median_filter();
+                }
                 SET_PROC_FLAG(LIBRAW_PROGRESS_MEDIAN_FILTER);
             }
         

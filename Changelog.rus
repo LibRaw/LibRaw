@@ -1,4 +1,25 @@
-﻿2010-11-11 Alex Tutubalin <lexa@lexa.ru>
+﻿2010-11-15 Alex Tutubalin <lexa@lexa.ru>
+
+        * Several demosaic algorithms, found in other open-source RAW processing
+          packages are implemented in LibRaw. 
+
+          1) DCB demosaic and FBDD denoise by Jacek Gozdz are included in 
+             main LibRaw source.
+          2) GPL2 demosaic pack with these demosaic methods:
+             * AFD and LMMSE implementations from PerfectRaw by Manuel Llorens
+             * VCD, Modified AHD, post-demosaic refinemend and median
+               filters by Paul Lee
+          3) GPL3 demosaic pack with AMaZe interpolation  by Emil Martinec
+
+          See more details in README.demosaic-packs
+        
+        * Current implementation of dcraw_emu sample allows only selection
+          of demosaic method (via -q) options. All other parameters change
+          will be implemented later.
+
+	* LibRaw 0.12-alpha1
+
+2010-11-11 Alex Tutubalin <lexa@lexa.ru>
         * Импортированы изменения ветки 0.11:
 	  + Исправлена обработка параметров командной строки в примере dcraw_emu
           + OpenMP выключен на MacOS X если библиотека собирается с -pthread
@@ -9,7 +30,7 @@
               Panasonic: FZ40, FZ100, LX5,
               Pentax: K-r, K-5, 645D,
               Samsung GX20, WB2000
-	* LibRaw 0.12-alpha1
+	* LibRaw 0.12-alpha0
 
 2010-11-08 Alex Tutubalin <lexa@lexa.ru>
 	* Исправления для совместимости с компилятором Sun Studio

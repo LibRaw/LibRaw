@@ -199,6 +199,18 @@ class DllDef LibRaw
     void        ppg_interpolate();
     void        ahd_interpolate();
 
+    /* from demosaic pack */
+    void        ahd_interpolate_mod();
+    void        afd_interpolate_pl(int afd_passes, int clip_on);
+    void        afd_noise_filter_pl();
+    void	lmmse_interpolate(int gamma_apply);
+    void        dcb(int iterations, int dcb_enhance);
+    void        fbdd(int noiserd);
+    void        vcd_interpolate(int ahd_cutoff);
+    void        amaze_demosaic_RT();
+    void        CA_correct_RT();
+    /* demosaic pack end */
+
     void        bad_pixels(const char*);
     void        subtract(const char*);
     void        hat_transform (float *temp, float *base, int st, int size, int sc);

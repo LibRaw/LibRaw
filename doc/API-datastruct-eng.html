@@ -514,7 +514,24 @@ changes the output size.
       <dt><b>int         user_qual;</b></dt>
       <dd>
         <b>dcraw keys:</b>       -q <br/>
-        0-3: interpolation quality (0 - linear, 1- VNG, 2 - PPG, 3 - AHD). 
+        0-10: interpolation quality:
+        <ul>
+          <li>0 - linear interpolation</li>
+          <li>1 - VNG interpolation</li>
+          <li>2 - PPG interpolation</li>
+          <li>3 - AHD interpolation</li>
+          <li>4 - DCB interpolation</li>
+          <li>5 - Modified AHD interpolation by Paul Lee</li>
+          <li>6 - AFD interpolation (5-pass)</li>
+          <li>7 - VCD interpolation</li>
+          <li>8 - Mixed VCD/Modified AHD interpolation</li>
+          <li>9 - LMMSE interpolation</li>
+          <li>10 - AMaZE intepolation</li>
+          </ul>
+        Values 5-9 are useful only if "LibRaw demosaic pack GPL2" compiled in (see README.demosaic-packs in
+        your distribution for details). Value 10 is useful only if LibRaw compiled with "LibRaw demosaic pack GPL3".
+        If some interpolation method is unsupported because LibRaw compiled without corresponding demosaic pack,
+        AHD interpolation will be used without any notice.
       </dd>
       <dt><b>int         user_black;</b></dt>
       <dd>
@@ -577,6 +594,41 @@ changes the output size.
         <b>dcraw keys:</b> none <br/>
          Default:  0 (not use), 1 - turns on this postprocessing stage. green_matching requires additional memory for
         image data.
+      </dd>
+      <dt><b>int dcb_iterations</b></dt>
+      <dd>
+        <b>dcraw keys:</b> none <br/>
+        Number of DCB correction passes. Default is -1 (no correction). Useful only for DCB interpolation.
+      </dd>
+      <dt><b>int dcb_enhance_fl</b></dt>
+      <dd>
+        <b>dcraw keys:</b> none <br/>
+        nonzero: DCB interpolation with enhance interpolated colors.
+      </dd>
+      <dt><b>int fbdd_noiserd</b></dt>
+      <dd>
+        <b>dcraw keys:</b> none <br/>
+        Controls FBDD noise reduction before demosaic.
+        <ul>
+          <li>0 - do not use FBDD noise reduction</li>
+          <li>1 - light FBDD reduction</li>
+          <li>2 (and more) - full FBDD reduction</li>
+        </ul>
+      </dd>
+      <dt><b>int eeci_refine</b></dt>
+      <dd>
+        <b>dcraw keys:</b> none <br/>
+        nonzero- Use EECI refine for VCD interpolation.
+      </dd>
+      <dt><b>int es_med_passes</b></dt>
+      <dd>
+        <b>dcraw keys:</b> none <br/>
+        nonzero - Use edge-sensitive median filtering for artifact supression after VCD demosaic.
+      </dd>
+      <dt><b>int amaze_ca_refine</b></dt>
+      <dd>
+        <b>dcraw keys:</b> none <br/>
+        nonzero - Suppress chromatic abberation for AMaZE demosaic.
       </dd>
     </dl>
     <a name="libraw_masked_t"></a>
@@ -1055,7 +1107,7 @@ data source is recorded. The possible values are listed below.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:42:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Sun Sep  5 18:25:49 MSD 2010
+Last modified: Mon Nov 15 16:33:23 UTC 2010
 <!-- hhmts end -->
   </body>
 </html>

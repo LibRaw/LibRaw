@@ -19,9 +19,18 @@ CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-
 #LCMS_DEF=-DUSE_LCMS -I/usr/local/include
 #LCMS_LIB=-L/usr/local/lib -llcms
 
+# Demosaic Pack GPL2:
+CFLAGS_DP1=-I../LibRaw-demosaic-pack-GPL2
+CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
+
+# Demosaic Pack GPL3:
+CFLAGS_DP2=-I../LibRaw-demosaic-pack-GPL3
+CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
+
+
 DCRAW_GEN= internal/dcraw_common.cpp internal/dcraw_fileio.cpp
-DCRAW_LIB_OBJECTS=object/dcraw_common.o object/libraw_cxx.o object/libraw_c_api.o object/dcraw_fileio.o
-DCRAW_LIB_MT_OBJECTS=object/dcraw_common_mt.o object/libraw_cxx_mt.o object/libraw_c_api_mt.o object/dcraw_fileio_mt.o
+DCRAW_LIB_OBJECTS=object/dcraw_common.o object/libraw_cxx.o object/libraw_c_api.o object/dcraw_fileio.o object/demosaic_packs.o
+DCRAW_LIB_MT_OBJECTS=object/dcraw_common_mt.o object/libraw_cxx_mt.o object/libraw_c_api_mt.o object/dcraw_fileio_mt.o object/demosaic_packs_mt.o
 LR_INCLUDES=libraw/libraw.h libraw/libraw_alloc.h libraw/libraw_const.h libraw/libraw_datastream.h libraw/libraw_internal.h libraw/libraw_types.h libraw/libraw_version.h
 
 sources: ${DCRAW_GEN} Makefile ${PP}
@@ -29,6 +38,16 @@ library: lib/libraw.a lib/libraw_r.a
 
 all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin/half_mt bin/mem_image bin/unprocessed_raw bin/4channels
 
+## Demosaic Pack(s)
+
+object/demosaic_packs.o: internal/demosaic_packs.cpp ${LR_INCLUDES}
+	$(CXX) -w -c -DLIBRAW_NOTHREADS ${CFLAGS} ${LCMS_DEF} ${CFLAGS_DP1} ${CFLAGS_DP2} -o object/demosaic_packs.o internal/demosaic_packs.cpp
+
+object/demosaic_packs_mt.o: internal/demosaic_packs.cpp ${LR_INCLUDES}
+	$(CXX) -w -c -pthread ${CFLAGS} ${LCMS_DEF} ${CFLAGS_DP1} ${CFLAGS_DP2} -o object/demosaic_packs_mt.o internal/demosaic_packs.cpp
+
+
+## Samples ##
 bin/raw-identify: lib/libraw.a samples/raw-identify.cpp
 	$(CXX) ${LCMS_DEF} ${CFLAGS} -o bin/raw-identify samples/raw-identify.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
 
