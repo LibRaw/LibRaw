@@ -6549,6 +6549,8 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 7971,-2314,-913,-8451,15762,2894,-1442,1520,7610 } },
     { "NIKON COOLPIX P6000", 0, 0,
 	{ 9698,-3367,-914,-4706,12584,2368,-837,968,5801 } },
+    { "NIKON COOLPIX P7000", 0, 0,
+ 	{ 7177, -1363, -1257, -1529, 7422, 839, -795, 1563, 2398 } },
     { "OLYMPUS C5050", 0, 0,
 	{ 10508,-3124,-1273,-6079,14294,1901,-1653,2306,6237 } },
     { "OLYMPUS C5060", 0, 0,
@@ -6823,7 +6825,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7286 "dcraw/dcraw.c"
+#line 7288 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -7547,6 +7549,9 @@ canon_cr2:
   } else if (!strncmp(model,"COOLPIX P",9)) {
     load_flags = 24;
     filters = 0x94949494;
+    // Coolpix P7000 temp patch
+    if(!strcmp(model,"COOLPIX P7000") && iso_speed >= 400)
+    	black = 256;
   } else if (fsize == 1581060) {
     height = 963;
     width = 1287;
@@ -8562,7 +8567,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9116 "dcraw/dcraw.c"
+#line 9121 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8781,7 +8786,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9359 "dcraw/dcraw.c"
+#line 9364 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

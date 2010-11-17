@@ -1,3 +1,8 @@
+2010-11-17 Alex Tutubalin <lexa@lexa.ru>
+	* Nikon P7000: color matrix data and black level patch for ISO >=400
+	  Thanks to Gunnar Thorburn 
+	* LibRaw 0.11.3
+
 2010-11-11 Alex Tutubalin <lexa@lexa.ru>
         * OpenMP is completely disabled on MacOS X if compiled with -pthread
           due to well-known MacOS problem.
