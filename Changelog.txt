@@ -1,6 +1,9 @@
 2010-11-17 Alex Tutubalin <lexa@lexa.ru>
 	* Nikon P7000: color matrix data and black level patch for ISO >=400
 	  Thanks to Gunnar Thorburn 
+        * Support for several industrial cameras based on Sony ICX 625/655 
+	  sensor: JAI BB500CL/GE, SVS625CL, ptGrey GRAS-50S5C
+	  Thanks to kaare
 	* LibRaw 0.11.3
 
 2010-11-11 Alex Tutubalin <lexa@lexa.ru>
