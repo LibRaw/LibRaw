@@ -48,7 +48,11 @@ it under the terms of the one of three licenses as you choose:
 extern "C" {
 #endif
 
-#ifndef USE_LCMS
+#if defined(USE_LCMS)
+#include <lcms.h>
+#elif defined(USE_LCMS2)
+#include <lcms2.h>
+#else
 #define NO_LCMS
 #endif
 

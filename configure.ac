@@ -22,14 +22,14 @@ AC_ARG_ENABLE([openmp],
 		yes) 	openmp=true ;;
 		no)		openmp=false ;;
 		*)		AC_MSG_ERROR([bad value ${enableval} for --enable-openmp]) ;;
-	esac],[openmp=false])
+	esac],[openmp=true])
 if test x$openmp = xtrue ; then
 	AX_OPENMP([
 		CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 		CFLAGS="$CFLAGS $OPENMP_CFLAGS"
 		AC_SUBST([PC_OPENMP],[" $OPENMP_CFLAGS"])		
 	],[
-		AC_MSG_ERROR([OpenMP support cannot be enabled because your system doesn't support it.])		
+		AC_MSG_WARN([OpenMP support cannot be enabled because your system doesn't support it.])		
 	])
 fi
 
@@ -40,12 +40,18 @@ AC_ARG_ENABLE([lcms],
 		yes)	lcms=true ;;
 		no)		lcms=false ;;
 		*)		AC_MSG_ERROR([bad value ${enableval} for --enable-lcms]) ;;
-	esac],[lcms=false])
+	esac],[lcms=true])
 if test x$lcms = xtrue; then
-	PKG_CHECK_MODULES([LCMS],[lcms],[
-		CPPFLAGS="$CPPFLAGS -DUSE_LCMS"
+	PKG_CHECK_MODULES([LCMS2],[lcms2],[
+		CPPFLAGS="$CPPFLAGS $LCMS2_CFLAGS -DUSE_LCMS2"
+		LDFLAGS="$LDFLAGS $LCMS2_LIBS"
 	],[
-		AC_MSG_ERROR([LCMS support cannot be enabled because: '$LCMS_PKG_ERRORS'])
+	PKG_CHECK_MODULES([LCMS],[lcms],[
+		CPPFLAGS="$CPPFLAGS $LCMS_CFLAGS -DUSE_LCMS"
+		LDFLAGS="$LDFLAGS $LCMS_LIBS"
+	],[
+		AC_MSG_WARN([LCMS support cannot be enabled])
+	])
 	])
 fi
 
