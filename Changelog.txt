@@ -1,4 +1,6 @@
 2010-11-17 Alex Tutubalin <lexa@lexa.ru>
+        * dcraw_emu sample command line keys added and reordered
+          to reflect changes in LibRaw 0.12. 
 	* Nikon P7000: color matrix data and black level patch for ISO >=400
 	  Thanks to Gunnar Thorburn 
         * Support for several industrial cameras based on Sony ICX 625/655 

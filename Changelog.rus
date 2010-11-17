@@ -1,8 +1,10 @@
-﻿2010-11-11 Alex Tutubalin <lexa@lexa.ru>
+﻿2010-11-17 Alex Tutubalin <lexa@lexa.ru>
+        * Добавление и упорядочение ключей командной строки примера dcraw_emu
 	* Nikon P7000: цветовая матрица и хак для уровня черного при ISO>=400
 	  Спасибо Gunnar Thorburn 
 	* Поддержка некоторых индустриальных камер на сенсоре Sony ICX 625/655
 	  JAI BB500CL/GE, SVS625CL, ptGrey GRAS-50S5C
+	* LibRaw 0.12-alpha2
 
 2010-11-11 Alex Tutubalin <lexa@lexa.ru>
 

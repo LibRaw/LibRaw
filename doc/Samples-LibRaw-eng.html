@@ -33,22 +33,57 @@ Their source codes are located in the samples/ folder, and after library build t
       <li><b>dcraw_emu</b> Complete emulation of dcraw (except for keys -D -d -P -K -i -e, which are considered in
         other usage examples). Of most interest is processing of command line keys (copied from dcraw).  The result of
         its work must be binary identical to the results produced by dcraw with the same command line keys. 
-        <br/>
-        This sample supports gamma-corrected output of 16-bit data (use <b>-1</b> command-line switch).
-        <br/>
-        The <b>-E</b> command-line switch turns on use of <a href="API-CXX-eng.html#open_buffer">open_buffer() API call</a>
-        used via mmap() of input file (Unix only).     
-        <br/>
-        The <b>-d</b> command-line switch turns on timing of processing steps.
-        <br/>
-        The  <b>-c float-value</b> command-line switch sets params.adjust_maximum value to nondefault.
-        Set it to zero to disable maximum adjustment and to nonzero to enable it. Disabling this feature
-        may result to incorrect highlights processing on some cameras.
-        <br/>
-        The <b>-G</b> switch turns on green_matching() mode.
-        <br/>
-        The <b>-B x y w h</b> command-line switch turns on cropping of output image to rectangle with width 'w',
-        height 'h' and left-top corner at x,y. All coordinates applied before any image rotation.
+
+        <p>
+          This sample supports additional command-line parameters absent in original dcraw:
+        </p>
+        <dl>
+          <dt><b>-mmap</b></dt>
+          <dd>
+            Use <a href="API-CXX-eng.html#open_buffer">open_buffer()</a> interface. Buffer prepared by mmap()
+            call. This option not supported under Win32.
+          </dd>
+          <dt><b>-c float-value</b></dt>
+          <dd>
+            This key sets <strong>params.adjust_maximum_thr</strong> parameter.<br/>
+            Use -c 0 to completely disable automatic maximum calculation.
+            <br/>
+            Default value: 0.75
+          </dd>
+          <dt><b>-timing</b></dt>
+          <dd>
+            Turns on detailed timing print.
+          </dd>
+          <dt><b>-G</b></dt>
+          <dd>
+            Turns on "green_matching" mode to suppress color mazes on cameras with different green channels.
+          </dd>
+          <dt><b>-B x y w h</b></dt>
+          <dd>
+            Crops output to rectangle with width w, height h and x,y coordinates of left upper corner.
+            All coordinates applied before any image rotation.
+          </dd>
+          <dt><b>-dcbi N</b></dt>
+          <dd>
+            Sets number of additional DCB-demosaic iterations (option valid only for -q 4, i.e. for DCB demosaic).
+          </dd>
+          <dt><b>-dcbe</b></dt>
+          <dd>
+            Turns on DCB color enhance mode (only for DCB demosaic, -q 4).
+          </dd>
+          <dt><b>-eeci</b></dt>
+          <dd>
+            Turns on EECI refine (only for mixed VCD/AHD -q 8)
+          </dd>
+          <dt><b>-esmed N</b></dt>
+          <dd>
+            Number of passes of edge-sensitive median filter for VCD+AHD demosaic.
+          </dd>
+          <dt><b>-amaseca</b></dt>
+          <dd>
+            Turns on chromatic aberration suppression before AMaZE interpolation (-q 10).
+          </dd>
+        </dl>
       </li>
       <li><b>half_mt</b> Emulation of <b>dcraw -h</b>. It &quot;understands&quot; the following keys: -a (automatic
         white balance over the entire image), -w (white balance of the camera), -T (output in the tiff format), and -J
@@ -189,7 +224,7 @@ end:
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 12:19:36 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Fri Oct 15 13:24:41 MSD 2010
+Last modified: Wed Nov 17 12:52:56 UTC 2010
 <!-- hhmts end -->
   </body>
 </html>

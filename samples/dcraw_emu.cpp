@@ -74,21 +74,38 @@ void usage(const char *prog)
 "-j        Don't stretch or rotate raw pixels\n"
 "-W        Don't automatically brighten the image\n"
 "-b <num>  Adjust brightness (default = 1.0)\n"
-"-q [0-3]  Set the interpolation quality\n"
+"-q N      Set the interpolation quality:\n"
+"          0 - linear, 1 - VNG, 2 - PPG, 3 - AHD, 4 - DCB\n"
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+"          5 - modified AHD,6 - AFD (5pass), 7 - VCD, 8 - VCD+AHD, 9 - LMMSE\n"
+#endif
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
+"          10-AMaZE\n"
+#endif
 "-h        Half-size color image (twice as fast as \"-q 0\")\n"
 "-f        Interpolate RGGB as four colors\n"
 "-m <num>  Apply a 3x3 median filter to R-G and B-G\n"
 "-s [0..N-1] Select one raw image from input file\n"
-"-4        Linear 16-bit, same as \"-6 -W -g 1 1\""
+"-4        Linear 16-bit, same as \"-6 -W -g 1 1\n"
 "-6        Write 16-bit linear instead of 8-bit with gamma\n"
 "-g pow ts Set gamma curve to gamma pow and toe slope ts (default = 2.222 4.5)\n"
 "-T        Write TIFF instead of PPM\n"
 "-G        Use green_matching() filter\n"
 "-B <x y w h> use cropbox\n"
 "-F        Use FILE I/O instead of streambuf API\n"
-"-d        Detailed timing report\n"
+"-timing   Detailed timing report\n"
+"-fbdd N   0 - disable FBDD noise reduction (default), 1 - light FBDD, 2 - full\n"
+"-dcbi N   Number of extra DCD iterations (default - 0)\n"
+"-dcbe     DCB color enhance\n"
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+"-eeci     EECI refine for mixed VCD/AHD (q=8)\n"
+"-esmed N  Number of edge-sensitive median filter passes (only if q=8)\n"
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
+"-amazeca  Use AMaZE chromatic aberrations refine (only if q=10)\n"
+#endif
+#endif
 #ifndef WIN32
-"-E        Use mmap()-ed buffer instead of plain FILE I/O\n"
+"-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
 #endif
         );
     exit(1);
@@ -168,10 +185,11 @@ int main(int argc, char *argv[])
   argv[argc] = (char*)"";
   for (arg=1; (((opm = argv[arg][0]) - 2) | 2) == '+'; ) 
       {
+          char *optstr = argv[arg];
           opt = argv[arg++][1];
           if ((cp = strchr (sp=(char*)"cnbrkStqmHABCgU", opt))!=0)
               for (i=0; i < "111411111142"[cp-sp]-'0'; i++)
-                  if (!isdigit(argv[arg+i][0])) 
+                  if (!isdigit(argv[arg+i][0]) && !optstr[2]) 
                       {
                           fprintf (stderr,"Non-numeric argument to \"-%c\"\n", opt);
                           return 1;
@@ -200,9 +218,21 @@ int main(int argc, char *argv[])
                   break;
               case 'k':  OUT.user_black  = atoi(argv[arg++]);  break;
               case 'S':  OUT.user_sat    = atoi(argv[arg++]);  break;
-              case 't':  OUT.user_flip   = atoi(argv[arg++]);  break;
+              case 't':  
+                  if(!strcmp(optstr,"-timing"))
+                      use_timing=1;
+                  else
+                      OUT.user_flip   = atoi(argv[arg++]);  
+                  break;
               case 'q':  OUT.user_qual   = atoi(argv[arg++]);  break;
-              case 'm':  OUT.med_passes  = atoi(argv[arg++]);  break;
+              case 'm':
+#ifndef WIN32
+                  if(!strcmp(optstr,"-mmap"))
+                      use_mmap              = 1;
+                  else
+#endif
+                      OUT.med_passes  = atoi(argv[arg++]);  
+                  break;
               case 'H':  OUT.highlight   = atoi(argv[arg++]);  break;
               case 's':  OUT.shot_select = abs(atoi(argv[arg++])); break;
               case 'o':  
@@ -218,11 +248,21 @@ int main(int argc, char *argv[])
               case 'h':  OUT.half_size         = 1;		
                   // no break:  "-h" implies "-f" 
               case 'f':  
-                  OUT.four_color_rgb    = 1;  
+                  if(!strcmp(optstr,"-fbdd"))
+                      OUT.fbdd_noiserd = atoi(argv[arg++]);
+                  else
+                      OUT.four_color_rgb    = 1;  
                   break;
               case 'A':  for(c=0; c<4;c++) OUT.greybox[c]  = atoi(argv[arg++]); break;
               case 'B':  for(c=0; c<4;c++) OUT.cropbox[c]  = atoi(argv[arg++]); break;
-              case 'a':  OUT.use_auto_wb       = 1;  break;
+              case 'a':
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
+                  if(!strcmp(optstr,"-amazeca"))
+                      OUT.amaze_ca_refine = 1;
+                  else
+#endif
+                      OUT.use_auto_wb       = 1;  
+                  break;
               case 'w':  OUT.use_camera_wb     = 1;  break;
               case 'M':  OUT.use_camera_matrix = (opm == '+');  break;
               case 'j':  OUT.use_fuji_rotate   = 0;  break;
@@ -231,9 +271,19 @@ int main(int argc, char *argv[])
               case '4':  OUT.gamm[0] = OUT.gamm[1] =  OUT.no_auto_bright    = 1; /* no break here! */
               case '6':  OUT.output_bps = 16;  break;
               case 'F':  use_bigfile=1; break;
-              case 'd':  use_timing=1; break;
-#ifndef WIN32
-              case 'E':  use_mmap              = 1;  break;
+              case 'd':
+                  if(!strcmp(optstr,"-dcbi"))
+                      OUT.dcb_iterations = atoi(argv[arg++]);
+                  else if(!strcmp(optstr,"-dcbe"))
+                      OUT.dcb_enhance_fl = 1;
+                  break;
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+              case 'e':
+                  if(!strcmp(optstr,"-eeci"))
+                      OUT.eeci_refine = 1;
+                  else if(!strcmp(optstr,"-esmed"))
+                      OUT.es_med_passes = atoi(argv[arg++]);
+                  break;
 #endif
               default:
                   fprintf (stderr,"Unknown option \"-%c\".\n", opt);
