@@ -48,14 +48,12 @@ it under the terms of the one of three licenses as you choose:
 extern "C" {
 #endif
 
-#ifndef USE_LCMS
-#define NO_LCMS
-#else
-#ifdef USE_LCMS2
+#if defined(USE_LCMS)
+#include <lcms.h>
+#elif defined(USE_LCMS2)
 #include <lcms2.h>
 #else
-#include <lcms.h>
-#endif
+#define NO_LCMS
 #endif
 
 #include "libraw_const.h"

@@ -16,16 +16,17 @@ CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-
 # CFLAGS= -O4 -march=core2 -I. -pedantic  -Wno-long-long -msse2 -mfpmath=sse  -fopenmp
 
 # LCMS support
-#LCMS_DEF=-DUSE_LCMS -I/usr/local/include
-#LCMS_LIB=-L/usr/local/lib -llcms
+# For lcms2 set -DUSE_LCMS2
+LCMS_DEF=-DUSE_LCMS -I/usr/local/include
+LCMS_LIB=-L/usr/local/lib -llcms
 
 # Demosaic Pack GPL2:
-CFLAGS_DP1=-I../LibRaw-demosaic-pack-GPL2
-CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
+#CFLAGS_DP1=-I../LibRaw-demosaic-pack-GPL2
+#CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
 
 # Demosaic Pack GPL3:
-CFLAGS_DP2=-I../LibRaw-demosaic-pack-GPL3
-CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
+#CFLAGS_DP2=-I../LibRaw-demosaic-pack-GPL3
+#CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
 
 
 DCRAW_GEN= internal/dcraw_common.cpp internal/dcraw_fileio.cpp
