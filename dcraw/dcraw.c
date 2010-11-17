@@ -7005,6 +7005,8 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 7971,-2314,-913,-8451,15762,2894,-1442,1520,7610 } },
     { "NIKON COOLPIX P6000", 0, 0,
 	{ 9698,-3367,-914,-4706,12584,2368,-837,968,5801 } },
+    { "NIKON COOLPIX P7000", 0, 0,
+ 	{ 7177, -1363, -1257, -1529, 7422, 839, -795, 1563, 2398 } },
     { "OLYMPUS C5050", 0, 0,
 	{ 10508,-3124,-1273,-6079,14294,1901,-1653,2306,6237 } },
     { "OLYMPUS C5060", 0, 0,
@@ -7425,6 +7427,10 @@ void CLASS identify()
     { 16215552, "SAMSUNG",  "S85"             ,1 },
     { 20487168, "SAMSUNG",  "WB550"           ,1 },
     { 24000000, "SAMSUNG",  "WB550"           ,1 },
+    { 9994240, "ptGrey", "GRAS-50S5C" ,0 }, // KC: SUPPORT GRASSHOPPER
+    { 10075968, "JaiPulnix","BB-500CL" ,0 }, // KC: SUPPORT BB-500CL
+    { 10108896, "JaiPulnix","BB-500GE" ,0 }, // KC: SUPPORT BB-500GE
+    { 10036800, "SVS", "SVS625CL" ,0 }, // KC: SUPPORT SVS625 cameralink
     { 12582980, "Sinar",    ""                ,0 },
     { 33292868, "Sinar",    ""                ,0 },
     { 44390468, "Sinar",    ""                ,0 } };
@@ -8006,6 +8012,9 @@ canon_cr2:
   } else if (!strncmp(model,"COOLPIX P",9)) {
     load_flags = 24;
     filters = 0x94949494;
+    // Coolpix P7000 temp patch
+    if(!strcmp(model,"COOLPIX P7000") && iso_speed >= 400)
+    	black = 256;
   } else if (fsize == 1581060) {
     height = 963;
     width = 1287;
@@ -9018,6 +9027,39 @@ else if (!strcmp(model,"QV-2000UX")) {
     height = 2318;
     width  = 3082;
     raw_width = 4672;
+  }
+  else if (!strcmp(model,"GRAS-50S5C")) {
+   height = 2048;
+   width = 2440;
+   load_raw = &CLASS unpacked_load_raw;
+   data_offset = 0;
+   filters = 0x49494949;
+   order = 0x4949;
+   maximum = 0xfffC;
+  } else if (!strcmp(model,"BB-500CL")) {
+   height = 2058;
+   width = 2448;
+   load_raw = &CLASS unpacked_load_raw;
+   data_offset = 0;
+   filters = 0x94949494;
+   order = 0x4949;
+   maximum = 0x3fff;
+  } else if (!strcmp(model,"BB-500GE")) {
+   height = 2058;
+   width = 2456;
+   load_raw = &CLASS unpacked_load_raw;
+   data_offset = 0;
+   filters = 0x94949494;
+   order = 0x4949;
+   maximum = 0x3fff;
+  } else if (!strcmp(model,"SVS625CL")) {
+   height = 2050;
+   width = 2448;
+   load_raw = &CLASS unpacked_load_raw;
+   data_offset = 0;
+   filters = 0x94949494;
+   order = 0x4949;
+   maximum = 0x0fff;
   }
 }
 

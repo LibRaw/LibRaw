@@ -1,4 +1,10 @@
-﻿2010-11-15 Alex Tutubalin <lexa@lexa.ru>
+﻿2010-11-11 Alex Tutubalin <lexa@lexa.ru>
+	* Nikon P7000: цветовая матрица и хак для уровня черного при ISO>=400
+	  Спасибо Gunnar Thorburn 
+	* Поддержка некоторых индустриальных камер на сенсоре Sony ICX 625/655
+	  JAI BB500CL/GE, SVS625CL, ptGrey GRAS-50S5C
+
+2010-11-11 Alex Tutubalin <lexa@lexa.ru>
 
         * Several demosaic algorithms, found in other open-source RAW processing
           packages are implemented in LibRaw. 
