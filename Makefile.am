@@ -28,10 +28,12 @@ lib_LIBRARIES = lib/libraw.a lib/libraw_r.a
 lib_libraw_a_CPPFLAGS = -DLIBRAW_NOTHREADS
 lib_libraw_a_SOURCES = internal/dcraw_common.cpp \
 				 internal/dcraw_fileio.cpp \
+				 internal/demosaic_packs.cpp \
 				 src/libraw_cxx.cpp \
 				 src/libraw_c_api.cpp
 
 lib_libraw_r_a_CXXFLAGS = -pthread
+lib_libraw_r_a_CFLAGS = -pthread
 lib_libraw_r_a_SOURCES = $(lib_libraw_a_SOURCES)
 
 

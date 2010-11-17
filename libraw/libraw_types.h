@@ -50,6 +50,12 @@ extern "C" {
 
 #ifndef USE_LCMS
 #define NO_LCMS
+#else
+#ifdef USE_LCMS2
+#include <lcms2.h>
+#else
+#include <lcms.h>
+#endif
 #endif
 
 #include "libraw_const.h"

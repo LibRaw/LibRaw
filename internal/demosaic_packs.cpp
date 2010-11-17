@@ -49,8 +49,11 @@ it under the terms of the one of three licenses as you choose:
 
 void CLASS ahd_interpolate_mod() {ahd_interpolate();}
 void CLASS afd_interpolate_pl(int, int) {ahd_interpolate();}
-void CLASS vcd_interpolate_pl(int) {ahd_interpolate();}
-void CLASS lmmse_interpolate_pl(int) {ahd_interpolate();}
+void CLASS vcd_interpolate(int) {ahd_interpolate();}
+void CLASS lmmse_interpolate(int) {ahd_interpolate();}
+void CLASS es_median_filter() {}
+void CLASS median_filter_new() {}
+void CLASS refinement() {}
 
 #endif
 

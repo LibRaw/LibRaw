@@ -55,9 +55,11 @@
 #ifndef NO_JPEG
 #include <jpeglib.h>
 #endif
+//@end DEFINES
 #ifndef NO_LCMS
 #include <lcms.h>
 #endif
+//@out DEFINES
 #ifdef LOCALEDIR
 #include <libintl.h>
 #define _(String) gettext(String)
@@ -9076,7 +9078,9 @@ void CLASS apply_profile (const char *input, const char *output)
   FILE *fp;
   unsigned size;
 
+#ifndef USE_LCMS2
   cmsErrorAction (LCMS_ERROR_SHOW);
+#endif
   if (strcmp (input, "embed"))
     hInProfile = cmsOpenProfileFromFile (input, "r");
   else if (profile_length) {
