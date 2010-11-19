@@ -1,7 +1,7 @@
 # Initialization
-AC_INIT([LibRaw], [0.12.0-alpha0], [info@libraw.org], [], [http://www.libraw.org])
+AC_INIT([LibRaw], m4_esyscmd([./version.sh]), [info@libraw.org], [], [http://www.libraw.org])
 AM_INIT_AUTOMAKE([foreign no-define])
-AM_SILENT_RULES([yes])
+#AM_SILENT_RULES([yes])
 
 # Tools to use
 AC_PROG_CXX
@@ -23,6 +23,7 @@ AC_ARG_ENABLE([openmp],
 		no)		openmp=false ;;
 		*)		AC_MSG_ERROR([bad value ${enableval} for --enable-openmp]) ;;
 	esac],[openmp=true])
+
 if test x$openmp = xtrue ; then
 	AX_OPENMP([
 		CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
@@ -41,6 +42,7 @@ AC_ARG_ENABLE([lcms],
 		no)		lcms=false ;;
 		*)		AC_MSG_ERROR([bad value ${enableval} for --enable-lcms]) ;;
 	esac],[lcms=true])
+
 if test x$lcms = xtrue; then
 	PKG_CHECK_MODULES([LCMS2],[lcms2],[
 		CPPFLAGS="$CPPFLAGS $LCMS2_CFLAGS -DUSE_LCMS2"
@@ -64,6 +66,94 @@ AC_ARG_ENABLE([examples],
 		*)		AC_MSG_ERROR([bad value ${enableval} for --enable-examples]) ;;
 	esac],[examples=true])
 AM_CONDITIONAL([EXAMPLES], [test x$examples = xtrue])
+
+# LibRaw-demosaic-pack-gpl2
+AC_ARG_ENABLE([demosaic-pack-gpl2],
+  [ --enable-demosaic-pack-gpl2  Enable LibRaw demosaic pack/GPL2 ],
+  [case "${enableval}" in
+      yes)    dp2=true ;;
+      no)     dp2=false ;;
+      *)      dp2=true; dp2dir=${enableval} ;;
+  esac],[dp2=true])
+
+if test x$dp2 = xtrue ; then
+  if test x$dp2dir = x ; then
+
+    if test -f ./LibRaw-demosaic-pack-GPL2/afd_interpolate_pl.c ; then
+        # Directory within LibRaw source tree.
+	echo "Activated LibRaw demosaic pack/GPL2 in current dir"
+        CPPFLAGS="$CPPFLAGS -I./LibRaw-demosaic-pack-GPL2 -DLIBRAW_DEMOSAIC_PACK_GPL2"
+    else
+        lcount=`ls -d ../LibRaw-demosaic*GPL2* | wc -l`
+        if test $lcount -eq 1 ; then
+                pdir=`ls -d ../LibRaw-demosaic*GPL2*`
+	        if test -f  ${pdir}/afd_interpolate_pl.c ; then
+           	        echo "Activated LibRaw demosaic pack/GPL2 in $pdir"
+                        CPPFLAGS="$CPPFLAGS -I${pdir} -DLIBRAW_DEMOSAIC_PACK_GPL2"
+                else
+	                AC_MSG_WARN([Unable to find working LibRaw-demosaic-pack-GPL2 in ${pdir}, disabling the feature.\n Use --enable-demosaic-pack-gpl2=directory to override]);	
+                fi
+         else
+	        AC_MSG_WARN([Unable to find working LibRaw-demosaic-pack-GPL2 in ${pdir}, disabling the feature. Use --enable-demosaic-pack-gpl2=directory to override]);	
+	  fi
+
+
+    fi
+  else
+    # directory set manually
+        if test -f ${dp2dir}/afd_interpolate_pl.c ; then
+           	echo "Activated LibRaw demosaic pack/GPL2 in $dp2dir"
+                CPPFLAGS="$CPPFLAGS -I${dp2dir} -DLIBRAW_DEMOSAIC_PACK_GPL2"
+        else
+		 AC_MSG_ERROR([${dp2dir} does not contain LibRaw-demosaic-pack-GPL2]);	
+	fi
+  fi 
+fi
+
+# LibRaw-demosaic-pack-gpl3
+AC_ARG_ENABLE([demosaic-pack-gpl3],
+  [ --enable-demosaic-pack-gpl3  Enable LibRaw demosaic pack/GPL3 ],
+  [case "${enableval}" in
+      yes)    dp3=true ;;
+      no)     dp3=false ;;
+      *)      dp3=true; dp3dir=${enableval} ;;
+  esac],[dp3=true])
+
+if test x$dp3 = xtrue ; then
+  if test x$dp3dir = x ; then
+
+    if test -f ./LibRaw-demosaic-pack-GPL3/amaze_ca_correct.c ; then
+        # Directory within LibRaw source tree.
+	echo "Activated LibRaw demosaic pack/GPL3 in current dir"
+        CPPFLAGS="$CPPFLAGS -I./LibRaw-demosaic-pack-GPL3 -DLIBRAW_DEMOSAIC_PACK_GPL3"
+    else
+        lcount=`ls -d ../LibRaw-demosaic*GPL3* | wc -l`
+        if test $lcount -eq 1 ; then
+                pdir=`ls -d ../LibRaw-demosaic*GPL3*`
+	        if test -f  ${pdir}/amaze_ca_correct.c ; then
+           	        echo "Activated LibRaw demosaic pack/GPL3 in $pdir"
+                        CPPFLAGS="$CPPFLAGS -I${pdir} -DLIBRAW_DEMOSAIC_PACK_GPL3"
+                else
+	                AC_MSG_WARN([Unable to find working LibRaw-demosaic-pack-GPL3 in ${pdir}, disabling the feature.\n Use --enable-demosaic-pack-gpl3=directory to override]);	
+                fi
+         else
+	        AC_MSG_WARN([Unable to find working LibRaw-demosaic-pack-GPL3 in ${pdir}, disabling the feature. Use --enable-demosaic-pack-gpl3=directory to override]);	
+	  fi
+
+
+    fi
+  else
+    # directory set manually
+        if test -f ${dp3dir}/amaze_ca_correct.c ; then
+           	echo "Activated LibRaw demosaic pack/GPL3 in $dp3dir"
+                CPPFLAGS="$CPPFLAGS -I${dp3dir} -DLIBRAW_DEMOSAIC_PACK_GPL3"
+        else
+		 AC_MSG_ERROR([${dp3dir} does not contain LibRaw-demosaic-pack-GPL3]);	
+	fi
+  fi 
+fi
+
+
 
 AC_OUTPUT
 

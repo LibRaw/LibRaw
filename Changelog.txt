@@ -1,4 +1,5 @@
 2010-11-17 Alex Tutubalin <lexa@lexa.ru>
+        * Demosaic pack(s) supported via ./configure   
 	* LCMS2 support
 	* afd_interpolate(2,1) instead of (5,0)
         * dcraw_emu sample command line keys added and reordered

@@ -1,6 +1,7 @@
 ﻿2010-11-17 Alex Tutubalin <lexa@lexa.ru>
+        * Поддержка demosaic pack(s) в ./configure
         * Добавлена поддержка LCMS2
-	* afd_interpolate(2,1) instead of (5,0)
+	* afd_interpolate(2,1) вместо (5,0)
         * Добавление и упорядочение ключей командной строки примера dcraw_emu
 	* Nikon P7000: цветовая матрица и хак для уровня черного при ISO>=400
 	  Спасибо Gunnar Thorburn 

@@ -21,13 +21,21 @@
     </p>
     <h3>Компиляция библиотеки и примеров</h3>
     <p>
-      Распакуйте скачанный дистрибутив, перейдите в получшвшийся каталог и запустите make:
+      Распакуйте скачанный дистрибутив. Если вы хотите использовать дополнительные наборы интерполяторов
+      (дебайеризаторов), распакуйте соответствующий архив LibRaw-demosaic-pack:
     </p>
     <pre>
         tar xzvf LibRaw-X.YY.tar.gz
-        cd  LibRaw-X.YY
-        make
+        tar xzvf LibRaw-demosaic-pack-X.YY.tar.gz
     </pre>
+    <p>
+      Перейдите в каталог ./LibRaw-X.YY и запустите <b>./configure</b> а затем <b>make</b>:
+    </p>
+      <pre>
+        cd LibRaw-X.YY
+        ./configure  # см. ниже параметры ./configure
+        make
+      </pre>
     <p>В результате скомпилируются:</p>
     <ul>
       <li>Библиотеку libraw.a в каталоге lib/</li>
@@ -39,28 +47,71 @@
       <li>libraw.a - не thread_safe вариант</li>
       <li>libraw_r.a - thread safe</li>
     </ul>
+    <p>Для установки выполните команду make install от пользователя с соответствующими правами:
+    <pre>
+     sudo make install
+    </pre>
+
     <h3>Параметры сборки</h3>
     <p>
       Для задания параметров сборки (использование OpenMP, использование LCMS) и установки, запустите
-      скрипт <b>configure</b> с нужными параметрами (./configure -h покажет список параметров).
-
-    <h3>Установка и использование</h3>
-    <p> Для установки библиотеки выполните команду</p>
-    <pre>
-make install
-    </pre>
-    <p>
-    Она установит библиотеки в <b>/usr/local/lib</b>,а include-файлы в /usr/local/include (в подкаталог libraw),
-      а скомпилированные примеры использования - в /usr/local/bin. Пути установки можно переопределить скриптом
-      ./configure.
-    <br/>
-      Для использования LibRaw добавьте следующие параметры к вызову компилятора (при сборке собственных проектов):
-    </p>
-    <ul>
-      <li>Путь к Include-файлам: -I/usr/local/include</li>
-      <li>Путь к библиотекам: -L/usr/local/lib</li>
-      <li>Библиотека: -lraw (обычная версия) или -lraw_r (thread-safe версия)</li>
-    </ul>
+      скрипт <b>configure</b> с нужными параметрами (./configure --help покажет список параметров).
+      <p>
+      Описание нестандартных параметров:
+      <dl>
+      <dt>--enable-openmp<br/>
+        --disable-openmp
+      </dt>
+      <dd>Включает/выключает проверки поддержки OpenMP если ваш компилятор поддерживает OpenMP. По-умолчанию,
+        проверка поддержки OpenMP включена.
+        Если проверкой установлено, что OpenMP поддерживается, то LibRaw будет собрана с OpenMP.
+      </dd>
+      <dt>--enable-lcms<br/>
+        --disable-lcms
+      </dt>
+      <dd>Включает-выключает проверку наличия библиотеки LCMS на компьютере. Если проверка включена и 
+        библиотека найдена, то LibRaw будет скомпилирована с поддержкой LCMS.
+      </dd>
+      <dt>
+        --enable-examples<br/>
+        --disable-examples
+        </dt>
+      <dd>Включает-выключает компиляцию примеров использования LibRaw</dd>
+      <dt>
+--enable-demosaic-pack-gpl2<br/> 
+--enable-demosaic-pack-gpl2=FOLDERNAME<br/>
+--enable-demosaic-pack-gpl2=no<br/>
+--disable-demosaic-pack-gpl2
+      </dt>
+      <dd>Включает (первые две опции)/выключает проверку наличия LibRaw-demosaic-pack-GPL2.
+        Если проверка включена и каталог с дополнительными дебайеризаторами найден - LibRaw будет собрана с
+        дополнительными методами интерполяции.
+        <br/>
+        Поиск дополнительных дебайеризаторов производится:
+        <ul>
+          <li>Если каталог с дебайеризаторами задан через <b>--enable-demosaic-pack-gpl2=FOLDERNAME</b>,
+            то только в каталоге FOLDERNAME.
+          </li>
+          <li>
+            Если каталог не указан то поиск будет производиться в 
+            <ul>
+              <li>./LibRaw-demosaic-pack-GPL2 (внутри текущего каталога LibRaw)
+              </li>
+              <li>../LibRaw-demosaic-pack*GPL2* (на один уровень выше).
+            </ul>
+            Во втором случае дополнительный каталог будет подключен только если найден ровно один каталог,
+            удовлетворяющий маске. Если найдено несколько, подключен не будет ни один из них (т.к. двусмысленность),
+            задайте в этом случае нужный каталог вручную.
+        </ul>
+      </dd>
+      <dt>
+--enable-demosaic-pack-gpl3<br/>
+--enable-demosaic-pack-gpl3=FOLDERNAME<br/>
+--enable-demosaic-pack-gpl3=no<br/>
+--disable-demosaic-pack-gpl3
+      </dt>
+      <dd>То же самое, что для demosaic-pack-GPL2 (см. выше).
+    </dl>
 
     <h2>Windows, сборка под Cygwin</h2>
     <p>
@@ -116,7 +167,7 @@ make install
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 11:53:43 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Sun Sep  5 18:29:09 MSD 2010
+Last modified: Fri Nov 19 14:49:22 UTC 2010
 <!-- hhmts end -->
   </body>
 </html>
