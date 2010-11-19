@@ -1646,7 +1646,7 @@ int LibRaw::dcraw_process(void)
                 else if (quality == 5)
                     ahd_interpolate_mod();
                 else if (quality == 6)
-                    afd_interpolate_pl(5,0);
+                    afd_interpolate_pl(2,1);
                 else if (quality == 7)
                     vcd_interpolate(0);
                 else if (quality == 8)

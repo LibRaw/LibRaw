@@ -1,5 +1,6 @@
 2010-11-17 Alex Tutubalin <lexa@lexa.ru>
 	* LCMS2 support
+	* afd_interpolate(2,1) instead of (5,0)
         * dcraw_emu sample command line keys added and reordered
           to reflect changes in LibRaw 0.12. 
 	* Nikon P7000: color matrix data and black level patch for ISO >=400
