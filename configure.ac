@@ -122,7 +122,7 @@ AC_ARG_ENABLE([demosaic-pack-gpl3],
 if test x$dp3 = xtrue ; then
   if test x$dp3dir = x ; then
 
-    if test -f ./LibRaw-demosaic-pack-GPL3/CA_correct_RT.c ; then
+    if test -f ./LibRaw-demosaic-pack-GPL3/CA_correct_RT.cc ; then
         # Directory within LibRaw source tree.
 	echo "Activated LibRaw demosaic pack/GPL3 in current dir"
         CPPFLAGS="$CPPFLAGS -I./LibRaw-demosaic-pack-GPL3 -DLIBRAW_DEMOSAIC_PACK_GPL3"
@@ -130,7 +130,7 @@ if test x$dp3 = xtrue ; then
         lcount=`ls -d ../LibRaw-demosaic*GPL3* | wc -l`
         if test $lcount -eq 1 ; then
                 pdir=`ls -d ../LibRaw-demosaic*GPL3*`
-	        if test -f  ${pdir}/CA_correct_RT.c ; then
+	        if test -f  ${pdir}/CA_correct_RT.cc ; then
            	        echo "Activated LibRaw demosaic pack/GPL3 in $pdir"
                         CPPFLAGS="$CPPFLAGS -I${pdir} -DLIBRAW_DEMOSAIC_PACK_GPL3"
                 else
@@ -144,7 +144,7 @@ if test x$dp3 = xtrue ; then
     fi
   else
     # directory set manually
-        if test -f ${dp3dir}/CA_correct_RT.c ; then
+        if test -f ${dp3dir}/CA_correct_RT.cc ; then
            	echo "Activated LibRaw demosaic pack/GPL3 in $dp3dir"
                 CPPFLAGS="$CPPFLAGS -I${dp3dir} -DLIBRAW_DEMOSAIC_PACK_GPL3"
         else
