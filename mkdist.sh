@@ -15,8 +15,8 @@ else
     cd ..
     rm -f internal/preprocess.pl clist2c.pl
     rm doc/*.psd
-    ./configure
-    rm -f Makefile Makefile.devel Makefile.dist
+    ./configure --disable-demosaic-pack-gpl2 --disable-demosaic-pack-gpl3
+    rm -f Makefile.devel 
     rm DEVELOPER-NOTES
     rm mkdist.sh export-dist.sh
   else
