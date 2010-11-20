@@ -17,7 +17,7 @@ else
     rm doc/*.psd
     rm -f Makefile Makefile.devel Makefile.dist
     rm DEVELOPER-NOTES
-    rm mkdist.sh
+    rm mkdist.sh export-dist.sh
   else
    echo 'Wrong directory or mkdist.sh already executed'
   fi
