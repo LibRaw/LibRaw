@@ -13,7 +13,7 @@ COMMON_LIBS=-lws2_32 -lm ${LCMS_LIB}
 CLIBS=-L./lib  -lraw ${COMMON_LIBS}
 CFLAGS=-O4 -I. -w -DLIBRAW_NODLL ${OPENMP_CFLAGS}
 
-DCRAW_LIB_OBJECTS=object/libraw_cxx.o object/libraw_c_api.o object/dcraw_common.o object/dcraw_fileio.o
+DCRAW_LIB_OBJECTS=object/libraw_cxx.o object/libraw_c_api.o object/dcraw_common.o object/dcraw_fileio.o object/demosaic_packs.o
 
 library: lib/libraw.a
 
@@ -55,6 +55,9 @@ bin/dcraw_emu: lib/libraw.a samples/dcraw_emu.cpp
 
 object/dcraw_common.o: internal/dcraw_common.cpp
 	g++ -c -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o object/dcraw_common.o internal/dcraw_common.cpp
+
+object/demosaic_packs.o: internal/demosaic_packs.cpp
+	g++ -c -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o object/demosaic_packs.o internal/demosaic_packs.cpp
 
 object/dcraw_fileio.o: internal/dcraw_fileio.cpp
 	g++ -c -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o object/dcraw_fileio.o internal/dcraw_fileio.cpp
