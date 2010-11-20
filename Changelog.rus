@@ -1,5 +1,11 @@
-﻿2010-11-17 Alex Tutubalin <lexa@lexa.ru>
+﻿2010-11-20 Alex Tutubalin <lexa@lexa.ru>
+        * Update for new demosaic-pack-GPL3
+	* LibRaw 0.12.0-Beta1
+
+2010-11-19 Alex Tutubalin <lexa@lexa.ru>
         * Поддержка demosaic pack(s) в ./configure
+
+2010-11-17 Alex Tutubalin <lexa@lexa.ru>
         * Добавлена поддержка LCMS2
 	* afd_interpolate(2,1) вместо (5,0)
         * Добавление и упорядочение ключей командной строки примера dcraw_emu

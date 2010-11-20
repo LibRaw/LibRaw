@@ -62,8 +62,8 @@ void CLASS refinement() {}
 
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL3
 /*AMaZE*/
-#include <amaze_demosaicing.c>
-#include <amaze_ca_correct.c>
+#include <amaze_demosaic_RT.cc>
+#include <CA_correct_RT.cc>
 #else
 // fallback to AHD and no correction
 void CLASS CA_correct_RT(){}

@@ -187,7 +187,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 
 // LibRaw demosaic packs  functions
 // AMaZe
-    int         LinEqSolve(int, int, int, float*, float*, float*);
+    int         LinEqSolve(int,  float*, float*, float*);
 // DCB
     void        dcb_pp();
     void        dcb_copy_to_buffer(float (*image2)[3]);

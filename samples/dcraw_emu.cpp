@@ -100,9 +100,9 @@ void usage(const char *prog)
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
 "-eeci     EECI refine for mixed VCD/AHD (q=8)\n"
 "-esmed N  Number of edge-sensitive median filter passes (only if q=8)\n"
+#endif
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL3
 "-amazeca  Use AMaZE chromatic aberrations refine (only if q=10)\n"
-#endif
 #endif
 #ifndef WIN32
 "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
