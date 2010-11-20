@@ -15,6 +15,7 @@ else
     cd ..
     rm -f internal/preprocess.pl clist2c.pl
     rm doc/*.psd
+    ./configure
     rm -f Makefile Makefile.devel Makefile.dist
     rm DEVELOPER-NOTES
     rm mkdist.sh export-dist.sh
