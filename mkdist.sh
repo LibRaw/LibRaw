@@ -8,14 +8,11 @@ else
     autoreconf --install
     rm -fr dcraw/*
     rm -f dcraw/.gdbinit
-    rm -f aclocal.m4
-    rm -fr autom4te.cache
     cd dcraw
     wget http://www.cybercom.net/~dcoffin/dcraw/dcraw.c
     cd ..
     rm -f internal/preprocess.pl clist2c.pl
     rm doc/*.psd
-    ./configure --disable-demosaic-pack-gpl2 --disable-demosaic-pack-gpl3
     rm -f Makefile.devel 
     rm DEVELOPER-NOTES
     rm mkdist.sh export-dist.sh

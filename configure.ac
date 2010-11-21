@@ -84,9 +84,9 @@ if test x$dp2 = xtrue ; then
 	echo "Activated LibRaw demosaic pack/GPL2 in current dir"
         CPPFLAGS="$CPPFLAGS -I./LibRaw-demosaic-pack-GPL2 -DLIBRAW_DEMOSAIC_PACK_GPL2"
     else
-        lcount=`ls -d ../LibRaw-demosaic*GPL2* | wc -l`
+        lcount=`find .. -type d -name 'LibRaw-demosaic*GPL2*' | wc -l`
         if test $lcount -eq 1 ; then
-                pdir=`ls -d ../LibRaw-demosaic*GPL2*`
+                pdir=`find .. -type d -name 'LibRaw-demosaic*GPL2*' | head -1`
 	        if test -f  ${pdir}/afd_interpolate_pl.c ; then
            	        echo "Activated LibRaw demosaic pack/GPL2 in $pdir"
                         CPPFLAGS="$CPPFLAGS -I${pdir} -DLIBRAW_DEMOSAIC_PACK_GPL2"
@@ -127,9 +127,9 @@ if test x$dp3 = xtrue ; then
 	echo "Activated LibRaw demosaic pack/GPL3 in current dir"
         CPPFLAGS="$CPPFLAGS -I./LibRaw-demosaic-pack-GPL3 -DLIBRAW_DEMOSAIC_PACK_GPL3"
     else
-        lcount=`ls -d ../LibRaw-demosaic*GPL3* | wc -l`
+        lcount=`find .. -type d -name 'LibRaw-demosaic*GPL3*' | wc -l`
         if test $lcount -eq 1 ; then
-                pdir=`ls -d ../LibRaw-demosaic*GPL3*`
+                pdir=`find .. -type d -name 'LibRaw-demosaic*GPL3*'|head -1`
 	        if test -f  ${pdir}/CA_correct_RT.cc ; then
            	        echo "Activated LibRaw demosaic pack/GPL3 in $pdir"
                         CPPFLAGS="$CPPFLAGS -I${pdir} -DLIBRAW_DEMOSAIC_PACK_GPL3"

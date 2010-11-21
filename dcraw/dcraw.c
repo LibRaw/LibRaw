@@ -19,8 +19,6 @@
    *If you have not modified dcraw.c in any way, a link to my
    homepage qualifies as "full source code".
 
-   $Revision: 710 $
-   $Date: 2010-11-11 20:39:03 +0300 (чт, 11 ноя 2010) $
  */
 
 /*@out DEFINES
@@ -3865,6 +3863,7 @@ void CLASS green_matching()
   const float thr = 0.01f;
   if(FC(oj, oi) != 3) oj++;
   if(FC(oj, oi) != 3) oi++;
+  if(FC(oj, oi) != 3) oj--;
 
   img = (ushort (*)[4]) calloc (height*width, sizeof *image);
   merror (img, "green_matching()");

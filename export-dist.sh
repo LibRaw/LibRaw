@@ -1,7 +1,11 @@
 #!/bin/sh
 
 DEST=$1
-VERSION=`./version.sh`
+VERSION=$2
+if test x$VERSION = x ; then
+ VERSION=`./version.sh`
+ echo VERSION set to $VERSION
+fi
 
 if test -d $DEST ; then
  echo Using $DEST/$VERSION
