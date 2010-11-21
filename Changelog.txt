@@ -1,3 +1,7 @@
+2010-11-21 Alex Tutubalin <lexa@lexa.ru>
+	* Changes in green_matching code for some types of bayer patterns
+	  Thanks to Sergey Pavlov
+
 2010-11-17 Alex Tutubalin <lexa@lexa.ru>
 	* Nikon P7000: color matrix data and black level patch for ISO >=400
 	  Thanks to Gunnar Thorburn 

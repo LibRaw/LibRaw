@@ -1,4 +1,8 @@
-﻿2010-11-17 Alex Tutubalin <lexa@lexa.ru>
+﻿2010-11-21 Alex Tutubalin <lexa@lexa.ru>
+        * Поправки в green_matching для некоторых типов матриц.
+	  Спасибо Сергею Павлову
+
+2010-11-17 Alex Tutubalin <lexa@lexa.ru>
 	* Nikon P7000: цветовая матрица и хак для уровня черного при ISO>=400
 	  Спасибо Gunnar Thorburn 
 	* Поддержка некоторых индустриальных камер на сенсоре Sony ICX 625/655
