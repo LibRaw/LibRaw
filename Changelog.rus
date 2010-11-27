@@ -1,6 +1,13 @@
-﻿2010-11-21 Alex Tutubalin <lexa@lexa.ru>
-	*  Исправления в green_matching для некоторых layouts байеровских
-	   матриц. Спасибо Сергею Павлову.
+﻿2010-11-27 Alex Tutubalin <lexa@lexa.ru>
+	* Исправлена ошибка в lmmse_interpolation (demosaic-pack-GPL2)
+	* в lmmse и amaze_interpolation аллокация заменена на calloc,
+	  чтобы осчастливить valgrind
+	* Изменения в скриптах подготовки дистрибутива.
+	* LibRaw 0.12.0-Beta2
+
+2010-11-21 Alex Tutubalin <lexa@lexa.ru>
+	* Исправления в green_matching для некоторых layouts байеровских
+	  матриц. Спасибо Сергею Павлову.
 
 2010-11-20 Alex Tutubalin <lexa@lexa.ru>
         * Update for new demosaic-pack-GPL3

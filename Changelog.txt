@@ -1,3 +1,10 @@
+2010-11-27 Alex Tutubalin <lexa@lexa.ru>
+        * Fixed allocation bug in lmmse_interpolation (demosaic-pack-GPL2)
+	* In LMMSE and AMaZE interpolators allocation changed to calloc
+	  to make valgrind happy with uninitialized values
+        * Changes in distribution-making scripts
+        * LibRaw 0.12.0-Beta2
+
 2010-11-21 Alex Tutubalin <lexa@lexa.ru>
 	* Fixes to green_matching code by Sergey Pavlov
 
