@@ -129,7 +129,7 @@ unsigned thumb_length, meta_length, profile_length;
 unsigned thumb_misc, *oprof, fuji_layout, shot_select=0, multi_out=0;
 unsigned tiff_nifds, tiff_samples, tiff_bps, tiff_compress;
 unsigned black, cblack[8], maximum, mix_green, raw_color, zero_is_bad;
-unsigned zero_after_ff, is_raw, dng_version,  data_error;
+unsigned zero_after_ff, is_raw, dng_version,  data_error, is_foveon;
 unsigned tile_width, tile_length, gpsdata[32], load_flags;
 ushort raw_height, raw_width, height, width, top_margin, left_margin;
 ushort shrink, iheight, iwidth, fuji_width, thumb_width, thumb_height;
@@ -167,6 +167,10 @@ struct ph1 {
   int format, key_off, t_black, black_off, split_col, tag_21a;
   float tag_210;
 } ph1;
+
+// Fake foveon functions to make dcraw.c compilable alone
+void parse_foveon() {}
+void foveon_load_raw() {}
 
 #define CLASS
 
@@ -7459,7 +7463,7 @@ void CLASS identify()
   write_thumb = &CLASS jpeg_thumb;
   data_offset = meta_length = tiff_bps = tiff_compress = 0;
   kodak_cbpp = zero_after_ff = dng_version = load_flags = 0;
-  timestamp = shot_order = tiff_samples = black = 0;
+  timestamp = shot_order = tiff_samples = black =  is_foveon = 0;
   mix_green = profile_length = data_error = zero_is_bad = 0;
   pixel_aspect = is_raw = raw_color = 1;
   tile_width = tile_length = INT_MAX;
@@ -7571,6 +7575,8 @@ void CLASS identify()
     parse_sinar_ia();
   else if (!memcmp (head,"\0MRM",4))
     parse_minolta(0);
+  else if (!memcmp (head,"FOVb",4))
+    parse_foveon();
   else if (!memcmp (head,"CI",2))
     parse_cine();
   else
@@ -7653,8 +7659,13 @@ void CLASS identify()
   }
 
 /* Set parameters based on camera name (for non-DNG files). */
-
-if (is_canon && tiff_bps == 15) {
+ if (is_foveon) {
+    if (height*2 < width) pixel_aspect = 0.5;
+    if (height   > width) pixel_aspect = 2;
+    filters = 0;
+    load_raw = &CLASS foveon_load_raw;
+    simple_coeff(0);
+  } else if (is_canon && tiff_bps == 15) {
     switch (width) {
       case 3344: width -= 66;
       case 3872: width -= 6;

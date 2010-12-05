@@ -298,6 +298,7 @@ const char * LibRaw::unpack_function_name()
     if (load_raw == &LibRaw::canon_sraw_load_raw)       return "canon_sraw_load_raw()"; //+
 
     if (load_raw == &LibRaw::eight_bit_load_raw )       return "eight_bit_load_raw()"; //+
+    if (load_raw == &LibRaw::foveon_load_raw )          return "foveon_load_raw()";
     if (load_raw == &LibRaw::fuji_load_raw )            return "fuji_load_raw()"; //+
     // 10
     if (load_raw == &LibRaw::hasselblad_load_raw )      return "hasselblad_load_raw()"; //+
@@ -484,7 +485,7 @@ int LibRaw::add_masked_borders_to_bitmap()
     if(S.width != S.iwidth || S.height!=S.iheight)
         return LIBRAW_CANNOT_ADDMASK;
 
-    if(!P1.filters)
+    if(P1.is_foveon || !P1.filters)
         return LIBRAW_CANNOT_ADDMASK;
         
     if(!imgdata.image)
@@ -823,6 +824,18 @@ int LibRaw::dcraw_document_mode_processing(void)
             rotate_fuji_raw();
 
         O.document_mode = 2;
+        
+        if(P1.is_foveon)
+            {
+                // filter image data for foveon document mode
+                short *iptr = (short *)imgdata.image;
+                for (int i=0; i < S.height*S.width*4; i++)
+                    {
+                        if ((short) iptr[i] < 0) 
+                            iptr[i] = 0;
+                    }
+                SET_PROC_FLAG(LIBRAW_PROGRESS_FOVEON_INTERPOLATE);
+            }
 
         O.use_fuji_rotate = 0;
 
@@ -855,14 +868,14 @@ int LibRaw::dcraw_document_mode_processing(void)
             }
         SET_PROC_FLAG(LIBRAW_PROGRESS_MIX_GREEN);
 
-        if ( P1.colors == 3) 
+        if (!P1.is_foveon && P1.colors == 3) 
             median_filter();
         SET_PROC_FLAG(LIBRAW_PROGRESS_MEDIAN_FILTER);
 
-        if ( O.highlight == 2) 
+        if (!P1.is_foveon && O.highlight == 2) 
             blend_highlights();
 
-        if ( O.highlight > 2) 
+        if (!P1.is_foveon && O.highlight > 2) 
             recover_highlights();
         SET_PROC_FLAG(LIBRAW_PROGRESS_HIGHLIGHTS);
 
@@ -1336,6 +1349,14 @@ int LibRaw::unpack_thumb(void)
                         return 0;
 
                     }
+                else if (write_thumb == &LibRaw::foveon_thumb)
+                    {
+                        foveon_thumb_loader();
+                        // may return with error, so format is set in
+                        // foveon thumb loader itself
+                        SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
+                        return 0;
+                    }
                 // else if -- all other write_thumb cases!
                 else
                     {
@@ -1601,12 +1622,18 @@ int LibRaw::dcraw_process(void)
 
         if (O.user_sat > 0) C.maximum = O.user_sat;
 
+        if (P1.is_foveon && !O.document_mode) 
+            {
+                foveon_interpolate();
+                SET_PROC_FLAG(LIBRAW_PROGRESS_FOVEON_INTERPOLATE);
+            }
+
         if (O.green_matching)
             {
                 green_matching();
             }
 
-        if ( O.document_mode < 2)
+        if (!P1.is_foveon &&  O.document_mode < 2)
             {
                 scale_colors();
                 SET_PROC_FLAG(LIBRAW_PROGRESS_SCALE_COLORS);
@@ -1670,19 +1697,22 @@ int LibRaw::dcraw_process(void)
                 SET_PROC_FLAG(LIBRAW_PROGRESS_MIX_GREEN);
             }
 
-        if (P1.colors == 3) 
+        if(!P1.is_foveon)
             {
-
-                if (quality == 8) 
+                if (P1.colors == 3) 
                     {
-                        if (eeci_refine_fl == 1) refinement();
-                        if (O.med_passes > 0)    median_filter_new();
-                        if (es_med_passes_fl > 0) es_median_filter();
-                    } 
-                else {
-                    median_filter();
-                }
-                SET_PROC_FLAG(LIBRAW_PROGRESS_MEDIAN_FILTER);
+                        
+                        if (quality == 8) 
+                            {
+                                if (eeci_refine_fl == 1) refinement();
+                                if (O.med_passes > 0)    median_filter_new();
+                                if (es_med_passes_fl > 0) es_median_filter();
+                            } 
+                        else {
+                            median_filter();
+                        }
+                        SET_PROC_FLAG(LIBRAW_PROGRESS_MEDIAN_FILTER);
+                    }
             }
         
         if (O.highlight == 2) 
@@ -2161,6 +2191,8 @@ const char * LibRaw::strprogress(enum LibRaw_progress p)
             return "Removing dead pixels";
         case LIBRAW_PROGRESS_DARK_FRAME:
             return "Subtracting dark frame data";
+        case LIBRAW_PROGRESS_FOVEON_INTERPOLATE:
+            return "Interpolating Foveon sensor data";
         case LIBRAW_PROGRESS_SCALE_COLORS:
             return "Scaling colors";
         case LIBRAW_PROGRESS_PRE_INTERPOLATE:

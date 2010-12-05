@@ -112,6 +112,11 @@ int main(int ac, char *av[])
                     fprintf(stderr,"Cannot open %s: %s\n",av[i],libraw_strerror(ret));
                     continue; // no recycle b/c open file will recycle itself
                 }
+            if(P1.is_foveon)
+                {
+                    printf("Cannot process foveon image %s\n",av[i]);
+                    continue ;
+                }
             if( (ret = RawProcessor.unpack() ) != LIBRAW_SUCCESS)
                 {
                     fprintf(stderr,"Cannot unpack %s: %s\n",av[i],libraw_strerror(ret));

@@ -21,7 +21,7 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
-#line 263 "dcraw/dcraw.c"
+#line 267 "dcraw/dcraw.c"
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
 #define LIBRAW_LIBRARY_BUILD
@@ -29,7 +29,7 @@ it under the terms of the one of three licenses as you choose:
 #include "libraw/libraw.h"
 #include "internal/defines.h"
 #include "internal/var_defines.h"
-#line 273 "dcraw/dcraw.c"
+#line 277 "dcraw/dcraw.c"
 
 #ifndef __GLIBC__
 char *my_memmem (char *haystack, size_t haystacklen,
@@ -44,7 +44,7 @@ char *my_memmem (char *haystack, size_t haystacklen,
 #define memmem my_memmem
 #endif
 
-#line 307 "dcraw/dcraw.c"
+#line 311 "dcraw/dcraw.c"
 
 ushort CLASS sget2 (uchar *s)
 {
@@ -119,7 +119,7 @@ void CLASS read_shorts (ushort *pixel, int count)
   if ((order == 0x4949) == (ntohs(0x1234) == 0x1234))
       swab ((char*)pixel, (char*)pixel, count*2);
 }
-#line 385 "dcraw/dcraw.c"
+#line 389 "dcraw/dcraw.c"
 
 void CLASS canon_600_fixed_wb (int temp)
 {
@@ -593,7 +593,7 @@ void CLASS canon_compressed_load_raw()
   FORC4 if (cblack[4+c]) cblack[c] /= cblack[4+c];
 }
 
-#line 869 "dcraw/dcraw.c"
+#line 873 "dcraw/dcraw.c"
 int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
   int c, tag, len;
@@ -1213,7 +1213,7 @@ void CLASS fuji_load_raw()
   free (pixel);
 #endif
 }
-#line 1493 "dcraw/dcraw.c"
+#line 1497 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -1748,7 +1748,7 @@ void CLASS leaf_hdr_load_raw()
   }
 }
 
-#line 2031 "dcraw/dcraw.c"
+#line 2035 "dcraw/dcraw.c"
 void CLASS sinar_4shot_load_raw()
 {
   ushort *pixel;
@@ -3010,7 +3010,7 @@ void CLASS smal_v9_load_raw()
     smal_decode_segment (seg+i, holes);
   if (holes) fill_holes (holes);
 }
-#line 3457 "dcraw/dcraw.c"
+#line 3461 "dcraw/dcraw.c"
 
 void CLASS crop_pixels()
 {
@@ -4401,7 +4401,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 4851 "dcraw/dcraw.c"
+#line 4855 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -4957,7 +4957,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5411 "dcraw/dcraw.c"
+#line 5415 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6193,7 +6193,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 6653 "dcraw/dcraw.c"
+#line 6657 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -6826,7 +6826,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7289 "dcraw/dcraw.c"
+#line 7293 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -7000,7 +7000,7 @@ void CLASS identify()
   write_thumb = &CLASS jpeg_thumb;
   data_offset = meta_length = tiff_bps = tiff_compress = 0;
   kodak_cbpp = zero_after_ff = dng_version = load_flags = 0;
-  timestamp = shot_order = tiff_samples = black = 0;
+  timestamp = shot_order = tiff_samples = black =  is_foveon = 0;
   mix_green = profile_length = data_error = zero_is_bad = 0;
   pixel_aspect = is_raw = raw_color = 1;
   tile_width = tile_length = INT_MAX;
@@ -7112,6 +7112,8 @@ void CLASS identify()
     parse_sinar_ia();
   else if (!memcmp (head,"\0MRM",4))
     parse_minolta(0);
+  else if (!memcmp (head,"FOVb",4))
+    parse_foveon();
   else if (!memcmp (head,"CI",2))
     parse_cine();
   else
@@ -7194,8 +7196,13 @@ void CLASS identify()
   }
 
 /* Set parameters based on camera name (for non-DNG files). */
-
-if (is_canon && tiff_bps == 15) {
+ if (is_foveon) {
+    if (height*2 < width) pixel_aspect = 0.5;
+    if (height   > width) pixel_aspect = 2;
+    filters = 0;
+    load_raw = &CLASS foveon_load_raw;
+    simple_coeff(0);
+  } else if (is_canon && tiff_bps == 15) {
     switch (width) {
       case 3344: width -= 66;
       case 3872: width -= 6;
@@ -8605,7 +8612,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9161 "dcraw/dcraw.c"
+#line 9172 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8824,7 +8831,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9404 "dcraw/dcraw.c"
+#line 9415 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

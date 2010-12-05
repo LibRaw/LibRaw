@@ -28,6 +28,10 @@ it under the terms of the one of three licenses as you choose:
 #define LIBRAW_IO_REDEFINED
 #include "libraw/libraw.h"
 #include "internal/defines.h"
+#define SRC_USES_SHRINK
+#define SRC_USES_BLACK
+#define SRC_USES_CURVE
+
 #include "internal/var_defines.h"
 
 
@@ -70,3 +74,16 @@ void CLASS CA_correct_RT(){}
 void CLASS amaze_demosaic_RT() { ahd_interpolate();}
 #endif
 
+#define sget4(s) sget4((uchar *)s)
+#ifndef M_PI
+#define M_PI            3.14159265358979323846
+#endif
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+#include <dcraw_foveon.c>
+#else
+void CLASS foveon_interpolate(){}
+void CLASS foveon_load_raw(){}
+void CLASS parse_foveon(){}
+void CLASS foveon_thumb_loader(){}
+void CLASS foveon_thumb(){}
+#endif

@@ -21,11 +21,11 @@ CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-
 #LCMS_LIB=-L/usr/local/lib -llcms
 
 # Demosaic Pack GPL2:
-CFLAGS_DP1=-I../LibRaw-demosaic-pack-GPL2
+CFLAGS_DP2=-I../LibRaw-demosaic-pack-GPL2
 CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
 
 # Demosaic Pack GPL3:
-CFLAGS_DP2=-I../LibRaw-demosaic-pack-GPL3
+CFLAGS_DP3=-I../LibRaw-demosaic-pack-GPL3
 CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
 
 
@@ -42,10 +42,10 @@ all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin
 ## Demosaic Pack(s)
 
 object/demosaic_packs.o: internal/demosaic_packs.cpp ${LR_INCLUDES}
-	$(CXX) -w -c -DLIBRAW_NOTHREADS ${CFLAGS} ${LCMS_DEF} ${CFLAGS_DP1} ${CFLAGS_DP2} -o object/demosaic_packs.o internal/demosaic_packs.cpp
+	$(CXX) -w -c -DLIBRAW_NOTHREADS ${CFLAGS} ${LCMS_DEF} ${CFLAGS_DP2} ${CFLAGS_DP3} -o object/demosaic_packs.o internal/demosaic_packs.cpp
 
 object/demosaic_packs_mt.o: internal/demosaic_packs.cpp ${LR_INCLUDES}
-	$(CXX) -w -c -pthread ${CFLAGS} ${LCMS_DEF} ${CFLAGS_DP1} ${CFLAGS_DP2} -o object/demosaic_packs_mt.o internal/demosaic_packs.cpp
+	$(CXX) -w -c -pthread ${CFLAGS} ${LCMS_DEF} ${CFLAGS_DP2} ${CFLAGS_DP3} -o object/demosaic_packs_mt.o internal/demosaic_packs.cpp
 
 
 ## Samples ##

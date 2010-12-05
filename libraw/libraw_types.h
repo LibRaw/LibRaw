@@ -128,6 +128,7 @@ typedef struct
 
     unsigned    raw_count;
     unsigned    dng_version;
+    unsigned    is_foveon;
     int         colors;
 
     unsigned    filters; 

@@ -26,6 +26,7 @@ it under the terms of the one of three licenses as you choose:
 #define model           (imgdata.idata.model)
 #define is_raw          (imgdata.idata.raw_count)
 #define dng_version     (imgdata.idata.dng_version)
+#define is_foveon       (imgdata.idata.is_foveon)
 #define colors          (imgdata.idata.colors)
 #define cdesc           (imgdata.idata.cdesc)
 #define filters         (imgdata.idata.filters)

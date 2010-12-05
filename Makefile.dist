@@ -3,11 +3,23 @@ all: library all_samples
 CFLAGS=-O4  -I. -w
 
 # OpenMP support
-#CFLAGS=-O4  -I. -w -fopenmp
+#CFLAGS+=-fopenmp
 
 # LCMS support
 #LCMS_DEF=-DUSE_LCMS -I/usr/local/include
 #LCMS_LIB=-L/usr/local/lib -llcms
+
+# LCMS2.x support
+#LCMS_DEF=-DUSE_LCMS2 -I/usr/local/include
+#LCMS_LIB=-L/usr/local/lib -llcms2
+
+# Demosaic Pack GPL2:
+#CFLAGS_DP2=-I../LibRaw-demosaic-pack-GPL2
+#CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
+
+# Demosaic Pack GPL3:
+#CFLAGS_DP3=-I../LibRaw-demosaic-pack-GPL3
+#CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
 
 
 DCRAW_LIB_OBJECTS=object/dcraw_common.o object/libraw_cxx.o object/libraw_c_api.o object/dcraw_fileio.o object/demosaic_packs.o
@@ -54,7 +66,7 @@ bin/dcraw_emu: lib/libraw.a samples/dcraw_emu.cpp
 #objects
 
 object/demosaic_packs.o: internal/demosaic_packs.cpp
-	g++ -c -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o object/demosaic_packs.o internal/demosaic_packs.cpp
+	g++ -c -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} ${CFLAGS_DP2} ${CFLAGS_DP3} -o object/demosaic_packs.o internal/demosaic_packs.cpp
 
 object/dcraw_common.o: internal/dcraw_common.cpp
 	g++ -c -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o object/dcraw_common.o internal/dcraw_common.cpp
@@ -86,7 +98,7 @@ lib/libraw_r.a: ${DCRAW_LIB_MT_OBJECTS}
 	ranlib lib/libraw_r.a
 
 object/demosaic_packs_mt.o: internal/demosaic_packs.cpp
-	g++ -c -pthread ${LCMS_DEF}  ${CFLAGS} -o object/demosaic_packs_mt.o internal/demosaic_packs.cpp
+	g++ -c -pthread ${LCMS_DEF}  ${CFLAGS} ${CFLAGS_DP2} ${CFLAGS_DP3} -o object/demosaic_packs_mt.o internal/demosaic_packs.cpp
 
 object/dcraw_common_mt.o: internal/dcraw_common.cpp
 	g++ -c -pthread ${LCMS_DEF}  ${CFLAGS} -o object/dcraw_common_mt.o internal/dcraw_common.cpp

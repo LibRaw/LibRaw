@@ -1,3 +1,9 @@
+2010-12-05 Alex Tutubalin <lexa@lexa.ru>
+        * Demosaic packs support in Makefile.dist
+        * Foveon support in LibRaw demosaic pack GPL2 
+        * all client code should be recompiled due to internals change.
+        * LibRaw 0.12.0-Beta3
+
 2010-11-27 Alex Tutubalin <lexa@lexa.ru>
         * Fixed allocation bug in lmmse_interpolation (demosaic-pack-GPL2)
 	* In LMMSE and AMaZE interpolators allocation changed to calloc

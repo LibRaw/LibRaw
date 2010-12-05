@@ -133,6 +133,9 @@ Fields of this structure are described in detail <a href="#libraw_iparams_t">bel
       <dd>
         DNG version (for the DNG format).
       </dd>
+      <dd>
+        1 for Foveon matrices, 0 for others. Foveon is supported in LibRaw-demosaic-pack-GPL2.
+        </p>      
       </dd>
       <dt><b>int         colors;</b></dt>
       <dd>
@@ -878,6 +881,10 @@ object will be brought to the state &quot;right after creation.&quot;
       <dd>
         Dark frame subtracted from RAW data.
       </dd>
+      <dt><b>LIBRAW_PROGRESS_FOVEON_INTERPOLATE</b></dt>
+      <dd>
+        Interpolation for cameras with a Foveon sensor performed.
+      </dd>
       <dt><b>LIBRAW_PROGRESS_SCALE_COLORS</b></dt>
       <dd>
         White balance performed.
@@ -967,6 +974,14 @@ object will be brought to the state &quot;right after creation.&quot;
     <p>Some suspicious situations emerging during image processing are not fatal but may affect the result of data
 retrieval or postprocessing. Such states are indicated by setting a bit in the imgdata.process_warnings field.</p>
     <dl>
+      <dt><b>LIBRAW_WARN_FOVEON_NOMATRIX</b></dt>
+      <dd>
+      Only for cameras with Foveon: extraction of one of data matrices has failed.
+      </dd>
+      <dt><b>LIBRAW_WARN_FOVEON_INVALIDWB</b></dt>
+      <dd>
+        Only for cameras with Foveon: extraction of white balance data has failed.
+      </dd>
       <dt><b>LIBRAW_WARN_BAD_CAMERA_WB</b></dt>
       <dd>
        Postprocessing must use white balance of the camera but this balance is not suitable for use.
@@ -1108,7 +1123,7 @@ data source is recorded. The possible values are listed below.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:42:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Wed Nov 17 12:25:39 UTC 2010
+Last modified: Sun Dec  5 14:04:47 UTC 2010
 <!-- hhmts end -->
   </body>
 </html>

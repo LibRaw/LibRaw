@@ -177,6 +177,7 @@ class DllDef LibRaw
 
     void        kodak_thumb_loader();
     void        write_thumb_ppm_tiff(FILE *); 
+    void        foveon_thumb_loader (void);
     
     void init_masked_ptrs();
     ushort *get_masked_pointer(int row, int col); 
@@ -224,6 +225,7 @@ class DllDef LibRaw
     void        fuji_rotate();
     void        stretch();
 
+    void        foveon_thumb ();
     void        jpeg_thumb_writer (FILE *tfp,char *thumb,int thumb_length);
     void        jpeg_thumb ();
     void        ppm_thumb ();
@@ -231,6 +233,7 @@ class DllDef LibRaw
     void        rollei_thumb ();
     void        kodak_thumb_load_raw();
 
+    void        foveon_decoder (unsigned size, unsigned code);
     unsigned    get4();
 
     int         flip_index (int row, int col);
