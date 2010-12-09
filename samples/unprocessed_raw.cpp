@@ -164,7 +164,7 @@ int main(int ac, char *av[])
             if(OUT.shot_select)
                 snprintf(outfn,sizeof(outfn),"%s-%d.tiff",av[i],OUT.shot_select);
             else
-                snprintf(outfn,sizeof(outfn),"%s.pgm",av[i]);
+                snprintf(outfn,sizeof(outfn),"%s.tiff",av[i]);
 
             if(verbose) printf("Writing file %s\n",outfn);
             if( LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_ppm_tiff_writer(outfn)))
