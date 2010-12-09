@@ -38,7 +38,7 @@ it under the terms of the one of three licenses as you choose:
 int main(int ac, char *av[])
 {
     int  i, ret;
-    int verbose=1,autoscale=0,use_gamma=0;
+    int verbose=1,autoscale=0,use_gamma=0,add_borders=0,subtract_black=0;
     char outfn[1024]; 
 
     LibRaw RawProcessor;
@@ -50,6 +50,8 @@ int main(int ac, char *av[])
                 "Usage: %s [-q] [-A] [-g] [-s N] [-N] raw-files....\n"
                 "\t-q - be quiet\n"
                 "\t-s N - select Nth image in file (default=0)\n"
+                "\t-M - add black (masked) pixels data to bitmap\n"
+                "\t-B - subtract black level from pixel data\n"
                 "\t-g - use gamma correction with gamma 2.2 (not precise,use for visual inspection only)\n"
                 "\t-A - autoscaling (by integer factor)\n"
                 "\t-N - no raw curve/zeroes filtering\n"
@@ -82,6 +84,10 @@ int main(int ac, char *av[])
                         autoscale=1;
                     else if(av[i][1]=='g' && av[i][2]==0)
                         use_gamma = 1;
+                    else if(av[i][1]=='M' && av[i][2]==0)
+                        add_borders = 1;
+                    else if(av[i][1]=='B' && av[i][2]==0)
+                        subtract_black = 1;
                     else if(av[i][1]=='N' && av[i][2]==0)
                         OUT.filtering_mode=LIBRAW_FILTERING_NONE;
                     else if(av[i][1]=='s' && av[i][2]==0)
@@ -92,6 +98,11 @@ int main(int ac, char *av[])
                     else
                         goto usage;
                     continue;
+                }
+            if(add_borders && subtract_black)
+                {
+                    fprintf(stderr,"Cannot add masked pixels data and subtract black simultaneously\n");
+                    exit(1);
                 }
             int c;
             if(!use_gamma)
@@ -118,18 +129,19 @@ int main(int ac, char *av[])
             if(verbose)
                 printf("Unpacked....\n");
 
-            if( (ret = RawProcessor.add_masked_borders_to_bitmap() ) != LIBRAW_SUCCESS)
-                {
-                    fprintf(stderr,"Cannot add mask data to bitmap %s\n",av[i]);
-                }
-
+            if(add_borders)
+                if( (ret = RawProcessor.add_masked_borders_to_bitmap() ) != LIBRAW_SUCCESS)
+                    {
+                        fprintf(stderr,"Cannot add mask data to bitmap %s\n",av[i]);
+                    }
+            if(subtract_black)
+                RawProcessor.subtract_black();
+                
             // move all pixel data to component 0
-
             for(int r=0;r<S.iheight;r++)
                 for(c=0;c<S.iwidth;c++)
                     RawProcessor.imgdata.image[r*S.iwidth+c][0] 
 		      = RawProcessor.imgdata.image[r*S.iwidth+c][RawProcessor.COLOR(r,c)];
-
             P1.colors=1;
             if(autoscale)
                 {
@@ -152,7 +164,7 @@ int main(int ac, char *av[])
             if(OUT.shot_select)
                 snprintf(outfn,sizeof(outfn),"%s-%d.tiff",av[i],OUT.shot_select);
             else
-                snprintf(outfn,sizeof(outfn),"%s.tiff",av[i]);
+                snprintf(outfn,sizeof(outfn),"%s.pgm",av[i]);
 
             if(verbose) printf("Writing file %s\n",outfn);
             if( LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_ppm_tiff_writer(outfn)))

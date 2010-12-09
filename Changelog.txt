@@ -1,3 +1,12 @@
+2010-12-09 Alex Tutubalin <lexa@lexa.ru>
+        * Fixed bug in add_masked_borders_to_bitmap() call for cameras
+          with odd pixels border.
+        * New command line options for unprocessed_raw sample:
+           -B - subtract black level, -M - add masked pixels to bitmap.
+        * Foveon-sensor cameras added to supported camera list if
+          compiled with demosaic pack GPL2 
+        * LibRaw 0.12.0-Beta4
+
 2010-12-05 Alex Tutubalin <lexa@lexa.ru>
         * Demosaic packs support in Makefile.dist
         * Foveon support in LibRaw demosaic pack GPL2 

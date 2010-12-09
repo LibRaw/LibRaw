@@ -1,4 +1,14 @@
-﻿2010-12-05 Alex Tutubalin <lexa@lexa.ru>
+﻿2010-12-09 Alex Tutubalin <lexa@lexa.ru>
+        * Исправлена ошибка в вызове add_masked_borders_to_bitmap(), которая
+          проявлялась на камерах с нечетной шириной черной рамки.
+        * Новые параметры командной строки примера unprocessed_raw:
+           -B - вычитать уровень черного, -M - добавлять маскированную рамку
+           к изображению.
+        * Камеры с сенсором Foveon добавляются в список поддерживаемого 
+          оборудования при сброрке с demosaic pack GPL2 
+        * LibRaw 0.12.0-Beta4
+
+2010-12-05 Alex Tutubalin <lexa@lexa.ru>
         * Поддержка demosaic packs в Makefile.dist
         * Поддержка Foveon в LibRaw demosaic pack GPL2 
         * Структуры данных изменены, требуется перекомпиляция всех приложений.

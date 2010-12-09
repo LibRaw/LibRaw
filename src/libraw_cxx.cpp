@@ -524,7 +524,7 @@ int LibRaw::add_masked_borders_to_bitmap()
             for(c=S.left_margin; c<S.left_margin+S.iwidth;c++)
                 {
                     int col = c - S.left_margin;
-                    newimage[r*S.raw_width+c][COLOR(r,c)] = imgdata.image[row*S.iwidth+col][COLOR(r,c)];
+                    newimage[r*S.raw_width+c][COLOR(r,c)] = imgdata.image[row*S.iwidth+col][COLOR(row,col)];
 //                    for(int cc=0;cc<4;cc++)
 //                        newimage[r*S.raw_width+c][cc] = imgdata.image[row*S.iwidth+col][cc];
                 }
@@ -2124,6 +2124,9 @@ static const char  *static_camera_list[] =
 "Phase One P 45+",
 "Phase One P 65",
 "Pixelink A782",
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+"Polaroid x530",
+#endif
 "Rollei d530flex",
 "RoverShot 3320af",
 "Samsung EX1",
@@ -2136,6 +2139,11 @@ static const char  *static_camera_list[] =
 "Samsung S85 (hacked)",
 "Samsung S850 (hacked)",
 "Sarnoff 4096x5440",
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+"Sigma SD9",
+"Sigma SD10",
+"Sigma SD14",
+#endif
 "Sinar 3072x2048",
 "Sinar 4080x4080",
 "Sinar 4080x5440",
