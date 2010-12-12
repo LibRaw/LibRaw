@@ -7,5 +7,10 @@ minor=`grep LIBRAW_MINOR_VERSION $vfile | head -1 | awk '{print $3}'`
 patch=`grep LIBRAW_PATCH_VERSION $vfile | head -1 | awk '{print $3}'`
 tail=`grep LIBRAW_VERSION_TAIL $vfile | head -1 | awk '{print $3}'`
 
-echo -n "$major.$minor.$patch-$tail"
+if [ x$tail = xRelease ] ; then
+ echo -n "$major.$minor.$patch"
+else
+ echo -n "$major.$minor.$patch-$tail"
+fi
+
 

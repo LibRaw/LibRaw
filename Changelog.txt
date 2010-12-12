@@ -1,3 +1,8 @@
+2010-12-12 Alex Tutubalin <lexa@lexa.ru>
+	* Thread-safe and demosaic packs support for MinGW build
+	* Demosaic packs support for MS VC build
+        * LibRaw 0.12.0-Release
+
 2010-12-09 Alex Tutubalin <lexa@lexa.ru>
         * Fixed bug in add_masked_borders_to_bitmap() call for cameras
           with odd pixels border.
