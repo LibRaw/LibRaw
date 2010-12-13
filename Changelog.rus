@@ -1,4 +1,8 @@
-﻿2010-12-12 Alex Tutubalin <lexa@lexa.ru>
+﻿2010-12-13 Alex Tutubalin <lexa@lexa.ru>
+        * Импортирован новый код коррекции хроматических аберраций,
+          предоставленный Jackues Desmis
+
+2010-12-12 Alex Tutubalin <lexa@lexa.ru>
 	* Поддержка thread-safe сборки и demosaic packs для MinGW-сборки
 	* Поддержка demosaic packs для MS VC-сборки
         * LibRaw 0.12.0-Release

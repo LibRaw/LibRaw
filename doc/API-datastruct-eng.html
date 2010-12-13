@@ -629,10 +629,16 @@ changes the output size.
         Number of edge-sensitive median filter passes after VCD+AHD demosaic.
         Value above 1 is highly not recommended.
       </dd>
-      <dt><b>int amaze_ca_refine</b></dt>
+      <dt><b>int ca_correc</b></dt>
       <dd>
-        <b>dcraw keys:</b> none <br/>
-        nonzero - Suppress chromatic abberation for AMaZE demosaic.
+        <b>Ключи dcraw:</b> нет <br/>
+        Nonzero - suppress chromatic aberrations.
+      </dd>
+      <dt><b>float cared,cablue</b></dt>
+      <dd>
+        <b>Ключи dcraw:</b> нет <br/>
+        If one of these fields is non-zero, then these values will be used instead of automatic ones.
+        Useable range is +-0.1..+-4.0.
       </dd>
     </dl>
     <a name="libraw_masked_t"></a>
@@ -1123,7 +1129,7 @@ data source is recorded. The possible values are listed below.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:42:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Sun Dec  5 14:04:47 UTC 2010
+Last modified: Mon Dec 13 12:26:33 UTC 2010
 <!-- hhmts end -->
   </body>
 </html>

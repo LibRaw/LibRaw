@@ -1,3 +1,7 @@
+2010-12-13 Alex Tutubalin <lexa@lexa.ru>
+        * Support of new CA correction code provided by Jacques Desmis
+          (actual code is in demosaic-pack-GPL3)
+
 2010-12-12 Alex Tutubalin <lexa@lexa.ru>
 	* Thread-safe and demosaic packs support for MinGW build
 	* Demosaic packs support for MS VC build
