@@ -102,7 +102,9 @@ void usage(const char *prog)
 "-esmed N  Number of edge-sensitive median filter passes (only if q=8)\n"
 #endif
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL3
-"-amazeca  Use AMaZE chromatic aberrations refine (only if q=10)\n"
+//"-amazeca  Use AMaZE chromatic aberrations refine (only if q=10)\n"
+"-acae <r b>Use chromatic aberrations correction\n" //modifJD
+
 #endif
 #ifndef WIN32
 "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
@@ -112,7 +114,7 @@ void usage(const char *prog)
 }
 
 static int verbosity=0;
-
+double dt; clock_t t1, t2; // modifJD
 int cnt=0;
 int my_progress_callback(void *d,enum LibRaw_progress p,int iteration, int expected)
 {
@@ -257,8 +259,12 @@ int main(int argc, char *argv[])
               case 'B':  for(c=0; c<4;c++) OUT.cropbox[c]  = atoi(argv[arg++]); break;
               case 'a':
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL3
-                  if(!strcmp(optstr,"-amazeca"))
-                      OUT.amaze_ca_refine = 1;
+                  if(!strcmp(optstr,"-acae")) 
+				  {
+                                      OUT.ca_correc = 1;
+                                      OUT.cared       = (float)atof(argv[arg++]);
+                                      OUT.cablue      = (float)atof(argv[arg++]);
+                                  }
                   else
 #endif
                       OUT.use_auto_wb       = 1;  
@@ -308,7 +314,7 @@ int main(int argc, char *argv[])
   if(verbosity)
           printf ("Using %d threads\n", omp_get_max_threads());
 #endif
-
+t1=clock();//modifJD
   for ( ; arg < argc; arg++)
         {
             char outfn[1024];
@@ -411,6 +417,12 @@ int main(int argc, char *argv[])
 #endif
             
             RawProcessor.recycle(); // just for show this call
+		t2 = clock();
+		dt = ((double)(t2-t1)) / CLOCKS_PER_SEC;
+	 {
+		printf("elapsed total time = %5.3fs\n",dt);}
+			
+			
         }
     return 0;
 }

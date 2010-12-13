@@ -1573,6 +1573,7 @@ int LibRaw::dcraw_process(void)
 
     int iterations=-1, dcb_enhance=1, noiserd=0;
     int eeci_refine_fl=0, es_med_passes_fl=0;
+	float cared=0,cablue=0;
 
     CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
     CHECK_ORDER_HIGH(LIBRAW_PROGRESS_PRE_INTERPOLATE);
@@ -1650,7 +1651,8 @@ int LibRaw::dcraw_process(void)
         if (O.es_med_passes >0 ) es_med_passes_fl = O.es_med_passes;
 
 // LIBRAW_DEMOSAIC_PACK_GPL3
-        if (quality == 10 && O.amaze_ca_refine >0 ) {CA_correct_RT();}
+        //if (quality == 10 && O.amaze_ca_refine >0 ) {CA_correct_RT();}
+        if (O.ca_correc >0 ) {cablue=O.cablue; cared=O.cared; CA_correct_RT(cablue, cared);}//modifJD
 
         if (P1.filters && !O.document_mode) 
             {

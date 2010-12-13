@@ -209,7 +209,9 @@ class DllDef LibRaw
     void        fbdd(int noiserd);
     void        vcd_interpolate(int ahd_cutoff);
     void        amaze_demosaic_RT();
-    void        CA_correct_RT();
+    //void        CA_correct_RT();
+    void        CA_correct_RT(float cared, float cablue);
+	
     /* demosaic pack end */
 
     void        bad_pixels(const char*);
