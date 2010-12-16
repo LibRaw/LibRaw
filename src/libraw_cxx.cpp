@@ -566,10 +566,15 @@ int LibRaw::open_file(const char *fname, INT64 max_buf_size)
 
     LibRaw_abstract_datastream *stream;
     try {
+#if 0
         if(big)
          stream = new LibRaw_bigfile_datastream(fname);
         else
          stream = new LibRaw_file_datastream(fname);
+#else
+         stream = new LibRaw_bigfile_datastream(fname);
+
+#endif
     }
 
     catch (std::bad_alloc)

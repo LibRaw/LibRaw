@@ -705,13 +705,64 @@ ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
 
 void CLASS lossless_jpeg_load_raw()
 {
-  int jwide, jrow, jcol, val, jidx, c, i, j, row=0, col=0;
+  int jwide, jrow, jcol, val, c, i, row=0, col=0;
+#ifndef LIBRAW_LIBRARY_BUILD
+  int jidx,j;
+#endif
   struct jhead jh;
   int min=INT_MAX;
   ushort *rp;
+#ifdef LIBRAW_LIBRARY_BUILD
+  unsigned slicesW[16],slicesWcnt=0,slices;
+  unsigned *offset;
+  unsigned t_y=0,t_x=0,t_s=0,slice=0,pixelsInSlice,pixno;
+#endif
+
+#ifdef LIBRAW_LIBRARY_BUILD
+  if (cr2_slice[0]>15)
+      throw LIBRAW_EXCEPTION_IO_EOF; // change many slices
+#else
+  fprintf(stderr,"Too many CR2 slices: %d\n",cr2_slice[0]+1);
+  return;
+#endif
+
 
   if (!ljpeg_start (&jh, 0)) return;
   jwide = jh.wide * jh.clrs;
+
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(cr2_slice[0])
+      {
+          for(i=0;i<cr2_slice[0];i++)
+              slicesW[slicesWcnt++] = cr2_slice[1];
+          slicesW[slicesWcnt++] = cr2_slice[2];
+      }
+  else
+      {
+          // not sliced
+          slicesW[slicesWcnt++] = raw_width; // safe fallback
+      }
+       
+  slices = slicesWcnt * jh.high;
+  offset = (unsigned*)calloc(slices+1,sizeof(offset[0]));
+  
+  for(slice=0;slice<slices;slice++)
+      {
+          offset[slice] = (t_x + t_y * raw_width)| (t_s<<28);
+          if(offset[slice] & 0x0fffffff >= raw_width * raw_height)
+              throw LIBRAW_EXCEPTION_IO_BADFILE; 
+          t_y++;
+          if(t_y == jh.high)
+              {
+                  t_y = 0;
+                  t_x += slicesW[t_s++];
+              }
+      }
+  offset[slices] = offset[slices-1];
+  slice = 1; // next slice
+  pixno = offset[0];
+  pixelsInSlice = slicesW[0];
+#endif
 
   for (jrow=0; jrow < jh.high; jrow++) {
     rp = ljpeg_row (jrow, &jh);
@@ -722,6 +773,7 @@ void CLASS lossless_jpeg_load_raw()
           if( !(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
 #endif
 	val = curve[val & 0xfff];
+#ifndef LIBRAW_LIBRARY_BUILD
       if (cr2_slice[0]) {
 	jidx = jrow*jwide + jcol;
 	i = jidx / (cr2_slice[1]*jh.high);
@@ -731,8 +783,20 @@ void CLASS lossless_jpeg_load_raw()
 	row = jidx / cr2_slice[1+j];
 	col = jidx % cr2_slice[1+j] + i*cr2_slice[1];
       }
+#else
+      row = pixno/raw_width;
+      col = pixno-(row*raw_width);
+      pixno++;
+      if (0 == --pixelsInSlice)
+          {
+              unsigned o = offset[slice++];
+              pixno = o & 0x0fffffff;
+              pixelsInSlice = slicesW[o>>28];
+          }
+#endif
       if (raw_width == 3984 && (col -= 2) < 0)
-	col += (row--,raw_width);
+              col += (row--,raw_width);
+
 #ifdef LIBRAW_LIBRARY_BUILD
       ushort *dfp = get_masked_pointer(row,col);
       if(dfp) *dfp = val;
@@ -748,14 +812,19 @@ void CLASS lossless_jpeg_load_raw()
 	} else if (col > 1 && (unsigned) (col-left_margin+2) > width+3)
 	  cblack[c] += (cblack[4+c]++,val);
       }
+#ifndef LIBRAW_LIBRARY_BUILD
       if (++col >= raw_width)
 	col = (row++,0);
+#endif
     }
   }
   ljpeg_end (&jh);
   FORC4 if (cblack[4+c]) cblack[c] /= cblack[4+c];
   if (!strcasecmp(make,"KODAK"))
     black = min;
+#ifdef LIBRAW_LIBRARY_BUILD
+  free(offset);
+#endif
 }
 
 void CLASS canon_sraw_load_raw()
@@ -1213,7 +1282,7 @@ void CLASS fuji_load_raw()
   free (pixel);
 #endif
 }
-#line 1497 "dcraw/dcraw.c"
+#line 1566 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -1748,7 +1817,7 @@ void CLASS leaf_hdr_load_raw()
   }
 }
 
-#line 2035 "dcraw/dcraw.c"
+#line 2104 "dcraw/dcraw.c"
 void CLASS sinar_4shot_load_raw()
 {
   ushort *pixel;
@@ -3010,7 +3079,7 @@ void CLASS smal_v9_load_raw()
     smal_decode_segment (seg+i, holes);
   if (holes) fill_holes (holes);
 }
-#line 3461 "dcraw/dcraw.c"
+#line 3530 "dcraw/dcraw.c"
 
 void CLASS crop_pixels()
 {
@@ -4401,7 +4470,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 4855 "dcraw/dcraw.c"
+#line 4924 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -4957,7 +5026,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5415 "dcraw/dcraw.c"
+#line 5484 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -5507,6 +5576,9 @@ void CLASS apply_tiff()
       data_offset   = tiff_ifd[i].offset;
       tiff_flip     = tiff_ifd[i].t_flip;
       tiff_samples  = tiff_ifd[i].samples;
+#ifdef LIBRAW_LIBRARY_BUILD
+      data_size     = tiff_ifd[i].bytes;
+#endif
       raw = i;
     }
   }
@@ -6193,7 +6265,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 6657 "dcraw/dcraw.c"
+#line 6729 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -6826,7 +6898,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7293 "dcraw/dcraw.c"
+#line 7365 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8612,7 +8684,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9172 "dcraw/dcraw.c"
+#line 9244 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8831,7 +8903,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9415 "dcraw/dcraw.c"
+#line 9487 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

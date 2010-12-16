@@ -9,6 +9,7 @@ CXX=g++
 #CFLAGS=-g -Wall -I.
 #CFLAGS=-g -I. -Wall
 CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
+#CFLAGS=-g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
 
 # GCC 4.4 section
 # CC=gcc44

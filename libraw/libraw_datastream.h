@@ -44,8 +44,36 @@ it under the terms of the one of three licenses as you choose:
 #endif
 #endif
 
+#define IOERROR() do { throw LIBRAW_EXCEPTION_IO_EOF; } while(0)
+
+class LibRaw_byte_buffer
+{
+  public:
+    LibRaw_byte_buffer(unsigned sz=0) 
+        : buf(0),size(sz),offt(0),do_free(0) 
+        { 
+            if(size)
+                { 
+                    buf = (unsigned char*)malloc(size); do_free=1;
+                }
+        }
+
+    void set_buffer(void *bb, unsigned int sz);// { buf = (unsigned char*bb); size = sz; offt=0; do_free=0;}
+
+    virtual ~LibRaw_byte_buffer() { if(do_free) free(buf);}
+
+    unsigned char get_byte() { if(offt>=size) IOERROR(); return buf[offt++];}
+
+    void *get_buffer() { return buf; }
+  private:
+    unsigned char *buf;
+    unsigned int  size,offt, do_free;
+
+};
+
 
 class LibRaw_buffer_datastream;
+
 
 class LibRaw_abstract_datastream
 {
@@ -60,6 +88,13 @@ class LibRaw_abstract_datastream
     virtual char*       gets(char *, int) = 0;
     virtual int         scanf_one(const char *, void *) = 0;
     virtual int         eof() = 0;
+    // Make buffer from current offset
+    virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz)
+    {
+        LibRaw_byte_buffer *ret = new LibRaw_byte_buffer(sz);
+        read(ret->get_buffer(),sz,1);
+        return ret;
+    }
 
     /* subfile parsing not implemented in base class */
     virtual const char* fname(){ return NULL;};
@@ -77,6 +112,7 @@ class LibRaw_abstract_datastream
     LibRaw_abstract_datastream *substream;
 };
 
+#if 0
 class LibRaw_file_datastream: public LibRaw_abstract_datastream
 {
   protected:
@@ -201,7 +237,7 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
     }
 };
 #undef LR_STREAM_CHK
-
+#endif
 
 class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
 {

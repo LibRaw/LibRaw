@@ -130,6 +130,7 @@ typedef struct
     unsigned    kodak_cbpp;
     INT64       strip_offset, data_offset;
     INT64       meta_offset;
+    unsigned    data_size;
     unsigned     meta_length;
     unsigned    thumb_misc;
     unsigned    fuji_layout;

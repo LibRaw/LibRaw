@@ -114,7 +114,6 @@ void usage(const char *prog)
 }
 
 static int verbosity=0;
-double dt; clock_t t1, t2; // modifJD
 int cnt=0;
 int my_progress_callback(void *d,enum LibRaw_progress p,int iteration, int expected)
 {
@@ -314,7 +313,7 @@ int main(int argc, char *argv[])
   if(verbosity)
           printf ("Using %d threads\n", omp_get_max_threads());
 #endif
-t1=clock();//modifJD
+
   for ( ; arg < argc; arg++)
         {
             char outfn[1024];
@@ -417,12 +416,6 @@ t1=clock();//modifJD
 #endif
             
             RawProcessor.recycle(); // just for show this call
-		t2 = clock();
-		dt = ((double)(t2-t1)) / CLOCKS_PER_SEC;
-	 {
-		printf("elapsed total time = %5.3fs\n",dt);}
-			
-			
         }
     return 0;
 }
