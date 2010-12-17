@@ -1013,12 +1013,10 @@ ushort * CLASS ljpeg_row_new (int jrow, struct jhead *jh, LibRaw_bit_buffer& bit
   if (jrow * jh->wide % jh->restart == 0) {
     FORC(6) jh->vpred[c] = 1 << (jh->bits-1);
     if (jrow) {
-//        fseek (ifp, -2, SEEK_CUR); // we need to change it to bytes!!!!
         bytes->unseek2();
-      do mark = (mark << 8) + (c = bytes->get_byte());
-      while (c != EOF && mark >> 4 != 0xffd);
+        do mark = (mark << 8) + (c = bytes->get_byte());
+        while (c != EOF && mark >> 4 != 0xffd);
     }
-//    getbits(-1);
     bits.reset();
   }
   FORC3 row[c] = jh->row + jh->wide*jh->clrs*((jrow+c) & 1);
@@ -1367,18 +1365,41 @@ void CLASS adobe_dng_load_raw_nc()
 
   pixel = (ushort *) calloc (raw_width * tiff_samples, sizeof *pixel);
   merror (pixel, "adobe_dng_load_raw_nc()");
+
+#ifdef LIBRAW_LIBRARY_BUILD
+  LibRaw_byte_buffer *buf = NULL;
+  if (tiff_bps != 16)
+      {
+          if(!data_size)
+              throw LIBRAW_EXCEPTION_IO_BADFILE;
+          buf = ifp->make_byte_buffer(data_size);
+      }
+  LibRaw_bit_buffer bits;
+#endif
+
   for (row=0; row < raw_height; row++) {
     if (tiff_bps == 16)
       read_shorts (pixel, raw_width * tiff_samples);
     else {
+#ifdef LIBRAW_LIBRARY_BUILD
+        bits.reset();
+        for (col=0; col < raw_width * tiff_samples; col++)
+            pixel[col] = bits._getbits(buf,tiff_bps,zero_after_ff);
+
+#else
       getbits(-1);
       for (col=0; col < raw_width * tiff_samples; col++)
 	pixel[col] = getbits(tiff_bps);
+#endif
     }
     for (rp=pixel, col=0; col < raw_width; col++)
       adobe_copy_pixel (row, col, &rp);
   }
   free (pixel);
+#ifdef LIBRAW_LIBRARY_BUILD
+    if(buf)
+        delete buf;
+#endif
 }
 
 void CLASS pentax_load_raw()
@@ -2513,18 +2534,34 @@ void CLASS olympus_load_raw()
   for (i=12; i--; )
     FORC(2048 >> i) huff[++n] = (i+1) << 8 | i;
   fseek (ifp, 7, SEEK_CUR);
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!data_size)
+      throw LIBRAW_EXCEPTION_IO_BADFILE;
+  LibRaw_byte_buffer *buf = ifp->make_byte_buffer(data_size);
+  LibRaw_bit_buffer bits;
+  bits.reset();
+#else
   getbits(-1);
+#endif
   for (row=0; row < height; row++) {
     memset (acarry, 0, sizeof acarry);
     for (col=0; col < raw_width; col++) {
       carry = acarry[col & 1];
       i = 2 * (carry[2] < 3);
       for (nbits=2+i; (ushort) carry[0] >> (nbits+i); nbits++);
+#ifdef LIBRAW_LIBRARY_BUILD
+      low = (sign = bits._getbits(buf,3,zero_after_ff)) & 3;
+      sign = sign << 29 >> 31;
+      if ((high = bits._gethuff(buf,12,huff,zero_after_ff)) == 12)
+          high = bits._getbits(buf,16-nbits,zero_after_ff) >> 1;
+      carry[0] = (high << nbits) | bits._getbits(buf,nbits,zero_after_ff);
+#else
       low = (sign = getbits(3)) & 3;
       sign = sign << 29 >> 31;
       if ((high = getbithuff(12,huff)) == 12)
 	high = getbits(16-nbits) >> 1;
       carry[0] = (high << nbits) | getbits(nbits);
+#endif
       diff = (carry[0] ^ sign) + carry[1];
       carry[1] = (diff*3 + carry[1]) >> 5;
       carry[2] = carry[0] > 16 ? 0 : carry[2]+1;
@@ -2555,6 +2592,9 @@ void CLASS olympus_load_raw()
 #endif
     }
   }
+#ifdef LIBRAW_LIBRARY_BUILD
+  delete buf;
+#endif
 }
 
 void CLASS minolta_rd175_load_raw()
@@ -3280,12 +3320,25 @@ void CLASS sony_arw_load_raw()
 
   for (n=i=0; i < 18; i++)
     FORC(32768 >> (tab[i] >> 8)) huff[n++] = tab[i];
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!data_size)
+      throw LIBRAW_EXCEPTION_IO_BADFILE;
+  LibRaw_byte_buffer *buf = ifp->make_byte_buffer(data_size);
+  LibRaw_bit_buffer bits;
+  bits.reset();
+#else
   getbits(-1);
+#endif
   for (col = raw_width; col--; )
     for (row=0; row < raw_height+1; row+=2) {
       if (row == raw_height) row = 1;
+#ifdef LIBRAW_LIBRARY_BUILD
+      len = bits._gethuff(buf,15,huff,zero_after_ff);
+      diff = bits._getbits(buf,len,zero_after_ff);
+#else
       len = getbithuff(15,huff);
       diff = getbits(len);
+#endif
       if ((diff & (1 << (len-1))) == 0)
 	diff -= (1 << len) - 1;
       if ((sum += diff) >> 12) derror();
@@ -3305,6 +3358,9 @@ void CLASS sony_arw_load_raw()
           }
 #endif
     }
+#ifdef LIBRAW_LIBRARY_BUILD
+  delete buf;
+#endif
 }
 
 void CLASS sony_arw2_load_raw()

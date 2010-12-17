@@ -154,7 +154,6 @@ class LibRaw_abstract_datastream
     LibRaw_abstract_datastream *substream;
 };
 
-#if 0
 class LibRaw_file_datastream: public LibRaw_abstract_datastream
 {
   protected:
@@ -279,7 +278,6 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
     }
 };
 #undef LR_STREAM_CHK
-#endif
 
 class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
 {
