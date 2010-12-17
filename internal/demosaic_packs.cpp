@@ -70,7 +70,7 @@ void CLASS refinement() {}
 #include <CA_correct_RT.cc>
 #else
 // fallback to AHD and no correction
-void CLASS CA_correct_RT(){}
+void CLASS CA_correct_RT(float,float){}
 void CLASS amaze_demosaic_RT() { ahd_interpolate();}
 #endif
 
