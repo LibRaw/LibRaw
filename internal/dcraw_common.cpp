@@ -336,6 +336,7 @@ int CLASS canon_s2is()
    getbits(-1) initializes the buffer
    getbits(n) where 0 <= n <= 25 returns an n-bit integer
  */
+
 unsigned CLASS getbithuff (int nbits, ushort *huff)
 {
 #ifdef LIBRAW_NOTHREADS
@@ -593,7 +594,7 @@ void CLASS canon_compressed_load_raw()
   FORC4 if (cblack[4+c]) cblack[c] /= cblack[4+c];
 }
 
-#line 873 "dcraw/dcraw.c"
+#line 874 "dcraw/dcraw.c"
 int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
   int c, tag, len;
@@ -664,6 +665,27 @@ int CLASS ljpeg_diff (ushort *huff)
   return diff;
 }
 
+#ifdef LIBRAW_LIBRARY_BUILD
+int CLASS ljpeg_diff_new (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff)
+{
+  int len, diff;
+
+//  len = gethuff(huff);
+  len = bits._gethuff(buf,*huff,huff+1,zero_after_ff);
+  if (len == 16 && (!dng_version || dng_version >= 0x1010000))
+    return -32768;
+//  diff = getbits(len);
+  diff = bits._getbits(buf,len,zero_after_ff);
+  if ((diff & (1 << (len-1))) == 0)
+    diff -= (1 << len) - 1;
+  return diff;
+}
+
+
+#endif
+
+
+
 ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
 {
   int col, c, diff, pred, spred=0;
@@ -702,6 +724,50 @@ ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
     }
   return row[2];
 }
+
+#ifdef LIBRAW_LIBRARY_BUILD
+ushort * CLASS ljpeg_row_new (int jrow, struct jhead *jh, LibRaw_bit_buffer& bits,LibRaw_byte_buffer* bytes)
+{
+  int col, c, diff, pred, spred=0;
+  ushort mark=0, *row[3];
+
+  if (jrow * jh->wide % jh->restart == 0) {
+    FORC(6) jh->vpred[c] = 1 << (jh->bits-1);
+    if (jrow) {
+//        fseek (ifp, -2, SEEK_CUR); // we need to change it to bytes!!!!
+        bytes->unseek2();
+      do mark = (mark << 8) + (c = bytes->get_byte());
+      while (c != EOF && mark >> 4 != 0xffd);
+    }
+//    getbits(-1);
+    bits.reset();
+  }
+  FORC3 row[c] = jh->row + jh->wide*jh->clrs*((jrow+c) & 1);
+  for (col=0; col < jh->wide; col++)
+    FORC(jh->clrs) {
+        diff = ljpeg_diff_new (bits,bytes,jh->huff[c]);
+      if (jh->sraw && c <= jh->sraw && (col | c))
+		    pred = spred;
+      else if (col) pred = row[0][-jh->clrs];
+      else	    pred = (jh->vpred[c] += diff) - diff;
+      if (jrow && col) switch (jh->psv) {
+	case 1:	break;
+	case 2: pred = row[1][0];					break;
+	case 3: pred = row[1][-jh->clrs];				break;
+	case 4: pred = pred +   row[1][0] - row[1][-jh->clrs];		break;
+	case 5: pred = pred + ((row[1][0] - row[1][-jh->clrs]) >> 1);	break;
+	case 6: pred = row[1][0] + ((pred - row[1][-jh->clrs]) >> 1);	break;
+	case 7: pred = (pred + row[1][0]) >> 1;				break;
+	default: pred = 0;
+      }
+      if ((**row = pred + diff) >> jh->bits) derror();
+      if (c <= jh->sraw) spred = **row;
+      row[0]++; row[1]++;
+    }
+  return row[2];
+}
+
+#endif
 
 void CLASS lossless_jpeg_load_raw()
 {
@@ -764,8 +830,16 @@ void CLASS lossless_jpeg_load_raw()
   pixelsInSlice = slicesW[0];
 #endif
 
+#ifdef LIBRAW_LIBRARY_BUILD
+  LibRaw_byte_buffer *buf = ifp->make_byte_buffer(data_size);
+  LibRaw_bit_buffer bits;
+#endif
   for (jrow=0; jrow < jh.high; jrow++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+      rp = ljpeg_row_new (jrow, &jh,bits,buf);
+#else
     rp = ljpeg_row (jrow, &jh);
+#endif
     for (jcol=0; jcol < jwide; jcol++) {
       val = *rp++;
       if (jh.bits <= 12)
@@ -785,7 +859,8 @@ void CLASS lossless_jpeg_load_raw()
       }
 #else
       row = pixno/raw_width;
-      col = pixno-(row*raw_width);
+//      col = pixno-(row*raw_width);
+      col = pixno % raw_width;
       pixno++;
       if (0 == --pixelsInSlice)
           {
@@ -823,6 +898,7 @@ void CLASS lossless_jpeg_load_raw()
   if (!strcasecmp(make,"KODAK"))
     black = min;
 #ifdef LIBRAW_LIBRARY_BUILD
+  delete buf;
   free(offset);
 #endif
 }
@@ -1282,7 +1358,7 @@ void CLASS fuji_load_raw()
   free (pixel);
 #endif
 }
-#line 1566 "dcraw/dcraw.c"
+#line 1642 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -1817,7 +1893,7 @@ void CLASS leaf_hdr_load_raw()
   }
 }
 
-#line 2104 "dcraw/dcraw.c"
+#line 2180 "dcraw/dcraw.c"
 void CLASS sinar_4shot_load_raw()
 {
   ushort *pixel;
@@ -3079,7 +3155,7 @@ void CLASS smal_v9_load_raw()
     smal_decode_segment (seg+i, holes);
   if (holes) fill_holes (holes);
 }
-#line 3530 "dcraw/dcraw.c"
+#line 3606 "dcraw/dcraw.c"
 
 void CLASS crop_pixels()
 {
@@ -4470,7 +4546,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 4924 "dcraw/dcraw.c"
+#line 5000 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5026,7 +5102,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5484 "dcraw/dcraw.c"
+#line 5560 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6265,7 +6341,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 6729 "dcraw/dcraw.c"
+#line 6805 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -6898,7 +6974,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7365 "dcraw/dcraw.c"
+#line 7441 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8684,7 +8760,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9244 "dcraw/dcraw.c"
+#line 9320 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8903,7 +8979,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9487 "dcraw/dcraw.c"
+#line 9563 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

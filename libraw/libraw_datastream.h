@@ -46,6 +46,7 @@ it under the terms of the one of three licenses as you choose:
 
 #define IOERROR() do { throw LIBRAW_EXCEPTION_IO_EOF; } while(0)
 
+
 class LibRaw_byte_buffer
 {
   public:
@@ -62,13 +63,54 @@ class LibRaw_byte_buffer
 
     virtual ~LibRaw_byte_buffer() { if(do_free) free(buf);}
 
-    unsigned char get_byte() { if(offt>=size) IOERROR(); return buf[offt++];}
-
+    int get_byte() { if(offt>=size) return EOF; return buf[offt++];}
+    void unseek2() { if(offt>=2) offt-=2;}
     void *get_buffer() { return buf; }
+
   private:
     unsigned char *buf;
     unsigned int  size,offt, do_free;
 
+};
+
+class LibRaw_bit_buffer
+{
+    unsigned bitbuf;
+    int vbits, rst;
+  public:
+    LibRaw_bit_buffer() : bitbuf(0),vbits(0),rst(0) {}
+
+        void reset() {  bitbuf=vbits=rst=0;}
+        void fill(LibRaw_byte_buffer* buf,int nbits,int zer0_ff)
+        {
+            unsigned c;
+            while (!rst && vbits < nbits && (c = buf->get_byte()) != EOF &&
+                   !(rst = zer0_ff && c == 0xff && buf->get_byte())) {
+                bitbuf = (bitbuf << 8) + (uchar) c;
+                vbits += 8;
+            }
+        }
+        unsigned _getbits(LibRaw_byte_buffer* buf, int nbits,int zer0_ff)
+        {
+            unsigned c;
+            if(nbits==0 || vbits < 0) return 0;
+            fill(buf,nbits,zer0_ff);
+            c = bitbuf << (32-vbits) >> (32-nbits);
+            vbits-=nbits;
+            if(vbits<0)throw LIBRAW_EXCEPTION_IO_EOF;
+            return c;
+        }
+        unsigned _gethuff(LibRaw_byte_buffer* buf, int nbits, unsigned short* huff, int zer0_ff)
+        {
+            unsigned c;
+            if(nbits==0 || vbits < 0) return 0;
+            fill(buf,nbits,zer0_ff);
+            c = bitbuf << (32-vbits) >> (32-nbits);
+            vbits -= huff[c] >> 8;
+            c = (uchar) huff[c];
+            if(vbits<0)throw LIBRAW_EXCEPTION_IO_EOF;
+            return c;
+        }
 };
 
 
