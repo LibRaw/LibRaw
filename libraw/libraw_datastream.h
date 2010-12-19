@@ -51,7 +51,7 @@ class LibRaw_byte_buffer
 {
   public:
     LibRaw_byte_buffer(unsigned sz=0) 
-        : buf(0),size(sz),offt(0),do_free(0) 
+        : buf(0),size(sz),offt(0),do_free(0) , next_ff(0)
         { 
             if(size)
                 { 
@@ -59,17 +59,29 @@ class LibRaw_byte_buffer
                 }
         }
 
-    void set_buffer(void *bb, unsigned int sz);// { buf = (unsigned char*bb); size = sz; offt=0; do_free=0;}
+        void set_buffer(void *bb, unsigned int sz) { buf = (unsigned char*)bb; size = sz; offt=0; do_free=0;}
 
     virtual ~LibRaw_byte_buffer() { if(do_free) free(buf);}
 
     int get_byte() { if(offt>=size) return EOF; return buf[offt++];}
     void unseek2() { if(offt>=2) offt-=2;}
     void *get_buffer() { return buf; }
+    int get_ljpeg_byte() {
+        if(offt<next_ff) return buf[offt++];
+        int ret = buf[offt++];
+        if(ret == 0xff) { if(buf[offt]==0x00) offt++; else return 0;}
+        // find next 0xff
+        unsigned char *p = (unsigned char*) memchr(buf+offt,0xff,size-offt);
+        if(p)
+            next_ff = p-buf;
+        else
+            next_ff = size;
+        return ret;
+    }
 
   private:
     unsigned char *buf;
-    unsigned int  size,offt, do_free;
+    unsigned int  size,offt, do_free,next_ff;
 
 };
 
@@ -83,13 +95,32 @@ class LibRaw_bit_buffer
         void reset() {  bitbuf=vbits=rst=0;}
         void fill(LibRaw_byte_buffer* buf,int nbits,int zer0_ff)
         {
-            unsigned c;
-            while (!rst && vbits < nbits && (c = buf->get_byte()) != EOF &&
-                   !(rst = zer0_ff && c == 0xff && buf->get_byte())) {
-                bitbuf = (bitbuf << 8) + (uchar) c;
-                vbits += 8;
-            }
+            unsigned c1,c2,c3;
+            if(rst || nbits < vbits) return;
+            int i,m = vbits >> 3;
+            switch(m)
+                {
+                case 2:	
+                    c1 = buf->get_ljpeg_byte();
+                    bitbuf = (bitbuf <<8) | (c1);
+                    vbits+=8;
+                    break;
+                case 1:
+                    c1 = buf->get_ljpeg_byte();
+                    c2 = buf->get_ljpeg_byte();
+                    bitbuf = (bitbuf <<16) | (c1<<8) | c2;
+                    vbits+=16;		
+                    break;
+                case 0:
+                    c1 = buf->get_ljpeg_byte();
+                    c2 = buf->get_ljpeg_byte();
+                    c3 = buf->get_ljpeg_byte();
+                    bitbuf = (bitbuf <<24) | (c1<<16) | (c2<<8)|c3;
+                    vbits+=24;
+                    break;
+                }
         }
+
         unsigned _getbits(LibRaw_byte_buffer* buf, int nbits,int zer0_ff)
         {
             unsigned c;
