@@ -1,4 +1,10 @@
-﻿2010-12-12 Alex Tutubalin <lexa@lexa.ru>
+﻿2010-12-20 Alex Tutubalin <lexa@lexa.ru>
+        * Отключена поддержка камер Sigma DPx по причине несовместимого
+          с существующим кодом формата сжатия и формата метаданных.
+          Поддержка этих камер появится только если она появится в dcraw.
+        * LibRaw 0.12.1-Release
+
+2010-12-12 Alex Tutubalin <lexa@lexa.ru>
 	* Поддержка thread-safe сборки и demosaic packs для MinGW-сборки
 	* Поддержка demosaic packs для MS VC-сборки
         * LibRaw 0.12.0-Release

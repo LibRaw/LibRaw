@@ -1,3 +1,10 @@
+2010-12-20 Alex Tutubalin <lexa@lexa.ru>
+        * Sigma DPx processing disabled because of unsupported 
+          compession scheme and incompatible metadata format.
+          These cameras will be supported only if dcraw will
+          support them.
+        * LibRaw 0.12.1-Release
+
 2010-12-12 Alex Tutubalin <lexa@lexa.ru>
 	* Thread-safe and demosaic packs support for MinGW build
 	* Demosaic packs support for MS VC build
