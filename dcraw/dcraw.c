@@ -7855,7 +7855,14 @@ void CLASS identify()
   else if (!memcmp (head,"\0MRM",4))
     parse_minolta(0);
   else if (!memcmp (head,"FOVb",4))
-    parse_foveon();
+      {
+          parse_foveon();
+          if(!strcasecmp(make,"SIGMA") && !strncasecmp(model,"SIGMA DP",8))
+              {
+                  make[0] = model[0] = 0;
+                  is_foveon = 0;
+              }
+      }
   else if (!memcmp (head,"CI",2))
     parse_cine();
   else

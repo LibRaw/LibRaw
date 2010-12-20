@@ -7392,7 +7392,14 @@ void CLASS identify()
   else if (!memcmp (head,"\0MRM",4))
     parse_minolta(0);
   else if (!memcmp (head,"FOVb",4))
-    parse_foveon();
+      {
+          parse_foveon();
+          if(!strcasecmp(make,"SIGMA") && !strncasecmp(model,"SIGMA DP",8))
+              {
+                  make[0] = model[0] = 0;
+                  is_foveon = 0;
+              }
+      }
   else if (!memcmp (head,"CI",2))
     parse_cine();
   else
@@ -8891,7 +8898,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9451 "dcraw/dcraw.c"
+#line 9458 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -9110,7 +9117,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9694 "dcraw/dcraw.c"
+#line 9701 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
