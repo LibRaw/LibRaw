@@ -1656,7 +1656,7 @@ int LibRaw::dcraw_process(void)
 // LIBRAW_DEMOSAIC_PACK_GPL3
         //if (quality == 10 && O.amaze_ca_refine >0 ) {CA_correct_RT();}
 
-        if (O.cfa_green >0) {thresh=O.thresh ;green_equilibrate(thresh);} 
+        if (O.cfa_green >0) {thresh=O.green_thresh ;green_equilibrate(thresh);} 
         if (O.ca_correc >0 ) {cablue=O.cablue; cared=O.cared; CA_correct_RT(cablue, cared);}
         if (O.cfaline >0 ) {linenoise=O.linenoise; cfa_linedn(linenoise);}
         if (O.cfa_clean >0 ) {lclean=O.lclean; cclean=O.cclean; cfa_impulse_gauss(lclean,cclean);}

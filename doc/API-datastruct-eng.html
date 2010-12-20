@@ -640,6 +640,30 @@ changes the output size.
         If one of these fields is non-zero, then these values will be used instead of automatic ones.
         Useable range is +-0.1..+-4.0.
       </dd>
+      <dt><b>int cfaline; float linenoise;</b></dt>
+      <dd>Line noise (banding) reduction.
+        <br/>
+          cfaline != 0 - turn feature on (default: off).
+        <br/>
+        linenoise - amount of reduction. Useful range is 0.001 to 0.02. Default value is 0.0 i.e. not clean anything.
+      </dd>
+      <dt><b>int cfa_clean; float lclean,cclean;</b></dt>
+      <dd>
+        Reduce impulse noise and Gaussian high frequency.
+        <br/>
+        cfa_clean: non-zero turns the feature on (default: off).
+        <br/>
+        lclean,cclean - amount of noise reduction for (L)uminance and (C)olor. Useable range from 0.005 to 0.05,
+        common value 0.01
+      </dd>
+      <dt><b>int cfa_green; float green_thresh;</b></dt>
+      <dd>
+        Reduces maze artifacts produced by bad balance of green channels.
+        <br/>
+        cfa_green - non-zero turns the feature on (default: off).
+        <br/>
+        green_thresh - max difference between channels allowed for equalization. Useful range between 0.01 and 0.1.
+      </dd>
     </dl>
     <a name="libraw_masked_t"></a>
     <h3>Structure libraw_masked_t - saved masked pixels (black frame) data</h3>
@@ -1129,7 +1153,7 @@ data source is recorded. The possible values are listed below.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:42:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Mon Dec 13 12:26:33 UTC 2010
+Last modified: Mon Dec 20 21:29:35 MSK 2010
 <!-- hhmts end -->
   </body>
 </html>

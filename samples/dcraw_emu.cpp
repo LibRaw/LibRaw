@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
                   else if(!strcmp(optstr,"-agreen"))			  
                       {
                           OUT.cfa_green = 1;
-                          OUT.thresh =(float)atof(argv[arg++]);
+                          OUT.green_thresh =(float)atof(argv[arg++]);
                       }								  
                   else
 #endif

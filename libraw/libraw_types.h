@@ -277,7 +277,7 @@ typedef struct
     float lclean;
     float cclean;
     int cfa_green;
-    float thresh;
+    float green_thresh;
 
 }libraw_output_params_t;
 

@@ -1,6 +1,21 @@
-2010-12-13 Alex Tutubalin <lexa@lexa.ru>
-        * Support of new CA correction code provided by Jacques Desmis
-          (actual code is in demosaic-pack-GPL3)
+2010-12-20 Alex Tutubalin <lexa@lexa.ru>
+        * Demosaic-pack-GPL3 changes:
+          + New noise reduction methods before demosaic 
+             - Banding suppression
+             - High-frequency noise suppression
+             - Green channel equalization
+          + New chromatic abberration correction.
+          All three methods are written by Emil Martinec for Raw Therapee.
+          Adapted to LibRaw by Jacques Desmis
+
+        * Merged Foveon code fix from LibRaw 0.12.1
+
+        * LJPEG decompressor speed-up (about 1.5 times for Canon cameras
+          and slightly less for others). Some ideas are from RawSpeed library.
+
+        * all client code should be recompiled due to internals change.
+
+        * LibRaw 0.13.0-Alpha1
 
 2010-12-12 Alex Tutubalin <lexa@lexa.ru>
 	* Thread-safe and demosaic packs support for MinGW build

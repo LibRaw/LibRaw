@@ -1,6 +1,21 @@
-﻿2010-12-13 Alex Tutubalin <lexa@lexa.ru>
-        * Импортирован новый код коррекции хроматических аберраций,
-          предоставленный Jackues Desmis
+﻿2010-12-20 Alex Tutubalin <lexa@lexa.ru>
+        * Новое в demosaic-pack-GPL3:
+          + Три дополнительных метода подавления шума перед демозаикой:
+             - Подавление banding
+             - Подавление шума
+             - Уравнивание зеленых каналов
+          + Обновлен код подавителя хроматических аберраций.
+          Все это написано Emil Martinec для  Raw Therapee.
+          Адаптация для LibRaw сделана Jacques Desmis
+
+        * Merged Foveon code fix from LibRaw 0.12.1
+
+        * LJPEG decompressor speed-up (about 1.5 times for Canon cameras
+          and slightly less for others). Some ideas are from RawSpeed library.
+
+        * all client code should be recompiled due to internals change.
+
+        * LibRaw 0.13.0-Alpha1
 
 2010-12-12 Alex Tutubalin <lexa@lexa.ru>
 	* Поддержка thread-safe сборки и demosaic packs для MinGW-сборки
