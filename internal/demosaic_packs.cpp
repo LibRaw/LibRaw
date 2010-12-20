@@ -68,10 +68,16 @@ void CLASS refinement() {}
 /*AMaZE*/
 #include <amaze_demosaic_RT.cc>
 #include <CA_correct_RT.cc>
+#include <cfa_linedn_new.c>
+#include <cfa_impulse_gauss.c>
+#include <green_equi.c>
 #else
 // fallback to AHD and no correction
 void CLASS CA_correct_RT(float,float){}
 void CLASS amaze_demosaic_RT() { ahd_interpolate();}
+void CLASS green_equilibrate(float thresh) {} // modifJD
+void CLASS cfa_linedn(float linenoise){}//modifJD
+void CLASS cfa_impulse_gauss(float lclean, float cclean){}//modifJD
 #endif
 
 #define sget4(s) sget4((uchar *)s)

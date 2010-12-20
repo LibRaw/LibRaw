@@ -97,7 +97,7 @@ class LibRaw_bit_buffer
         {
             unsigned c1,c2,c3;
             if(rst || nbits < vbits) return;
-            int i,m = vbits >> 3;
+            int m = vbits >> 3;
             switch(m)
                 {
                 case 2:	
