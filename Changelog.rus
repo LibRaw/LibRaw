@@ -8,13 +8,10 @@
           Все это написано Emil Martinec для  Raw Therapee.
           Адаптация для LibRaw сделана Jacques Desmis
 
-        * Merged Foveon code fix from LibRaw 0.12.1
-
-        * LJPEG decompressor speed-up (about 1.5 times for Canon cameras
-          and slightly less for others). Some ideas are from RawSpeed library.
-
-        * all client code should be recompiled due to internals change.
-
+        * Импортированы правки обработки Sigma DPx из LibRaw 0.12.1
+        * Ускорение декомпрессора LJPEG (примерно в 1.5 раза для камер Canon
+          и чуть меньше для остальных).
+        * Структуры данных изменены, требуется перекомпиляция всех приложений.
         * LibRaw 0.13.0-Alpha1
 
 2010-12-12 Alex Tutubalin <lexa@lexa.ru>
