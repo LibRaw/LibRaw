@@ -947,11 +947,22 @@ int CLASS ljpeg_diff_new (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushor
 {
   int len, diff;
 
-//  len = gethuff(huff);
+  len = bits._gethuff_lj(buf,*huff,huff+1);
+  if (len == 16 && (!dng_version || dng_version >= 0x1010000))
+    return -32768;
+  diff = bits._getbits_lj(buf,len);
+  if ((diff & (1 << (len-1))) == 0)
+    diff -= (1 << len) - 1;
+  return diff;
+}
+
+int CLASS ljpeg_diff_pef (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff)
+{
+  int len, diff;
+
   len = bits._gethuff(buf,*huff,huff+1,zero_after_ff);
   if (len == 16 && (!dng_version || dng_version >= 0x1010000))
     return -32768;
-//  diff = getbits(len);
   diff = bits._getbits(buf,len,zero_after_ff);
   if ((diff & (1 << (len-1))) == 0)
     diff -= (1 << len) - 1;
@@ -1366,13 +1377,13 @@ void CLASS adobe_dng_load_raw_nc()
   pixel = (ushort *) calloc (raw_width * tiff_samples, sizeof *pixel);
   merror (pixel, "adobe_dng_load_raw_nc()");
 
+
 #ifdef LIBRAW_LIBRARY_BUILD
+  int dsz= raw_height*raw_width * tiff_samples * tiff_bps/8;
   LibRaw_byte_buffer *buf = NULL;
   if (tiff_bps != 16)
       {
-          if(!data_size)
-              throw LIBRAW_EXCEPTION_IO_BADFILE;
-          buf = ifp->make_byte_buffer(data_size);
+          buf = ifp->make_byte_buffer(dsz);
       }
   LibRaw_bit_buffer bits;
 #endif
@@ -1434,7 +1445,7 @@ void CLASS pentax_load_raw()
 #endif
     for (col=0; col < raw_width; col++) {
 #ifdef LIBRAW_LIBRARY_BUILD
-        diff = ljpeg_diff_new(bits,buf,huff);
+        diff = ljpeg_diff_pef(bits,buf,huff);
 #else
       diff = ljpeg_diff (huff);
 #endif

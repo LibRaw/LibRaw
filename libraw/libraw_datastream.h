@@ -93,7 +93,7 @@ class LibRaw_bit_buffer
     LibRaw_bit_buffer() : bitbuf(0),vbits(0),rst(0) {}
 
         void reset() {  bitbuf=vbits=rst=0;}
-        void fill(LibRaw_byte_buffer* buf,int nbits,int zer0_ff)
+        void fill_lj(LibRaw_byte_buffer* buf,int nbits)
         {
             unsigned c1,c2,c3;
             if(rst || nbits < vbits) return;
@@ -121,6 +121,36 @@ class LibRaw_bit_buffer
                 }
         }
 
+        unsigned _getbits_lj(LibRaw_byte_buffer* buf, int nbits)
+        {
+            unsigned c;
+            if(nbits==0 || vbits < 0) return 0;
+            fill_lj(buf,nbits);
+            c = bitbuf << (32-vbits) >> (32-nbits);
+            vbits-=nbits;
+            if(vbits<0)throw LIBRAW_EXCEPTION_IO_EOF;
+            return c;
+        }
+        unsigned _gethuff_lj(LibRaw_byte_buffer* buf, int nbits, unsigned short* huff)
+        {
+            unsigned c;
+            if(nbits==0 || vbits < 0) return 0;
+            fill_lj(buf,nbits);
+            c = bitbuf << (32-vbits) >> (32-nbits);
+            vbits -= huff[c] >> 8;
+            c = (uchar) huff[c];
+            if(vbits<0)throw LIBRAW_EXCEPTION_IO_EOF;
+            return c;
+        }
+        void fill(LibRaw_byte_buffer* buf,int nbits,int zer0_ff)
+        {
+            unsigned c;
+            while (!rst && vbits < nbits && (c = buf->get_byte()) != EOF &&
+                   !(rst = zer0_ff && c == 0xff && buf->get_byte())) {
+                bitbuf = (bitbuf << 8) + (uchar) c;
+                vbits += 8;
+            }
+        }
         unsigned _getbits(LibRaw_byte_buffer* buf, int nbits,int zer0_ff)
         {
             unsigned c;
@@ -142,6 +172,7 @@ class LibRaw_bit_buffer
             if(vbits<0)throw LIBRAW_EXCEPTION_IO_EOF;
             return c;
         }
+
 };
 
 

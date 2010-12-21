@@ -671,11 +671,22 @@ int CLASS ljpeg_diff_new (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushor
 {
   int len, diff;
 
-//  len = gethuff(huff);
+  len = bits._gethuff_lj(buf,*huff,huff+1);
+  if (len == 16 && (!dng_version || dng_version >= 0x1010000))
+    return -32768;
+  diff = bits._getbits_lj(buf,len);
+  if ((diff & (1 << (len-1))) == 0)
+    diff -= (1 << len) - 1;
+  return diff;
+}
+
+int CLASS ljpeg_diff_pef (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff)
+{
+  int len, diff;
+
   len = bits._gethuff(buf,*huff,huff+1,zero_after_ff);
   if (len == 16 && (!dng_version || dng_version >= 0x1010000))
     return -32768;
-//  diff = getbits(len);
   diff = bits._getbits(buf,len,zero_after_ff);
   if ((diff & (1 << (len-1))) == 0)
     diff -= (1 << len) - 1;
@@ -1090,13 +1101,13 @@ void CLASS adobe_dng_load_raw_nc()
   pixel = (ushort *) calloc (raw_width * tiff_samples, sizeof *pixel);
   merror (pixel, "adobe_dng_load_raw_nc()");
 
+
 #ifdef LIBRAW_LIBRARY_BUILD
+  int dsz= raw_height*raw_width * tiff_samples * tiff_bps/8;
   LibRaw_byte_buffer *buf = NULL;
   if (tiff_bps != 16)
       {
-          if(!data_size)
-              throw LIBRAW_EXCEPTION_IO_BADFILE;
-          buf = ifp->make_byte_buffer(data_size);
+          buf = ifp->make_byte_buffer(dsz);
       }
   LibRaw_bit_buffer bits;
 #endif
@@ -1158,7 +1169,7 @@ void CLASS pentax_load_raw()
 #endif
     for (col=0; col < raw_width; col++) {
 #ifdef LIBRAW_LIBRARY_BUILD
-        diff = ljpeg_diff_new(bits,buf,huff);
+        diff = ljpeg_diff_pef(bits,buf,huff);
 #else
       diff = ljpeg_diff (huff);
 #endif
@@ -1444,7 +1455,7 @@ void CLASS fuji_load_raw()
   free (pixel);
 #endif
 }
-#line 1728 "dcraw/dcraw.c"
+#line 1739 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -1979,7 +1990,7 @@ void CLASS leaf_hdr_load_raw()
   }
 }
 
-#line 2266 "dcraw/dcraw.c"
+#line 2277 "dcraw/dcraw.c"
 void CLASS sinar_4shot_load_raw()
 {
   ushort *pixel;
@@ -3276,7 +3287,7 @@ void CLASS smal_v9_load_raw()
     smal_decode_segment (seg+i, holes);
   if (holes) fill_holes (holes);
 }
-#line 3727 "dcraw/dcraw.c"
+#line 3738 "dcraw/dcraw.c"
 
 void CLASS crop_pixels()
 {
@@ -4667,7 +4678,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 5121 "dcraw/dcraw.c"
+#line 5132 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5223,7 +5234,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5681 "dcraw/dcraw.c"
+#line 5692 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6472,7 +6483,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 6936 "dcraw/dcraw.c"
+#line 6947 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -7105,7 +7116,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7572 "dcraw/dcraw.c"
+#line 7583 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8898,7 +8909,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9458 "dcraw/dcraw.c"
+#line 9469 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -9117,7 +9128,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9701 "dcraw/dcraw.c"
+#line 9712 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
