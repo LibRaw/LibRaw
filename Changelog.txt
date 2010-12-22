@@ -1,3 +1,8 @@
+2010-12-22 Alex Tutubalin <lexa@lexa.ru>
+        * Zero copy huffman buffer for LibRaw_buffer_datastream
+        * Fixed memory leak in compressed NEFs handling
+        * LibRaw 0.13.0-Alpha2
+
 2010-12-20 Alex Tutubalin <lexa@lexa.ru>
         * Demosaic-pack-GPL3 changes:
           + New noise reduction methods before demosaic 

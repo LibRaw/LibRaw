@@ -1,4 +1,10 @@
-﻿2010-12-20 Alex Tutubalin <lexa@lexa.ru>
+﻿2010-12-22 Alex Tutubalin <lexa@lexa.ru>
+        * Для LibRaw_buffer_datastream реализован zero-copy буфер для 
+          распаковки сжатия по Хаффману.
+        * Исправлена утечка памяти в распаковке сжатых NEF-файлов
+        * LibRaw 0.13.0-Alpha2
+
+2010-12-20 Alex Tutubalin <lexa@lexa.ru>
         * Новое в demosaic-pack-GPL3:
           + Три дополнительных метода подавления шума перед демозаикой:
              - Подавление banding

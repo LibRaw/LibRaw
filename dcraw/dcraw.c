@@ -1340,10 +1340,9 @@ void CLASS adobe_dng_load_raw_lj()
     if (filters) jwide *= jh.clrs;
     jwide /= is_raw;
 #ifdef LIBRAW_LIBRARY_BUILD
-    LibRaw_byte_buffer *buf = NULL;
     if(!data_size)
         throw LIBRAW_EXCEPTION_IO_BADFILE;
-    buf = ifp->make_byte_buffer(data_size);
+    LibRaw_byte_buffer *buf = ifp->make_byte_buffer(data_size);
     LibRaw_bit_buffer bits;
 #endif
     for (row=col=jrow=0; jrow < jh.high; jrow++) {
@@ -1363,8 +1362,7 @@ void CLASS adobe_dng_load_raw_lj()
       trow += tile_length + (tcol = 0);
     ljpeg_end (&jh);
 #ifdef LIBRAW_LIBRARY_BUILD
-    if(buf)
-        delete buf;
+    delete buf;
 #endif
   }
 }
@@ -1583,6 +1581,9 @@ void CLASS nikon_compressed_load_raw()
 
     }
   }
+#ifdef LIBRAW_LIBRARY_BUILD
+  delete buf;
+#endif
   free (huff);
 }
 

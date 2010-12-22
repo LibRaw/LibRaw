@@ -51,16 +51,16 @@ class LibRaw_byte_buffer
 {
   public:
     LibRaw_byte_buffer(unsigned sz=0) 
-        : buf(0),size(sz),offt(0),do_free(0) , next_ff(0)
         { 
+            buf=0; size=sz; offt=0; do_free=0; next_ff=0;
             if(size)
                 { 
                     buf = (unsigned char*)malloc(size); do_free=1;
                 }
         }
-
-        void set_buffer(void *bb, unsigned int sz) { buf = (unsigned char*)bb; size = sz; offt=0; do_free=0;}
-
+    
+    void set_buffer(void *bb, unsigned int sz) { buf = (unsigned char*)bb; size = sz; offt=0; do_free=0;}
+    
     virtual ~LibRaw_byte_buffer() { if(do_free) free(buf);}
 
     int get_byte() { if(offt>=size) return EOF; return buf[offt++];}
@@ -349,6 +349,16 @@ class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
 
     virtual ~LibRaw_buffer_datastream(){}
     virtual int valid() { return buf?1:0;}
+
+    virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz)
+    {
+        printf("Making zero-copy buffer\n");
+        LibRaw_byte_buffer *ret = new LibRaw_byte_buffer(0);
+        ret->set_buffer(buf+streampos,sz);
+        return ret;
+    }
+
+
     virtual int read(void * ptr,size_t sz, size_t nmemb)
     { 
         if(substream) return substream->read(ptr,sz,nmemb);
