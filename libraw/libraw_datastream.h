@@ -93,6 +93,14 @@ class LibRaw_bit_buffer
     LibRaw_bit_buffer() : bitbuf(0),vbits(0),rst(0) {}
 
         void reset() {  bitbuf=vbits=rst=0;}
+#ifndef LIBRAW_LIBRARY_BUILD
+        void fill_lj(LibRaw_byte_buffer* buf,int nbits);
+        unsigned _getbits_lj(LibRaw_byte_buffer* buf, int nbits);
+        unsigned _gethuff_lj(LibRaw_byte_buffer* buf, int nbits, unsigned short* huff);
+        void fill(LibRaw_byte_buffer* buf,int nbits,int zer0_ff);
+        unsigned _getbits(LibRaw_byte_buffer* buf, int nbits,int zer0_ff);
+        unsigned _gethuff(LibRaw_byte_buffer* buf, int nbits, unsigned short* huff, int zer0_ff);
+#else
         void fill_lj(LibRaw_byte_buffer* buf,int nbits)
         {
             unsigned c1,c2,c3;
@@ -172,7 +180,7 @@ class LibRaw_bit_buffer
             if(vbits<0)throw LIBRAW_EXCEPTION_IO_EOF;
             return c;
         }
-
+#endif
 };
 
 
