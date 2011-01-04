@@ -264,6 +264,7 @@ int CLASS fc (int row, int col)
 }
 
 /* @out COMMON
+#include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
 #define LIBRAW_LIBRARY_BUILD
@@ -3297,6 +3298,7 @@ void CLASS smal_v9_load_raw()
 
 
 /* @out FILEIO
+#include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
 #define LIBRAW_LIBRARY_BUILD

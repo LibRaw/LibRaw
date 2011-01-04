@@ -47,10 +47,12 @@ if test x$lcms = xtrue; then
 	PKG_CHECK_MODULES([LCMS2],[lcms2],[
 		CPPFLAGS="$CPPFLAGS $LCMS2_CFLAGS -DUSE_LCMS2"
 		LDFLAGS="$LDFLAGS $LCMS2_LIBS"
+	        AC_SUBST([PACKAGE_REQUIRES],[lcms2])
 	],[
 	PKG_CHECK_MODULES([LCMS],[lcms],[
 		CPPFLAGS="$CPPFLAGS $LCMS_CFLAGS -DUSE_LCMS"
 		LDFLAGS="$LDFLAGS $LCMS_LIBS"
+	        AC_SUBST([PACKAGE_REQUIRES],[lcms])
 	],[
 		AC_MSG_WARN([LCMS support cannot be enabled])
 	])

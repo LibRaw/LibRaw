@@ -5,7 +5,8 @@ includedir=@includedir@
 
 Name: libraw
 Description: Raw image decoder library (thread-safe)
-Requires:  lcms
-Version: 0.9.1
-Libs: -L${libdir} -lraw_r -lstdc++ @LCMS_LIBS@
-Cflags: -I${includedir}/libraw@PC_OPENMP@
+Requires: @PACKAGE_REQUIRES@
+Version: @PACKAGE_VERSION@
+Libs: -L${libdir} -lraw_r -lstdc++@PC_OPENMP@
+Cflags: -I${includedir}/libraw
+

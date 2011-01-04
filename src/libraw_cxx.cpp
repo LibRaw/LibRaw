@@ -648,6 +648,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
             O.use_camera_matrix = O.use_camera_wb;
 
         identify();
+        if(!strcmp(P1.make,"FUJIFILM") && !strcmp(P1.model,"FinePix S5500"))
+            {
+                S.top_margin +=8;
+                S.height -=16;
+                S.left_margin +=8;
+                S.width -= 16;
+            }
 
         if(IO.fuji_width)
             {

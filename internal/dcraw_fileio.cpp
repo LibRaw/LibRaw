@@ -21,14 +21,15 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
-#line 3300 "dcraw/dcraw.c"
+#line 3301 "dcraw/dcraw.c"
+#include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
 #define LIBRAW_LIBRARY_BUILD
 #include "libraw/libraw.h"
 #include "internal/defines.h"
 #include "internal/var_defines.h"
-#line 3310 "dcraw/dcraw.c"
+#line 3312 "dcraw/dcraw.c"
 
 /*
    Seach from the current directory up to the root looking for
@@ -54,7 +55,7 @@ void CLASS bad_pixels (const char *cfname)
 #endif
   if (cfname)
     fp = fopen (cfname, "r");
-#line 3361 "dcraw/dcraw.c"
+#line 3363 "dcraw/dcraw.c"
   if (!fp) 
       {
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -152,7 +153,7 @@ void CLASS subtract (const char *fname)
   RUN_CALLBACK(LIBRAW_PROGRESS_DARK_FRAME,1,2);
 #endif
 }
-#line 9088 "dcraw/dcraw.c"
+#line 9090 "dcraw/dcraw.c"
 
 #ifndef NO_LCMS
 void CLASS apply_profile (const char *input, const char *output)
