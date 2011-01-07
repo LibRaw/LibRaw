@@ -51,32 +51,32 @@ endif
 
 bin_raw_identify_SOURCES = samples/raw-identify.cpp
 bin_raw_identify_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_raw_identify_LDADD = -Llib/  -lm -lraw $(LCMS_LIBS)
+bin_raw_identify_LDADD = -Llib/  -lm -lraw $(LCMS_LIBS) $(LCMS2_LIBS)
 
 bin_unprocessed_raw_SOURCES = samples/unprocessed_raw.cpp
 bin_unprocessed_raw_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_unprocessed_raw_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS)
+bin_unprocessed_raw_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS) $(LCMS2_LIBS)
 
 bin_4channels_SOURCES = samples/4channels.cpp
 bin_4channels_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_4channels_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS)
+bin_4channels_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS) $(LCMS2_LIBS)
 
 bin_simple_dcraw_SOURCES = samples/simple_dcraw.cpp
 bin_simple_dcraw_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_simple_dcraw_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS)
+bin_simple_dcraw_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS) $(LCMS2_LIBS)
 
 bin_mem_image_SOURCES = samples/mem_image.cpp
 bin_mem_image_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_mem_image_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS)
+bin_mem_image_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS) $(LCMS2_LIBS)
 
 bin_dcraw_half_SOURCES = samples/dcraw_half.c
 bin_dcraw_half_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_dcraw_half_LDADD = -Llib/ -lm -lraw -lstdc++ $(LCMS_LIBS)
+bin_dcraw_half_LDADD = -Llib/ -lm -lraw -lstdc++ $(LCMS_LIBS) $(LCMS2_LIBS)
 
 bin_half_mt_SOURCES = samples/half_mt.c
 bin_half_mt_CFLAGS = $(lib_libraw_r_a_CXXFLAGS)
-bin_half_mt_LDADD = -Llib/ -lm -lraw_r -lstdc++ $(LCMS_LIBS)
+bin_half_mt_LDADD = -Llib/ -lm -lraw_r -lstdc++ $(LCMS_LIBS) $(LCMS2_LIBS)
 
 bin_dcraw_emu_SOURCES = samples/dcraw_emu.cpp
 bin_dcraw_emu_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_dcraw_emu_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS)
+bin_dcraw_emu_LDADD = -Llib/ -lm -lraw $(LCMS_LIBS) $(LCMS2_LIBS)
