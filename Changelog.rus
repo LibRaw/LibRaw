@@ -1,4 +1,8 @@
 ﻿2011-01-04 Alex Tutubalin <lexa@lexa.ru>
+	* Исправление для configure-скриптов для лучшей поддержки LCMS2
+        * LibRaw 0.12.3-Release
+
+2011-01-04 Alex Tutubalin <lexa@lexa.ru>
 	* Исправление для configure-скриптов
 	* math.h включается перед всеми другими #include, чтобы избежать
           конфликта при сборке KDE под Win32 компилятором Visual C++

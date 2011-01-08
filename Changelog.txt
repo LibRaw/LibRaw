@@ -1,3 +1,7 @@
+2011-01-08 Alex Tutubalin <lexa@lexa.ru>
+        * Patches for ./configure system for better LCMS2 support
+        * LibRaw 0.12.3-Release
+
 2011-01-04 Alex Tutubalin <lexa@lexa.ru>
 	* Patches for ./configure system
 	* math.h included before any other includes to make KDE compile
