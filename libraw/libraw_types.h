@@ -288,7 +288,9 @@ typedef struct
     float cclean;
     int cfa_green;
     float green_thresh;
-
+    int exp_correc;
+    float exp_shift;
+    float exp_preser;
 }libraw_output_params_t;
 
 typedef struct

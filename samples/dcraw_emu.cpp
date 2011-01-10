@@ -107,6 +107,7 @@ void usage(const char *prog)
 "-aline <l> reduction of line noise\n" 
 "-aclean <l c> clean CFA\n"
 "-agreen <g> equilibrate green\n"
+"-aexpo <e p> exposure correction\n"
 #endif
 #ifndef WIN32
 "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
@@ -266,6 +267,12 @@ int main(int argc, char *argv[])
                           OUT.cared       = (float)atof(argv[arg++]);
                           OUT.cablue      = (float)atof(argv[arg++]);
                       }
+                  else if(!strcmp(optstr,"-aexpo"))			  
+                      {
+                          OUT.exp_correc = 1;
+                          OUT.exp_shift = (float)atof(argv[arg++]);
+                          OUT.exp_preser = (float)atof(argv[arg++]);
+                      }	
                   else if(!strcmp(optstr,"-aline"))			  
                       {
                           OUT.cfaline = 1;

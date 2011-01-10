@@ -129,7 +129,7 @@ int main(int ac, char *av[])
 
             if(autoscale)
                 {
-                    unsigned max=0,scale;
+                    unsigned max=0,scale=1;
                     for(int j=0; j<S.iheight*S.iwidth; j++)
                         for(int c = 0; c< 4; c++)
                             if(max < RawProcessor.imgdata.image[j][c])
