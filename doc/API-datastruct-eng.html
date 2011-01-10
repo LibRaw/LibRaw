@@ -632,7 +632,7 @@ changes the output size.
       <dt><b>int ca_correc</b></dt>
       <dd>
         <b>Ключи dcraw:</b> нет <br/>
-        Nonzero - suppress chromatic aberrations.
+        positive value turns on chromatic aberrations suppression (default:0 i.e. off).
       </dd>
       <dt><b>float cared,cablue</b></dt>
       <dd>
@@ -643,7 +643,7 @@ changes the output size.
       <dt><b>int cfaline; float linenoise;</b></dt>
       <dd>Line noise (banding) reduction.
         <br/>
-          cfaline != 0 - turn feature on (default: off).
+          positive value turns this feature on (default: off).
         <br/>
         linenoise - amount of reduction. Useful range is 0.001 to 0.02. Default value is 0.0 i.e. not clean anything.
       </dd>
@@ -651,7 +651,7 @@ changes the output size.
       <dd>
         Reduce impulse noise and Gaussian high frequency.
         <br/>
-        cfa_clean: non-zero turns the feature on (default: off).
+        cfa_clean: positive value turns the feature on (default: off).
         <br/>
         lclean,cclean - amount of noise reduction for (L)uminance and (C)olor. Useable range from 0.005 to 0.05,
         common value 0.01
@@ -660,10 +660,22 @@ changes the output size.
       <dd>
         Reduces maze artifacts produced by bad balance of green channels.
         <br/>
-        cfa_green - non-zero turns the feature on (default: off).
+        cfa_green: positive value turns the feature on (default: off).
         <br/>
         green_thresh - max difference between channels allowed for equalization. Useful range between 0.01 and 0.1.
       </dd>
+      <dt><b>int exp_correc; float exp_shift,exp_preser;</b></dt>
+      <dd>
+        Exposure correction before demosaic.
+        <br/>
+        <ul>
+          <li>exp_correc: positive value turns the feature on (default: off).</li>
+          <li>exp_shift: exposure shift in linear scale. Usable range from 0.5 (1-stop darken) to
+            3.0 (1.5-stop lighter). Default: 1.0 (no exposure shift).</li>
+          <li>exp_preser: preserve highlights when lighten the image. Usable range from 0.0 (no preservation) to 1.0
+            (full preservation). 0.0 is the default value.
+      </dd>
+
     </dl>
     <a name="libraw_masked_t"></a>
     <h3>Structure libraw_masked_t - saved masked pixels (black frame) data</h3>
@@ -1153,7 +1165,7 @@ data source is recorded. The possible values are listed below.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:42:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Mon Dec 20 21:29:35 MSK 2010
+Last modified: Mon Jan 10 18:37:39 MSK 2011
 <!-- hhmts end -->
   </body>
 </html>

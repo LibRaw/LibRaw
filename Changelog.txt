@@ -1,9 +1,17 @@
 2011-01-10 Alex Tutubalin <lexa@lexa.ru>
 	* Three patches provided by Jacques Desmis:
-		- Exposure correction before demosaic (demosaic pack GPL3)
-		- OpenMP speed-up in median filters (demosaic pack GPL2)
-		- OpenMP speed-up in green equilibration (demosaic pack GPL3)
-	* Merged 0.12.2-0.12.3 changes
+          - Exposure correction before demosaic (demosaic pack GPL3)
+	  - OpenMP speed-up in median filters (demosaic pack GPL2)
+	  - OpenMP speed-up in green equilibration (demosaic pack GPL3)
+	* Merged 0.12.2-0.12.3 changes:
+          - Patches for ./configure system for better LCMS2 support
+	  - Patches for ./configure system
+	  - math.h included before any other includes to make KDE compile
+	    with Visual C++ happy
+	  - Fuji FinePix S5500 size adjusted to ignore (rare?) garbage 
+	    at top of frame.
+        * all client code should be recompiled due to internals change.
+        * LibRaw 0.13.0-Beta1
 
 2010-12-22 Alex Tutubalin <lexa@lexa.ru>
         * Zero copy huffman buffer for LibRaw_buffer_datastream
