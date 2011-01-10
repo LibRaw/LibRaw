@@ -90,7 +90,7 @@ void * process_files(void *q)
             ret = libraw_dcraw_process(iprc);
             HANDLE_ERRORS(ret);
             
-            snprintf(outfn,1023,"%s.ppm",fn);
+            snprintf(outfn,1023,"%s.%s",fn,tiff_mode?"tiff":"ppm");
 
             if(verbose) fprintf(stderr,"Writing file %s\n",outfn);
             ret = libraw_dcraw_ppm_tiff_writer(iprc,outfn);
