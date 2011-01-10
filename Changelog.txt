@@ -3,6 +3,7 @@
 		- Exposure correction before demosaic (demosaic pack GPL3)
 		- OpenMP speed-up in median filters (demosaic pack GPL2)
 		- OpenMP speed-up in green equilibration (demosaic pack GPL3)
+	* Merged 0.12.2-0.12.3 changes
 
 2010-12-22 Alex Tutubalin <lexa@lexa.ru>
         * Zero copy huffman buffer for LibRaw_buffer_datastream
