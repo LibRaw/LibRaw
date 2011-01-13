@@ -3,6 +3,7 @@
         * Brigtness table in ahd_demosaic is calculated in reversed order
           to prevent possible (very unlikely) multithreaded app problem.
         * New exposure correction code based on linear-cubic root combination.
+          New working correction range is from 0.25 (-2 stops) to 8 (+3 stops)
         * LibRaw 0.13.0-Beta2
 
 2011-01-10 Alex Tutubalin <lexa@lexa.ru>
