@@ -1570,13 +1570,11 @@ void LibRaw::subtract_black()
 }
 
 #define TBLN 65535
-#define FSTOPS 4
-#define LSTOPS (1<<FSTOPS)
 
 void LibRaw::exp_bef(float shift, float smooth)
 {
     // params limits
-    if(shift>4.5) shift = 4.5;
+    if(shift>8) shift = 8;
     if(shift<0.25) shift = 0.25;
     if(smooth < 0.0) smooth = 0.0;
     if(smooth > 1.0) smooth = 1.0;
@@ -1591,8 +1589,12 @@ void LibRaw::exp_bef(float shift, float smooth)
     else
         {
             float x1,x2,y1,y2;
+
+            float cstops = log(shift)/log(2.0f);
+            float room = cstops*2;
+            float roomlin = powf(2.0f,room);
             x2 = (float)TBLN;
-            x1 = (x2+1)/LSTOPS-1;
+            x1 = (x2+1)/roomlin-1;
             y1 = x1*shift;
             y2 = x2*(1+(1-smooth)*(shift-1));
             float sq3x=powf(x1*x1*x2,1.0f/3.0f);
