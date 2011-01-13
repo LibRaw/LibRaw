@@ -1,5 +1,13 @@
+2011-01-13 Alex Tutubalin <lexa@lexa.ru>
+        * Better parsing of unknown command-line params in dcraw_emu sample
+        * Brigtness table in ahd_demosaic is calculated in reversed order
+          to prevent possible (very unlikely) multithreaded app problem.
+        * New exposure correction code based on linear-cubic root combination.
+        * LibRaw 0.13.0-Beta2
+
 2011-01-10 Alex Tutubalin <lexa@lexa.ru>
 	* Fixed file extension in half_mt.c sample
+
 2011-01-10 Alex Tutubalin <lexa@lexa.ru>
 	* Three patches provided by Jacques Desmis:
           - Exposure correction before demosaic (demosaic pack GPL3)

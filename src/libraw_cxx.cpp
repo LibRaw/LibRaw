@@ -32,6 +32,7 @@ it under the terms of the one of three licenses as you choose:
 #endif
 #define LIBRAW_LIBRARY_BUILD
 #include "libraw/libraw.h"
+//#include "internal/defines.h"
 
 #ifdef __cplusplus
 extern "C" 
@@ -1568,6 +1569,59 @@ void LibRaw::subtract_black()
         }
 }
 
+#define TBLN 65535
+#define FSTOPS 4
+#define LSTOPS (1<<FSTOPS)
+
+void LibRaw::exp_bef(float shift, float smooth)
+{
+    // params limits
+    if(shift>4.5) shift = 4.5;
+    if(shift<0.25) shift = 0.25;
+    if(smooth < 0.0) smooth = 0.0;
+    if(smooth > 1.0) smooth = 1.0;
+    
+    unsigned short *lut = (ushort*)malloc((TBLN+1)*sizeof(unsigned short));
+
+    if(shift <=1.0)
+        {
+            for(int i=0;i<=TBLN;i++)
+                lut[i] = ushort((float)i*shift);
+        }
+    else
+        {
+            float x1,x2,y1,y2;
+            x2 = (float)TBLN;
+            x1 = (x2+1)/LSTOPS-1;
+            y1 = x1*shift;
+            y2 = x2*(1+(1-smooth)*(shift-1));
+            float sq3x=powf(x1*x1*x2,1.0f/3.0f);
+            float B = (y2-y1+shift*(3*x1-3.0f*sq3x)) / (x2+2.0f*x1-3.0f*sq3x);
+            float A = (shift - B)*3.0f*powf(x1*x1,1.0f/3.0f);
+            float CC = y2 - A*powf(x2,1.0f/3.0f)-B*x2;
+            for(int i=0;i<=TBLN;i++)
+                {
+                    float X = (float)i;
+                    float Y = A*powf(X,1.0f/3.0f)+B*X+CC;
+                    if(i<x1)
+                        lut[i] = ushort((float)i*shift);
+                    else
+                        lut[i] = Y<0?0:(Y>TBLN?TBLN:ushort(Y));
+                }
+        }
+    for(int i=0; i< S.height*S.width; i++)
+        {
+            imgdata.image[i][0] = lut[imgdata.image[i][0]];
+            imgdata.image[i][1] = lut[imgdata.image[i][1]];
+            imgdata.image[i][2] = lut[imgdata.image[i][2]];
+            imgdata.image[i][3] = lut[imgdata.image[i][3]];
+        }
+    for(int i=0;i<4;i++)
+        C.channel_maximum[i] = lut[C.channel_maximum[i]];
+    C.maximum = lut[C.maximum];
+    // no need to adjust the minumum, black is already subtracted
+    free(lut);
+}
 int LibRaw::dcraw_process(void)
 {
     int quality,i;

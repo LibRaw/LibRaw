@@ -4427,7 +4427,7 @@ void CLASS ahd_interpolate()
   int terminate_flag = 0;
 
   if(dcraw_cbrt[0]<-0.1){
-      for (i=0; i < 0x10000; i++) {
+      for (i=0x10000-1; i >=0; i--) {
           r = i / 65535.0;
           dcraw_cbrt[i] = 64.0*(r > 0.008856 ? pow((double)r,1/3.0) : 7.787*r + 16/116.0);
       }

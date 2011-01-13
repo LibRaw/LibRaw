@@ -107,8 +107,8 @@ void usage(const char *prog)
 "-aline <l> reduction of line noise\n" 
 "-aclean <l c> clean CFA\n"
 "-agreen <g> equilibrate green\n"
-"-aexpo <e p> exposure correction\n"
 #endif
+"-aexpo <e p> exposure correction\n"
 #ifndef WIN32
 "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
 #endif
@@ -198,6 +198,8 @@ int main(int argc, char *argv[])
                           fprintf (stderr,"Non-numeric argument to \"-%c\"\n", opt);
                           return 1;
                       }
+          if(!strchr("ftdeam",opt) && argv[arg-1][2])
+              fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
           switch (opt) 
               {
               case 'v':  verbosity++;  break;
@@ -225,8 +227,10 @@ int main(int argc, char *argv[])
               case 't':  
                   if(!strcmp(optstr,"-timing"))
                       use_timing=1;
-                  else
+                  else if(!argv[arg-1][2])
                       OUT.user_flip   = atoi(argv[arg++]);  
+                  else
+                      fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
                   break;
               case 'q':  OUT.user_qual   = atoi(argv[arg++]);  break;
               case 'm':
@@ -235,7 +239,12 @@ int main(int argc, char *argv[])
                       use_mmap              = 1;
                   else
 #endif
-                      OUT.med_passes  = atoi(argv[arg++]);  
+                      {
+                          if(!argv[arg-1][2])
+                              OUT.med_passes  = atoi(argv[arg++]);  
+                          else
+                              fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
+                      }
                   break;
               case 'H':  OUT.highlight   = atoi(argv[arg++]);  break;
               case 's':  OUT.shot_select = abs(atoi(argv[arg++])); break;
@@ -255,43 +264,52 @@ int main(int argc, char *argv[])
                   if(!strcmp(optstr,"-fbdd"))
                       OUT.fbdd_noiserd = atoi(argv[arg++]);
                   else
-                      OUT.four_color_rgb    = 1;  
+                      {
+                          if(!argv[arg-1][2])    
+                              OUT.four_color_rgb    = 1;  
+                          else
+                              fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
+                      }
                   break;
               case 'A':  for(c=0; c<4;c++) OUT.greybox[c]  = atoi(argv[arg++]); break;
               case 'B':  for(c=0; c<4;c++) OUT.cropbox[c]  = atoi(argv[arg++]); break;
               case 'a':
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
-                  if(!strcmp(optstr,"-acae")) 
-                      {
-                          OUT.ca_correc = 1;
-                          OUT.cared       = (float)atof(argv[arg++]);
-                          OUT.cablue      = (float)atof(argv[arg++]);
-                      }
-                  else if(!strcmp(optstr,"-aexpo"))			  
+                  if(!strcmp(optstr,"-aexpo"))			  
                       {
                           OUT.exp_correc = 1;
                           OUT.exp_shift = (float)atof(argv[arg++]);
                           OUT.exp_preser = (float)atof(argv[arg++]);
                       }	
-                  else if(!strcmp(optstr,"-aline"))			  
-                      {
+                  else
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
+                      if(!strcmp(optstr,"-acae")) 
+                          {
+                              OUT.ca_correc = 1;
+                              OUT.cared       = (float)atof(argv[arg++]);
+                              OUT.cablue      = (float)atof(argv[arg++]);
+                          }
+                      else if(!strcmp(optstr,"-aline"))			  
+                          {
                           OUT.cfaline = 1;
                           OUT.linenoise = (float)atof(argv[arg++]);
                       }	
-                  else if(!strcmp(optstr,"-aclean"))			  
-                      {
-                          OUT.cfa_clean = 1;
-                          OUT.lclean = (float)atof(argv[arg++]);
-                          OUT.cclean = (float)atof(argv[arg++]);
-                      }								  
-                  else if(!strcmp(optstr,"-agreen"))			  
-                      {
-                          OUT.cfa_green = 1;
-                          OUT.green_thresh =(float)atof(argv[arg++]);
-                      }								  
-                  else
+                      else if(!strcmp(optstr,"-aclean"))			  
+                          {
+                              OUT.cfa_clean = 1;
+                              OUT.lclean = (float)atof(argv[arg++]);
+                              OUT.cclean = (float)atof(argv[arg++]);
+                          }								  
+                      else if(!strcmp(optstr,"-agreen"))			  
+                          {
+                              OUT.cfa_green = 1;
+                              OUT.green_thresh =(float)atof(argv[arg++]);
+                          }								  
+                      else
 #endif
-                      OUT.use_auto_wb       = 1;  
+                          if(!argv[arg-1][2])    
+                              OUT.use_auto_wb       = 1;  
+                          else
+                              fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
                   break;
               case 'w':  OUT.use_camera_wb     = 1;  break;
               case 'M':  OUT.use_camera_matrix = (opm == '+');  break;
@@ -306,6 +324,8 @@ int main(int argc, char *argv[])
                       OUT.dcb_iterations = atoi(argv[arg++]);
                   else if(!strcmp(optstr,"-dcbe"))
                       OUT.dcb_enhance_fl = 1;
+                  else
+                      fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
                   break;
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
               case 'e':
@@ -313,6 +333,8 @@ int main(int argc, char *argv[])
                       OUT.eeci_refine = 1;
                   else if(!strcmp(optstr,"-esmed"))
                       OUT.es_med_passes = atoi(argv[arg++]);
+                  else
+                      fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
                   break;
 #endif
               default:
