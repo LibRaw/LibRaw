@@ -279,7 +279,7 @@ void LibRaw:: recycle()
     ZERO(imgdata.masked_pixels);
     ZERO(imgdata.sizes);
     ZERO(imgdata.color);
-    ZERO(libraw_internal_data.internal_output_params);
+    ZERO(libraw_internal_data);
     memmgr.cleanup();
     imgdata.thumbnail.tformat = LIBRAW_THUMBNAIL_UNKNOWN;
     imgdata.progress_flags = 0;

@@ -1,3 +1,9 @@
+2011-01-15 Alex Tutubalin <lexa@lexa.ru>
+        * Fallback to old huffman decoder for Sony files with unspecified
+          data length (Sony A100)
+        * Fixed incomplete data fields reset in LibRaw::recycle()
+        * LibRaw 0.13.0-Beta3
+   
 2011-01-13 Alex Tutubalin <lexa@lexa.ru>
         * Better parsing of unknown command-line params in dcraw_emu sample
         * Brigtness table in ahd_demosaic is calculated in reversed order
