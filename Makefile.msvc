@@ -4,7 +4,7 @@
 #CFLAGSG2=/DLIBRAW_DEMOSAIC_PACK_GPL2
 
 # Demosaic Pack GPL3:
-#CFLAGS_DP3=-I../LibRaw-demosaic-pack-GPL3
+#CFLAGS_DP3=/I"..\\LibRaw-demosaic-pack-GPL3"
 #CFLAGSG3=/DLIBRAW_DEMOSAIC_PACK_GPL3
 
 
