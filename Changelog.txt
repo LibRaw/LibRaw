@@ -1,3 +1,12 @@
+2011-02-02 Alex Tutubalin <lexa@lexa.ru>
+        * dcraw.c 9.06/1.440 imported:
+          + New camera support: Canon S95, Casio EX-Z1080, Panasonic GF2 
+            and GH2, Samsung NX100, Sony A-580
+          + New color data for: Canon G12, Nikon D3100, D7000 and P7000,
+            Olympus E-5, Pentax K-r and K-5, Samsung NX10 and WB2000 
+
+        * LibRaw 0.12.4-Release
+
 2011-01-08 Alex Tutubalin <lexa@lexa.ru>
         * Patches for ./configure system for better LCMS2 support
         * LibRaw 0.12.3-Release

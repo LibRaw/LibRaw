@@ -4,11 +4,18 @@ PP=./internal/preprocess.pl
 
 CC=gcc
 CXX=g++
+# FreeBSD/gcc 4.6
+#CC=gcc46
+#CXX=g++46
 
 #CFLAGS=-O4 -march=core2 -march=core2 -mtune=core2 -fomit-frame-pointer -ffast-math -fstrict-aliasing -funsafe-math-optimizations -mfpmath=sse -msse2 -I. 
 #CFLAGS=-g -Wall -I.
 #CFLAGS=-g -I. -Wall
-CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
+
+CFLAGS=-g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fexceptions -fopenmp
+
+# FreeBSD gcc 4.6
+#CFLAGS=-msse4.2 -march=corei7 -g -O4 -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fexceptions -fopenmp
 
 # GCC 4.4 section
 # CC=gcc44
