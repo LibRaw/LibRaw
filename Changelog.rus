@@ -1,4 +1,9 @@
-﻿2011-02-02 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-02-05 Alex Tutubalin <lexa@lexa.ru>
+        * green_matching() выключается при half-size интерполяции
+          (потому что для такой интерполяции от green_matching только вред).
+        * LibRaw 0.12.5-Release
+
+2011-02-02 Alex Tutubalin <lexa@lexa.ru>
         * Импортирована dcraw.c 9.06/1.440:
           + Поддержка камер: Canon S95, Casio EX-Z1080, Panasonic GF2 
             и GH2, Samsung NX100, Sony A-580

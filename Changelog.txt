@@ -1,3 +1,7 @@
+2011-02-05 Alex Tutubalin <lexa@lexa.ru>
+        * green_matching() code is disabled for half-size processing
+        * LibRaw 0.12.5-Release
+
 2011-02-02 Alex Tutubalin <lexa@lexa.ru>
         * dcraw.c 9.06/1.440 imported:
           + New camera support: Canon S95, Casio EX-Z1080, Panasonic GF2 

@@ -7,12 +7,18 @@ if test x$VERSION = x ; then
  echo VERSION set to $VERSION
 fi
 
+if test x$DEST = x ; then
+  echo Usage: $0 destination-dir
+  exit 1
+fi
+
 if test -d $DEST ; then
  echo Using $DEST/$VERSION
 else
   echo Usage: $0 destination-dir
   exit 1
 fi
+
 cd ..
 for dir in LibRaw LibRaw-demosaic-pack-GPL2 LibRaw-demosaic-pack-GPL3
 do

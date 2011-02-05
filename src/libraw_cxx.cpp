@@ -1635,10 +1635,8 @@ int LibRaw::dcraw_process(void)
                 SET_PROC_FLAG(LIBRAW_PROGRESS_FOVEON_INTERPOLATE);
             }
 
-        if (O.green_matching)
-            {
-                green_matching();
-            }
+        if (O.green_matching && !O.half_size)
+            green_matching();
 
         if (!P1.is_foveon &&  O.document_mode < 2)
             {
