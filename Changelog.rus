@@ -1,4 +1,17 @@
-﻿2011-01-15 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-02-05 Alex Tutubalin <lexa@lexa.ru>
+        * Исправления в ./configure: установка правильных зависимостей
+          в pkg-config
+        * Makefile.msvc: правильные флаги компиляции для сборки с demosaic packs
+        * Импортирована dcraw.c 9.06/1.440:
+          + Поддержка камер: Canon S95, Casio EX-Z1080, Panasonic GF2 
+            и GH2, Samsung NX100, Sony A-580
+          + Новые цветовые данные для камер: Canon G12, Nikon D3100, 
+            D7000 и P7000, Olympus E-5, Pentax K-r и K-5,
+            Samsung NX10 и WB2000 
+        * green_matching() выключается при half-size интерполяции
+          (потому что для такой интерполяции от green_matching только вред).
+
+2011-01-15 Alex Tutubalin <lexa@lexa.ru>
         * Для файлов Sony у которых неизвестна длина данных (Sony A100, возможно
           и другие тоже) используется старый метод распаковки.
         * Исправлена неполная переинциализация данных в LibRaw::recycle()

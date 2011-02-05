@@ -1692,7 +1692,7 @@ int LibRaw::dcraw_process(void)
                 SET_PROC_FLAG(LIBRAW_PROGRESS_FOVEON_INTERPOLATE);
             }
 
-        if (O.green_matching)
+        if (O.green_matching && !O.half_size)
             {
                 green_matching();
             }
@@ -1715,7 +1715,7 @@ int LibRaw::dcraw_process(void)
 
 // LIBRAW_DEMOSAIC_PACK_GPL3
 
-        if (O.cfa_green >0) {thresh=O.green_thresh ;green_equilibrate(thresh);} 
+        if (!O.half_size && O.cfa_green >0) {thresh=O.green_thresh ;green_equilibrate(thresh);} 
         if (O.exp_correc >0) {expos=O.exp_shift ; preser=O.exp_preser; exp_bef(expos,preser);} 
         if (O.ca_correc >0 ) {cablue=O.cablue; cared=O.cared; CA_correct_RT(cablue, cared);}
         if (O.cfaline >0 ) {linenoise=O.linenoise; cfa_linedn(linenoise);}
@@ -1888,6 +1888,7 @@ static const char  *static_camera_list[] =
 "Canon PowerShot S60",
 "Canon PowerShot S70",
 "Canon PowerShot S90",
+"Canon PowerShot S95",
 "Canon PowerShot SX1 IS",
 "Canon PowerShot SX110 IS (CHDK hack)",
 "Canon PowerShot SX120 IS (CHDK hack)",
@@ -1937,6 +1938,7 @@ static const char  *static_camera_list[] =
 "Casio EX-Z750",
 "Casio EX-Z850",
 "Casio EX-Z1050",
+"Casio EX-Z1080",
 "Casio Exlim Pro 505",
 "Casio Exlim Pro 600",
 "Casio Exlim Pro 700",
@@ -2154,7 +2156,9 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-G10",
 "Panasonic DMC-G2",
 "Panasonic DMC-GF1",
+"Panasonic DMC-GF2",
 "Panasonic DMC-GH1",
+"Panasonic DMC-GH2",
 "Panasonic DMC-L1",
 "Panasonic DMC-L10",
 "Panasonic DMC-LC1",
@@ -2203,6 +2207,7 @@ static const char  *static_camera_list[] =
 "Samsung GX10",
 "Samsung GX20",
 "Samsung NX10",
+"Samsung NX100",
 "Samsung WB550",
 "Samsung WB2000",
 "Samsung S85 (hacked)",
@@ -2232,6 +2237,7 @@ static const char  *static_camera_list[] =
 "Sony DSLR-A450",
 "Sony DSLR-A500",
 "Sony DSLR-A550",
+"Sony DSLR-A580",
 "Sony DSLR-A700",
 "Sony DSLR-A850",
 "Sony DSLR-A900",

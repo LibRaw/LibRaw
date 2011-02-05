@@ -1,3 +1,13 @@
+2011-02-05 Alex Tutubalin <lexa@lexa.ru>
+        * ./configure fixes for PACKAGE_REQUIRES
+        * Makefile.msvc: correct compiler flags for demosaic packs
+        * dcraw.c 9.06/1.440 imported:
+          + New camera support: Canon S95, Casio EX-Z1080, Panasonic GF2 
+            and GH2, Samsung NX100, Sony A-580
+          + New color data for: Canon G12, Nikon D3100, D7000 and P7000,
+            Olympus E-5, Pentax K-r and K-5, Samsung NX10 and WB2000 
+        * green_matching() code is disabled for half-size processing
+
 2011-01-15 Alex Tutubalin <lexa@lexa.ru>
         * Fallback to old huffman decoder for Sony files with unspecified
           data length (Sony A100)
