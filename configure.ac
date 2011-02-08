@@ -155,7 +155,7 @@ if test x$dp3 = xtrue ; then
   fi 
 fi
 
-
+LIBS="$LIBS -lm -lstdc++"
 
 AC_OUTPUT
 

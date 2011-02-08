@@ -1,4 +1,13 @@
-﻿2011-02-05 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-02-07 Alex Tutubalin <lexa@lexa.ru>
+        * Обновлена документация dcraw_emu
+        * Обновлены файлы ./configure для более корректной линковки на 
+          некоторых системах
+        * Алгоритм подавления FBDD выключен для полноцветных (не байеровских)
+          и 4-цветных байеровских файлов из-за несовместимости (включая
+          псевдо-4-цветный байер, включенный опцией four_color_rgb)
+        * LibRaw 0.13.1-Release
+
+2011-02-05 Alex Tutubalin <lexa@lexa.ru>
         * Исправления в ./configure: установка правильных зависимостей
           в pkg-config
         * Makefile.msvc: правильные флаги компиляции для сборки с demosaic packs
@@ -10,6 +19,7 @@
             Samsung NX10 и WB2000 
         * green_matching() выключается при half-size интерполяции
           (потому что для такой интерполяции от green_matching только вред).
+        * LibRaw 0.13.0-Release
 
 2011-01-15 Alex Tutubalin <lexa@lexa.ru>
         * Для файлов Sony у которых неизвестна длина данных (Sony A100, возможно

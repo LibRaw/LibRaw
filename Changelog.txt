@@ -1,3 +1,10 @@
+2011-02-07 Alex Tutubalin <lexa@lexa.ru>
+        * dcraw_emu documentation updated
+        * ./configure stuff changed for correct linking on some systems        
+        * FBDD denoising is disabled for full-color images and 4-color bayer
+          data (including forced 4-color via four_color_rgb option)
+        * LibRaw 0.13.1-Release
+
 2011-02-05 Alex Tutubalin <lexa@lexa.ru>
         * ./configure fixes for PACKAGE_REQUIRES
         * Makefile.msvc: correct compiler flags for demosaic packs
@@ -7,6 +14,7 @@
           + New color data for: Canon G12, Nikon D3100, D7000 and P7000,
             Olympus E-5, Pentax K-r and K-5, Samsung NX10 and WB2000 
         * green_matching() code is disabled for half-size processing
+        * LibRaw 0.13.0-Release
 
 2011-01-15 Alex Tutubalin <lexa@lexa.ru>
         * Fallback to old huffman decoder for Sony files with unspecified

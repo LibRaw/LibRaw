@@ -1723,7 +1723,7 @@ int LibRaw::dcraw_process(void)
 
         if (P1.filters && !O.document_mode) 
             {
-                if (noiserd>0) fbdd(noiserd);
+                if (noiserd>0 && P1.colors==3 && P1.filters) fbdd(noiserd);
 
                 if (quality == 0)
                     lin_interpolate();

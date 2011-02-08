@@ -78,9 +78,31 @@ Their source codes are located in the samples/ folder, and after library build t
           <dd>
             Number of passes of edge-sensitive median filter for VCD+AHD demosaic.
           </dd>
-          <dt><b>-amaseca</b></dt>
+          <dt><b>-acae r b</b></dt>
           <dd>
-            Turns on chromatic aberration suppression before AMaZE interpolation (-q 10).
+            Turns on chromatic aberration suppression. r and b parameters are amount of red and blue axis correction
+            respectively. For automatic correction use <b>-acae 0 0</b>.
+          </dd>
+          <dt><b>-aline l</b></dt>
+          <dd>
+            Turns on banding suppression. l is the correction amount, useable range is from 0.001 to 0.02, typical
+            value is 0.005.
+          </dd>
+          <dt><b>-aclean l c</b></dt>
+          <dd>
+            Turns on impulse noise suppression. l and c are luminocity and chrominance suppression values,
+            respectively. Useable range for both is 0.005-0.05 and typical value is 0.01.
+          </dd>
+          <dt><b>-agreen g</b></dt>
+          <dd>
+            Turns on green channels equalization on uniform surfaces. g is the algorithm sensitivity with
+            useable range 0.01-0.1 and typical value 0.03.
+          </dd>
+          <dt><b>-aexpo e p</b></dt>
+          <dd>
+            Turns on exposure correction. e is exposure shift in linear scale from 0.25 (darken 2 stops) to
+            8.0 (lighten 3 stops). p is highlights preservation amount from 0.0 (no preservation, full clipping)
+            to 1.0 (full preservation, S-like curve in highlights).
           </dd>
         </dl>
       </li>
@@ -223,7 +245,7 @@ end:
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 12:19:36 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Thu Dec  9 14:14:26 UTC 2010
+Last modified: Tue Feb  8 13:36:10 MSK 2011
 <!-- hhmts end -->
   </body>
 </html>
