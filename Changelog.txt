@@ -1,3 +1,5 @@
+2011-02-12 Alex Tutubalin <lexa@lexa.ru>
+	* Added qmake .pro and Visual Studio 2008 sln/vcproj project files
 2011-02-07 Alex Tutubalin <lexa@lexa.ru>
         * dcraw_emu documentation updated
         * ./configure stuff changed for correct linking on some systems        
