@@ -7,8 +7,15 @@ AM_INIT_AUTOMAKE([foreign no-define])
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_RANLIB
+AC_ENABLE_SHARED
+AC_ENABLE_STATIC
+AC_LIBTOOL_WIN32_DLL
+AC_LIBTOOL_SETUP
+AC_PROG_LIBTOOL
+AC_SUBST(LIBTOOL_DEPS)
 
 # Config files to generate
+
 AC_CONFIG_FILES([
 	Makefile
 	libraw.pc
@@ -156,6 +163,9 @@ if test x$dp3 = xtrue ; then
 fi
 
 LIBS="$LIBS -lm -lstdc++"
+
+AC_SUBST([LIBRAW_SHLIB_VERSION],m4_esyscmd([./shlib-version.sh]))
+AC_SUBST([LIBRAW_RELEASE_VERSION],m4_esyscmd([./version.sh]))
 
 AC_OUTPUT
 

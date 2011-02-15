@@ -2,6 +2,9 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS=subdir-objects
 
+LIBRAW_SHLIB_VER = @LIBRAW_SHLIB_VERSION@
+LIBRAW_RELEASE_VER = @LIBRAW_RELEASE_VERSION@
+
 # Headers
 nobase_include_HEADERS = 	libraw/libraw.h \
 							libraw/libraw_alloc.h \
@@ -24,6 +27,7 @@ pkgconfig_DATA = libraw.pc libraw_r.pc
 
 # Libraries
 lib_LIBRARIES = lib/libraw.a lib/libraw_r.a
+lib_LTLIBRARIES = lib/libraw.la lib/libraw_r.la
 
 lib_libraw_a_CPPFLAGS = -DLIBRAW_NOTHREADS -w
 lib_libraw_a_SOURCES = internal/dcraw_common.cpp \
@@ -35,6 +39,11 @@ lib_libraw_a_SOURCES = internal/dcraw_common.cpp \
 lib_libraw_r_a_CXXFLAGS = -pthread -w
 lib_libraw_r_a_CFLAGS = -pthread -w
 lib_libraw_r_a_SOURCES = $(lib_libraw_a_SOURCES)
+lib_libraw_la_SOURCES = $(lib_libraw_a_SOURCES)
+lib_libraw_r_la_SOURCES = $(lib_libraw_a_SOURCES)
+
+lib_libraw_la_LDFLAGS = -no-undefined -version-info $(LIBRAW_SHLIB_VER) -release $(LIBRAW_RELEASE_VER)
+lib_libraw_r_la_LDFLAGS = -no-undefined -version-info $(LIBRAW_SHLIB_VER) -release $(LIBRAW_RELEASE_VER)
 
 
 # Sample binaries
