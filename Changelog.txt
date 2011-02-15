@@ -1,3 +1,7 @@
+2011-02-15 Alex Tutubalin <lexa@lexa.ru>
+	* New -mem option for dcraw_emu: I/O via allocated buffer
+	* Removed debug printf from LibRaw_memory_buffer code
+
 2011-02-12 Alex Tutubalin <lexa@lexa.ru>
 	* Added qmake .pro and Visual Studio 2008 sln/vcproj project files
 2011-02-07 Alex Tutubalin <lexa@lexa.ru>

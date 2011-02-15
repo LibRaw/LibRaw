@@ -32,17 +32,20 @@ it under the terms of the one of three licenses as you choose:
 #include <math.h>
 #include <ctype.h>
 #ifndef WIN32
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#else
+#include <io.h>
 #endif
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "libraw/libraw.h"
 #ifdef WIN32
 #define snprintf _snprintf
 #include <windows.h>
+#else
+#define O_BINARY 0
 #endif
 
 
@@ -112,6 +115,7 @@ void usage(const char *prog)
 #ifndef WIN32
 "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
 #endif
+"-mem	   Use memory buffer instead of FILE I/O\n"
         );
     exit(1);
 }
@@ -174,12 +178,12 @@ int main(int argc, char *argv[])
     LibRaw RawProcessor;
     int i,arg,c,ret;
     char opm,opt,*cp,*sp;
-    int use_bigfile=0, use_timing=0;
+    int use_bigfile=0, use_timing=0,use_mem=0;
 #ifndef WIN32
     int msize = 0,use_mmap=0;
-    void *iobuffer=0;
+    
 #endif
-
+	void *iobuffer=0;
 #ifdef OUT
 #undef OUT
 #endif
@@ -239,6 +243,9 @@ int main(int argc, char *argv[])
                       use_mmap              = 1;
                   else
 #endif
+				  if(!strcmp(optstr,"-mem"))
+                      use_mem              = 1;
+                  else
                       {
                           if(!argv[arg-1][2])
                               OUT.med_passes  = atoi(argv[arg++]);  
@@ -404,6 +411,44 @@ int main(int argc, char *argv[])
                 }
             else
 #endif
+			if (use_mem)
+			{
+				int file = open(argv[arg],O_RDONLY|O_BINARY);
+                    struct stat st;
+                    if(file<0)
+                        {
+                            fprintf(stderr,"Cannot open %s: %s\n",argv[arg],strerror(errno));
+                            continue;
+                        }
+                    if(fstat(file,&st))
+                        {
+                            fprintf(stderr,"Cannot stat %s: %s\n",argv[arg],strerror(errno));
+                            close(file);
+                            continue;
+                        }
+					if(!(iobuffer = malloc(st.st_size)))
+					{
+						fprintf(stderr,"Cannot allocate %d kbytes for memory buffer\n",st.st_size/1024);
+						close(file);
+						continue;
+					}
+					int rd;
+					if(st.st_size!=(rd=read(file,iobuffer,st.st_size)))
+					{
+						fprintf(stderr,"Cannot read %d bytes instead of  %d to memory buffer\n",rd,st.st_size);
+						close(file);
+						free(iobuffer);
+						continue;
+					}
+					close(file);
+					if( (ret = RawProcessor.open_buffer(iobuffer,st.st_size) != LIBRAW_SUCCESS))
+                    {
+                            fprintf(stderr,"Cannot open_buffer %s: %s\n",argv[arg],libraw_strerror(ret));
+							free(iobuffer);
+                            continue; // no recycle b/c open file will recycle itself
+                    }
+			}
+			else
                 {
                     if(use_bigfile)
                         // force open_file switch to bigfile processing
@@ -461,6 +506,11 @@ int main(int argc, char *argv[])
                     iobuffer=0;
                 }
 #endif
+			else if(use_mem && iobuffer)
+			{
+				free(iobuffer);
+				iobuffer = 0;
+			}
             
             RawProcessor.recycle(); // just for show this call
         }
