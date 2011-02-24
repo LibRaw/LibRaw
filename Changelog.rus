@@ -1,4 +1,15 @@
-﻿2011-02-12 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-02-25 Alex Tutubalin <lexa@lexa.ru>
+        * Поддержка камеры Sony A390 (цветовые данные от A380)
+        * Leica D-LUX 4: исправлена опечатка в названии камеры в
+	  таблице цветовых данных
+
+2011-02-15 Alex Tutubalin <lexa@lexa.ru>
+        * Пример dcraw_emu: добавлен параметр командной строки -mem 
+	  для тестирования чтения из буфера
+        * Удалена отладочная печать из LibRaw_memory_buffer 
+        * Предварительная поддержка shared library через ./configure
+
+2011-02-12 Alex Tutubalin <lexa@lexa.ru>
 	* Добавлены файлы проектов для qmake и Visual Studio 2008
 2011-02-07 Alex Tutubalin <lexa@lexa.ru>
         * Обновлена документация dcraw_emu

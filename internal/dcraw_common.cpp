@@ -7015,7 +7015,7 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 8048,-2810,-623,-6450,13519,3272,-1700,2146,7049 } },
     { "Panasonic DMC-LX3", 15, 0,
 	{ 8128,-2668,-655,-6134,13307,3161,-1782,2568,6083 } },
-    { "LEICA D-LUX4", 15, 0,
+    { "LEICA D-LUX 4", 15, 0,
 	{ 8128,-2668,-655,-6134,13307,3161,-1782,2568,6083 } },
     { "Panasonic DMC-LX5", 143, 0,
 	{ 10909,-4295,-948,-1333,9306,2399,22,1738,4582 } },
@@ -7076,6 +7076,8 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
     { "SONY DSLR-A350", 0, 0xffc,
 	{ 6038,-1484,-578,-9146,16746,2513,-875,746,7217 } },
     { "SONY DSLR-A380", 0, 0,
+	{ 6038,-1484,-579,-9145,16746,2512,-875,746,7218 } },
+    { "SONY DSLR-A390", 0, 0,
 	{ 6038,-1484,-579,-9145,16746,2512,-875,746,7218 } },
     { "SONY DSLR-A450", 128, 0xfeb,
 	{ 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
@@ -7163,7 +7165,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7633 "dcraw/dcraw.c"
+#line 7635 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8728,7 +8730,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9291 "dcraw/dcraw.c"
+#line 9293 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8947,7 +8949,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9534 "dcraw/dcraw.c"
+#line 9536 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
