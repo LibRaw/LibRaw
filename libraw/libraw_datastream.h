@@ -252,7 +252,7 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
 /* Visual Studio 2008 marks sgetn as insecure, but VS2010 does not. */
 #if defined(WIN32SECURECALLS) && (_MSC_VER < 1600)
 	virtual int read(void * ptr,size_t size, size_t nmemb){
-            if(substream) return substream->read(ptr,sz,nmemb);
+            if(substream) return substream->read(ptr,size,nmemb);
             LR_STREAM_CHK(); return int(f->_Sgetn_s(static_cast<char*>(ptr), nmemb * size,nmemb * size) / size); 
         }
 #else
