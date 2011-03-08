@@ -1,3 +1,7 @@
+2011-03-08 Alex Tutubalin <lexa@lexa.ru>
+        * Fixed broken camera white balance reading for some Sony cameras
+        * LibRaw 0.13.2-Release
+
 2011-02-25 Alex Tutubalin <lexa@lexa.ru>
 	* Sony A390 support (colordata from A380)
 	* Leica D-LUX 4: fixed typo in camera name in colordata

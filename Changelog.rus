@@ -1,4 +1,9 @@
-﻿2011-02-25 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-03-08 Alex Tutubalin <lexa@lexa.ru>
+        * Исправлена ошибка чтения камерного баланса белого для некоторых 
+          камер Sony
+        * LibRaw 0.13.2-Release
+
+2011-02-25 Alex Tutubalin <lexa@lexa.ru>
         * Поддержка камеры Sony A390 (цветовые данные от A380)
         * Leica D-LUX 4: исправлена опечатка в названии камеры в
 	  таблице цветовых данных

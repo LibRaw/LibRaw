@@ -251,15 +251,25 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
 
 /* Visual Studio 2008 marks sgetn as insecure, but VS2010 does not. */
 #if defined(WIN32SECURECALLS) && (_MSC_VER < 1600)
-	virtual int read(void * ptr,size_t size, size_t nmemb){LR_STREAM_CHK(); return int(f->_Sgetn_s(static_cast<char*>(ptr), nmemb * size,nmemb * size) / size); }
+	virtual int read(void * ptr,size_t size, size_t nmemb){
+            if(substream) return substream->read(ptr,sz,nmemb);
+            LR_STREAM_CHK(); return int(f->_Sgetn_s(static_cast<char*>(ptr), nmemb * size,nmemb * size) / size); 
+        }
 #else
-    virtual int read(void * ptr,size_t size, size_t nmemb){LR_STREAM_CHK(); return int(f->sgetn(static_cast<char*>(ptr), std::streamsize(nmemb * size)) / size); }
+    virtual int read(void * ptr,size_t size, size_t nmemb){
+        if(substream) return substream->read(ptr,size,nmemb);
+        LR_STREAM_CHK(); return int(f->sgetn(static_cast<char*>(ptr), std::streamsize(nmemb * size)) / size); 
+    }
 #endif
 
-    virtual int eof() { LR_STREAM_CHK(); return f->sgetc() == EOF; }
+    virtual int eof() { 
+        if(substream) return substream->eof();
+        LR_STREAM_CHK(); return f->sgetc() == EOF; 
+    }
 
     virtual int seek(INT64 o, int whence) 
     { 
+        if(substream) return substream->seek(o,whence);
         LR_STREAM_CHK(); 
         std::ios_base::seekdir dir;
         switch (whence) 
@@ -272,11 +282,18 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
         return (int)f->pubseekoff((long)o, dir);
     }
 
-    virtual INT64 tell()     { LR_STREAM_CHK(); return f->pubseekoff(0, std::ios_base::cur);  }
+    virtual INT64 tell()     { 
+        if(substream) return substream->tell();
+        LR_STREAM_CHK(); return f->pubseekoff(0, std::ios_base::cur);  
+    }
 
-    virtual int get_char() { LR_STREAM_CHK();  return f->sbumpc();  }
+    virtual int get_char() { 
+        if(substream) return substream->get_char();
+        LR_STREAM_CHK();  return f->sbumpc();  
+    }
     virtual char* gets(char *str, int sz) 
     { 
+        if(substream) return substream->gets(str,sz);
         LR_STREAM_CHK(); 
         std::istream is(f.get());
         is.getline(str, sz);
@@ -286,6 +303,7 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
 
     virtual int scanf_one(const char *fmt, void*val) 
     { 
+        if(substream) return substream->scanf_one(fmt,val);
         LR_STREAM_CHK(); 
 
         std::istream is(f.get());
@@ -305,7 +323,9 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
 
         return 1;
     }
-    virtual const char* fname() { return filename; }
+    virtual const char* fname() { 
+        return filename; 
+    }
     /* You can't have a "subfile" and a "tempfile" at the same time. */
     virtual int subfile_open(const char *fn)
     {
@@ -326,26 +346,6 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
     }
     
     virtual void subfile_close()    { if (!saved_f.get()) return; f = saved_f;   }
-    virtual int tempbuffer_open(void* buf, size_t size)
-    {
-        LR_STREAM_CHK();
-        if (saved_f.get()) return EBUSY;
-        saved_f = f;
-        
-        f.reset(new std::filebuf());
-        if (!f.get()) {
-            f = saved_f;
-            return ENOMEM;
-        }
-		f->pubsetbuf(static_cast<char*>(buf), static_cast<std::streamsize>(size));
-        return 0;
-    }
-    
-    virtual void	tempbuffer_close()
-    {
-        if (!saved_f.get()) return;
-        f = saved_f;
-    }
 };
 #undef LR_STREAM_CHK
 
