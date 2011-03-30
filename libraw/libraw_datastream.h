@@ -52,7 +52,7 @@ class LibRaw_byte_buffer
   public:
     LibRaw_byte_buffer(unsigned sz=0) 
         { 
-            buf=0; size=sz; offt=0; do_free=0; next_ff=0;
+            buf=0; size=sz; offt=0; do_free=0; 
             if(size)
                 { 
                     buf = (unsigned char*)malloc(size); do_free=1;
@@ -67,22 +67,17 @@ class LibRaw_byte_buffer
     void unseek2() { if(offt>=2) offt-=2;}
     void *get_buffer() { return buf; }
     int get_ljpeg_byte() {
-        if(offt<next_ff) return buf[offt++];
-        int ret = buf[offt++];
-        if(ret == 0xff) { if(buf[offt]==0x00) offt++; else return 0;}
-        // find next 0xff
-        unsigned char *p = (unsigned char*) memchr(buf+offt,0xff,size-offt);
-        if(p)
-            next_ff = p-buf;
-        else
-            next_ff = size;
-        return ret;
+        if(offt>=size) return 0;
+        unsigned char val = buf[offt++];
+        if(val!=0xFF || offt >=size || buf[offt++]==0)
+            return val;
+        offt -=2;
+        return 0;
     }
 
   private:
     unsigned char *buf;
-    unsigned int  size,offt, do_free,next_ff;
-
+    unsigned int  size,offt, do_free;
 };
 
 class LibRaw_bit_buffer
@@ -361,10 +356,11 @@ class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
     virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz)
     {
         LibRaw_byte_buffer *ret = new LibRaw_byte_buffer(0);
+        if(streampos + sz > streamsize)
+            sz = streamsize - streampos;
         ret->set_buffer(buf+streampos,sz);
         return ret;
     }
-
 
     virtual int read(void * ptr,size_t sz, size_t nmemb)
     { 

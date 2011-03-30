@@ -6824,6 +6824,18 @@ void CLASS parse_fuji (int offset)
       color_flags.cam_mul_state = LIBRAW_COLORSTATE_LOADED;
 #endif
         }
+      else if (tag == 0xc000) 
+       {
+	raw_height = order;
+	order = 0x4949;
+	width  = get4();
+	height = get4();
+	order = raw_height;
+	raw_height = 1;
+	load_raw = &CLASS packed_load_raw;
+	load_flags = 16;
+     }
+
     fseek (ifp, save+len, SEEK_SET);
   }
   if (!raw_height) {
@@ -8490,8 +8502,8 @@ cp_e2500:
       maximum = 0x3e00;
     if (is_raw == 2 && shot_select)
       maximum = 0x2f00;
-    top_margin = (raw_height - height)/2;
-    left_margin = (raw_width - width )/2;
+    top_margin = (raw_height - height) >> 2 << 1;
+    left_margin = (raw_width - width) >> 2 << 1;
     if (is_raw == 2)
       data_offset += (shot_select > 0) * ( fuji_layout ?
 		(raw_width *= 2) : raw_height*raw_width*2 );

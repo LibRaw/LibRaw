@@ -6367,6 +6367,18 @@ void CLASS parse_fuji (int offset)
       color_flags.cam_mul_state = LIBRAW_COLORSTATE_LOADED;
 #endif
         }
+      else if (tag == 0xc000) 
+       {
+	raw_height = order;
+	order = 0x4949;
+	width  = get4();
+	height = get4();
+	order = raw_height;
+	raw_height = 1;
+	load_raw = &CLASS packed_load_raw;
+	load_flags = 16;
+     }
+
     fseek (ifp, save+len, SEEK_SET);
   }
   if (!raw_height) {
@@ -6518,7 +6530,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 6985 "dcraw/dcraw.c"
+#line 6997 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -7165,7 +7177,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7635 "dcraw/dcraw.c"
+#line 7647 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8024,8 +8036,13 @@ cp_e2500:
       maximum = 0x3e00;
     if (is_raw == 2 && shot_select)
       maximum = 0x2f00;
+#if 0
     top_margin = (raw_height - height)/2;
     left_margin = (raw_width - width )/2;
+#else
+    top_margin = (raw_height - height) >> 2 << 1;
+    left_margin = (raw_width - width) >> 2 << 1;
+#endif
     if (is_raw == 2)
       data_offset += (shot_select > 0) * ( fuji_layout ?
 		(raw_width *= 2) : raw_height*raw_width*2 );
@@ -8730,7 +8747,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9293 "dcraw/dcraw.c"
+#line 9310 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8949,7 +8966,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9536 "dcraw/dcraw.c"
+#line 9553 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

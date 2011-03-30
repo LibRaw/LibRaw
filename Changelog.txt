@@ -1,3 +1,13 @@
+2011-03-30 Alex Tutubalin <lexa@lexa.ru>
+        * Preliminary support for Leaf Aptus II cameras (no color data yet):
+          Leaf Aptus II 6,7,8,10 and 12 are tested, Aptus II 5 should work.
+        * Preliminary support for Fujifilm X100 camera (again, no color data).
+        * Fixed possible after the end of buffer read when working with
+          in-memory data.
+        * Fixed possible loss of JPEG stream sync marks in LJPEG decoder
+          (this bug was found only for Leaf Aptus II RAWs).
+        * LibRaw 0.13.3-Release
+
 2011-03-08 Alex Tutubalin <lexa@lexa.ru>
         * Fixed broken camera white balance reading for some Sony cameras
         * LibRaw 0.13.2-Release
