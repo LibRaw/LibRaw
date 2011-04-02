@@ -5148,9 +5148,18 @@ void CLASS parse_mos (int offset)
   char data[40];
   int skip, from, i, c, neut[4], planes=0, frot=0;
   static const char *mod[] =
+#if 1
+  { "","DCB2","Volare","Cantare","CMost","Valeo 6","Valeo 11","Valeo 22",
+    "Valeo 11p","Valeo 17","","Aptus 17","Aptus 22","Aptus 75","Aptus 65",
+    "Aptus 54S","Aptus 65S","Aptus 75S","AFi 5","AFi 6","AFi 7","Aptus-II 7",
+    "","","Aptus-II 6","","","Aptus-II 10","Aptus-II 5"
+    "","","","","","Aptus-II 10R","Aptus-II 8","","Aptus-II 12"};
+#else
   { "","DCB2","Volare","Cantare","CMost","Valeo 6","Valeo 11","Valeo 22",
     "Valeo 11p","Valeo 17","","Aptus 17","Aptus 22","Aptus 75","Aptus 65",
     "Aptus 54S","Aptus 65S","Aptus 75S","AFi 5","AFi 6","AFi 7" };
+#endif
+
   float romm_cam[3][3];
 
   fseek (ifp, offset, SEEK_SET);
@@ -5269,7 +5278,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5730 "dcraw/dcraw.c"
+#line 5739 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6530,7 +6539,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 6997 "dcraw/dcraw.c"
+#line 7006 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -6661,6 +6670,8 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 9427,-3036,-959,-2581,10671,1911,-1039,1982,4430 } },
     { "Canon PowerShot A720", 0, 0,	/* DJC */
 	{ 14573,-5482,-1546,-1266,9799,1468,-1040,1912,3810 } },
+    { "Canon PowerShot S2 IS", 0, 0,    /* jlb */
+      { 14062,-5199,-1446,-4712,12470,2243,-1286,2028,4836 } },   /* jlb - copied from Powershot S3 IS */
     { "Canon PowerShot S3 IS", 0, 0,	/* DJC */
 	{ 14062,-5199,-1446,-4712,12470,2243,-1286,2028,4836 } },
     { "Canon PowerShot SX1 IS", 0, 0,
@@ -6793,6 +6804,22 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 7914,1414,-1190,-8777,16582,2280,-2811,4605,5562 } },
     { "Leaf Aptus 75", 0, 0,
 	{ 7914,1414,-1190,-8777,16582,2280,-2811,4605,5562 } },
+    { "Leaf Aptus 22", 0, 0,
+      { 8236, 1746, -1314, -8251, 15953, 2428, -3673, 5786, 5770, } },
+    { "Leaf Aptus-II 5", 0, 0,                                                    // Mamiya 645 AFD
+      { 8236, 1746, -1314, -8251, 15953, 2428, -3673, 5786, 5770, } },
+    { "Leaf Aptus-II 6", 0, 0,
+      { 7914, 1414, -1190, -8777, 16582, 2280, -2811, 4605, 5562, } },
+    { "Leaf Aptus-II 7", 0, 0,
+      { 7914, 1414, -1190, -8777, 16582, 2280, -2811, 4605, 5562, } },
+    { "Leaf Aptus-II 8", 0, 0,                                                    // Hasselblad 500 Series
+      { 8236, 1746, -1314, -8251, 15953, 2428, -3673, 5786, 5770, } },
+    { "Leaf Aptus-II 10", 0, 0,
+      { 8236, 1746, -1314, -8251, 15953, 2428, -3673, 5786, 5770, } },
+    { "Leaf Aptus-II 10R", 0, 0,
+      { 8236, 1746, -1314, -8251, 15953, 2428, -3673, 5786, 5770, } },
+    { "Leaf Aptus-II 12", 0, 0,
+      { 8236, 1746, -1314, -8251, 15953, 2428, -3673, 5786, 5770, } },
     { "Leaf", 0, 0,
 	{ 8236,1746,-1314,-8251,15953,2428,-3673,5786,5771 } },
     { "Mamiya ZD", 0, 0,
@@ -7177,7 +7204,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7647 "dcraw/dcraw.c"
+#line 7674 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8036,13 +8063,8 @@ cp_e2500:
       maximum = 0x3e00;
     if (is_raw == 2 && shot_select)
       maximum = 0x2f00;
-#if 0
-    top_margin = (raw_height - height)/2;
-    left_margin = (raw_width - width )/2;
-#else
     top_margin = (raw_height - height) >> 2 << 1;
     left_margin = (raw_width - width) >> 2 << 1;
-#endif
     if (is_raw == 2)
       data_offset += (shot_select > 0) * ( fuji_layout ?
 		(raw_width *= 2) : raw_height*raw_width*2 );
@@ -8747,7 +8769,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9310 "dcraw/dcraw.c"
+#line 9332 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8966,7 +8988,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9553 "dcraw/dcraw.c"
+#line 9575 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
