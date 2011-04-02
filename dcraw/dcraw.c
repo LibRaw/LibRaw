@@ -19,8 +19,8 @@
    *If you have not modified dcraw.c in any way, a link to my
    homepage qualifies as "full source code".
 
-   $Revision: 1.440 $
-   $Date: 2011/01/29 07:43:38 $
+   $Revision: 1.442 $
+   $Date: 2011/04/01 23:30:09 $
  */
 
 /*@out DEFINES
@@ -29,7 +29,7 @@
 #define NO_LCMS
 #define DCRAW_VERBOSE
 //@out DEFINES
-#define VERSION "9.06"
+#define VERSION "9.07"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -2207,7 +2207,7 @@ void CLASS hasselblad_load_raw()
   order = 0x4949;
   ph1_bits(-1);
   for (row=-top_margin; row < raw_height-top_margin; row++) {
-    pred[0] = pred[1] = 0x8000;
+    pred[0] = pred[1] = 0x8000 + load_flags;
     for (col=-left_margin; col < raw_width-left_margin; col+=2) {
       FORC(2) len[c] = ph1_huff(jh.huff[0]);
       FORC(2) {
@@ -5601,17 +5601,11 @@ void CLASS parse_mos (int offset)
   char data[40];
   int skip, from, i, c, neut[4], planes=0, frot=0;
   static const char *mod[] =
-#if 1
   { "","DCB2","Volare","Cantare","CMost","Valeo 6","Valeo 11","Valeo 22",
     "Valeo 11p","Valeo 17","","Aptus 17","Aptus 22","Aptus 75","Aptus 65",
     "Aptus 54S","Aptus 65S","Aptus 75S","AFi 5","AFi 6","AFi 7","Aptus-II 7",
     "","","Aptus-II 6","","","Aptus-II 10","Aptus-II 5"
     "","","","","","Aptus-II 10R","Aptus-II 8","","Aptus-II 12"};
-#else
-  { "","DCB2","Volare","Cantare","CMost","Valeo 6","Valeo 11","Valeo 22",
-    "Valeo 11p","Valeo 17","","Aptus 17","Aptus 22","Aptus 75","Aptus 65",
-    "Aptus 54S","Aptus 65S","Aptus 75S","AFi 5","AFi 6","AFi 7" };
-#endif
 
   float romm_cam[3][3];
 
@@ -5832,7 +5826,7 @@ int CLASS parse_tiff_ifd (int base)
       case 513:				/* JpegIFOffset */
       case 61447:
 	tiff_ifd[ifd].offset = get4()+base;
-	if (!tiff_ifd[ifd].bps) {
+	if (!tiff_ifd[ifd].bps && tiff_ifd[ifd].offset > 0) {
 	  fseek (ifp, tiff_ifd[ifd].offset, SEEK_SET);
 	  if (ljpeg_start (&jh, 1)) {
 	    tiff_ifd[ifd].comp    = 6;
@@ -6844,7 +6838,6 @@ void CLASS parse_fuji (int offset)
 	load_raw = &CLASS packed_load_raw;
 	load_flags = 16;
      }
-
     fseek (ifp, save+len, SEEK_SET);
   }
   if (!raw_height) {
@@ -7053,8 +7046,12 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 4763,712,-646,-6821,14399,2640,-1921,3276,6561 } },
     { "Canon EOS 550D", 0, 0x3dd7,
 	{ 6941,-1164,-857,-3825,11597,2534,-416,1540,6039 } },
+    { "Canon EOS 600D", 0, 0x3510,	/* DJC */
+	{ 5589,-1476,-292,-3401,9372,4030,-706,2038,6350 } },
     { "Canon EOS 1000D", 0, 0xe43,
 	{ 6771,-1139,-977,-7818,15123,2928,-1244,1437,7533 } },
+    { "Canon EOS 1100D", 0, 0x3510,	/* DJC */
+	{ 5193,-1423,-226,-3414,9273,4142,-679,2103,6808 } },
     { "Canon EOS-1Ds Mark III", 0, 0x3bb0,
 	{ 5859,-211,-930,-8255,16017,2353,-1732,1887,7448 } },
     { "Canon EOS-1Ds Mark II", 0, 0xe80,
@@ -8316,6 +8313,12 @@ canon_a5:
     if (unique_id == 0x80000176)
       adobe_coeff ("Canon","EOS 450D");
     goto canon_cr2;
+  } else if (is_canon && raw_width == 4352) {
+    top_margin  = 18;
+    left_margin = 62;
+    if (unique_id == 0x80000288)
+      adobe_coeff ("Canon","EOS 1100D");
+    goto canon_cr2;
   } else if (is_canon && raw_width == 4476) {
     top_margin  = 34;
     left_margin = 90;
@@ -8341,6 +8344,8 @@ canon_a5:
     left_margin = 142;
     if (unique_id == 0x80000270)
       adobe_coeff ("Canon","EOS 550D");
+    if (unique_id == 0x80000286)
+      adobe_coeff ("Canon","EOS 600D");
     goto canon_cr2;
   } else if (is_canon && raw_width == 5360) {
     top_margin = 51;
@@ -8530,7 +8535,7 @@ cp_e2500:
     if (is_raw == 2 && shot_select)
       maximum = 0x2f00;
     top_margin = (raw_height - height) >> 2 << 1;
-    left_margin = (raw_width - width) >> 2 << 1;
+    left_margin = (raw_width - width ) >> 2 << 1;
     if (is_raw == 2)
       data_offset += (shot_select > 0) * ( fuji_layout ?
 		(raw_width *= 2) : raw_height*raw_width*2 );
@@ -8636,18 +8641,22 @@ konica_400z:
     load_flags = 32;
   } else if (!strcmp(model,"EX1")) {
     order = 0x4949;
-    height = 2760;
+    height -= 20;
     top_margin = 2;
     if ((width -= 6) > 3682) {
-      height = 2750;
-      width  = 3668;
+      height -= 10;
+      width  -= 46;
       top_margin = 8;
     }
   } else if (!strcmp(model,"WB2000")) {
     order = 0x4949;
     height -= 3;
-    width -= 10;
     top_margin = 2;
+    if ((width -= 10) > 3718) {
+      height -= 28;
+      width  -= 56;
+      top_margin = 8;
+    }
   } else if (fsize == 20487168) {
     height = 2808;
     width  = 3648;
@@ -8751,6 +8760,13 @@ wb550:
       top_margin  = 4;
       left_margin = 41;
       filters = 0x61616161;
+    } else if (raw_width == 9044) {
+      height = 6716;
+      width  = 8964;
+      top_margin  = 8;
+      left_margin = 40;
+      black += load_flags = 256;
+      maximum = 0x8101;
     } else if (raw_width == 4090) {
       strcpy (model, "V96C");
       height -= (top_margin = 6);
@@ -8773,8 +8789,10 @@ wb550:
     if (ljpeg_start (&jh, 1) && jh.bits == 15)
       maximum = 0x1fff;
     if (tiff_samples > 1) filters = 0;
-    if (tiff_samples > 1 || tile_length < raw_height)
+    if (tiff_samples > 1 || tile_length < raw_height) {
       load_raw = &CLASS leaf_hdr_load_raw;
+      raw_width = tile_width;
+    }
     if ((width | height) == 2048) {
       if (tiff_samples == 1) {
 	filters = 1;

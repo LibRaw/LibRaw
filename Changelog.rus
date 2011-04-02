@@ -1,4 +1,10 @@
-﻿2011-03-30 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-04-02 Alex Tutubalin <lexa@lexa.ru>
+        * Импортирована dcraw 9.07/1.442:
+          + Поддержка новых камер: Canon 600D и 1100D, Hasselblad H4D-60
+        * Цветовые данные для Leaf Aptus II и Canon Powershot S2 IS
+        * LibRaw 0.13.4-Release
+
+2011-03-30 Alex Tutubalin <lexa@lexa.ru>
         * Предварительная поддержка для камер Leaf Aptus II (без цветовых
           данных). Протестировано на файлах Leaf Aptus II 6,7,8,10 и 12,
           должно работать с Aptus II 5.
