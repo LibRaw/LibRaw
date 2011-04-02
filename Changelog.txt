@@ -1,6 +1,7 @@
 2011-04-02 Alex Tutubalin <lexa@lexa.ru>
         * Imported new dcraw 9.07/1.442:
-          + New cameras supported: Canon 600D and 1100D, Hasselblad H4D-60
+          + Support for Canon 600D and 1100D, Hasselblad H4D-60,
+            Olympus E-PL2
         * Color data for Leaf Aptus II and Canon Powershot S2 IS
         * LibRaw 0.13.4-Release
 
