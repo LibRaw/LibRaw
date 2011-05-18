@@ -24,7 +24,7 @@ it under the terms of the one of three licenses as you choose:
 #line 27 "dcraw/dcraw.c"
 #define NO_JPEG
 #line 32 "dcraw/dcraw.c"
-#define VERSION "9.07"
+#define VERSION "9.08"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
