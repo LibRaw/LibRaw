@@ -11,10 +11,10 @@ CXX=g++
 CFLAGS= -O4 -g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
 #CFLAGS=-g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
 
-# GCC 4.4 section
-# CC=gcc44
-# CXX=g++44
-# CFLAGS= -O4 -march=core2 -I. -pedantic  -Wno-long-long -msse2 -mfpmath=sse  -fopenmp
+# GCC 4.6 section
+CC=gcc46
+CXX=g++46
+CFLAGS= -O4 -march=core2 -I. -pedantic  -Wno-long-long -msse2 -mfpmath=sse  -fopenmp
 
 # LCMS support
 # For lcms2 set -DUSE_LCMS2

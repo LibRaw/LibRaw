@@ -1,3 +1,11 @@
+2011-05-18 Alex Tutubalin <lexa@lexa.ru>
+        * Imported new dcraw 9.08/1.443:
+           + New color data for Canon 600D and 1100D, Fuji S200EXR
+           + New camera supported: Fuji HS20EXR and F550EXR, Kodak Z990, 
+                                   Nikon D5100, Olympus E-PL1s and XZ-1, 
+                                   Samsung NX11, Sony A230 and 290.
+        * LibRaw 0.13.5-Release
+
 2011-04-02 Alex Tutubalin <lexa@lexa.ru>
         * Imported new dcraw 9.07/1.442:
           + Support for Canon 600D and 1100D, Hasselblad H4D-60,

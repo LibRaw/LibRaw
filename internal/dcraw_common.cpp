@@ -6375,6 +6375,9 @@ void CLASS parse_fuji (int offset)
 	&CLASS unpacked_load_raw : &CLASS fuji_load_raw;
     } else if (tag == 0x2ff0) {
       FORC4 cam_mul[c ^ 1] = get2();
+#ifdef LIBRAW_LIBRARY_BUILD
+      color_flags.cam_mul_state = LIBRAW_COLORSTATE_LOADED;
+#endif
     } else if (tag == 0xc000) {
       c = order;
       order = 0x4949;
@@ -6382,24 +6385,6 @@ void CLASS parse_fuji (int offset)
       height = get4();
       order = c;
     }
-    if (tag == 0x2ff0)
-        {
-      FORC4 cam_mul[c ^ 1] = get2();
-#ifdef LIBRAW_LIBRARY_BUILD
-      color_flags.cam_mul_state = LIBRAW_COLORSTATE_LOADED;
-#endif
-        }
-      else if (tag == 0xc000) 
-       {
-	raw_height = order;
-	order = 0x4949;
-	width  = get4();
-	height = get4();
-	order = raw_height;
-	raw_height = 1;
-	load_raw = &CLASS packed_load_raw;
-	load_flags = 16;
-     }
     fseek (ifp, save+len, SEEK_SET);
   }
   height <<= fuji_layout;
@@ -6546,7 +6531,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 7013 "dcraw/dcraw.c"
+#line 6998 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -6823,8 +6808,10 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 7914,1414,-1190,-8777,16582,2280,-2811,4605,5562 } },
     { "Leaf Aptus 75", 0, 0,
 	{ 7914,1414,-1190,-8777,16582,2280,-2811,4605,5562 } },
+#if 0
     { "Leaf Aptus 22", 0, 0,
       { 8236, 1746, -1314, -8251, 15953, 2428, -3673, 5786, 5770, } },
+#endif
     { "Leaf Aptus-II 5", 0, 0,                                                    // Mamiya 645 AFD
       { 8236, 1746, -1314, -8251, 15953, 2428, -3673, 5786, 5770, } },
     { "Leaf Aptus-II 6", 0, 0,
@@ -7233,7 +7220,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7703 "dcraw/dcraw.c"
+#line 7690 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8814,7 +8801,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9377 "dcraw/dcraw.c"
+#line 9364 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -9033,7 +9020,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9620 "dcraw/dcraw.c"
+#line 9607 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

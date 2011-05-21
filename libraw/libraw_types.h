@@ -41,7 +41,7 @@ it under the terms of the one of three licenses as you choose:
 #else
 #  undef LIBRAW_USE_OPENMP
 #endif
-// Not Win32
+/* Not Win32 */
 # elif (defined(__APPLE__) || defined(__MACOSX__)) && defined(_REENTRANT)
 #   undef LIBRAW_USE_OPENMP
 # else 

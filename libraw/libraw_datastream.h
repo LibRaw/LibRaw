@@ -195,7 +195,7 @@ class LibRaw_abstract_datastream
     virtual char*       gets(char *, int) = 0;
     virtual int         scanf_one(const char *, void *) = 0;
     virtual int         eof() = 0;
-    // Make buffer from current offset
+    /* Make buffer from current offset */
     virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz)
     {
         LibRaw_byte_buffer *ret = new LibRaw_byte_buffer(sz);
