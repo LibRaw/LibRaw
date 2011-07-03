@@ -32,7 +32,7 @@ it under the terms of the one of three licenses as you choose:
 #if defined (_OPENMP) 
 
 #if defined(WIN32) 
-# if defined (_MSC_VER) && (_MSC_VER >= 1500) 
+# if defined (_MSC_VER) && (_MSC_VER >= 1600 || (_MSC_VER == 1500 && _MSC_FULL_VER >= 150030729) ) 
 /* VS2010+ : OpenMP works OK, VS2008: have tested by cgilles */
 #   define LIBRAW_USE_OPENMP
 #elif defined (__INTEL_COMPILER) && (__INTEL_COMPILER >=910)
