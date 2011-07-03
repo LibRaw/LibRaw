@@ -1,3 +1,24 @@
+2011-07-03 Alex Tutubalin <lexa@lexa.ru>
+        * Cosmetic cleanup in Libraw_memmgr code
+
+        * Permit OpenMP support on MS VS2008
+
+        * More general mem_image interface:
+          + New call get_mem_image_format returns bitmap size and bit depth
+          + New call copy_mem_image can copy bitmap into buffer with 
+            different color order (RGB/BGR) and line stride
+          + dcraw_make_mem_image() uses calls mentioned above
+          + see documentation for info on these function parameters.
+
+        * libraw/librawwindows.h implements LibRaw_datastream class based
+          on Windows memory mapped files.Win32/64-only 
+          Thanks to Linc Brookes.
+
+        * Fixed parallel make errors in configure/Makefile.am
+
+        * LibRaw 0.13.6-Release
+
+        
 2011-05-18 Alex Tutubalin <lexa@lexa.ru>
         * Imported new dcraw 9.08/1.443:
            + New color data for Canon 600D and 1100D, Fuji S200EXR

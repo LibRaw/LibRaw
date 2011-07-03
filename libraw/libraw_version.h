@@ -25,11 +25,11 @@ it under the terms of the one of three licenses as you choose:
 
 #define LIBRAW_MAJOR_VERSION  0
 #define LIBRAW_MINOR_VERSION  13
-#define LIBRAW_PATCH_VERSION  5
+#define LIBRAW_PATCH_VERSION  6
 #define LIBRAW_VERSION_TAIL   Release
 
 #define LIBRAW_SHLIB_CURRENT  	2
-#define LIBRAW_SHLIB_REVISION 	4
+#define LIBRAW_SHLIB_REVISION 	5
 #define LIBRAW_SHLIB_AGE     	0
 
 #define _LIBRAW_VERSION_MAKE(a,b,c,d) #a"."#b"."#c"-"#d

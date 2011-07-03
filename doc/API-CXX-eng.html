@@ -69,6 +69,13 @@
         <a href="#memwrite">Copying unpacked data into memory buffer</a>
         <ul>
           <li>
+            <a href="#get_mem_image_format">void get_mem_image_format(int *widthp, int *heightp, int *colorsp, int
+              *bpp)</a>
+            </li>
+          <li>
+            <a href="#copy_mem_image">int LibRaw::copy_mem_image(void* scan0, int stride, int bgr)</a>
+          </li>
+          <li>
             <a href="#dcraw_make_mem_image">libraw_processed_image_t *dcraw_make_mem_image(int *errorcode)</a>
           </li>
           <li>
@@ -581,8 +588,12 @@ LibRaw.
     <a name="memwrite"></a>
     <h2>Copying unpacked data into memory buffer</h2>
     <p>
-      There is two function calls for store unpacked data into memory buffer (after using dcraw_process() and so on):
+      There is several function calls for store unpacked data into memory buffer (after using dcraw_process() and so on):
       <ul>
+      <li><b>get_mem_image_format</b> - get resulting bitmap size and bit depth.</li>
+      <li><b>copy_mem_image</b> - copy postprocessed data into some memory buffer with different color order and
+        line stride.
+        </li>
       <li><b>dcraw_make_mem_image</b> - store processed image data into allocated buffer;
         </li>
       <li><b>dcraw_make_mem_thumb</b> -  store extracted thumbnail into buffer as JPEG-file image (for most cameras)
@@ -590,6 +601,36 @@ LibRaw.
       </li>
       </ul>
     For usage primer see samples/mem_image.c sample.
+    </p>
+    <a name="get_mem_image_format"></a>
+    <h3>void get_mem_image_format(int *widthp, int *heightp, int *colorsp, int *bpp) const - return processing bitmap
+      size</h3>
+    <p>This function returns size of postprocessed image:
+    </p>
+    <ul>
+      <li>Image width is returned in *widthp;</li>
+      <li>Bitmap height is returned in *heightp;</li>
+      <li>Image color count is returned in *colorsp;</li>
+      <li>Bits per pixel (8 or 16) is returned in *bpp;</li>
+    </ul>
+    <a name="copy_mem_image"></a>
+    <h3>int LibRaw::copy_mem_image(void* scan0, int stride, int bgr) - copies postprocessed bitmap data into
+      buffer</h3>
+    <p>
+      Function parameters:
+      </p>
+    <ul>
+      <li>void *scan0 - pointer to buffer to copy data to. The buffer should be at least stride*image_height
+        bytes;</li> 
+      <li>int stride - stride of each other image line (row) in bytes. Usually
+        image_width*(bit_per_pixel/8)*image_colors, but may be more if you wish to align image rows to, for example, 8
+      or 16 or 32 bytes to make CPU more happy.</li>
+      <li>int bgr - pixel copy order. RGB if bgr==0 and BGR overwise.</li>
+    </ul>
+    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>error
+code convention</a>: positive if any system call has returned an error, negative (from the
+<a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+LibRaw.
     </p>
     <a name="dcraw_make_mem_image"></a>
     <h3>libraw_processed_image_t *dcraw_make_mem_image(int *errorcode=NULL) - store unpacked and processed image into
@@ -854,7 +895,7 @@ LibRaw.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Tue Oct 12 21:41:13 MSD 2010
+Last modified: Sun Jul  3 16:22:47 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

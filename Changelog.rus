@@ -1,4 +1,27 @@
-﻿2011-05-18 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-07-03 Alex Tutubalin <lexa@lexa.ru>
+        * Косметические исправления в коде Libraw_memmgr
+
+        * Поддержка OpenMP разрешена для MS VS2008
+
+        * Расширенный интерфейс копирования процессированных изображений
+          в буфер памяти:
+          + Новый вызов get_mem_image_format() возвращает размеры 
+            результирующего битмепа.
+          + Новый вызов copy_mem_image() копирует изображение в 
+            переданный буфер в заданном порядке цветов пиксела (RGB/BGR)
+            и с заданным шагом (stride) строк.
+          + dcraw_make_mem_image() использует вышеуказанные вызовы.
+          + Подробности описаны в документации.
+
+        * libraw/librawwindows.h - реализация LibRaw_datastream поверх
+          Windows memory mapped files. Win32/64.
+          Спасибо Linc Brookes.
+
+        * Исправлены ошибки зависимостей в configure/Makefile.am
+
+        * LibRaw 0.13.6-Release
+
+2011-05-18 Alex Tutubalin <lexa@lexa.ru>
         * Imported new dcraw 9.08/1.443:
            + Новые цветовые данные для камер Canon 600D и 1100D, Fuji S200EXR
            + Поддержка новых камер: Fuji HS20EXR и F550EXR, Kodak Z990, 

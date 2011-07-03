@@ -69,6 +69,13 @@
       </li>
       <li><a href="#memwrite">Запись распакованых данных в буфер в памяти</a>
         <ul>
+          <li>
+            <a href="#get_mem_image_format">void get_mem_image_format(int *widthp, int *heightp, int *colorsp, int
+              *bpp)</a>
+            </li>
+          <li>
+            <a href="#copy_mem_image">int LibRaw::copy_mem_image(void* scan0, int stride, int bgr)</a>
+          </li>
           <li><a href="#dcraw_make_mem_image">libraw_processed_image_t *dcraw_make_mem_image(int * errcode)</a>
           </li>
           <li><a href="#dcraw_make_mem_thumb">libraw_processed_image_t *dcraw_make_mem_thumb(int *errorcode)</a>
@@ -591,6 +598,10 @@ int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int ex
       Помимо записи в файл, библиотека предоставляет возможности записи извлеченных и обработанных функциями
         dcraw_* данных в буфер в памяти. Для этого имеются такие вызовы:
       <ul>
+      <li><b>get_mem_image_format</b> - возвращает размер битмепа и его битность</li>
+      <li><b>copy_mem_image</b> - копирует постпроцессированное изображение в произвольный буфер с заданным шагом
+        (stride) строк и с заданным порядком данных в пикселе (RGB/BGR)
+        </li>
       <li><b>dcraw_make_mem_image</b> - преобразование извлеченных данных в RGB-битмэп нужного размера.
         </li>
       <li><b>dcraw_make_mem_thumb</b> -  извлечение thumbnail в виде образа JPEG-файла в памяти, либо (для тех камер,
@@ -599,6 +610,38 @@ int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int ex
       </ul>
     Пример использования этих функций - mem_image (см. каталог samples/  дистрибутива).
     </p>
+    <a name="get_mem_image_format"></a>
+    <h3>void get_mem_image_format(int *widthp, int *heightp, int *colorsp, int *bpp) const - возвращает размеры
+      обработанного изображения</h3>
+    <p>Значения (размеры изображения) возвращаются в переменных, заданных указателями:
+    </p>
+    <ul>
+      <li>Ширина изображения в пикселах - в *widthp;</li>
+      <li>Высота - в *heightp;</li>
+      <li>Количество цветов изображения - в *colorsp;</li>
+      <li>Битность изображения (8 или 16) в *bpp;</li>
+    </ul>
+    <a name="copy_mem_image"></a>
+    <h3>int LibRaw::copy_mem_image(void* scan0, int stride, int bgr) - копирует постпроцессированное изображение
+      в виде битмепа в произвольный буфер</h3>
+    <p>
+      Параметры функции:
+      </p>
+    <ul>
+      <li>void *scan0 - указатель на буфер. Буфер аллоцируется вызывающим приложением и должен быть не меньше чем
+        stride*image_height</li> 
+      <li>int stride - шаг (stride) строки изображения в байтах. Обычно должен быть равен
+        image_width*(bits_per_pixel/8*image_colors, но может быть больше, если, например, строки изображения хочется
+        выровнять на 8 (16, 32) байта.
+      <li>int bgr - порядок следования цветов пиксела. RGB для  bgr==0 и BGR в остальных случаях.</li>
+    </ul>
+    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>error
+code convention</a>: positive if any system call has returned an error, negative (from the
+<a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+LibRaw.
+    </p>
+
+
     <a name="dcraw_make_mem_image"></a>
     <h3>libraw_processed_image_t *dcraw_make_mem_image(int *errorcode=NULL) - запись распакованного изображения в буфер в памяти</h3>
     <p>
@@ -843,7 +886,7 @@ int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int ex
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Fri Oct 15 12:01:53 MSD 2010
+Last modified: Sun Jul  3 16:21:26 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

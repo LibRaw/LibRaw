@@ -127,6 +127,10 @@ class DllDef LibRaw
     libraw_processed_image_t*   dcraw_make_mem_image(int *errcode=NULL);  
     libraw_processed_image_t*   dcraw_make_mem_thumb(int *errcode=NULL);
     static void                 dcraw_clear_mem(libraw_processed_image_t*);
+    
+    /* Additional calls for make_mem_image */
+    void get_mem_image_format(int* width, int* height, int* colors, int* bps) const;
+    int  copy_mem_image(void* scan0, int stride, int bgr);
 
     /* free all internal data structures */
     void         recycle(); 
