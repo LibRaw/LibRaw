@@ -26,7 +26,6 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libraw.pc libraw_r.pc
 
 # Libraries
-lib_LIBRARIES = lib/libraw.a lib/libraw_r.a
 lib_LTLIBRARIES = lib/libraw.la lib/libraw_r.la
 
 lib_libraw_a_CPPFLAGS = -DLIBRAW_NOTHREADS -w
