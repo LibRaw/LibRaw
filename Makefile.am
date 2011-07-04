@@ -26,7 +26,6 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libraw.pc libraw_r.pc
 
 # Libraries
-lib_LIBRARIES = lib/libraw.a lib/libraw_r.a
 lib_LTLIBRARIES = lib/libraw.la lib/libraw_r.la
 
 lib_libraw_a_CPPFLAGS = -DLIBRAW_NOTHREADS -w
@@ -60,40 +59,32 @@ endif
 
 bin_raw_identify_SOURCES = samples/raw-identify.cpp
 bin_raw_identify_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_raw_identify_LDADD = -Llib/  -lraw 
-bin_raw_identify_DEPENDENCIES = lib/libraw.a
+bin_raw_identify_LDADD = lib/libraw.la
 
 bin_unprocessed_raw_SOURCES = samples/unprocessed_raw.cpp
 bin_unprocessed_raw_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_unprocessed_raw_LDADD = -Llib/ -lraw
-bin_unprocessed_raw_DEPENDENCIES = lib/libraw.a
+bin_unprocessed_raw_LDADD = lib/libraw.la
 
 bin_4channels_SOURCES = samples/4channels.cpp
 bin_4channels_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_4channels_LDADD = -Llib/ -lraw 
-bin_4channels_DEPENDENCIES = lib/libraw.a
+bin_4channels_LDADD = lib/libraw.la
 
 bin_simple_dcraw_SOURCES = samples/simple_dcraw.cpp
 bin_simple_dcraw_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_simple_dcraw_LDADD = -Llib/ -lraw
-bin_simple_dcraw_DEPENDENCIES = lib/libraw.a
+bin_simple_dcraw_LDADD = lib/libraw.la
 
 bin_mem_image_SOURCES = samples/mem_image.cpp
 bin_mem_image_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_mem_image_LDADD = -Llib/ -lraw 
-bin_mem_image_DEPENDENCIES = lib/libraw.a
+bin_mem_image_LDADD = lib/libraw.la
 
 bin_dcraw_half_SOURCES = samples/dcraw_half.c
 bin_dcraw_half_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_dcraw_half_LDADD = -Llib/ -lraw 
-bin_dcraw_half_DEPENDENCIES = lib/libraw.a
+bin_dcraw_half_LDADD = lib/libraw.la
 
 bin_half_mt_SOURCES = samples/half_mt.c
 bin_half_mt_CFLAGS = $(lib_libraw_r_a_CXXFLAGS)
-bin_half_mt_LDADD = -Llib/ -lraw_r 
-bin_half_mt_DEPENDENCIES = lib/libraw_r.a
+bin_half_mt_LDADD = lib/libraw_r.la
 
 bin_dcraw_emu_SOURCES = samples/dcraw_emu.cpp
 bin_dcraw_emu_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
-bin_dcraw_emu_LDADD = -Llib/ -lraw 
-bin_dcraw_emu_DEPENDENCIES = lib/libraw.a
+bin_dcraw_emu_LDADD = lib/libraw.la
