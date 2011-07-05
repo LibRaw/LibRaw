@@ -334,7 +334,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "foveon_load_raw()";
             d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT; 
         }
-    else if (load_raw == &LibRaw::fuji_load_raw )            d_info->decoder_name = "fuji_load_raw()"; //+
+    else if (load_raw == &LibRaw::fuji_load_raw ) 
+        { 
+            d_info->decoder_name = "fuji_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
     else if (load_raw == &LibRaw::hasselblad_load_raw )      d_info->decoder_name = "hasselblad_load_raw()"; //+
     else if (load_raw == &LibRaw::imacon_full_load_raw )     d_info->decoder_name = "imacon_full_load_raw()"; 
     else if (load_raw == &LibRaw::kodak_262_load_raw )       d_info->decoder_name = "kodak_262_load_raw()"; //+

@@ -1734,6 +1734,9 @@ void CLASS fuji_load_raw()
   for (row=0; row < raw_height; row++) {
     read_shorts (pixel, raw_width);
     for (col=0; col < raw_width; col++) {
+#if 1
+        raw_image[row*raw_width+col] = pixel[col]; // memmove!
+#else
         if(col >= left_margin && col < width+left_margin
            && row >= top_margin && row < height+top_margin)
             {
@@ -1748,6 +1751,7 @@ void CLASS fuji_load_raw()
                 ushort *dfp = get_masked_pointer(row,col);
                 if(dfp) *dfp = pixel[col];
             }
+#endif
     }
   }
   free (pixel);
