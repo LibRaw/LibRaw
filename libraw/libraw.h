@@ -143,6 +143,8 @@ class DllDef LibRaw
     int add_masked_borders_to_bitmap();
     
     const char *unpack_function_name();
+    int get_decoder_info(libraw_decoder_info_t* d_info);
+
     int         rotate_fuji_raw();
 
   private:

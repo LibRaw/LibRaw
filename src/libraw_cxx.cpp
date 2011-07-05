@@ -268,6 +268,7 @@ void LibRaw:: recycle()
 #define FREE(a) do { if(a) { free(a); a = NULL;} }while(0)
             
     FREE(imgdata.image); 
+    FREE(imgdata.raw_image); 
     FREE(imgdata.thumbnail.thumb);
     FREE(libraw_internal_data.internal_data.meta_data);
     FREE(libraw_internal_data.output_data.histogram);
@@ -289,62 +290,79 @@ void LibRaw:: recycle()
 
 const char * LibRaw::unpack_function_name()
 {
-    if(!load_raw) return "Function not set";
+    libraw_decoder_info_t decoder_info;
+    get_decoder_info(&decoder_info);
+    return decoder_info.decoder_name;
+}
+
+int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
+{
+    if(!d_info)   return LIBRAW_UNSPECIFIED_ERROR;
+    if(!load_raw) return LIBRAW_OUT_OF_ORDER_CALL;
+    
+    d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
 
     // sorted names order
-    if (load_raw == &LibRaw::adobe_dng_load_raw_lj)     return "adobe_dng_load_raw_lj()"; //+
-    if (load_raw == &LibRaw::adobe_dng_load_raw_nc)     return "adobe_dng_load_raw_nc()"; //+
-    if (load_raw == &LibRaw::canon_600_load_raw)        return "canon_600_load_raw()";    //+
-
-    if (load_raw == &LibRaw::canon_compressed_load_raw) return "canon_compressed_load_raw()"; //+
-    if (load_raw == &LibRaw::canon_sraw_load_raw)       return "canon_sraw_load_raw()"; //+
-
-    if (load_raw == &LibRaw::eight_bit_load_raw )       return "eight_bit_load_raw()"; //+
-    if (load_raw == &LibRaw::foveon_load_raw )          return "foveon_load_raw()";
-    if (load_raw == &LibRaw::fuji_load_raw )            return "fuji_load_raw()"; //+
-    // 10
-    if (load_raw == &LibRaw::hasselblad_load_raw )      return "hasselblad_load_raw()"; //+
-    if (load_raw == &LibRaw::imacon_full_load_raw )     return "imacon_full_load_raw()"; //+ (untested)
-    if (load_raw == &LibRaw::kodak_262_load_raw )       return "kodak_262_load_raw()"; //+
-
-    if (load_raw == &LibRaw::kodak_65000_load_raw )     return "kodak_65000_load_raw()";//+
-    if (load_raw == &LibRaw::kodak_dc120_load_raw )     return "kodak_dc120_load_raw()"; //+
-    if (load_raw == &LibRaw::kodak_jpeg_load_raw )      return "kodak_jpeg_load_raw()"; //+ (untested)
-
-    if (load_raw == &LibRaw::kodak_radc_load_raw )      return "kodak_radc_load_raw()"; //+
-    if (load_raw == &LibRaw::kodak_rgb_load_raw )       return "kodak_rgb_load_raw()"; //+ (untested)
-    if (load_raw == &LibRaw::kodak_yrgb_load_raw )      return "kodak_yrgb_load_raw()"; //+
-    if (load_raw == &LibRaw::kodak_ycbcr_load_raw )     return "kodak_ycbcr_load_raw()"; //+ (untested)
-    // 20
-    if (load_raw == &LibRaw::leaf_hdr_load_raw )        return "leaf_hdr_load_raw()"; //+
-    if (load_raw == &LibRaw::lossless_jpeg_load_raw)    return "lossless_jpeg_load_raw()"; //+
-    if (load_raw == &LibRaw::minolta_rd175_load_raw )   return "minolta_rd175_load_raw()"; //+
-
-    if (load_raw == &LibRaw::nikon_compressed_load_raw) return "nikon_compressed_load_raw()";//+
-    if (load_raw == &LibRaw::nokia_load_raw )           return "nokia_load_raw()";//+ (untested)
-
-    if (load_raw == &LibRaw::olympus_load_raw )    return "olympus_load_raw()"; //+
-    if (load_raw == &LibRaw::packed_load_raw )       return "packed_load_raw()"; //+
-    if (load_raw == &LibRaw::panasonic_load_raw )       return "panasonic_load_raw()";//+
-    // 30
-    if (load_raw == &LibRaw::pentax_load_raw )          return "pentax_load_raw()"; //+
-    if (load_raw == &LibRaw::phase_one_load_raw )       return "phase_one_load_raw()"; //+
-    if (load_raw == &LibRaw::phase_one_load_raw_c )     return "phase_one_load_raw_c()"; //+
-
-    if (load_raw == &LibRaw::quicktake_100_load_raw )   return "quicktake_100_load_raw()";//+ (untested)
-    if (load_raw == &LibRaw::rollei_load_raw )          return "rollei_load_raw()"; //+ (untested)
-    if (load_raw == &LibRaw::sinar_4shot_load_raw )     return "sinar_4shot_load_raw()";//+
-
-    if (load_raw == &LibRaw::smal_v6_load_raw )         return "smal_v6_load_raw()";//+ (untested)
-    if (load_raw == &LibRaw::smal_v9_load_raw )         return "smal_v9_load_raw()";//+ (untested)
-    if (load_raw == &LibRaw::sony_load_raw )            return "sony_load_raw()"; //+
-    if (load_raw == &LibRaw::sony_arw_load_raw )        return "sony_arw_load_raw()";//+
-    // 40
-    if (load_raw == &LibRaw::sony_arw2_load_raw )       return "sony_arw2_load_raw()";//+
-    if (load_raw == &LibRaw::unpacked_load_raw )        return "unpacked_load_raw()"; //+
-    // 42 total
-        
-    return "Unknown unpack function";
+    if (load_raw == &LibRaw::adobe_dng_load_raw_lj)          d_info->decoder_name = "adobe_dng_load_raw_lj()"; //+
+    else if (load_raw == &LibRaw::adobe_dng_load_raw_nc)     d_info->decoder_name = "adobe_dng_load_raw_nc()"; //+
+    else if (load_raw == &LibRaw::canon_600_load_raw) 
+        {
+            d_info->decoder_name = "canon_600_load_raw()";   
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT; // WB set within decoder, no need to load raw
+        }
+    else if (load_raw == &LibRaw::canon_compressed_load_raw)
+        {
+            d_info->decoder_name = "canon_compressed_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::canon_sraw_load_raw)       d_info->decoder_name = "canon_sraw_load_raw()"; //+
+    else if (load_raw == &LibRaw::eight_bit_load_raw )       d_info->decoder_name = "eight_bit_load_raw()"; //+
+    else if (load_raw == &LibRaw::foveon_load_raw )
+        {
+            d_info->decoder_name = "foveon_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::fuji_load_raw )            d_info->decoder_name = "fuji_load_raw()"; //+
+    else if (load_raw == &LibRaw::hasselblad_load_raw )      d_info->decoder_name = "hasselblad_load_raw()"; //+
+    else if (load_raw == &LibRaw::imacon_full_load_raw )     d_info->decoder_name = "imacon_full_load_raw()"; 
+    else if (load_raw == &LibRaw::kodak_262_load_raw )       d_info->decoder_name = "kodak_262_load_raw()"; //+
+    else if (load_raw == &LibRaw::kodak_65000_load_raw )     d_info->decoder_name = "kodak_65000_load_raw()";//+
+    else if (load_raw == &LibRaw::kodak_dc120_load_raw )     d_info->decoder_name = "kodak_dc120_load_raw()"; //+
+    else if (load_raw == &LibRaw::kodak_jpeg_load_raw )      d_info->decoder_name = "kodak_jpeg_load_raw()"; 
+    else if (load_raw == &LibRaw::kodak_radc_load_raw )      d_info->decoder_name = "kodak_radc_load_raw()"; //+
+    else if (load_raw == &LibRaw::kodak_rgb_load_raw )       d_info->decoder_name = "kodak_rgb_load_raw()"; //
+    else if (load_raw == &LibRaw::kodak_yrgb_load_raw )      d_info->decoder_name = "kodak_yrgb_load_raw()"; //+
+    else if (load_raw == &LibRaw::kodak_ycbcr_load_raw )     d_info->decoder_name = "kodak_ycbcr_load_raw()"; //
+    else if (load_raw == &LibRaw::leaf_hdr_load_raw )        d_info->decoder_name = "leaf_hdr_load_raw()"; //+
+    else if (load_raw == &LibRaw::lossless_jpeg_load_raw)    d_info->decoder_name = "lossless_jpeg_load_raw()"; //+
+    else if (load_raw == &LibRaw::minolta_rd175_load_raw )   d_info->decoder_name = "minolta_rd175_load_raw()"; //+
+    else if (load_raw == &LibRaw::nikon_compressed_load_raw) d_info->decoder_name = "nikon_compressed_load_raw()";//+
+    else if (load_raw == &LibRaw::nokia_load_raw )           d_info->decoder_name = "nokia_load_raw()";//+
+    else if (load_raw == &LibRaw::olympus_load_raw )         d_info->decoder_name = "olympus_load_raw()"; //+
+    else if (load_raw == &LibRaw::packed_load_raw )          d_info->decoder_name = "packed_load_raw()"; //+
+    else if (load_raw == &LibRaw::panasonic_load_raw )       d_info->decoder_name = "panasonic_load_raw()";//+
+    else if (load_raw == &LibRaw::pentax_load_raw )          d_info->decoder_name = "pentax_load_raw()"; //+
+    else if (load_raw == &LibRaw::phase_one_load_raw )       d_info->decoder_name = "phase_one_load_raw()"; //+
+    else if (load_raw == &LibRaw::phase_one_load_raw_c )     d_info->decoder_name = "phase_one_load_raw_c()"; //+
+    else if (load_raw == &LibRaw::quicktake_100_load_raw )   d_info->decoder_name = "quicktake_100_load_raw()";//+
+    else if (load_raw == &LibRaw::rollei_load_raw )          d_info->decoder_name = "rollei_load_raw()"; //+ 
+    else if (load_raw == &LibRaw::sinar_4shot_load_raw )
+        {
+            d_info->decoder_name = "sinar_4shot_load_raw()";//+
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT;
+        }
+    else if (load_raw == &LibRaw::smal_v6_load_raw )         d_info->decoder_name = "smal_v6_load_raw()";//+
+    else if (load_raw == &LibRaw::smal_v9_load_raw )         d_info->decoder_name = "smal_v9_load_raw()";//+ 
+    else if (load_raw == &LibRaw::sony_load_raw )            d_info->decoder_name = "sony_load_raw()"; //+
+    else if (load_raw == &LibRaw::sony_arw_load_raw )        d_info->decoder_name = "sony_arw_load_raw()";//+
+    else if (load_raw == &LibRaw::sony_arw2_load_raw )       d_info->decoder_name = "sony_arw2_load_raw()";//+
+    else if (load_raw == &LibRaw::unpacked_load_raw )        d_info->decoder_name = "unpacked_load_raw()"; //+
+    else
+        {
+            d_info->decoder_name = "Unknown unpack function";
+            d_info->decoder_flags = LIBRAW_DECODER_NOTSET;
+        }
+    return LIBRAW_SUCCESS;
 }
 
 int LibRaw::adjust_maximum()
@@ -775,8 +793,34 @@ int LibRaw::unpack(void)
 
         if(!own_filtering_supported() && (O.filtering_mode & LIBRAW_FILTERING_AUTOMATIC_BIT))
             O.filtering_mode = LIBRAW_FILTERING_AUTOMATIC_BIT; // turn on black and zeroes filtering
+
+        libraw_decoder_info_t decoder_info;
+        get_decoder_info(&decoder_info);
+        if(decoder_info.decoder_flags == LIBRAW_DECODER_FLATFIELD)
+            {
+                imgdata.raw_image = (ushort*)malloc(S.raw_width*S.raw_height*sizeof(imgdata.raw_image[0]));
+            }
         
         (this->*load_raw)();
+
+        if(decoder_info.decoder_flags == LIBRAW_DECODER_FLATFIELD)
+            {
+                // Move raw_image into image
+                int colors[2];
+                for(int c=0;c<3;c++) C.channel_maximum[c] = 0;
+                for(int row = 0; row < S.height; row++)
+                    {
+                        colors[0] = FC(row,0);
+                        colors[1] = FC(row,1);
+                        for(int col = 0; col < S.width; col++)
+                            {
+                                int cc = colors[col%2];
+                                ushort val = imgdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+                                imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
+                                if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                            }
+                    }
+            }
         
         O.document_mode = save_document_mode;
 

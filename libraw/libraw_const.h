@@ -24,6 +24,15 @@ it under the terms of the one of three licenses as you choose:
 #define LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD 0.75
 #define LIBRAW_DEFAULT_AUTO_BRIGHTNESS_THRESHOLD 0.01
 
+enum LibRaw_decoder_flags
+{
+    LIBRAW_DECODER_LEGACY = 0,      
+    LIBRAW_DECODER_FLATFIELD = 1,
+    LIBRAW_DECODER_4COMPONENT = 1<<1,
+    LIBRAW_DECODER_NOTSET = 1<<2
+};
+
+
 enum LibRaw_constructor_flags
 {
     LIBRAW_OPTIONS_NONE         =0,

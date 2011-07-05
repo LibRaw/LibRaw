@@ -832,31 +832,48 @@ void CLASS canon_compressed_load_raw()
       }
       fseek (ifp, save, SEEK_SET);
     }
+
+#ifdef LIBRAW_LIBRARY_BUILD
+    for (r=0; r < 8; r++) {
+        if(row+r>=raw_height) break; // Not sure that raw_height is always N*8
+        // MOVE entire row into place
+        memmove(&raw_image[(row+r)*raw_width],&pixel[r*raw_width],raw_width*sizeof(pixel[0]));
+
+        irow = row - top_margin + r;
+        if (irow >= height) continue; // if row above image area than irow is VERY positive :)
+
+        // only margins!
+        for (col=0; col < left_margin; col++) 
+            {
+                icol = col - left_margin;
+                c = FC(irow,icol);
+                if (icol >= width && col > 1 && (unsigned) (col-left_margin+2) > width+3)
+                    cblack[c] += (cblack[4+c]++,pixel[r*raw_width+col]);
+            }
+        for (col=width+left_margin; col < raw_width; col++) 
+            {
+                icol = col - left_margin;
+                c = FC(irow,icol);
+                if (icol >= width && col > 1 && (unsigned) (col-left_margin+2) > width+3)
+                    cblack[c] += (cblack[4+c]++,pixel[r*raw_width+col]);
+            }
+
+    }
+#else
+    // dcraw original code
     for (r=0; r < 8; r++) {
       irow = row - top_margin + r;
-#ifndef LIBRAW_LIBRARY_BUILD
       if (irow >= height) continue;
-#endif
       for (col=0; col < raw_width; col++) {
-#ifdef LIBRAW_LIBRARY_BUILD
-          ushort *dfp = get_masked_pointer(row+r,col);
-          if(dfp) *dfp = pixel[r*raw_width+col];
-          if (irow >= height) continue; // skip for top/bottom rows
-#endif
 	icol = col - left_margin;
 	c = FC(irow,icol);
 	if (icol < width)
-            {
-#ifdef LIBRAW_LIBRARY_BUILD
-                ushort val = pixel[r*raw_width+col];
-                if(channel_maximum[c] < val) channel_maximum[c]=val;
-#endif
-                BAYER(irow,icol) = pixel[r*raw_width+col];
-            }
+	  BAYER(irow,icol) = pixel[r*raw_width+col];
 	else if (col > 1 && (unsigned) (col-left_margin+2) > width+3)
 	  cblack[c] += (cblack[4+c]++,pixel[r*raw_width+col]);
       }
     }
+#endif
   }
   free (pixel);
   FORC(2) free (huff[c]);

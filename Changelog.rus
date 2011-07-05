@@ -1,4 +1,9 @@
-﻿2011-07-03 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-07-05 Alex Tutubalin <lexa@lexa.ru>
+        * Распаковка данных в плоский буфер
+          + canon_compressed_load_raw
+
+
+2011-07-03 Alex Tutubalin <lexa@lexa.ru>
         * Косметические исправления в коде Libraw_memmgr
 
         * Поддержка OpenMP разрешена для MS VS2008

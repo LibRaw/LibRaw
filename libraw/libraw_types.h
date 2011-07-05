@@ -94,6 +94,11 @@ typedef unsigned short ushort;
 #  define DllDef
 #endif
 
+typedef struct
+{
+    const char          *decoder_name;
+    enum LibRaw_decoder_flags decoder_flags;
+}libraw_decoder_info_t;
 
 
 typedef void (* memory_callback)(void * data, const char *file, const char *where);
@@ -318,6 +323,7 @@ typedef struct
     libraw_thumbnail_t          thumbnail;
     libraw_masked_t             masked_pixels;
     ushort                      (*image)[4] ;
+    ushort                      *raw_image;
     libraw_output_params_t     params;
     void                *parent_class;      
 } libraw_data_t;
