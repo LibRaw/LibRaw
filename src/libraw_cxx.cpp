@@ -817,39 +817,22 @@ int LibRaw::unpack(void)
 
         if(decoder_info.decoder_flags == LIBRAW_DECODER_FLATFIELD)
             {
-                printf("MM: %d %d B: %d S: %d \n",S.top_margin,S.left_margin,C.black,IO.shrink);
                 // Move raw_image into image
                 for(int c=0;c<4;c++) C.channel_maximum[c] = 0;
-                if(IO.fuji_width)
+                for(int row = 0; row < S.height; row++)
                     {
-                        for(int row = 0; row < S.height; row++)
+                        int colors[4];
+                        for (int xx=0;xx<4;xx++)
+                            colors[xx] = COLOR(row,xx);
+                        for(int col = 0; col < S.width; col++)
                             {
-                            for(int col = 0; col < S.width; col++)
-                                {
-                                    int cc = COLOR(row,col);
-                                    ushort val = imgdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
-                                    imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
-                                    if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
-                                }
-                        }
-
-                    }
-                else
-                    {
-                        int colors[2];
-                        for(int row = 0; row < S.height; row++)
-                            {
-                                colors[0] = COLOR(row,0);
-                                colors[1] = COLOR(row,1);
-                                for(int col = 0; col < S.width; col++)
-                                    {
-                                        int cc = colors[col%2];
-                                        ushort val = imgdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
-                                        imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
-                                        if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
-                                    }
+                                int cc = colors[col%4];
+                                ushort val = imgdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+                                imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
+                                if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
                             }
                     }
+
             }
         
         O.document_mode = save_document_mode;
