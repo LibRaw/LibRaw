@@ -1309,35 +1309,17 @@ void CLASS adobe_copy_pixel (int row, int col, ushort **rp)
 {
   unsigned r, c;
 
+#ifndef LIBRAW_LIBRARY_BUILD
   r = row -= top_margin;
   c = col -= left_margin;
   if (is_raw == 2 && shot_select) (*rp)++;
   if (filters) {
-#ifndef LIBRAW_LIBRARY_BUILD
     if (fuji_width) {
       r = row + fuji_width - 1 - (col >> 1);
       c = row + ((col+1) >> 1);
     }
-#endif
-#ifdef LIBRAW_LIBRARY_BUILD
-    ushort val = **rp;
-    if(!(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
-        val = **rp < 0x1000 ? curve[**rp] : **rp;
-    if (r < height && c < width)
-        {
-            ushort color = COLOR(r,c);
-            image[((row) >> shrink)*iwidth + ((col) >> shrink)][color] = val;
-            if(channel_maximum[color] < val) channel_maximum[color] = val;
-        }
-    else
-        {
-            ushort *dfp = get_masked_pointer(row+top_margin,col+left_margin);
-            if(dfp) *dfp = val;
-        }
-#else
     if (r < height && c < width)
       BAYER(r,c) = **rp < 0x1000 ? curve[**rp] : **rp;
-#endif
     *rp += is_raw;
   } else {
     if (r < height && c < width)
@@ -1345,7 +1327,24 @@ void CLASS adobe_copy_pixel (int row, int col, ushort **rp)
 	image[row*width+col][c] = (*rp)[c] < 0x1000 ? curve[(*rp)[c]]:(*rp)[c];
     *rp += tiff_samples;
   }
+#else
+  if (is_raw == 2 && shot_select) (*rp)++;
+  if (filters) {
+      if(row < raw_height && col < raw_width)
+          raw_image[row*raw_width+col] = **rp < 0x1000 ? curve[**rp] : **rp;
+    *rp += is_raw;
+  } else {
+      r = row -= top_margin;
+      c = col -= left_margin;
+      if (r < height && c < width)
+          FORC(tiff_samples)
+              image[row*width+col][c] = (*rp)[c] < 0x1000 ? curve[(*rp)[c]]:(*rp)[c];
+      *rp += tiff_samples;
+  }
+
+#endif
   if (is_raw == 2 && shot_select) (*rp)--;
+
 }
 
 void CLASS adobe_dng_load_raw_lj()

@@ -303,8 +303,16 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
 
     // sorted names order
-    if (load_raw == &LibRaw::adobe_dng_load_raw_lj)          d_info->decoder_name = "adobe_dng_load_raw_lj()"; //+
-    else if (load_raw == &LibRaw::adobe_dng_load_raw_nc)     d_info->decoder_name = "adobe_dng_load_raw_nc()"; //+
+    if (load_raw == &LibRaw::adobe_dng_load_raw_lj) 
+        {
+            d_info->decoder_name = "adobe_dng_load_raw_lj()"; 
+            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT;
+        }
+    else if (load_raw == &LibRaw::adobe_dng_load_raw_nc)
+        {
+            d_info->decoder_name = "adobe_dng_load_raw_nc()"; 
+            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT;
+        }
     else if (load_raw == &LibRaw::canon_600_load_raw) 
         {
             d_info->decoder_name = "canon_600_load_raw()";   
@@ -315,12 +323,16 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "canon_compressed_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
-    else if (load_raw == &LibRaw::canon_sraw_load_raw)       d_info->decoder_name = "canon_sraw_load_raw()"; //+
+    else if (load_raw == &LibRaw::canon_sraw_load_raw) 
+        {
+            d_info->decoder_name = "canon_sraw_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT; 
+        }
     else if (load_raw == &LibRaw::eight_bit_load_raw )       d_info->decoder_name = "eight_bit_load_raw()"; //+
     else if (load_raw == &LibRaw::foveon_load_raw )
         {
             d_info->decoder_name = "foveon_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT; 
         }
     else if (load_raw == &LibRaw::fuji_load_raw )            d_info->decoder_name = "fuji_load_raw()"; //+
     else if (load_raw == &LibRaw::hasselblad_load_raw )      d_info->decoder_name = "hasselblad_load_raw()"; //+
@@ -805,19 +817,37 @@ int LibRaw::unpack(void)
 
         if(decoder_info.decoder_flags == LIBRAW_DECODER_FLATFIELD)
             {
+                printf("MM: %d %d B: %d S: %d \n",S.top_margin,S.left_margin,C.black,IO.shrink);
                 // Move raw_image into image
-                int colors[2];
-                for(int c=0;c<3;c++) C.channel_maximum[c] = 0;
-                for(int row = 0; row < S.height; row++)
+                for(int c=0;c<4;c++) C.channel_maximum[c] = 0;
+                if(IO.fuji_width)
                     {
-                        colors[0] = FC(row,0);
-                        colors[1] = FC(row,1);
-                        for(int col = 0; col < S.width; col++)
+                        for(int row = 0; row < S.height; row++)
                             {
-                                int cc = colors[col%2];
-                                ushort val = imgdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
-                                imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
-                                if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                            for(int col = 0; col < S.width; col++)
+                                {
+                                    int cc = COLOR(row,col);
+                                    ushort val = imgdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+                                    imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
+                                    if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                                }
+                        }
+
+                    }
+                else
+                    {
+                        int colors[2];
+                        for(int row = 0; row < S.height; row++)
+                            {
+                                colors[0] = COLOR(row,0);
+                                colors[1] = COLOR(row,1);
+                                for(int col = 0; col < S.width; col++)
+                                    {
+                                        int cc = colors[col%2];
+                                        ushort val = imgdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+                                        imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
+                                        if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                                    }
                             }
                     }
             }
