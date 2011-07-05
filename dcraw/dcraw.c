@@ -1704,8 +1704,8 @@ int CLASS minolta_z2()
  */
 void CLASS fuji_load_raw()
 {
-  ushort *pixel;
 #ifndef LIBRAW_LIBRARY_BUILD
+  ushort *pixel;
   int wide, row, col, r, c;
 
   fseek (ifp, (top_margin*raw_width + left_margin) * 2, SEEK_CUR);
@@ -1728,33 +1728,7 @@ void CLASS fuji_load_raw()
   }
   free (pixel);
 #else
-  int row,col;
-  pixel = (ushort *) calloc (raw_width, sizeof *pixel);
-  merror (pixel, "fuji_load_raw()");
-  for (row=0; row < raw_height; row++) {
-    read_shorts (pixel, raw_width);
-    for (col=0; col < raw_width; col++) {
-#if 1
-        raw_image[row*raw_width+col] = pixel[col]; // memmove!
-#else
-        if(col >= left_margin && col < width+left_margin
-           && row >= top_margin && row < height+top_margin)
-            {
-                int rrow = row-top_margin;
-                int ccol = col-left_margin;
-                ushort color = FCF(rrow,ccol);
-                image[((rrow) >> shrink)*iwidth + ((ccol) >> shrink)][color] = pixel[col];
-                if(channel_maximum[color] < pixel[col] ) channel_maximum[color] = pixel[col];
-            }
-        else
-            {
-                ushort *dfp = get_masked_pointer(row,col);
-                if(dfp) *dfp = pixel[col];
-            }
-#endif
-    }
-  }
-  free (pixel);
+  read_shorts(raw_image,raw_width*raw_height);
 #endif
 }
 //@end COMMON
