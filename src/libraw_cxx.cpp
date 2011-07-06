@@ -305,11 +305,13 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     // sorted names order
     if (load_raw == &LibRaw::adobe_dng_load_raw_lj) 
         {
+            // Check rbayer
             d_info->decoder_name = "adobe_dng_load_raw_lj()"; 
             d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
         }
     else if (load_raw == &LibRaw::adobe_dng_load_raw_nc)
         {
+            // Check rbayer
             d_info->decoder_name = "adobe_dng_load_raw_nc()"; 
             d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
         }
@@ -403,6 +405,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         }
     else if (load_raw == &LibRaw::lossless_jpeg_load_raw)
         {
+            // Check rbayer
             d_info->decoder_name = "lossless_jpeg_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }

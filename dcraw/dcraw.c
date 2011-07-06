@@ -1203,7 +1203,7 @@ void CLASS lossless_jpeg_load_raw()
 	  cblack[c] += (cblack[4+c]++,val);
       }
 #else
-      raw_image[row*raw_width+col] = val;
+      RBAYER(row,col) = val;
       if ((unsigned) (row-top_margin) < height) 
           {
               // within image height
@@ -1353,7 +1353,7 @@ void CLASS adobe_copy_pixel (int row, int col, ushort **rp)
   if (is_raw == 2 && shot_select) (*rp)++;
   if (filters) {
       if(row < raw_height && col < raw_width)
-          raw_image[row*raw_width+col] = **rp < 0x1000 ? curve[**rp] : **rp;
+          RBAYER(row,col) = **rp < 0x1000 ? curve[**rp] : **rp;
     *rp += is_raw;
   } else {
       r = row -= top_margin;
@@ -1609,7 +1609,7 @@ void CLASS nikon_compressed_load_raw()
       ushort xval = hpred[col & 1];
       if(!(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
           xval = curve[LIM((short)xval,0,0x3fff)];
-      raw_image[row*raw_width+col] = xval;
+      RBAYER(row,col) = xval;
 #endif
 
     }
@@ -2282,7 +2282,7 @@ void CLASS hasselblad_load_raw()
 	  diff -= (1 << len[c]) - 1;
 	if (diff == 65535) diff = -32768;
 	pred[c] += diff;
-        raw_image[row*raw_width+col+c] = pred[c];
+        RBAYER(row,col+c) = pred[c];
       }
     }
   }
@@ -2316,7 +2316,7 @@ void CLASS leaf_hdr_load_raw()
 #else
       if(filters)
           {
-              memmove(&raw_image[r*raw_width],pixel,raw_width*sizeof(raw_image[0]));
+              memmove(&raw_image[r*raw_width],pixel,raw_width*sizeof(pixel[0]));
           }
       else if ((row = r - top_margin) >= height) 
           continue; // out of visible area!
@@ -2913,17 +2913,10 @@ void CLASS kodak_jpeg_load_raw()
     jpeg_read_scanlines (&cinfo, buf, 1);
     pixel = (JSAMPLE (*)[3]) buf[0];
     for (col=0; col < width; col+=2) {
-#ifndef LIBRAW_LIBRARY_BUILD
-      BAYER(row+0,col+0) = pixel[col+0][1] << 1;
-      BAYER(row+1,col+1) = pixel[col+1][1] << 1;
-      BAYER(row+0,col+1) = pixel[col][0] + pixel[col+1][0];
-      BAYER(row+1,col+0) = pixel[col][2] + pixel[col+1][2];
-#else
-      raw_image[(row+0)*raw_width+(col+0)] = pixel[col+0][1] << 1;
-      raw_image[(row+1)*raw_width+(col+1)] = pixel[col+1][1] << 1;
-      raw_image[(row+0)*raw_width+(col+1)] = pixel[col][0] + pixel[col+1][0];
-      raw_image[(row+1)*raw_width+(col+0)] = pixel[col][2] + pixel[col+1][2];
-#endif
+      RBAYER(row+0,col+0) = pixel[col+0][1] << 1;
+      RBAYER(row+1,col+1) = pixel[col+1][1] << 1;
+      RBAYER(row+0,col+1) = pixel[col][0] + pixel[col+1][0];
+      RBAYER(row+1,col+0) = pixel[col][2] + pixel[col+1][2];
     }
   }
   jpeg_finish_decompress (&cinfo);
@@ -2943,11 +2936,7 @@ void CLASS kodak_dc120_load_raw()
     if (fread (pixel, 1, 848, ifp) < 848) derror();
     shift = row * mul[row & 3] + add[row & 3];
     for (col=0; col < width; col++)
-#ifdef LIBRAW_LIBRARY_BUILD
-        raw_image[row*raw_width+col] = pixel[(col + shift) % 848];
-#else
-      BAYER(row,col) = (ushort) pixel[(col + shift) % 848];
-#endif
+      RBAYER(row,col) = (ushort) pixel[(col + shift) % 848];
   }
   maximum = 0xff;
 }
@@ -2981,7 +2970,7 @@ void CLASS eight_bit_load_raw()
             }
         else
             val = curve[pixel[col]];
-        raw_image[row*raw_width+col] = val;
+        RBAYER(row,col) = val;
         if((unsigned) (row-top_margin)< height)
             if ((unsigned) (col-left_margin) >= width)
                 lblack+=val;
@@ -3072,7 +3061,7 @@ void CLASS kodak_262_load_raw()
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
-      raw_image[row*raw_width+col] = val;
+      RBAYER(row,col) = val;
       if ((unsigned) (col-left_margin) >= width)
           black+=val;
 #else
@@ -3153,7 +3142,7 @@ void CLASS kodak_65000_load_raw()
           ushort val = ret ? buf[i] : (pred[i & 1] += buf[i]);
           if(!(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
               val = curve[val];
-          raw_image[row*raw_width+col+i] = val;
+          RBAYER(row,col+i) = val;
           if(curve[val]>>12) derror();
       }
 #endif
