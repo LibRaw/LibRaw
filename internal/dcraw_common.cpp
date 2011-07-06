@@ -809,9 +809,12 @@ void CLASS lossless_jpeg_load_raw()
   int min=INT_MAX;
   ushort *rp;
 #ifdef LIBRAW_LIBRARY_BUILD
+  int save_min = 0;
   unsigned slicesW[16],slicesWcnt=0,slices;
   unsigned *offset;
   unsigned t_y=0,t_x=0,t_s=0,slice=0,pixelsInSlice,pixno;
+  if (!strcasecmp(make,"KODAK"))
+      save_min = 1;
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -906,21 +909,34 @@ void CLASS lossless_jpeg_load_raw()
       if (raw_width == 3984 && (col -= 2) < 0)
               col += (row--,raw_width);
 
-#ifdef LIBRAW_LIBRARY_BUILD
-      ushort *dfp = get_masked_pointer(row,col);
-      if(dfp) *dfp = val;
-#endif
+#ifndef LIBRAW_LIBRARY_BUILD
       if ((unsigned) (row-top_margin) < height) {
 	c = FC(row-top_margin,col-left_margin);
 	if ((unsigned) (col-left_margin) < width) {
-#ifdef LIBRAW_LIBRARY_BUILD
-            if(channel_maximum[c] < val) channel_maximum[c] = val;
-#endif
 	  BAYER(row-top_margin,col-left_margin) = val;
 	  if (min > val) min = val;
 	} else if (col > 1 && (unsigned) (col-left_margin+2) > width+3)
 	  cblack[c] += (cblack[4+c]++,val);
       }
+#else
+      raw_image[row*raw_width+col] = val;
+      if ((unsigned) (row-top_margin) < height) 
+          {
+              // within image height
+              if ((unsigned) (col-left_margin) < width) 
+                  {
+                      // within image area, save min
+                      if(save_min)
+                          if (min > val) min = val;
+                  } 
+              else if (col > 1 && (unsigned) (col-left_margin+2) > width+3) 
+                  {
+                      c = FC(row-top_margin,col-left_margin);
+                      cblack[c] += (cblack[4+c]++,val);
+                  }
+          }
+#endif
+
 #ifndef LIBRAW_LIBRARY_BUILD
       if (++col >= raw_width)
 	col = (row++,0);
@@ -1453,7 +1469,7 @@ void CLASS fuji_load_raw()
   read_shorts(raw_image,raw_width*raw_height);
 #endif
 }
-#line 1739 "dcraw/dcraw.c"
+#line 1755 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -2036,7 +2052,7 @@ void CLASS leaf_hdr_load_raw()
   }
 }
 
-#line 2325 "dcraw/dcraw.c"
+#line 2341 "dcraw/dcraw.c"
 void CLASS sinar_4shot_load_raw()
 {
   ushort *pixel;
@@ -3299,7 +3315,7 @@ void CLASS smal_v9_load_raw()
     smal_decode_segment (seg+i, holes);
   if (holes) fill_holes (holes);
 }
-#line 3753 "dcraw/dcraw.c"
+#line 3769 "dcraw/dcraw.c"
 
 void CLASS crop_pixels()
 {
@@ -4691,7 +4707,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 5148 "dcraw/dcraw.c"
+#line 5164 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5271,7 +5287,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5732 "dcraw/dcraw.c"
+#line 5748 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6524,7 +6540,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 6991 "dcraw/dcraw.c"
+#line 7007 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -7213,7 +7229,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7683 "dcraw/dcraw.c"
+#line 7699 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8794,7 +8810,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9357 "dcraw/dcraw.c"
+#line 9373 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -9013,7 +9029,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9600 "dcraw/dcraw.c"
+#line 9616 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

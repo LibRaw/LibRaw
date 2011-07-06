@@ -401,7 +401,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "leaf_hdr_load_raw()"; 
             d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
         }
-    else if (load_raw == &LibRaw::lossless_jpeg_load_raw)    d_info->decoder_name = "lossless_jpeg_load_raw()"; //+
+    else if (load_raw == &LibRaw::lossless_jpeg_load_raw)
+        {
+            d_info->decoder_name = "lossless_jpeg_load_raw()"; //+
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
     else if (load_raw == &LibRaw::minolta_rd175_load_raw )   d_info->decoder_name = "minolta_rd175_load_raw()"; //+
     else if (load_raw == &LibRaw::nikon_compressed_load_raw) d_info->decoder_name = "nikon_compressed_load_raw()";//+
     else if (load_raw == &LibRaw::nokia_load_raw )           d_info->decoder_name = "nokia_load_raw()";//+

@@ -1087,9 +1087,12 @@ void CLASS lossless_jpeg_load_raw()
   int min=INT_MAX;
   ushort *rp;
 #ifdef LIBRAW_LIBRARY_BUILD
+  int save_min = 0;
   unsigned slicesW[16],slicesWcnt=0,slices;
   unsigned *offset;
   unsigned t_y=0,t_x=0,t_s=0,slice=0,pixelsInSlice,pixno;
+  if (!strcasecmp(make,"KODAK"))
+      save_min = 1;
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -1184,21 +1187,34 @@ void CLASS lossless_jpeg_load_raw()
       if (raw_width == 3984 && (col -= 2) < 0)
               col += (row--,raw_width);
 
-#ifdef LIBRAW_LIBRARY_BUILD
-      ushort *dfp = get_masked_pointer(row,col);
-      if(dfp) *dfp = val;
-#endif
+#ifndef LIBRAW_LIBRARY_BUILD
       if ((unsigned) (row-top_margin) < height) {
 	c = FC(row-top_margin,col-left_margin);
 	if ((unsigned) (col-left_margin) < width) {
-#ifdef LIBRAW_LIBRARY_BUILD
-            if(channel_maximum[c] < val) channel_maximum[c] = val;
-#endif
 	  BAYER(row-top_margin,col-left_margin) = val;
 	  if (min > val) min = val;
 	} else if (col > 1 && (unsigned) (col-left_margin+2) > width+3)
 	  cblack[c] += (cblack[4+c]++,val);
       }
+#else
+      raw_image[row*raw_width+col] = val;
+      if ((unsigned) (row-top_margin) < height) 
+          {
+              // within image height
+              if ((unsigned) (col-left_margin) < width) 
+                  {
+                      // within image area, save min
+                      if(save_min)
+                          if (min > val) min = val;
+                  } 
+              else if (col > 1 && (unsigned) (col-left_margin+2) > width+3) 
+                  {
+                      c = FC(row-top_margin,col-left_margin);
+                      cblack[c] += (cblack[4+c]++,val);
+                  }
+          }
+#endif
+
 #ifndef LIBRAW_LIBRARY_BUILD
       if (++col >= raw_width)
 	col = (row++,0);
