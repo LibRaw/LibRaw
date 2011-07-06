@@ -122,6 +122,12 @@ void CLASS read_shorts (ushort *pixel, int count)
 }
 #line 392 "dcraw/dcraw.c"
 
+#ifdef LIBRAW_LIBRARY_BUILD
+#define RBAYER(x,y) raw_image[(x)*raw_width+(y)]
+#else
+#define RBAYER(x,y) BAYER((x),(y))
+#endif
+
 void CLASS canon_600_fixed_wb (int temp)
 {
   static const short mul[4][5] = {
@@ -612,7 +618,7 @@ void CLASS canon_compressed_load_raw()
   FORC4 if (cblack[4+c]) cblack[c] /= cblack[4+c];
 }
 
-#line 894 "dcraw/dcraw.c"
+#line 900 "dcraw/dcraw.c"
 int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
   int c, tag, len;
@@ -1325,17 +1331,7 @@ void CLASS nikon_compressed_load_raw()
       ushort xval = hpred[col & 1];
       if(!(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
           xval = curve[LIM((short)xval,0,0x3fff)];
-      if ((unsigned) (col-left_margin) < width)
-          {
-              ushort color = FC(row,col-left_margin);
-              if(channel_maximum[color] < xval ) channel_maximum[color] = xval;
-              BAYER(row,col-left_margin) =  xval;
-          }
-      else
-        {
-          ushort *dfp = get_masked_pointer(row,col);
-          if(dfp) *dfp = xval;
-        }
+      raw_image[row*raw_width+col] = xval;
 #endif
 
     }
@@ -1469,7 +1465,7 @@ void CLASS fuji_load_raw()
   read_shorts(raw_image,raw_width*raw_height);
 #endif
 }
-#line 1755 "dcraw/dcraw.c"
+#line 1751 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -2052,7 +2048,7 @@ void CLASS leaf_hdr_load_raw()
   }
 }
 
-#line 2341 "dcraw/dcraw.c"
+#line 2337 "dcraw/dcraw.c"
 void CLASS sinar_4shot_load_raw()
 {
   ushort *pixel;
@@ -2117,7 +2113,8 @@ void CLASS packed_load_raw()
   fseek (ifp, top_margin*bwide, SEEK_CUR);
   bite = 8 + (load_flags & 24);
   half = (height+1) >> 1;
-  for (irow=0; irow < height; irow++) {
+  for (irow=0; irow < height; irow++) 
+  {
     row = irow;
     if (load_flags & 2 &&
 	(row = irow % half * 2 + irow / half) == 1 &&
@@ -2137,25 +2134,20 @@ void CLASS packed_load_raw()
       }
       val = bitbuf << (64-tiff_bps-vbits) >> (64-tiff_bps);
       i = (col ^ (bite == 24)) - left_margin;
-      if ((unsigned) i < width)
-          {
 #ifdef LIBRAW_LIBRARY_BUILD
-              ushort color = FC(row,i);
-              if( channel_maximum[color] < val ) channel_maximum[color] = val;
-              BAYER(row,i) = val;
+      RBAYER(row+top_margin,i+left_margin) = val;
+      if (((unsigned)i>=width) && (load_flags & 32) ) {
+	black += val;
+	zero += !val;
+      }
 #else
-	BAYER(row,i) = val;
+      if ((unsigned) i < width)
+	BAYER(row,i+left_margin) = val;
+      else if (load_flags & 32) {
+	black += val;
+	zero += !val;
+      }
 #endif
-          }
-      else if (load_flags & 32)
-          {
-#ifdef LIBRAW_LIBRARY_BUILD
-              ushort *dfp = get_masked_pointer(row,col);
-              if(dfp) *dfp = val;
-#endif
-              black += val;
-              zero += !val;
-          }
       if (load_flags & 1 && (col % 10) == 9 &&
 	fgetc(ifp) && col < width+left_margin) derror();
     }
@@ -2225,28 +2217,13 @@ void CLASS nokia_load_raw()
     for (dp=data, pix=pixel; pix < pixel+raw_width; dp+=5, pix+=4)
       FORC4 pix[c] = (dp[c] << 2) | (dp[4] >> (c << 1) & 3);
     if (row < top_margin)
-#ifdef LIBRAW_LIBRARY_BUILD
-        {
-            int col;
-            for(col=0;col<width;col++)
-                {
-                    ushort *dfp = get_masked_pointer(row,col);
-                    if(dfp) 
-                        *dfp = pixel[col];
-                    black += pixel[c];
-                }
-        }
-#else
       FORC(width) black += pixel[c];
+#ifndef LIBRAW_LIBRARY_BUILD
+    else
+      FORC(width) BAYER(row-top_margin,c) = pixel[c];
+#else
+    memmove(&raw_image[row*raw_width],pixel,width*sizeof(pixel[0]));
 #endif
-      else
-              FORC(width){
-#ifdef LIBRAW_LIBRARY_BUILD
-                  ushort color = FC(row-top_margin,c);
-                  if(channel_maximum[color] < pixel[c]) channel_maximum[color] = pixel[c];
-#endif
-                  BAYER(row-top_margin,c) = pixel[c];
-              }
   }
   free (data);
   if (top_margin) black /= top_margin * width;
@@ -2316,6 +2293,7 @@ void CLASS panasonic_load_raw()
     }
 }
 
+
 void CLASS olympus_load_raw()
 {
   ushort huff[4096];
@@ -2359,35 +2337,26 @@ void CLASS olympus_load_raw()
       carry[2] = carry[0] > 16 ? 0 : carry[2]+1;
       if (col >= width) continue;
       if (row < 2 && col < 2) pred = 0;
-      else if (row < 2) pred = BAYER(row,col-2);
-      else if (col < 2) pred = BAYER(row-2,col);
+      else if (row < 2) pred = RBAYER(row,col-2);
+      else if (col < 2) pred = RBAYER(row-2,col);
       else {
-	w  = BAYER(row,col-2);
-	n  = BAYER(row-2,col);
-	nw = BAYER(row-2,col-2);
+	w  = RBAYER(row,col-2);
+	n  = RBAYER(row-2,col);
+	nw = RBAYER(row-2,col-2);
 	if ((w < nw && nw < n) || (n < nw && nw < w)) {
 	  if (ABS(w-nw) > 32 || ABS(n-nw) > 32)
 	    pred = w + n - nw;
 	  else pred = (w + n) >> 1;
 	} else pred = ABS(w-nw) > ABS(n-nw) ? w : n;
       }
-#ifdef LIBRAW_LIBRARY_BUILD
-      {
-          ushort val = pred + ((diff << 2) | low);
-          ushort color = FC(row,col);
-          if(val >> 12) derror();
-          BAYER(row,col)=val;
-          if(channel_maximum[color] < val ) channel_maximum[color] = val;
-      }
-#else
-      if ((BAYER(row,col) = pred + ((diff << 2) | low)) >> 12) derror();
-#endif
+      if ((RBAYER(row,col) = pred + ((diff << 2) | low)) >> 12) derror();
     }
   }
 #ifdef LIBRAW_LIBRARY_BUILD
   delete buf;
 #endif
 }
+
 
 void CLASS minolta_rd175_load_raw()
 {
@@ -2413,11 +2382,6 @@ void CLASS minolta_rd175_load_raw()
     } else
       for (col=row & 1; col < 1534; col+=2)
           {
-#ifdef LIBRAW_LIBRARY_BUILD
-              ushort color = FC(row,col);
-              if(channel_maximum[color] < pixel[col/2] << 1)
-                  channel_maximum[color] = pixel[col/2] << 1;
-#endif
               BAYER(row,col) = pixel[col/2] << 1;
           }
   }
@@ -3315,7 +3279,7 @@ void CLASS smal_v9_load_raw()
     smal_decode_segment (seg+i, holes);
   if (holes) fill_holes (holes);
 }
-#line 3769 "dcraw/dcraw.c"
+#line 3733 "dcraw/dcraw.c"
 
 void CLASS crop_pixels()
 {
@@ -4707,7 +4671,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 5164 "dcraw/dcraw.c"
+#line 5128 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5287,7 +5251,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5748 "dcraw/dcraw.c"
+#line 5712 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6540,7 +6504,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 7007 "dcraw/dcraw.c"
+#line 6971 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -7229,7 +7193,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7699 "dcraw/dcraw.c"
+#line 7663 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8810,7 +8774,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9373 "dcraw/dcraw.c"
+#line 9337 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -9029,7 +8993,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9616 "dcraw/dcraw.c"
+#line 9580 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

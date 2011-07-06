@@ -403,14 +403,36 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         }
     else if (load_raw == &LibRaw::lossless_jpeg_load_raw)
         {
-            d_info->decoder_name = "lossless_jpeg_load_raw()"; //+
+            d_info->decoder_name = "lossless_jpeg_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
-    else if (load_raw == &LibRaw::minolta_rd175_load_raw )   d_info->decoder_name = "minolta_rd175_load_raw()"; //+
-    else if (load_raw == &LibRaw::nikon_compressed_load_raw) d_info->decoder_name = "nikon_compressed_load_raw()";//+
-    else if (load_raw == &LibRaw::nokia_load_raw )           d_info->decoder_name = "nokia_load_raw()";//+
-    else if (load_raw == &LibRaw::olympus_load_raw )         d_info->decoder_name = "olympus_load_raw()"; //+
-    else if (load_raw == &LibRaw::packed_load_raw )          d_info->decoder_name = "packed_load_raw()"; //+
+    else if (load_raw == &LibRaw::minolta_rd175_load_raw ) 
+        {  
+            // UNTESTED
+            d_info->decoder_name = "minolta_rd175_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+        }
+    else if (load_raw == &LibRaw::nikon_compressed_load_raw)
+        {
+            d_info->decoder_name = "nikon_compressed_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::nokia_load_raw )
+        {
+            // UNTESTED
+            d_info->decoder_name = "nokia_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::olympus_load_raw )
+        {
+            d_info->decoder_name = "olympus_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::packed_load_raw )
+        {
+            d_info->decoder_name = "packed_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
     else if (load_raw == &LibRaw::panasonic_load_raw )       d_info->decoder_name = "panasonic_load_raw()";//+
     else if (load_raw == &LibRaw::pentax_load_raw )          d_info->decoder_name = "pentax_load_raw()"; //+
     else if (load_raw == &LibRaw::phase_one_load_raw )       d_info->decoder_name = "phase_one_load_raw()"; //+
