@@ -306,17 +306,17 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     if (load_raw == &LibRaw::adobe_dng_load_raw_lj) 
         {
             d_info->decoder_name = "adobe_dng_load_raw_lj()"; 
-            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT;
+            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
         }
     else if (load_raw == &LibRaw::adobe_dng_load_raw_nc)
         {
             d_info->decoder_name = "adobe_dng_load_raw_nc()"; 
-            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT;
+            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
         }
     else if (load_raw == &LibRaw::canon_600_load_raw) 
         {
             d_info->decoder_name = "canon_600_load_raw()";   
-            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT; // WB set within decoder, no need to load raw
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY; // WB set within decoder, no need to load raw
         }
     else if (load_raw == &LibRaw::canon_compressed_load_raw)
         {
@@ -326,30 +326,81 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::canon_sraw_load_raw) 
         {
             d_info->decoder_name = "canon_sraw_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
         }
-    else if (load_raw == &LibRaw::eight_bit_load_raw )       d_info->decoder_name = "eight_bit_load_raw()"; //+
+    else if (load_raw == &LibRaw::eight_bit_load_raw )
+        {
+            d_info->decoder_name = "eight_bit_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
     else if (load_raw == &LibRaw::foveon_load_raw )
         {
             d_info->decoder_name = "foveon_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
         }
     else if (load_raw == &LibRaw::fuji_load_raw ) 
         { 
             d_info->decoder_name = "fuji_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
-    else if (load_raw == &LibRaw::hasselblad_load_raw )      d_info->decoder_name = "hasselblad_load_raw()"; //+
-    else if (load_raw == &LibRaw::imacon_full_load_raw )     d_info->decoder_name = "imacon_full_load_raw()"; 
-    else if (load_raw == &LibRaw::kodak_262_load_raw )       d_info->decoder_name = "kodak_262_load_raw()"; //+
-    else if (load_raw == &LibRaw::kodak_65000_load_raw )     d_info->decoder_name = "kodak_65000_load_raw()";//+
-    else if (load_raw == &LibRaw::kodak_dc120_load_raw )     d_info->decoder_name = "kodak_dc120_load_raw()"; //+
-    else if (load_raw == &LibRaw::kodak_jpeg_load_raw )      d_info->decoder_name = "kodak_jpeg_load_raw()"; 
-    else if (load_raw == &LibRaw::kodak_radc_load_raw )      d_info->decoder_name = "kodak_radc_load_raw()"; //+
-    else if (load_raw == &LibRaw::kodak_rgb_load_raw )       d_info->decoder_name = "kodak_rgb_load_raw()"; //
-    else if (load_raw == &LibRaw::kodak_yrgb_load_raw )      d_info->decoder_name = "kodak_yrgb_load_raw()"; //+
-    else if (load_raw == &LibRaw::kodak_ycbcr_load_raw )     d_info->decoder_name = "kodak_ycbcr_load_raw()"; //
-    else if (load_raw == &LibRaw::leaf_hdr_load_raw )        d_info->decoder_name = "leaf_hdr_load_raw()"; //+
+    else if (load_raw == &LibRaw::hasselblad_load_raw )
+        {
+            d_info->decoder_name = "hasselblad_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::imacon_full_load_raw )
+        {
+            d_info->decoder_name = "imacon_full_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
+        }
+    else if (load_raw == &LibRaw::kodak_262_load_raw )
+        {
+            d_info->decoder_name = "kodak_262_load_raw()"; // UNTESTED!
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::kodak_65000_load_raw )
+        {
+            d_info->decoder_name = "kodak_65000_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::kodak_dc120_load_raw )
+        {
+            d_info->decoder_name = "kodak_dc120_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::kodak_jpeg_load_raw )
+        {
+            // UNTESTED
+            d_info->decoder_name = "kodak_jpeg_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::kodak_radc_load_raw )
+        {
+            d_info->decoder_name = "kodak_radc_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+        }
+    else if (load_raw == &LibRaw::kodak_rgb_load_raw ) 
+        {
+            // UNTESTED
+            d_info->decoder_name = "kodak_rgb_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+        }
+    else if (load_raw == &LibRaw::kodak_yrgb_load_raw )    
+        {
+            d_info->decoder_name = "kodak_yrgb_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+        }
+    else if (load_raw == &LibRaw::kodak_ycbcr_load_raw )
+        {
+            // UNTESTED
+            d_info->decoder_name = "kodak_ycbcr_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+        }
+    else if (load_raw == &LibRaw::leaf_hdr_load_raw )
+        {
+            d_info->decoder_name = "leaf_hdr_load_raw()"; 
+            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
+        }
     else if (load_raw == &LibRaw::lossless_jpeg_load_raw)    d_info->decoder_name = "lossless_jpeg_load_raw()"; //+
     else if (load_raw == &LibRaw::minolta_rd175_load_raw )   d_info->decoder_name = "minolta_rd175_load_raw()"; //+
     else if (load_raw == &LibRaw::nikon_compressed_load_raw) d_info->decoder_name = "nikon_compressed_load_raw()";//+
@@ -365,7 +416,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::sinar_4shot_load_raw )
         {
             d_info->decoder_name = "sinar_4shot_load_raw()";//+
-            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT;
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
         }
     else if (load_raw == &LibRaw::smal_v6_load_raw )         d_info->decoder_name = "smal_v6_load_raw()";//+
     else if (load_raw == &LibRaw::smal_v9_load_raw )         d_info->decoder_name = "smal_v9_load_raw()";//+ 
@@ -822,6 +873,7 @@ int LibRaw::unpack(void)
         if(decoder_info.decoder_flags == LIBRAW_DECODER_FLATFIELD)
             {
                 // Move raw_image into image
+//                printf("MM: %d %d\n",S.top_margin,S.left_margin);
                 for(int c=0;c<4;c++) C.channel_maximum[c] = 0;
                 for(int row = 0; row < S.height; row++)
                     {
