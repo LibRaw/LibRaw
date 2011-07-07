@@ -324,7 +324,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::canon_sraw_load_raw) 
         {
             d_info->decoder_name = "canon_sraw_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_4CHANNEL; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
         }
     else if (load_raw == &LibRaw::eight_bit_load_raw )
         {
@@ -349,7 +349,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::imacon_full_load_raw )
         {
             d_info->decoder_name = "imacon_full_load_raw()"; 
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT; 
         }
     else if (load_raw == &LibRaw::kodak_262_load_raw )
         {
