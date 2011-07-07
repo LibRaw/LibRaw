@@ -372,7 +372,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         }
     else if (load_raw == &LibRaw::kodak_jpeg_load_raw )
         {
-            // UNTESTED
+            // UNTESTED + RBAYER
             d_info->decoder_name = "kodak_jpeg_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
@@ -417,6 +417,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         }
     else if (load_raw == &LibRaw::nikon_compressed_load_raw)
         {
+            // Check rbayer
             d_info->decoder_name = "nikon_compressed_load_raw()";
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
@@ -436,10 +437,26 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "packed_load_raw()";
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
-    else if (load_raw == &LibRaw::panasonic_load_raw )       d_info->decoder_name = "panasonic_load_raw()";//+
-    else if (load_raw == &LibRaw::pentax_load_raw )          d_info->decoder_name = "pentax_load_raw()"; //+
-    else if (load_raw == &LibRaw::phase_one_load_raw )       d_info->decoder_name = "phase_one_load_raw()"; //+
-    else if (load_raw == &LibRaw::phase_one_load_raw_c )     d_info->decoder_name = "phase_one_load_raw_c()"; //+
+    else if (load_raw == &LibRaw::panasonic_load_raw )
+        {
+            d_info->decoder_name = "panasonic_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::pentax_load_raw )
+        {
+            d_info->decoder_name = "pentax_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::phase_one_load_raw )
+        {
+            d_info->decoder_name = "phase_one_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::phase_one_load_raw_c )
+        {
+            d_info->decoder_name = "phase_one_load_raw_c()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
     else if (load_raw == &LibRaw::quicktake_100_load_raw )   d_info->decoder_name = "quicktake_100_load_raw()";//+
     else if (load_raw == &LibRaw::rollei_load_raw )          d_info->decoder_name = "rollei_load_raw()"; //+ 
     else if (load_raw == &LibRaw::sinar_4shot_load_raw )
