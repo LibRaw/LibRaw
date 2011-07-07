@@ -26,10 +26,10 @@ it under the terms of the one of three licenses as you choose:
 
 enum LibRaw_decoder_flags
 {
-    LIBRAW_DECODER_LEGACY = 0,      
-    LIBRAW_DECODER_FLATFIELD = 1,
-    LIBRAW_DECODER_4COMPONENT = 1<<1,
-    LIBRAW_DECODER_USEBAYER2 = 1<<2,
+    LIBRAW_DECODER_LEGACY = 1,      
+    LIBRAW_DECODER_FLATFIELD = 1<<1,
+    LIBRAW_DECODER_4COMPONENT = 1<<2,
+    LIBRAW_DECODER_USEBAYER2 = 1<<3,
     LIBRAW_DECODER_NOTSET = 1<<15
 };
 

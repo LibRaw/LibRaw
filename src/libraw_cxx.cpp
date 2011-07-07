@@ -296,7 +296,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     if(!d_info)   return LIBRAW_UNSPECIFIED_ERROR;
     if(!load_raw) return LIBRAW_OUT_OF_ORDER_CALL;
     
-    d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+    d_info->decoder_flags = LIBRAW_DECODER_NOTSET;
 
     // sorted names order
     if (load_raw == &LibRaw::adobe_dng_load_raw_lj) 
@@ -375,29 +375,29 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::kodak_radc_load_raw )
         {
             d_info->decoder_name = "kodak_radc_load_raw()"; 
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT;
         }
     else if (load_raw == &LibRaw::kodak_rgb_load_raw ) 
         {
             // UNTESTED
             d_info->decoder_name = "kodak_rgb_load_raw()"; 
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT;
         }
     else if (load_raw == &LibRaw::kodak_yrgb_load_raw )    
         {
             d_info->decoder_name = "kodak_yrgb_load_raw()"; 
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT;
         }
     else if (load_raw == &LibRaw::kodak_ycbcr_load_raw )
         {
             // UNTESTED
             d_info->decoder_name = "kodak_ycbcr_load_raw()"; 
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT;
         }
     else if (load_raw == &LibRaw::leaf_hdr_load_raw )
         {
             d_info->decoder_name = "leaf_hdr_load_raw()"; 
-            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT;
         }
     else if (load_raw == &LibRaw::lossless_jpeg_load_raw)
         {
@@ -409,7 +409,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         {  
             // UNTESTED
             d_info->decoder_name = "minolta_rd175_load_raw()"; 
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
     else if (load_raw == &LibRaw::nikon_compressed_load_raw)
         {
@@ -469,7 +469,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         {
             // UNTESTED
             d_info->decoder_name = "sinar_4shot_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = LIBRAW_DECODER_4COMPONENT;
         }
     else if (load_raw == &LibRaw::smal_v6_load_raw )
         {
@@ -754,9 +754,6 @@ int LibRaw::unpack(void)
                 imgdata.image = 0;
             }
 
-        imgdata.image = (ushort (*)[4]) calloc (S.iheight*S.iwidth, sizeof (*imgdata.image));
-        merror (imgdata.image, "unpack()");
-
         if (libraw_internal_data.unpacker_data.meta_length) 
             {
                 libraw_internal_data.internal_data.meta_data = 
@@ -770,8 +767,11 @@ int LibRaw::unpack(void)
         if(!own_filtering_supported() && (O.filtering_mode & LIBRAW_FILTERING_AUTOMATIC_BIT))
             O.filtering_mode = LIBRAW_FILTERING_AUTOMATIC_BIT; // turn on black and zeroes filtering
 
+
         libraw_decoder_info_t decoder_info;
         get_decoder_info(&decoder_info);
+
+        int save_iwidth = S.iwidth, save_iheight = S.iheight, save_shrink = IO.shrink;
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
             {
                 imgdata.rawdata.raw_alloc = malloc(S.raw_width*S.raw_height*sizeof(imgdata.rawdata.raw_image[0]));
@@ -779,16 +779,45 @@ int LibRaw::unpack(void)
             }
         else if (decoder_info.decoder_flags &  LIBRAW_DECODER_4COMPONENT)
             {
+                S.iwidth = S.width;
+                S.iheight= S.height;
+                IO.shrink = 0;
                 imgdata.rawdata.raw_alloc = calloc(S.raw_width*S.raw_height,sizeof(*imgdata.rawdata.color_image));
                 imgdata.rawdata.color_image = (ushort(*)[4]) imgdata.rawdata.raw_alloc;
             }
+        else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+            {
+                // sRAW and Foveon only, so extra buffer size is just 1/4
+                // Legacy converters does not supports half mode!
+                S.iwidth = S.width;
+                S.iheight= S.height;
+                IO.shrink = 0;
+                // allocate image as temporary buffer, size 
+                imgdata.rawdata.raw_alloc = calloc(S.iwidth*S.iheight,sizeof(*imgdata.image));
+                imgdata.image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
+            }
+
+
         (this->*load_raw)();
 
+        S.iwidth = save_iwidth;
+        S.iheight = save_iheight;
+        IO.shrink = save_shrink;
+
+        // recover saved
+        if( decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+            {
+                imgdata.image = 0; 
+                imgdata.rawdata.color_image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
+            }
+#if 1
+        imgdata.image = (ushort (*)[4]) calloc (S.iheight*S.iwidth, sizeof (*imgdata.image));
+        merror (imgdata.image, "unpack()");
+#endif
+        
+        // Move it to separate call...
         if(decoder_info.decoder_flags & LIBRAW_DECODER_FLATFIELD)
             {
-                // Move raw_image into image
-//                printf("MM: %d %d\n",S.top_margin,S.left_margin);
-                for(int c=0;c<4;c++) C.channel_maximum[c] = 0;
                 if(decoder_info.decoder_flags & LIBRAW_DECODER_USEBAYER2)
                     {
                         for(int row = 0; row < S.height; row++)
@@ -798,7 +827,6 @@ int LibRaw::unpack(void)
                                         ushort val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
                                                                                +(col+S.left_margin)];
                                         imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
-                                        if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
                                     }
                     }
                 else
@@ -811,21 +839,43 @@ int LibRaw::unpack(void)
                                 for(int col = 0; col < S.width; col++)
                                     {
                                         int cc = colors[col&3];
-                                        ushort val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
-                                                                       +(col+S.left_margin)];
-                                        imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
-                                        if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                                        imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] =
+                                            imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
                                     }
                             }
                     }
             }
         else if (decoder_info.decoder_flags & LIBRAW_DECODER_4COMPONENT)
             {
-                // no way shrink is set because half-size disabled for 4-color images!
-                for(int row = 0; row < S.height; row++)
-                    memmove(&imgdata.image[row*S.width],
-                            &imgdata.rawdata.color_image[(row+S.top_margin)*S.raw_width+S.left_margin],
-                            S.width*sizeof(*imgdata.image));
+                if(IO.shrink)
+                    {
+                        for(int row = 0; row < S.height; row++)
+                            for(int col = 0; col < S.width; col++)
+                                {
+                                    int cc = FC(row,col);
+                                    imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] 
+                                        = imgdata.rawdata.color_image[(row+S.top_margin)*S.raw_width+S.left_margin+col][cc];
+                                }
+                    }
+                else
+                    for(int row = 0; row < S.height; row++)
+                        memmove(&imgdata.image[row*S.width],
+                                &imgdata.rawdata.color_image[(row+S.top_margin)*S.raw_width+S.left_margin],
+                                S.width*sizeof(*imgdata.image));
+            }
+        else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+            {
+                // legacy is always 4channel
+                memmove(imgdata.image,imgdata.rawdata.color_image,S.width*S.height*sizeof(*imgdata.image));
+            }
+
+        for(int c=0;c<4;c++) C.channel_maximum[c] = 0;
+        for(int rc = 0; rc < S.iwidth*S.iheight; rc++)
+            {
+                if(C.channel_maximum[0]<imgdata.image[rc][0]) C.channel_maximum[0]=imgdata.image[rc][0];
+                if(C.channel_maximum[1]<imgdata.image[rc][1]) C.channel_maximum[1]=imgdata.image[rc][1];
+                if(C.channel_maximum[2]<imgdata.image[rc][2]) C.channel_maximum[2]=imgdata.image[rc][2];
+                if(C.channel_maximum[3]<imgdata.image[rc][3]) C.channel_maximum[3]=imgdata.image[rc][3];
             }
 
         O.document_mode = save_document_mode;
