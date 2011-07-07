@@ -69,7 +69,6 @@ DllDef    int                 libraw_cameraCount();
 DllDef    void                libraw_set_memerror_handler(libraw_data_t*, memory_callback cb, void *datap);
 DllDef    void                libraw_set_dataerror_handler(libraw_data_t*,data_callback func,void *datap);
 DllDef    void                libraw_set_progress_handler(libraw_data_t*,progress_callback cb,void *datap);
-DllDef    int                 libraw_add_masked_borders_to_bitmap(libraw_data_t* lr);
 DllDef    const char *        libraw_unpack_function_name(libraw_data_t* lr);
 DllDef    int                 libraw_rotate_fuji_raw(libraw_data_t* lr);
 
@@ -140,7 +139,6 @@ class DllDef LibRaw
  
     int FC(int row,int col) { return (imgdata.idata.filters >> (((row << 1 & 14) | (col & 1)) << 1) & 3);}
     int         fc (int row, int col);
-    int add_masked_borders_to_bitmap();
     
     const char *unpack_function_name();
     int get_decoder_info(libraw_decoder_info_t* d_info);
@@ -184,9 +182,6 @@ class DllDef LibRaw
     void        kodak_thumb_loader();
     void        write_thumb_ppm_tiff(FILE *); 
     void        foveon_thumb_loader (void);
-    
-    void init_masked_ptrs();
-    ushort *get_masked_pointer(int row, int col); 
     
     int         own_filtering_supported(){ return 0;}
     void        identify();

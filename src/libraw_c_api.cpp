@@ -68,13 +68,6 @@ extern "C"
     }
 
 
-    int libraw_add_masked_borders_to_bitmap(libraw_data_t* lr)
-    {
-        if(!lr) return EINVAL;
-        LibRaw *ip = (LibRaw*) lr->parent_class;
-        return ip->add_masked_borders_to_bitmap();
-    }
-
     int libraw_open_file(libraw_data_t* lr, const char *file)
     {
         if(!lr) return EINVAL;

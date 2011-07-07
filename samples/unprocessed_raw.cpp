@@ -129,11 +129,13 @@ int main(int ac, char *av[])
             if(verbose)
                 printf("Unpacked....\n");
 
+#if 0
             if(add_borders)
                 if( (ret = RawProcessor.add_masked_borders_to_bitmap() ) != LIBRAW_SUCCESS)
                     {
                         fprintf(stderr,"Cannot add mask data to bitmap %s\n",av[i]);
                     }
+#endif
             if(subtract_black)
                 RawProcessor.subtract_black();
                 

@@ -69,8 +69,6 @@ extern "C"
                 return "No thumbnail in file";
             case    LIBRAW_UNSUPPORTED_THUMBNAIL:
                 return "Unsupported thumbnail format";
-            case LIBRAW_CANNOT_ADDMASK:
-                return "Cannot add masked pixels to resized image";
             case    LIBRAW_UNSUFFICIENT_MEMORY:
                 return "Unsufficient memory";
             case    LIBRAW_DATA_ERROR:
@@ -104,7 +102,6 @@ const float LibRaw_constants::d65_white[3] =  { 0.950456, 1, 1.088754 };
 #define S imgdata.sizes
 #define O imgdata.params
 #define C imgdata.color
-#define M imgdata.masked_pixels
 #define T imgdata.thumbnail
 #define IO libraw_internal_data.internal_output_params
 #define ID libraw_internal_data.internal_data
@@ -268,16 +265,15 @@ void LibRaw:: recycle()
 #define FREE(a) do { if(a) { free(a); a = NULL;} }while(0)
             
     FREE(imgdata.image); 
-    FREE(imgdata.raw_image); 
     FREE(imgdata.thumbnail.thumb);
     FREE(libraw_internal_data.internal_data.meta_data);
     FREE(libraw_internal_data.output_data.histogram);
     FREE(libraw_internal_data.output_data.oprof);
     FREE(imgdata.color.profile);
-    FREE(imgdata.masked_pixels.buffer);
-    FREE(imgdata.masked_pixels.ph1_black);
+    FREE(imgdata.rawdata.ph1_black);
+    FREE(imgdata.rawdata.raw_alloc); 
 #undef FREE
-    ZERO(imgdata.masked_pixels);
+    ZERO(imgdata.rawdata);
     ZERO(imgdata.sizes);
     ZERO(imgdata.color);
     ZERO(libraw_internal_data);
@@ -307,18 +303,18 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         {
             // Check rbayer
             d_info->decoder_name = "adobe_dng_load_raw_lj()"; 
-            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT;
         }
     else if (load_raw == &LibRaw::adobe_dng_load_raw_nc)
         {
             // Check rbayer
             d_info->decoder_name = "adobe_dng_load_raw_nc()"; 
-            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT;
         }
     else if (load_raw == &LibRaw::canon_600_load_raw) 
         {
             d_info->decoder_name = "canon_600_load_raw()";   
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY; // WB set within decoder, no need to load raw
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; // WB set within decoder, no need to load raw
         }
     else if (load_raw == &LibRaw::canon_compressed_load_raw)
         {
@@ -457,19 +453,56 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "phase_one_load_raw_c()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
-    else if (load_raw == &LibRaw::quicktake_100_load_raw )   d_info->decoder_name = "quicktake_100_load_raw()";//+
-    else if (load_raw == &LibRaw::rollei_load_raw )          d_info->decoder_name = "rollei_load_raw()"; //+ 
+    else if (load_raw == &LibRaw::quicktake_100_load_raw )
+        {
+            // UNTESTED
+            d_info->decoder_name = "quicktake_100_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::rollei_load_raw )
+        {
+            // UNTESTED
+            d_info->decoder_name = "rollei_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
     else if (load_raw == &LibRaw::sinar_4shot_load_raw )
         {
-            d_info->decoder_name = "sinar_4shot_load_raw()";//+
+            // UNTESTED
+            d_info->decoder_name = "sinar_4shot_load_raw()";
             d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
         }
-    else if (load_raw == &LibRaw::smal_v6_load_raw )         d_info->decoder_name = "smal_v6_load_raw()";//+
-    else if (load_raw == &LibRaw::smal_v9_load_raw )         d_info->decoder_name = "smal_v9_load_raw()";//+ 
-    else if (load_raw == &LibRaw::sony_load_raw )            d_info->decoder_name = "sony_load_raw()"; //+
-    else if (load_raw == &LibRaw::sony_arw_load_raw )        d_info->decoder_name = "sony_arw_load_raw()";//+
-    else if (load_raw == &LibRaw::sony_arw2_load_raw )       d_info->decoder_name = "sony_arw2_load_raw()";//+
-    else if (load_raw == &LibRaw::unpacked_load_raw )        d_info->decoder_name = "unpacked_load_raw()"; //+
+    else if (load_raw == &LibRaw::smal_v6_load_raw )
+        {
+            // UNTESTED
+            d_info->decoder_name = "smal_v6_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::smal_v9_load_raw )
+        {
+            // UNTESTED
+            d_info->decoder_name = "smal_v9_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::sony_load_raw )
+        {
+            d_info->decoder_name = "sony_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::sony_arw_load_raw )
+        {
+            d_info->decoder_name = "sony_arw_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::sony_arw2_load_raw )
+        {
+            d_info->decoder_name = "sony_arw2_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+        }
+    else if (load_raw == &LibRaw::unpacked_load_raw )
+        {
+            d_info->decoder_name = "unpacked_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_USEBAYER2;
+        }
     else
         {
             d_info->decoder_name = "Unknown unpack function";
@@ -516,172 +549,7 @@ void LibRaw:: merror (void *ptr, const char *where)
     throw LIBRAW_EXCEPTION_ALLOC;
 }
 
-ushort * LibRaw::get_masked_pointer(int row, int col) 
-{ 
-    if(row<0 || col < 0) return NULL;
-    if(!M.buffer) return NULL; 
-    if(row < S.top_margin)
-        {
-            // top band
-            if(col < S.left_margin)
-                {
-                    return &(M.tl[row*S.left_margin+col]);
-                }
-            else if (col < S.left_margin + S.width)
-                {
-                    int icol = col - S.left_margin;
-                    return &(M.top[row*S.width+icol]);
-                }
-            else if (col < S.raw_width)
-                {
-                    int icol = col - S.left_margin - S.width;
-                    return &(M.tr[row*S.right_margin+icol]);
-                }
-            else
-                return NULL; // out of bounds
-        }
-    else if (row < S.top_margin + S.height)
-        {
-            //normal image height
-            int irow = row - S.top_margin;
-            if(col < S.left_margin)
-                {
-                    return &M.left[irow*S.left_margin + col];
-                }
-            else if (col < S.left_margin + S.width)
-                {
-                    // central image
-                    return NULL;
-                }
-            else if (col < S.raw_width)
-                {
-                    int icol = col - S.left_margin - S.width;
-                    return &M.right[irow*S.right_margin+icol];
-                }
-            else
-                return NULL; // out of bounds
-        }
-    else if (row < S.raw_height)
-        {
-            int irow = row - S.top_margin - S.height;
-            // bottom band
-            if(col < S.left_margin)
-                {
-                    return &M.bl[irow*S.left_margin+col];
-                }
-            else if (col < S.left_margin + S.width)
-                {
-                    int icol = col - S.left_margin;
-                    return &M.bottom[irow*S.width + icol];
-                }
-            else if (col < S.raw_width)
-                {
-                    int icol = col - S.left_margin - S.width;
-                    return &M.br[irow*S.right_margin + icol];
-                }
-            else
-                return NULL; // out of bounds
-        }
-    else
-        {
-            // out of bounds
-            return NULL;
-        }
-    // fallback
-    return NULL;
-}
 
-void LibRaw:: init_masked_ptrs()
-{
-    if(!M.buffer) return;
-    
-    // top band
-    M.tl = M.buffer;
-    M.top = M.tl +(S.top_margin*S.left_margin);
-    M.tr =  M.top + (S.top_margin*S.width);
-    
-    // left-right
-    M.left = M.tr + (S.top_margin * S.right_margin);
-    M.right = M.left + (S.left_margin * S.height);
-
-    // bottom band
-    M.bl = M.right + (S.right_margin * S.height);
-    M.bottom = M.bl + (S.left_margin * S.bottom_margin);
-    M.br = M.bottom + (S.width * S.bottom_margin);
-
-}
-int LibRaw::add_masked_borders_to_bitmap()
-{
-    CHECK_ORDER_HIGH(LIBRAW_PROGRESS_PRE_INTERPOLATE);
-    CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
-
-    if(S.width != S.iwidth || S.height!=S.iheight)
-        return LIBRAW_CANNOT_ADDMASK;
-
-    if(P1.is_foveon || !P1.filters)
-        return LIBRAW_CANNOT_ADDMASK;
-        
-    if(!imgdata.image)
-        return LIBRAW_OUT_OF_ORDER_CALL;
-
-    if(S.raw_width < S.width || S.raw_height < S.height)
-        return LIBRAW_SUCCESS; // nothing to do or already called
-
-    if(S.width == S.raw_width && S.height == S.raw_height)
-        return LIBRAW_SUCCESS; // nothing to do or already called
-
-    ushort (*newimage)[4];
-
-    newimage = (ushort (*)[4]) calloc (S.raw_height*S.raw_width, sizeof (*newimage));
-    merror (newimage, "add_masked_borders_to_bitmap()");
-
-    int r,c;
-    // top rows
-    for (r=0; r<S.top_margin;r++)
-        for(c=0;c<S.raw_width;c++)
-            {
-                ushort *p = get_masked_pointer(r,c);
-                if(p)
-                    newimage[r*S.raw_width+c][COLOR(r,c)] = *p;
-            }
-    // middle rows
-    for (r=S.top_margin; r<S.top_margin+S.height;r++)
-        {
-            int row = r-S.top_margin;
-            for(c=0;c<S.left_margin;c++)
-                {
-                    ushort *p = get_masked_pointer(r,c);
-                    if(p)
-                        newimage[r*S.raw_width+c][COLOR(r,c)] =  *p;
-                }
-            for(c=S.left_margin; c<S.left_margin+S.iwidth;c++)
-                {
-                    int col = c - S.left_margin;
-                    newimage[r*S.raw_width+c][COLOR(r,c)] = imgdata.image[row*S.iwidth+col][COLOR(row,col)];
-//                    for(int cc=0;cc<4;cc++)
-//                        newimage[r*S.raw_width+c][cc] = imgdata.image[row*S.iwidth+col][cc];
-                }
-            for(c=S.left_margin+S.iwidth;c<S.raw_width;c++)
-                {
-                    ushort *p = get_masked_pointer(r,c);
-                    if(p)
-                        newimage[r*S.raw_width+c][COLOR(r,c)] =  *p;
-                }
-        }
-    // bottom rows
-    for (r=S.top_margin+S.height; r<S.raw_height;r++)
-        for(c=0;c<S.raw_width;c++)
-            {
-                ushort *p = get_masked_pointer(r,c);
-                if(p)
-                    newimage[r*S.raw_width+c][COLOR(r,c)] = *p;
-            }
-    free(imgdata.image);
-    imgdata.image=newimage;
-    S.iwidth = S.width = S.raw_width;
-    S.iheight = S.height = S.raw_height;
-    return LIBRAW_SUCCESS;
-}
 
 int LibRaw::open_file(const char *fname, INT64 max_buf_size)
 {
@@ -880,20 +748,15 @@ int LibRaw::unpack(void)
                 IO.raw_color = 0;
             }
         // already allocated ?
-        if(imgdata.image) free(imgdata.image);
-        
+        if(imgdata.image)
+            {
+                free(imgdata.image);
+                imgdata.image = 0;
+            }
+
         imgdata.image = (ushort (*)[4]) calloc (S.iheight*S.iwidth, sizeof (*imgdata.image));
         merror (imgdata.image, "unpack()");
 
-
-        if(S.top_margin || S.left_margin || S.right_margin || S.bottom_margin)
-            {
-                unsigned sz = S.raw_height*(S.left_margin+S.right_margin) 
-                    + S.width*(S.top_margin+S.bottom_margin);
-                imgdata.masked_pixels.buffer = (ushort*) calloc(sz, sizeof(ushort)); 
-                merror (imgdata.masked_pixels.buffer, "unpack()");
-                init_masked_ptrs();
-            }
         if (libraw_internal_data.unpacker_data.meta_length) 
             {
                 libraw_internal_data.internal_data.meta_data = 
@@ -909,34 +772,62 @@ int LibRaw::unpack(void)
 
         libraw_decoder_info_t decoder_info;
         get_decoder_info(&decoder_info);
-        if(decoder_info.decoder_flags == LIBRAW_DECODER_FLATFIELD)
+        if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
             {
-                imgdata.raw_image = (ushort*)malloc(S.raw_width*S.raw_height*sizeof(imgdata.raw_image[0]));
+                imgdata.rawdata.raw_alloc = malloc(S.raw_width*S.raw_height*sizeof(imgdata.rawdata.raw_image[0]));
+                imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
             }
-        
+        else if (decoder_info.decoder_flags &  LIBRAW_DECODER_4COMPONENT)
+            {
+                imgdata.rawdata.raw_alloc = calloc(S.raw_width*S.raw_height,sizeof(*imgdata.rawdata.color_image));
+                imgdata.rawdata.color_image = (ushort(*)[4]) imgdata.rawdata.raw_alloc;
+            }
         (this->*load_raw)();
 
-        if(decoder_info.decoder_flags == LIBRAW_DECODER_FLATFIELD)
+        if(decoder_info.decoder_flags & LIBRAW_DECODER_FLATFIELD)
             {
                 // Move raw_image into image
 //                printf("MM: %d %d\n",S.top_margin,S.left_margin);
                 for(int c=0;c<4;c++) C.channel_maximum[c] = 0;
-                for(int row = 0; row < S.height; row++)
+                if(decoder_info.decoder_flags & LIBRAW_DECODER_USEBAYER2)
                     {
-                        int colors[4];
-                        for (int xx=0;xx<4;xx++)
-                            colors[xx] = COLOR(row,xx);
-                        for(int col = 0; col < S.width; col++)
+                        for(int row = 0; row < S.height; row++)
+                                for(int col = 0; col < S.width; col++)
+                                    {
+                                        int cc = fc(row,col);
+                                        ushort val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
+                                                                               +(col+S.left_margin)];
+                                        imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
+                                        if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                                    }
+                    }
+                else
+                    {
+                        for(int row = 0; row < S.height; row++)
                             {
-                                int cc = colors[col%4];
-                                ushort val = imgdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
-                                imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
-                                if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                                int colors[4];
+                                for (int xx=0;xx<4;xx++)
+                                    colors[xx] = COLOR(row,xx);
+                                for(int col = 0; col < S.width; col++)
+                                    {
+                                        int cc = colors[col&3];
+                                        ushort val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
+                                                                       +(col+S.left_margin)];
+                                        imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
+                                        if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                                    }
                             }
                     }
-
             }
-        
+        else if (decoder_info.decoder_flags & LIBRAW_DECODER_4COMPONENT)
+            {
+                // no way shrink is set because half-size disabled for 4-color images!
+                for(int row = 0; row < S.height; row++)
+                    memmove(&imgdata.image[row*S.width],
+                            &imgdata.rawdata.color_image[(row+S.top_margin)*S.raw_width+S.left_margin],
+                            S.width*sizeof(*imgdata.image));
+            }
+
         O.document_mode = save_document_mode;
 
         if (O.filtering_mode & LIBRAW_FILTERING_AUTOMATIC_BIT)
@@ -1794,7 +1685,7 @@ void LibRaw::subtract_black()
 
 #define BAYERC(row,col,c) imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][c] 
 
-    if(imgdata.masked_pixels.ph1_black)
+    if(imgdata.rawdata.ph1_black)
         {
             // Phase One compressed format
             int row,col,val,cc;
@@ -1804,7 +1695,7 @@ void LibRaw::subtract_black()
                         cc=FC(row,col);
                         val = BAYERC(row,col,cc) 
                             - imgdata.color.phase_one_data.t_black 
-                            + imgdata.masked_pixels.ph1_black[row+S.top_margin][(col + S.left_margin) 
+                            + imgdata.rawdata.ph1_black[row+S.top_margin][(col + S.left_margin) 
                                                                                 >=C.phase_one_data.split_col];
                         if(val<0) val = 0;
                         BAYERC(row,col,cc) = val;
@@ -1825,10 +1716,10 @@ void LibRaw::subtract_black()
                     }
             // clear P1 black level data
             imgdata.color.phase_one_data.t_black = 0;
-            if(imgdata.masked_pixels.ph1_black)
+            if(imgdata.rawdata.ph1_black)
                 {
-                    free(imgdata.masked_pixels.ph1_black);
-                    imgdata.masked_pixels.ph1_black = 0;
+                    free(imgdata.rawdata.ph1_black);
+                    imgdata.rawdata.ph1_black = 0;
                 }
             ZERO(C.cblack);
             C.black = 0;

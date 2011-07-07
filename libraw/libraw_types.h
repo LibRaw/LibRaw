@@ -97,7 +97,7 @@ typedef unsigned short ushort;
 typedef struct
 {
     const char          *decoder_name;
-    enum LibRaw_decoder_flags decoder_flags;
+    unsigned             decoder_flags;
 }libraw_decoder_info_t;
 
 
@@ -300,17 +300,18 @@ typedef struct
 
 typedef struct
 {
-    ushort  *buffer; 
-    ushort  *tl;     
-    ushort  *top;    
-    ushort  *tr;    
-    ushort  *left;  
-    ushort  *right; 
-    ushort  *bl;     
-    ushort  *bottom; 
-    ushort  *br;     
-    ushort  (*ph1_black)[2]; 
-}libraw_masked_t;
+    // really allocated bitmap
+    void        *raw_alloc;
+    // alias to single_channel variant
+    ushort                      *raw_image;
+    // alias to 4-channel variant
+    ushort                      (*color_image)[4] ;
+    
+    // Phase One black level data;
+    ushort  (*ph1_black)[2];
+    // save color and sizes here, too....
+} libraw_rawdata_t;
+
 
 typedef struct
 {
@@ -321,9 +322,9 @@ typedef struct
     libraw_colordata_t          color;
     libraw_imgother_t           other;
     libraw_thumbnail_t          thumbnail;
-    libraw_masked_t             masked_pixels;
+    libraw_rawdata_t            rawdata;
+//    libraw_masked_t             masked_pixels;
     ushort                      (*image)[4] ;
-    ushort                      *raw_image;
     libraw_output_params_t     params;
     void                *parent_class;      
 } libraw_data_t;
