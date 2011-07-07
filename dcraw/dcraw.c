@@ -1265,6 +1265,8 @@ void CLASS canon_sraw_load_raw()
       throw LIBRAW_EXCEPTION_IO_BADFILE;
   LibRaw_byte_buffer *buf = ifp->make_byte_buffer(data_size);
   LibRaw_bit_buffer bits;
+  int save_width = width;
+  width = raw_width;
 #endif
 
 
@@ -1273,7 +1275,11 @@ void CLASS canon_sraw_load_raw()
     ecol += cr2_slice[1] * 2 / jh.clrs;
     if (!cr2_slice[0] || ecol > raw_width-1) ecol = raw_width & -2;
     for (row=0; row < height; row += (jh.clrs >> 1) - 1) {
+#ifndef LIBRAW_LIBRARY_BUILD
       ip = (short (*)[4]) image + row*width;
+#else
+      ip = (short (*)[4]) color_image + row*width;
+#endif
       for (col=scol; col < ecol; col+=2, jcol+=jh.clrs) {
 	if ((jcol %= jwide) == 0)
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -1295,7 +1301,12 @@ void CLASS canon_sraw_load_raw()
   hue = (jh.sraw+1) << 2;
   if (unique_id == 0x80000218 && ver > 1000006 && ver < 3000000)
     hue = jh.sraw << 1;
+#ifndef LIBRAW_LIBRARY_BUILD
   ip = (short (*)[4]) image;
+#else
+  ip = (short (*)[4]) color_image;
+#endif
+  
   rp = ip[0];
   for (row=0; row < height; row++, ip+=width) {
     if (row & (jh.sraw >> 1))
@@ -1328,6 +1339,7 @@ void CLASS canon_sraw_load_raw()
   }
 #ifdef LIBRAW_LIBRARY_BUILD
   delete buf;
+  width = save_width;
 #endif
   ljpeg_end (&jh);
   maximum = 0x3fff;

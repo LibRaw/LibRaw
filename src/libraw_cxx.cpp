@@ -324,7 +324,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::canon_sraw_load_raw) 
         {
             d_info->decoder_name = "canon_sraw_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
+            d_info->decoder_flags = LIBRAW_DECODER_4CHANNEL; 
         }
     else if (load_raw == &LibRaw::eight_bit_load_raw )
         {
