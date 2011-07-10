@@ -34,7 +34,7 @@ bin\raw-identify.exe: $(LINKLIB) samples\raw-identify.cpp
 	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\raw-identify.exe" /Fo"object\\" samples\raw-identify.cpp $(LINKLIB)
 
 bin\unprocessed_raw.exe: $(LINKLIB) samples\unprocessed_raw.cpp
-	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\unprocessed_raw.exe" /Fo"object\\" samples\unprocessed_raw.cpp $(LINKLIB)
+	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\unprocessed_raw.exe" /Fo"object\\" samples\unprocessed_raw.cpp $(LINKLIB) ws2_32.lib
 
 bin\4channels.exe: $(LINKLIB) samples\4channels.cpp
 	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\4channels.exe" /Fo"object\\" samples\4channels.cpp $(LINKLIB)
