@@ -107,7 +107,7 @@ int main(int ac, char *av[])
                 }
             if(P1.is_foveon)
                 {
-                    printf("Cannot process foveon image %s\n",av[i]);
+                    printf("Cannot process Foveon image %s\n",av[i]);
                     continue ;
                 }
             if( (ret = RawProcessor.unpack() ) != LIBRAW_SUCCESS)
@@ -115,6 +115,7 @@ int main(int ac, char *av[])
                     fprintf(stderr,"Cannot unpack %s: %s\n",av[i],libraw_strerror(ret));
                     continue;
                 }
+            RawProcessor.raw2image();
             if(black_subtraction)
                 {
                     RawProcessor.subtract_black();

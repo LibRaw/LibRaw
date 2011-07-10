@@ -25,9 +25,10 @@ it under the terms of the one of three licenses as you choose:
 #include <stdio.h>
 #ifdef __cplusplus
 
-
+#ifdef LIBRAW_LIBRARY_BUILD
 #ifndef CLASS
 #define CLASS LibRaw::
+#endif
 #endif
 
 #else
