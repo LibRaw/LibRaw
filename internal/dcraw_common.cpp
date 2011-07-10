@@ -899,9 +899,6 @@ void CLASS lossless_jpeg_load_raw()
     for (jcol=0; jcol < jwide; jcol++) {
       val = *rp++;
       if (jh.bits <= 12)
-#ifdef LIBRAW_LIBRARY_BUILD
-          if( !(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
-#endif
 	val = curve[val & 0xfff];
 #ifndef LIBRAW_LIBRARY_BUILD
       if (cr2_slice[0]) {
@@ -1321,8 +1318,7 @@ void CLASS nikon_compressed_load_raw()
 	BAYER(row,col-left_margin) =  curve[LIM((short)hpred[col & 1],0,0x3fff)];
 #else
       ushort xval = hpred[col & 1];
-      if(!(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
-          xval = curve[LIM((short)xval,0,0x3fff)];
+      xval = curve[LIM((short)xval,0,0x3fff)];
       RBAYER(row,col) = xval;
 #endif
 
@@ -1457,7 +1453,7 @@ void CLASS fuji_load_raw()
   read_shorts(raw_image,raw_width*raw_height);
 #endif
 }
-#line 1743 "dcraw/dcraw.c"
+#line 1739 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -1736,6 +1732,7 @@ void CLASS phase_one_load_raw()
       BAYER(row,col) = pixel[col+left_margin];
   }
   free (pixel);
+  phase_one_correct();
 #else
   fseek (ifp, data_offset, SEEK_SET);
   pixel = (ushort *) calloc (raw_width, sizeof *pixel);
@@ -1752,9 +1749,9 @@ void CLASS phase_one_load_raw()
     memmove(&raw_image[row*raw_width],pixel,raw_width*sizeof(pixel[0]));
   }
   free (pixel);
-  if(!( filtering_mode & LIBRAW_FILTERING_NORAWCURVE) )
+  // use correct on postprocessing!
+  imgdata.rawdata.use_ph1_correct=1;
 #endif
-  phase_one_correct();
 }
 
 unsigned CLASS ph1_bithuff (int nbits, ushort *huff)
@@ -1836,9 +1833,6 @@ void CLASS phase_one_load_raw_c()
       else
 	pixel[col] = pred[col & 1] += ph1_bits(i) + 1 - (1 << (i - 1));
       if (pred[col & 1] >> 16) derror();
-#ifdef LIBRAW_LIBRARY_BUILD
-  if(!( filtering_mode & LIBRAW_FILTERING_NORAWCURVE) )
-#endif
       if (ph1.format == 5 && pixel[col] < 256)
 	pixel[col] = curve[pixel[col]];
     }
@@ -1858,9 +1852,6 @@ void CLASS phase_one_load_raw_c()
 #endif
   }
   free (pixel);
-#ifdef LIBRAW_LIBRARY_BUILD
-  if(!( filtering_mode & LIBRAW_FILTERING_NORAWCURVE) )
-#endif
 #ifndef LIBRAW_LIBRARY_BUILD
   phase_one_correct();
   maximum = 0xfffc - ph1.t_black;
@@ -1950,7 +1941,7 @@ void CLASS leaf_hdr_load_raw()
   }
 }
 
-#line 2239 "dcraw/dcraw.c"
+#line 2230 "dcraw/dcraw.c"
 void CLASS sinar_4shot_load_raw()
 {
   ushort *pixel;
@@ -2577,12 +2568,6 @@ void CLASS eight_bit_load_raw()
   for (row=0; row < raw_height; row++) {
     if (fread (pixel, 1, raw_width, ifp) < raw_width) derror();
     for (col=0; col < raw_width; col++) {
-        if(filtering_mode & LIBRAW_FILTERING_NORAWCURVE)
-            {
-                val = pixel[col];
-                if(val>maximum) maximum = val;
-            }
-        else
             val = curve[pixel[col]];
         RBAYER(row,col) = val;
         if((unsigned) (row-top_margin)< height)
@@ -2597,9 +2582,6 @@ void CLASS eight_bit_load_raw()
     black = lblack / ((raw_width - width) * height);
   if (!strncmp(model,"DC2",3))
     black = 0;
-#ifdef LIBRAW_LIBRARY_BUILD
-  if(!(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
-#endif
   maximum = curve[0xff];
 }
 
@@ -2668,15 +2650,6 @@ void CLASS kodak_262_load_raw()
       if (val >> 8) derror();
 
       val = curve[pixel[pi++]];
-
-#ifdef LIBRAW_LIBRARY_BUILD
-      if(filtering_mode & LIBRAW_FILTERING_NORAWCURVE)
-          val = pixel[pi++];
-      else
-          val = curve[pixel[pi++]];
-#else
-      val = curve[pixel[pi++]];
-#endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
       RBAYER(row,col) = val;
@@ -2758,8 +2731,7 @@ void CLASS kodak_65000_load_raw()
 #else
       {
           ushort val = ret ? buf[i] : (pred[i & 1] += buf[i]);
-          if(!(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
-              val = curve[val];
+          val = curve[val];
           RBAYER(row,col+i) = val;
           if(curve[val]>>12) derror();
       }
@@ -2792,10 +2764,7 @@ void CLASS kodak_ycbcr_load_raw()
 	    FORC3 ip[c] = curve[LIM(y[j][k]+rgb[c], 0, 0xfff)];
 #else
 	    ip = color_image[(row+top_margin+j)*raw_width + col+i+k+left_margin];
-          if(!(filtering_mode & LIBRAW_FILTERING_NORAWCURVE))
-              FORC3 ip[c] = curve[LIM(y[j][k]+rgb[c], 0, 0xfff)];
-          else
-              FORC3 ip[c] = y[j][k]+rgb[c];;
+            FORC3 ip[c] = curve[LIM(y[j][k]+rgb[c], 0, 0xfff)];
 #endif
 	  }
       }
@@ -3138,7 +3107,7 @@ void CLASS smal_v9_load_raw()
     smal_decode_segment (seg+i, holes);
   if (holes) fill_holes (holes);
 }
-#line 3592 "dcraw/dcraw.c"
+#line 3561 "dcraw/dcraw.c"
 
 void CLASS crop_pixels()
 {
@@ -4530,7 +4499,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 4987 "dcraw/dcraw.c"
+#line 4956 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5110,7 +5079,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5571 "dcraw/dcraw.c"
+#line 5540 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6363,7 +6332,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 6830 "dcraw/dcraw.c"
+#line 6799 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -7050,7 +7019,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7520 "dcraw/dcraw.c"
+#line 7489 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8631,7 +8600,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9194 "dcraw/dcraw.c"
+#line 9163 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8850,7 +8819,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9437 "dcraw/dcraw.c"
+#line 9406 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

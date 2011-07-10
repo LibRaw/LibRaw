@@ -40,7 +40,7 @@ it under the terms of the one of three licenses as you choose:
 int main(int ac, char *av[])
 {
     int  i, ret;
-    int autoscale=0,filtering_mode=LIBRAW_FILTERING_DEFAULT,black_subtraction=1, use_gamma=0;
+    int autoscale=0,black_subtraction=1, use_gamma=0;
     char outfn[1024]; 
 
     LibRaw RawProcessor;
@@ -54,7 +54,6 @@ int main(int ac, char *av[])
                 "\t-g - use gamma correction with gamma 2.2 (not precise,use for visual inspection only)\n"
                 "\t-A - autoscaling (by integer factor)\n"
                 "\t-B - no black subtraction\n"
-                "\t-N - no raw curve\n"
                 ,LibRaw::version(),
                 LibRaw::cameraCount(),
                 av[0]);
@@ -74,7 +73,6 @@ int main(int ac, char *av[])
     OUT.user_flip=0;
     OUT.no_auto_bright = 1;
     OUT.half_size=1;
-    OUT.filtering_mode= LIBRAW_FILTERING_AUTOMATIC;
 
     for (i=1;i<ac;i++)
         {
@@ -91,11 +89,8 @@ int main(int ac, char *av[])
                         autoscale=1;
                     else if(av[i][1]=='B' && av[i][2]==0)
                         {
-                            filtering_mode |= (LIBRAW_FILTERING_NOZEROES);
                             black_subtraction=0;
                         }
-                    else if(av[i][1]=='N' && av[i][2]==0)
-                        filtering_mode |= LIBRAW_FILTERING_NORAWCURVE;
                     else
                         goto usage;
                     continue;
@@ -103,8 +98,6 @@ int main(int ac, char *av[])
             if(!use_gamma)
                 OUT.gamm[0] = OUT.gamm[1] = 1;
                 
-            if(filtering_mode)
-                OUT.filtering_mode = (LibRaw_filtering) filtering_mode;
             int c;
             printf("Processing file %s\n",av[i]);
             if( (ret = RawProcessor.open_file(av[i])) != LIBRAW_SUCCESS)

@@ -8,6 +8,7 @@ SUBDIRS= \
 	buildfiles/mem_image.pro \
 	buildfiles/raw-identify.pro \
 	buildfiles/simple_dcraw.pro \
+	buildfiles/multirender_test.pro \
 	buildfiles/unprocessed_raw.pro \
 	buildfiles/4channels.pro  \
 

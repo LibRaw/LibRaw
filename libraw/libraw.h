@@ -27,7 +27,7 @@ it under the terms of the one of three licenses as you choose:
 #define _FILE_OFFSET_BITS 64
 #endif
 
-// maximum file size to use LibRaw_file_datastream (fully buffered) I/O
+/* maximum file size to use LibRaw_file_datastream (fully buffered) I/O */
 #define LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE (250*1024L*1024L)
 
 
@@ -105,6 +105,7 @@ class DllDef LibRaw
 
     int                         adjust_sizes_info_only(void);
     void                        subtract_black();
+    int                        raw2image();
     int                         adjust_maximum();
     void                        set_memerror_handler( memory_callback cb,void *data) {callbacks.memcb_data = data; callbacks.mem_cb = cb; }
     void                        set_dataerror_handler(data_callback func, void *data) { callbacks.datacb_data = data; callbacks.data_cb = func;}

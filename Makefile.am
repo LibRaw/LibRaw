@@ -73,6 +73,10 @@ bin_simple_dcraw_SOURCES = samples/simple_dcraw.cpp
 bin_simple_dcraw_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
 bin_simple_dcraw_LDADD = lib/libraw.la
 
+bin_multirender_test_SOURCES = samples/multirender_test.cpp
+bin_multirender_test_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
+bin_multirender_test_LDADD = lib/libraw.la
+
 bin_mem_image_SOURCES = samples/mem_image.cpp
 bin_mem_image_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
 bin_mem_image_LDADD = lib/libraw.la

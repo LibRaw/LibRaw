@@ -40,6 +40,7 @@ it under the terms of the one of three licenses as you choose:
 #ifdef __cplusplus
 
 #include "libraw_datastream.h"
+#include "libraw_types.h"
 
 class LibRaw_TLS
 {
@@ -98,15 +99,6 @@ typedef struct
 
 } internal_data_t;
 
-typedef struct
-{
-    unsigned    mix_green;
-    unsigned    raw_color;
-    unsigned    zero_is_bad;
-    ushort      shrink;
-    ushort      fuji_width;
-    ushort      fwidth,fheight;
-} internal_output_params_t;
 
 #define LIBRAW_HISTOGRAM_SIZE 0x2000
 typedef struct
@@ -147,7 +139,7 @@ typedef struct
 typedef struct
 {
     internal_data_t internal_data;
-    internal_output_params_t internal_output_params;    
+    libraw_internal_output_params_t internal_output_params;    
     output_data_t output_data;
     identify_data_t identify_data;
     unpacker_data_t unpacker_data;

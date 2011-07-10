@@ -1,3 +1,58 @@
+2011-07-10 Alex Tutubalin <lexa@lexa.ru>
+        * Multiple rendering (LibRaw::dcraw_process() calls) allowed
+          without re-opening RAW file with open()/unpack() pair.
+          You may change any processing parameters (with exception
+          of shot_select parameter) between dcraw_process() call.
+
+          + New sample samples/multirender_test.cpp: renders data
+            with and without half_mode with different white balance.
+
+          + Unprocessed RAW data is stored in separate data buffer:
+            (2 bytes per pixel for all Bayer-pattern images,
+            8 bytes per pixel for Foveon, sRAW and other full-color RAWs),
+            so LibRaw uses 25% more memory for most common  Bayer images.
+
+          + New call LibRaw::raw2image() fills imgdata.image array
+            with fresh copy of data.
+            There is no need to call raw2image() separately if you use 
+            dcraw_process() or dcraw_document_mode_processing() calls.
+
+          + New call LibRaw::get_decoder_info() to determine RAW data
+            storage layout. See samples/unprocessed_raw.cpp for usage primer.
+
+        If your code uses usual open()/unpack()/dcraw_process() call
+        order, then NOTHING CHANGED: your program should produce same
+        results. For interactive programs you may skip open()/unpack()
+        calls after adjusting processing parameters, so user will see
+        refreshed image much faster.
+
+        If your code uses RAW data (open+unpack calls), you need to call
+        LibRaw::raw2image() and imgdata.image will contain same bitmap
+        as in LibRaw 0.13.x
+
+        If you code uses access to masked borders data, you need to
+        rewrite it. See samples/unprocessed_raw.cpp as a sample.
+
+        Unfortunately, documentation is untouched yet. This problem will be
+        fixed in next Alpha release.
+
+        Other changes:
+
+        * No separate imgdata.masked_pixels buffers, Bayer RAWs are read
+          to buffer with borders. So, no ugly add_masked_border_to_bitmap()
+          call.
+
+        * No filtering_mode parameter. Raw tone curve is applied 
+          on unpack() stage; zero pixels removed on postprocesing stage.
+
+        * unprocessed_raw and 4colors samples are adjusted to use
+          new RAW data storage layout.
+
+        * all client code should be recompiled due to internals change.
+
+        * LibRaw 0.14.0-Alpha1
+
+
 2011-07-03 Alex Tutubalin <lexa@lexa.ru>
         * Cosmetic cleanup in Libraw_memmgr code
 

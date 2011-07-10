@@ -27,7 +27,8 @@ DCRAW_LIB_MT_OBJECTS=object/dcraw_common_mt.o object/libraw_cxx_mt.o object/libr
 
 library: lib/libraw.a lib/libraw_r.a
 
-all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin/half_mt bin/mem_image bin/unprocessed_raw bin/4channels
+all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin/half_mt bin/mem_image \
+             bin/unprocessed_raw bin/4channels bin/multirender_test
 
 install: library
 	@if [ -d /usr/local/include ] ; then cp -R libraw /usr/local/include/ ; else echo 'no /usr/local/include' ; fi
@@ -50,6 +51,9 @@ bin/4channels: lib/libraw.a samples/4channels.cpp
 
 bin/simple_dcraw: lib/libraw.a samples/simple_dcraw.cpp
 	g++ -DLIBRAW_NOTHREADS ${LCMS_DEF}  ${CFLAGS} -o bin/simple_dcraw samples/simple_dcraw.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
+
+bin/multirender_test: lib/libraw.a samples/multirender_test.cpp
+	g++ -DLIBRAW_NOTHREADS ${LCMS_DEF}  ${CFLAGS} -o bin/multirender_test samples/multirender_test.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
 
 bin/mem_image: lib/libraw.a samples/mem_image.cpp
 	g++ -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o bin/mem_image samples/mem_image.cpp -L./lib -lraw  -lm  ${LCMS_LIB}

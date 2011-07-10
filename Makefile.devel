@@ -38,7 +38,8 @@ LR_INCLUDES=libraw/libraw.h libraw/libraw_alloc.h libraw/libraw_const.h libraw/l
 sources: ${DCRAW_GEN} Makefile.devel ${PP}
 library: lib/libraw.a lib/libraw_r.a
 
-all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin/half_mt bin/mem_image bin/unprocessed_raw bin/4channels
+all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin/half_mt bin/mem_image \
+        bin/unprocessed_raw bin/4channels bin/multirender_test
 
 ## Demosaic Pack(s)
 
@@ -55,6 +56,9 @@ bin/raw-identify: lib/libraw.a samples/raw-identify.cpp
 
 bin/simple_dcraw: lib/libraw.a samples/simple_dcraw.cpp
 	$(CXX) -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o bin/simple_dcraw samples/simple_dcraw.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
+
+bin/multirender_test: lib/libraw.a samples/multirender_test.cpp
+	$(CXX) -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o bin/multirender_test samples/multirender_test.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
 
 bin/unprocessed_raw: lib/libraw.a samples/unprocessed_raw.cpp
 	$(CXX) -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o bin/unprocessed_raw samples/unprocessed_raw.cpp -L./lib -lraw  -lm  ${LCMS_LIB}

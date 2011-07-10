@@ -40,7 +40,7 @@ it under the terms of the one of three licenses as you choose:
 int process_once(LibRaw& RawProcessor, int half_mode, int camera_wb, int auto_wb, int suffix, char *fname)
 {
     char outfn[1024];
-    RawProcessor.imgdata.params.half_mode = half_mode;
+    RawProcessor.imgdata.params.half_size = half_mode;
     RawProcessor.imgdata.params.use_camera_wb = camera_wb;
     RawProcessor.imgdata.params.use_auto_wb = auto_wb;
 
@@ -49,11 +49,10 @@ int process_once(LibRaw& RawProcessor, int half_mode, int camera_wb, int auto_wb
     if(LIBRAW_SUCCESS !=ret)
         {
             fprintf(stderr,"Cannot do postpocessing on %s: %s\n",
-                    av[i],libraw_strerror(ret));
-            if(LIBRAW_FATAL_ERROR(ret))
-                return ret; 
+                    fname,libraw_strerror(ret));
+            return ret; 
         }
-    snprintf(outfn,sizeof(outfn),"%s.%d.%s", fname, suffix, (P1.colors>1?"ppm":"pgm"));
+    snprintf(outfn,sizeof(outfn),"%s.%d.%s", fname, suffix, (RawProcessor.imgdata.idata.colors>1?"ppm":"pgm"));
 
     printf("Writing file %s\n",outfn);
 
@@ -67,9 +66,6 @@ int process_once(LibRaw& RawProcessor, int half_mode, int camera_wb, int auto_wb
 int main(int ac, char *av[])
 {
     int  i, ret;
-
-    // don't use fixed size buffers in real apps!
-    ,thumbfn[1024]; 
 
     LibRaw RawProcessor;
     if(ac<2) 
@@ -86,7 +82,7 @@ int main(int ac, char *av[])
     for (i=1;i<ac;i++)
         {
 
-            if(verbose) printf("Processing file %s\n",av[i]);
+            printf("Processing file %s\n",av[i]);
 
             if( (ret = RawProcessor.open_file(av[i])) != LIBRAW_SUCCESS)
                 {

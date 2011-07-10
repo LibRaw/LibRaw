@@ -24,12 +24,12 @@ it under the terms of the one of three licenses as you choose:
 #define __VERSION_H
 
 #define LIBRAW_MAJOR_VERSION  0
-#define LIBRAW_MINOR_VERSION  13
-#define LIBRAW_PATCH_VERSION  6
-#define LIBRAW_VERSION_TAIL   Release
+#define LIBRAW_MINOR_VERSION  14
+#define LIBRAW_PATCH_VERSION  0
+#define LIBRAW_VERSION_TAIL   Alpha1
 
-#define LIBRAW_SHLIB_CURRENT  	2
-#define LIBRAW_SHLIB_REVISION 	5
+#define LIBRAW_SHLIB_CURRENT  	3
+#define LIBRAW_SHLIB_REVISION 	0
 #define LIBRAW_SHLIB_AGE     	0
 
 #define _LIBRAW_VERSION_MAKE(a,b,c,d) #a"."#b"."#c"-"#d

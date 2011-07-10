@@ -100,6 +100,16 @@ typedef struct
     unsigned             decoder_flags;
 }libraw_decoder_info_t;
 
+typedef struct
+{
+    unsigned    mix_green;
+    unsigned    raw_color;
+    unsigned    zero_is_bad;
+    ushort      shrink;
+    ushort      fuji_width;
+    ushort      fwidth,fheight;
+} libraw_internal_output_params_t;
+
 
 typedef void (* memory_callback)(void * data, const char *file, const char *where);
 
@@ -205,6 +215,7 @@ typedef struct
     char        model2[64];
     void        *profile;
     unsigned    profile_length;
+    ushort  (*ph1_black)[2];
 }libraw_colordata_t;
 
 typedef struct
@@ -266,7 +277,6 @@ typedef struct
     int         no_auto_bright; /* -W */
     int         use_fuji_rotate;/* -j */
     int         green_matching;
-    enum LibRaw_filtering    filtering_mode; 
 #if 0
     /* AFD noise suppression parameters, disabled for now */
     int         afd_noise_att;
@@ -300,16 +310,21 @@ typedef struct
 
 typedef struct
 {
-    // really allocated bitmap
+    /* really allocated bitmap */
     void        *raw_alloc;
-    // alias to single_channel variant
+    /* alias to single_channel variant */
     ushort                      *raw_image;
-    // alias to 4-channel variant
+    /* alias to 4-channel variant */
     ushort                      (*color_image)[4] ;
     
-    // Phase One black level data;
+    /* Phase One black level data; */
     ushort  (*ph1_black)[2];
-    // save color and sizes here, too....
+    int         use_ph1_correct;
+    /* save color and sizes here, too.... */
+    libraw_iparams_t  iparams;
+    libraw_image_sizes_t sizes;
+    libraw_internal_output_params_t ioparams;
+    libraw_colordata_t color;
 } libraw_rawdata_t;
 
 
