@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.00"
+	Version="9,00"
 	Name="simple_dcraw"
-	ProjectGUID="{20F4CBAB-3D73-3C1B-BD52-A83349CB6F5F}"
+	ProjectGUID="{565CBC57-1103-3452-9E7A-6AE0876D5AD6}"
 	Keyword="Qt4VSv1.0">
 	<Platforms>
 		<Platform
@@ -19,8 +19,8 @@
 			UseOfMfc="0">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..&quot;,d:\Qt\4.7.1\mkspecs\win32-msvc2008"
-				AdditionalOptions="-Zm200"
+				AdditionalIncludeDirectories="&quot;..&quot;,d:\Qt\4.7.3\mkspecs\win32-msvc2008"
+				AdditionalOptions="-Zm200 -MP"
 				AssemblerListingLocation="debug\"
 				BufferSecurityCheck="false"
 				DebugInformationFormat="3"
@@ -39,7 +39,7 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="debug/libraw.lib"
+				AdditionalDependencies="debug/libraw.lib ws2_32.lib"
 				GenerateDebugInformation="true"
 				IgnoreImportLibrary="true"
 				LinkTimeCodeGeneration="0"
@@ -71,8 +71,8 @@
 			UseOfMfc="0">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..&quot;,d:\Qt\4.7.1\mkspecs\win32-msvc2008"
-				AdditionalOptions="-Zm200"
+				AdditionalIncludeDirectories="&quot;..&quot;,d:\Qt\4.7.3\mkspecs\win32-msvc2008"
+				AdditionalOptions="-Zm200 -MP"
 				AssemblerListingLocation="release\"
 				BufferSecurityCheck="false"
 				DebugInformationFormat="0"
@@ -91,7 +91,7 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="release/libraw.lib"
+				AdditionalDependencies="release/libraw.lib ws2_32.lib"
 				GenerateDebugInformation="false"
 				IgnoreImportLibrary="true"
 				LinkIncremental="1"

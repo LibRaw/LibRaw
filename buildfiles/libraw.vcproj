@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.00"
+	Version="9,00"
 	Name="libraw"
-	ProjectGUID="{E98D1B7D-EAAF-3DFB-B2C7-45F538508537}"
+	ProjectGUID="{1D287C6B-06AD-3BF8-ACDB-BD510A122212}"
 	Keyword="Qt4VSv1.0">
 	<Platforms>
 		<Platform
@@ -19,8 +19,8 @@
 			UseOfMfc="0">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..&quot;,d:\Qt\4.7.1\mkspecs\win32-msvc2008"
-				AdditionalOptions="-Zm200"
+				AdditionalIncludeDirectories="&quot;..&quot;,d:\Qt\4.7.3\mkspecs\win32-msvc2008"
+				AdditionalOptions="-Zm200 -MP"
 				AssemblerListingLocation="debug\"
 				BufferSecurityCheck="false"
 				DebugInformationFormat="3"
@@ -70,8 +70,8 @@
 			UseOfMfc="0">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..&quot;,d:\Qt\4.7.1\mkspecs\win32-msvc2008"
-				AdditionalOptions="-Zm200"
+				AdditionalIncludeDirectories="&quot;..&quot;,d:\Qt\4.7.3\mkspecs\win32-msvc2008"
+				AdditionalOptions="-Zm200 -MP"
 				AssemblerListingLocation="release\"
 				BufferSecurityCheck="false"
 				DebugInformationFormat="0"

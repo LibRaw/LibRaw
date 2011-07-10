@@ -23,9 +23,11 @@ it under the terms of the one of three licenses as you choose:
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #ifndef WIN32
 #include <netinet/in.h>
 #else
+#include <sys/utime.h>
 #include <winsock2.h>
 #endif
 
