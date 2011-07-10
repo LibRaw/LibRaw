@@ -1,33 +1,37 @@
 2011-07-10 Alex Tutubalin <lexa@lexa.ru>
         * Multiple rendering (LibRaw::dcraw_process() calls) allowed
-          without re-opening RAW file with open()/unpack() pair.
-          You may change any processing parameters (with exception
-          of shot_select parameter) between dcraw_process() call.
+          without re-opening RAW file thrfough the sequence of open()/unpack()
+          calls.
+          You should be able to change any processing parameters (except
+          shot_select parameter) between dcraw_process() calls.
 
-          + New sample samples/multirender_test.cpp: renders data
-            with and without half_mode with different white balance.
+          + New sample in samples/multirender_test.cpp: renders data 4 times:
+            in half and full modes with different white balance settings.
 
           + Unprocessed RAW data is stored in separate data buffer:
             (2 bytes per pixel for all Bayer-pattern images,
-            8 bytes per pixel for Foveon, sRAW and other full-color RAWs),
-            so LibRaw uses 25% more memory for most common  Bayer images.
+            8 bytes per pixel for Foveon, sRAW, and other full-color raw 
+            formats), so now LibRaw uses 25% more memory for full processing of 
+            most common Bayer images; while for just unpack memory is reduced 
+            4 times.
 
           + New call LibRaw::raw2image() fills imgdata.image array
             with fresh copy of data.
             There is no need to call raw2image() separately if you use 
             dcraw_process() or dcraw_document_mode_processing() calls.
 
-          + New call LibRaw::get_decoder_info() to determine RAW data
-            storage layout. See samples/unprocessed_raw.cpp for usage primer.
+          + New call LibRaw::get_decoder_info() to determine raw data
+            storage layout. See samples/unprocessed_raw.cpp for an example 
+            of how to use it.
 
         If your code uses usual open()/unpack()/dcraw_process() call
-        order, then NOTHING CHANGED: your program should produce same
+        sequence, then NOTHING CHANGED: your program should produce same
         results. For interactive programs you may skip open()/unpack()
-        calls after adjusting processing parameters, so user will see
-        refreshed image much faster.
+        calls after adjusting processing parameters, so user should see
+        image refreshed much faster.
 
-        If your code uses RAW data (open+unpack calls), you need to call
-        LibRaw::raw2image() and imgdata.image will contain same bitmap
+        If your code uses raw data (open+unpack calls), you need to call
+        LibRaw::raw2image(), and imgdata.image will contain same bitmap
         as in LibRaw 0.13.x
 
         If you code uses access to masked borders data, you need to
@@ -38,12 +42,12 @@
 
         Other changes:
 
-        * No separate imgdata.masked_pixels buffers, Bayer RAWs are read
+        * No separate imgdata.masked_pixels buffers, Bayer raw formats are read
           to buffer with borders. So, no ugly add_masked_border_to_bitmap()
           call.
 
         * No filtering_mode parameter. Raw tone curve is applied 
-          on unpack() stage; zero pixels removed on postprocesing stage.
+          at unpack() stage; zero pixels removed on postprocesing stage.
 
         * unprocessed_raw and 4colors samples are adjusted to use
           new RAW data storage layout.
