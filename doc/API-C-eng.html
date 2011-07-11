@@ -77,7 +77,7 @@ In all other cases, the <a href="API-CXX-eng.html#return">C++ API return code</a
       </dd>
       <dt>bool LIBRAW_CHECK_VERSION(major,minor,patch)</dt>
       <dd>
-        See <a href="API-CXX-eng.html#LIBRAW_CHECK_VERSION">LIBRAW_CHECK_VERSION</a> в описании C++ API
+        See <a href="API-CXX-eng.html#LIBRAW_CHECK_VERSION">LIBRAW_CHECK_VERSION</a> 
       </dd>
     <dt>int libraw_cameraCount()</dt>
       <dd>
@@ -87,6 +87,10 @@ In all other cases, the <a href="API-CXX-eng.html#return">C++ API return code</a
       <dd>
         See <a href="API-CXX-eng.html#cameraList">LibRaw::cameraList()</a>
       </dd>
+      <dt>void                libraw_get_decoder_info(libraw_data_t*,libraw_decoder_info_t *);</dt>
+      <dd>
+        See <a href="API-CXX-eng.html#get_decoder_info">LibRaw::get_decoder_info()</a>
+      </dd>
       <dt>void                libraw_unpack_function_name(libraw_data_t*);</dt>
       <dd>
         See <a href="API-CXX-eng.html#unpack_function_name">LibRaw::unpack_function_name()</a>
@@ -94,10 +98,6 @@ In all other cases, the <a href="API-CXX-eng.html#return">C++ API return code</a
       <dt>void                libraw_subtract_black(libraw_data_t*);</dt>
       <dd>
         See <a href="API-CXX-eng.html#add_subtract_black">LibRaw::subtract_black()</a>
-      </dd>
-      <dt>void                libraw_add_masked_borders_to_bitmap(libraw_data_t*);</dt>
-      <dd>
-        See <a href="API-CXX-eng.html#add_masked_borders_to_bitmap">LibRaw::add_masked_borders_to_bitmap()</a>
       </dd>
       <dt>void                libraw_rotate_fuji_raw(libraw_data_t*);</dt>
       <dd>
@@ -151,6 +151,14 @@ In all other cases, the <a href="API-CXX-eng.html#return">C++ API return code</a
     <a name="emu"></a>
     <h3>Emulation of dcraw Behavior</h3>
     <dl>
+    <dt>int                 libraw_raw2image(libraw_data_t*);</dt>
+      <dd>
+        See <a href="API-CXX-eng.html#raw2image">LibRaw::raw2image</a>
+      </dd>
+    <dt>int                 libraw_free_image(libraw_data_t*);</dt>
+      <dd>
+        See <a href="API-CXX-eng.html#free_image">LibRaw::free_image</a>
+      </dd>
     <dt>int                 libraw_adjust_sizes_info_only(libraw_data_t*);</dt>
       <dd>
         See <a href="API-CXX-eng.html#adjust_sizes_info_only">LibRaw::adjust_sizes_info_only()</a>
@@ -191,7 +199,7 @@ In all other cases, the <a href="API-CXX-eng.html#return">C++ API return code</a
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:44:49 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Tue Oct 12 21:48:13 MSD 2010
+Last modified: Mon Jul 11 21:34:33 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

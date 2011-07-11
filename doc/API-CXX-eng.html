@@ -35,18 +35,18 @@
               <li><a href="#cameraList">const char** LibRaw::cameraList()</a></li>
             </ul>
           </li>
-          <li<<a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
-          <li><a href="#add_masked_borders_to_bitmap">void LibRaw::add_masked_borders_to_bitmap</a></li>
+          <li><a href="#get_decoder_info">int LibRaw::get_decoder_info(libraw_decoder_info_t *)</a></li>
+          <li><a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
           <li><a href="#rotate_fuji_raw">int LibRaw:: rotate_fuji_raw()</a>
-          <li><a  href="#recycle">void LibRaw::recycle(void)</a></li>
-          <li><a  href="#~LibRaw">LibRaw::~LibRaw()</a></li>
+          <li><a href="#recycle">void LibRaw::recycle(void)</a></li>
+          <li><a href="#~LibRaw">LibRaw::~LibRaw()</a></li>
           <li><a href="#strprogress">const char* LibRaw::strprogress(enum LibRaw_progress code)</a></li>
-          <li><a  href="#libraw_strerror">const char* LibRaw::strerror(int errorcode)</a></li>
-          <li><a  href="#callbacks">Setting Error Notification Functions</a>
+          <li><a href="#libraw_strerror">const char* LibRaw::strerror(int errorcode)</a></li>
+          <li><a href="#callbacks">Setting Error Notification Functions</a>
             <ul>
               <li><a href="#progress">User callback for progress indication/interruption</a></li>
-              <li><a  href="#memerror">Out-of-Memory Notifier</a></li>
-              <li><a  href="#dataerror">File Reading Notifier</a></li>
+              <li><a href="#memerror">Out-of-Memory Notifier</a></li>
+              <li><a href="#dataerror">File Reading Notifier</a></li>
               </ul>
             </li>
           </ul>
@@ -54,6 +54,8 @@
     <li><a  href="#dcrawemu">Data Postprocessing: Emulation of dcraw Behavior</a>
         <ul>
           <li><a  href="#dcraw_params">Parameter Setting</a></li>
+          <li><a href="#raw2image">int LibRaw::raw2image</a></li>
+          <li><a href="#free_image">void LibRaw::free_image</a></li>
           <li><a  href="#adjust_sizes_info_only">int LibRaw::adjust_sizes_info_only(void)</a></li>
           <li><a  href="#dcraw_document_mode_processing">int LibRaw::dcraw_document_mode_processing(void)</a></li>
           <li><a  href="#dcraw_process">int LibRaw::dcraw_process(void)</a></li>
@@ -276,6 +278,17 @@ LibRaw.
     <p>
       Returns list of supported cameras. Latest item of list is set to NULL (for easy printing).
     </p>
+    <a name="get_decoder_info"></a>
+    <h4>int LibRaw::get_decoder_info(libraw_decoder_info_t *)</h4>
+    <p>
+      The function fills <a href=API-datastruct-eng.html#libraw_decoder_info_t>libraw_decoder_info_t</a>
+      structure by passed pointer with current raw decoder data.
+    </p>
+    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return code
+        convention</a>: positive if any system call has returned an error, negative (from the
+      <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+      LibRaw. 
+    </p>
     <a name="unpack_function_name"></a>
     <h3>const char* LibRaw::unpack_function_name()</h3>
     <p>
@@ -297,27 +310,6 @@ LibRaw.
       <a href="#dcrawemu">postprocessing functions</a> will call <b>subtract_black()</b> by oneself.
     </p>
 
-    <a name="add_masked_borders_to_bitmap"></a>
-    <h3>void LibRaw::add_masked_borders_to_bitmap</h3>
-    <p>
-      This call rebuilds <b>imgdata.image</b> bitmap and makes full bitmap, contains both image data (active 
-      pixels) and 'black border' (masked pixels). If no masked pixels data present, then this call does nothing.
-      Function call changes data fields <b>sizes.width,sizes.height,sizes.iwidth,sizes.iheight</b> to full image
-      size (i.e. raw_width/raw_height).<br/>
-      This call does nothing:
-      </p>
-    <ul>
-      <li>for images containing more than one color component per pixel (full-color DNG,
-        already demosaiced files: Canon sRAW, Sinar 4-shot etc).</li>
-      <li>for images, unpacked with half resolution (one of parameters set in options: half_mode, wavelet denoising
-        threshold, aberration fixing data).
-      </li>
-    </ul>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return code
-        convention</a>: positive if any system call has returned an error, negative (from the
-      <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
-      LibRaw. 
-    </p>
     <a name="rotate_fuji_raw"></a>
     <h3> int LibRaw:: rotate_fuji_raw()</h3>
     <p>
@@ -491,16 +483,42 @@ Processing of a new file may be started in the usual way, by calling LibRaw::ope
     <a name="dcrawemu"></a>
     <h2>Data Postprocessing: Emulation of dcraw Behavior</h2>
     <p>
-Instead of writing one's own Bayer pattern postprocessing, one can use the dcraw functions, which are called
-after the calls of open_file() + unpack() /+ unpack_thumb()/
+      Instead of writing one's own Bayer pattern postprocessing, one can use the dcraw functions, which are called 
+      after the calls of open_file() + unpack() /+ unpack_thumb()/
     </p>
     <a name="dcraw_params"></a>
     <h3>Parameter Setting</h3>
     <p>
-Virtually all parameters that can be set through the dcraw command line are specified by assigning values to
-fields of the <b>LibRaw::imgdata.params</b> structure. The type of this structure is <b>libraw_output_params_t</b>;
-all fields are listed and described in sufficient detail in the <a href="API-datastruct-eng.html#libraw_output_params_t">description
-of data structures</a>.
+      Virtually all parameters that can be set through the dcraw command line are specified by assigning values to 
+      fields of the <b>LibRaw::imgdata.params</b> structure. The type of this structure is 
+      <b>libraw_output_params_t</b>; all fields are listed and described in sufficient detail in the <a
+        href="API-datastruct-eng.html#libraw_output_params_t">description of data structures</a>.
+    </p>
+    <a name="raw2image"></a>
+    <h3>int LibRaw::raw2image</h3>
+    <p>
+      This functions allocates buffer for postprocessing (imgdata.image) and fills it with data layout compatible
+      with LibRaw 0.13 and below. If the buffer is already allocated, it will be free()ed and allocated again.
+    </p>
+    <p>
+      This function should be called only if your code do postprocessing stage. If you use LibRaw's postprocessing
+      calls (see below) you don't need to call raw2image().
+    </p>
+    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return code
+        convention</a>: positive if any system call has returned an error, negative (from the
+      <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+      LibRaw. 
+    </p>
+
+    <a name="free_image"></a>
+    <h3>void LibRaw::free_image</h3>
+    <p>
+      This function releases the imgdata.image buffer allocated by raw2image();
+    </p>
+    <p>
+      This method should be called if current postprocessing results are not needed by the program (e.g. already
+      copied somewhere), but new postprocessing calls (with another settings) are possible, so it is to early
+       to call <a href="#recycle">recycle()</a>.
     </p>
 
     <a name="adjust_sizes_info_only"></a>
@@ -895,7 +913,7 @@ LibRaw.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Sun Jul  3 16:22:47 MSD 2011
+Last modified: Mon Jul 11 20:58:10 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

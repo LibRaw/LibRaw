@@ -143,8 +143,7 @@ while the compatibility mode supporting older
         or relaunching the library. 
       </li>
       <li>The required amount of RAM is somewhat lower.</li>
-      <li><b>Work with masked pixels and black subtraction:</b>: it is possible to turn off all data filtering 
-	and black level subtraction.</li>
+      <li><b>Work with black subtraction:</b>: it is possible to turn off black level subtraction.</li>
       <li><b>Processing of the black frame</b>: black subtraction and zero pixel cleaning already can be turned off. 
 	Code for accurate black level calculation and banding suppression is planned.
       </li>
@@ -161,20 +160,12 @@ while the compatibility mode supporting older
     <h2>Planned Improvements</h2>
     <p>The dcraw code needs significant modifications and additions:</p>
     <ul>
-      <li><b>Output of unpacked data in various memory layouts</b>: depending on the requirements of
-the calling program, the results of RAW unpacking will be output in one of the following runtime-selected formats:
-        <ul>
-          <li>Four-component pixels (internal dcraw data format)</li>
-          <li>Bayer format: 2D array with each element corresponding to a pixel in the matrix</li>
-          <li>4 two-dimensional arrays (one per component).</li>
-          </ul>
-        </li>
       <li><b>Single-pass unpacking of RAW files containing several image variants/planes</b>: for applicable cameras
         (Fuji cameras, cameras with 4-shot/16-shot modes), several planes of the same image will be extracted.
         </li>
 
-      <li><b>Data unpacking verifications for the widest possible set of file formats</b>. According to some studies, dcraw
-does not completely ensure correct unpacking of some data formats.
+      <li><b>Data unpacking verifications for the widest possible set of file formats</b>. According to some studies,
+        dcraw does not completely ensure correct unpacking of some data formats.
       </li>
 
       <li><b>Processing of the EXIF/Makernote</b> data: retrieval of large data amounts, including
@@ -199,13 +190,6 @@ does not completely ensure correct unpacking of some data formats.
           <li>RAW files from digital backs with 4-shot and 16-shot modes.</li>
         </ul>
       </li>
-      <li>Technical improvements, including
-        <ul>
-          <li>Extraction of ICC profile (for those RAW files that contain it)</li>
-          <li>Cutting down on the size of the allocated memory - in cases where post-processing will not be performed in the
-same buffer as the one used for reading the RAW data.</li>
-        </ul>
-      </li>
     </ul>
     <p>At the same time, we are not planning any modifications or extensions of the dcraw data processing code
  (de-Bayer, color conversions, etc.); all of this is up to the calling application. Standard processing modes
@@ -219,7 +203,7 @@ same buffer as the one used for reading the RAW data.</li>
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 09:12:42 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Sun Mar 28 21:23:10 MSD 2010
+Last modified: Mon Jul 11 20:20:12 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

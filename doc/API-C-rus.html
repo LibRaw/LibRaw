@@ -86,6 +86,10 @@
       <dd>
         См. <a href="API-CXX-rus.html#cameraList">LibRaw::cameraList()</a>
       </dd>
+      <dt>void                libraw_get_decoder_info(libraw_data_t*,libraw_decoder_info_t *);</dt>
+      <dd>
+        См. <a href="API-CXX-rus.html#get_decoder_info">LibRaw::get_decoder_info()</a>
+      </dd>
       <dt>void                libraw_unpack_function_name(libraw_data_t*);</dt>
       <dd>
         См. <a href="API-CXX-rus.html#unpack_function_name">LibRaw::unpack_function_name()</a>
@@ -93,10 +97,6 @@
       <dt>void libraw_subtract_black(libraw_data_t*);</dt>
       <dd>
         См. <a href="API-CXX-rus.html#subtract_black">LibRaw::subtract_black()</a>
-      </dd>
-      <dt>void                libraw_add_masked_borders_to_bitmap(libraw_data_t*);</dt>
-      <dd>
-        См. <a href="API-CXX-rus.html#add_masked_borders_to_bitmap">LibRaw::add_masked_borders_to_bitmap()</a>
       </dd>
       <dt>void                libraw_rotate_fuji_raw(libraw_data_t*);</dt>
       <dd>
@@ -150,6 +150,14 @@
     <a name="emu"></a>
     <h3>Эмуляция поведения  dcraw</h3>
     <dl>
+    <dt>int                 libraw_raw2image(libraw_data_t*);</dt>
+      <dd>
+        См. <a href="API-CXX-rus.html#raw2image">LibRaw::raw2image()</a>
+      </dd>
+    <dt>int                 libraw_free_image(libraw_data_t*);</dt>
+      <dd>
+        См. <a href="API-CXX-rus.html#free_image">LibRaw::free_image()</a>
+      </dd>
     <dt>int                 libraw_adjust_sizes_info_only(libraw_data_t*);</dt>
       <dd>
         См. <a href="API-CXX-rus.html#adjust_sizes_info_only">LibRaw::adjust_sizes_info_only()</a>
@@ -192,7 +200,7 @@
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:44:49 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Tue Oct 12 21:48:35 MSD 2010
+Last modified: Mon Jul 11 21:06:44 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

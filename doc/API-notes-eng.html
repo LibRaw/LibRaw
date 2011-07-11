@@ -18,15 +18,14 @@
       <li><a href="#CXX">The Use of C++</a></li>
       <li><a href="#imgdata_params">Parameters of the LibRaw::imgdata.params Structure Affecting the Behavior of
           open_file/unpack/unpack_thumb</a></li>
-      <li><a href="#filtering">RAW-data filtering</a></li>
-      <li><a href="#masked-border">Masked pixels storage</a></li>
       <li><a href="#memory">Memory Usage</a>
         <ol>
           <li><a href="#stack">Stack Usage</a></li>
           <li><a href="#memmgr">Dynamic Memory Management</a></li>
           <li><a href="#memuse">Dynamic Memory Usage</a>
             <ol>
-              <li><a href="#memimage">Memory for the Decoded Image</a></li>
+              <li><a href="#memraw">Memory Buffer for the RAW Image</a></li>
+              <li><a href="#memimage">Memory for the Postprocessed Image</a></li>
               <li><a href="#memthumb">Memory for the Decoded Thumbnail</a></li>
               <li><a href="#memprofile">Memory for the Decoded ICC Profile</a></li>
 	      <li><a name="#memraw">Memory for RAW Unpacking</a></li>
@@ -195,11 +194,6 @@
         If these parameters used, then half-sized bitmap will be used for data unpacking. See above for details.
       </dd>
 
-      <dt><b>imgdata.params.filtering_mode</b></dt>
-      <dd>
-        Affects RAW data loading for cameras with black level subtraction/de-banding during RAW read phase:
-        Canon A600, A5, CRW/CR2; cameras with LJPEG-compression (some Nikon, Kodak and Hasselblad cameras).
-      </dd>
       <dt><b>imgdata.params.use_camera_wb</b></dt>
       <dd>
         Affects loading of white balance matrix for Leaf backs.
@@ -209,53 +203,6 @@
         <b>Does not affect data reading in the current version of LibRaw</b>. In dcraw, this parameter affects the thumbnail data for certain Kodak cameras.
       </dd>
       </dl>
-
-    <a name="filtering"></a>
-    <h2>RAW-data filtration</h2>
-    <p>
-      During RAW unpacking and post-process stages LibRaw can filter RAW data:
-    </p>
-    <ul>
-      <li>Black level subtraction (required if not already done by camera firmware).</li>
-      <li>Zero pixels removal (averaging with nearest pixel values).</li>
-      <li>Tone curve operations on RAW-data.</li>
-    </ul>
-
-    <p>
-      Current LibRaw version allows tuning of filtration process by setting <b>imgdata.params.filtering_mode</b>
-      option to one of <a href="API-datastruct-eng.html#LibRaw_filtering">enum LibRaw_filtering</a> vales:
-      </p>
-    <ul>
-      <li>Dcraw-compatible filtration. This mode is default for old LibRaw versions compatibility. This mode
-        is not recommended for new applications.</li>
-      <li>One or several (or all) filtering stages can be turned off. This mode recommended for
-        RAW analysers and advanced data filtration made by calling program (this programs may 
-        calculate black level by analyzing <a href=#masked-border>masked frame data</a>.</li>
-      <li>Automatic selection of best filtration  avaliable in LibRaw (e.g. camera/model specific
-        routines). This mode is recommended for most applications.
-        </li>
-      </ul>
-    <a name="masked-border"></a>
-    <h2>Masked pixels storage</h2>
-    <p>
-      Some of RAW images contains data for not-active ("black","masked") pixels. For some of these formats
-      LibRaw can extract these pixels values and store it in 
-      <a href="API-datastruct-eng.html#libraw_masked_t">imgdata.masked_pixels</a> data structure. 
-      These values can be explored for:
-    </p>
-    <ul>
-      <li>Black level calculation (with banding suppression on some cameras).</li>
-      <li>Noise level calculation, e.g. per-channel noise. This is useful for cameras with per-channel
-        amplification.</li>
-    </ul>
-    <p>Masked pixel data avaliable only for bayer-pattern data (one component per pixel) and only for cameras
-      with masked frame. Masked pixels extraction for other color models (Canon sRAW, Kodak YRGB, Sinar 4-shot
-      files) will possibly be added in future LibRaw versions.</p>
-    <p>
-      LibRaw provides interface for merging active pixel data and masked pixels into one bitmap:
-      <a href="API-CXX-eng.html#add_masked_borders_to_bitmap">add_masked_borders_to_bitmap()</a>.
-      This call is useful for RAW analyzers.
-    </p>
 
     <a name="memory"></a>
     <h2>Memory Usage</h2>
@@ -291,24 +238,42 @@
     <ul>
       <li>for the decoded image;</li>
       <li>for the decoded thumbnail;</li>
+      <li>for the postprocessed image;</li>
       <li>for the ICC profile retrieved from the RAW file (if available);</li>
       <li>for temporary data at the stage of RAW file unpacking;</li>
       <li>for temporary data at the stage of postprocessing and result output;</li>
       <li>for reading of the RAW source file (only under Win32).</li>
     </ul>
-    <a name="memimage"></a>
-    <h4>Memory for the Decoded Image</h4>
+    <a name="memraw"></a>
+    <h4>Memory buffer for the RAW image</h4>
     <p>
-      To simplify further processing, memory for the extracted RAW data is allocated with a fourfold (for Bayer sensor
-      cameras) excess: <b>for each pixel, four 16-bit components are available</b> (three of them will be zero after
-      RAW unpacking). Thus, one can perform debayer and other postprocessing actions directly in the same buffer as
-      the one used for data extraction, but the required amount of memory becomes four times higher. <br/>
-   <b>Hence, the size of memory for the image buffer is 6-10 times greater than the size of the source RAW
-        file.</b><br/> <i>It is quite likely that allocation of this buffer in next versions of LibRaw will be more
-        economical, under the condition that postprocessing calls inherited from dcraw will not be used.</i>.
+      Decoded RAW data are stored:
     </p>
-    <p>The buffer for the decoded image is allocated upon calling <a href="API-CXX-eng.html#unpack">unpack()</a> and
-      freed upon calling <a href="API-CXX-eng.html#recycle">recycle()</a>.
+    <ul>
+      <li>one 16-bit value per pixel for "bayer" images. The masked pixels (black or dark or masked frame) are
+        stored with image data.
+      </li>
+      <li>Four  16-bit values for full-color images (Foveon, Linear DNG, Canon sRAW etc.). 
+      </li>
+    </ul>
+    <p>The buffer for RAW data is allocated by 
+        href="API-CXX-eng.html#unpack">unpack()</a> call and freeed upon calling
+      освобождается при <a href="API-CXX-eng.html#recycle">recycle()</a>. 
+    </p> 
+
+    <a name="memimage"></a>
+    <h4>Memory for the Postprocessed Image</h4>
+    <p>
+      On postprocessing stage each pixel contains four 16-bit values, one for each possible color channel (some
+      sensors are actually 4-color).
+    <p>The buffer for the decoded image is allocated upon calling 
+      <a href="API-CXX-eng.html#raw2image">raw2image()</a>,
+      <a href="API-CXX-eng.html#dcraw_process">dcraw_process()</a> or
+      <a href="API-CXX-eng.html#dcraw_document_mode_processing">dcraw_mode_processing()</a> calls.
+    </p>
+    <p>The buffer freed upon calling <a href="API-CXX-eng.html#recycle">recycle()</a> 
+      or 
+      <a href="API-CXX-eng.html#free_image">free_image()</a> calls.
     </p> 
     <a name="memthumb"></a>
     <h4>Memory for the Decoded Thumbnail</h4>
@@ -394,7 +359,7 @@
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:05:08 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Sun Mar 28 22:08:30 MSD 2010
+Last modified: Mon Jul 11 20:33:38 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

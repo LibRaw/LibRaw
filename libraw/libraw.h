@@ -59,8 +59,10 @@ DllDef    int                 libraw_unpack_thumb(libraw_data_t*);
 DllDef    void                libraw_recycle(libraw_data_t*);
 DllDef    void                libraw_close(libraw_data_t*);
 DllDef    void                libraw_subtract_black(libraw_data_t*);
+DllDef    int                 libraw_raw2image(libraw_data_t*);
+DllDef    void                libraw_free_image(libraw_data_t*);
     /* version helpers */
-DllDef    const char*               libraw_version();
+DllDef    const char*         libraw_version();
 DllDef    int                 libraw_versionNumber();
     /* Camera list */
 DllDef    const char**        libraw_cameraList();
@@ -70,6 +72,7 @@ DllDef    void                libraw_set_memerror_handler(libraw_data_t*, memory
 DllDef    void                libraw_set_dataerror_handler(libraw_data_t*,data_callback func,void *datap);
 DllDef    void                libraw_set_progress_handler(libraw_data_t*,progress_callback cb,void *datap);
 DllDef    const char *        libraw_unpack_function_name(libraw_data_t* lr);
+DllDef    int                 libraw_get_decoder_info(libraw_data_t* lr,libraw_decoder_info_t* d);
 DllDef    int                 libraw_rotate_fuji_raw(libraw_data_t* lr);
 
     /* DCRAW compatibility */
@@ -105,7 +108,8 @@ class DllDef LibRaw
 
     int                         adjust_sizes_info_only(void);
     void                        subtract_black();
-    int                        raw2image();
+    int                         raw2image();
+    void                        free_image();
     int                         adjust_maximum();
     void                        set_memerror_handler( memory_callback cb,void *data) {callbacks.memcb_data = data; callbacks.mem_cb = cb; }
     void                        set_dataerror_handler(data_callback func, void *data) { callbacks.datacb_data = data; callbacks.data_cb = func;}

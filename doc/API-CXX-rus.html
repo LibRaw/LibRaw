@@ -36,9 +36,9 @@
               <li><a href="#cameraList">const char** LibRaw::cameraList()</a></li>
             </ul>
           </li>
-          <li<<a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
+          <li><a href="#get_decoder_info">int LibRaw::get_decoder_info(libraw_decoder_info_t *)</a></li>
+          <li><a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
           <li><a href="#subtract_black">void LibRaw::subtract_black()</a>
-          <li><a href="#add_masked_borders_to_bitmap">void LibRaw::add_masked_borders_to_bitmap</a></li>
           <li><a href="#rotate_fuji_raw">int LibRaw:: rotate_fuji_raw()</a>
           <li><a  href="#recycle">void LibRaw::recycle(void)</a></li>
           <li><a  href="#~LibRaw">LibRaw::~LibRaw()</a></li>
@@ -56,6 +56,8 @@
     <li><a  href="#dcrawemu">Постобработка данных, эмуляция поведения dcraw</a>
         <ul>
           <li><a  href="#dcraw_params">Задание параметров</a></li>
+          <li><a href="#raw2image">int LibRaw::raw2image</a></li>
+          <li><a href="#free_image">void LibRaw::free_image</a></li>
           <li><a  href="#adjust_sizes_info_only">int LibRaw::adjust_sizes_info_only(void)</a></li>
           <li><a  href="#dcraw_document_mode_processing">int LibRaw::dcraw_document_mode_processing(void)</a></li>
           <li><a  href="#dcraw_process">int LibRaw::dcraw_process(void)</a></li>
@@ -281,6 +283,16 @@
       последнем элементе списка содержится NULL.
     </p>
     <h3>Прочие вспомогательные функции</h3>
+    <a name="get_decoder_info"></a>
+    <h4>int LibRaw::get_decoder_info(libraw_decoder_info_t *)</h4>
+    <p>
+      Функция заполняет структуру libraw_decoder_info_t по переданному указателю данными о текущем декодере.
+    </p>
+    <p>Функция возвращает целое число в соответствии с <a href=API-notes-rus.html#errors>соглашением о кодах
+        возврата</a>: положительное число, если какой-то из системных вызовов вернул ошибку, отрицательное число (из
+      <a href=API-datastruct-rus.html#LibRaw_errors>списка ошибок LibRaw</a>) при ошибочной ситуации
+      внутри LibRaw.
+    </p>
     <a name="unpack_function_name"></a>
     <h4>const char* LibRaw::unpack_function_name()</h4>
     <p>
@@ -301,26 +313,6 @@
       самостоятельно. Встроенные в LibRaw <a href="#dcrawemu">функции постпроцессинга</a> вызовут
       <b>subtract_black()</b> самостоятельно.
 
-    <a name="add_masked_borders_to_bitmap"></a>
-    <h4>void LibRaw::add_masked_borders_to_bitmap</h4>
-    <p>
-      Вызов перестраивает битмэп <b>imgdata.image</b> добавляя к нему данные черной рамки (маскированных пикселов),
-      если эта рамка есть в данных, выдаваемых камерой (если рамки нет, то вызов ничего не делает).<br/>
-      Вызов меняет поля <b>sizes.width,sizes.height,sizes.iwidth,sizes.iheight</b> на полный размер изображения.<br/>
-      Вызов ничего не делает:
-      </p>
-    <ul>
-        <li>для изображений, содержащих более одного компонента в каждом пикселе (полноцветные DNG,
-        файлы, демозаика которых уже проведена: Canon sRAW, Sinar 4-shot и т.п.).</li>
-      <li>для изображений, которым указано половинное разрешение при распаковке (половинная интерполяция,
-        исправление аберраций, wavelet denoise).
-      </li>
-    </ul>
-    <p>Функция возвращает целое число в соответствии с <a href=API-notes-rus.html#errors>соглашением о кодах
-        возврата</a>: положительное число, если какой-то из системных вызовов вернул ошибку, отрицательное число (из
-      <a href=API-datastruct-rus.html#LibRaw_errors>списка ошибок LibRaw</a>) при ошибочной ситуации
-      внутри LibRaw.
-    </p>
     <a name="rotate_fuji_raw"></a>
     <h4> int LibRaw:: rotate_fuji_raw()</h4>
     <p>
@@ -506,6 +498,34 @@ int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int ex
       значений полям структуры <b>LibRaw::imgdata.params</b>, структура имеет тип <b>libraw_output_params_t</b>, все
       поля перечислены и достаточно подробно описаны <a href="API-datastruct-rus.html#libraw_output_params_t">в
         описании структур данных</a>.
+    </p>
+
+    <a name="raw2image"></a>
+    <h3>int LibRaw::raw2image</h3>
+    <p>
+      Функция аллоцирует буфер для постобработки imgdata.image, предварительно освобождая его, если он уже 
+      был аллоцирован, и заполняет его данными в формате,
+      совместимыми с версиями LibRaw 0.13 и старше.
+    </p>
+    <p>
+      Эту функцию следует вызывать самостоятельно только если вы собираетесь самостоятельно обрабатывать
+      RAW-данные и ваш код рассчитан на LibRaw 0.13 и более старые версии. Функции постпроцессинга (см.
+      ниже) вызывают raw2image() самостоятельно.
+    </p>
+    <p>Функция возвращает целое число в соответствии с <a href=API-notes-rus.html#errors>соглашением о кодах
+        возврата</a>: положительное число, если какой-то из системных вызовов вернул ошибку, отрицательное число (из
+      <a href=API-datastruct-rus.html#LibRaw_errors>списка ошибок LibRaw</a>) при ошибочной ситуации
+      внутри LibRaw.
+    </p>
+    <a name="free_image"></a>
+    <h3>void LibRaw::free_image</h3>
+    <p>
+      Этот вызов освобождает буфер imgdata.image, аллоцированный вызовом raw2image();
+    </p>
+    <p>
+      Эту функцию следует вызывать, если текущий результат постпроцессинга уже не нужен (например, скопирован
+      куда-то), но возможны повторные вызовы постпроцессинга тех же данных (например, с другими параметрами),
+      поэтому вызывать <a href="#recycle">recycle()</a> еще рано.
     </p>
 
     <a name="adjust_sizes_info_only"></a>
@@ -886,7 +906,7 @@ LibRaw.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Sun Jul  3 16:21:26 MSD 2011
+Last modified: Mon Jul 11 20:58:31 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

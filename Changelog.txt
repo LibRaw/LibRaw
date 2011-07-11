@@ -1,3 +1,19 @@
+2011-07-11 Alex Tutubalin <lexa@lexa.ru>
+        * New call LibRaw::free_image(), deallocates imgdata.image buffer.
+          Use this call if current postprocessing results are not
+          needed, but it is to early to call recycle() because
+          dcraw_process() may be called later.
+
+        * New C-API calls
+          libraw_raw2image() - C API for LibRaw::raw2image()
+          libraw_free_image() - C API for LibRaw::free_image()
+          libraw_get_decoder_info() - C API for LibRaw::get_decoder_info()
+
+        * Bugfix: change of params.user_flip aftee open()/unpack()
+          calls should work.
+
+        * LibRaw 0.14.0-Alpha2
+
 2011-07-10 Alex Tutubalin <lexa@lexa.ru>
         * Multiple rendering (LibRaw::dcraw_process() calls) allowed
           without re-opening RAW file thrfough the sequence of open()/unpack()

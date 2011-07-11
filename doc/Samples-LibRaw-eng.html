@@ -16,7 +16,8 @@ Their source codes are located in the samples/ folder, and after library build t
         further code prints the values of the fields of the imgdata structure. The output of 
         <b>raw-identify</b>/<b>raw-identify -v</b> is virtually identical to the output of 
         <b>dcraw -i</b>/<b>dcraw -i -v </b> (in the output of this example, the sources of color data in the numeric
-        form are additionally printed). Command line key <b>-u</b> shows unpacking function name.   
+        form are additionally printed). Command line key <b>-u</b> shows unpacking function name, while <b>-u -f</b>
+        prints function name and masked are sizes.
       </li>
       <li><b>simple_dcraw</b> A simple &quot;emulation&quot; of dcraw reproducing the behavior of  
         <b>dcraw [-D] [-e] [-v] [-T]</b>. The result of its work must be binary identical to the result produced by a
@@ -41,6 +42,11 @@ Their source codes are located in the samples/ folder, and after library build t
           <dd>
             Use <a href="API-CXX-eng.html#open_buffer">open_buffer()</a> interface. Buffer prepared by mmap()
             call. This option not supported under Win32.
+          </dd>
+          <dt><b>-meme</b></dt>
+          <dd>
+            Use <a href="API-CXX-eng.html#open_buffer">open_buffer()</a> interface. Buffer prepared by 
+            malloc()+read() calls.
           </dd>
           <dt><b>-c float-value</b></dt>
           <dd>
@@ -121,13 +127,12 @@ Their source codes are located in the samples/ folder, and after library build t
         <b>-4, -1, -e, -h</b>). 
       </li>
       <li><b>unprocessed_raw</b> This sample extracts (mostly) unaltered RAW data including masked pixels
-        data (on supported cameras). Black level subtraction and zero pixel averaging is turned off.
+        data (on supported cameras). 
         If black frame exists and black frame extraction is supported for given format, masked pixels
         data is added to resulting .TIFF file.
         Command line options: <b>-q</b> - be quiet, <b>-A</b> - autoscale data (integer multiplier),
-        <b>-g</b> gamma-correction (gamma 2.2) for data (instead of precise linear one), <b>-N</b> turns off tone
-        curve correction of RAW data, <b>-B</b> turns on black level subtraction,
-        <b>-M</b> adds masked pixels to output image.
+        <b>-g</b> gamma-correction (gamma 2.2) for data (instead of precise linear one),  <b>-B</b> turns on black
+        level subtraction 
         </li>
       <li><b>4channnels</b> - splits RAW-file into four separate 16-bit grayscale TIFFs (per RAW channel).<br/>
         Command line switches:
@@ -138,6 +143,8 @@ Their source codes are located in the samples/ folder, and after library build t
           <li><b>-B</b> turn off black subtraction</li>
           <li><b>-N</b> no RAW curve </li>
         </ul>
+      </li>
+      <li><b>multirender_test</b> - very simple example of multiple rendering on one file without reopen.
       </li>
     </ul>
     <h2>Example of docmode</h2>
@@ -245,7 +252,7 @@ end:
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 12:19:36 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Tue Feb  8 13:36:10 MSK 2011
+Last modified: Mon Jul 11 20:24:09 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

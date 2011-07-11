@@ -893,6 +893,18 @@ int LibRaw::unpack(void)
     }
 }
 
+void LibRaw::free_image(void)
+{
+    if(imgdata.image)
+        {
+            free(imgdata.image);
+            imgdata.image = 0;
+            imgdata.progress_flags 
+                = LIBRAW_PROGRESS_START|LIBRAW_PROGRESS_OPEN
+                |LIBRAW_PROGRESS_IDENTIFY|LIBRAW_PROGRESS_SIZE_ADJUST|LIBRAW_PROGRESS_LOAD_RAW;
+        }
+}
+
 int LibRaw::raw2image(void)
 {
 
@@ -905,6 +917,17 @@ int LibRaw::raw2image(void)
         memmove(&imgdata.sizes,&imgdata.rawdata.sizes,sizeof(imgdata.sizes));
         memmove(&imgdata.idata,&imgdata.rawdata.iparams,sizeof(imgdata.idata));
         memmove(&libraw_internal_data.internal_output_params,&imgdata.rawdata.ioparams,sizeof(libraw_internal_data.internal_output_params));
+
+
+        if (O.user_flip >= 0)
+            S.flip = O.user_flip;
+        
+        switch ((S.flip+3600) % 360) 
+            {
+            case 270:  S.flip = 5;  break;
+            case 180:  S.flip = 3;  break;
+            case  90:  S.flip = 6;  break;
+            }
 
         // adjust for half mode!
         IO.shrink = P1.filters && (O.half_size ||
