@@ -1,3 +1,6 @@
+﻿2011-07-15 Alex Tutubalin <lexa@lexa.ru>
+        * Импортирован код кроппинга из 0.13.7
+
 ﻿2011-07-11 Alex Tutubalin <lexa@lexa.ru>
         * Новый вызов LibRaw::free_image()
           Освобождает память, выделенную для imgdata.image. Может быть

@@ -1,5 +1,9 @@
+2011-07-15 Alex Tutubalin <lexa@lexa.ru>
+        * imported cropping code from 0.13 branch
+
 2011-07-12 Alex Tutubalin <lexa@lexa.ru>
         * samples/multirender_test - check for different clip settings
+
 2011-07-11 Alex Tutubalin <lexa@lexa.ru>
         * New call LibRaw::free_image(), deallocates imgdata.image buffer.
           Use this call if current postprocessing results are not
@@ -73,7 +77,6 @@
         * all client code should be recompiled due to internals change.
 
         * LibRaw 0.14.0-Alpha1
-
 
 2011-07-03 Alex Tutubalin <lexa@lexa.ru>
         * Cosmetic cleanup in Libraw_memmgr code

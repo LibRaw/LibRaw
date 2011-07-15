@@ -3109,6 +3109,8 @@ void CLASS smal_v9_load_raw()
 }
 #line 3561 "dcraw/dcraw.c"
 
+#ifdef LIBRAW_LIBRARY_BUILD
+
 void CLASS crop_pixels()
 {
   int crop[4], filt, row, c;
@@ -3120,23 +3122,39 @@ void CLASS crop_pixels()
 #ifdef DCRAW_VERBOSE
   if(verbose) fprintf (stderr, _("%s is cropped to nothing!\n"), ifname);
 #endif
-#ifdef LIBRAW_LIBRARY_BUILD
   throw LIBRAW_EXCEPTION_BAD_CROP;
-#else
-    longjmp (failure, 4);
-#endif
   }
-  for (row=0; row < crop[3]; row++)
-    memmove (image[crop[2]*row],
-	     image[(crop[1]+row)*iwidth+crop[0]], crop[2]*sizeof *image);
-  image = (ushort (*)[4]) realloc (image, crop[2]*crop[3]*sizeof *image);
-  width  = (iwidth  = crop[2]) << shrink;
-  height = (iheight = crop[3]) << shrink;
-  for (filt=c=0; c < 16; c++)
-    filt |= FC((c >> 1)+(crop[1] << shrink),
-	       (c &  1)+(crop[0] << shrink)) << c*2;
-  filters = filt;
+  if(fuji_width)
+      {
+
+          FORC(2) crop[c] = (crop[c]>>2)<<2;
+
+          for (row=0; row < crop[3]; row++)
+              memmove (image[crop[2]*row],
+                       image[(crop[1]+row)*iwidth+crop[0]], crop[2]*sizeof *image);
+          image = (ushort (*)[4]) realloc (image, crop[2]*crop[3]*sizeof *image);
+          width  = (iwidth  = crop[2]) << shrink;
+          height = (iheight = crop[3]) << shrink;
+
+          fuji_width = width >> !fuji_layout;
+          libraw_internal_data.internal_output_params.fwidth = (height >> fuji_layout) + fuji_width;
+          libraw_internal_data.internal_output_params.fheight = libraw_internal_data.internal_output_params.fwidth - 1;
+      }
+  else
+      {
+          for (row=0; row < crop[3]; row++)
+              memmove (image[crop[2]*row],
+                       image[(crop[1]+row)*iwidth+crop[0]], crop[2]*sizeof *image);
+          image = (ushort (*)[4]) realloc (image, crop[2]*crop[3]*sizeof *image);
+          width  = (iwidth  = crop[2]) << shrink;
+          height = (iheight = crop[3]) << shrink;
+          for (filt=c=0; c < 16; c++)
+              filt |= FC((c >> 1)+(crop[1] << shrink),
+                         (c &  1)+(crop[0] << shrink)) << c*2;
+          filters = filt;
+      }
 }
+#endif
 
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
 {
@@ -4499,7 +4517,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 4956 "dcraw/dcraw.c"
+#line 4974 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5079,7 +5097,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5540 "dcraw/dcraw.c"
+#line 5558 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6332,7 +6350,7 @@ void CLASS parse_cine()
   data_offset  = (INT64) get4() + 8;
   data_offset += (INT64) get4() << 32;
 }
-#line 6799 "dcraw/dcraw.c"
+#line 6817 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -7019,7 +7037,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7489 "dcraw/dcraw.c"
+#line 7507 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8600,7 +8618,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9163 "dcraw/dcraw.c"
+#line 9181 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8819,7 +8837,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9406 "dcraw/dcraw.c"
+#line 9424 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

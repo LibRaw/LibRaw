@@ -3559,6 +3559,8 @@ void CLASS subtract (const char *fname)
 
 //@out COMMON
 
+#ifdef LIBRAW_LIBRARY_BUILD
+
 void CLASS crop_pixels()
 {
   int crop[4], filt, row, c;
@@ -3570,23 +3572,39 @@ void CLASS crop_pixels()
 #ifdef DCRAW_VERBOSE
   if(verbose) fprintf (stderr, _("%s is cropped to nothing!\n"), ifname);
 #endif
-#ifdef LIBRAW_LIBRARY_BUILD
   throw LIBRAW_EXCEPTION_BAD_CROP;
-#else
-    longjmp (failure, 4);
-#endif
   }
-  for (row=0; row < crop[3]; row++)
-    memmove (image[crop[2]*row],
-	     image[(crop[1]+row)*iwidth+crop[0]], crop[2]*sizeof *image);
-  image = (ushort (*)[4]) realloc (image, crop[2]*crop[3]*sizeof *image);
-  width  = (iwidth  = crop[2]) << shrink;
-  height = (iheight = crop[3]) << shrink;
-  for (filt=c=0; c < 16; c++)
-    filt |= FC((c >> 1)+(crop[1] << shrink),
-	       (c &  1)+(crop[0] << shrink)) << c*2;
-  filters = filt;
+  if(fuji_width)
+      {
+
+          FORC(2) crop[c] = (crop[c]>>2)<<2;
+
+          for (row=0; row < crop[3]; row++)
+              memmove (image[crop[2]*row],
+                       image[(crop[1]+row)*iwidth+crop[0]], crop[2]*sizeof *image);
+          image = (ushort (*)[4]) realloc (image, crop[2]*crop[3]*sizeof *image);
+          width  = (iwidth  = crop[2]) << shrink;
+          height = (iheight = crop[3]) << shrink;
+
+          fuji_width = width >> !fuji_layout;
+          libraw_internal_data.internal_output_params.fwidth = (height >> fuji_layout) + fuji_width;
+          libraw_internal_data.internal_output_params.fheight = libraw_internal_data.internal_output_params.fwidth - 1;
+      }
+  else
+      {
+          for (row=0; row < crop[3]; row++)
+              memmove (image[crop[2]*row],
+                       image[(crop[1]+row)*iwidth+crop[0]], crop[2]*sizeof *image);
+          image = (ushort (*)[4]) realloc (image, crop[2]*crop[3]*sizeof *image);
+          width  = (iwidth  = crop[2]) << shrink;
+          height = (iheight = crop[3]) << shrink;
+          for (filt=c=0; c < 16; c++)
+              filt |= FC((c >> 1)+(crop[1] << shrink),
+                         (c &  1)+(crop[0] << shrink)) << c*2;
+          filters = filt;
+      }
 }
+#endif
 
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
 {
