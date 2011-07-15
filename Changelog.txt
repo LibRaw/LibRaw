@@ -11,7 +11,7 @@
              disabled.
         * OpenMP enabled for Visual Studio 2008 SP1+, but not for RTM
 
-        * LibRaw 0.13.6-Release
+        * LibRaw 0.13.7-Release
 
 
 2011-07-03 Alex Tutubalin <lexa@lexa.ru>
