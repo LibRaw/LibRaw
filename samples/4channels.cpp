@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: 4channels.cpp
- * Copyright 2008-2010 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2011 LibRaw LLC (info@libraw.org)
  * Created: Mon Feb 09, 2009
  *
  * LibRaw sample

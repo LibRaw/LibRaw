@@ -1,7 +1,7 @@
 /* -*- C++ -*-
  * File: identify.cpp
- * Copyright 2008-2010 LibRaw LLC (info@libraw.org)
- * Created: Sat Mar  8 , 2008
+ * Copyright 2008-2011 LibRaw LLC (info@libraw.org)
+ * Created: Sat Mar  8, 2008
  *
  * LibRaw C++ demo: emulates dcraw -i [-v]
  *

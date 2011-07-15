@@ -1,7 +1,6 @@
 /* -*- C++ -*-
  * File: mem_image.cpp
- * Copyright 2008-2010 LibRaw LLC (info@libraw.org)
- * Created: Sat Mar  8 , 2008
+ * Copyright 2008-2011 LibRaw LLC (info@libraw.org)
  *
  * LibRaw mem_image/mem_thumb API test. Results should be same (bitwise) to dcraw [-4] [-6] [-e]
  * Testing note: for ppm-thumbnails you should use dcraw -w -e for thumbnail extraction

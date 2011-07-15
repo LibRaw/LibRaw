@@ -36,7 +36,7 @@ DCRAW_LIB_OBJECTS=object/libraw_cxx.o object/libraw_c_api.o object/dcraw_common.
 library: lib/libraw.a
 
 samples: bin/raw-identify bin/simple_dcraw bin/dcraw_emu bin/dcraw_half bin/mem_image bin/mem_image \
-        bin/unprocessed_raw bin/4channels  bin/multirender_test
+        bin/unprocessed_raw bin/4channels  bin/multirender_test bin/postprocessing_benchmark
 
 install: library
 	@if [ -d /usr/local/include ] ; then cp -R libraw /usr/local/include/ ; else echo 'no /usr/local/include' ; fi
@@ -61,6 +61,9 @@ bin/simple_dcraw: lib/libraw.a samples/simple_dcraw.cpp
 
 bin/multirender_test: lib/libraw.a samples/multirender_test.cpp
 	g++ ${LCMS_DEF} ${CFLAGS} -o bin/multirender_test samples/multirender_test.cpp ${CLIBS}
+
+bin/postprocessing_benchmark: lib/libraw.a samples/postprocessing_benchmark.cpp
+	g++ ${LCMS_DEF} ${CFLAGS} -o bin/postprocessing_benchmark samples/postprocessing_benchmark.cpp ${CLIBS}
 
 bin/mem_image: lib/libraw.a samples/mem_image.cpp
 	g++ ${LCMS_DEF} ${CFLAGS} -o bin/mem_image samples/mem_image.cpp ${CLIBS}

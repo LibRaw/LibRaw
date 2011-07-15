@@ -77,6 +77,10 @@ bin_multirender_test_SOURCES = samples/multirender_test.cpp
 bin_multirender_test_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
 bin_multirender_test_LDADD = lib/libraw.la
 
+bin_postprocessing_benchmark_SOURCES = samples/postprocessing_benchmark.cpp
+bin_postprocessing_benchmark_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
+bin_postprocessing_benchmark_LDADD = lib/libraw.la
+
 bin_mem_image_SOURCES = samples/mem_image.cpp
 bin_mem_image_CPPFLAGS = $(lib_libraw_a_CPPFLAGS)
 bin_mem_image_LDADD = lib/libraw.la

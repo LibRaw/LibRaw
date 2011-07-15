@@ -1,3 +1,5 @@
+2011-07-12 Alex Tutubalin <lexa@lexa.ru>
+        * samples/multirender_test - check for different clip settings
 2011-07-11 Alex Tutubalin <lexa@lexa.ru>
         * New call LibRaw::free_image(), deallocates imgdata.image buffer.
           Use this call if current postprocessing results are not

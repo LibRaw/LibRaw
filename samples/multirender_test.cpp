@@ -1,9 +1,9 @@
 /* -*- C++ -*-
- * File: simple_dcraw.cpp
- * Copyright 2008-2010 LibRaw LLC (info@libraw.org)
+ * File: multirender_test.cpp
+ * Copyright 2008-2011 LibRaw LLC (info@libraw.org)
  * Created: Jul 10, 2011
  *
- * LibRaw simple C++ API:  creates 4 different renderings from 1 source file. The 1st and 4th one should be identical
+ * LibRaw simple C++ API:  creates 8 different renderings from 1 source file. The 1st and 4th one should be identical
 
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of three licenses as you choose:
@@ -37,12 +37,13 @@ it under the terms of the one of three licenses as you choose:
 #define snprintf _snprintf
 #endif
 
-int process_once(LibRaw& RawProcessor, int half_mode, int camera_wb, int auto_wb, int suffix, char *fname)
+int process_once(LibRaw& RawProcessor, int half_mode, int camera_wb, int auto_wb, int suffix, int user_flip,char *fname)
 {
     char outfn[1024];
     RawProcessor.imgdata.params.half_size = half_mode;
     RawProcessor.imgdata.params.use_camera_wb = camera_wb;
     RawProcessor.imgdata.params.use_auto_wb = auto_wb;
+    RawProcessor.imgdata.params.user_flip = user_flip;
 
     int ret = RawProcessor.dcraw_process();
                 
@@ -95,10 +96,14 @@ int main(int ac, char *av[])
                     fprintf(stderr,"Cannot unpack %s: %s\n",av[i],libraw_strerror(ret));
                     continue;
                 }
-            process_once(RawProcessor,0,0,0,1,av[i]);
-            process_once(RawProcessor,1,0,1,2,av[i]);
-            process_once(RawProcessor,1,1,0,3,av[i]);
-            process_once(RawProcessor,0,0,0,4,av[i]);
+            process_once(RawProcessor,0,0,0,1,-1,av[i]); // default flip
+            process_once(RawProcessor,1,0,1,2,-1,av[i]);
+            process_once(RawProcessor,1,1,0,3,-1,av[i]); // default flip
+            process_once(RawProcessor,1,1,0,4,1,av[i]); // flip 1
+            process_once(RawProcessor,1,1,0,5,3,av[i]); // flip 3
+            process_once(RawProcessor,1,1,0,6,1,av[i]); // 1 again same as 4
+            process_once(RawProcessor,1,1,0,7,-1,av[i]); // default again, same as 3
+            process_once(RawProcessor,0,0,0,8,-1,av[i]); // same as 1
 
             RawProcessor.recycle(); // just for show this call
         }
