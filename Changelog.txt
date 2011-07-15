@@ -1,3 +1,19 @@
+2011-07-15 Alex Tutubalin <lexa@lexa.ru>
+        * Changes in cropping code:
+           + cropping is now works for Fuji files (instead of crash)
+           + bad pixels map and dark frame subtraction is turned off if
+             cropping enabled
+           + for technical reasons, coordinates of top-left corner of
+             crop box are rounded to multiple of 4.
+        * ./configure stuff fixes: 
+           + only install static libraries when --enable-static is set
+           + compiled samples are dynamically linked if shared library not
+             disabled.
+        * OpenMP enabled for Visual Studio 2008 SP1+, but not for RTM
+
+        * LibRaw 0.13.6-Release
+
+
 2011-07-03 Alex Tutubalin <lexa@lexa.ru>
         * Cosmetic cleanup in Libraw_memmgr code
 
