@@ -34,6 +34,8 @@ it under the terms of the one of three licenses as you choose:
 #include "libraw/libraw.h"
 //#include "internal/defines.h"
 
+#define NEW_CROP_CODE
+
 #ifdef __cplusplus
 extern "C" 
 {
@@ -905,19 +907,14 @@ void LibRaw::free_image(void)
         }
 }
 
-int LibRaw::raw2image(void)
+
+void LibRaw::raw2image_start()
 {
-
-    CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
-
-    try {
-
         // restore color,sizes and internal data into raw_image fields
         memmove(&imgdata.color,&imgdata.rawdata.color,sizeof(imgdata.color));
         memmove(&imgdata.sizes,&imgdata.rawdata.sizes,sizeof(imgdata.sizes));
         memmove(&imgdata.idata,&imgdata.rawdata.iparams,sizeof(imgdata.idata));
         memmove(&libraw_internal_data.internal_output_params,&imgdata.rawdata.ioparams,sizeof(libraw_internal_data.internal_output_params));
-
 
         if (O.user_flip >= 0)
             S.flip = O.user_flip;
@@ -935,13 +932,154 @@ int LibRaw::raw2image(void)
         
         S.iheight = (S.height + IO.shrink) >> IO.shrink;
         S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
+}
 
+// Same as raw2image, but
+// 1) Do raw2image and rotate_fuji_raw in one pass
+// 2) Do raw2image and cropping in one pass
+#ifndef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+int LibRaw::raw2image_ex(void)
+{
+    CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
+
+    raw2image_start();
+        
+    if(IO.fwidth) 
+        {
+            // fuji code
+        }
+    else
+        {
+            int do_crop = 0;
+            unsigned save_filters = imgdata.idata.filters;
+            unsigned save_width = S.width;
+            if (~O.cropbox[2] && ~O.cropbox[3])
+                {
+                    int crop[4],c,filt;
+                    for(int c=0;c<4;c++) crop[c] = O.cropbox[c];
+                    do_crop = 1;
+                    crop[2] = MIN (crop[2], (signed) S.width-crop[0]);
+                    crop[3] = MIN (crop[3], (signed) S.height-crop[1]);
+                    if (crop[2] <= 0 || crop[3] <= 0)
+                        throw LIBRAW_EXCEPTION_BAD_CROP;
+
+                    // adjust sizes!
+                    S.left_margin+=crop[0];
+                    S.top_margin+=crop[1];
+                    S.width=crop[2];
+                    S.height=crop[3];
+                    S.bottom_margin = S.raw_height - S.height - S.top_margin;
+                    S.right_margin = S.raw_width - S.width - S.left_margin;
+
+                    S.iheight = (S.height + IO.shrink) >> IO.shrink;
+                    S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
+                    if(imgdata.idata.filters)
+                        {
+                            for (filt=c=0; c < 16; c++)
+                                filt |= FC((c >> 1)+(crop[1]),
+                                           (c &  1)+(crop[0])) << c*2;
+                            imgdata.idata.filters = filt;
+                        }
+
+                }
+
+                if(imgdata.image)
+                    {
+                        imgdata.image = (ushort (*)[4]) realloc (imgdata.image,S.iheight*S.iwidth 
+                                                                 *sizeof (*imgdata.image));
+                        memset(imgdata.image,0,S.iheight*S.iwidth *sizeof (*imgdata.image));
+                    }
+                else
+                    imgdata.image = (ushort (*)[4]) calloc (S.iheight*S.iwidth, sizeof (*imgdata.image));
+
+                merror (imgdata.image, "raw2image_ex()");
+                
+                libraw_decoder_info_t decoder_info;
+                get_decoder_info(&decoder_info);
+
+
+                if(decoder_info.decoder_flags & LIBRAW_DECODER_FLATFIELD)
+                    {
+                        if(decoder_info.decoder_flags & LIBRAW_DECODER_USEBAYER2)
+                            for(int row = 0; row < S.height; row++)
+                                for(int col = 0; col < S.width; col++)
+                                    imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][fc(row,col)]
+                                        = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
+                                                                    +(col+S.left_margin)];
+                        else
+                            for(int row = 0; row < S.height; row++)
+                                {
+                                    int colors[4];
+                                    for (int xx=0;xx<4;xx++)
+                                        colors[xx] = COLOR(row,xx);
+                                    for(int col = 0; col < S.width; col++)
+                                        {
+                                            int cc = colors[col&3];
+                                            imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] =
+                                                imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
+                                                                          +(col+S.left_margin)];
+                                        }
+                                }
+                    }
+                else if (decoder_info.decoder_flags & LIBRAW_DECODER_4COMPONENT)
+                    {
+#define FC0(row,col) (save_filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
+                        if(IO.shrink)
+                            for(int row = 0; row < S.height; row++)
+                                for(int col = 0; col < S.width; col++)
+                                    imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][FC(row,col)] 
+                                        = imgdata.rawdata.color_image[(row+S.top_margin)*S.raw_width
+                                                                      +S.left_margin+col]
+                                        [FC0(row+S.top_margin,col+S.left_margin)];
+#undef FC0
+                        else
+                            for(int row = 0; row < S.height; row++)
+                                memmove(&imgdata.image[row*S.width],
+                                        &imgdata.rawdata.color_image[(row+S.top_margin)*S.raw_width+S.left_margin],
+                                        S.width*sizeof(*imgdata.image));
+                    }
+                else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+                    {
+                        if(do_crop)
+                            for(int row = 0; row < S.height; row++)
+                                memmove(&imgdata.image[row*S.width],
+                                        &imgdata.rawdata.color_image[(row+S.top_margin)*save_width+S.left_margin],
+                                        S.width*sizeof(*imgdata.image));
+                                
+                        else 
+                            memmove(imgdata.image,imgdata.rawdata.color_image,
+                                    S.width*S.height*sizeof(*imgdata.image));
+                    }
+
+
+
+                if(imgdata.rawdata.use_ph1_correct) // Phase one unpacked!
+                    phase_one_correct();
+            }
+}
+
+#undef MIN
+
+int LibRaw::raw2image(void)
+{
+
+    CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
+
+    try {
+        raw2image_start();
 
         // free and re-allocate image bitmap
         if(imgdata.image)
-            free(imgdata.image);
-        imgdata.image = (ushort (*)[4]) calloc (S.iheight*S.iwidth, sizeof (*imgdata.image));
-        merror (imgdata.image, "unpack()");
+            {
+                imgdata.image = (ushort (*)[4]) realloc (imgdata.image,S.iheight*S.iwidth *sizeof (*imgdata.image));
+                memset(imgdata.image,0,S.iheight*S.iwidth *sizeof (*imgdata.image));
+            }
+        else
+            imgdata.image = (ushort (*)[4]) calloc (S.iheight*S.iwidth, sizeof (*imgdata.image));
+
+        merror (imgdata.image, "raw2image()");
 
         libraw_decoder_info_t decoder_info;
         get_decoder_info(&decoder_info);
@@ -953,12 +1091,9 @@ int LibRaw::raw2image(void)
                     {
                         for(int row = 0; row < S.height; row++)
                             for(int col = 0; col < S.width; col++)
-                                {
-                                    int cc = fc(row,col);
-                                    ushort val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
+                                imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][fc(row,col)]
+                                = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
                                                                            +(col+S.left_margin)];
-                                    imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] = val;
-                                }
                     }
                 else
                     {
@@ -998,9 +1133,10 @@ int LibRaw::raw2image(void)
             }
         else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
             {
-                // legacy is always 4channel
+                // legacy is always 4channel and not shrinked!
                 memmove(imgdata.image,imgdata.rawdata.color_image,S.width*S.height*sizeof(*imgdata.image));
             }
+
         if(imgdata.rawdata.use_ph1_correct) // Phase one unpacked!
             phase_one_correct();
 
@@ -1023,11 +1159,19 @@ int LibRaw::dcraw_document_mode_processing(void)
 
     try {
 
+        int no_crop = 1;
 
+#ifndef NEW_CROP_CODE
         if(raw2image())
             throw LIBRAW_EXCEPTION_ALLOC;
+#else
+        if (~O.cropbox[2] && ~O.cropbox[3])
+            no_crop=0;
 
-        if (IO.zero_is_bad)
+        raw2image_ex(); // raw2image+crop+rotate_fuji_raw
+#endif
+
+        if (no_crop && IO.zero_is_bad)
             {
                 remove_zeroes();
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
@@ -1038,6 +1182,7 @@ int LibRaw::dcraw_document_mode_processing(void)
         subtract_black();
         
         int cropped = 0;
+#ifndef NEW_CROP_CODE
         if (~O.cropbox[2] && ~O.cropbox[3])
             {
                 crop_pixels();
@@ -1046,6 +1191,7 @@ int LibRaw::dcraw_document_mode_processing(void)
 
         if(IO.fwidth) 
             rotate_fuji_raw();
+#endif
 
         O.document_mode = 2;
         
@@ -1896,13 +2042,21 @@ int LibRaw::dcraw_process(void)
 //    CHECK_ORDER_HIGH(LIBRAW_PROGRESS_PRE_INTERPOLATE);
 
     try {
-        
+
+        int no_crop = 1;
+#ifndef NEW_CROP_CODE
         if(raw2image())
             throw LIBRAW_EXCEPTION_ALLOC;
+#else
+        if (~O.cropbox[2] && ~O.cropbox[3])
+            no_crop=0;
+
+        raw2image_ex(); // raw2image+crop+rotate_fuji_raw
+#endif
 
         int save_4color = O.four_color_rgb;
 
-        if (IO.zero_is_bad) 
+        if (no_crop && IO.zero_is_bad) 
             {
                 remove_zeroes();
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
@@ -1913,6 +2067,7 @@ int LibRaw::dcraw_process(void)
         subtract_black();
 
         int cropped = 0;
+#ifndef NEW_CROP_CODE
         if (~O.cropbox[2] && ~O.cropbox[3])
             {
                 crop_pixels();
@@ -1922,7 +2077,7 @@ int LibRaw::dcraw_process(void)
 
         if(IO.fwidth) 
             rotate_fuji_raw();
-
+#endif
 
         if(O.half_size) 
             O.four_color_rgb = 1;

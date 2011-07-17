@@ -109,6 +109,8 @@ class DllDef LibRaw
     int                         adjust_sizes_info_only(void);
     void                        subtract_black();
     int                         raw2image();
+    int                         raw2image_ex();
+    void                        raw2image_start();
     void                        free_image();
     int                         adjust_maximum();
     void                        set_memerror_handler( memory_callback cb,void *data) {callbacks.memcb_data = data; callbacks.mem_cb = cb; }
