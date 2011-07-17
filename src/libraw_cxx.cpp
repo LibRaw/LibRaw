@@ -945,45 +945,99 @@ int LibRaw::raw2image_ex(void)
     CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
 
     raw2image_start();
-        
+
+    // process cropping
+    int do_crop = 0;
+    unsigned save_filters = imgdata.idata.filters;
+    unsigned save_width = S.width;
+    if (~O.cropbox[2] && ~O.cropbox[3])
+        {
+            int crop[4],c,filt;
+            for(int c=0;c<4;c++) 
+                {
+                    crop[c] = O.cropbox[c];
+                    if(crop[c]<0)
+                        crop[c]=0;
+                }
+            if(IO.fwidth) 
+                {
+                    crop[0] = (crop[0]/4)*4;
+                    crop[1] = (crop[1]/4)*4;
+                }
+            do_crop = 1;
+            crop[2] = MIN (crop[2], (signed) S.width-crop[0]);
+            crop[3] = MIN (crop[3], (signed) S.height-crop[1]);
+            if (crop[2] <= 0 || crop[3] <= 0)
+                throw LIBRAW_EXCEPTION_BAD_CROP;
+            
+            // adjust sizes!
+            S.left_margin+=crop[0];
+            S.top_margin+=crop[1];
+            S.width=crop[2];
+            S.height=crop[3];
+            S.bottom_margin = S.raw_height - S.height - S.top_margin;
+            S.right_margin = S.raw_width - S.width - S.left_margin;
+            
+            S.iheight = (S.height + IO.shrink) >> IO.shrink;
+            S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
+            if(imgdata.idata.filters)
+                {
+                    for (filt=c=0; c < 16; c++)
+                        filt |= FC((c >> 1)+(crop[1]),
+                                   (c &  1)+(crop[0])) << c*2;
+                    imgdata.idata.filters = filt;
+                }
+        }
+
     if(IO.fwidth) 
         {
-            // fuji code
+            ushort fiwidth,fiheight;
+            if(do_crop)
+                {
+                    IO.fuji_width = S.width >> !libraw_internal_data.unpacker_data.fuji_layout;
+                    IO.fwidth = (S.height >> libraw_internal_data.unpacker_data.fuji_layout) + IO.fuji_width;
+                    IO.fheight = IO.fwidth - 1;
+                }
+
+            fiheight = (IO.fheight + IO.shrink) >> IO.shrink;
+            fiwidth = (IO.fwidth + IO.shrink) >> IO.shrink;
+            if(imgdata.image)
+                    {
+                        imgdata.image = (ushort (*)[4])realloc(imgdata.image,fiheight*fiwidth*sizeof (*imgdata.image));
+                        memset(imgdata.image,0,fiheight*fiwidth *sizeof (*imgdata.image));
+                    }
+                else
+                    imgdata.image = (ushort (*)[4]) calloc (fiheight*fiwidth, sizeof (*imgdata.image));
+            merror (imgdata.image, "raw2image_ex()");
+            
+            int row,col;
+            for(row=0;row<S.height;row++)
+                {
+                    for(col=0;col<S.width;col++)
+                        {
+                            int r,c;
+                            if (libraw_internal_data.unpacker_data.fuji_layout) {
+                                r = IO.fuji_width - 1 - col + (row >> 1);
+                                c = col + ((row+1) >> 1);
+                            } else {
+                                r = IO.fuji_width - 1 + row - (col >> 1);
+                                c = row + ((col+1) >> 1);
+                            }
+                            imgdata.image[((r) >> IO.shrink)*fiwidth + ((c) >> IO.shrink)][FC(r,c)] 
+                                = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
+                                                                    +(col+S.left_margin)];
+                        }
+                }
+            // restore fuji sizes!
+            S.height = IO.fheight;
+            S.width = IO.fwidth;
+            S.iheight = (S.height + IO.shrink) >> IO.shrink;
+            S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
+            S.raw_height -= 2*S.top_margin;
+            IO.fheight = IO.fwidth = 0; // prevent repeated calls
         }
     else
         {
-            int do_crop = 0;
-            unsigned save_filters = imgdata.idata.filters;
-            unsigned save_width = S.width;
-            if (~O.cropbox[2] && ~O.cropbox[3])
-                {
-                    int crop[4],c,filt;
-                    for(int c=0;c<4;c++) crop[c] = O.cropbox[c];
-                    do_crop = 1;
-                    crop[2] = MIN (crop[2], (signed) S.width-crop[0]);
-                    crop[3] = MIN (crop[3], (signed) S.height-crop[1]);
-                    if (crop[2] <= 0 || crop[3] <= 0)
-                        throw LIBRAW_EXCEPTION_BAD_CROP;
-
-                    // adjust sizes!
-                    S.left_margin+=crop[0];
-                    S.top_margin+=crop[1];
-                    S.width=crop[2];
-                    S.height=crop[3];
-                    S.bottom_margin = S.raw_height - S.height - S.top_margin;
-                    S.right_margin = S.raw_width - S.width - S.left_margin;
-
-                    S.iheight = (S.height + IO.shrink) >> IO.shrink;
-                    S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
-                    if(imgdata.idata.filters)
-                        {
-                            for (filt=c=0; c < 16; c++)
-                                filt |= FC((c >> 1)+(crop[1]),
-                                           (c &  1)+(crop[0])) << c*2;
-                            imgdata.idata.filters = filt;
-                        }
-
-                }
 
                 if(imgdata.image)
                     {
@@ -1053,10 +1107,8 @@ int LibRaw::raw2image_ex(void)
                                     S.width*S.height*sizeof(*imgdata.image));
                     }
 
-
-
                 if(imgdata.rawdata.use_ph1_correct) // Phase one unpacked!
-                    phase_one_correct();
+                        phase_one_correct();
             }
 }
 
@@ -1161,15 +1213,10 @@ int LibRaw::dcraw_document_mode_processing(void)
 
         int no_crop = 1;
 
-#ifndef NEW_CROP_CODE
-        if(raw2image())
-            throw LIBRAW_EXCEPTION_ALLOC;
-#else
         if (~O.cropbox[2] && ~O.cropbox[3])
             no_crop=0;
 
         raw2image_ex(); // raw2image+crop+rotate_fuji_raw
-#endif
 
         if (no_crop && IO.zero_is_bad)
             {
@@ -1181,18 +1228,6 @@ int LibRaw::dcraw_document_mode_processing(void)
             C.black = O.user_black;
         subtract_black();
         
-        int cropped = 0;
-#ifndef NEW_CROP_CODE
-        if (~O.cropbox[2] && ~O.cropbox[3])
-            {
-                crop_pixels();
-                cropped = 1;
-            }
-
-        if(IO.fwidth) 
-            rotate_fuji_raw();
-#endif
-
         O.document_mode = 2;
         
         if(P1.is_foveon)
@@ -1209,12 +1244,12 @@ int LibRaw::dcraw_document_mode_processing(void)
 
         O.use_fuji_rotate = 0;
 
-        if(O.bad_pixels && !cropped) 
+        if(O.bad_pixels && no_crop) 
             {
                 bad_pixels(O.bad_pixels);
                 SET_PROC_FLAG(LIBRAW_PROGRESS_BAD_PIXELS);
             }
-        if (O.dark_frame && !cropped)
+        if (O.dark_frame && no_crop)
             {
                 subtract (O.dark_frame);
                 SET_PROC_FLAG(LIBRAW_PROGRESS_DARK_FRAME);
@@ -1862,50 +1897,6 @@ int LibRaw::adjust_sizes_info_only(void)
     return 0;
 }
 
-int LibRaw::rotate_fuji_raw(void)
-{
-    CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
-    CHECK_ORDER_HIGH(LIBRAW_PROGRESS_PRE_INTERPOLATE);
-
-
-    if(!IO.fwidth) return LIBRAW_SUCCESS;
-    int row,col,r,c;
-    ushort (*newimage)[4];
-    ushort fiwidth,fiheight;
-
-    fiheight = (IO.fheight + IO.shrink) >> IO.shrink;
-    fiwidth = (IO.fwidth + IO.shrink) >> IO.shrink;
-    
-    newimage = (ushort (*)[4]) calloc (fiheight*fiwidth, sizeof (*newimage));
-    merror(newimage,"rotate_fuji_raw()");
-    for(row=0;row<S.height;row++)
-        {
-            for(col=0;col<S.width;col++)
-                {
-                    if (libraw_internal_data.unpacker_data.fuji_layout) {
-                        r = IO.fuji_width - 1 - col + (row >> 1);
-                        c = col + ((row+1) >> 1);
-                    } else {
-                        r = IO.fuji_width - 1 + row - (col >> 1);
-                        c = row + ((col+1) >> 1);
-                    }
-                    newimage[((r) >> IO.shrink)*fiwidth + ((c) >> IO.shrink)][FCF(row,col)] = 
-                        imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][FCF(row,col)];
-                }
-        }
-    // restore fuji sizes!
-    S.height = IO.fheight;
-    S.width = IO.fwidth;
-    S.iheight = (S.height + IO.shrink) >> IO.shrink;
-    S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
-    S.raw_height -= 2*S.top_margin;
-    IO.fheight = IO.fwidth = 0; // prevent repeated calls
-
-    free(imgdata.image);
-    imgdata.image = newimage;
-    return LIBRAW_SUCCESS;
-    
-}
 
 void LibRaw::subtract_black()
 {
@@ -2044,15 +2035,11 @@ int LibRaw::dcraw_process(void)
     try {
 
         int no_crop = 1;
-#ifndef NEW_CROP_CODE
-        if(raw2image())
-            throw LIBRAW_EXCEPTION_ALLOC;
-#else
+
         if (~O.cropbox[2] && ~O.cropbox[3])
             no_crop=0;
 
         raw2image_ex(); // raw2image+crop+rotate_fuji_raw
-#endif
 
         int save_4color = O.four_color_rgb;
 
@@ -2066,29 +2053,16 @@ int LibRaw::dcraw_process(void)
         if (O.user_black >= 0) C.black = O.user_black;
         subtract_black();
 
-        int cropped = 0;
-#ifndef NEW_CROP_CODE
-        if (~O.cropbox[2] && ~O.cropbox[3])
-            {
-                crop_pixels();
-                cropped=1;
-            }
-
-
-        if(IO.fwidth) 
-            rotate_fuji_raw();
-#endif
-
         if(O.half_size) 
             O.four_color_rgb = 1;
 
-        if(O.bad_pixels && !cropped) 
+        if(O.bad_pixels && no_crop) 
             {
                 bad_pixels(O.bad_pixels);
                 SET_PROC_FLAG(LIBRAW_PROGRESS_BAD_PIXELS);
             }
 
-        if (O.dark_frame && !cropped)
+        if (O.dark_frame && no_crop)
             {
                 subtract (O.dark_frame);
                 SET_PROC_FLAG(LIBRAW_PROGRESS_DARK_FRAME);

@@ -12,10 +12,10 @@ CFLAGS= -O4 -g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -Wno-o
 #CFLAGS=-g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
 
 # GCC 4.6 section
-#CC=gcc46
-#CXX=g++46
-#CFLAGS= -O4 -march=core2 -I. -pedantic  -Wno-long-long -Wno-overflow -msse2 -mfpmath=sse  -fopenmp 
-CFLAGS= -O -I. -pedantic  -Wno-long-long -Wno-overflow -g
+CC=gcc46
+CXX=g++46
+CFLAGS= -O4 -march=core2 -I. -pedantic  -Wno-long-long -Wno-overflow -msse2 -mfpmath=sse  -fopenmp 
+#CFLAGS= -O -I. -pedantic  -Wno-long-long -Wno-overflow -g
 
 # LCMS support
 # For lcms2 set -DUSE_LCMS2

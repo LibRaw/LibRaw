@@ -157,14 +157,14 @@ int main(int argc, char *argv[])
                     if(crop[1]+crop[3]>S.height) crop[3] = S.height-crop[1];
                     printf(
                         "Performance: %.2f Mpix/sec\n"
-                        "File: %s, Frame: %d %.1f total Mpix, %.0f msec\n"
+                        "File: %s, Frame: %d %.1f total Mpix, %.1f msec\n"
                         "Params:      WB=%s Highlight=%d Qual=%d HalfSize=%s Median=%d Wavelet=%.0f\n"
-                        "Crop:        %u-%u:%ux%u, active Mpix: %.1f\n",
+                        "Crop:        %u-%u:%ux%u, active Mpix: %.1f, %.1f frames/sec\n",
                         mpixsec
                         ,argv[arg],OUT.shot_select,rmpix,msec,
                         OUT.use_auto_wb?"auto":"default",OUT.highlight,OUT.user_qual,OUT.half_size?"YES":"No",
                         OUT.med_passes,OUT.threshold,
-                        crop[0],crop[1],crop[2],crop[3],mpix );
+                        crop[0],crop[1],crop[2],crop[3],mpix,1000.0f/msec);
                 }
         }
     

@@ -73,7 +73,6 @@ DllDef    void                libraw_set_dataerror_handler(libraw_data_t*,data_c
 DllDef    void                libraw_set_progress_handler(libraw_data_t*,progress_callback cb,void *datap);
 DllDef    const char *        libraw_unpack_function_name(libraw_data_t* lr);
 DllDef    int                 libraw_get_decoder_info(libraw_data_t* lr,libraw_decoder_info_t* d);
-DllDef    int                 libraw_rotate_fuji_raw(libraw_data_t* lr);
 
     /* DCRAW compatibility */
 DllDef    int                 libraw_adjust_sizes_info_only(libraw_data_t*);
@@ -150,8 +149,6 @@ class DllDef LibRaw
     const char *unpack_function_name();
     int get_decoder_info(libraw_decoder_info_t* d_info);
 
-    int         rotate_fuji_raw();
-
   private:
 
     int FCF(int row,int col) { 
@@ -197,7 +194,6 @@ class DllDef LibRaw
     void        convert_to_rgb();
     void        kodak_ycbcr_load_raw();
     void        remove_zeroes();
-    void        crop_pixels();
 #ifndef NO_LCMS
     void	apply_profile(const char*,const char*);
 #endif

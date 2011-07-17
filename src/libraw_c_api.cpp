@@ -53,12 +53,6 @@ extern "C"
         LibRaw *ip = (LibRaw*) lr->parent_class;
         return ip->unpack_function_name();
     }
-    int libraw_rotate_fuji_raw(libraw_data_t* lr)
-    {
-        if(!lr) return EINVAL;
-        LibRaw *ip = (LibRaw*) lr->parent_class;
-        return ip->rotate_fuji_raw();
-    }
 
     void libraw_subtract_black(libraw_data_t* lr)
     {
