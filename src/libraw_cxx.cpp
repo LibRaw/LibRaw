@@ -932,6 +932,9 @@ void LibRaw::raw2image_start()
         
         S.iheight = (S.height + IO.shrink) >> IO.shrink;
         S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
+
+        if (O.user_black >= 0) 
+            C.black = O.user_black;
 }
 
 // Same as raw2image, but
@@ -980,7 +983,7 @@ int LibRaw::raw2image_ex(void)
             
             S.iheight = (S.height + IO.shrink) >> IO.shrink;
             S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
-            if(imgdata.idata.filters)
+            if(!IO.fwidth && imgdata.idata.filters)
                 {
                     for (filt=c=0; c < 16; c++)
                         filt |= FC((c >> 1)+(crop[1]),
@@ -1009,7 +1012,14 @@ int LibRaw::raw2image_ex(void)
                 else
                     imgdata.image = (ushort (*)[4]) calloc (fiheight*fiwidth, sizeof (*imgdata.image));
             merror (imgdata.image, "raw2image_ex()");
-            
+
+            printf("BU3: %d %d %d %d %d\n",C.black,C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
+            int cblk[4],i;
+            for(i=0;i<4;i++)
+                cblk[i] = C.cblack[i]+C.black;
+            printf("BB: %d %d %d %d\n",cblk[0],cblk[1],cblk[2],cblk[3]);
+            ZERO(C.channel_maximum);
+
             int row,col;
             for(row=0;row<S.height;row++)
                 {
@@ -1023,18 +1033,28 @@ int LibRaw::raw2image_ex(void)
                                 r = IO.fuji_width - 1 + row - (col >> 1);
                                 c = row + ((col+1) >> 1);
                             }
-                            imgdata.image[((r) >> IO.shrink)*fiwidth + ((c) >> IO.shrink)][FC(r,c)] 
-                                = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
-                                                                    +(col+S.left_margin)];
+                            
+                            int val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
+                                                            +(col+S.left_margin)];
+                            int cc = FCF(row,col);
+                            if(val > cblk[cc])
+                                val -= cblk[cc];
+                            else
+                                val = 0;
+                            imgdata.image[((r) >> IO.shrink)*fiwidth + ((c) >> IO.shrink)][cc] = val;
+                            if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
                         }
                 }
+            C.maximum -= C.black;
+            ZERO(C.cblack);
+            C.black = 0;
+
             // restore fuji sizes!
             S.height = IO.fheight;
             S.width = IO.fwidth;
             S.iheight = (S.height + IO.shrink) >> IO.shrink;
             S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
             S.raw_height -= 2*S.top_margin;
-            IO.fheight = IO.fwidth = 0; // prevent repeated calls
         }
     else
         {
@@ -1113,6 +1133,9 @@ int LibRaw::raw2image_ex(void)
 }
 
 #undef MIN
+
+
+
 
 int LibRaw::raw2image(void)
 {
@@ -1224,8 +1247,6 @@ int LibRaw::dcraw_document_mode_processing(void)
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
             }
 
-        if (O.user_black >= 0) 
-            C.black = O.user_black;
         subtract_black();
         
         O.document_mode = 2;
@@ -2039,7 +2060,7 @@ int LibRaw::dcraw_process(void)
         if (~O.cropbox[2] && ~O.cropbox[3])
             no_crop=0;
 
-        raw2image_ex(); // raw2image+crop+rotate_fuji_raw
+        raw2image_ex(); // raw2image+crop+rotate_fuji_raw + subtract_black for fuji
 
         int save_4color = O.four_color_rgb;
 
@@ -2049,8 +2070,7 @@ int LibRaw::dcraw_process(void)
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
             }
 
-        // black already set to possible maximum
-        if (O.user_black >= 0) C.black = O.user_black;
+
         subtract_black();
 
         if(O.half_size) 
