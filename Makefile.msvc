@@ -8,7 +8,7 @@
 #CFLAGSG3=/DLIBRAW_DEMOSAIC_PACK_GPL3
 
 
-SAMPLES=bin\raw-identify.exe bin\simple_dcraw.exe  bin\dcraw_emu.exe bin\dcraw_half.exe bin\half_mt.exe bin\mem_image.exe bin\unprocessed_raw.exe bin\4channels.exe bin\multirender_test.exe
+SAMPLES=bin\raw-identify.exe bin\simple_dcraw.exe  bin\dcraw_emu.exe bin\dcraw_half.exe bin\half_mt.exe bin\mem_image.exe bin\unprocessed_raw.exe bin\4channels.exe bin\multirender_test.exe bin\postprocessing_benchmark.exe
 
 LIBSTATIC=lib\libraw_static.lib
 DLL=bin\libraw.dll
@@ -42,8 +42,12 @@ bin\4channels.exe: $(LINKLIB) samples\4channels.cpp
 bin\simple_dcraw.exe: $(LINKLIB) samples\simple_dcraw.cpp
 	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\simple_dcraw.exe" /Fo"object\\" samples\simple_dcraw.cpp $(LINKLIB)
 
+bin\postprocessing_benchmark.exe: $(LINKLIB) samples\postprocessing_benchmark.cpp
+	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\postprocessing_benchmark.exe" /Fo"object\\" samples\postprocessing_benchmark.cpp $(LINKLIB)
+
 bin\multirender_test.exe: $(LINKLIB) samples\multirender_test.cpp
 	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\multirender_test.exe" /Fo"object\\" samples\multirender_test.cpp $(LINKLIB)
+
 
 bin\mem_image.exe: $(LINKLIB) samples\mem_image.cpp
 	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\mem_image.exe" /Fo"object\\" samples\mem_image.cpp $(LINKLIB)

@@ -28,6 +28,8 @@ it under the terms of the one of three licenses as you choose:
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#else
+#include <windows.h>
 #endif
 
 #include "libraw/libraw.h"
