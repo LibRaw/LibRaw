@@ -1013,11 +1013,9 @@ int LibRaw::raw2image_ex(void)
                     imgdata.image = (ushort (*)[4]) calloc (fiheight*fiwidth, sizeof (*imgdata.image));
             merror (imgdata.image, "raw2image_ex()");
 
-            printf("BU3: %d %d %d %d %d\n",C.black,C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
             int cblk[4],i;
             for(i=0;i<4;i++)
                 cblk[i] = C.cblack[i]+C.black;
-            printf("BB: %d %d %d %d\n",cblk[0],cblk[1],cblk[2],cblk[3]);
             ZERO(C.channel_maximum);
 
             int row,col;
@@ -1085,12 +1083,12 @@ int LibRaw::raw2image_ex(void)
                         else
                             for(int row = 0; row < S.height; row++)
                                 {
-                                    int colors[4];
-                                    for (int xx=0;xx<4;xx++)
+                                    int colors[2];
+                                    for (int xx=0;xx<2;xx++)
                                         colors[xx] = COLOR(row,xx);
                                     for(int col = 0; col < S.width; col++)
                                         {
-                                            int cc = colors[col&3];
+                                            int cc = colors[col&1];
                                             imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][cc] =
                                                 imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
                                                                           +(col+S.left_margin)];
@@ -1241,13 +1239,14 @@ int LibRaw::dcraw_document_mode_processing(void)
 
         raw2image_ex(); // raw2image+crop+rotate_fuji_raw
 
-        if (no_crop && IO.zero_is_bad)
+        if (IO.zero_is_bad)
             {
                 remove_zeroes();
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
             }
 
-        subtract_black();
+        if(!!IO.fuji_width)
+            subtract_black();
         
         O.document_mode = 2;
         
@@ -1881,7 +1880,8 @@ int LibRaw::dcraw_thumb_writer(const char *fname)
 int LibRaw::adjust_sizes_info_only(void)
 {
     CHECK_ORDER_LOW(LIBRAW_PROGRESS_IDENTIFY);
-    CHECK_ORDER_HIGH(LIBRAW_PROGRESS_FUJI_ROTATE);
+
+    raw2image_start();
     if (O.use_fuji_rotate)
         {
             if (IO.fuji_width) 
@@ -1908,7 +1908,7 @@ int LibRaw::adjust_sizes_info_only(void)
                 }
         }
     SET_PROC_FLAG(LIBRAW_PROGRESS_FUJI_ROTATE);
-    if (S.flip & 4)
+    if ( S.flip & 4)
         {
             unsigned short t = S.iheight;
             S.iheight=S.iwidth;
@@ -1978,6 +1978,20 @@ void LibRaw::subtract_black()
             C.maximum -= C.black;
             ZERO(C.cblack);
             C.black = 0;
+        }
+    else
+        {
+            // only calculate channel maximum;
+            int row,col,cc,val;
+            ZERO(C.channel_maximum);
+            for(row=0;row<S.height;row++)
+                for(col=0;col<S.width;col++)
+                    for(cc = 0; cc< 4; cc++)
+                        {
+                            int val = BAYERC(row,col,cc);
+                            if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                        }
+            
         }
 }
 
@@ -2064,14 +2078,14 @@ int LibRaw::dcraw_process(void)
 
         int save_4color = O.four_color_rgb;
 
-        if (no_crop && IO.zero_is_bad) 
+        if (IO.zero_is_bad) 
             {
                 remove_zeroes();
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
             }
 
-
-        subtract_black();
+        if(!!IO.fuji_width)
+            subtract_black();
 
         if(O.half_size) 
             O.four_color_rgb = 1;

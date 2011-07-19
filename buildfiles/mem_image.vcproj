@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="mem_image"
-	ProjectGUID="{1897184C-1A40-38B6-9C34-F448EDDE0E65}"
+	ProjectGUID="{5FEB7B7F-91EE-3AEB-9F3A-BD24953D6445}"
 	Keyword="Qt4VSv1.0">
 	<Platforms>
 		<Platform
@@ -39,7 +39,7 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="debug/libraw.lib ws2_32.lib"
+				AdditionalDependencies="debug/libraw.lib"
 				GenerateDebugInformation="true"
 				IgnoreImportLibrary="true"
 				LinkTimeCodeGeneration="0"
@@ -91,7 +91,7 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="release/libraw.lib ws2_32.lib"
+				AdditionalDependencies="release/libraw.lib"
 				GenerateDebugInformation="false"
 				IgnoreImportLibrary="true"
 				LinkIncremental="1"

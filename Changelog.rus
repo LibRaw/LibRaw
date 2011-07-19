@@ -1,4 +1,23 @@
-﻿2011-07-15 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-07-19 Alex Tutubalin <lexa@lexa.ru>
+        * Новый пример samples/postprocessing_benchmark.cpp
+          Позволяет оценить скорость этапа постпроцессинга.
+          Поддерживает разные варианты интерполяции, кроппинг,
+          averaged white balance, медианный фильтр, 
+          wavelet-фильтрацию и highlight recovery.
+        * Удален вызов LibRaw::rotate_fuji_raw() и соответствующий
+          ему вызов С API.
+        * LibRaw::adjust_sizes_info_only() может вызываться произвольное
+          количество раз, втч. и вместе с dcraw_process()
+        * Оптимизация постпроцессинга, особенно для обрезанных (cropped)
+          изображений.
+        * Кроппинг работает и для сенсоров FujiCCD. По ряду причин,
+          позиция верхнего левого угла области кроппинга округляется до
+          ближайшего меньшего целого числа кратного 4.
+
+        * LibRaw 0.14.0-Alpha3
+
+
+2011-07-15 Alex Tutubalin <lexa@lexa.ru>
         * Импортирован код кроппинга из 0.13.7
 
 ﻿2011-07-11 Alex Tutubalin <lexa@lexa.ru>

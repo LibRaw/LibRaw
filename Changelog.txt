@@ -1,3 +1,24 @@
+2011-07-19 Alex Tutubalin <lexa@lexa.ru>
+        * New sample samples/postprocessing_benchmark.cpp
+          This sample measures postprocessing speed.
+          All demosaic methods, averaged white balance, median
+          filtering, wavelet filtration, highlight recovery, and
+          cropping are supported.
+
+        * Removed LibRaw::rotate_fuji_raw() call and corresponding C-API call.
+
+        * The LibRaw::adjust_sizes_info_only() call may be called repeated
+          and mixed with dcraw_process() call.
+
+        * Postprocessing speedup and optimization, especially if cropping set.
+
+        * Cropping works for FujiCCD raws. For the technical reasons, the position
+          of top-left corner of crop area will be rounded to the nearest
+          multiple of 4 (the corner is shifted top-left).
+
+        * LibRaw 0.14.0-Alpha3
+
+
 2011-07-15 Alex Tutubalin <lexa@lexa.ru>
         * imported cropping code from 0.13 branch
 

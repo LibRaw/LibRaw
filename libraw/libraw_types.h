@@ -338,7 +338,6 @@ typedef struct
     libraw_imgother_t           other;
     libraw_thumbnail_t          thumbnail;
     libraw_rawdata_t            rawdata;
-//    libraw_masked_t             masked_pixels;
     ushort                      (*image)[4] ;
     libraw_output_params_t     params;
     void                *parent_class;      

@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
         }
     char opm,opt,*cp,*sp;
     int arg,c;
+    int shrink = 0;
 
     argv[argc] = (char*)"";
     for (arg=1; (((opm = argv[arg][0]) - 2) | 2) == '+'; ) 
@@ -91,6 +92,7 @@ int main(int argc, char *argv[])
                 case 'h':  
                     OUT.half_size = 1;		
                     OUT.four_color_rgb    = 1;  
+                    shrink = 1;
                     break;
                 case 'm':
                     OUT.med_passes  = atoi(argv[arg++]);  
@@ -128,7 +130,6 @@ int main(int argc, char *argv[])
                     continue;
                 }
             float mpix,rmpix;
-            rmpix = (S.raw_width*S.raw_height)/1000000.0f;
             timerstart();
             for(c=0; c < rep; c++)
                 {
@@ -138,28 +139,35 @@ int main(int argc, char *argv[])
                             break;
                         }
                     libraw_processed_image_t *p = RawProcessor.dcraw_make_mem_image();
-                    if(c==0)
-                        mpix = float(S.width*S.height)/1000000.0f;
                     if(p)
                         RawProcessor.dcraw_clear_mem(p);
                     RawProcessor.free_image();
                 }
             float msec = timerend()/(float)rep;
-            float mpixsec = mpix*1000.0f/msec;
-            if(c==rep)
+
+            if( (ret = RawProcessor.adjust_sizes_info_only() ) != LIBRAW_SUCCESS)
+                {
+                    fprintf(stderr,"Cannot adjust sizes for %s: %s\n",argv[arg],libraw_strerror(ret));
+                    break;
+                }
+            rmpix = (S.iwidth*S.iheight)/1000000.0f;
+
+            if(c==rep) // no failure
                 {
                     unsigned int crop[4];
-                    crop[0] = OUT.cropbox[0];
-                    crop[1] = OUT.cropbox[1];
-                    crop[2] = OUT.cropbox[2];
-                    crop[3] = OUT.cropbox[3];
-                    if(crop[0]+crop[2]>S.width) crop[2] = S.width-crop[0];
-                    if(crop[1]+crop[3]>S.height) crop[3] = S.height-crop[1];
+                    for(int i=0;i<4;i++) crop[i] = (OUT.cropbox[i]+shrink)>>shrink;
+                    if(crop[0]+crop[2]>S.iwidth) crop[2] = S.iwidth-crop[0];
+                    if(crop[1]+crop[3]>S.iheight) crop[3] = S.iheight-crop[1];
+                    
+
+                    mpix = float(crop[2]*crop[3])/1000000.0f;
+                    float mpixsec = mpix*1000.0f/msec;
+
                     printf(
                         "Performance: %.2f Mpix/sec\n"
                         "File: %s, Frame: %d %.1f total Mpix, %.1f msec\n"
                         "Params:      WB=%s Highlight=%d Qual=%d HalfSize=%s Median=%d Wavelet=%.0f\n"
-                        "Crop:        %u-%u:%ux%u, active Mpix: %.1f, %.1f frames/sec\n",
+                        "Crop:        %u-%u:%ux%u, active Mpix: %.2f, %.1f frames/sec\n",
                         mpixsec
                         ,argv[arg],OUT.shot_select,rmpix,msec,
                         OUT.use_auto_wb?"auto":"default",OUT.highlight,OUT.user_qual,OUT.half_size?"YES":"No",

@@ -39,7 +39,6 @@
           <li><a href="#get_decoder_info">int LibRaw::get_decoder_info(libraw_decoder_info_t *)</a></li>
           <li><a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
           <li><a href="#subtract_black">void LibRaw::subtract_black()</a>
-          <li><a href="#rotate_fuji_raw">int LibRaw:: rotate_fuji_raw()</a>
           <li><a  href="#recycle">void LibRaw::recycle(void)</a></li>
           <li><a  href="#~LibRaw">LibRaw::~LibRaw()</a></li>
           <li><a href="#strprogress">const char* LibRaw::strprogress(enum LibRaw_progress code)</a></li>
@@ -312,21 +311,9 @@
       Данный вызов надлежит использовать в случае, когда вы хотите делать постпроцессинг RAW-данных 
       самостоятельно. Встроенные в LibRaw <a href="#dcrawemu">функции постпроцессинга</a> вызовут
       <b>subtract_black()</b> самостоятельно.
+    </p>
 
-    <a name="rotate_fuji_raw"></a>
-    <h4> int LibRaw:: rotate_fuji_raw()</h4>
-    <p>
-      Вызов осуществляет поворот RAW-bitmap (до постпроцессинга) данных с камер Fuji, приводя все в вид,
-      аналогичный предыдущим версиям LibRaw (до 0.6 включительно). Вызов предназначен для использования в
-      программах, работающих с неинтерполированными данными самостоятельно. При использовании вызовов
-      dcraw_process/dcraw_document_mode_processing поворот будет произведен ими.
-    </p>
-    <p>Функция возвращает целое число в соответствии с <a href=API-notes-rus.html#errors>соглашением о кодах
-        возврата</a>: положительное число, если какой-то из системных вызовов вернул ошибку, отрицательное число (из
-      <a href=API-datastruct-rus.html#LibRaw_errors>списка ошибок LibRaw</a>) при ошибочной ситуации
-      внутри LibRaw.
-    </p>
-      <a name="recycle"></a>
+    <a name="recycle"></a>
     <h4>void LibRaw::recycle(void)</h4>
     <p>
       Освобождает аллоцированные данные экземпляра LibRaw, делая  возможным обработку следующего файла тем же
@@ -906,7 +893,7 @@ LibRaw.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Mon Jul 11 20:58:31 MSD 2011
+Last modified: Tue Jul 19 14:50:24 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

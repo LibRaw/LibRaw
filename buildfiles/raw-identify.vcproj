@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="raw-identify"
-	ProjectGUID="{DEEFEE0F-3D8B-3504-BAE0-36A75B87EBF4}"
+	ProjectGUID="{9EE11DED-03F8-340D-8B8A-08DF0E4C015A}"
 	Keyword="Qt4VSv1.0">
 	<Platforms>
 		<Platform
@@ -39,7 +39,7 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="debug/libraw.lib ws2_32.lib"
+				AdditionalDependencies="debug/libraw.lib"
 				GenerateDebugInformation="true"
 				IgnoreImportLibrary="true"
 				LinkTimeCodeGeneration="0"
@@ -91,7 +91,7 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="release/libraw.lib ws2_32.lib"
+				AdditionalDependencies="release/libraw.lib"
 				GenerateDebugInformation="false"
 				IgnoreImportLibrary="true"
 				LinkIncremental="1"
