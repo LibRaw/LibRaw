@@ -14,7 +14,7 @@ CFLAGS= -O4 -g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -Wno-o
 # GCC 4.6 section
 CC=gcc46
 CXX=g++46
-CFLAGS= -O4 -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse2 -mfpmath=sse  -fopenmp 
+CFLAGS= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse2 -mfpmath=sse  -fopenmp 
 #CFLAGS= -O -I. -pedantic  -Wno-long-long -Wno-overflow -g
 
 # LCMS support

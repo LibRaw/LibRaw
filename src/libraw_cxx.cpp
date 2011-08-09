@@ -724,6 +724,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     S.iheight = (S.height + IO.shrink) >> IO.shrink;
     S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
+
+    // Save color,sizes and internal data into raw_image fields
+    memmove(&imgdata.rawdata.color,&imgdata.color,sizeof(imgdata.color));
+    memmove(&imgdata.rawdata.sizes,&imgdata.sizes,sizeof(imgdata.sizes));
+    memmove(&imgdata.rawdata.iparams,&imgdata.idata,sizeof(imgdata.idata));
+    memmove(&imgdata.rawdata.ioparams,&libraw_internal_data.internal_output_params,sizeof(libraw_internal_data.internal_output_params));
     
     SET_PROC_FLAG(LIBRAW_PROGRESS_SIZE_ADJUST);
 
