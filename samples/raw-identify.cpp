@@ -131,12 +131,16 @@ int main(int ac, char *av[])
                     {
                         char frame[32]="";
                         if(print_frame)
-                            snprintf(frame,32,"%dx%dx%dx%d",S.left_margin,S.top_margin,S.right_margin,S.bottom_margin);
-                        printf ("%s\t%s\t%s\t%s/%s\n", 
+                            {
+                                ushort right_margin = S.raw_width - S.width - S.left_margin;
+                                ushort bottom_margin = S.raw_height - S.height - S.top_margin;
+                                snprintf(frame,32,"%dx%dx%dx%d",S.left_margin,S.top_margin,right_margin,bottom_margin);
+                                printf ("%s\t%s\t%s\t%s/%s\n", 
                                 av[i],
                                 MyCoolRawProcessor.unpack_function_name(),
                                 frame,
                                 P1.make, P1.model);
+                            }
                     }
                 else
                     printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);

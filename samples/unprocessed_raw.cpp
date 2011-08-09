@@ -99,8 +99,8 @@ int main(int ac, char *av[])
             if(verbose)
                 {
                     printf("Image size: %dx%d\nRaw size: %dx%d\n",S.width,S.height,S.raw_width,S.raw_height);
-                    printf("Margins: top=%d, left=%d, right=%d, bottom=%d\n",
-                           S.top_margin,S.left_margin,S.right_margin,S.bottom_margin);
+                    printf("Margins: top=%d, left=%d\n",
+                           S.top_margin,S.left_margin);
                 }
 
             if( (ret = RawProcessor.unpack() ) != LIBRAW_SUCCESS)

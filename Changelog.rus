@@ -1,4 +1,12 @@
-﻿2011-07-19 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-08-09 Alex Tutubalin <lexa@lexa.ru>
+        * Исправлена работа при последовательности вызовов 
+           open_file() + adjust_sizes_info_only()
+
+        * Удалены поля данных imgdata.sizes.bottom_margin и right_margin
+
+        * Структуры данных изменены, требуется перекомпиляция всех приложений.
+
+2011-07-19 Alex Tutubalin <lexa@lexa.ru>
         * Новый пример samples/postprocessing_benchmark.cpp
           Позволяет оценить скорость этапа постпроцессинга.
           Поддерживает разные варианты интерполяции, кроппинг,

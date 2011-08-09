@@ -661,6 +661,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
                 S.raw_height += 2*S.top_margin;
             }
 
+#if 0
         int saved_raw_width = S.raw_width;
         int saved_width = S.width;
         // from packed_12_load_raw
@@ -682,6 +683,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
         S.raw_width = saved_raw_width;
         S.width = saved_width;
+#endif
 
         if(C.profile_length)
             {
@@ -984,8 +986,10 @@ int LibRaw::raw2image_ex(void)
             S.top_margin+=crop[1];
             S.width=crop[2];
             S.height=crop[3];
+#if 0
             S.bottom_margin = S.raw_height - S.height - S.top_margin;
             S.right_margin = S.raw_width - S.width - S.left_margin;
+#endif
             
             S.iheight = (S.height + IO.shrink) >> IO.shrink;
             S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
