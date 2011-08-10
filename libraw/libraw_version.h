@@ -44,7 +44,7 @@ it under the terms of the one of three licenses as you choose:
     LIBRAW_MAKE_VERSION(LIBRAW_MAJOR_VERSION,LIBRAW_MINOR_VERSION,LIBRAW_PATCH_VERSION)
 
 #define LIBRAW_CHECK_VERSION(major,minor,patch) \
-    ( LibRaw::versionNumber() >= LIBRAW_MAKE_VERSION(major,minor,patch) )
+    ( LIBRAW_VERSION >= LIBRAW_MAKE_VERSION(major,minor,patch) )
 
 
 #endif
