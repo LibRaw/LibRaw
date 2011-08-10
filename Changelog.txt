@@ -1,3 +1,14 @@
+2011-08-10 Alex Tutubalin <lexa@lexa.ru>
+        * Imported dcraw 9.10 (1.444), support for new cameras added:
+          ARRIRAW format, Canon SX30 IS, Leica D-LUX 5 and V-LUX2,
+          Olympus E-P3, Panasonic G3 and GF3, Sony NEX-C3 and SLT-A35
+
+        * Bugfix: green matching is turned off if output image is shrinked
+          due to wavelet filtering or aberration correction.
+
+        * LibRaw 0.13.8-Release
+
+
 2011-07-15 Alex Tutubalin <lexa@lexa.ru>
         * Changes in cropping code:
            + cropping is now works for Fuji files (instead of crash)

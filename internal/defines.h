@@ -23,8 +23,9 @@ it under the terms of the one of three licenses as you choose:
 
 #line 27 "dcraw/dcraw.c"
 #define NO_JPEG
-#line 32 "dcraw/dcraw.c"
-#define VERSION "9.08"
+#define NO_JASPER
+#line 33 "dcraw/dcraw.c"
+#define DCRAW_VERSION "9.10"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -47,17 +48,25 @@ it under the terms of the one of three licenses as you choose:
    NO_JPEG disables decoding of compressed Kodak DC120 files.
    NO_LCMS disables the "-p" option.
  */
-#ifndef NO_JPEG
-#include <jpeglib.h>
+#ifdef NODEPS
+#define NO_JASPER
+#define NO_JPEG
+#define NO_LCMS
 #endif
-#line 63 "dcraw/dcraw.c"
+#ifndef NO_JASPER
+#include <jasper/jasper.h>	/* Decode RED camera movies */
+#endif
+#ifndef NO_JPEG
+#include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
+#endif
+#line 72 "dcraw/dcraw.c"
 #ifdef LOCALEDIR
 #include <libintl.h>
 #define _(String) gettext(String)
 #else
 #define _(String) (String)
 #endif
-#line 77 "dcraw/dcraw.c"
+#line 87 "dcraw/dcraw.c"
 #ifdef __CYGWIN__
 #include <io.h>
 #endif
@@ -68,12 +77,12 @@ it under the terms of the one of three licenses as you choose:
 #define snprintf _snprintf
 #define strcasecmp _stricmp
 #define strncasecmp strnicmp
-#line 91 "dcraw/dcraw.c"
+#line 101 "dcraw/dcraw.c"
 #else
 #include <unistd.h>
 #include <utime.h>
 #include <netinet/in.h>
-#line 99 "dcraw/dcraw.c"
+#line 109 "dcraw/dcraw.c"
 #endif
 
 #ifdef LJPEG_DECODE
@@ -84,7 +93,7 @@ it under the terms of the one of three licenses as you choose:
 #ifndef LONG_BIT
 #define LONG_BIT (8 * sizeof (long))
 #endif
-#line 180 "dcraw/dcraw.c"
+#line 193 "dcraw/dcraw.c"
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
@@ -138,7 +147,7 @@ it under the terms of the one of three licenses as you choose:
 	3 G R G R G R	3 B G B G B G	3 R G R G R G	3 G B G B G B
  */
 
-#line 238 "dcraw/dcraw.c"
+#line 251 "dcraw/dcraw.c"
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 #define BAYER2(row,col) \

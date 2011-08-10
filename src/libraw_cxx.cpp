@@ -32,7 +32,7 @@ it under the terms of the one of three licenses as you choose:
 #endif
 #define LIBRAW_LIBRARY_BUILD
 #include "libraw/libraw.h"
-//#include "internal/defines.h"
+#include "internal/defines.h"
 
 #ifdef __cplusplus
 extern "C" 
@@ -118,6 +118,9 @@ const float LibRaw_constants::d65_white[3] =  { 0.950456, 1, 1.088754 };
                 return LIBRAW_UNSUFFICIENT_MEMORY;      \
             case LIBRAW_EXCEPTION_DECODE_RAW:           \
             case LIBRAW_EXCEPTION_DECODE_JPEG:          \
+                recycle();                              \
+                return LIBRAW_DATA_ERROR;               \
+            case LIBRAW_EXCEPTION_DECODE_JPEG2000:      \
                 recycle();                              \
                 return LIBRAW_DATA_ERROR;               \
             case LIBRAW_EXCEPTION_IO_EOF:               \
@@ -342,7 +345,8 @@ const char * LibRaw::unpack_function_name()
     // 40
     if (load_raw == &LibRaw::sony_arw2_load_raw )       return "sony_arw2_load_raw()";//+
     if (load_raw == &LibRaw::unpacked_load_raw )        return "unpacked_load_raw()"; //+
-    // 42 total
+    if (load_raw == &LibRaw::redcine_load_raw)          return "redcine_load_raw()"; //+
+    // 43 total
         
     return "Unknown unpack function";
 }
@@ -921,9 +925,6 @@ int LibRaw::dcraw_document_mode_processing(void)
 }
 
 #if 1
-#define FORC(cnt) for (c=0; c < cnt; c++)
-#define FORCC FORC(ret->colors)
-#define SWAP(a,b) { a ^= b; a ^= (b ^= a); }
 
 libraw_processed_image_t * LibRaw::dcraw_make_mem_thumb(int *errcode)
 {
@@ -1987,6 +1988,7 @@ static const char  *static_camera_list[] =
 "Apple QuickTake 100",
 "Apple QuickTake 150",
 "Apple QuickTake 200",
+"ARRIRAW format",
 "AVT F-080C",
 "AVT F-145C",
 "AVT F-201C",
@@ -2037,6 +2039,7 @@ static const char  *static_camera_list[] =
 "Canon PowerShot SX110 IS (CHDK hack)",
 "Canon PowerShot SX120 IS (CHDK hack)",
 "Canon PowerShot SX20 IS (CHDK hack)",
+"Canon PowerShot SX30 IS (CHDK hack)",
 "Canon EOS D30",
 "Canon EOS D60",
 "Canon EOS 5D",
@@ -2195,7 +2198,9 @@ static const char  *static_camera_list[] =
 "Leica D-LUX2",
 "Leica D-LUX3",
 "Leica D-LUX4",
+"Leica D-LUX5",
 "Leica V-LUX1",
+"Leica V-LUX2",
 "Logitech Fotoman Pixtura",
 "Mamiya ZD",
 "Micron 2010",
@@ -2293,6 +2298,7 @@ static const char  *static_camera_list[] =
 "Olympus E-620",
 "Olympus E-P1",
 "Olympus E-P2",
+"Olympus E-P3",
 "Olympus E-PL1",
 "Olympus E-PL1s",
 "Olympus E-PL2",
@@ -2317,8 +2323,10 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-G1",
 "Panasonic DMC-G10",
 "Panasonic DMC-G2",
+"Panasonic DMC-G3",
 "Panasonic DMC-GF1",
 "Panasonic DMC-GF2",
+"Panasonic DMC-GF3",
 "Panasonic DMC-GH1",
 "Panasonic DMC-GH2",
 "Panasonic DMC-L1",
@@ -2361,6 +2369,9 @@ static const char  *static_camera_list[] =
 "Pixelink A782",
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
 "Polaroid x530",
+#endif
+#ifndef NO_JASPER
++    * Redcode R3D format
 #endif
 "Rollei d530flex",
 "RoverShot 3320af",
@@ -2409,7 +2420,9 @@ static const char  *static_camera_list[] =
 "Sony DSLR-A900",
 "Sony NEX-3",
 "Sony NEX-5",
+"Sony NEX-C3",
 "Sony SLT-A33",
+"Sony SLT-A35",
 "Sony SLT-A55V",
 "Sony XCD-SX910CR",
 "STV680 VGA",

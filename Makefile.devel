@@ -77,7 +77,7 @@ bin/dcraw_emu: lib/libraw.a samples/dcraw_emu.cpp
 dcraw_binaries: bin/dcraw_dist
 
 bin/dcraw_dist: dcraw/dcraw.c Makefile.devel
-	$(CXX) -w -O4 -DLIBRAW_NOTHREADS -DNO_JPEG -DNO_LCMS -I/usr/local/include -o bin/dcraw_dist dcraw/dcraw.c -lm -L/usr/local/lib
+	$(CXX) -w -O4 -DLIBRAW_NOTHREADS -DNO_JPEG -DNO_JASPER -DNO_LCMS -I/usr/local/include -o bin/dcraw_dist dcraw/dcraw.c -lm -L/usr/local/lib
 
 regenerate:
 	${PP} -N -DDEFINES dcraw/dcraw.c  >internal/defines.h
