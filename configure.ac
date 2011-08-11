@@ -59,9 +59,9 @@ if test x$jasper = xtrue; then
                         AC_CHECK_HEADERS([jasper/jasper.h], [
                                 CPPFLAGS="$CPPFLAGS -DUSE_JASPER"
                                 LIBS="$LIBS -ljasper"
-                        ], AC_MSG_FAILURE([no jasper headers found]))
+                        ], AC_MSG_WARN([no jasper headers found]))
                 ],
-                AC_MSG_FAILURE([libjasper not found])
+                AC_MSG_WARN([libjasper not found])
         )
 fi
 
