@@ -25,6 +25,23 @@
           the same with bottom_margin.
 
         * minor ./configure cleanup
+        
+        * Qmake files and Visual Studio Project files are updated.
+
+        * New version check macros:
+          For use at runtime checks:
+           LIBRAW_RUNTIME_CHECK_VERSION_EXACT() - checks  that runtime 
+            major/minor version numbers are same with compile-time values.
+
+           LIBRAW_RUNTIME_CHECK_VERSION_NOTLESS() - checks that runtime
+            version is not less that compile-time one.
+
+          For use at compile-time in preprocessor directives:
+           LIBRAW_COMPILE_CHECK_VERSION_EXACT(major,minor) - Compile-time
+            check that LibRaw version is exact major.minor.
+
+           LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(major,minor) - Compile-time
+            check that version is not less than major.minor.
 
         * all client code should be recompiled due to internals change.
 

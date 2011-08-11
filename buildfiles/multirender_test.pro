@@ -1,9 +1,11 @@
 
-CONFIG(debug,debug|release) {
-	LIBS+=debug/libraw.lib
+win32:CONFIG(debug,debug|release) {
+	LIBS+=-Ldebug
 } else {
-	LIBS+=release/libraw.lib
+	LIBS+=-Lrelease
 }
+unix:LIBS+=-lraw
+win32:LIBS+=libraw.lib
 INCLUDEPATH=../
 CONFIG-=qt
 win32:CONFIG+=console

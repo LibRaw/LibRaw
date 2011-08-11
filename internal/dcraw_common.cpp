@@ -21,6 +21,7 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
+#line 289 "dcraw/dcraw.c"
 #include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
@@ -29,6 +30,7 @@ it under the terms of the one of three licenses as you choose:
 #include "libraw/libraw.h"
 #include "internal/defines.h"
 #include "internal/var_defines.h"
+#line 300 "dcraw/dcraw.c"
 
 #ifndef __GLIBC__
 char *my_memmem (char *haystack, size_t haystacklen,
@@ -43,6 +45,7 @@ char *my_memmem (char *haystack, size_t haystacklen,
 #define memmem my_memmem
 #endif
 
+#line 334 "dcraw/dcraw.c"
 
 ushort CLASS sget2 (uchar *s)
 {
@@ -117,6 +120,7 @@ void CLASS read_shorts (ushort *pixel, int count)
   if ((order == 0x4949) == (ntohs(0x1234) == 0x1234))
       swab ((char*)pixel, (char*)pixel, count*2);
 }
+#line 412 "dcraw/dcraw.c"
 
 #ifdef LIBRAW_LIBRARY_BUILD
 #define RBAYER(x,y) raw_image[(x)*raw_width+(y)]
@@ -627,6 +631,7 @@ void CLASS canon_compressed_load_raw()
   FORC4 if (cblack[4+c]) cblack[c] /= cblack[4+c];
 }
 
+#line 933 "dcraw/dcraw.c"
 int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
   int c, tag, len;
@@ -1448,6 +1453,7 @@ void CLASS fuji_load_raw()
   read_shorts(raw_image,raw_width*raw_height);
 #endif
 }
+#line 1759 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -1935,6 +1941,7 @@ void CLASS leaf_hdr_load_raw()
   }
 }
 
+#line 2250 "dcraw/dcraw.c"
 void CLASS sinar_4shot_load_raw()
 {
   ushort *pixel;
@@ -3116,6 +3123,8 @@ void CLASS redcine_load_raw()
   in = jas_stream_fopen (ifname, "rb");
 #else
   in = (jas_stream_t*)ifp->make_jas_stream();
+  if(!in)
+          throw LIBRAW_EXCEPTION_DECODE_JPEG2000;
 #endif
   jas_stream_seek (in, data_offset+20, SEEK_SET);
   jimg = jas_image_decode (in, -1, 0);
@@ -3123,7 +3132,10 @@ void CLASS redcine_load_raw()
   if (!jimg) longjmp (failure, 3);
 #else
   if(!jimg)
+      {
+          jas_stream_close (in);
           throw LIBRAW_EXCEPTION_DECODE_JPEG2000;
+      }
 #endif
   jmat = jas_matrix_create (height/2, width/2);
   merror (jmat, "redcine_load_raw()");
@@ -3161,6 +3173,7 @@ void CLASS redcine_load_raw()
   jas_stream_close (in);
 #endif
 }
+#line 3647 "dcraw/dcraw.c"
 
 
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
@@ -4524,6 +4537,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
+#line 5014 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5101,6 +5115,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
+#line 5596 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6384,6 +6399,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
+#line 6886 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -7086,6 +7102,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
+#line 7592 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8715,6 +8732,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
+#line 9315 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -8933,6 +8951,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
+#line 9558 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

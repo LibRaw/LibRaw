@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="postprocessing_benchmark"
-	ProjectGUID="{E9768D31-D81C-349F-BA49-E11E2883BF4C}"
+	ProjectGUID="{7101B5EF-6757-30FF-840F-8A022ECE3065}"
 	Keyword="Qt4VSv1.0">
 	<Platforms>
 		<Platform
@@ -39,7 +39,8 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="debug/libraw.lib"
+				AdditionalDependencies="libraw.lib"
+				AdditionalLibraryDirectories="debug/"
 				GenerateDebugInformation="true"
 				IgnoreImportLibrary="true"
 				LinkTimeCodeGeneration="0"
@@ -91,7 +92,8 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="release/libraw.lib"
+				AdditionalDependencies="libraw.lib"
+				AdditionalLibraryDirectories="release/"
 				GenerateDebugInformation="false"
 				IgnoreImportLibrary="true"
 				LinkIncremental="1"

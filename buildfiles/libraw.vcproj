@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="libraw"
-	ProjectGUID="{640AC264-CCA1-3A6C-B564-0EBFD2560F9D}"
+	ProjectGUID="{2FBFAA81-822F-33B9-8371-3AB3C515F19C}"
 	Keyword="Qt4VSv1.0">
 	<Platforms>
 		<Platform

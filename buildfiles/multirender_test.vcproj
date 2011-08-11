@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="multirender_test"
-	ProjectGUID="{72B6ADBD-444C-3BF7-85A2-BB38FBA26BEB}"
+	ProjectGUID="{333626F0-EC45-3771-92C8-5E276A8799C7}"
 	Keyword="Qt4VSv1.0">
 	<Platforms>
 		<Platform
@@ -39,7 +39,8 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="debug/libraw.lib"
+				AdditionalDependencies="libraw.lib"
+				AdditionalLibraryDirectories="debug"
 				GenerateDebugInformation="true"
 				IgnoreImportLibrary="true"
 				LinkTimeCodeGeneration="0"
@@ -91,7 +92,8 @@
 				Name="VCCustomBuildTool" />
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="release/libraw.lib"
+				AdditionalDependencies="libraw.lib"
+				AdditionalLibraryDirectories="release"
 				GenerateDebugInformation="false"
 				IgnoreImportLibrary="true"
 				LinkIncremental="1"

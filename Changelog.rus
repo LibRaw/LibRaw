@@ -27,6 +27,21 @@
           raw_width - width - left_margin (и аналогично для нижнего поля).
           
         * Косметические изменения в ./configure
+        
+        * Обновлены файлы для Qmake и проектные файлы Visual Studio.
+
+        * Новые макросы проверки версий:
+           LIBRAW_RUNTIME_CHECK_VERSION_EXACT() - рантайм проверка,
+            что версия библиотеки (DLL, .SO) в точности та же, что была
+            на компиляции приложения.
+           LIBRAW_RUNTIME_CHECK_VERSION_NOTLESS() - рантайм проверка,
+            что версия не меньше той, что была на компиляции.
+
+           LIBRAW_COMPILE_CHECK_VERSION_EXACT(major,minor) - Проверка на
+            компиляции, что версия в точности major.minor
+
+           LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(major,minor) - Проверка на
+            шаге компиляции, что версия не меньше чем major.minor
 
         * Структуры данных изменены, требуется перекомпиляция всех приложений.
 

@@ -37,6 +37,10 @@ it under the terms of the one of three licenses as you choose:
 #define snprintf _snprintf
 #endif
 
+#if !(LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0,14))
+#error This code is for LibRaw 0.14+ only
+#endif
+
 void  gamma_curve (unsigned short curve[]);
 void write_ppm(unsigned width, unsigned height, unsigned short *bitmap, const char *basename);
 void write_tiff(int width, int height, unsigned short *bitmap, const char *basename);
