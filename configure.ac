@@ -16,6 +16,9 @@ AC_SUBST(LIBTOOL_DEPS)
 
 # Config files to generate
 
+CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+LDFLAGS="$LDFLAGS -L/usr/local/lib"
+
 AC_CONFIG_FILES([
 	Makefile
 	libraw.pc
@@ -40,6 +43,29 @@ if test x$openmp = xtrue ; then
 		AC_MSG_WARN([OpenMP support cannot be enabled because your system doesn't support it.])		
 	])
 fi
+
+# check for Jasper (JPEG2000) support
+AC_ARG_ENABLE([jasper],
+	[  --enable-jasper    Enable Jasper (JPEG2000) support for RedCine files],
+	[case "${enableval}" in
+		yes)	jasper=true ;;
+		no)	jasper=false ;;
+		*)	AC_MSG_ERROR([bad value ${enableval} for --enable-jasper]) ;;
+	esac],[jasper=true])
+
+if test x$jasper = xtrue; then
+        AC_CHECK_LIB([jasper], [jas_init],
+                [
+                        AC_CHECK_HEADERS([jasper/jasper.h], [
+                                CPPFLAGS="$CPPFLAGS -DUSE_JASPER"
+                                LIBS="$LIBS -ljasper"
+                        ], AC_MSG_FAILURE([no jasper headers found]))
+                ],
+                AC_MSG_FAILURE([libjasper not found])
+        )
+fi
+
+
 
 # check if we want LCMS support
 AC_ARG_ENABLE([lcms],

@@ -47,4 +47,5 @@ it under the terms of the one of three licenses as you choose:
     ( LibRaw::versionNumber() >= LIBRAW_MAKE_VERSION(major,minor,patch) )
 
 
+
 #endif

@@ -17,17 +17,22 @@ CXX=g++46
 CFLAGS= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse2 -mfpmath=sse  -fopenmp 
 #CFLAGS= -O -I. -pedantic  -Wno-long-long -Wno-overflow -g
 
+
 # LCMS support
 # For lcms2 set -DUSE_LCMS2
-#LCMS_DEF=-DUSE_LCMS -I/usr/local/include
-#LCMS_LIB=-L/usr/local/lib -llcms
+#CFLAGS+=-DUSE_LCMS -I/usr/local/include
+#LDADD+=-L/usr/local/lib -llcms
+
+# Jasper support for RedCine
+CFLAGS+=-DUSE_JASPER -I/usr/local/include
+LDADD+=-L/usr/local/lib -ljasper
 
 # Demosaic Pack GPL2:
-CFLAGS_DP2=-I../LibRaw-demosaic-pack-GPL2
+DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
 CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
 
 # Demosaic Pack GPL3:
-CFLAGS_DP3=-I../LibRaw-demosaic-pack-GPL3
+DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL3
 CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
 
 
@@ -45,47 +50,46 @@ all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin
 ## Demosaic Pack(s)
 
 object/demosaic_packs.o: internal/demosaic_packs.cpp ${LR_INCLUDES}
-	$(CXX) -w -c -DLIBRAW_NOTHREADS ${CFLAGS} ${LCMS_DEF} ${CFLAGS_DP2} ${CFLAGS_DP3} -o object/demosaic_packs.o internal/demosaic_packs.cpp
+	$(CXX) -w -c -DLIBRAW_NOTHREADS ${CFLAGS} ${DPCFLAGS} -o object/demosaic_packs.o internal/demosaic_packs.cpp
 
 object/demosaic_packs_mt.o: internal/demosaic_packs.cpp ${LR_INCLUDES}
-	$(CXX) -w -c -pthread ${CFLAGS} ${LCMS_DEF} ${CFLAGS_DP2} ${CFLAGS_DP3} -o object/demosaic_packs_mt.o internal/demosaic_packs.cpp
-
+	$(CXX) -w -c -pthread ${CFLAGS} ${DPCFLAGS} -o object/demosaic_packs_mt.o internal/demosaic_packs.cpp
 
 ## Samples ##
 bin/raw-identify: lib/libraw.a samples/raw-identify.cpp
-	$(CXX) ${LCMS_DEF} ${CFLAGS} -o bin/raw-identify samples/raw-identify.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
+	$(CXX) ${CFLAGS} -o bin/raw-identify samples/raw-identify.cpp -L./lib -lraw  -lm  ${LDADD}
 
 bin/simple_dcraw: lib/libraw.a samples/simple_dcraw.cpp
-	$(CXX) -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o bin/simple_dcraw samples/simple_dcraw.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
+	$(CXX) -DLIBRAW_NOTHREADS ${CFLAGS} -o bin/simple_dcraw samples/simple_dcraw.cpp -L./lib -lraw  -lm  ${LDADD}
 
 bin/multirender_test: lib/libraw.a samples/multirender_test.cpp
-	$(CXX) -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o bin/multirender_test samples/multirender_test.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
+	$(CXX) -DLIBRAW_NOTHREADS ${CFLAGS} -o bin/multirender_test samples/multirender_test.cpp -L./lib -lraw  -lm  ${LDADD}
 
 bin/postprocessing_benchmark: lib/libraw.a samples/postprocessing_benchmark.cpp
-	$(CXX) -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o bin/postprocessing_benchmark samples/postprocessing_benchmark.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
+	$(CXX) -DLIBRAW_NOTHREADS ${CFLAGS} -o bin/postprocessing_benchmark samples/postprocessing_benchmark.cpp -L./lib -lraw  -lm  ${LDADD}
 
 bin/unprocessed_raw: lib/libraw.a samples/unprocessed_raw.cpp
-	$(CXX) -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o bin/unprocessed_raw samples/unprocessed_raw.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
+	$(CXX) -DLIBRAW_NOTHREADS ${CFLAGS} -o bin/unprocessed_raw samples/unprocessed_raw.cpp -L./lib -lraw  -lm  ${LDADD}
 
 bin/4channels: lib/libraw.a samples/4channels.cpp
-	$(CXX) -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o bin/4channels samples/4channels.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
+	$(CXX) -DLIBRAW_NOTHREADS ${CFLAGS} -o bin/4channels samples/4channels.cpp -L./lib -lraw  -lm  ${LDADD}
 
 bin/mem_image: lib/libraw.a samples/mem_image.cpp
-	$(CXX) ${LCMS_DEF} ${CFLAGS} -o bin/mem_image samples/mem_image.cpp -L./lib -lraw  -lm  ${LCMS_LIB}
+	$(CXX) ${CFLAGS} -o bin/mem_image samples/mem_image.cpp -L./lib -lraw  -lm  ${LDADD}
 
 bin/dcraw_half: lib/libraw.a samples/dcraw_half.c
-	$(CC) ${LCMS_DEF} ${CFLAGS} -o bin/dcraw_half samples/dcraw_half.c -L./lib -lraw  -lm -lstdc++  ${LCMS_LIB}
+	$(CC) ${CFLAGS} -o bin/dcraw_half samples/dcraw_half.c -L./lib -lraw  -lm -lstdc++  ${LDADD}
 
 bin/half_mt: lib/libraw_r.a samples/half_mt.c
-	$(CC) -pthread ${LCMS_DEF} ${CFLAGS} -o bin/half_mt samples/half_mt.c -L./lib -lraw_r  -lm -lstdc++  ${LCMS_LIB}
+	$(CC) -pthread ${CFLAGS} -o bin/half_mt samples/half_mt.c -L./lib -lraw_r  -lm -lstdc++  ${LDADD}
 
 bin/dcraw_emu: lib/libraw.a samples/dcraw_emu.cpp
-	$(CXX) ${CFLAGS} ${LCMS_DEF} -o bin/dcraw_emu samples/dcraw_emu.cpp -L./lib -lraw_r  -lm ${LCMS_LIB}
+	$(CXX) ${CFLAGS} -o bin/dcraw_emu samples/dcraw_emu.cpp -L./lib -lraw_r  -lm ${LDADD}
 
 dcraw_binaries: bin/dcraw_dist
 
 bin/dcraw_dist: dcraw/dcraw.c Makefile.devel
-	$(CXX) -w -O4 -DLIBRAW_NOTHREADS -DNO_JPEG -DNO_LCMS -I/usr/local/include -o bin/dcraw_dist dcraw/dcraw.c -lm -L/usr/local/lib
+	$(CXX) -w -O4 -DLIBRAW_NOTHREADS -DNO_JPEG -DNO_LCMS -DNO_JASPER -I/usr/local/include -o bin/dcraw_dist dcraw/dcraw.c -lm -L/usr/local/lib 
 
 regenerate:
 	${PP} -N -DDEFINES dcraw/dcraw.c  >internal/defines.h

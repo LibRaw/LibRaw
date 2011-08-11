@@ -85,8 +85,9 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        fuji_load_raw();
     void        parse_fuji (int offset);
 
-
-
+// RedCine
+    void        parse_redcine();
+    void        redcine_load_raw();
 
 // Rollei
     void        rollei_load_raw();

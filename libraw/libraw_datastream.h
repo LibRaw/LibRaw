@@ -195,6 +195,7 @@ class LibRaw_abstract_datastream
     virtual char*       gets(char *, int) = 0;
     virtual int         scanf_one(const char *, void *) = 0;
     virtual int         eof() = 0;
+    virtual void *      make_jas_stream() = 0;
     /* Make buffer from current offset */
     virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz)
     {
@@ -228,6 +229,7 @@ class LibRaw_file_datastream: public LibRaw_abstract_datastream
 
   public:
     virtual ~LibRaw_file_datastream(){}
+    virtual void *make_jas_stream();
     LibRaw_file_datastream(const char *fname)
       :filename(fname)
     {
@@ -352,6 +354,7 @@ class LibRaw_buffer_datastream : public LibRaw_abstract_datastream
 
     virtual ~LibRaw_buffer_datastream(){}
     virtual int valid() { return buf?1:0;}
+    virtual void *make_jas_stream();
 
     virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz)
     {
@@ -528,6 +531,7 @@ class LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
 
     virtual             ~LibRaw_bigfile_datastream() {if(f)fclose(f); if(sav)fclose(sav);}
     virtual int         valid() { return f?1:0;}
+    virtual void *make_jas_stream();
 
     virtual int         read(void * ptr,size_t size, size_t nmemb) 
     { 

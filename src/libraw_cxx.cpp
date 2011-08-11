@@ -32,9 +32,7 @@ it under the terms of the one of three licenses as you choose:
 #endif
 #define LIBRAW_LIBRARY_BUILD
 #include "libraw/libraw.h"
-//#include "internal/defines.h"
-
-#define NEW_CROP_CODE
+#include "internal/defines.h"
 
 #ifdef __cplusplus
 extern "C" 
@@ -117,6 +115,9 @@ const float LibRaw_constants::d65_white[3] =  { 0.950456, 1, 1.088754 };
                 return LIBRAW_UNSUFFICIENT_MEMORY;      \
             case LIBRAW_EXCEPTION_DECODE_RAW:           \
             case LIBRAW_EXCEPTION_DECODE_JPEG:          \
+                recycle();                              \
+                return LIBRAW_DATA_ERROR;               \
+            case LIBRAW_EXCEPTION_DECODE_JPEG2000:      \
                 recycle();                              \
                 return LIBRAW_DATA_ERROR;               \
             case LIBRAW_EXCEPTION_IO_EOF:               \
@@ -505,6 +506,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "unpacked_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_USEBAYER2;
         }
+    else  if (load_raw == &LibRaw::redcine_load_raw)
+        {
+            d_info->decoder_name = "redcine_load_raw()";
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; 
+        }
     else
         {
             d_info->decoder_name = "Unknown unpack function";
@@ -660,30 +666,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
                 S.iheight = S.height = S.raw_height;
                 S.raw_height += 2*S.top_margin;
             }
-
-#if 0
-        int saved_raw_width = S.raw_width;
-        int saved_width = S.width;
-        // from packed_12_load_raw
-        if ((load_raw == &LibRaw:: packed_load_raw) && (S.raw_width * 8U >= S.width * libraw_internal_data.unpacker_data.tiff_bps))
-            {	
-                // raw_width is in bytes!
-                S.raw_width = S.raw_width * 8 / libraw_internal_data.unpacker_data.tiff_bps;	
-            }
-        else if (S.pixel_aspect < 0.95 || S.pixel_aspect > 1.05)
-            {
-                S.width*=S.pixel_aspect;
-            }
-
-        if(S.raw_width>S.width + S.left_margin)
-            S.right_margin = S.raw_width - S.width - S.left_margin;
-
-        if(S.raw_height > S.height + S.top_margin)
-            S.bottom_margin = S.raw_height - S.height - S.top_margin;
-
-        S.raw_width = saved_raw_width;
-        S.width = saved_width;
-#endif
 
         if(C.profile_length)
             {
@@ -986,10 +968,6 @@ int LibRaw::raw2image_ex(void)
             S.top_margin+=crop[1];
             S.width=crop[2];
             S.height=crop[3];
-#if 0
-            S.bottom_margin = S.raw_height - S.height - S.top_margin;
-            S.right_margin = S.raw_width - S.width - S.left_margin;
-#endif
             
             S.iheight = (S.height + IO.shrink) >> IO.shrink;
             S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
@@ -1344,9 +1322,6 @@ int LibRaw::dcraw_document_mode_processing(void)
 }
 
 #if 1
-#define FORC(cnt) for (c=0; c < cnt; c++)
-#define FORCC FORC(ret->colors)
-#define SWAP(a,b) { a ^= b; a ^= (b ^= a); }
 
 libraw_processed_image_t * LibRaw::dcraw_make_mem_thumb(int *errcode)
 {
@@ -2020,7 +1995,7 @@ void LibRaw::exp_bef(float shift, float smooth)
     if(shift <=1.0)
         {
             for(int i=0;i<=TBLN;i++)
-                lut[i] = ushort((float)i*shift);
+                lut[i] = (unsigned short)((float)i*shift);
         }
     else
         {
@@ -2042,9 +2017,9 @@ void LibRaw::exp_bef(float shift, float smooth)
                     float X = (float)i;
                     float Y = A*powf(X,1.0f/3.0f)+B*X+CC;
                     if(i<x1)
-                        lut[i] = ushort((float)i*shift);
+                        lut[i] = (unsigned short)((float)i*shift);
                     else
-                        lut[i] = Y<0?0:(Y>TBLN?TBLN:ushort(Y));
+                        lut[i] = Y<0?0:(Y>TBLN?TBLN:(unsigned short)(Y));
                 }
         }
     for(int i=0; i< S.height*S.width; i++)
@@ -2275,6 +2250,7 @@ static const char  *static_camera_list[] =
 "Apple QuickTake 100",
 "Apple QuickTake 150",
 "Apple QuickTake 200",
+"ARRIRAW format",
 "AVT F-080C",
 "AVT F-145C",
 "AVT F-201C",
@@ -2325,6 +2301,7 @@ static const char  *static_camera_list[] =
 "Canon PowerShot SX110 IS (CHDK hack)",
 "Canon PowerShot SX120 IS (CHDK hack)",
 "Canon PowerShot SX20 IS (CHDK hack)",
+"Canon PowerShot SX30 IS (CHDK hack)",
 "Canon EOS D30",
 "Canon EOS D60",
 "Canon EOS 5D",
@@ -2483,7 +2460,9 @@ static const char  *static_camera_list[] =
 "Leica D-LUX2",
 "Leica D-LUX3",
 "Leica D-LUX4",
+"Leica D-LUX5",
 "Leica V-LUX1",
+"Leica V-LUX2",
 "Logitech Fotoman Pixtura",
 "Mamiya ZD",
 "Micron 2010",
@@ -2581,6 +2560,7 @@ static const char  *static_camera_list[] =
 "Olympus E-620",
 "Olympus E-P1",
 "Olympus E-P2",
+"Olympus E-P3",
 "Olympus E-PL1",
 "Olympus E-PL1s",
 "Olympus E-PL2",
@@ -2605,8 +2585,10 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-G1",
 "Panasonic DMC-G10",
 "Panasonic DMC-G2",
+"Panasonic DMC-G3",
 "Panasonic DMC-GF1",
 "Panasonic DMC-GF2",
+"Panasonic DMC-GF3",
 "Panasonic DMC-GH1",
 "Panasonic DMC-GH2",
 "Panasonic DMC-L1",
@@ -2649,6 +2631,9 @@ static const char  *static_camera_list[] =
 "Pixelink A782",
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
 "Polaroid x530",
+#endif
+#ifndef NO_JASPER
+"Redcode R3D format",
 #endif
 "Rollei d530flex",
 "RoverShot 3320af",
@@ -2697,7 +2682,9 @@ static const char  *static_camera_list[] =
 "Sony DSLR-A900",
 "Sony NEX-3",
 "Sony NEX-5",
+"Sony NEX-C3",
 "Sony SLT-A33",
+"Sony SLT-A35",
 "Sony SLT-A55V",
 "Sony XCD-SX910CR",
 "STV680 VGA",
@@ -2759,7 +2746,29 @@ const char * LibRaw::strprogress(enum LibRaw_progress p)
         }
 }
 
+void * LibRaw_file_datastream::make_jas_stream()
+{
+#ifdef NO_JASPER
+    return NULL;
+#else
+    return jas_stream_fopen(fname(),"rb");
+#endif
+}
 
-
-
+void * LibRaw_buffer_datastream::make_jas_stream()
+{
+#ifdef NO_JASPER
+    return NULL;
+#else
+    return jas_stream_memopen((char*)buf,streamsize);
+#endif
+}
+void *LibRaw_bigfile_datastream::make_jas_stream()
+{
+#ifdef NO_JASPER
+    return NULL;
+#else
+    return jas_stream_freopen(fname(),"rb",f);
+#endif
+}
 

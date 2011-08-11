@@ -174,8 +174,6 @@ typedef struct
     double      pixel_aspect;
     int         flip;
 
-//    ushort      right_margin,bottom_margin; 
-
 } libraw_image_sizes_t;
 
 struct ph1_t

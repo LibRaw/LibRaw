@@ -37,7 +37,6 @@ lib_libraw_a_SOURCES = internal/dcraw_common.cpp \
 
 lib_libraw_r_a_CXXFLAGS = -pthread -w
 lib_libraw_r_a_CFLAGS = -pthread -w
-lib_libraw_r_a_SOURCES = $(lib_libraw_a_SOURCES)
 lib_libraw_la_SOURCES = $(lib_libraw_a_SOURCES)
 lib_libraw_r_la_SOURCES = $(lib_libraw_a_SOURCES)
 
@@ -54,6 +53,8 @@ bin_PROGRAMS =	bin/raw-identify \
 				bin/mem_image \
 				bin/dcraw_half \
 				bin/half_mt \
+				bin/multirender_test \
+				bin/postprocessing_benchmark \
 				bin/dcraw_emu
 endif
 

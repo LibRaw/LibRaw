@@ -1,10 +1,34 @@
-2011-08-09 Alex Tutubalin <lexa@lexa.ru>
+2011-08-11 Alex Tutubalin <lexa@lexa.ru>
+        * Imported dcraw 9.10 (1.444), support for new cameras added:
+          ARRIRAW format, Canon SX30 IS, Leica D-LUX 5 and V-LUX2,
+          Olympus E-P3, Panasonic G3 and GF3, Sony NEX-C3 and SLT-A35
+          
+        * Support for RedOne digital movie cameras (R3D format). 
+          To enable this support you should:
+           + install libjasper JPEG2000 support library
+
+           + compile LibRaw with -DUSE_JASPER compiler switch (./configure
+             will do it for you)
+
+           + If you use own LibRaw_datastream implementation, you should
+             implement make_jas_stream() call for your datastream. See
+             bottom of src/libraw_cxx.cpp for  implementations in datafile
+             and mem-buffer LibRaw streams.
+
+        * Bugfix: green matching is turned off if output image is shrinked
+          due to wavelet filtering or aberration correction.
 
         * fixed open_file()/adjust_sizes_info_only() code path
 
         * Removed imgdata.sizes.bottom_margin and right_margin data fields
+          use imgdata.sizes.raw_width - width - left_margin to get right one,
+          the same with bottom_margin.
+
+        * minor ./configure cleanup
 
         * all client code should be recompiled due to internals change.
+
+        * LibRaw 0.14.0-Alpha4
 
 2011-07-19 Alex Tutubalin <lexa@lexa.ru>
         * New sample samples/postprocessing_benchmark.cpp
@@ -25,7 +49,6 @@
           multiple of 4 (the corner is shifted top-left).
 
         * LibRaw 0.14.0-Alpha3
-
 
 2011-07-15 Alex Tutubalin <lexa@lexa.ru>
         * imported cropping code from 0.13 branch
