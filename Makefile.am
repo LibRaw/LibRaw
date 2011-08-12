@@ -33,6 +33,7 @@ lib_libraw_a_SOURCES = internal/dcraw_common.cpp \
 				 internal/dcraw_fileio.cpp \
 				 internal/demosaic_packs.cpp \
 				 src/libraw_cxx.cpp \
+				 src/libraw_datastream.cpp \
 				 src/libraw_c_api.cpp
 
 lib_libraw_r_a_CXXFLAGS = -pthread -w

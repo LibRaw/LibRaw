@@ -1,3 +1,8 @@
+2011-08-12 Alex Tutubalin <lexa@lexa.ru>
+        * Most of LibRaw_datastream function bodies are moved to
+          separate source file
+        * LibRaw_windows_datastream is merged to main sourcetree
+
 2011-08-11 Alex Tutubalin <lexa@lexa.ru>
         * Imported dcraw 9.10 (1.444), support for new cameras added:
           ARRIRAW format, Canon SX30 IS, Leica D-LUX 5 and V-LUX2,

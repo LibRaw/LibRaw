@@ -294,6 +294,7 @@ int CLASS fc (int row, int col)
 #include "libraw/libraw.h"
 #include "internal/defines.h"
 #include "internal/var_defines.h"
+#include "internal/libraw_bytebuffer.h"
 @end COMMON */
 
 //@out COMMON

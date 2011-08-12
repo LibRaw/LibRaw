@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="libraw"
-	ProjectGUID="{2FBFAA81-822F-33B9-8371-3AB3C515F19C}"
+	ProjectGUID="{767E57ED-6D37-32A1-B51E-C39E7C1CD02A}"
 	Keyword="Qt4VSv1.0">
 	<Platforms>
 		<Platform
@@ -129,6 +129,8 @@
 				RelativePath="..\src\libraw_c_api.cpp" />
 			<File
 				RelativePath="..\src\libraw_cxx.cpp" />
+			<File
+				RelativePath="..\src\libraw_datastream.cpp" />
 		</Filter>
 		<Filter
 			Name="Header Files"

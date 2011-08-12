@@ -7,17 +7,18 @@
           с вейвлет-фильтрацией, коррекцией аберраций и прочими случаями 
           уменьшения выходного изображения вдвое.
 
-        * Support for RedOne digital movie cameras (R3D format). 
-          To enable this support you should:
-           + install libjasper JPEG2000 support library
+        * Поддержка цифровых кинокамер  RedOne (формат R3D). 
+          Для использования этой поддержки вам надо:
+           + Установить библиотеку libjasper для раскодирования JPEG2000
 
-           + compile LibRaw with -DUSE_JASPER compiler switch (./configure
-             will do it for you)
+           + компилировать LibRaw с ключом компилятора -DUSE_JASPER 
+            (./configure сделает это сама)
 
-           + If you use own LibRaw_datastream implementation, you should
-             implement make_jas_stream() call for your datastream. See
-             bottom of src/libraw_cxx.cpp for  implementations in datafile
-             and mem-buffer LibRaw streams.
+           + Если вы используюете свой LibRaw_datastream, вы должны имплементировать
+             там вызов make_jas_stream(), который вернет указатель на "поток"
+             libjasper.
+             Примеры реализаций этого вызова для потоков LibRaw можно найти
+             в хвосте файла src/libraw_cxx.cpp
 
         * Исправлена работа при последовательности вызовов 
            open_file() + adjust_sizes_info_only()

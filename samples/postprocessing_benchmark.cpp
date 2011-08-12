@@ -29,7 +29,7 @@ it under the terms of the one of three licenses as you choose:
 #include <fcntl.h>
 #include <sys/stat.h>
 #else
-#include <windows.h>
+#include <winsock2.h>
 #endif
 
 #include "libraw/libraw.h"
