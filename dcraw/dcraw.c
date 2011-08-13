@@ -1221,10 +1221,11 @@ void CLASS lossless_jpeg_load_raw()
               pixelsInSlice = slicesW[o>>28];
           }
 #endif
+#ifndef LIBRAW_LIBRARY_BUILD
+
       if (raw_width == 3984 && (col -= 2) < 0)
               col += (row--,raw_width);
 
-#ifndef LIBRAW_LIBRARY_BUILD
       if ((unsigned) (row-top_margin) < height) {
 	c = FC(row-top_margin,col-left_margin);
 	if ((unsigned) (col-left_margin) < width) {
@@ -1235,6 +1236,9 @@ void CLASS lossless_jpeg_load_raw()
       }
 #else
       RBAYER(row,col) = val;
+
+      if (raw_width == 3984 && (col -= 2) < 0)
+              col += (row--,raw_width);
       if ((unsigned) (row-top_margin) < height) 
           {
               // within image height

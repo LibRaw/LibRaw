@@ -1,3 +1,6 @@
+2011-08-13 Alex Tutubalin <lexa@lexa.ru>
+        * Fixed buffer overrun for some LJPEG-compressed files
+
 2011-08-12 Alex Tutubalin <lexa@lexa.ru>
         * Most of LibRaw_datastream function bodies are moved to
           separate source file
