@@ -685,15 +685,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     if(P1.raw_count < 1) 
         return LIBRAW_FILE_UNSUPPORTED;
 
-    if (O.user_flip >= 0)
-        S.flip = O.user_flip;
-    
-    switch ((S.flip+3600) % 360) 
-        {
-        case 270:  S.flip = 5;  break;
-        case 180:  S.flip = 3;  break;
-        case  90:  S.flip = 6;  break;
-        }
     
     write_fun = &LibRaw::write_ppm_tiff;
     
