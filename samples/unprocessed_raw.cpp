@@ -248,7 +248,7 @@ void tiff_set (ushort *ntag,
 void tiff_head (int width, int height, struct tiff_hdr *th)
 {
   int c;
-  time_t timestamp;
+  time_t timestamp = time(NULL);
   struct tm *t;
 
   memset (th, 0, sizeof *th);
@@ -274,8 +274,9 @@ void tiff_head (int width, int height, struct tiff_hdr *th)
   th->rat[0] = th->rat[2] = 300;
   th->rat[1] = th->rat[3] = 1;
   t = localtime (&timestamp);
-  sprintf (th->date, "%04d:%02d:%02d %02d:%02d:%02d",
-      t->tm_year+1900,t->tm_mon+1,t->tm_mday,t->tm_hour,t->tm_min,t->tm_sec);
+  if(t)
+      sprintf (th->date, "%04d:%02d:%02d %02d:%02d:%02d",
+               t->tm_year+1900,t->tm_mon+1,t->tm_mday,t->tm_hour,t->tm_min,t->tm_sec);
 }
 
 void write_tiff(int width, int height, unsigned short *bitmap, const char *fn)

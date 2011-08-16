@@ -760,9 +760,20 @@ int LibRaw::unpack(void)
         get_decoder_info(&decoder_info);
 
         int save_iwidth = S.iwidth, save_iheight = S.iheight, save_shrink = IO.shrink;
+
+        int rwidth = S.raw_width, rheight = S.raw_height;
+        if( !IO.fuji_width)
+            {
+                // adjust non-Fuji allocation
+                if(rwidth < S.width + S.left_margin)
+                    rwidth = S.width + S.left_margin;
+                if(rheight < S.height + S.top_margin)
+                    rheight = S.height + S.top_margin;
+            }
+        
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
             {
-                imgdata.rawdata.raw_alloc = malloc(S.raw_width*S.raw_height*sizeof(imgdata.rawdata.raw_image[0]));
+                imgdata.rawdata.raw_alloc = malloc(rwidth*rheight*sizeof(imgdata.rawdata.raw_image[0]));
                 imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
             }
         else if (decoder_info.decoder_flags &  LIBRAW_DECODER_4COMPONENT)
@@ -770,7 +781,7 @@ int LibRaw::unpack(void)
                 S.iwidth = S.width;
                 S.iheight= S.height;
                 IO.shrink = 0;
-                imgdata.rawdata.raw_alloc = calloc(S.raw_width*S.raw_height,sizeof(*imgdata.rawdata.color_image));
+                imgdata.rawdata.raw_alloc = calloc(rwidth*rheight,sizeof(*imgdata.rawdata.color_image));
                 imgdata.rawdata.color_image = (ushort(*)[4]) imgdata.rawdata.raw_alloc;
             }
         else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)

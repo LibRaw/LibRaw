@@ -1,3 +1,9 @@
+2011-08-16 Alex Tutubalin <lexa@lexa.ru>
+        * Fixed crash in unprocessed_raw sample due to uninitialized
+          timestamp variable.
+        * Fixed crash in raw decoding if raw_width/raw_height is
+          less than resulting image width/height.
+
 2011-08-13 Alex Tutubalin <lexa@lexa.ru>
         * Fixed buffer overrun for some LJPEG-compressed files
 
