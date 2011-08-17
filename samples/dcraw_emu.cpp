@@ -34,6 +34,7 @@ it under the terms of the one of three licenses as you choose:
 #ifndef WIN32
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <unistd.h>
 #else
 #include <io.h>
 #endif
