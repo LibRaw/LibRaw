@@ -1,20 +1,24 @@
-2011-08-18 Alex Tutubalin <lexa@lexa.ru>
+2011-08-20 Alex Tutubalin <lexa@lexa.ru>
+
         * Patch to dcraw_emu for SunStudio compiler compatibility
-2011-08-16 Alex Tutubalin <lexa@lexa.ru>
+
         * Fixed crash in unprocessed_raw sample due to uninitialized
           timestamp variable.
+
         * Fixed crash in raw decoding if raw_width/raw_height is
           less than resulting image width/height.
+
         * imgdata.sizes.flip is set from user_flip only on
           postprocessing and/or adjust_sizes_info_only()
 
-2011-08-13 Alex Tutubalin <lexa@lexa.ru>
         * Fixed buffer overrun for some LJPEG-compressed files
 
-2011-08-12 Alex Tutubalin <lexa@lexa.ru>
         * Most of LibRaw_datastream function bodies are moved to
           separate source file
+
         * LibRaw_windows_datastream is merged to main sourcetree
+
+        * LibRaw 0.14.0-Alpha5
 
 2011-08-11 Alex Tutubalin <lexa@lexa.ru>
         * Imported dcraw 9.10 (1.444), support for new cameras added:
