@@ -1235,10 +1235,16 @@ void CLASS lossless_jpeg_load_raw()
 	  cblack[c] += (cblack[4+c]++,val);
       }
 #else
-      RBAYER(row,col) = val;
+      if (raw_width == 3984)
+          {
+              if ( (col -= 2) < 0)
+                  col += (row--,raw_width);
+              if(row >= 0 && row < raw_height && col >= 0 && col < raw_width)
+                  RBAYER(row,col) = val;
+          }
+      else 
+                  RBAYER(row,col) = val;
 
-      if (raw_width == 3984 && (col -= 2) < 0)
-              col += (row--,raw_width);
       if ((unsigned) (row-top_margin) < height) 
           {
               // within image height
