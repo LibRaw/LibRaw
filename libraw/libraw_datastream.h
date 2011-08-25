@@ -82,6 +82,8 @@ class DllDef LibRaw_abstract_datastream
     LibRaw_abstract_datastream *substream;
 };
 
+template class DllDef std::auto_ptr<std::streambuf>;
+
 class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
 {
   protected:
