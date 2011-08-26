@@ -169,30 +169,29 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
     FILE *f,*sav;
     const char *filename;
 };
-#undef LR_BF_CHK
 
 #ifdef WIN32
 class DllDef  LibRaw_windows_datastream : public LibRaw_buffer_datastream 
 {
 public:
-	// ctor: high level constructor opens a file by name
+    /* ctor: high level constructor opens a file by name */
     LibRaw_windows_datastream(const TCHAR* sFile);
-    // ctor: construct with a file handle - caller is responsible for closing the file handle
+    /* ctor: construct with a file handle - caller is responsible for closing the file handle */
     LibRaw_windows_datastream(HANDLE hFile);
-    // dtor: unmap and close the mapping handle
+    /* dtor: unmap and close the mapping handle */
     virtual ~LibRaw_windows_datastream();
 
 protected:
     void Open(HANDLE hFile);
     inline void reconstruct_base()
 	{
-            // this subterfuge is to overcome the private-ness of LibRaw_buffer_datastream
+            /* this subterfuge is to overcome the private-ness of LibRaw_buffer_datastream */
             (LibRaw_buffer_datastream&)*this = LibRaw_buffer_datastream(pView_, (size_t)cbView_);
 	}
 
-	HANDLE		hMap_;			// handle of the file mapping
-	void*		pView_;			// pointer to the mapped memory
-	__int64	cbView_;		// size of the mapping in bytes
+    HANDLE		hMap_;			/* handle of the file mapping */
+    void*		pView_;			/* pointer to the mapped memory */
+    __int64	cbView_;		/* size of the mapping in bytes */
 };
 
 #endif

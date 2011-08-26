@@ -1065,12 +1065,18 @@ int LibRaw::raw2image_ex(void)
                 if(decoder_info.decoder_flags & LIBRAW_DECODER_FLATFIELD)
                     {
                         if(decoder_info.decoder_flags & LIBRAW_DECODER_USEBAYER2)
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for default(shared)
+#endif
                             for(int row = 0; row < S.height; row++)
                                 for(int col = 0; col < S.width; col++)
                                     imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][fc(row,col)]
                                         = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
                                                                     +(col+S.left_margin)];
                         else
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for default(shared)
+#endif
                             for(int row = 0; row < S.height; row++)
                                 {
                                     int colors[2];
@@ -1089,6 +1095,9 @@ int LibRaw::raw2image_ex(void)
                     {
 #define FC0(row,col) (save_filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
                         if(IO.shrink)
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for default(shared)
+#endif
                             for(int row = 0; row < S.height; row++)
                                 for(int col = 0; col < S.width; col++)
                                     imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][FC(row,col)] 
@@ -1097,6 +1106,9 @@ int LibRaw::raw2image_ex(void)
                                         [FC0(row+S.top_margin,col+S.left_margin)];
 #undef FC0
                         else
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for default(shared)
+#endif
                             for(int row = 0; row < S.height; row++)
                                 memmove(&imgdata.image[row*S.width],
                                         &imgdata.rawdata.color_image[(row+S.top_margin)*S.raw_width+S.left_margin],
@@ -1105,6 +1117,9 @@ int LibRaw::raw2image_ex(void)
                 else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
                     {
                         if(do_crop)
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for default(shared)
+#endif
                             for(int row = 0; row < S.height; row++)
                                 memmove(&imgdata.image[row*S.width],
                                         &imgdata.rawdata.color_image[(row+S.top_margin)*save_width+S.left_margin],
@@ -1464,7 +1479,6 @@ int LibRaw::copy_mem_image(void* scan0, int stride, int bgr)
     S.iwidth  = S.width;
 
     if (S.flip & 4) SWAP(S.height,S.width);
-    uchar *bufp = (uchar*)scan0;
     uchar *ppm;
     ushort *ppm2;
     int c, row, col, soff, rstep, cstep;
@@ -1475,6 +1489,7 @@ int LibRaw::copy_mem_image(void* scan0, int stride, int bgr)
 
     for (row=0; row < S.height; row++, soff += rstep) 
         {
+            uchar *bufp = ((uchar*)scan0)+row*stride;
             ppm2 = (ushort*) (ppm = bufp);
             // keep trivial decisions in the outer loop for speed
             if (bgr) {
@@ -1498,7 +1513,7 @@ int LibRaw::copy_mem_image(void* scan0, int stride, int bgr)
                 }
             }
 
-            bufp += stride;           // go to the next line
+//            bufp += stride;           // go to the next line
         }
  
     S.iheight = s_iheight;

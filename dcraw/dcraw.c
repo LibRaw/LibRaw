@@ -4167,7 +4167,11 @@ skip_block: ;
     fputc ('\n', stderr);
   }
 #endif
+
   size = iheight*iwidth;
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for private(val) default(shared)
+#endif
   for (i=0; i < size*4; i++) {
     val = image[0][i];
     if (!val) continue;

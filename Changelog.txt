@@ -1,3 +1,8 @@
+2011-08-26 Alex Tutubalin <lexa@lexa.ru>
+        * Cosmetic changes to LibRaw_file_datastream interface
+        * OpenMP speedup of postprocessing steps (up to 50% for
+          half mode and 4-core machine)
+
 2011-08-20 Alex Tutubalin <lexa@lexa.ru>
 
         * Patch to dcraw_emu for SunStudio compiler compatibility
