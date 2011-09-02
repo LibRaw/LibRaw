@@ -1,7 +1,10 @@
-2011-08-26 Alex Tutubalin <lexa@lexa.ru>
+2011-09-02 Alex Tutubalin <lexa@lexa.ru>
         * Cosmetic changes to LibRaw_file_datastream interface
+
         * OpenMP speedup of postprocessing steps (up to 50% for
           half mode and 4-core machine)
+
+        * LibRaw 0.14.0-Beta1
 
 2011-08-20 Alex Tutubalin <lexa@lexa.ru>
 

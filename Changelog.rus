@@ -1,4 +1,13 @@
-﻿2011-08-20 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-09-02 Alex Tutubalin <lexa@lexa.ru>
+        * Минимальные косметические изменения в описании интерфейса
+          LibRaw_file_datastream interface
+
+        * OpenMP-ускорение постпроцессинга (до 50% для режима half_size
+          на 4-ядерном CPU)
+
+        * LibRaw 0.14.0-Beta1
+
+2011-08-20 Alex Tutubalin <lexa@lexa.ru>
 
         * Пример dcraw_emu: косметические исправления для совместимости
           с компилятором SunStudio
