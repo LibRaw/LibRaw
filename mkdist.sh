@@ -12,7 +12,6 @@ else
     wget http://www.cybercom.net/~dcoffin/dcraw/dcraw.c
     cd ..
     rm -f internal/preprocess.pl clist2c.pl
-    rm doc/*.psd
     rm -f Makefile.devel 
     rm DEVELOPER-NOTES
     rm mkdist.sh export-dist.sh
