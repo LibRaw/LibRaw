@@ -82,7 +82,9 @@ class DllDef LibRaw_abstract_datastream
     LibRaw_abstract_datastream *substream;
 };
 
+#ifdef WIN32
 template class DllDef std::auto_ptr<std::streambuf>;
+#endif
 
 class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
 {
