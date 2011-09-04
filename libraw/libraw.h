@@ -192,7 +192,6 @@ class DllDef LibRaw
     void        identify2(unsigned, unsigned, char*);
     void        write_ppm_tiff ();
     void        convert_to_rgb();
-    void        kodak_ycbcr_load_raw();
     void        remove_zeroes();
 #ifndef NO_LCMS
     void	apply_profile(const char*,const char*);

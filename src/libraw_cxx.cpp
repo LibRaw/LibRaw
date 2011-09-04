@@ -96,7 +96,7 @@ const double LibRaw_constants::xyz_rgb[3][3] =
     { 0.019334, 0.119193, 0.950227 } 
 };
 
-const float LibRaw_constants::d65_white[3] =  { 0.950456, 1, 1.088754 };
+const float LibRaw_constants::d65_white[3] =  { 0.950456f, 1.0f, 1.088754f };
 
 #define P1 imgdata.idata
 #define S imgdata.sizes
@@ -1133,6 +1133,7 @@ int LibRaw::raw2image_ex(void)
                 if(imgdata.rawdata.use_ph1_correct) // Phase one unpacked!
                         phase_one_correct();
             }
+    return LIBRAW_SUCCESS;
 }
 
 #undef MIN
@@ -1610,7 +1611,7 @@ void LibRaw::kodak_thumb_loader()
     S.width  = T.twidth;
     P1.filters = 0;
 
-    if (thumb_load_raw == &CLASS kodak_ycbcr_load_raw) 
+    if (thumb_load_raw == &CLASS kodak_ycbcr_load_thumb) 
         {
             S.height += S.height & 1;
             S.width  += S.width  & 1;

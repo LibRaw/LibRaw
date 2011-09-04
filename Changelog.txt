@@ -1,3 +1,8 @@
+2011-09-04 Alex Tutubalin <lexa@lexa.ru>
+        * Fixed bug with Kodak thumbnail extraction
+        * raw2image_ex() always return value
+        * LibRaw 0.14.0-Beta2
+
 2011-09-02 Alex Tutubalin <lexa@lexa.ru>
         * Cosmetic changes to LibRaw_file_datastream interface
 
