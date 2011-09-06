@@ -4215,12 +4215,12 @@ skip_block: ;
 #if defined(LIBRAW_USE_OPENMP)
 #pragma omp parallel for private(val) default(shared)
 #endif
-  for (i=0; i < size*4; i++) {
-    val = image[0][i];
+  for (int i1=0; i1 < size*4; i1++) {
+    val = image[0][i1];
     if (!val) continue;
-    val -= cblack[i & 3];
-    val *= scale_mul[i & 3];
-    image[0][i] = CLIP(val);
+    val -= cblack[i1 & 3];
+    val *= scale_mul[i1 & 3];
+    image[0][i1] = CLIP(val);
   }
   if ((aber[0] != 1 || aber[2] != 1) && colors == 3) {
 #ifdef DCRAW_VERBOSE
