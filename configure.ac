@@ -2,6 +2,7 @@
 AC_INIT([LibRaw], m4_esyscmd([./version.sh]), [info@libraw.org], [], [http://www.libraw.org])
 AM_INIT_AUTOMAKE([foreign no-define])
 #AM_SILENT_RULES([yes])
+AC_CONFIG_MACRO_DIR([m4])
 
 # Tools to use
 AC_PROG_CXX
@@ -11,7 +12,6 @@ AC_ENABLE_SHARED
 AC_ENABLE_STATIC
 AC_LIBTOOL_WIN32_DLL
 AC_LIBTOOL_SETUP
-AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
 # Config files to generate
