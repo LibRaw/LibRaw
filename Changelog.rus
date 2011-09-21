@@ -1,5 +1,8 @@
 ﻿2011-09-21 Alex Tutubalin <lexa@lexa.ru>
         * Косметические изменения для OpenMP-сборки Visual C++
+        * Исправлен расчет мегапикселей изображения в примере 
+          postprocessing_benchmark
+        * Увеличен номер версии разделяемой библиотеки (Unix)
         * LibRaw 0.14.0-Release
 
 2011-09-04 Alex Tutubalin <lexa@lexa.ru>

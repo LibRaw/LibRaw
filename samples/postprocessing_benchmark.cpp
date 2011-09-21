@@ -157,10 +157,9 @@ int main(int argc, char *argv[])
             if(c==rep) // no failure
                 {
                     unsigned int crop[4];
-                    for(int i=0;i<4;i++) crop[i] = (OUT.cropbox[i]+shrink)>>shrink;
+                    for(int i=0;i<4;i++) crop[i] = (OUT.cropbox[i])>>shrink;
                     if(crop[0]+crop[2]>S.iwidth) crop[2] = S.iwidth-crop[0];
                     if(crop[1]+crop[3]>S.iheight) crop[3] = S.iheight-crop[1];
-                    
 
                     mpix = float(crop[2]*crop[3])/1000000.0f;
                     float mpixsec = mpix*1000.0f/msec;

@@ -1,5 +1,7 @@
 2011-09-21 Alex Tutubalin <lexa@lexa.ru>
         * Cosmetic changes to make Visual C++/OpenMP more happy
+        * Fix megapixel calculation for postprocessing_benchmark in half mode
+        * Shlib version number increment
         * LibRaw 0.14.0-Release
 
 2011-09-04 Alex Tutubalin <lexa@lexa.ru>
