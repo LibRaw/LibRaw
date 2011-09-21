@@ -1,4 +1,8 @@
-﻿2011-09-04 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-09-21 Alex Tutubalin <lexa@lexa.ru>
+        * Косметические изменения для OpenMP-сборки Visual C++
+        * LibRaw 0.14.0-Release
+
+2011-09-04 Alex Tutubalin <lexa@lexa.ru>
         * Исправлена ошибка в распаковке thumbnail для камер Kodak
         * Функция raw2image_ex() всегда возвращает значение
         * LibRaw 0.14.0-Beta2

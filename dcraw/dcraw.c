@@ -4114,8 +4114,8 @@ void CLASS green_matching()
 
 void CLASS scale_colors()
 {
-  unsigned bottom, right, size, row, col, ur, uc, i, x, y, c, sum[8];
-  int val, dark, sat;
+  unsigned bottom, right, size, row, col, ur, uc, x, y, c, sum[8];
+  int val, dark, sat,i;
   double dsum[8], dmin, dmax;
   float scale_mul[4], fr, fc;
   ushort *img=0, *pix;
