@@ -1,3 +1,16 @@
+2011-10-11 Alex Tutubalin <lexa@lexa.ru>
+        * Imported dcraw 9.11/1.445:
+          + Support for new cameras added: Fujifilm F600EXR, Nikon P7100,
+            Olympus E-PL3 and E-PM1, Panasonic DMC-FZ150, PhaseOne H25 and P40,
+            Sony NEX-5N, A65 and A77.
+          + Changed color data for: Olympus E-P3, Panasonic G3 and GF3,
+            PhaseOne P65, Sony NEX-C3, NEX-5, NEX-3, A35 and A55.
+          + Support for dark frame extraction on Sony cameras.
+
+        * DCB demosaicing: reserving 6 pixels instead of 3 to suppress 
+          colored image frame.
+        * LibRaw 0.14.1-Release
+
 2011-09-21 Alex Tutubalin <lexa@lexa.ru>
         * Cosmetic changes to make Visual C++/OpenMP more happy
         * Fix megapixel calculation for postprocessing_benchmark in half mode

@@ -1,4 +1,18 @@
-﻿2011-09-21 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-10-11 Alex Tutubalin <lexa@lexa.ru>
+        * Импортирована dcraw 9.11/1.445:
+          + Поддержка новых камер: Fujifilm F600EXR, Nikon P7100,
+            Olympus E-PL3 и E-PM1, Panasonic DMC-FZ150, PhaseOne H25 и P40,
+            Sony NEX-5N, A65 и A77.
+          + Изменены цветовые данные камер: Olympus E-P3, Panasonic G3 и GF3,
+            PhaseOne P65, Sony NEX-C3, NEX-5, NEX-3, A35 и A55.
+          + Извлечение темной рамки на камерах Sony (там где она есть)
+
+        * DCB-интерполяция: размер выходного изображения уменьшен на 3 пикселя,
+          чтобы дать интерполятору больше места (и подавить цветные артефакты)
+
+        * LibRaw 0.14.1-Release
+
+2011-09-21 Alex Tutubalin <lexa@lexa.ru>
         * Косметические изменения для OpenMP-сборки Visual C++
         * Исправлен расчет мегапикселей изображения в примере 
           postprocessing_benchmark
