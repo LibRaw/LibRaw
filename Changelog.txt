@@ -1,3 +1,8 @@
+2011-10-19 Alex Tutubalin <lexa@lexa.ru>
+        * Fixed bug in Canon 1D and 1Ds files decoding.
+        * New decoder information bit DECODER_HASRAWCURVE 
+        * LibRaw 0.14.2-Release
+
 2011-10-11 Alex Tutubalin <lexa@lexa.ru>
         * Imported dcraw 9.11/1.445:
           + Support for new cameras added: Fujifilm F600EXR, Nikon P7100,

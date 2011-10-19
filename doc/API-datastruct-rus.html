@@ -903,6 +903,10 @@ protected:
       <dd>
         Аналогичен LIBRAW_DECODER_4COMPONENT, но черная рамка отсутствует. Размер буфера [width*height].
       </dd>
+      <dt><b>LIBRAW_DECODER_HASCURVE</b></dt>
+      <dd>Флаг выставляется, если в декодере используется тоновая кривая, данные для которой
+        можно изменить до вызова декодера (т.е. кривая не считываются внутри декодера).
+      </dd>
       </dl>
     <a name="progress"></a>    
     <h3>enum LibRaw_progress - текущее состояние объекта LibRaw</h3>
@@ -1145,7 +1149,7 @@ protected:
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:42:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Tue Aug  9 19:03:49 MSD 2011
+Last modified: Wed Oct 19 13:09:51 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

@@ -871,6 +871,10 @@ object will be brought to the state &quot;right after creation.&quot;
         Same as LIBRAW_DECODER_4COMPONENT, but without masked pixels data. Buffer size is [width*height*4] 16-bit
         values.
       </dd>
+      <dt><b>LIBRAW_DECODER_HASCURVE</b></dt>
+      <dd>This flag is set if decoder uses RAW tone curve and curve data may be modified before call
+         to decoder (i.e. curve values are not read or calculated within decoder).
+      </dd>
       </dl>
 
     <a name="progress"></a>    
@@ -1109,7 +1113,7 @@ data source is recorded. The possible values are listed below.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:42:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Tue Aug  9 19:04:00 MSD 2011
+Last modified: Wed Oct 19 13:10:59 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

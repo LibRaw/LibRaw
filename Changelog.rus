@@ -1,4 +1,9 @@
-﻿2011-10-11 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-10-19 Alex Tutubalin <lexa@lexa.ru>
+        * Исправлена ошибка в раскодировании файлов Canon 1D/1Ds
+        * Новый флаг LIBRAW_DECODER_HASRAWCURVE в libraw_decoder_info.flags
+        * LibRaw 0.14.2-Release
+
+2011-10-11 Alex Tutubalin <lexa@lexa.ru>
         * Импортирована dcraw 9.11/1.445:
 
           + Поддержка новых камер: Fujifilm F600EXR, Nikon P7100,

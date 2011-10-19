@@ -51,7 +51,7 @@ it under the terms of the one of three licenses as you choose:
     int         ljpeg_diff (ushort *huff); 
     int         ljpeg_diff_new (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff);
     int         ljpeg_diff_pef (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff);
-//    ushort *    ljpeg_row (int jrow, struct jhead *jh);
+    ushort *    ljpeg_row (int jrow, struct jhead *jh);
     ushort *    ljpeg_row_new (int jrow, struct jhead *jh, LibRaw_bit_buffer& bits,LibRaw_byte_buffer* bytes);
 
     unsigned    ph1_bithuff (int nbits, ushort *huff);

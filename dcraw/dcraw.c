@@ -1033,8 +1033,6 @@ int CLASS ljpeg_diff_pef (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushor
 #endif
 
 
-#ifndef LIBRAW_LIBRARY_BUILD
-
 ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
 {
   int col, c, diff, pred, spred=0;
@@ -1073,7 +1071,6 @@ ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
     }
   return row[2];
 }
-#endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
 ushort * CLASS ljpeg_row_new (int jrow, struct jhead *jh, LibRaw_bit_buffer& bits,LibRaw_byte_buffer* bytes)
@@ -1182,17 +1179,19 @@ void CLASS lossless_jpeg_load_raw()
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
-  if(!data_size)
-      throw LIBRAW_EXCEPTION_IO_BADFILE;
-  LibRaw_byte_buffer *buf = ifp->make_byte_buffer(data_size);
+  LibRaw_byte_buffer *buf=NULL;
+  if(data_size)
+      buf = ifp->make_byte_buffer(data_size);
   LibRaw_bit_buffer bits;
 #endif
   for (jrow=0; jrow < jh.high; jrow++) {
 #ifdef LIBRAW_LIBRARY_BUILD
-      rp = ljpeg_row_new (jrow, &jh,bits,buf);
-#else
-    rp = ljpeg_row (jrow, &jh);
+      if (data_size)
+          rp = ljpeg_row_new (jrow, &jh,bits,buf);
+      else
 #endif
+    rp = ljpeg_row (jrow, &jh);
+
     if (load_flags & 1)
       row = jrow & 1 ? height-1-jrow/2 : jrow/2;
     for (jcol=0; jcol < jwide; jcol++) {
@@ -1200,6 +1199,7 @@ void CLASS lossless_jpeg_load_raw()
       if (jh.bits <= 12)
 	val = curve[val & 0xfff];
 #ifndef LIBRAW_LIBRARY_BUILD
+      // slow dcraw way to calculate row/col
       if (cr2_slice[0]) {
 	jidx = jrow*jwide + jcol;
 	i = jidx / (cr2_slice[1]*jh.high);
@@ -1210,15 +1210,18 @@ void CLASS lossless_jpeg_load_raw()
 	col = jidx % cr2_slice[1+j] + i*cr2_slice[1];
       }
 #else
-      row = pixno/raw_width;
-//      col = pixno-(row*raw_width);
-      col = pixno % raw_width;
-      pixno++;
-      if (0 == --pixelsInSlice)
+      // new fast one, but for data_size defined only (i.e. new CR2 format, not 1D/1Ds)
+      if(data_size) 
           {
-              unsigned o = offset[slice++];
-              pixno = o & 0x0fffffff;
-              pixelsInSlice = slicesW[o>>28];
+              row = pixno/raw_width;
+              col = pixno % raw_width;
+              pixno++;
+              if (0 == --pixelsInSlice)
+                  {
+                      unsigned o = offset[slice++];
+                      pixno = o & 0x0fffffff;
+                      pixelsInSlice = slicesW[o>>28];
+                  }
           }
 #endif
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -1243,7 +1246,7 @@ void CLASS lossless_jpeg_load_raw()
                   RBAYER(row,col) = val;
           }
       else 
-                  RBAYER(row,col) = val;
+          RBAYER(row,col) = val;
 
       if ((unsigned) (row-top_margin) < height) 
           {
@@ -1265,6 +1268,10 @@ void CLASS lossless_jpeg_load_raw()
 #ifndef LIBRAW_LIBRARY_BUILD
       if (++col >= raw_width)
 	col = (row++,0);
+#else
+      if(!data_size) // 1D or 1Ds case
+          if (++col >= raw_width)
+              col = (row++,0);
 #endif
     }
   }
@@ -1273,7 +1280,8 @@ void CLASS lossless_jpeg_load_raw()
   if (!strcasecmp(make,"KODAK"))
     black = min;
 #ifdef LIBRAW_LIBRARY_BUILD
-  delete buf;
+  if(buf)
+      delete buf;
   free(offset);
 #endif
 }
