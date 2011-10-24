@@ -42,6 +42,9 @@ int process_image(char *file)
         // Let us unpack the image
         iProcessor.unpack();
 
+        // Convert from imgdata.rawdata to imgdata.image:
+        iProcessor.raw2image();
+
         // And let us print its dump; the data are accessible through <a href="API-datastruct-eng.html">data fields of the class</a>
         for(i = 0;i lt; iProcessor.imgdata.sizes.iwidth *  iProcessor.imgdata.sizes.iheight; i++)
            printf("i=%d R=%d G=%d B=%d G2=%d\n",
@@ -63,7 +66,7 @@ int process_image(char *file)
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 09:15:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Mon May  4 22:11:54 MSD 2009
+Last modified: Mon Oct 24 13:09:54 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

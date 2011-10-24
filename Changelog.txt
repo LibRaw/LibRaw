@@ -1,3 +1,8 @@
+2011-10-24 Alex Tutubalin <lexa@lexa.ru>
+        * new call get_internal_data_pointer() for developers who
+          need access to libraw_internal_data fields (i.e. Fuji RAW layout)
+        * Fixes for doc/API-overview to reflect 0.14 changes
+
 2011-10-19 Alex Tutubalin <lexa@lexa.ru>
         * Fixed bug in Canon 1D and 1Ds files decoding.
         * New decoder information bit DECODER_HASRAWCURVE 

@@ -41,6 +41,9 @@ int process_image(char *file)
 
         // Распакуем изображение
         iProcessor.unpack();
+        
+        // Преобразуем из iProcessor.rawdata... в iProcessor.image
+        iProcessor.raw2image();
 
         // И напечатаем его дамп, данные доступны в <a href="API-datastruct-rus.html">полях данных класса</a>
         for(i = 0;i lt; iProcessor.imgdata.sizes.iwidth *  iProcessor.imgdata.sizes.iheight; i++)
@@ -63,7 +66,7 @@ int process_image(char *file)
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 09:15:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Mon May  4 22:11:53 MSD 2009
+Last modified: Mon Oct 24 13:10:54 MSD 2011
 <!-- hhmts end -->
   </body>
 </html>

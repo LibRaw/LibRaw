@@ -148,6 +148,7 @@ class DllDef LibRaw
     
     const char *unpack_function_name();
     int get_decoder_info(libraw_decoder_info_t* d_info);
+    libraw_internal_data_t * get_internal_data_pointer(){ return &libraw_internal_data; }
 
   private:
 
