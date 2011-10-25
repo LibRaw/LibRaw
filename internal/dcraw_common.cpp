@@ -1825,9 +1825,9 @@ void CLASS phase_one_load_raw_c()
       {
           read_shorts ((ushort *) t_black[0], raw_height*2);
 #ifdef LIBRAW_LIBRARY_BUILD
-          imgdata.rawdata.ph1_black = (ushort (*)[2])calloc(raw_height*2,sizeof(ushort));
+          imgdata.rawdata.ph1_black = (short (*)[2])calloc(raw_height*2,sizeof(ushort));
           merror (imgdata.rawdata.ph1_black, "phase_one_load_raw_c()");
-          memmove(imgdata.rawdata.ph1_black,(ushort *) t_black[0],raw_height*2*sizeof(ushort));
+          memmove(imgdata.rawdata.ph1_black,(short *) t_black[0],raw_height*2*sizeof(ushort));
 #endif
       }
   for (i=0; i < 256; i++)

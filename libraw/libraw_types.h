@@ -213,7 +213,7 @@ typedef struct
     char        model2[64];
     void        *profile;
     unsigned    profile_length;
-    ushort  (*ph1_black)[2];
+    short  (*ph1_black)[2];
 }libraw_colordata_t;
 
 typedef struct
@@ -316,7 +316,7 @@ typedef struct
     ushort                      (*color_image)[4] ;
     
     /* Phase One black level data; */
-    ushort  (*ph1_black)[2];
+    short  (*ph1_black)[2];
     int         use_ph1_correct;
     /* save color and sizes here, too.... */
     libraw_iparams_t  iparams;
