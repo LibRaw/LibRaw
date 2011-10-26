@@ -1,7 +1,13 @@
-2011-10-24 Alex Tutubalin <lexa@lexa.ru>
-        * new call get_internal_data_pointer() for developers who
-          need access to libraw_internal_data fields (i.e. Fuji RAW layout)
-        * Fixes for doc/API-overview to reflect 0.14 changes
+2011-10-26 Alex Tutubalin <lexa@lexa.ru>
+        * Bug fixes in black level subtraction code for PhaseOne files
+
+        * New API call LibRaw::get_internal_data_pointer() for developers
+           who need access to libraw_internal_data fields (i.e. 
+           Fuji SuperCCD layout).
+
+        *  doc/API-overview fixes to reflect 0.14 changes
+
+        * LibRaw 0.14.3-Release
 
 2011-10-19 Alex Tutubalin <lexa@lexa.ru>
         * Fixed bug in Canon 1D and 1Ds files decoding.

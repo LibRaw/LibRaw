@@ -1,4 +1,16 @@
-﻿2011-10-19 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-10-26 Alex Tutubalin <lexa@lexa.ru>
+        * Исправления в коде вычитания уровня черного в файлах PhaseOne
+
+        * Новый вызов LibRaw::get_internal_data_pointer() для нужд тех
+          разработчиков, кому нужен доступ в самые потроха (например,
+          описание layout для камер Fuji SuperCCD)
+
+        * Исправления в документации (doc/API-overview), отражающие
+          изменения версии 0.14.
+
+        * LibRaw 0.14.3-Release
+
+2011-10-19 Alex Tutubalin <lexa@lexa.ru>
         * Исправлена ошибка в раскодировании файлов Canon 1D/1Ds
         * Новый флаг LIBRAW_DECODER_HASRAWCURVE в libraw_decoder_info.flags
         * LibRaw 0.14.2-Release

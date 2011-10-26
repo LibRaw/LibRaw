@@ -1260,7 +1260,7 @@ int LibRaw::dcraw_document_mode_processing(void)
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
             }
 
-        if(!!IO.fuji_width)
+        if(!IO.fuji_width)
             subtract_black();
         
         O.document_mode = 2;
@@ -2096,7 +2096,7 @@ int LibRaw::dcraw_process(void)
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
             }
 
-        if(!!IO.fuji_width)
+        if(!IO.fuji_width) // PhaseOne only, all other cases handled at raw2image_ex()
             subtract_black();
 
         if(O.half_size) 
