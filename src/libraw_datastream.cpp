@@ -1,6 +1,6 @@
 #define LIBRAW_LIBRARY_BUILD
-#include "libraw/libraw.h"
 #include "internal/defines.h"
+#include "libraw/libraw.h"
 #include "libraw/libraw_datastream.h"
 #include "internal/libraw_bytebuffer.h"
 
