@@ -3823,7 +3823,8 @@ void CLASS pre_interpolate()
     }
   }
   if (filters && colors == 3) {
-    if ((mix_green = four_color_rgb)) colors++;
+    if (four_color_rgb && colors++)
+      mix_green = !half_size;
     else {
       for (row = FC(1,0) >> 1; row < height; row+=2)
 	for (col = FC(row,1) & 1; col < width; col+=2)
@@ -4607,7 +4608,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 5084 "dcraw/dcraw.c"
+#line 5085 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5186,7 +5187,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5667 "dcraw/dcraw.c"
+#line 5668 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -5817,7 +5818,7 @@ void CLASS apply_tiff()
       || (tiff_bps == 8 && !strstr(make,"KODAK") && !strstr(make,"Kodak") &&
 	  !strstr(model2,"DEBUG RAW")))
       is_raw = 0;
-  if(dng_version && max_bps > 166)
+  if(dng_version && max_bps > 16)
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
     if (i != raw && tiff_ifd[i].samples == max_samp &&
@@ -6474,7 +6475,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 6961 "dcraw/dcraw.c"
+#line 6962 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -6595,6 +6596,8 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 12374,-5016,-1049,-1677,9902,2078,-83,852,4683 } },
     { "Canon PowerShot S95", 0, 0,
 	{ 13440,-5896,-1279,-1236,9598,1931,-180,1001,4651 } },
+    { "Canon PowerShot S100", 0, 0,	/* DJC */
+	{ 7941,-2567,-291,-2273,9182,3092,177,485,4022 } },
     { "Canon PowerShot A470", 0, 0,	/* DJC */
 	{ 12513,-4407,-1242,-2680,10276,2405,-878,2215,4734 } },
     { "Canon PowerShot A610", 0, 0,	/* DJC */
@@ -6875,6 +6878,10 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 11432,-3679,-1111,-3169,11239,2202,-791,1380,4455 } },
     { "NIKON COOLPIX P7100", 0, 0,
 	{ 11053,-4269,-1024,-1976,10182,2088,-526,1263,4469 } },
+    { "NIKON 1 J1", 0, 0,		/* DJC */
+	{ 7607,-2818,81,-3147,8939,4209,-307,1563,6426 } },
+    { "NIKON 1 V1", 0, 0,		/* DJC */
+	{ 6948,-2298,150,-3331,9127,4205,-470,1824,6363 } },
     { "OLYMPUS C5050", 0, 0,
 	{ 10508,-3124,-1273,-6079,14294,1901,-1653,2306,6237 } },
     { "OLYMPUS C5060", 0, 0,
@@ -6993,7 +7000,7 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 10976,-4029,-1141,-7918,15491,2600,-1670,2071,8246 } },
     { "Panasonic DMC-FZ3", 143, 0,
 	{ 9938,-2780,-890,-4604,12393,2480,-1117,2304,4620 } },
-    { "Panasonic DMC-FZ40", 143, 0,
+    { "Panasonic DMC-FZ4", 143, 0,
 	{ 13639,-5535,-1371,-1698,9633,2430,316,1152,4108 } },
     { "Panasonic DMC-FZ50", 0, 0,
 	{ 7906,-2709,-594,-6231,13351,3220,-1922,2631,6537 } },
@@ -7051,6 +7058,8 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 6299,-1466,-532,-6535,13852,2969,-2331,3112,5984 } },
     { "Panasonic DMC-GH2", 15, 0xf95,
 	{ 7780,-2410,-806,-3913,11724,2484,-1018,2390,5298 } },
+    { "Panasonic DMC-GX1", 143, 0,	/* DJC */
+	{ 6918,-2820,-318,-2763,8846,3918,-1079,2645,6054 } },
     { "Phase One H 20", 0, 0,		/* DJC */
 	{ 1313,1855,-109,-6715,15908,808,-327,1840,6020 } },
     { "Phase One H 25", 0, 0,
@@ -7071,6 +7080,8 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 8898,-2498,-994,-3144,11328,2066,-760,1381,4576 } },
     { "SAMSUNG NX1", 0, 0,
 	{ 10332,-3234,-1168,-6111,14639,1520,-1352,2647,8331 } },
+    { "SAMSUNG NX200", 0, 0xfff,	/* DJC */
+	{ 6330,-2608,-23,-3808,9860,3949,-661,1712,5843 } },
     { "SAMSUNG WB2000", 0, 0xfff,
 	{ 12093,-3557,-1155,-1000,9534,1733,-22,1787,4576 } },
     { "SAMSUNG GX-1", 0, 0,
@@ -7125,6 +7136,8 @@ void CLASS adobe_coeff (const char *p_make, const char *p_model)
 	{ 6549,-1550,-436,-4880,12435,2753,-854,1868,6976 } },
     { "SONY NEX-5", 128, 0,		/* Adobe */
 	{ 6549,-1550,-436,-4880,12435,2753,-854,1868,6976 } },
+    { "SONY NEX-7", 128, 0,		/* DJC */
+	{ 4388,-1199,177,-3720,9422,4300,-718,1977,7000 } },
     { "SONY SLT-A33", 128, 0,
 	{ 6069,-1221,-366,-5221,12779,2734,-1024,2066,6834 } },
     { "SONY SLT-A35", 128, 0,
@@ -7199,7 +7212,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7689 "dcraw/dcraw.c"
+#line 7702 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -7871,6 +7884,11 @@ canon_a5:
     top_margin  = 12;
     left_margin = 192;
     goto canon_cr2;
+  } else if (is_canon && raw_width == 4160) {
+    height = 3048;
+    width  = 4048;
+    top_margin  = 11;
+    left_margin = 104;
   } else if (is_canon && raw_width == 4312) {
     top_margin  = 18;
     left_margin = 22;
@@ -7985,6 +8003,8 @@ canon_cr2:
     filters = 0x94949494;
     if (model[9] == '7' && iso_speed >= 400)
       black = 255;
+  } else if (!strncmp(model,"1 ",2)) {
+    height -= 2;
   } else if (fsize == 1581060) {
     height = 963;
     width = 1287;
@@ -8103,6 +8123,8 @@ cp_e2500:
       width = 3262;
       left_margin = 34;
     }
+    if (!strcmp(model,"X10"))
+      filters = 0x16161616;
     if (fuji_layout) raw_width *= is_raw;
     if (load_raw == &CLASS fuji_load_raw) {
       fuji_width = width >> !fuji_layout;
@@ -8204,6 +8226,12 @@ konica_400z:
     height -= top_margin = 8;
     width -= 2 * (left_margin = 8);
     load_flags = 32;
+  } else if (!strcmp(model,"NX200")) {
+    order = 0x4949;
+    height = 3662;
+    width  = 5528;
+    top_margin = 2;
+    left_margin = 46;
   } else if (!strcmp(model,"EX1")) {
     order = 0x4949;
     height -= 20;
@@ -8832,7 +8860,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9415 "dcraw/dcraw.c"
+#line 9443 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -9051,7 +9079,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9658 "dcraw/dcraw.c"
+#line 9686 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

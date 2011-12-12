@@ -1,9 +1,18 @@
 2011-12-12 Alex Tutubalin <lexa@lexa.ru>
+
         * Fixes to Panasonic/Leica file parser to prevent crash
           on broken jpegs.
+
         * Fixes to include order in src/libraw_datastream.cpp to
           better compile with KDEWIN
+
         * Floating-point DNGs are rejected.
+
+        * Support for new cameras: Canon S100, Fuji X10, Panasonic GX1, 
+          Samsung NX200, Sony NEX-7.
+
+        * LibRaw 0.14.4-Release
+          
 
 2011-10-26 Alex Tutubalin <lexa@lexa.ru>
         * Bug fixes in black level subtraction code for PhaseOne files

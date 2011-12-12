@@ -1,4 +1,18 @@
-﻿2011-10-26 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-12-12 Alex Tutubalin <lexa@lexa.ru>
+        * Обработчик файлов с камер Panasonic/Leica file больше не падает
+          на поврежденных JPEG-файлах
+
+        * Изменен порядок следования #include в src/libraw_datastream.cpp,
+          что должно облегчить сборку под KDEWIN
+
+        * DNG-файлы в плавучей точке отвергаются на ранних стадиях обработки
+
+        * Поддержка новых камер: Canon S100, Fuji X10, Panasonic GX1, 
+          Samsung NX200, Sony NEX-7.
+
+        * LibRaw 0.14.4-Release
+          
+2011-10-26 Alex Tutubalin <lexa@lexa.ru>
         * Исправления в коде вычитания уровня черного в файлах PhaseOne
 
         * Новый вызов LibRaw::get_internal_data_pointer() для нужд тех
