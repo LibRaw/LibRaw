@@ -6,7 +6,7 @@
         * Fixes to include order in src/libraw_datastream.cpp to
           better compile with KDEWIN
 
-        * Floating-point DNGs are rejected.
+        * Floating-point DNGs are rejected on early processing stage.
 
         * Support for new cameras: Canon S100, Fuji X10, Panasonic GX1, 
           Samsung NX200, Sony NEX-7.
