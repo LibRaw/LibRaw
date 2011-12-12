@@ -1,8 +1,12 @@
 #define LIBRAW_LIBRARY_BUILD
-#include "internal/defines.h"
+#include "libraw/libraw_types.h"
 #include "libraw/libraw.h"
 #include "libraw/libraw_datastream.h"
 #include "internal/libraw_bytebuffer.h"
+#ifndef NO_JASPER
+#include <jasper/jasper.h>	/* Decode RED camera movies */
+#endif
+
 
 LibRaw_byte_buffer::LibRaw_byte_buffer(unsigned sz) 
 { 

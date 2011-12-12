@@ -6202,7 +6202,7 @@ int CLASS parse_tiff (int base)
 
 void CLASS apply_tiff()
 {
-  int max_samp=0, raw=-1, thm=-1, i;
+  int max_samp=0, raw=-1, thm=-1, i,max_bps=0;
   struct jhead jh;
 
   thumb_misc = 16;
@@ -6218,6 +6218,8 @@ void CLASS apply_tiff()
     if (max_samp < tiff_ifd[i].samples)
 	max_samp = tiff_ifd[i].samples;
     if (max_samp > 3) max_samp = 3;
+    if (max_bps < tiff_ifd[i].bps)
+        max_bps = tiff_ifd[i].bps;
     if ((tiff_ifd[i].comp != 6 || tiff_ifd[i].samples != 3) &&
 	(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
 	tiff_ifd[i].t_width*tiff_ifd[i].t_height > raw_width*raw_height) {
@@ -6291,6 +6293,8 @@ void CLASS apply_tiff()
 	  tiff_bps != 14 && tiff_bps != 2048)
       || (tiff_bps == 8 && !strstr(make,"KODAK") && !strstr(make,"Kodak") &&
 	  !strstr(model2,"DEBUG RAW")))
+      is_raw = 0;
+  if(dng_version && max_bps > 16)
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
     if (i != raw && tiff_ifd[i].samples == max_samp &&
@@ -8873,6 +8877,7 @@ wb550:
       filters = 0x16161616;
     }
   } else if (!strcmp(make,"LEICA") || !strcmp(make,"Panasonic")) {
+     if(raw_width < 1) { is_raw = 0; goto notraw; }
     if ((flen - data_offset) / (raw_width*8/7) == raw_height)
       load_raw = &CLASS panasonic_load_raw;
     if (!load_raw) {
