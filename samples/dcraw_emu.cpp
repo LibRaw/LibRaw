@@ -113,6 +113,8 @@ void usage(const char *prog)
 "-agreen <g> equilibrate green\n"
 #endif
 "-aexpo <e p> exposure correction\n"
+// WF
+"-dbnd <r g b g> debanding\n"
 #ifndef WIN32
 "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
 #endif
@@ -334,6 +336,12 @@ int main(int argc, char *argv[])
                       OUT.dcb_iterations = atoi(argv[arg++]);
                   else if(!strcmp(optstr,"-dcbe"))
                       OUT.dcb_enhance_fl = 1;
+                  else if(!strcmp(optstr,"-dbnd"))
+                  {
+                  	for(c=0; c<4; c++)
+                            OUT.wf_deband_treshold[c] = (float)atof(argv[arg++]);
+			OUT.wf_debanding = 1;
+                  }
                   else
                       fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
                   break;

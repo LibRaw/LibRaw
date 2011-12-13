@@ -150,6 +150,10 @@ class DllDef LibRaw
     int get_decoder_info(libraw_decoder_info_t* d_info);
     libraw_internal_data_t * get_internal_data_pointer(){ return &libraw_internal_data; }
 
+    /* Debanding filter */
+    int                         wf_remove_banding();
+
+
   private:
 
     int FCF(int row,int col) { 

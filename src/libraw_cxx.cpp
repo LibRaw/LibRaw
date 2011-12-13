@@ -2121,6 +2121,10 @@ int LibRaw::dcraw_process(void)
                 SET_PROC_FLAG(LIBRAW_PROGRESS_DARK_FRAME);
             }
 
+	if (O.wf_debanding)
+	{
+		wf_remove_banding();
+	}
 
         quality = 2 + !IO.fuji_width;
 
