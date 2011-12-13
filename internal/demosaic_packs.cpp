@@ -34,6 +34,10 @@ it under the terms of the one of three licenses as you choose:
 #define SRC_USES_BLACK
 #define SRC_USES_CURVE
 
+/* WF filtering is allowed to triple libraw license */
+#include "./wf_filtering.cpp"
+
+
 #include "internal/var_defines.h"
 
 
@@ -65,6 +69,7 @@ void CLASS refinement() {}
 
 /* DCB is BSD licensed, so include it */
 #include "./dcb_demosaicing.c"
+
 
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL3
 /*AMaZE*/
