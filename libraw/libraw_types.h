@@ -304,6 +304,9 @@ typedef struct
     int exp_correc;
     float exp_shift;
     float exp_preser;
+   /* WF debanding */
+    int   wf_debanding;
+    float wf_deband_treshold[4];
 }libraw_output_params_t;
 
 typedef struct
