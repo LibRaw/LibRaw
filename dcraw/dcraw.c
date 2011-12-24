@@ -3401,6 +3401,7 @@ void CLASS smal_decode_segment (unsigned seg[2][2], int holes)
     if (row < height && col < width)
             BAYER(row,col) = pred[pix & 1];
 #else
+    row = pix / raw_width - top_margin;
     RBAYER(pix / raw_width, pix % raw_width) = pred[pix & 1];
 #endif
     if (!(pix & 1) && HOLE(row)) pix += 2;
