@@ -1,4 +1,14 @@
-﻿2011-12-12 Alex Tutubalin <lexa@lexa.ru>
+﻿2011-12-24 Alex Tutubalin <lexa@lexa.ru>
+        * Исправлена ошибка (неинициализированная переменная) в 
+          декодере формата SMAL.
+
+        * Импортирована новая версия dcraw (9.12/1.446): поддержка для 
+           Leica V-LUX 3, обновлены цветовые данные для камер Canon S100, 
+           Fujifilm X10, Nikon 1 J1/V1, Panasonic GX1, Samsung NX200, 
+           Sony NEX-7
+
+        * LibRaw 0.14.5-Release
+2011-12-12 Alex Tutubalin <lexa@lexa.ru>
         * Обработчик файлов с камер Panasonic/Leica file больше не падает
           на поврежденных JPEG-файлах
 

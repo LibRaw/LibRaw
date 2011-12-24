@@ -2540,6 +2540,8 @@ static const char  *static_camera_list[] =
 "Nikon D5000",
 "Nikon D5100",
 "Nikon D7000",
+"Nikon 1 J1",
+"Nikon 1 V1",
 "Nikon E700 (\"DIAG RAW\" hack)",
 "Nikon E800 (\"DIAG RAW\" hack)",
 "Nikon E880 (\"DIAG RAW\" hack)",
