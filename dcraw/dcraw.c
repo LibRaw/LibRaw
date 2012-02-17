@@ -3323,16 +3323,29 @@ void CLASS sony_arw2_load_raw()
 	  if (pix[i] > 0x7ff) pix[i] = 0x7ff;
 	  bit += 7;
 	}
-      for (i=0; i < 16; i++, col+=2)
 #ifdef LIBRAW_LIBRARY_BUILD
-	RBAYER(row,col) = curve[pix[i] << 1] >> 2;
+      if(imgdata.params.sony_arw2_hack)
+          {
+              for (i=0; i < 16; i++, col+=2)
+                  RBAYER(row,col) = curve[pix[i] << 1];
+          }
+      else
+          {
+              for (i=0; i < 16; i++, col+=2)
+                  RBAYER(row,col) = curve[pix[i] << 1] >> 2;
+          }
 #else
+      for (i=0; i < 16; i++, col+=2)
 	if (col < width) BAYER(row,col) = curve[pix[i] << 1] >> 2;
 #endif
       col -= col & 1 ? 1:31;
     }
   }
   free (data);
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(imgdata.params.sony_arw2_hack)
+      black << 2;
+#endif
 }
  
 #define HOLE(row) ((holes >> (((row) - raw_height) & 7)) & 1)
