@@ -10,6 +10,12 @@
           Leaf Aptus II
         * LibRaw 0.14.6-Release
 
+﻿2011-03-09 Alex Tutubalin <lexa@lexa.ru>
+        * WIN32: Поддержан вызов LibRaw::open_file(wchar_t* filename)
+        * импортирована обработка исключений из ветки 0.14
+        * imgdata.params.user_cblack[4] позволяет задать поканальный
+          уровень черного
+
 2011-12-24 Alex Tutubalin <lexa@lexa.ru>
         * Исправлена ошибка (неинициализированная переменная) в 
           декодере формата SMAL.

@@ -267,8 +267,8 @@ typedef struct
     int         user_flip;      /* -t */
     int         user_qual;      /* -q */
     int         user_black;     /* -k */
-    int			user_cblack[4];
-    int			sony_hack;
+    int		user_cblack[4];
+    int		sony_arw2_hack;
     int         user_sat;       /* -S */
 
     int         med_passes;     /* -m */
