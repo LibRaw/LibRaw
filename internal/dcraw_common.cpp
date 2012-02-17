@@ -5921,7 +5921,7 @@ void CLASS parse_external_jpeg()
 	  }
 	  else
 		  imgdata.process_warnings |= LIBRAW_WARN_NO_METADATA ;
-	  return;
+	 return;
   }
 #endif
   if(!ifp->fname())
@@ -6499,7 +6499,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 6969 "dcraw/dcraw.c"
+#line 6980 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -7238,7 +7238,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7711 "dcraw/dcraw.c"
+#line 7722 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -8892,7 +8892,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9458 "dcraw/dcraw.c"
+#line 9463 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -9111,7 +9111,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9701 "dcraw/dcraw.c"
+#line 9706 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
