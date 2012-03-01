@@ -943,6 +943,9 @@ void LibRaw::raw2image_start()
 
         if (O.user_black >= 0) 
             C.black = O.user_black;
+		for(int i=0; i<4; i++)
+			if(O.user_cblack[i])
+				C.cblack[i] = O.user_cblack[i];
 }
 
 // Same as raw2image, but
