@@ -100,6 +100,9 @@ class DllDef LibRaw
     
     libraw_output_params_t*     output_params_ptr() { return &imgdata.params;}
     int                         open_file(const char *fname, INT64 max_buffered_sz=LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE);
+#ifdef WIN32
+	int                         open_file(const wchar_t *fname, INT64 max_buffered_sz=LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE);
+#endif
     int                         open_buffer(void *buffer, size_t size);
     int                         open_datastream(LibRaw_abstract_datastream *);
     int                         unpack(void);
