@@ -5,6 +5,7 @@ HEADERS=../libraw/libraw.h \
 	 ../libraw/libraw_alloc.h \
 	../libraw/libraw_const.h \
 	../libraw/libraw_datastream.h \
+	../libraw/libraw_types.h \
 	../libraw/libraw_internal.h \
 	../libraw/libraw_version.h \
 	../internal/defines.h \
