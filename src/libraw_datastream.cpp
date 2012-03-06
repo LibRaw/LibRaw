@@ -70,6 +70,20 @@ LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
         }
     }
 }
+#ifdef WIN32
+LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname) : filename(NULL)
+{
+	if (fname) {
+		std::auto_ptr<std::filebuf> buf(new std::filebuf());
+		buf->open(fname, std::ios_base::in | std::ios_base::binary);
+		if (buf->is_open()) {
+			f = buf;
+		}
+	}
+
+}
+#endif
+
  int LibRaw_file_datastream::valid()
 { 
     return f.get() ? 1 : 0; 
@@ -360,6 +374,24 @@ LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname)
         {filename=0;f=0;}
     sav=0;
 }
+
+#ifdef WIN32
+LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const wchar_t *fname) : filename(NULL)
+{ 
+	if(fname)
+	{
+#ifndef WIN32SECURECALLS
+		f = wfopen(fname,"rb");
+#else
+		if(_wfopen_s(&f,fname,L"rb"))
+			f = 0;
+#endif
+	}
+	else 
+	{filename=0;f=0;}
+	sav=0;
+}
+#endif
 
 LibRaw_bigfile_datastream::~LibRaw_bigfile_datastream() {if(f)fclose(f); if(sav)fclose(sav);}
 int         LibRaw_bigfile_datastream::valid() { return f?1:0;}
