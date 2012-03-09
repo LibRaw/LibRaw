@@ -3348,7 +3348,10 @@ void CLASS sony_arw2_load_raw()
   free (data);
 #ifdef LIBRAW_LIBRARY_BUILD
   if(imgdata.params.sony_arw2_hack)
-      black <<= 2;
+  {
+	black <<= 2;
+	maximum <<=2;
+  }
 #endif
 }
  
