@@ -71,6 +71,10 @@ class DllDef LibRaw_abstract_datastream
 
     /* subfile parsing not implemented in base class */
     virtual const char* fname(){ return NULL;};
+#ifdef WIN32
+	virtual const wchar_t* wfname(){ return NULL;};
+	virtual int         subfile_open(const wchar_t*) { return -1;}
+#endif
     virtual int         subfile_open(const char*) { return -1;}
     virtual void        subfile_close() { }
 
@@ -92,9 +96,12 @@ class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
     std::auto_ptr<std::streambuf> f; /* will close() automatically through dtor */
     std::auto_ptr<std::streambuf> saved_f; /* when *f is a subfile, *saved_f is the master file */
     const char *filename;
-
+#ifdef WIN32
+	const wchar_t *wfilename;
+	FILE *jas_file;
+#endif
   public:
-    virtual             ~LibRaw_file_datastream(){}
+    virtual             ~LibRaw_file_datastream();
                         LibRaw_file_datastream(const char *fname);
 #ifdef WIN32
 						LibRaw_file_datastream(const wchar_t *fname);
@@ -113,6 +120,10 @@ class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
     virtual char*       gets(char *str, int sz); 
     virtual int         scanf_one(const char *fmt, void*val); 
     virtual const char* fname();
+#ifdef WIN32
+	virtual const wchar_t* wfname() { return wfilename;}
+	virtual int         subfile_open(const wchar_t *fn);
+#endif
     virtual int         subfile_open(const char *fn);
     virtual void        subfile_close();
 };
@@ -163,6 +174,10 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
     virtual char*       gets(char *str, int sz);
     virtual int         scanf_one(const char *fmt, void*val);
     virtual const char *fname();
+#ifdef WIN32
+	virtual const wchar_t* wfname() { return wfilename;}
+	virtual int         subfile_open(const wchar_t *fn);
+#endif
     virtual int         subfile_open(const char *fn);
     virtual void        subfile_close();
     virtual int         get_char()
@@ -177,6 +192,9 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
   private:
     FILE *f,*sav;
     const char *filename;
+#ifdef WIN32
+	const wchar_t *wfilename;
+#endif
 };
 
 #ifdef WIN32
