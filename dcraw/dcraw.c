@@ -6382,6 +6382,23 @@ void CLASS parse_external_jpeg()
 #ifndef LIBRAW_LIBRARY_BUILD
   FILE *save=ifp;
 #else
+#ifdef WIN32
+  if(ifp->wfname())
+  {
+	  std::wstring rawfile(ifp->wfname());
+	  rawfile.replace(rawfile.length()-3,3,L"JPG");
+	  if(!ifp->subfile_open(rawfile.c_str()))
+	  {
+		  parse_tiff (12);
+		  thumb_offset = 0;
+		  is_raw = 1;
+		  ifp->subfile_close();
+	  }
+	  else
+		  imgdata.process_warnings |= LIBRAW_WARN_NO_METADATA ;
+	 return;
+  }
+#endif
   if(!ifp->fname())
       {
           imgdata.process_warnings |= LIBRAW_WARN_NO_METADATA ;
