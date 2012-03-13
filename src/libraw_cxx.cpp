@@ -214,11 +214,15 @@ LibRaw:: LibRaw(unsigned int flags)
 void* LibRaw:: malloc(size_t t)
 {
     void *p = memmgr.malloc(t);
+	if(!p)
+		throw LIBRAW_EXCEPTION_ALLOC;
     return p;
 }
 void* LibRaw:: realloc(void *q,size_t t)
 {
     void *p = memmgr.realloc(q,t);
+	if(!p)
+		throw LIBRAW_EXCEPTION_ALLOC;
     return p;
 }
 
@@ -226,6 +230,8 @@ void* LibRaw:: realloc(void *q,size_t t)
 void* LibRaw::       calloc(size_t n,size_t t)
 {
     void *p = memmgr.calloc(n,t);
+	if(!p)
+		throw LIBRAW_EXCEPTION_ALLOC;
     return p;
 }
 void  LibRaw::      free(void *p)
