@@ -19,8 +19,8 @@
    *If you have not modified dcraw.c in any way, a link to my
    homepage qualifies as "full source code".
 
-   $Revision: 1.446 $
-   $Date: 2011/12/21 01:21:23 $
+   $Revision: 1.447 $
+   $Date: 2011/12/26 17:31:23 $
  */
 
 #define DCRAW_VERSION "9.12"
@@ -6999,6 +6999,7 @@ void CLASS identify()
     {  2937856, "CASIO",    "EX-S20"          ,1 },
     {  4948608, "CASIO",    "EX-S100"         ,1 },
     {  7542528, "CASIO",    "EX-Z50"          ,1 },
+    {  7562048, "CASIO",    "EX-Z500"         ,1 },
     {  7753344, "CASIO",    "EX-Z55"          ,1 },
     {  7816704, "CASIO",    "EX-Z60"          ,1 },
     { 10843712, "CASIO",    "EX-Z75"          ,1 },
@@ -8339,6 +8340,11 @@ c603:
     height = 1931;
     width  = 2570;
     raw_width = 3904;
+  } else if (!strcmp(model,"EX-Z500")) {
+    height = 1937;
+    width  = 2577;
+    raw_width = 3904;
+    filters = 0x16161616;
   } else if (!strcmp(model,"EX-Z55")) {
     height = 1960;
     width  = 2570;
