@@ -12,9 +12,9 @@ CFLAGS= -O4 -g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -Wno-o
 #CFLAGS=-g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
 
 # GCC 4.6 section
-CC=gcc46
-CXX=g++46
-CFLAGS= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse4.2 -mfpmath=sse  -fopenmp 
+#CC=gcc46
+#CXX=g++46
+#CFLAGS= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse4.2 -mfpmath=sse  -fopenmp 
 #CFLAGS= -O -I. -pedantic  -Wno-long-long -Wno-overflow -g
 
 
@@ -24,16 +24,16 @@ CFLAGS= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-ov
 #LDADD+=-L/usr/local/lib -llcms
 
 # Jasper support for RedCine
-CFLAGS+=-DUSE_JASPER -I/usr/local/include
-LDADD+=-L/usr/local/lib -ljasper
+#CFLAGS+=-DUSE_JASPER -I/usr/local/include
+#LDADD+=-L/usr/local/lib -ljasper
 
 # Demosaic Pack GPL2:
-DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
-CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
+#DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
+#CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
 
 # Demosaic Pack GPL3:
-DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL3
-CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
+#DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL3
+#CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
 
 
 DCRAW_GEN= internal/dcraw_common.cpp internal/dcraw_fileio.cpp
