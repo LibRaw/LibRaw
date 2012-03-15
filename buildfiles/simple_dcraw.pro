@@ -13,3 +13,7 @@ CONFIG-=qt
 win32:CONFIG+=console
 SOURCES=../samples/simple_dcraw.cpp
 CONFIG+=warn_off
+win32-g++:
+{
+    LIBS += -lws2_32
+}

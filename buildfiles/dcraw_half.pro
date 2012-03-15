@@ -11,3 +11,7 @@ CONFIG-=qt
 win32:CONFIG+=console
 SOURCES=../samples/dcraw_half.c
 CONFIG+=warn_off
+win32-g++:
+{
+    LIBS += -lws2_32
+}

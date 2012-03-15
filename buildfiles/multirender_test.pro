@@ -11,3 +11,7 @@ CONFIG-=qt
 win32:CONFIG+=console
 SOURCES=../samples/multirender_test.cpp
 CONFIG+=warn_off
+win32-g++:
+{
+    LIBS += -lws2_32
+}

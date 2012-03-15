@@ -15,3 +15,7 @@ win32 {
 	SOURCES=../samples/half_mt.c
 }
 CONFIG+=warn_off
+win32-g++:
+{
+    LIBS += -lws2_32
+}

@@ -1,3 +1,10 @@
+#ifdef WIN32
+#ifdef __MINGW32__
+    #define _WIN32_WINNT 0x0500
+    #include <stdexcept>
+#endif
+#endif
+
 #define LIBRAW_LIBRARY_BUILD
 #include "libraw/libraw_types.h"
 #include "libraw/libraw.h"
