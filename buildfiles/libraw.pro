@@ -14,7 +14,7 @@ HEADERS=../libraw/libraw.h \
 
 CONFIG-=qt
 CONFIG+=warn_off
-macx: CONFIG+= static
+macx: CONFIG+= static x86 x86_x64
 macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.5
 DEFINES+=LIBRAW_BUILDLIB
 
