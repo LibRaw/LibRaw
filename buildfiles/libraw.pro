@@ -24,3 +24,24 @@ SOURCES=../internal/dcraw_common.cpp \
 	../src/libraw_cxx.cpp \
 	../src/libraw_datastream.cpp \
 	../src/libraw_c_api.cpp
+
+win32:CONFIG(debug,debug|release) {
+	win32:contains(QMAKE_HOST.arch, x86_64):{
+		OBJECTS_DIR = debug-x64/
+		MOC_DIR = debug-x64/
+		RCC_DIR = debug-x64/
+		UI_DIR = debug-x64/
+		DESTDIR = debug-x64/
+        }
+}
+
+win32:CONFIG(release,debug|release) {
+	LIBS+=-L../LibRaw/buildfiles/release/
+	win32:contains(QMAKE_HOST.arch, x86_64):{
+		OBJECTS_DIR = release-x64/
+		MOC_DIR = release-x64/
+		RCC_DIR = release-x64/
+		UI_DIR = release-x64/
+		DESTDIR = release-x64/
+        }
+}
