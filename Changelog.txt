@@ -1,3 +1,6 @@
+2012-04-11 Alex Tutubalin <lexa@lexa.ru>
+        * Fixed thumbnail processing (esp. for Adobe Lightroom DNGs)
+
 2012-04-05 Alex Tutubalin <lexa@lexa.ru>
         * Casio EX-Z500 support
         * (possible) I/O exceptions on file open catched in open_datastream

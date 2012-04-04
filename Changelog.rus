@@ -1,3 +1,7 @@
+﻿2012-04-11 Alex Tutubalin <lexa@lexa.ru>
+        * Улучшено извлечение thumbnails из файлов (стало работать
+          извлечение из DNG произведенных Adobe Lightroom 4)
+
 ﻿2012-04-04 Alex Tutubalin <lexa@lexa.ru>
         * Поддержка камеры Casio EX-Z500   
         * Обработка исключений ввода-вывода при открытии файла
