@@ -1,3 +1,12 @@
+2012-04-05 Alex Tutubalin <lexa@lexa.ru>
+        * Casio EX-Z500 support
+        * (possible) I/O exceptions on file open catched in open_datastream
+        * Fixed possible read-after-buffer in Sony ARW2 decoder
+        * Fixed mingw32 errors when compiling LibRaw_windows_datastream
+        * Makefile.msvc: support of OpenMP and LCMS (uncomment to use)
+        * Fixed decoding of some Leaf Aptus II files
+        * LibRaw 0.14.6-Release
+
 2011-12-24 Alex Tutubalin <lexa@lexa.ru>
         * Fixed bug (uninitialized variable) in SMAL format decoding.
 

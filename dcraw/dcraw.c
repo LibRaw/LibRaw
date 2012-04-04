@@ -1136,8 +1136,11 @@ void CLASS lossless_jpeg_load_raw()
   if (cr2_slice[0]>15)
       throw LIBRAW_EXCEPTION_IO_EOF; // change many slices
 #else
-  fprintf(stderr,"Too many CR2 slices: %d\n",cr2_slice[0]+1);
-  return;
+  if (cr2_slice[0]>15)
+  {
+      fprintf(stderr,"Too many CR2 slices: %d\n",cr2_slice[0]+1);
+      return;
+  }
 #endif
 
 
@@ -1159,11 +1162,11 @@ void CLASS lossless_jpeg_load_raw()
        
   slices = slicesWcnt * jh.high;
   offset = (unsigned*)calloc(slices+1,sizeof(offset[0]));
-  
+
   for(slice=0;slice<slices;slice++)
       {
           offset[slice] = (t_x + t_y * raw_width)| (t_s<<28);
-          if(offset[slice] & 0x0fffffff >= raw_width * raw_height)
+          if((offset[slice] & 0x0fffffff) >= raw_width * raw_height)
               throw LIBRAW_EXCEPTION_IO_BADFILE; 
           t_y++;
           if(t_y == jh.high)
@@ -1174,7 +1177,7 @@ void CLASS lossless_jpeg_load_raw()
       }
   offset[slices] = offset[slices-1];
   slice = 1; // next slice
-  pixno = offset[0];
+  pixno = offset[0]; 
   pixelsInSlice = slicesW[0];
 #endif
 
@@ -1186,7 +1189,7 @@ void CLASS lossless_jpeg_load_raw()
 #endif
   for (jrow=0; jrow < jh.high; jrow++) {
 #ifdef LIBRAW_LIBRARY_BUILD
-      if (data_size)
+      if (buf)
           rp = ljpeg_row_new (jrow, &jh,bits,buf);
       else
 #endif
@@ -1211,9 +1214,10 @@ void CLASS lossless_jpeg_load_raw()
       }
 #else
       // new fast one, but for data_size defined only (i.e. new CR2 format, not 1D/1Ds)
-      if(data_size) 
+      if(buf) 
           {
-              row = pixno/raw_width;
+              if(!(load_flags & 1))
+                  row = pixno/raw_width;
               col = pixno % raw_width;
               pixno++;
               if (0 == --pixelsInSlice)
@@ -1269,9 +1273,9 @@ void CLASS lossless_jpeg_load_raw()
       if (++col >= raw_width)
 	col = (row++,0);
 #else
-      if(!data_size) // 1D or 1Ds case
-          if (++col >= raw_width)
-              col = (row++,0);
+      if(!buf) // 1D or 1Ds case
+         if (++col >= raw_width)
+            col = (row++,0);
 #endif
     }
   }

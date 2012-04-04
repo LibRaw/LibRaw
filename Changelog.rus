@@ -1,4 +1,16 @@
-﻿2011-12-24 Alex Tutubalin <lexa@lexa.ru>
+﻿2012-04-04 Alex Tutubalin <lexa@lexa.ru>
+        * Поддержка камеры Casio EX-Z500   
+        * Обработка исключений ввода-вывода при открытии файла
+        * Исправлен (несуществующий) buffer overrun (readonly) в
+          раскодировании формата ARW2, на который ругался valgrind
+        * Исправления для компиляции LibRaw_windows_datastream mingw32
+        * Дополнительные (закомментированные) ключи компиляции в 
+          Makefile.msvc для сборки с LCMS и OpenMP
+        * Исправлена ошибка распаковки для некоторых файлов с
+          Leaf Aptus II
+        * LibRaw 0.14.6-Release
+
+2011-12-24 Alex Tutubalin <lexa@lexa.ru>
         * Исправлена ошибка (неинициализированная переменная) в 
           декодере формата SMAL.
 
