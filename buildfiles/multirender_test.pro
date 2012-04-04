@@ -1,17 +1,4 @@
-
-win32:CONFIG(debug,debug|release) {
-	LIBS+=-Ldebug
-} else {
-	LIBS+=-Lrelease
-}
-unix:LIBS+=-lraw
+include (libraw-common.pro)
 win32:LIBS+=libraw.lib
-INCLUDEPATH=../
-CONFIG-=qt
-win32:CONFIG+=console
+unix:LIBS+=-lraw
 SOURCES=../samples/multirender_test.cpp
-CONFIG+=warn_off
-win32-g++:
-{
-    LIBS += -lws2_32
-}

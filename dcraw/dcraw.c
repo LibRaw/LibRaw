@@ -4245,9 +4245,9 @@ skip_block: ;
 #endif
 
   size = iheight*iwidth;
-#if defined(LIBRAW_USE_OPENMP)
-#pragma omp parallel for private(val) default(shared)
-#endif
+#ifdef LIBRAW_LIBRARY_BUILD
+  scale_colors_loop(scale_mul);
+#else
   for (i=0; i < size*4; i++) {
     val = image[0][i];
     if (!val) continue;
@@ -4255,6 +4255,7 @@ skip_block: ;
     val *= scale_mul[i & 3];
     image[0][i] = CLIP(val);
   }
+#endif
   if ((aber[0] != 1 || aber[2] != 1) && colors == 3) {
 #ifdef DCRAW_VERBOSE
     if (verbose)
@@ -9578,10 +9579,9 @@ void CLASS convert_to_rgb()
 
 #endif
 #ifdef LIBRAW_LIBRARY_BUILD
-  memset(histogram,0,sizeof(int)*LIBRAW_HISTOGRAM_SIZE*4);
+  convert_to_rgb_loop(out_cam);
 #else
   memset (histogram, 0, sizeof histogram);
-#endif
   for (img=image[0], row=0; row < height; row++)
     for (col=0; col < width; col++, img+=4) {
       if (!raw_color) {
@@ -9597,6 +9597,7 @@ void CLASS convert_to_rgb()
 	img[0] = img[FC(row,col)];
       FORCC histogram[c][img[c] >> 3]++;
     }
+#endif
   if (colors == 4 && output_color) colors = 3;
   if (document_mode && filters) colors = 1;
 #ifdef LIBRAW_LIBRARY_BUILD
