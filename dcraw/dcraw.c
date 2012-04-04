@@ -6303,7 +6303,7 @@ void CLASS apply_tiff()
   if(dng_version && max_bps > 16)
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
-    if (i != raw && tiff_ifd[i].samples == max_samp &&
+    if (i != raw && tiff_ifd[i].samples == max_samp && tiff_ifd[i].offset && tiff_ifd[i].bytes &&
 	tiff_ifd[i].t_width * tiff_ifd[i].t_height / SQR(tiff_ifd[i].bps+1) >
 	      thumb_width *       thumb_height / SQR(thumb_misc+1)) {
       thumb_width  = tiff_ifd[i].t_width;
