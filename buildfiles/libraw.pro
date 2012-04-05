@@ -25,16 +25,4 @@ SOURCES=../internal/dcraw_common.cpp \
 	../src/libraw_datastream.cpp \
 	../src/libraw_c_api.cpp
 
-win32:CONFIG(debug,debug|release) {
-	OUTD=debug-$$QMAKE_TARGET.arch
-} else {
-	OUTD=release-$$QMAKE_TARGET.arch
-}
-
-win32: {
-	OBJECTS_DIR = $$OUTD/
-	MOC_DIR = $$OUTD/
-	RCC_DIR = $$OUTD/
-	UI_DIR = $$OUTD/
-	DESTDIR = $$OUTD/
-}
+include (libraw-common.pro)
