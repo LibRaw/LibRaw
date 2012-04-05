@@ -10,3 +10,7 @@ CONFIG-=qt
 win32:CONFIG+=console
 SOURCES=../samples/dcraw_emu.cpp
 CONFIG+=warn_off
+win32-g++:
+{
+    LIBS += -lws2_32
+}
