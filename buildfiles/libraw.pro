@@ -25,4 +25,4 @@ SOURCES=../internal/dcraw_common.cpp \
 	../src/libraw_datastream.cpp \
 	../src/libraw_c_api.cpp
 
-include (libraw-common.pro)
+include (libraw-common-lib.pro)
