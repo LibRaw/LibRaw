@@ -132,8 +132,8 @@ class DllDef LibRaw
     int                         dcraw_thumb_writer(const char *fname);
     int                         dcraw_process(void);
     /* memory writers */
-    libraw_processed_image_t*   dcraw_make_mem_image(int *errcode=NULL);  
-    libraw_processed_image_t*   dcraw_make_mem_thumb(int *errcode=NULL);
+    virtual libraw_processed_image_t*   dcraw_make_mem_image(int *errcode=NULL);  
+    virtual libraw_processed_image_t*   dcraw_make_mem_thumb(int *errcode=NULL);
     static void                 dcraw_clear_mem(libraw_processed_image_t*);
     
     /* Additional calls for make_mem_image */
@@ -157,7 +157,7 @@ class DllDef LibRaw
     int                         wf_remove_banding();
 
 
-  private:
+protected:
 
     int FCF(int row,int col) { 
         int rr,cc;
@@ -200,6 +200,7 @@ class DllDef LibRaw
     void        identify2(unsigned, unsigned, char*);
     void        write_ppm_tiff ();
     void        convert_to_rgb();
+	virtual		void convert_to_rgb_loop(float out_cam[3][4]);
     void        remove_zeroes();
 #ifndef NO_LCMS
     void	apply_profile(const char*,const char*);
@@ -233,6 +234,7 @@ class DllDef LibRaw
     void        hat_transform (float *temp, float *base, int st, int size, int sc);
     void        wavelet_denoise();
     void        scale_colors();
+	virtual void scale_colors_loop(float scale_mul[4]);
     void        median_filter ();
     void        blend_highlights();
     void        recover_highlights();
