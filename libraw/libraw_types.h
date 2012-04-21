@@ -195,6 +195,11 @@ typedef struct
 
 typedef struct
 {
+	ushort      curve[0x10000]; 
+	unsigned    cblack[8];
+	unsigned    black;
+	unsigned    maximum;
+	unsigned    channel_maximum[4];
     color_data_state_t   color_flags;
     ushort      white[8][8];  
     float       cam_mul[4]; 
@@ -202,11 +207,6 @@ typedef struct
     float       cmatrix[3][4]; 
     float       rgb_cam[3][4]; 
     float       cam_xyz[4][3]; 
-    ushort      curve[0x10000]; 
-    unsigned    black;
-    unsigned    cblack[8];
-    unsigned    maximum;
-    unsigned    channel_maximum[4];
     struct ph1_t       phase_one_data;
     float       flash_used; 
     float       canon_ev; 
@@ -333,16 +333,16 @@ typedef struct
 
 typedef struct
 {
+	ushort                      (*image)[4] ;
+	libraw_image_sizes_t        sizes;
+	libraw_iparams_t            idata;
+	libraw_output_params_t		params;
     unsigned int                progress_flags;
     unsigned int                process_warnings;
-    libraw_iparams_t            idata;
-    libraw_image_sizes_t        sizes;
     libraw_colordata_t          color;
     libraw_imgother_t           other;
     libraw_thumbnail_t          thumbnail;
     libraw_rawdata_t            rawdata;
-    ushort                      (*image)[4] ;
-    libraw_output_params_t     params;
     void                *parent_class;      
 } libraw_data_t;
 

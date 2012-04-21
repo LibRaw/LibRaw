@@ -61,13 +61,12 @@ public:
     {
          unsigned pad[128], p;
     }sony_decrypt;
-    uchar jpeg_buffer[4096];
     struct
     {
         uchar buf[0x4000];
         int vbits, padding;
     }pana_bits;
-
+	uchar jpeg_buffer[4096];
     void init() 
         { 
             getbits.bitbuf = 0; getbits.vbits = getbits.reset = 0;
