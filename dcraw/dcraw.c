@@ -19,8 +19,8 @@
    *If you have not modified dcraw.c in any way, a link to my
    homepage qualifies as "full source code".
 
-   $Revision: 1.448 $
-   $Date: 2012/06/18 19:44:18 $
+   $Revision: 1.449 $
+   $Date: 2012/06/26 02:43:41 $
  */
 
 #define DCRAW_VERSION "9.15"
@@ -4625,10 +4625,11 @@ nf: order = 0x4949;
       cam_mul[2] = getreal(type);
     }
     if (tag == 0xd && type == 7 && get2() == 0xaaaa) {
-      fread (buf97, 1, sizeof buf97, ifp);
-      i = (uchar *) memmem (buf97, sizeof buf97,"\xbb\xbb",2) - buf97 + 10;
-      if (i < 70 && buf97[i] < 3)
-	flip = "065"[buf97[i]]-'0';
+      for (c=i=2; (ushort) c != 0xbbbb && i < len; i++)
+	c = c << 8 | fgetc(ifp);
+      while ((i+=4) < len-5)
+	if (get4() == 257 && (i=len) && (c = (get4(),fgetc(ifp))) < 3)
+	  flip = "065"[c]-'0';
     }
     if (tag == 0x10 && type == 4)
       unique_id = get4();
