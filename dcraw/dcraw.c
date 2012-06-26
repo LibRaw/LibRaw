@@ -5240,12 +5240,12 @@ nf: order = 0x4949;
 #endif
     }
     if (tag == 0xd && type == 7 && get2() == 0xaaaa) {
-      fread (buf97, 1, sizeof buf97, ifp);
-      char *pp = (char*)memmem ((char*)buf97, sizeof buf97,(char*)"\xbb\xbb",2);
-      i = ((uchar*)pp  - buf97) + 10;
-      if (i < 70 && buf97[i] < 3)
-	flip = "065"[buf97[i]]-'0';
-    }
+      for (c=i=2; (ushort) c != 0xbbbb && i < len; i++)
+        c = c << 8 | fgetc(ifp);
+      while ((i+=4) < len-5)
+        if (get4() == 257 && (i=len) && (c = (get4(),fgetc(ifp))) < 3)
+          flip = "065"[c]-'0';
+     }
     if (tag == 0x10 && type == 4)
       unique_id = get4();
     if (tag == 0x11 && is_raw && !strncmp(make,"NIKON",5)) {
