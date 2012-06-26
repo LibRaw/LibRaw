@@ -1352,6 +1352,22 @@ void CLASS canon_sraw_load_raw()
 	else ip[col][c] = (ip[col-1][c] + ip[col+1][c] + 1) >> 1;
   }
   for ( ; rp < ip[0]; rp+=4) {
+#if 1
+    if (unique_id < 0x80000218) {
+      rp[0] -= 512;
+      goto next;
+    } else if (unique_id == 0x80000285) {
+next: pix[0] = rp[0] + rp[2];
+      pix[2] = rp[0] + rp[1];
+      pix[1] = rp[0] + ((-778*rp[1] - (rp[2] << 11)) >> 12);
+    } else {
+      rp[1] = (rp[1] << 2) + hue;
+      rp[2] = (rp[2] << 2) + hue;
+      pix[0] = rp[0] + ((   50*rp[1] + 22929*rp[2]) >> 14);
+      pix[1] = rp[0] + ((-5640*rp[1] - 11751*rp[2]) >> 14);
+      pix[2] = rp[0] + ((29040*rp[1] -   101*rp[2]) >> 14);
+    }
+#else
     if (unique_id < 0x80000218) {
       pix[0] = rp[0] + rp[2] - 512;
       pix[2] = rp[0] + rp[1] - 512;
@@ -1363,6 +1379,7 @@ void CLASS canon_sraw_load_raw()
       pix[1] = rp[0] + ((-5640*rp[1] - 11751*rp[2]) >> 14);
       pix[2] = rp[0] + ((29040*rp[1] -   101*rp[2]) >> 14);
     }
+#endif
     FORC3 
         rp[c] = CLIP(pix[c] * sraw_mul[c] >> 10);
   }
@@ -5425,7 +5442,7 @@ get2_rggb:
 #ifdef LIBRAW_LIBRARY_BUILD
       color_flags.cam_mul_state = LIBRAW_COLORSTATE_LOADED;
 #endif
-#if 0
+#if 1
       i = len == 1312 ? 112:22;
       fseek (ifp, i, SEEK_CUR);
 #else
