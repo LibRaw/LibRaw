@@ -1,3 +1,13 @@
+2012-06-27 Alex Tutubalin <lexa@lexa.ru>
+        * Imported dcraw 9.15 (1.449):
+          - New cameras supported: Canon 5D Mark III, G1 X, 1D X and Powershot SX200;
+            Nikon D4,D800/D800E and D3200; Fuji X-S1 and HS30EXR; Casio EX-Z8;
+            Olympus E-M5; Panasonic GF5; Sony NEX-F3, SLT-A37 and SLT-A57;
+            Samsung NX20 and NX210;
+          - Support for updated Samsung NX200 firmware.
+        * Makefile.msvc: additional compiler flags
+        * LibRaw 0.14.7-Release
+
 2012-04-11 Alex Tutubalin <lexa@lexa.ru>
         * Fixed thumbnail processing (esp. for Adobe Lightroom DNGs)
 
