@@ -8648,42 +8648,6 @@ wb550:
       thumb_height = 480;
       thumb_width  = 640;
     }
-  } else if (!strcmp(model,"N Digital")) {
-    height = 2047;
-    width  = 3072;
-    filters = 0x61616161;
-    data_offset = 0x1a00;
-    load_raw = &CLASS packed_load_raw;
-  } else if (!strcmp(model,"DSC-F828")) {
-    width = 3288;
-    left_margin = 5;
-    data_offset = 862144;
-    load_raw = &CLASS sony_load_raw;
-    filters = 0x9c9c9c9c;
-    colors = 4;
-    strcpy (cdesc, "RGBE");
-  } else if (!strcmp(model,"DSC-V3")) {
-    width = 3109;
-    left_margin = 59;
-    data_offset = 787392;
-    load_raw = &CLASS sony_load_raw;
-  } else if (!strcmp(make,"SONY") && raw_width == 3984) {
-    adobe_coeff ("SONY","DSC-R1");
-    width = 3925;
-    order = 0x4d4d;
-  } else if (!strcmp(make,"SONY") && raw_width == 6048) {
-    width -= 24;
-  } else if (!strcmp(model,"DSLR-A100")) {
-    if (width == 3880) {
-      height--;
-      width = ++raw_width;
-    } else {
-      order = 0x4d4d;
-      load_flags = 2;
-    }
-    filters = 0x61616161;
-  } else if (!strcmp(model,"DSLR-A350")) {
-    height -= 4;
   }
   else
       identify2(fsize,flen,head); /* Avoid MS VS 2008 bug */
@@ -8760,7 +8724,44 @@ notraw:
 
 void CLASS identify2(unsigned fsize, unsigned flen, char *head)
 {
- if (!strcmp(model,"PIXL")) {
+ if (!strcmp(model,"N Digital")) {
+    height = 2047;
+    width  = 3072;
+    filters = 0x61616161;
+    data_offset = 0x1a00;
+    load_raw = &CLASS packed_load_raw;
+  } else if (!strcmp(model,"DSC-F828")) {
+    width = 3288;
+    left_margin = 5;
+    data_offset = 862144;
+    load_raw = &CLASS sony_load_raw;
+    filters = 0x9c9c9c9c;
+    colors = 4;
+    strcpy (cdesc, "RGBE");
+  } else if (!strcmp(model,"DSC-V3")) {
+    width = 3109;
+    left_margin = 59;
+    data_offset = 787392;
+    load_raw = &CLASS sony_load_raw;
+  } else if (!strcmp(make,"SONY") && raw_width == 3984) {
+    adobe_coeff ("SONY","DSC-R1");
+    width = 3925;
+    order = 0x4d4d;
+  } else if (!strcmp(make,"SONY") && raw_width == 6048) {
+    width -= 24;
+  } else if (!strcmp(model,"DSLR-A100")) {
+    if (width == 3880) {
+      height--;
+      width = ++raw_width;
+    } else {
+      order = 0x4d4d;
+      load_flags = 2;
+    }
+    filters = 0x61616161;
+  } else if (!strcmp(model,"DSLR-A350")) {
+    height -= 4;
+  }
+ else if (!strcmp(model,"PIXL")) {
     height -= top_margin = 4;
     width -= left_margin = 32;
     gamma_curve (0, 7, 1, 255);
@@ -9064,7 +9065,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9647 "dcraw/dcraw.c"
+#line 9648 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -9283,7 +9284,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9890 "dcraw/dcraw.c"
+#line 9891 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
