@@ -247,6 +247,7 @@ protected:
     void        jpeg_thumb_writer (FILE *tfp,char *thumb,int thumb_length);
     void        jpeg_thumb ();
     void        ppm_thumb ();
+    void        ppm16_thumb();
     void        layer_thumb ();
     void        rollei_thumb ();
     void        kodak_thumb_load_raw();

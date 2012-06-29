@@ -45,6 +45,7 @@ it under the terms of the one of three licenses as you choose:
     void        canon_600_auto_wb();
     void        canon_600_coeff();
     void        canon_600_load_raw();
+    void        canon_600_correct();
     int         canon_s2is();
     void        parse_ciff (int offset, int length);
     void        ciff_block_1030();
@@ -66,12 +67,14 @@ it under the terms of the one of three licenses as you choose:
 // Canon DSLRs
 void        crw_init_tables (unsigned table, ushort *huff[2]);
     int         canon_has_lowbits();
-    void        canon_compressed_load_raw();
+    void        canon_load_raw();
     void        lossless_jpeg_load_raw();
     void        canon_sraw_load_raw();
 // Adobe DNG
-    void        adobe_copy_pixel (int row, int col, ushort **rp);
-    void        adobe_dng_load_raw_lj();
+    void        adobe_copy_pixel (unsigned int row, unsigned int col, ushort **rp);
+    void        lossless_dng_load_raw();
+    void        packed_dng_load_raw();
+    void        lossy_dng_load_raw();
     void        adobe_dng_load_raw_nc();
 
 // Pentax
@@ -79,8 +82,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        pentax_tree();
 
 // Nikon (and Minolta Z2)
-    void        nikon_compressed_load_raw();
     void        nikon_load_raw();
+//void        nikon_load_raw();
     int         nikon_is_compressed();
     int         nikon_e995();
     int         nikon_e2100();
@@ -101,7 +104,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        parse_rollei();
 
 // MF backs
-    int         bayer (unsigned row, unsigned col);
+//int         bayer (unsigned row, unsigned col);
+    int         raw(unsigned,unsigned);
     void        phase_one_flat_field (int is_float, int nc);
     void        phase_one_correct();
     void        phase_one_load_raw();

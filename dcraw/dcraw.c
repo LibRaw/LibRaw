@@ -22,7 +22,18 @@
    $Revision: 1.449 $
    $Date: 2012/06/26 02:43:41 $
  */
+/*@out DEFINES
+#ifndef USE_JPEG
+#define NO_JPEG
+#endif
+#ifndef USE_JASPER
+#define NO_JASPER
+#endif
+@end DEFINES */
 
+#define NO_LCMS
+#define DCRAW_VERBOSE
+//@out DEFINES
 #define DCRAW_VERSION "9.15"
 
 #ifndef _GNU_SOURCE
@@ -53,22 +64,25 @@
 #ifndef NO_JPEG
 #include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
 #endif				/* and Adobe Lossy DNGs */
+//@end DEFINES
 #ifndef NO_LCMS
 #include <lcms.h>		/* Support color profiles */
 #endif
+//@out DEFINES
 #ifdef LOCALEDIR
 #include <libintl.h>
 #define _(String) gettext(String)
 #else
 #define _(String) (String)
 #endif
-
+//@end DEFINES
 #if defined(DJGPP) || defined(__MINGW32__)
 #define fseeko fseek
 #define ftello ftell
 #else
 #define fgetc getc_unlocked
 #endif
+//@out DEFINES
 #ifdef __CYGWIN__
 #include <io.h>
 #endif
@@ -79,8 +93,10 @@
 #define snprintf _snprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
+//@end DEFINES
 typedef __int64 INT64;
 typedef unsigned __int64 UINT64;
+//@out DEFINES
 #else
 #include <unistd.h>
 #include <utime.h>
@@ -97,6 +113,7 @@ typedef unsigned long long UINT64;
 #ifndef LONG_BIT
 #define LONG_BIT (8 * sizeof (long))
 #endif
+//@end DEFINES
 
 #if !defined(uchar)
 #define uchar unsigned char
@@ -155,8 +172,8 @@ struct decode {
 } first_decode[2048], *second_decode, *free_decode;
 
 struct tiff_ifd {
-  int width, height, bps, comp, phint, offset, flip, samples, bytes;
-  int tile_width, tile_length;
+  int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes;
+  int t_tile_width, t_tile_length;
 } tiff_ifd[10];
 
 struct ph1 {
@@ -166,6 +183,7 @@ struct ph1 {
 
 #define CLASS
 
+//@out DEFINES
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
@@ -221,15 +239,18 @@ struct ph1 {
 
 #define RAW(row,col) \
 	raw_image[(row)*raw_width+(col)]
+//@end DEFINES
 
 #define FC(row,col) \
 	(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
+//@out DEFINES
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 
 #define BAYER2(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][fcol(row,col)]
+//@end DEFINES
 
 int CLASS fcol (int row, int col)
 {
@@ -263,6 +284,19 @@ int CLASS fcol (int row, int col)
   return FC(row,col);
 }
 
+/* @out COMMON
+#include <math.h>
+#define CLASS LibRaw::
+#include "libraw/libraw_types.h"
+#define LIBRAW_LIBRARY_BUILD
+#define LIBRAW_IO_REDEFINED
+#include "libraw/libraw.h"
+#include "internal/defines.h"
+#include "internal/var_defines.h"
+#include "internal/libraw_bytebuffer.h"
+@end COMMON */
+
+//@out COMMON
 #ifndef __GLIBC__
 char *my_memmem (char *haystack, size_t haystacklen,
 	      char *needle, size_t needlelen)
@@ -275,6 +309,7 @@ char *my_memmem (char *haystack, size_t haystacklen,
 }
 #define memmem my_memmem
 #endif
+//@end COMMON
 
 void CLASS merror (void *ptr, const char *where)
 {
@@ -295,6 +330,7 @@ void CLASS derror()
   data_error++;
 }
 
+//@out COMMON
 ushort CLASS sget2 (uchar *s)
 {
   if (order == 0x4949)		/* "II" means little-endian */
@@ -544,8 +580,14 @@ int CLASS canon_s2is()
  */
 unsigned CLASS getbithuff (int nbits, ushort *huff)
 {
+#ifdef LIBRAW_NOTHREADS
   static unsigned bitbuf=0;
   static int vbits=0, reset=0;
+#else
+#define bitbuf tls->getbits.bitbuf
+#define vbits  tls->getbits.vbits
+#define reset  tls->getbits.reset
+#endif
   unsigned c;
 
   if (nbits == -1)
@@ -564,6 +606,11 @@ unsigned CLASS getbithuff (int nbits, ushort *huff)
     vbits -= nbits;
   if (vbits < 0) derror();
   return c;
+#ifndef LIBRAW_NOTHREADS
+#undef bitbuf
+#undef vbits
+#undef reset
+#endif
 }
 
 #define getbits(n) getbithuff(n,0)
@@ -756,6 +803,7 @@ void CLASS canon_load_raw()
   }
   FORC(2) free (huff[c]);
 }
+//@end COMMON
 
 /*
    Not a full implementation of Lossless JPEG, just
@@ -766,6 +814,7 @@ struct jhead {
   ushort *huff[6], *free[4], *row;
 };
 
+//@out COMMON
 int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
   int c, tag, len;
@@ -836,6 +885,34 @@ int CLASS ljpeg_diff (ushort *huff)
   return diff;
 }
 
+#ifdef LIBRAW_LIBRARY_BUILD
+int CLASS ljpeg_diff_new (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff)
+{
+  int len, diff;
+
+  len = bits._gethuff_lj(buf,*huff,huff+1);
+  if (len == 16 && (!dng_version || dng_version >= 0x1010000))
+    return -32768;
+  diff = bits._getbits_lj(buf,len);
+  if ((diff & (1 << (len-1))) == 0)
+    diff -= (1 << len) - 1;
+  return diff;
+}
+
+int CLASS ljpeg_diff_pef (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff)
+{
+  int len, diff;
+
+  len = bits._gethuff(buf,*huff,huff+1,zero_after_ff);
+  if (len == 16 && (!dng_version || dng_version >= 0x1010000))
+    return -32768;
+  diff = bits._getbits(buf,len,zero_after_ff);
+  if ((diff & (1 << (len-1))) == 0)
+    diff -= (1 << len) - 1;
+  return diff;
+}
+#endif
+
 ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
 {
   int col, c, diff, pred, spred=0;
@@ -874,6 +951,46 @@ ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
     }
   return row[2];
 }
+#ifdef LIBRAW_LIBRARY_BUILD
+ushort * CLASS ljpeg_row_new (int jrow, struct jhead *jh, LibRaw_bit_buffer& bits,LibRaw_byte_buffer* bytes)
+{
+  int col, c, diff, pred, spred=0;
+  ushort mark=0, *row[3];
+
+  if (jrow * jh->wide % jh->restart == 0) {
+    FORC(6) jh->vpred[c] = 1 << (jh->bits-1);
+    if (jrow) {
+        bytes->unseek2();
+        do mark = (mark << 8) + (c = bytes->get_byte());
+        while (c != EOF && mark >> 4 != 0xffd);
+    }
+    bits.reset();
+  }
+  FORC3 row[c] = jh->row + jh->wide*jh->clrs*((jrow+c) & 1);
+  for (col=0; col < jh->wide; col++)
+    FORC(jh->clrs) {
+        diff = ljpeg_diff_new (bits,bytes,jh->huff[c]);
+      if (jh->sraw && c <= jh->sraw && (col | c))
+		    pred = spred;
+      else if (col) pred = row[0][-jh->clrs];
+      else	    pred = (jh->vpred[c] += diff) - diff;
+      if (jrow && col) switch (jh->psv) {
+	case 1:	break;
+	case 2: pred = row[1][0];					break;
+	case 3: pred = row[1][-jh->clrs];				break;
+	case 4: pred = pred +   row[1][0] - row[1][-jh->clrs];		break;
+	case 5: pred = pred + ((row[1][0] - row[1][-jh->clrs]) >> 1);	break;
+	case 6: pred = row[1][0] + ((pred - row[1][-jh->clrs]) >> 1);	break;
+	case 7: pred = (pred + row[1][0]) >> 1;				break;
+	default: pred = 0;
+      }
+      if ((**row = pred + diff) >> jh->bits) derror();
+      if (c <= jh->sraw) spred = **row;
+      row[0]++; row[1]++;
+    }
+  return row[2];
+}
+#endif
 
 void CLASS lossless_jpeg_load_raw()
 {
@@ -1198,7 +1315,7 @@ void CLASS nikon_3700()
   uchar dp[24];
   static const struct {
     int bits;
-    char make[12], model[15];
+    char t_make[12], t_model[15];
   } table[] = {
     { 0x00, "PENTAX",  "Optio 33WR" },
     { 0x03, "NIKON",   "E3200" },
@@ -1210,8 +1327,8 @@ void CLASS nikon_3700()
   bits = (dp[8] & 3) << 4 | (dp[20] & 3);
   for (i=0; i < sizeof table / sizeof *table; i++)
     if (bits == table[i].bits) {
-      strcpy (make,  table[i].make );
-      strcpy (model, table[i].model);
+      strcpy (make,  table[i].t_make );
+      strcpy (model, table[i].t_model);
     }
 }
 
@@ -1229,9 +1346,11 @@ int CLASS minolta_z2()
     if (tail[i]) nz++;
   return nz > 20;
 }
+//@end COMMON
 
 void CLASS jpeg_thumb();
 
+//@out COMMON
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -1510,8 +1629,13 @@ void CLASS phase_one_load_raw()
 
 unsigned CLASS ph1_bithuff (int nbits, ushort *huff)
 {
+#ifndef LIBRAW_NOTHREADS
+#define bitbuf tls->ph1_bits.bitbuf
+#define vbits  tls->ph1_bits.vbits    
+#else
   static UINT64 bitbuf=0;
   static int vbits=0;
+#endif
   unsigned c;
 
   if (nbits == -1)
@@ -1528,6 +1652,10 @@ unsigned CLASS ph1_bithuff (int nbits, ushort *huff)
   }
   vbits -= nbits;
   return c;
+#ifndef LIBRAW_NOTHREADS
+#undef bitbuf
+#undef vbits
+#endif
 }
 #define ph1_bits(n) ph1_bithuff(n,0)
 #define ph1_huff(h) ph1_bithuff(*h,h+1)
@@ -1537,7 +1665,7 @@ void CLASS phase_one_load_raw_c()
   static const int length[] = { 8,7,6,9,11,10,5,12,14,13 };
   int *offset, len[2], pred[2], row, col, i, j;
   ushort *pixel;
-  short (*black)[2];
+  short (*t_black)[2];
 
   pixel = (ushort *) calloc (raw_width + raw_height*4, 2);
   merror (pixel, "phase_one_load_raw_c()");
@@ -1545,10 +1673,17 @@ void CLASS phase_one_load_raw_c()
   fseek (ifp, strip_offset, SEEK_SET);
   for (row=0; row < raw_height; row++)
     offset[row] = get4();
-  black = (short (*)[2]) offset + raw_height;
+  t_black = (short (*)[2]) offset + raw_height;
   fseek (ifp, ph1.black_off, SEEK_SET);
   if (ph1.black_off)
-    read_shorts ((ushort *) black[0], raw_height*2);
+      {
+          read_shorts ((ushort *) t_black[0], raw_height*2);
+#ifdef LIBRAW_LIBRARY_BUILD
+          imgdata.rawdata.ph1_black = (short (*)[2])calloc(raw_height*2,sizeof(short));
+          merror (imgdata.rawdata.ph1_black, "phase_one_load_raw_c()");
+          memmove(imgdata.rawdata.ph1_black,(short *) t_black[0],raw_height*2*sizeof(short));
+#endif
+      }
   for (i=0; i < 256; i++)
     curve[i] = i*i / 3.969 + 0.5;
   for (row=0; row < raw_height; row++) {
@@ -1572,12 +1707,12 @@ void CLASS phase_one_load_raw_c()
 	pixel[col] = curve[pixel[col]];
     }
     for (col=0; col < raw_width; col++) {
-      i = (pixel[col] << 2) - ph1.black + black[row][col >= ph1.split_col];
+      i = (pixel[col] << 2) - ph1.t_black + t_black[row][col >= ph1.split_col];
 	if (i > 0) RAW(row,col) = i;
     }
   }
   free (pixel);
-  maximum = 0xfffc - ph1.black;
+  maximum = 0xfffc - ph1.t_black;
 }
 
 void CLASS hasselblad_load_raw()
@@ -1755,8 +1890,13 @@ void CLASS nokia_load_raw()
 
 unsigned CLASS pana_bits (int nbits)
 {
+#ifndef LIBRAW_NOTHREADS
+#define buf tls->pana_bits.buf
+#define vbits tls->pana_bits.vbits   
+#else
   static uchar buf[0x4000];
   static int vbits;
+#endif
   int byte;
 
   if (!nbits) return vbits=0;
@@ -1767,6 +1907,10 @@ unsigned CLASS pana_bits (int nbits)
   vbits = (vbits - nbits) & 0x1ffff;
   byte = vbits >> 3 ^ 0x3ff0;
   return (buf[byte] | buf[byte+1] << 8) >> (vbits & 7) & ~(-1 << nbits);
+#ifndef LIBRAW_NOTHREADS
+#undef buf
+#undef vbits
+#endif
 }
 
 void CLASS panasonic_load_raw()
@@ -1872,7 +2016,7 @@ void CLASS quicktake_100_load_raw()
   static const short rstep[6][4] =
   { {  -3,-1,1,3  }, {  -5,-1,1,5  }, {  -8,-2,2,8  },
     { -13,-3,3,13 }, { -19,-4,4,19 }, { -28,-6,6,28 } };
-  static const short curve[256] =
+  static const short t_curve[256] =
   { 0,1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,
     28,29,30,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,53,
     54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,74,75,76,77,78,
@@ -1927,7 +2071,7 @@ void CLASS quicktake_100_load_raw()
     }
   for (row=0; row < height; row++)
     for (col=0; col < width; col++)
-      RAW(row,col) = curve[pixel[row+2][col+2]];
+      RAW(row,col) = t_curve[pixel[row+2][col+2]];
   maximum = 0x3ff;
 }
 
@@ -2046,7 +2190,11 @@ void CLASS lossy_dng_load_raw() {}
 METHODDEF(boolean)
 fill_input_buffer (j_decompress_ptr cinfo)
 {
+#ifndef LIBRAW_NOTHREADS
+#define jpeg_buffer tls->jpeg_buffer
+#else
   static uchar jpeg_buffer[4096];
+#endif
   size_t nbytes;
 
   nbytes = fread (jpeg_buffer, 1, 4096, ifp);
@@ -2054,6 +2202,9 @@ fill_input_buffer (j_decompress_ptr cinfo)
   cinfo->src->next_input_byte = jpeg_buffer;
   cinfo->src->bytes_in_buffer = nbytes;
   return TRUE;
+#ifndef LIBRAW_NOTHREADS
+#undef jpeg_buffer
+#endif
 }
 
 void CLASS kodak_jpeg_load_raw()
@@ -2204,7 +2355,11 @@ void CLASS kodak_yrgb_load_raw()
       rgb[1] = y-((cb + cr + 2) >> 2);
       rgb[2] = rgb[1] + cb;
       rgb[0] = rgb[1] + cr;
+#ifndef LIBRAW_LIBRARY_BUILD
       FORC3 image[row*width+col][c] = curve[LIM(rgb[c],0,255)];
+#else
+      FORC3 color_image[(row+top_margin)*raw_width+col+left_margin][c] = curve[LIM(rgb[c],0,255)];
+#endif
     }
   }
   free (pixel);
@@ -2334,8 +2489,13 @@ void CLASS kodak_ycbcr_load_raw()
 	for (j=0; j < 2; j++)
 	  for (k=0; k < 2; k++) {
 	    if ((y[j][k] = y[j][k^1] + *bp++) >> 10) derror();
+#ifndef LIBRAW_LIBRARY_BUILD
 	    ip = image[(row+j)*width + col+i+k];
 	    FORC3 ip[c] = curve[LIM(y[j][k]+rgb[c], 0, 0xfff)];
+#else
+	    ip = color_image[(row+top_margin+j)*raw_width + col+i+k+left_margin];
+            FORC3 ip[c] = curve[LIM(y[j][k]+rgb[c], 0, 0xfff)];
+#endif
 	  }
       }
     }
@@ -2347,13 +2507,18 @@ void CLASS kodak_rgb_load_raw()
   int row, col, len, c, i, rgb[3];
   ushort *ip=image[0];
 
+#ifndef LIBRAW_LIBRARY_BUILD
   if (raw_image) free (raw_image);
   raw_image = 0;
+#endif
   for (row=0; row < height; row++)
     for (col=0; col < width; col+=256) {
       len = MIN (256, width-col);
       kodak_65000_decode (buf, len*3);
       memset (rgb, 0, sizeof rgb);
+#ifdef LIBRAW_LIBRARY_BUILD
+      ip = &color_image[(row+top_margin)*raw_width+left_margin][0];
+#endif
       for (bp=buf, i=0; i < len; i++, ip+=4)
 	FORC3 if ((ip[c] = rgb[c] += *bp++) >> 12) derror();
     }
@@ -2371,8 +2536,12 @@ void CLASS kodak_thumb_load_raw()
 
 void CLASS sony_decrypt (unsigned *data, int len, int start, int key)
 {
+#ifndef LIBRAW_NOTHREADS
+#define pad tls->sony_decrypt.pad
+#define p   tls->sony_decrypt.p
+#else
   static unsigned pad[128], p;
-
+#endif
   if (start) {
     for (p=0; p < 4; p++)
       pad[p] = key = key * 48828125 + 1;
@@ -2384,6 +2553,10 @@ void CLASS sony_decrypt (unsigned *data, int len, int start, int key)
   }
   while (len--)
     *data++ ^= pad[p++ & 127] = pad[(p+1) & 127] ^ pad[(p+65) & 127];
+#ifndef LIBRAW_NOTHREADS
+#undef pad
+#undef p
+#endif
 }
 
 void CLASS sony_load_raw()
@@ -2459,12 +2632,32 @@ void CLASS sony_arw2_load_raw()
 	  if (pix[i] > 0x7ff) pix[i] = 0x7ff;
 	  bit += 7;
 	}
+#ifdef LIBRAW_LIBRARY_BUILD
+      if(imgdata.params.sony_arw2_hack)
+          {
+              for (i=0; i < 16; i++, col+=2)
+                  RAW(row,col) = curve[pix[i] << 1];
+          }
+      else
+          {
+              for (i=0; i < 16; i++, col+=2)
+                  RAW(row,col) = curve[pix[i] << 1] >> 2;
+          }
+#else
       for (i=0; i < 16; i++, col+=2)
 	if (col < width) RAW(row,col) = curve[pix[i] << 1] >> 2;
+#endif
       col -= col & 1 ? 1:31;
     }
   }
   free (data);
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(imgdata.params.sony_arw2_hack)
+  {
+	black <<= 2;
+	maximum <<=2;
+  }
+#endif
 }
 
 #define HOLE(row) ((holes >> (((row) - raw_height) & 7)) & 1)
@@ -2613,10 +2806,24 @@ void CLASS redcine_load_raw()
   ushort *img, *pix;
 
   jas_init();
+#ifndef LIBRAW_LIBRARY_BUILD
   in = jas_stream_fopen (ifname, "rb");
+#else
+  in = (jas_stream_t*)ifp->make_jas_stream();
+  if(!in)
+          throw LIBRAW_EXCEPTION_DECODE_JPEG2000;
+#endif
   jas_stream_seek (in, data_offset+20, SEEK_SET);
   jimg = jas_image_decode (in, -1, 0);
+#ifndef LIBRAW_LIBRARY_BUILD
   if (!jimg) longjmp (failure, 3);
+#else
+  if(!jimg)
+      {
+          jas_stream_close (in);
+          throw LIBRAW_EXCEPTION_DECODE_JPEG2000;
+      }
+#endif
   jmat = jas_matrix_create (height/2, width/2);
   merror (jmat, "redcine_load_raw()");
   img = (ushort *) calloc ((height+2)*(width+2), 2);
@@ -2653,710 +2860,7 @@ void CLASS redcine_load_raw()
   jas_stream_close (in);
 #endif
 }
-
-/* RESTRICTED code starts here */
-
-void CLASS foveon_decoder (unsigned size, unsigned code)
-{
-  static unsigned huff[1024];
-  struct decode *cur;
-  int i, len;
-
-  if (!code) {
-    for (i=0; i < size; i++)
-      huff[i] = get4();
-    memset (first_decode, 0, sizeof first_decode);
-    free_decode = first_decode;
-  }
-  cur = free_decode++;
-  if (free_decode > first_decode+2048) {
-    fprintf (stderr,_("%s: decoder table overflow\n"), ifname);
-    longjmp (failure, 2);
-  }
-  if (code)
-    for (i=0; i < size; i++)
-      if (huff[i] == code) {
-	cur->leaf = i;
-	return;
-      }
-  if ((len = code >> 27) > 26) return;
-  code = (len+1) << 27 | (code & 0x3ffffff) << 1;
-
-  cur->branch[0] = free_decode;
-  foveon_decoder (size, code);
-  cur->branch[1] = free_decode;
-  foveon_decoder (size, code+1);
-}
-
-void CLASS foveon_thumb()
-{
-  unsigned bwide, row, col, bitbuf=0, bit=1, c, i;
-  char *buf;
-  struct decode *dindex;
-  short pred[3];
-
-  bwide = get4();
-  fprintf (ofp, "P6\n%d %d\n255\n", thumb_width, thumb_height);
-  if (bwide > 0) {
-    if (bwide < thumb_width*3) return;
-    buf = (char *) malloc (bwide);
-    merror (buf, "foveon_thumb()");
-    for (row=0; row < thumb_height; row++) {
-      fread  (buf, 1, bwide, ifp);
-      fwrite (buf, 3, thumb_width, ofp);
-    }
-    free (buf);
-    return;
-  }
-  foveon_decoder (256, 0);
-
-  for (row=0; row < thumb_height; row++) {
-    memset (pred, 0, sizeof pred);
-    if (!bit) get4();
-    for (bit=col=0; col < thumb_width; col++)
-      FORC3 {
-	for (dindex=first_decode; dindex->branch[0]; ) {
-	  if ((bit = (bit-1) & 31) == 31)
-	    for (i=0; i < 4; i++)
-	      bitbuf = (bitbuf << 8) + fgetc(ifp);
-	  dindex = dindex->branch[bitbuf >> bit & 1];
-	}
-	pred[c] += dindex->leaf;
-	fputc (pred[c], ofp);
-      }
-  }
-}
-
-void CLASS foveon_sd_load_raw()
-{
-  struct decode *dindex;
-  short diff[1024];
-  unsigned bitbuf=0;
-  int pred[3], row, col, bit=-1, c, i;
-
-  read_shorts ((ushort *) diff, 1024);
-  if (!load_flags) foveon_decoder (1024, 0);
-
-  for (row=0; row < height; row++) {
-    memset (pred, 0, sizeof pred);
-    if (!bit && !load_flags && atoi(model+2) < 14) get4();
-    for (col=bit=0; col < width; col++) {
-      if (load_flags) {
-	bitbuf = get4();
-	FORC3 pred[2-c] += diff[bitbuf >> c*10 & 0x3ff];
-      }
-      else FORC3 {
-	for (dindex=first_decode; dindex->branch[0]; ) {
-	  if ((bit = (bit-1) & 31) == 31)
-	    for (i=0; i < 4; i++)
-	      bitbuf = (bitbuf << 8) + fgetc(ifp);
-	  dindex = dindex->branch[bitbuf >> bit & 1];
-	}
-	pred[c] += diff[dindex->leaf];
-	if (pred[c] >> 16 && ~pred[c] >> 16) derror();
-      }
-      FORC3 image[row*width+col][c] = pred[c];
-    }
-  }
-}
-
-void CLASS foveon_huff (ushort *huff)
-{
-  int i, j, clen, code;
-
-  huff[0] = 8;
-  for (i=0; i < 13; i++) {
-    clen = getc(ifp);
-    code = getc(ifp);
-    for (j=0; j < 256 >> clen; )
-      huff[code+ ++j] = clen << 8 | i;
-  }
-  get2();
-}
-
-void CLASS foveon_dp_load_raw()
-{
-  unsigned c, roff[4], row, col, diff;
-  ushort huff[258], vpred, hpred;
-
-  fseek (ifp, 8, SEEK_CUR);
-  foveon_huff (huff);
-  roff[0] = 48;
-  FORC3 roff[c+1] = -(-(roff[c] + get4()) & -16);
-  FORC3 {
-    fseek (ifp, data_offset+roff[c], SEEK_SET);
-    getbits(-1);
-    vpred = 1024;
-    for (row=0; row < height; row++) {
-      for (col=0; col < width; col++) {
-	diff = ljpeg_diff(huff);
-	if (col) hpred += diff;
-	else hpred = vpred += diff;
-	image[row*width+col][c] = hpred;
-      }
-    }
-  }
-}
-
-void CLASS foveon_load_camf()
-{
-  unsigned type, wide, high, i, j, row, col, diff;
-  ushort huff[258], vpred[2][2] = {{512,512},{512,512}}, hpred[2];
-
-  fseek (ifp, meta_offset, SEEK_SET);
-  type = get4();  get4();  get4();
-  wide = get4();
-  high = get4();
-  if (type == 2) {
-    fread (meta_data, 1, meta_length, ifp);
-    for (i=0; i < meta_length; i++) {
-      high = (high * 1597 + 51749) % 244944;
-      wide = high * (INT64) 301593171 >> 24;
-      meta_data[i] ^= ((((high << 8) - wide) >> 1) + wide) >> 17;
-    }
-  } else if (type == 4) {
-    free (meta_data);
-    meta_data = (char *) malloc (meta_length = wide*high*3/2);
-    merror (meta_data, "foveon_load_camf()");
-    foveon_huff (huff);
-    get4();
-    getbits(-1);
-    for (j=row=0; row < high; row++) {
-      for (col=0; col < wide; col++) {
-	diff = ljpeg_diff(huff);
-	if (col < 2) hpred[col] = vpred[row & 1][col] += diff;
-	else         hpred[col & 1] += diff;
-	if (col & 1) {
-	  meta_data[j++] = hpred[0] >> 4;
-	  meta_data[j++] = hpred[0] << 4 | hpred[1] >> 8;
-	  meta_data[j++] = hpred[1];
-        }
-      }
-    }
-  } else
-    fprintf (stderr,_("%s has unknown CAMF type %d.\n"), ifname, type);
-}
-
-const char * CLASS foveon_camf_param (const char *block, const char *param)
-{
-  unsigned idx, num;
-  char *pos, *cp, *dp;
-
-  for (idx=0; idx < meta_length; idx += sget4(pos+8)) {
-    pos = meta_data + idx;
-    if (strncmp (pos, "CMb", 3)) break;
-    if (pos[3] != 'P') continue;
-    if (strcmp (block, pos+sget4(pos+12))) continue;
-    cp = pos + sget4(pos+16);
-    num = sget4(cp);
-    dp = pos + sget4(cp+4);
-    while (num--) {
-      cp += 8;
-      if (!strcmp (param, dp+sget4(cp)))
-	return dp+sget4(cp+4);
-    }
-  }
-  return 0;
-}
-
-void * CLASS foveon_camf_matrix (unsigned dim[3], const char *name)
-{
-  unsigned i, idx, type, ndim, size, *mat;
-  char *pos, *cp, *dp;
-  double dsize;
-
-  for (idx=0; idx < meta_length; idx += sget4(pos+8)) {
-    pos = meta_data + idx;
-    if (strncmp (pos, "CMb", 3)) break;
-    if (pos[3] != 'M') continue;
-    if (strcmp (name, pos+sget4(pos+12))) continue;
-    dim[0] = dim[1] = dim[2] = 1;
-    cp = pos + sget4(pos+16);
-    type = sget4(cp);
-    if ((ndim = sget4(cp+4)) > 3) break;
-    dp = pos + sget4(cp+8);
-    for (i=ndim; i--; ) {
-      cp += 12;
-      dim[i] = sget4(cp);
-    }
-    if ((dsize = (double) dim[0]*dim[1]*dim[2]) > meta_length/4) break;
-    mat = (unsigned *) malloc ((size = dsize) * 4);
-    merror (mat, "foveon_camf_matrix()");
-    for (i=0; i < size; i++)
-      if (type && type != 6)
-	mat[i] = sget4(dp + i*4);
-      else
-	mat[i] = sget4(dp + i*2) & 0xffff;
-    return mat;
-  }
-  fprintf (stderr,_("%s: \"%s\" matrix not found!\n"), ifname, name);
-  return 0;
-}
-
-int CLASS foveon_fixed (void *ptr, int size, const char *name)
-{
-  void *dp;
-  unsigned dim[3];
-
-  if (!name) return 0;
-  dp = foveon_camf_matrix (dim, name);
-  if (!dp) return 0;
-  memcpy (ptr, dp, size*4);
-  free (dp);
-  return 1;
-}
-
-float CLASS foveon_avg (short *pix, int range[2], float cfilt)
-{
-  int i;
-  float val, min=FLT_MAX, max=-FLT_MAX, sum=0;
-
-  for (i=range[0]; i <= range[1]; i++) {
-    sum += val = pix[i*4] + (pix[i*4]-pix[(i-1)*4]) * cfilt;
-    if (min > val) min = val;
-    if (max < val) max = val;
-  }
-  if (range[1] - range[0] == 1) return sum/2;
-  return (sum - min - max) / (range[1] - range[0] - 1);
-}
-
-short * CLASS foveon_make_curve (double max, double mul, double filt)
-{
-  short *curve;
-  unsigned i, size;
-  double x;
-
-  if (!filt) filt = 0.8;
-  size = 4*M_PI*max / filt;
-  if (size == UINT_MAX) size--;
-  curve = (short *) calloc (size+1, sizeof *curve);
-  merror (curve, "foveon_make_curve()");
-  curve[0] = size;
-  for (i=0; i < size; i++) {
-    x = i*filt/max/4;
-    curve[i+1] = (cos(x)+1)/2 * tanh(i*filt/mul) * mul + 0.5;
-  }
-  return curve;
-}
-
-void CLASS foveon_make_curves
-	(short **curvep, float dq[3], float div[3], float filt)
-{
-  double mul[3], max=0;
-  int c;
-
-  FORC3 mul[c] = dq[c]/div[c];
-  FORC3 if (max < mul[c]) max = mul[c];
-  FORC3 curvep[c] = foveon_make_curve (max, mul[c], filt);
-}
-
-int CLASS foveon_apply_curve (short *curve, int i)
-{
-  if (abs(i) >= curve[0]) return 0;
-  return i < 0 ? -curve[1-i] : curve[1+i];
-}
-
-#define image ((short (*)[4]) image)
-
-void CLASS foveon_interpolate()
-{
-  static const short hood[] = { -1,-1, -1,0, -1,1, 0,-1, 0,1, 1,-1, 1,0, 1,1 };
-  short *pix, prev[3], *curve[8], (*shrink)[3];
-  float cfilt=0, ddft[3][3][2], ppm[3][3][3];
-  float cam_xyz[3][3], correct[3][3], last[3][3], trans[3][3];
-  float chroma_dq[3], color_dq[3], diag[3][3], div[3];
-  float (*black)[3], (*sgain)[3], (*sgrow)[3];
-  float fsum[3], val, frow, num;
-  int row, col, c, i, j, diff, sgx, irow, sum, min, max, limit;
-  int dscr[2][2], dstb[4], (*smrow[7])[3], total[4], ipix[3];
-  int work[3][3], smlast, smred, smred_p=0, dev[3];
-  int satlev[3], keep[4], active[4];
-  unsigned dim[3], *badpix;
-  double dsum=0, trsum[3];
-  char str[128];
-  const char* cp;
-
-  if (verbose)
-    fprintf (stderr,_("Foveon interpolation...\n"));
-
-  foveon_load_camf();
-  foveon_fixed (dscr, 4, "DarkShieldColRange");
-  foveon_fixed (ppm[0][0], 27, "PostPolyMatrix");
-  foveon_fixed (satlev, 3, "SaturationLevel");
-  foveon_fixed (keep, 4, "KeepImageArea");
-  foveon_fixed (active, 4, "ActiveImageArea");
-  foveon_fixed (chroma_dq, 3, "ChromaDQ");
-  foveon_fixed (color_dq, 3,
-	foveon_camf_param ("IncludeBlocks", "ColorDQ") ?
-		"ColorDQ" : "ColorDQCamRGB");
-  if (foveon_camf_param ("IncludeBlocks", "ColumnFilter"))
-  		 foveon_fixed (&cfilt, 1, "ColumnFilter");
-
-  memset (ddft, 0, sizeof ddft);
-  if (!foveon_camf_param ("IncludeBlocks", "DarkDrift")
-	 || !foveon_fixed (ddft[1][0], 12, "DarkDrift"))
-    for (i=0; i < 2; i++) {
-      foveon_fixed (dstb, 4, i ? "DarkShieldBottom":"DarkShieldTop");
-      for (row = dstb[1]; row <= dstb[3]; row++)
-	for (col = dstb[0]; col <= dstb[2]; col++)
-	  FORC3 ddft[i+1][c][1] += (short) image[row*width+col][c];
-      FORC3 ddft[i+1][c][1] /= (dstb[3]-dstb[1]+1) * (dstb[2]-dstb[0]+1);
-    }
-
-  if (!(cp = foveon_camf_param ("WhiteBalanceIlluminants", model2)))
-  { fprintf (stderr,_("%s: Invalid white balance \"%s\"\n"), ifname, model2);
-    return; }
-  foveon_fixed (cam_xyz, 9, cp);
-  foveon_fixed (correct, 9,
-	foveon_camf_param ("WhiteBalanceCorrections", model2));
-  memset (last, 0, sizeof last);
-  for (i=0; i < 3; i++)
-    for (j=0; j < 3; j++)
-      FORC3 last[i][j] += correct[i][c] * cam_xyz[c][j];
-
-  #define LAST(x,y) last[(i+x)%3][(c+y)%3]
-  for (i=0; i < 3; i++)
-    FORC3 diag[c][i] = LAST(1,1)*LAST(2,2) - LAST(1,2)*LAST(2,1);
-  #undef LAST
-  FORC3 div[c] = diag[c][0]*0.3127 + diag[c][1]*0.329 + diag[c][2]*0.3583;
-  sprintf (str, "%sRGBNeutral", model2);
-  if (foveon_camf_param ("IncludeBlocks", str))
-    foveon_fixed (div, 3, str);
-  num = 0;
-  FORC3 if (num < div[c]) num = div[c];
-  FORC3 div[c] /= num;
-
-  memset (trans, 0, sizeof trans);
-  for (i=0; i < 3; i++)
-    for (j=0; j < 3; j++)
-      FORC3 trans[i][j] += rgb_cam[i][c] * last[c][j] * div[j];
-  FORC3 trsum[c] = trans[c][0] + trans[c][1] + trans[c][2];
-  dsum = (6*trsum[0] + 11*trsum[1] + 3*trsum[2]) / 20;
-  for (i=0; i < 3; i++)
-    FORC3 last[i][c] = trans[i][c] * dsum / trsum[i];
-  memset (trans, 0, sizeof trans);
-  for (i=0; i < 3; i++)
-    for (j=0; j < 3; j++)
-      FORC3 trans[i][j] += (i==c ? 32 : -1) * last[c][j] / 30;
-
-  foveon_make_curves (curve, color_dq, div, cfilt);
-  FORC3 chroma_dq[c] /= 3;
-  foveon_make_curves (curve+3, chroma_dq, div, cfilt);
-  FORC3 dsum += chroma_dq[c] / div[c];
-  curve[6] = foveon_make_curve (dsum, dsum, cfilt);
-  curve[7] = foveon_make_curve (dsum*2, dsum*2, cfilt);
-
-  sgain = (float (*)[3]) foveon_camf_matrix (dim, "SpatialGain");
-  if (!sgain) return;
-  sgrow = (float (*)[3]) calloc (dim[1], sizeof *sgrow);
-  sgx = (width + dim[1]-2) / (dim[1]-1);
-
-  black = (float (*)[3]) calloc (height, sizeof *black);
-  for (row=0; row < height; row++) {
-    for (i=0; i < 6; i++)
-      ddft[0][0][i] = ddft[1][0][i] +
-	row / (height-1.0) * (ddft[2][0][i] - ddft[1][0][i]);
-    FORC3 black[row][c] =
- 	( foveon_avg (image[row*width]+c, dscr[0], cfilt) +
-	  foveon_avg (image[row*width]+c, dscr[1], cfilt) * 3
-	  - ddft[0][c][0] ) / 4 - ddft[0][c][1];
-  }
-  memcpy (black, black+8, sizeof *black*8);
-  memcpy (black+height-11, black+height-22, 11*sizeof *black);
-  memcpy (last, black, sizeof last);
-
-  for (row=1; row < height-1; row++) {
-    FORC3 if (last[1][c] > last[0][c]) {
-	if (last[1][c] > last[2][c])
-	  black[row][c] = (last[0][c] > last[2][c]) ? last[0][c]:last[2][c];
-      } else
-	if (last[1][c] < last[2][c])
-	  black[row][c] = (last[0][c] < last[2][c]) ? last[0][c]:last[2][c];
-    memmove (last, last+1, 2*sizeof last[0]);
-    memcpy (last[2], black[row+1], sizeof last[2]);
-  }
-  FORC3 black[row][c] = (last[0][c] + last[1][c])/2;
-  FORC3 black[0][c] = (black[1][c] + black[3][c])/2;
-
-  val = 1 - exp(-1/24.0);
-  memcpy (fsum, black, sizeof fsum);
-  for (row=1; row < height; row++)
-    FORC3 fsum[c] += black[row][c] =
-	(black[row][c] - black[row-1][c])*val + black[row-1][c];
-  memcpy (last[0], black[height-1], sizeof last[0]);
-  FORC3 fsum[c] /= height;
-  for (row = height; row--; )
-    FORC3 last[0][c] = black[row][c] =
-	(black[row][c] - fsum[c] - last[0][c])*val + last[0][c];
-
-  memset (total, 0, sizeof total);
-  for (row=2; row < height; row+=4)
-    for (col=2; col < width; col+=4) {
-      FORC3 total[c] += (short) image[row*width+col][c];
-      total[3]++;
-    }
-  for (row=0; row < height; row++)
-    FORC3 black[row][c] += fsum[c]/2 + total[c]/(total[3]*100.0);
-
-  for (row=0; row < height; row++) {
-    for (i=0; i < 6; i++)
-      ddft[0][0][i] = ddft[1][0][i] +
-	row / (height-1.0) * (ddft[2][0][i] - ddft[1][0][i]);
-    pix = image[row*width];
-    memcpy (prev, pix, sizeof prev);
-    frow = row / (height-1.0) * (dim[2]-1);
-    if ((irow = frow) == dim[2]-1) irow--;
-    frow -= irow;
-    for (i=0; i < dim[1]; i++)
-      FORC3 sgrow[i][c] = sgain[ irow   *dim[1]+i][c] * (1-frow) +
-			  sgain[(irow+1)*dim[1]+i][c] *    frow;
-    for (col=0; col < width; col++) {
-      FORC3 {
-	diff = pix[c] - prev[c];
-	prev[c] = pix[c];
-	ipix[c] = pix[c] + floor ((diff + (diff*diff >> 14)) * cfilt
-		- ddft[0][c][1] - ddft[0][c][0] * ((float) col/width - 0.5)
-		- black[row][c] );
-      }
-      FORC3 {
-	work[0][c] = ipix[c] * ipix[c] >> 14;
-	work[2][c] = ipix[c] * work[0][c] >> 14;
-	work[1][2-c] = ipix[(c+1) % 3] * ipix[(c+2) % 3] >> 14;
-      }
-      FORC3 {
-	for (val=i=0; i < 3; i++)
-	  for (  j=0; j < 3; j++)
-	    val += ppm[c][i][j] * work[i][j];
-	ipix[c] = floor ((ipix[c] + floor(val)) *
-		( sgrow[col/sgx  ][c] * (sgx - col%sgx) +
-		  sgrow[col/sgx+1][c] * (col%sgx) ) / sgx / div[c]);
-	if (ipix[c] > 32000) ipix[c] = 32000;
-	pix[c] = ipix[c];
-      }
-      pix += 4;
-    }
-  }
-  free (black);
-  free (sgrow);
-  free (sgain);
-
-  if ((badpix = (unsigned int *) foveon_camf_matrix (dim, "BadPixels"))) {
-    for (i=0; i < dim[0]; i++) {
-      col = (badpix[i] >> 8 & 0xfff) - keep[0];
-      row = (badpix[i] >> 20       ) - keep[1];
-      if ((unsigned)(row-1) > height-3 || (unsigned)(col-1) > width-3)
-	continue;
-      memset (fsum, 0, sizeof fsum);
-      for (sum=j=0; j < 8; j++)
-	if (badpix[i] & (1 << j)) {
-	  FORC3 fsum[c] += (short)
-		image[(row+hood[j*2])*width+col+hood[j*2+1]][c];
-	  sum++;
-	}
-      if (sum) FORC3 image[row*width+col][c] = fsum[c]/sum;
-    }
-    free (badpix);
-  }
-
-  /* Array for 5x5 Gaussian averaging of red values */
-  smrow[6] = (int (*)[3]) calloc (width*5, sizeof **smrow);
-  merror (smrow[6], "foveon_interpolate()");
-  for (i=0; i < 5; i++)
-    smrow[i] = smrow[6] + i*width;
-
-  /* Sharpen the reds against these Gaussian averages */
-  for (smlast=-1, row=2; row < height-2; row++) {
-    while (smlast < row+2) {
-      for (i=0; i < 6; i++)
-	smrow[(i+5) % 6] = smrow[i];
-      pix = image[++smlast*width+2];
-      for (col=2; col < width-2; col++) {
-	smrow[4][col][0] =
-	  (pix[0]*6 + (pix[-4]+pix[4])*4 + pix[-8]+pix[8] + 8) >> 4;
-	pix += 4;
-      }
-    }
-    pix = image[row*width+2];
-    for (col=2; col < width-2; col++) {
-      smred = ( 6 *  smrow[2][col][0]
-	      + 4 * (smrow[1][col][0] + smrow[3][col][0])
-	      +      smrow[0][col][0] + smrow[4][col][0] + 8 ) >> 4;
-      if (col == 2)
-	smred_p = smred;
-      i = pix[0] + ((pix[0] - ((smred*7 + smred_p) >> 3)) >> 3);
-      if (i > 32000) i = 32000;
-      pix[0] = i;
-      smred_p = smred;
-      pix += 4;
-    }
-  }
-
-  /* Adjust the brighter pixels for better linearity */
-  min = 0xffff;
-  FORC3 {
-    i = satlev[c] / div[c];
-    if (min > i) min = i;
-  }
-  limit = min * 9 >> 4;
-  for (pix=image[0]; pix < image[height*width]; pix+=4) {
-    if (pix[0] <= limit || pix[1] <= limit || pix[2] <= limit)
-      continue;
-    min = max = pix[0];
-    for (c=1; c < 3; c++) {
-      if (min > pix[c]) min = pix[c];
-      if (max < pix[c]) max = pix[c];
-    }
-    if (min >= limit*2) {
-      pix[0] = pix[1] = pix[2] = max;
-    } else {
-      i = 0x4000 - ((min - limit) << 14) / limit;
-      i = 0x4000 - (i*i >> 14);
-      i = i*i >> 14;
-      FORC3 pix[c] += (max - pix[c]) * i >> 14;
-    }
-  }
-/*
-   Because photons that miss one detector often hit another,
-   the sum R+G+B is much less noisy than the individual colors.
-   So smooth the hues without smoothing the total.
- */
-  for (smlast=-1, row=2; row < height-2; row++) {
-    while (smlast < row+2) {
-      for (i=0; i < 6; i++)
-	smrow[(i+5) % 6] = smrow[i];
-      pix = image[++smlast*width+2];
-      for (col=2; col < width-2; col++) {
-	FORC3 smrow[4][col][c] = (pix[c-4]+2*pix[c]+pix[c+4]+2) >> 2;
-	pix += 4;
-      }
-    }
-    pix = image[row*width+2];
-    for (col=2; col < width-2; col++) {
-      FORC3 dev[c] = -foveon_apply_curve (curve[7], pix[c] -
-	((smrow[1][col][c] + 2*smrow[2][col][c] + smrow[3][col][c]) >> 2));
-      sum = (dev[0] + dev[1] + dev[2]) >> 3;
-      FORC3 pix[c] += dev[c] - sum;
-      pix += 4;
-    }
-  }
-  for (smlast=-1, row=2; row < height-2; row++) {
-    while (smlast < row+2) {
-      for (i=0; i < 6; i++)
-	smrow[(i+5) % 6] = smrow[i];
-      pix = image[++smlast*width+2];
-      for (col=2; col < width-2; col++) {
-	FORC3 smrow[4][col][c] =
-		(pix[c-8]+pix[c-4]+pix[c]+pix[c+4]+pix[c+8]+2) >> 2;
-	pix += 4;
-      }
-    }
-    pix = image[row*width+2];
-    for (col=2; col < width-2; col++) {
-      for (total[3]=375, sum=60, c=0; c < 3; c++) {
-	for (total[c]=i=0; i < 5; i++)
-	  total[c] += smrow[i][col][c];
-	total[3] += total[c];
-	sum += pix[c];
-      }
-      if (sum < 0) sum = 0;
-      j = total[3] > 375 ? (sum << 16) / total[3] : sum * 174;
-      FORC3 pix[c] += foveon_apply_curve (curve[6],
-		((j*total[c] + 0x8000) >> 16) - pix[c]);
-      pix += 4;
-    }
-  }
-
-  /* Transform the image to a different colorspace */
-  for (pix=image[0]; pix < image[height*width]; pix+=4) {
-    FORC3 pix[c] -= foveon_apply_curve (curve[c], pix[c]);
-    sum = (pix[0]+pix[1]+pix[1]+pix[2]) >> 2;
-    FORC3 pix[c] -= foveon_apply_curve (curve[c], pix[c]-sum);
-    FORC3 {
-      for (dsum=i=0; i < 3; i++)
-	dsum += trans[c][i] * pix[i];
-      if (dsum < 0)  dsum = 0;
-      if (dsum > 24000) dsum = 24000;
-      ipix[c] = dsum + 0.5;
-    }
-    FORC3 pix[c] = ipix[c];
-  }
-
-  /* Smooth the image bottom-to-top and save at 1/4 scale */
-  shrink = (short (*)[3]) calloc ((width/4) * (height/4), sizeof *shrink);
-  merror (shrink, "foveon_interpolate()");
-  for (row = height/4; row--; )
-    for (col=0; col < width/4; col++) {
-      ipix[0] = ipix[1] = ipix[2] = 0;
-      for (i=0; i < 4; i++)
-	for (j=0; j < 4; j++)
-	  FORC3 ipix[c] += image[(row*4+i)*width+col*4+j][c];
-      FORC3
-	if (row+2 > height/4)
-	  shrink[row*(width/4)+col][c] = ipix[c] >> 4;
-	else
-	  shrink[row*(width/4)+col][c] =
-	    (shrink[(row+1)*(width/4)+col][c]*1840 + ipix[c]*141 + 2048) >> 12;
-    }
-  /* From the 1/4-scale image, smooth right-to-left */
-  for (row=0; row < (height & ~3); row++) {
-    ipix[0] = ipix[1] = ipix[2] = 0;
-    if ((row & 3) == 0)
-      for (col = width & ~3 ; col--; )
-	FORC3 smrow[0][col][c] = ipix[c] =
-	  (shrink[(row/4)*(width/4)+col/4][c]*1485 + ipix[c]*6707 + 4096) >> 13;
-
-  /* Then smooth left-to-right */
-    ipix[0] = ipix[1] = ipix[2] = 0;
-    for (col=0; col < (width & ~3); col++)
-      FORC3 smrow[1][col][c] = ipix[c] =
-	(smrow[0][col][c]*1485 + ipix[c]*6707 + 4096) >> 13;
-
-  /* Smooth top-to-bottom */
-    if (row == 0)
-      memcpy (smrow[2], smrow[1], sizeof **smrow * width);
-    else
-      for (col=0; col < (width & ~3); col++)
-	FORC3 smrow[2][col][c] =
-	  (smrow[2][col][c]*6707 + smrow[1][col][c]*1485 + 4096) >> 13;
-
-  /* Adjust the chroma toward the smooth values */
-    for (col=0; col < (width & ~3); col++) {
-      for (i=j=30, c=0; c < 3; c++) {
-	i += smrow[2][col][c];
-	j += image[row*width+col][c];
-      }
-      j = (j << 16) / i;
-      for (sum=c=0; c < 3; c++) {
-	ipix[c] = foveon_apply_curve (curve[c+3],
-	  ((smrow[2][col][c] * j + 0x8000) >> 16) - image[row*width+col][c]);
-	sum += ipix[c];
-      }
-      sum >>= 3;
-      FORC3 {
-	i = image[row*width+col][c] + ipix[c] - sum;
-	if (i < 0) i = 0;
-	image[row*width+col][c] = i;
-      }
-    }
-  }
-  free (shrink);
-  free (smrow[6]);
-  for (i=0; i < 8; i++)
-    free (curve[i]);
-
-  /* Trim off the black border */
-  active[1] -= keep[1];
-  active[3] -= 2;
-  i = active[2] - active[0];
-  for (row=0; row < active[3]-active[1]; row++)
-    memcpy (image[row*i], image[(row+active[1])*width+active[0]],
-	 i * sizeof *image);
-  width = i;
-  height = row;
-}
-#undef image
-
-/* RESTRICTED code ends here */
+//@end COMMON
 
 void CLASS crop_masked_pixels()
 {
@@ -5066,10 +4570,10 @@ int CLASS parse_tiff_ifd (int base)
 	parse_tiff_ifd (base);
 	break;
       case 2: case 256: case 61441:	/* ImageWidth */
-	tiff_ifd[ifd].width = getint(type);
+	tiff_ifd[ifd].t_width = getint(type);
 	break;
       case 3: case 257: case 61442:	/* ImageHeight */
-	tiff_ifd[ifd].height = getint(type);
+	tiff_ifd[ifd].t_height = getint(type);
 	break;
       case 258:				/* BitsPerSample */
       case 61443:
@@ -5108,12 +4612,12 @@ int CLASS parse_tiff_ifd (int base)
 	  fseek (ifp, tiff_ifd[ifd].offset, SEEK_SET);
 	  if (ljpeg_start (&jh, 1)) {
 	    tiff_ifd[ifd].comp    = 6;
-	    tiff_ifd[ifd].width   = jh.wide;
-	    tiff_ifd[ifd].height  = jh.high;
+	    tiff_ifd[ifd].t_width   = jh.wide;
+	    tiff_ifd[ifd].t_height  = jh.high;
 	    tiff_ifd[ifd].bps     = jh.bits;
 	    tiff_ifd[ifd].samples = jh.clrs;
 	    if (!(jh.sraw || (jh.clrs & 1)))
-	      tiff_ifd[ifd].width *= jh.clrs;
+	      tiff_ifd[ifd].t_width *= jh.clrs;
 	    i = order;
 	    parse_tiff (tiff_ifd[ifd].offset + 12);
 	    order = i;
@@ -5121,7 +4625,7 @@ int CLASS parse_tiff_ifd (int base)
 	}
 	break;
       case 274:				/* Orientation */
-	tiff_ifd[ifd].flip = "50132467"[get2() & 7]-'0';
+	tiff_ifd[ifd].t_flip = "50132467"[get2() & 7]-'0';
 	break;
       case 277:				/* SamplesPerPixel */
 	tiff_ifd[ifd].samples = getint(type) & 7;
@@ -5151,10 +4655,10 @@ int CLASS parse_tiff_ifd (int base)
 	fread (artist, 64, 1, ifp);
 	break;
       case 322:				/* TileWidth */
-	tiff_ifd[ifd].tile_width = getint(type);
+	tiff_ifd[ifd].t_tile_width = getint(type);
 	break;
       case 323:				/* TileLength */
-	tiff_ifd[ifd].tile_length = getint(type);
+	tiff_ifd[ifd].t_tile_length = getint(type);
 	break;
       case 324:				/* TileOffsets */
 	tiff_ifd[ifd].offset = len > 1 ? ftell(ifp) : get4();
@@ -5164,7 +4668,7 @@ int CLASS parse_tiff_ifd (int base)
 	}
 	break;
       case 330:				/* SubIFDs */
-	if (!strcmp(model,"DSLR-A100") && tiff_ifd[ifd].width == 3872) {
+	if (!strcmp(model,"DSLR-A100") && tiff_ifd[ifd].t_width == 3872) {
 	  load_raw = &CLASS sony_arw_load_raw;
 	  data_offset = get4()+base;
 	  ifd++;  break;
@@ -5517,24 +5021,24 @@ void CLASS apply_tiff()
 	max_samp = tiff_ifd[i].samples;
     if (max_samp > 3) max_samp = 3;
     if ((tiff_ifd[i].comp != 6 || tiff_ifd[i].samples != 3) &&
-	(tiff_ifd[i].width | tiff_ifd[i].height) < 0x10000 &&
-	tiff_ifd[i].width*tiff_ifd[i].height > raw_width*raw_height) {
-      raw_width     = tiff_ifd[i].width;
-      raw_height    = tiff_ifd[i].height;
+	(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
+	tiff_ifd[i].t_width*tiff_ifd[i].t_height > raw_width*raw_height) {
+      raw_width     = tiff_ifd[i].t_width;
+      raw_height    = tiff_ifd[i].t_height;
       tiff_bps      = tiff_ifd[i].bps;
       tiff_compress = tiff_ifd[i].comp;
       data_offset   = tiff_ifd[i].offset;
-      tiff_flip     = tiff_ifd[i].flip;
+      tiff_flip     = tiff_ifd[i].t_flip;
       tiff_samples  = tiff_ifd[i].samples;
-      tile_width    = tiff_ifd[i].tile_width;
-      tile_length   = tiff_ifd[i].tile_length;
+      tile_width    = tiff_ifd[i].t_tile_width;
+      tile_length   = tiff_ifd[i].t_tile_length;
       raw = i;
     }
   }
   if (!tile_width ) tile_width  = INT_MAX;
   if (!tile_length) tile_length = INT_MAX;
   for (i=tiff_nifds; i--; )
-    if (tiff_ifd[i].flip) tiff_flip = tiff_ifd[i].flip;
+    if (tiff_ifd[i].t_flip) tiff_flip = tiff_ifd[i].t_flip;
   if (raw >= 0 && !load_raw)
     switch (tiff_compress) {
       case 32767:
@@ -5592,11 +5096,11 @@ void CLASS apply_tiff()
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
     if (i != raw && tiff_ifd[i].samples == max_samp &&
-	tiff_ifd[i].width * tiff_ifd[i].height / SQR(tiff_ifd[i].bps+1) >
+	tiff_ifd[i].t_width * tiff_ifd[i].t_height / SQR(tiff_ifd[i].bps+1) >
 	      thumb_width *       thumb_height / SQR(thumb_misc+1)
 	&& tiff_ifd[i].comp != 34892) {
-      thumb_width  = tiff_ifd[i].width;
-      thumb_height = tiff_ifd[i].height;
+      thumb_width  = tiff_ifd[i].t_width;
+      thumb_height = tiff_ifd[i].t_height;
       thumb_offset = tiff_ifd[i].offset;
       thumb_length = tiff_ifd[i].bytes;
       thumb_misc   = tiff_ifd[i].bps;

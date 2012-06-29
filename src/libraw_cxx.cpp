@@ -309,10 +309,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     d_info->decoder_flags = LIBRAW_DECODER_NOTSET;
 
     // sorted names order
-    if (load_raw == &LibRaw::adobe_dng_load_raw_lj) 
+    if (load_raw == &LibRaw::lossless_dng_load_raw) 
         {
             // Check rbayer
-            d_info->decoder_name = "adobe_dng_load_raw_lj()"; 
+            d_info->decoder_name = "lossless_dng_load_raw()"; 
             d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT ;
             d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
         }
@@ -328,9 +328,9 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "canon_600_load_raw()";   
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; // WB set within decoder, no need to load raw
         }
-    else if (load_raw == &LibRaw::canon_compressed_load_raw)
+    else if (load_raw == &LibRaw::canon_load_raw)
         {
-            d_info->decoder_name = "canon_compressed_load_raw()"; 
+            d_info->decoder_name = "canon_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
     else if (load_raw == &LibRaw::canon_sraw_load_raw) 
@@ -428,10 +428,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "minolta_rd175_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
-    else if (load_raw == &LibRaw::nikon_compressed_load_raw)
+    else if (load_raw == &LibRaw::nikon_load_raw)
         {
             // Check rbayer
-            d_info->decoder_name = "nikon_compressed_load_raw()";
+            d_info->decoder_name = "nikon_load_raw()";
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
     else if (load_raw == &LibRaw::nokia_load_raw )
