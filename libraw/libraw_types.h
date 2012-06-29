@@ -173,6 +173,7 @@ typedef struct
                 iwidth;
     double      pixel_aspect;
     int         flip;
+  int         mask[8][4];
 
 } libraw_image_sizes_t;
 

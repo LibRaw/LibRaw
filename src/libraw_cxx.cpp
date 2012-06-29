@@ -239,7 +239,7 @@ void  LibRaw::      free(void *p)
     memmgr.free(p);
 }
 
-
+#if 0
 int LibRaw:: fc (int row, int col)
 {
     static const char filter[16][16] =
@@ -263,6 +263,7 @@ int LibRaw:: fc (int row, int col)
     if (imgdata.idata.filters != 1) return FC(row,col);
     return filter[(row+imgdata.sizes.top_margin) & 15][(col+imgdata.sizes.left_margin) & 15];
 }
+#endif
 
 void LibRaw:: recycle() 
 {
@@ -316,10 +317,17 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT ;
             d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
         }
-    else if (load_raw == &LibRaw::adobe_dng_load_raw_nc)
+    else if (load_raw == &LibRaw::packed_dng_load_raw)
         {
             // Check rbayer
-            d_info->decoder_name = "adobe_dng_load_raw_nc()"; 
+            d_info->decoder_name = "packed_dng_load_raw()"; 
+            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT;
+            d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
+        }
+    else if (load_raw == &LibRaw::lossy_dng_load_raw)
+        {
+            // Check rbayer
+            d_info->decoder_name = "lossy_dng_load_raw()"; 
             d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_4COMPONENT;
             d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
         }
@@ -349,11 +357,13 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "foveon_load_raw()";
             d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
         }
+#if 0
     else if (load_raw == &LibRaw::fuji_load_raw ) 
         { 
             d_info->decoder_name = "fuji_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
         }
+#endif
     else if (load_raw == &LibRaw::hasselblad_load_raw )
         {
             d_info->decoder_name = "hasselblad_load_raw()"; 
@@ -1137,7 +1147,7 @@ int LibRaw::raw2image_ex(void)
 #endif
                             for(int row = 0; row < S.height; row++)
                                 for(int col = 0; col < S.width; col++)
-                                    imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][fc(row,col)]
+                                    imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][fcol(row,col)]
                                         = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
                                                                     +(col+S.left_margin)];
                         else
@@ -1237,7 +1247,7 @@ int LibRaw::raw2image(void)
                     {
                         for(int row = 0; row < S.height; row++)
                             for(int col = 0; col < S.width; col++)
-                                imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][fc(row,col)]
+                                imgdata.image[(row >> IO.shrink)*S.iwidth + (col>>IO.shrink)][fcol(row,col)]
                                 = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
                                                                            +(col+S.left_margin)];
                     }

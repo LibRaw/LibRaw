@@ -49,6 +49,7 @@ it under the terms of the one of three licenses as you choose:
 #define iwidth          (imgdata.sizes.iwidth)
 #define pixel_aspect    (imgdata.sizes.pixel_aspect)
 #define flip            (imgdata.sizes.flip)
+#define mask            (imgdata.sizes.mask)
 
 //imgdata.color
 #define white           (imgdata.color.white)

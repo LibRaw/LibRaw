@@ -75,7 +75,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        lossless_dng_load_raw();
     void        packed_dng_load_raw();
     void        lossy_dng_load_raw();
-    void        adobe_dng_load_raw_nc();
+//void        adobe_dng_load_raw_nc();
 
 // Pentax
     void        pentax_load_raw();
@@ -92,7 +92,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        nikon_e2100_load_raw();
 
 // Fuji
-    void        fuji_load_raw();
+//void        fuji_load_raw();
     void        parse_fuji (int offset);
 
 // RedCine

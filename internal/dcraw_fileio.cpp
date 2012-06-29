@@ -21,3 +21,134 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
+#line 2956 "dcraw/dcraw.c"
+#include <math.h>
+#define CLASS LibRaw::
+#include "libraw/libraw_types.h"
+#define LIBRAW_LIBRARY_BUILD
+#include "libraw/libraw.h"
+#include "internal/defines.h"
+#include "internal/var_defines.h"
+#line 2967 "dcraw/dcraw.c"
+/*
+   Seach from the current directory up to the root looking for
+   a ".badpixels" file, and fix those pixels now.
+ */
+void CLASS bad_pixels (const char *cfname)
+{
+  FILE *fp=NULL;
+#ifndef LIBRAW_LIBRARY_BUILD
+  char *fname, *cp, line[128];
+  int len, time, row, col, r, c, rad, tot, n, fixed=0;
+#else
+  char *cp, line[128];
+  int time, row, col, r, c, rad, tot, n;
+#ifdef DCRAW_VERBOSE
+  int fixed = 0;
+#endif
+#endif
+
+  if (!filters) return;
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_BAD_PIXELS,0,2);
+#endif
+  if (cfname)
+    fp = fopen (cfname, "r");
+#line 3017 "dcraw/dcraw.c"
+  if (!fp)
+      {
+#ifdef LIBRAW_LIBRARY_BUILD
+          imgdata.process_warnings |= LIBRAW_WARN_NO_BADPIXELMAP;
+#endif
+          return;
+      }
+  while (fgets (line, 128, fp)) {
+    cp = strchr (line, '#');
+    if (cp) *cp = 0;
+    if (sscanf (line, "%d %d %d", &col, &row, &time) != 3) continue;
+    if ((unsigned) col >= width || (unsigned) row >= height) continue;
+    if (time > timestamp) continue;
+    for (tot=n=0, rad=1; rad < 3 && n==0; rad++)
+      for (r = row-rad; r <= row+rad; r++)
+	for (c = col-rad; c <= col+rad; c++)
+	  if ((unsigned) r < height && (unsigned) c < width &&
+		(r != row || c != col) && fcol(r,c) == fcol(row,col)) {
+	    tot += BAYER2(r,c);
+	    n++;
+	  }
+    BAYER2(row,col) = tot/n;
+#ifdef DCRAW_VERBOSE
+    if (verbose) {
+      if (!fixed++)
+	fprintf (stderr,_("Fixed dead pixels at:"));
+      fprintf (stderr, " %d,%d", col, row);
+    }
+#endif
+  }
+#ifdef DCRAW_VERBOSE
+  if (fixed) fputc ('\n', stderr);
+#endif
+  fclose (fp);
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_BAD_PIXELS,1,2);
+#endif
+}
+
+void CLASS subtract (const char *fname)
+{
+  FILE *fp;
+  int dim[3]={0,0,0}, comment=0, number=0, error=0, nd=0, c, row, col;
+  ushort *pixel;
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_DARK_FRAME,0,2);
+#endif
+
+  if (!(fp = fopen (fname, "rb"))) {
+#ifdef DCRAW_VERBOSE
+    perror (fname); 
+#endif
+#ifdef LIBRAW_LIBRARY_BUILD
+    imgdata.process_warnings |= LIBRAW_WARN_BAD_DARKFRAME_FILE;
+#endif
+    return;
+  }
+  if (fgetc(fp) != 'P' || fgetc(fp) != '5') error = 1;
+  while (!error && nd < 3 && (c = fgetc(fp)) != EOF) {
+    if (c == '#')  comment = 1;
+    if (c == '\n') comment = 0;
+    if (comment) continue;
+    if (isdigit(c)) number = 1;
+    if (number) {
+      if (isdigit(c)) dim[nd] = dim[nd]*10 + c -'0';
+      else if (isspace(c)) {
+	number = 0;  nd++;
+      } else error = 1;
+    }
+  }
+  if (error || nd < 3) {
+    fprintf (stderr,_("%s is not a valid PGM file!\n"), fname);
+    fclose (fp);  return;
+  } else if (dim[0] != width || dim[1] != height || dim[2] != 65535) {
+#ifdef DCRAW_VERBOSE
+      fprintf (stderr,_("%s has the wrong dimensions!\n"), fname);
+#endif
+#ifdef LIBRAW_LIBRARY_BUILD
+      imgdata.process_warnings |= LIBRAW_WARN_BAD_DARKFRAME_DIM;
+#endif
+    fclose (fp);  return;
+  }
+  pixel = (ushort *) calloc (width, sizeof *pixel);
+  merror (pixel, "subtract()");
+  for (row=0; row < height; row++) {
+    fread (pixel, 2, width, fp);
+    for (col=0; col < width; col++)
+      BAYER(row,col) = MAX (BAYER(row,col) - ntohs(pixel[col]), 0);
+  }
+  free (pixel);
+  fclose (fp);
+  memset (cblack, 0, sizeof cblack);
+  black = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_DARK_FRAME,1,2);
+#endif
+}

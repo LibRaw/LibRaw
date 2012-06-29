@@ -105,7 +105,7 @@ int main(int ac, char *av[])
                     printf ("\nFilter pattern: ");
                     if (!P1.cdesc[3]) P1.cdesc[3] = 'G';
                     for (int i=0; i < 16; i++)
-                        putchar (P1.cdesc[MyCoolRawProcessor.fc(i >> 1,i & 1)]);
+                        putchar (P1.cdesc[MyCoolRawProcessor.fcol(i >> 1,i & 1)]);
                 }
             printf ("\nDaylight multipliers:");
             for(int c=0;c<P1.colors;c++) printf (" %f", C.pre_mul[c]);

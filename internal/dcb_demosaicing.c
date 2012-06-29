@@ -500,7 +500,7 @@ void CLASS fbdd_correction()
 	for (row=2; row < height-2; row++) {
 	for (col=2, indx=row*width+col; col < width-2; col++, indx++) { 	
 
-		c =  fc(row,col);
+		c =  fcol(row,col);
 
 		image[indx][c] = ULIM(image[indx][c], 
 					MAX(image[indx-1][c], MAX(image[indx+1][c], MAX(image[indx-u][c], image[indx+u][c]))), 
