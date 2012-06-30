@@ -2591,7 +2591,7 @@ void CLASS redcine_load_raw()
   jas_stream_close (in);
 #endif
 }
-#line 2937 "dcraw/dcraw.c"
+#line 3640 "dcraw/dcraw.c"
 void CLASS remove_zeroes()
 {
   unsigned row, col, tot, n, r, c;
@@ -2608,7 +2608,7 @@ void CLASS remove_zeroes()
 	if (n) BAYER(row,col) = tot/n;
       }
 }
-#line 3117 "dcraw/dcraw.c"
+#line 3820 "dcraw/dcraw.c"
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
 {
   int i;
@@ -3676,7 +3676,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 4189 "dcraw/dcraw.c"
+#line 4892 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -4191,7 +4191,7 @@ void CLASS parse_kodak_ifd (int base)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 4709 "dcraw/dcraw.c"
+#line 5412 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -5428,7 +5428,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 6052 "dcraw/dcraw.c"
+#line 6755 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -7803,7 +7803,7 @@ notraw:
   RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
 #endif
 }
-#line 8516 "dcraw/dcraw.c"
+#line 9219 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -8026,7 +8026,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 8764 "dcraw/dcraw.c"
+#line 9467 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

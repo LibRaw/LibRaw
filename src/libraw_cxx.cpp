@@ -2060,7 +2060,7 @@ void LibRaw::subtract_black()
     else
         {
             // only calculate channel maximum;
-            int row,col,cc,val;
+            int row,col,cc;
             ZERO(C.channel_maximum);
             for(row=0;row<S.height;row++)
                 for(col=0;col<S.width;col++)
