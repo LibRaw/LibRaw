@@ -177,7 +177,7 @@ struct tiff_ifd {
 } tiff_ifd[10];
 
 struct ph1 {
-  int format, key_off, black, black_off, split_col, tag_21a;
+  int format, key_off, t_black, black_off, split_col, tag_21a;
   float tag_210;
 } ph1;
 
@@ -5473,7 +5473,7 @@ void CLASS parse_external_jpeg()
   ifp = save;
 #endif
 }
-//@end COMMON
+
 /*
    CIFF block 0x1030 contains an 8x8 white sample.
    Load this into white[][] for use in scale_colors().
@@ -5720,7 +5720,7 @@ void CLASS parse_phase_one (int base)
       case 0x210:  ph1.tag_210   = int_to_float(data);	break;
       case 0x21a:  ph1.tag_21a   = data;		break;
       case 0x21c:  strip_offset  = data+base;		break;
-      case 0x21d:  ph1.black     = data;		break;
+      case 0x21d:  ph1.t_black     = data;		break;
       case 0x222:  ph1.split_col = data;		break;
       case 0x223:  ph1.black_off = data+base;		break;
       case 0x301:
@@ -5924,7 +5924,9 @@ void CLASS parse_redcine()
   fseek (ifp, 0, SEEK_END);
   fseek (ifp, -(i = ftello(ifp) & 511), SEEK_CUR);
   if (get4() != i || get4() != 0x52454f42) {
+#ifdef DCRAW_VERBOSE
     fprintf (stderr,_("%s: Tail is missing, parsing from head...\n"), ifname);
+#endif
     fseek (ifp, 0, SEEK_SET);
     while ((len = get4()) != EOF) {
       if (get4() == 0x52454456)
@@ -5940,6 +5942,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
+//@end COMMON
 
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
@@ -5980,8 +5983,10 @@ void CLASS parse_foveon()
 	if (wide > raw_width && high > raw_height) {
 	  switch (pent) {
 	    case  5:  load_flags = 1;
+#if 0
 	    case  6:  load_raw = &CLASS foveon_sd_load_raw;  break;
 	    case 30:  load_raw = &CLASS foveon_dp_load_raw;  break;
+#endif
 	    default:  load_raw = 0;
 	  }
 	  raw_width  = wide;
@@ -6042,14 +6047,16 @@ void CLASS parse_foveon()
   is_foveon = 1;
 }
 
+
+//@out COMMON
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
-void CLASS adobe_coeff (const char *make, const char *model)
+void CLASS adobe_coeff (const char *t_make, const char *t_model)
 {
   static const struct {
     const char *prefix;
-    short black, maximum, trans[12];
+    short t_black, t_maximum, trans[12];
   } table[] = {
     { "AGFAPHOTO DC-833m", 0, 0,	/* DJC */
 	{ 11438,-3762,-1115,-2409,9914,2497,-1227,2295,5300 } },
@@ -6736,13 +6743,16 @@ void CLASS adobe_coeff (const char *make, const char *model)
   char name[130];
   int i, j;
 
-  sprintf (name, "%s %s", make, model);
+  sprintf (name, "%s %s", t_make, t_model);
   for (i=0; i < sizeof table / sizeof *table; i++)
     if (!strncmp (name, table[i].prefix, strlen(table[i].prefix))) {
-      if (table[i].black)   black   = (ushort) table[i].black;
-      if (table[i].maximum) maximum = (ushort) table[i].maximum;
+      if (table[i].t_black)   black   = (ushort) table[i].t_black;
+      if (table[i].t_maximum) maximum = (ushort) table[i].t_maximum;
       if (table[i].trans[0]) {
 	for (j=0; j < 12; j++)
+#ifdef LIBRAW_LIBRARY_BUILD
+          imgdata.color.cam_xyz[0][j] = 
+#endif
 	  cam_xyz[0][j] = table[i].trans[j] / 10000.0;
 	cam_xyz_coeff (cam_xyz);
       }
@@ -6849,7 +6859,7 @@ void CLASS identify()
     { 4508, 3330,  0,  0, -3, -6 } };
   static const struct {
     int fsize;
-    char make[12], model[19], withjpeg;
+    char t_make[12], t_model[19], withjpeg;
   } table[] = {
     {    62464, "Kodak",    "DC20"            ,0 },
     {   124928, "Kodak",    "DC20"            ,0 },
@@ -6943,6 +6953,10 @@ void CLASS identify()
       "MINOLTA", "Minolta", "Konica", "CASIO", "Sinar", "Phase One",
       "SAMSUNG", "Mamiya", "MOTOROLA", "LEICA" };
 
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,0,2);
+#endif
+
   tiff_flip = flip = filters = -1;	/* 0 is valid, so -1 is unknown */
   raw_height = raw_width = fuji_width = fuji_layout = cr2_slice[0] = 0;
   maximum = height = width = top_margin = left_margin = 0;
@@ -6978,8 +6992,8 @@ void CLASS identify()
   fread (head, 1, 32, ifp);
   fseek (ifp, 0, SEEK_END);
   flen = fsize = ftell(ifp);
-  if ((cp = (char *) memmem (head, 32, "MMMM", 4)) ||
-      (cp = (char *) memmem (head, 32, "IIII", 4))) {
+  if ((cp = (char *) memmem (head, 32, (char*)"MMMM", 4)) ||
+      (cp = (char *) memmem (head, 32, (char*)"IIII", 4))) {
     parse_phase_one (cp-head);
     if (cp-head && parse_tiff(0)) apply_tiff();
   } else if (order == 0x4949 || order == 0x4d4d) {
@@ -7088,8 +7102,8 @@ void CLASS identify()
   else
     for (zero_fsize=i=0; i < sizeof table / sizeof *table; i++)
       if (fsize == table[i].fsize) {
-	strcpy (make,  table[i].make );
-	strcpy (model, table[i].model);
+	strcpy (make,  table[i].t_make );
+	strcpy (model, table[i].t_model);
 	if (table[i].withjpeg)
 	  parse_external_jpeg();
       }
@@ -8372,17 +8386,27 @@ dng_skip:
   if (!load_raw || height < 22) is_raw = 0;
 #ifdef NO_JASPER
   if (load_raw == &CLASS redcine_load_raw) {
+#ifdef DCRAW_VERBOSE
     fprintf (stderr,_("%s: You must link dcraw with %s!!\n"),
 	ifname, "libjasper");
+#endif
     is_raw = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+    imgdata.process_warnings |= LIBRAW_WARN_NO_JASPER;
+#endif
   }
 #endif
 #ifdef NO_JPEG
   if (load_raw == &CLASS kodak_jpeg_load_raw ||
       load_raw == &CLASS lossy_dng_load_raw) {
+#ifdef DCRAW_VERBOSE
     fprintf (stderr,_("%s: You must link dcraw with %s!!\n"),
 	ifname, "libjpeg");
+#endif
     is_raw = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+    imgdata.process_warnings |= LIBRAW_WARN_NO_JPEGLIB;
+#endif
   }
 #endif
   if (!cdesc[0])
@@ -8395,8 +8419,13 @@ dng_skip:
 notraw:
   if (flip == -1) flip = tiff_flip;
   if (flip == -1) flip = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
+#endif
 }
+//@end COMMON
 
+//@out FILEIO
 #ifndef NO_LCMS
 void CLASS apply_profile (const char *input, const char *output)
 {
@@ -8410,15 +8439,32 @@ void CLASS apply_profile (const char *input, const char *output)
   if (strcmp (input, "embed"))
     hInProfile = cmsOpenProfileFromFile (input, "r");
   else if (profile_length) {
+#ifndef LIBRAW_LIBRARY_BUILD
     prof = (char *) malloc (profile_length);
     merror (prof, "apply_profile()");
     fseek (ifp, profile_offset, SEEK_SET);
     fread (prof, 1, profile_length, ifp);
     hInProfile = cmsOpenProfileFromMem (prof, profile_length);
     free (prof);
+#else
+    hInProfile = cmsOpenProfileFromMem (imgdata.color.profile, profile_length);
+#endif
   } else
-    fprintf (stderr,_("%s has no embedded profile.\n"), ifname);
-  if (!hInProfile) return;
+    {
+#ifdef LIBRAW_LIBRARY_BUILD
+          imgdata.process_warnings |= LIBRAW_WARN_NO_EMBEDDED_PROFILE;
+#endif
+#ifdef DCRAW_VERBOSE
+          fprintf (stderr,_("%s has no embedded profile.\n"), ifname);
+#endif
+    }
+  if (!hInProfile)
+      {
+#ifdef LIBRAW_LIBRARY_BUILD
+          imgdata.process_warnings |= LIBRAW_WARN_NO_INPUT_PROFILE;
+#endif
+          return;
+      }
   if (!output)
     hOutProfile = cmsCreate_sRGBProfile();
   else if ((fp = fopen (output, "rb"))) {
@@ -8432,11 +8478,25 @@ void CLASS apply_profile (const char *input, const char *output)
       free (oprof);
       oprof = 0;
     }
-  } else
+  }
+#ifdef DCRAW_VERBOSE
+ else
     fprintf (stderr,_("Cannot open file %s!\n"), output);
-  if (!hOutProfile) goto quit;
+#endif
+  if (!hOutProfile)
+      {
+#ifdef LIBRAW_LIBRARY_BUILD
+          imgdata.process_warnings |= LIBRAW_WARN_BAD_OUTPUT_PROFILE;
+#endif
+          goto quit;
+      }
+#ifdef DCRAW_VERBOSE
   if (verbose)
     fprintf (stderr,_("Applying color profile...\n"));
+#endif
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_APPLY_PROFILE,0,2);
+#endif
   hTransform = cmsCreateTransform (hInProfile, TYPE_RGBA_16,
 	hOutProfile, TYPE_RGBA_16, INTENT_PERCEPTUAL, 0);
   cmsDoTransform (hTransform, image, image, width*height);
@@ -8445,14 +8505,25 @@ void CLASS apply_profile (const char *input, const char *output)
   cmsCloseProfile (hOutProfile);
 quit:
   cmsCloseProfile (hInProfile);
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_APPLY_PROFILE,1,2);
+#endif
 }
 #endif
+//@end FILEIO
 
+//@out COMMON
 void CLASS convert_to_rgb()
 {
-  int row, col, c, i, j, k;
+#ifndef LIBRAW_LIBRARY_BUILD
+  int row, col, c;
+#endif
+  int  i, j, k;
+#ifndef LIBRAW_LIBRARY_BUILD
   ushort *img;
-  float out[3], out_cam[3][4];
+  float out[3];
+#endif
+  float out_cam[3][4];
   double num, inverse[3][3];
   static const double xyzd50_srgb[3][3] =
   { { 0.436083, 0.385083, 0.143055 },
@@ -8493,6 +8564,9 @@ void CLASS convert_to_rgb()
   static const unsigned pwhite[] = { 0xf351, 0x10000, 0x116cc };
   unsigned pcurve[] = { 0x63757276, 0, 1, 0x1000000 };
 
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_CONVERT_RGB,0,2);
+#endif
   gamma_curve (gamm[0], gamm[1], 0, 0);
   memcpy (out_cam, rgb_cam, sizeof out_cam);
   raw_color |= colors == 1 || document_mode ||
@@ -8530,10 +8604,14 @@ void CLASS convert_to_rgb()
 	for (out_cam[i][j] = k=0; k < 3; k++)
 	  out_cam[i][j] += out_rgb[output_color-1][i][k] * rgb_cam[k][j];
   }
+#ifdef DCRAW_VERBOSE
   if (verbose)
     fprintf (stderr, raw_color ? _("Building histograms...\n") :
 	_("Converting to %s colorspace...\n"), name[output_color-1]);
-
+#endif
+#ifdef LIBRAW_LIBRARY_BUILD
+  convert_to_rgb_loop(out_cam);
+#else
   memset (histogram, 0, sizeof histogram);
   for (img=image[0], row=0; row < height; row++)
     for (col=0; col < width; col++, img+=4) {
@@ -8550,8 +8628,12 @@ void CLASS convert_to_rgb()
 	img[0] = img[fcol(row,col)];
       FORCC histogram[c][img[c] >> 3]++;
     }
+#endif
   if (colors == 4 && output_color) colors = 3;
   if (document_mode && filters) colors = 1;
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_CONVERT_RGB,1,2);
+#endif
 }
 
 void CLASS fuji_rotate()
@@ -8563,14 +8645,20 @@ void CLASS fuji_rotate()
   ushort wide, high, (*img)[4], (*pix)[4];
 
   if (!fuji_width) return;
+#ifdef DCRAW_VERBOSE
   if (verbose)
     fprintf (stderr,_("Rotating image 45 degrees...\n"));
+#endif
   fuji_width = (fuji_width - 1 + shrink) >> shrink;
   step = sqrt(0.5);
   wide = fuji_width / step;
   high = (height - fuji_width) / step;
   img = (ushort (*)[4]) calloc (wide*high, sizeof *img);
   merror (img, "fuji_rotate()");
+
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_FUJI_ROTATE,0,2);
+#endif
 
   for (row=0; row < high; row++)
     for (col=0; col < wide; col++) {
@@ -8590,6 +8678,9 @@ void CLASS fuji_rotate()
   height = high;
   image  = img;
   fuji_width = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_FUJI_ROTATE,1,2);
+#endif
 }
 
 void CLASS stretch()
@@ -8599,7 +8690,12 @@ void CLASS stretch()
   double rc, frac;
 
   if (pixel_aspect == 1) return;
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_STRETCH,0,2);
+#endif
+#ifdef DCRAW_VERBOSE
   if (verbose) fprintf (stderr,_("Stretching the image...\n"));
+#endif
   if (pixel_aspect < 1) {
     newdim = height / pixel_aspect + 0.5;
     img = (ushort (*)[4]) calloc (width*newdim, sizeof *img);
@@ -8627,6 +8723,9 @@ void CLASS stretch()
   }
   free (image);
   image = img;
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_STRETCH,1,2);
+#endif
 }
 
 int CLASS flip_index (int row, int col)
@@ -8636,6 +8735,8 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
+//@end COMMON
+
 
 struct tiff_tag {
   ushort tag, type;
@@ -8644,7 +8745,7 @@ struct tiff_tag {
 };
 
 struct tiff_hdr {
-  ushort order, magic;
+  ushort t_order, magic;
   int ifd;
   ushort pad, ntag;
   struct tiff_tag tag[23];
@@ -8656,9 +8757,10 @@ struct tiff_hdr {
   short bps[4];
   int rat[10];
   unsigned gps[26];
-  char desc[512], make[64], model[64], soft[32], date[20], artist[64];
+  char t_desc[512], t_make[64], t_model[64], soft[32], date[20], t_artist[64];
 };
 
+//@out COMMON
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
@@ -8684,7 +8786,7 @@ void CLASS tiff_head (struct tiff_hdr *th, int full)
   struct tm *t;
 
   memset (th, 0, sizeof *th);
-  th->order = htonl(0x4d4d4949) >> 16;
+  th->t_order = htonl(0x4d4d4949) >> 16;
   th->magic = 42;
   th->ifd = 10;
   if (full) {
@@ -8698,9 +8800,9 @@ void CLASS tiff_head (struct tiff_hdr *th, int full)
     tiff_set (&th->ntag, 259, 3, 1, 1);
     tiff_set (&th->ntag, 262, 3, 1, 1 + (colors > 1));
   }
-  tiff_set (&th->ntag, 270, 2, 512, TOFF(th->desc));
-  tiff_set (&th->ntag, 271, 2, 64, TOFF(th->make));
-  tiff_set (&th->ntag, 272, 2, 64, TOFF(th->model));
+  tiff_set (&th->ntag, 270, 2, 512, TOFF(th->t_desc));
+  tiff_set (&th->ntag, 271, 2, 64, TOFF(th->t_make));
+  tiff_set (&th->ntag, 272, 2, 64, TOFF(th->t_model));
   if (full) {
     if (oprof) psize = ntohl(oprof[0]);
     tiff_set (&th->ntag, 273, 4, 1, sizeof *th + psize);
@@ -8715,7 +8817,7 @@ void CLASS tiff_head (struct tiff_hdr *th, int full)
   tiff_set (&th->ntag, 296, 3, 1, 2);
   tiff_set (&th->ntag, 305, 2, 32, TOFF(th->soft));
   tiff_set (&th->ntag, 306, 2, 20, TOFF(th->date));
-  tiff_set (&th->ntag, 315, 2, 64, TOFF(th->artist));
+  tiff_set (&th->ntag, 315, 2, 64, TOFF(th->t_artist));
   tiff_set (&th->ntag, 34665, 4, 1, TOFF(th->nexif));
   if (psize) tiff_set (&th->ntag, 34675, 7, psize, sizeof *th);
   tiff_set (&th->nexif, 33434, 5, 1, TOFF(th->rat[4]));
@@ -8742,16 +8844,44 @@ void CLASS tiff_head (struct tiff_hdr *th, int full)
   th->rat[4] *= shutter;
   th->rat[6] *= aperture;
   th->rat[8] *= focal_len;
-  strncpy (th->desc, desc, 512);
-  strncpy (th->make, make, 64);
-  strncpy (th->model, model, 64);
+  strncpy (th->t_desc, desc, 512);
+  strncpy (th->t_make, make, 64);
+  strncpy (th->t_model, model, 64);
   strcpy (th->soft, "dcraw v"DCRAW_VERSION);
   t = localtime (&timestamp);
   sprintf (th->date, "%04d:%02d:%02d %02d:%02d:%02d",
       t->tm_year+1900,t->tm_mon+1,t->tm_mday,t->tm_hour,t->tm_min,t->tm_sec);
-  strncpy (th->artist, artist, 64);
+  strncpy (th->t_artist, artist, 64);
 }
 
+#ifdef LIBRAW_LIBRARY_BUILD
+void CLASS jpeg_thumb_writer (FILE *tfp,char *t_humb,int t_humb_length)
+{
+  ushort exif[5];
+  struct tiff_hdr th;
+  fputc (0xff, tfp);
+  fputc (0xd8, tfp);
+  if (strcmp (t_humb+6, "Exif")) {
+    memcpy (exif, "\xff\xe1  Exif\0\0", 10);
+    exif[1] = htons (8 + sizeof th);
+    fwrite (exif, 1, sizeof exif, tfp);
+    tiff_head (&th, 0);
+    fwrite (&th, 1, sizeof th, tfp);
+  }
+  fwrite (t_humb+2, 1, t_humb_length-2, tfp);
+}
+
+void CLASS jpeg_thumb()
+{
+  char *thumb;
+
+  thumb = (char *) malloc (thumb_length);
+  merror (thumb, "jpeg_thumb()");
+  fread (thumb, 1, thumb_length, ifp);
+  jpeg_thumb_writer(ofp,thumb,thumb_length);
+  free (thumb);
+}
+#else
 void CLASS jpeg_thumb()
 {
   char *thumb;
@@ -8773,6 +8903,7 @@ void CLASS jpeg_thumb()
   fwrite (thumb+2, 1, thumb_length-2, ofp);
   free (thumb);
 }
+#endif
 
 void CLASS write_ppm_tiff()
 {
@@ -8780,17 +8911,17 @@ void CLASS write_ppm_tiff()
   uchar *ppm;
   ushort *ppm2;
   int c, row, col, soff, rstep, cstep;
-  int perc, val, total, white=0x2000;
+  int perc, val, total, t_white=0x2000;
 
   perc = width * height * 0.01;		/* 99th percentile white level */
   if (fuji_width) perc /= 2;
   if (!((highlight & ~2) || no_auto_bright))
-    for (white=c=0; c < colors; c++) {
+    for (t_white=c=0; c < colors; c++) {
       for (val=0x2000, total=0; --val > 32; )
 	if ((total += histogram[c][val]) > perc) break;
-      if (white < val) white = val;
+      if (t_white < val) t_white = val;
     }
-  gamma_curve (gamm[0], gamm[1], 2, (white << 3)/bright);
+  gamma_curve (gamm[0], gamm[1], 2, (t_white << 3)/bright);
   iheight = height;
   iwidth  = width;
   if (flip & 4) SWAP(height,width);
@@ -8823,6 +8954,7 @@ void CLASS write_ppm_tiff()
   }
   free (ppm);
 }
+//@end COMMON
 
 int CLASS main (int argc, const char **argv)
 {

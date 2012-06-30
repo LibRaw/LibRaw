@@ -1688,7 +1688,7 @@ void LibRaw::kodak_thumb_loader()
     S.width  = T.twidth;
     P1.filters = 0;
 
-    if (thumb_load_raw == &CLASS kodak_ycbcr_load_thumb) 
+    if (thumb_load_raw == &CLASS kodak_ycbcr_load_raw) 
         {
             S.height += S.height & 1;
             S.width  += S.width  & 1;
@@ -1842,8 +1842,6 @@ void LibRaw::kodak_thumb_loader()
 #undef LIM
 #undef CLIP
 #undef SWAP
-
-
 
 
 // Достает thumbnail из файла, ставит thumb_format в соответствии с форматом

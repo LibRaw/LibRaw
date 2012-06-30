@@ -438,14 +438,14 @@ int main(int argc, char *argv[])
                         }
 					if(!(iobuffer = malloc(st.st_size)))
 					{
-						fprintf(stderr,"Cannot allocate %d kbytes for memory buffer\n",st.st_size/1024);
+						fprintf(stderr,"Cannot allocate %lld kbytes for memory buffer\n",st.st_size/1024);
 						close(file);
 						continue;
 					}
 					int rd;
 					if(st.st_size!=(rd=read(file,iobuffer,st.st_size)))
 					{
-						fprintf(stderr,"Cannot read %d bytes instead of  %d to memory buffer\n",rd,st.st_size);
+						fprintf(stderr,"Cannot read %d bytes instead of  %lld to memory buffer\n",rd,st.st_size);
 						close(file);
 						free(iobuffer);
 						continue;

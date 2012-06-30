@@ -183,17 +183,6 @@ struct ph1_t
     float tag_210;
 };
 
-
-typedef struct
-{
-    unsigned curve_state        : 3;
-    unsigned rgb_cam_state      : 3;
-    unsigned cmatrix_state      : 3;
-    unsigned pre_mul_state      : 3;
-    unsigned cam_mul_state      : 3;
-    unsigned filler             : 17;
-} color_data_state_t;
-
 typedef struct
 {
 	ushort      curve[0x10000]; 
@@ -201,7 +190,6 @@ typedef struct
 	unsigned    black;
 	unsigned    maximum;
 	unsigned    channel_maximum[4];
-    color_data_state_t   color_flags;
     ushort      white[8][8];  
     float       cam_mul[4]; 
     float       pre_mul[4]; 
