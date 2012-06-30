@@ -1227,7 +1227,9 @@ void CLASS phase_one_correct()
   ushort *xval[2];
 
   if (half_size || !meta_length) return;
+#ifdef DCRAW_VERBOSE
   if (verbose) fprintf (stderr,_("Phase One correction...\n"));
+#endif
   fseek (ifp, meta_offset, SEEK_SET);
   order = get2();
   fseek (ifp, 6, SEEK_CUR);
@@ -1955,9 +1957,15 @@ void CLASS kodak_jpeg_load_raw()
   if ((cinfo.output_width      != width  ) ||
       (cinfo.output_height*2   != height ) ||
       (cinfo.output_components != 3      )) {
+#ifdef DCRAW_VERBOSE
     fprintf (stderr,_("%s: incorrect JPEG dimensions\n"), ifname);
+#endif
     jpeg_destroy_decompress (&cinfo);
+#ifdef LIBRAW_LIBRARY_BUILD
+    throw LIBRAW_EXCEPTION_DECODE_JPEG;
+#else
     longjmp (failure, 3);
+#endif
   }
   buf = (*cinfo.mem->alloc_sarray)
 		((j_common_ptr) &cinfo, JPOOL_IMAGE, width*3, 1);
@@ -2591,10 +2599,14 @@ void CLASS redcine_load_raw()
   jas_stream_close (in);
 #endif
 }
-#line 3640 "dcraw/dcraw.c"
+#line 3648 "dcraw/dcraw.c"
 void CLASS remove_zeroes()
 {
   unsigned row, col, tot, n, r, c;
+
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_REMOVE_ZEROES,0,2);
+#endif
 
   for (row=0; row < height; row++)
     for (col=0; col < width; col++)
@@ -2607,8 +2619,11 @@ void CLASS remove_zeroes()
 	      tot += (n++,BAYER(r,c));
 	if (n) BAYER(row,col) = tot/n;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_REMOVE_ZEROES,1,2);
+#endif
 }
-#line 3820 "dcraw/dcraw.c"
+#line 3837 "dcraw/dcraw.c"
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
 {
   int i;
@@ -2979,12 +2994,14 @@ skip_block: ;
   }
   if (!highlight) dmax = dmin;
   FORC4 scale_mul[c] = (pre_mul[c] /= dmax) * 65535.0 / maximum;
+#ifdef DCRAW_VERBOSE
   if (verbose) {
     fprintf (stderr,
       _("Scaling with darkness %d, saturation %d, and\nmultipliers"), dark, sat);
     FORC4 fprintf (stderr, " %f", pre_mul[c]);
     fputc ('\n', stderr);
   }
+#endif
   size = iheight*iwidth;
 #ifdef LIBRAW_LIBRARY_BUILD
   scale_colors_loop(scale_mul);
@@ -2998,8 +3015,10 @@ skip_block: ;
   }
 #endif
   if ((aber[0] != 1 || aber[2] != 1) && colors == 3) {
+#ifdef DCRAW_VERBOSE
     if (verbose)
       fprintf (stderr,_("Correcting chromatic aberration...\n"));
+#endif
     for (c=0; c < 4; c+=2) {
       if (aber[c] == 1) continue;
       img = (ushort *) malloc (size * sizeof *img);
@@ -3304,9 +3323,6 @@ void CLASS ppg_interpolate()
 /*  Fill in the green layer with gradients and pattern recognition: */
 #ifdef LIBRAW_LIBRARY_BUILD
   RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE,0,3);
-#ifdef LIBRAW_USE_OPENMP
-#pragma omp parallel for default(shared) private(guess, diff, row, col, d, c, i, pix) schedule(static)
-#endif
 #endif
   for (row=3; row < height-3; row++)
     for (col=3+(FC(row,3) & 1), c=FC(row,col); col < width-3; col+=2) {
@@ -3326,9 +3342,6 @@ void CLASS ppg_interpolate()
 /*  Calculate red and blue for each green pixel:		*/
 #ifdef LIBRAW_LIBRARY_BUILD
   RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE,1,3);
-#ifdef LIBRAW_USE_OPENMP
-#pragma omp parallel for default(shared) private(guess, diff, row, col, d, c, i, pix) schedule(static)
-#endif
 #endif
   for (row=1; row < height-1; row++)
     for (col=1+(FC(row,2) & 1), c=FC(row,col+1); col < width-1; col+=2) {
@@ -3378,7 +3391,9 @@ void CLASS ahd_interpolate()
    short (*lab)[TS][TS][3], (*lix)[3];
    char (*homo)[TS][TS], *buffer;
 
+#ifdef DCRAW_VERBOSE
   if (verbose) fprintf (stderr,_("AHD interpolation...\n"));
+#endif
 
   for (i=0; i < 0x10000; i++) {
     r = i / 65535.0;
@@ -3676,7 +3691,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 4892 "dcraw/dcraw.c"
+#line 4909 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -4191,7 +4206,7 @@ void CLASS parse_kodak_ifd (int base)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 5412 "dcraw/dcraw.c"
+#line 5429 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -4728,7 +4743,7 @@ void CLASS apply_tiff()
       tile_width    = tiff_ifd[i].t_tile_width;
       tile_length   = tiff_ifd[i].t_tile_length;
 #ifdef LIBRAW_LIBRARY_BUILD
-      data_size     = tile_length < INT_MAX ? tiff_ifd[i].tile_maxbytes: tiff_ifd[i].bytes;
+      data_size     = tile_length < INT_MAX && tile_length>0 ? tiff_ifd[i].tile_maxbytes: tiff_ifd[i].bytes;
 #endif
       raw = i;
     }
@@ -4953,7 +4968,14 @@ void CLASS parse_external_jpeg()
       }
 #endif
   if (!timestamp)
-    fprintf (stderr,_("Failed to read metadata from %s\n"), jname);
+      {
+#ifdef LIBRAW_LIBRARY_BUILD
+          imgdata.process_warnings |= LIBRAW_WARN_NO_METADATA ;
+#endif
+#ifdef DCRAW_VERBOSE
+          fprintf (stderr,_("Failed to read metadata from %s\n"), jname);
+#endif
+      }
   free (jname);
 #ifndef LIBRAW_LIBRARY_BUILD
   ifp = save;
@@ -5428,7 +5450,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 6755 "dcraw/dcraw.c"
+#line 6779 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -7803,7 +7825,7 @@ notraw:
   RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
 #endif
 }
-#line 9219 "dcraw/dcraw.c"
+#line 9243 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -8026,7 +8048,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 9467 "dcraw/dcraw.c"
+#line 9491 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
