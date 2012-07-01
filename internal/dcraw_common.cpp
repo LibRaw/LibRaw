@@ -831,6 +831,7 @@ next: pix[0] = rp[0] + rp[2];
   maximum = 0x3fff;
 }
 
+#ifndef LIBRAW_LIBRARY_BUILD
 void CLASS adobe_copy_pixel (unsigned row, unsigned col, ushort **rp)
 {
   int c;
@@ -848,6 +849,28 @@ void CLASS adobe_copy_pixel (unsigned row, unsigned col, ushort **rp)
   }
   if (is_raw == 2 && shot_select) (*rp)--;
 }
+#else
+void CLASS adobe_copy_pixel_raw (unsigned row, unsigned col, ushort **rp)
+{
+  if (is_raw == 2 && shot_select) (*rp)++;
+  if (row < raw_height && col < raw_width)
+    RAW(row,col) = curve[**rp];
+  *rp += is_raw;
+  if (is_raw == 2 && shot_select) (*rp)--;
+}
+void CLASS adobe_copy_pixel_color (unsigned row, unsigned col, ushort **rp)
+{
+  int c;
+
+  if (is_raw == 2 && shot_select) (*rp)++;
+  if (row < height && col < width)
+    FORC(tiff_samples)
+      image[row*width+col][c] = curve[(*rp)[c]];
+  *rp += tiff_samples;
+  if (is_raw == 2 && shot_select) (*rp)--;
+}
+#endif
+
 
 void CLASS lossless_dng_load_raw()
 {
@@ -863,6 +886,7 @@ void CLASS lossless_dng_load_raw()
     jwide = jh.wide;
     if (filters) jwide *= jh.clrs;
     jwide /= is_raw;
+#ifndef LIBRAW_LIBRARY_BUILD
     for (row=col=jrow=0; jrow < jh.high; jrow++) {
       rp = ljpeg_row (jrow, &jh);
       for (jcol=0; jcol < jwide; jcol++) {
@@ -871,6 +895,30 @@ void CLASS lossless_dng_load_raw()
 	  row += 1 + (col = 0);
       }
     }
+#else
+    if(raw_image)
+      {
+        for (row=col=jrow=0; jrow < jh.high; jrow++) {
+          rp = ljpeg_row (jrow, &jh);
+          for (jcol=0; jcol < jwide; jcol++) {
+            adobe_copy_pixel_raw (trow+row, tcol+col, &rp);
+            if (++col >= tile_width || col >= raw_width)
+              row += 1 + (col = 0);
+          }
+        }
+      }
+    else
+      {
+        for (row=col=jrow=0; jrow < jh.high; jrow++) {
+          rp = ljpeg_row (jrow, &jh);
+          for (jcol=0; jcol < jwide; jcol++) {
+            adobe_copy_pixel_color (trow+row, tcol+col, &rp);
+            if (++col >= tile_width || col >= raw_width)
+              row += 1 + (col = 0);
+          }
+        }
+      }
+#endif
     fseek (ifp, save+4, SEEK_SET);
     if ((tcol += tile_width) >= raw_width)
       trow += tile_length + (tcol = 0);
@@ -893,8 +941,17 @@ void CLASS packed_dng_load_raw()
       for (col=0; col < raw_width * tiff_samples; col++)
 	pixel[col] = getbits(tiff_bps);
     }
+#ifndef LIBRAW_LIBRARY_BUILD
     for (rp=pixel, col=0; col < raw_width; col++)
       adobe_copy_pixel (row, col, &rp);
+#else
+    if(raw_image)
+      for (rp=pixel, col=0; col < raw_width; col++)
+        adobe_copy_pixel_raw (row, col, &rp);
+    else
+      for (rp=pixel, col=0; col < raw_width; col++)
+        adobe_copy_pixel_color (row, col, &rp);
+#endif
   }
   free (pixel);
 }
@@ -1081,7 +1138,7 @@ int CLASS minolta_z2()
     if (tail[i]) nz++;
   return nz > 20;
 }
-#line 1354 "dcraw/dcraw.c"
+#line 1411 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -1530,12 +1587,14 @@ void CLASS sinar_4shot_load_raw()
     unpacked_load_raw();
     return;
   }
+#ifndef LIBRAW_LIBRARY_BUILD
   free (raw_image);
   raw_image = 0;
   free (image);
   image = (ushort (*)[4])
 	calloc ((iheight=height)*(iwidth=width), sizeof *image);
   merror (image, "sinar_4shot_load_raw()");
+#endif
   pixel = (ushort *) calloc (raw_width, sizeof *pixel);
   merror (pixel, "sinar_4shot_load_raw()");
   for (shot=0; shot < 4; shot++) {
@@ -2587,7 +2646,7 @@ void CLASS redcine_load_raw()
   jas_stream_close (in);
 #endif
 }
-#line 3565 "dcraw/dcraw.c"
+#line 3624 "dcraw/dcraw.c"
 void CLASS crop_masked_pixels()
 {
   int row, col;
@@ -2596,7 +2655,6 @@ void CLASS crop_masked_pixels()
     r,
 #endif
     c, m, mblack[8], zero, val;
-  printf("Entering crop masked!\n");
 
   if (load_raw == &CLASS phase_one_load_raw ||
       load_raw == &CLASS phase_one_load_raw_c)
@@ -2689,7 +2747,7 @@ void CLASS remove_zeroes()
   RUN_CALLBACK(LIBRAW_PROGRESS_REMOVE_ZEROES,1,2);
 #endif
 }
-#line 3832 "dcraw/dcraw.c"
+#line 3890 "dcraw/dcraw.c"
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
 {
   int i;
@@ -3757,7 +3815,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 4904 "dcraw/dcraw.c"
+#line 4962 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -4272,7 +4330,7 @@ void CLASS parse_kodak_ifd (int base)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 5424 "dcraw/dcraw.c"
+#line 5482 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -5516,7 +5574,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 6774 "dcraw/dcraw.c"
+#line 6832 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -7891,7 +7949,7 @@ notraw:
   RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
 #endif
 }
-#line 9238 "dcraw/dcraw.c"
+#line 9296 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -8114,7 +8172,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 9486 "dcraw/dcraw.c"
+#line 9544 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

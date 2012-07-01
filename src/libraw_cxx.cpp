@@ -308,7 +308,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     if(!load_raw) return LIBRAW_OUT_OF_ORDER_CALL;
     
     d_info->decoder_flags = LIBRAW_DECODER_NOTSET;
-
+    int rawdata = (imgdata.idata.filters || P1.colors == 1);
     // dcraw.c names order
     if (load_raw == &LibRaw::canon_600_load_raw) 
         {
@@ -335,14 +335,14 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         {
             // Check rbayer
             d_info->decoder_name = "lossless_dng_load_raw()"; 
-            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY ;
+            d_info->decoder_flags = rawdata? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY ;
             d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
         }
     else if (load_raw == &LibRaw::packed_dng_load_raw)
         {
             // Check rbayer
             d_info->decoder_name = "packed_dng_load_raw()"; 
-            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = rawdata ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
             d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
         }
     else if (load_raw == &LibRaw::pentax_load_raw )
@@ -380,7 +380,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::leaf_hdr_load_raw )
         {
             d_info->decoder_name = "leaf_hdr_load_raw()"; 
-            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = imgdata.idata.filters? LIBRAW_DECODER_FLATFIELD:LIBRAW_DECODER_LEGACY;
         }
     else if (load_raw == &LibRaw::unpacked_load_raw )
         {
@@ -391,7 +391,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         {
             // UNTESTED
             d_info->decoder_name = "sinar_4shot_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = (O.shot_select|| O.half_size)?LIBRAW_DECODER_FLATFIELD:LIBRAW_DECODER_LEGACY;
         }
     else if (load_raw == &LibRaw::imacon_full_load_raw )
         {
@@ -446,7 +446,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         {
             // Check rbayer
             d_info->decoder_name = "lossy_dng_load_raw()"; 
-            d_info->decoder_flags = imgdata.idata.filters ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
             d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
         }
     else if (load_raw == &LibRaw::kodak_dc120_load_raw )
@@ -805,8 +805,6 @@ int LibRaw::unpack(void)
                 free(imgdata.image);
                 imgdata.image = 0;
             }
-
-        printf("Entering unpack\n");
 
         if (libraw_internal_data.unpacker_data.meta_length) 
             {

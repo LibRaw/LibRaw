@@ -24,8 +24,13 @@ CFLAGS= -O4 -g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -Wno-o
 #LDADD+=-L/usr/local/lib -llcms
 
 # Jasper support for RedCine
-#CFLAGS+=-DUSE_JASPER -I/usr/local/include
-#LDADD+=-L/usr/local/lib -ljasper
+CFLAGS+=-DUSE_JASPER -I/usr/local/include
+LDADD+=-L/usr/local/lib -ljasper
+
+# JPEG support for DNG
+#CFLAGS+=-DUSE_JPEG -I/usr/local/include
+#LDADD+=-L/usr/local/lib -ljpeg
+
 
 # Demosaic Pack GPL2:
 #DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2

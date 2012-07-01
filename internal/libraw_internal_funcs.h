@@ -71,7 +71,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        lossless_jpeg_load_raw();
     void        canon_sraw_load_raw();
 // Adobe DNG
-    void        adobe_copy_pixel (unsigned int row, unsigned int col, ushort **rp);
+    void        adobe_copy_pixel_raw (unsigned int row, unsigned int col, ushort **rp);
+    void        adobe_copy_pixel_color (unsigned int row, unsigned int col, ushort **rp);
     void        lossless_dng_load_raw();
     void        packed_dng_load_raw();
     void        lossy_dng_load_raw();
