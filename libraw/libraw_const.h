@@ -2,7 +2,6 @@
  * File: libraw_const.h
  * Copyright 2008-2010 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
- *
  * LibRaw error codes
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of three licenses as you choose:
@@ -28,10 +27,9 @@ enum LibRaw_decoder_flags
 {
     LIBRAW_DECODER_LEGACY = 1,      
     LIBRAW_DECODER_FLATFIELD = 1<<1,
-    LIBRAW_DECODER_4COMPONENT = 1<<2,
     LIBRAW_DECODER_USEBAYER2 = 1<<3,
     LIBRAW_DECODER_HASCURVE = 1<<4,
-	LIBRAW_DECODER_ITSASONY = 1<<5,
+    LIBRAW_DECODER_ITSASONY = 1<<5,
     LIBRAW_DECODER_NOTSET = 1<<15
 };
 

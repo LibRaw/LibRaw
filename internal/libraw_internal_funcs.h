@@ -164,7 +164,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 
 // Foveon/Sigma
     void        foveon_load_camf();
-    void        foveon_load_raw();
+    void        foveon_sd_load_raw();
+    void        foveon_dp_load_raw();
     const char* foveon_camf_param (const char *block, const char *param);
     void *      foveon_camf_matrix (unsigned dim[3], const char *name);
     int         foveon_fixed (void *ptr, int size, const char *name);

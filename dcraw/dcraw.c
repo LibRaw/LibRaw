@@ -2363,11 +2363,7 @@ void CLASS kodak_yrgb_load_raw()
       rgb[1] = y-((cb + cr + 2) >> 2);
       rgb[2] = rgb[1] + cb;
       rgb[0] = rgb[1] + cr;
-#ifndef LIBRAW_LIBRARY_BUILD
       FORC3 image[row*width+col][c] = curve[LIM(rgb[c],0,255)];
-#else
-      FORC3 color_image[(row+top_margin)*raw_width+col+left_margin][c] = curve[LIM(rgb[c],0,255)];
-#endif
     }
   }
   free (pixel);
@@ -2497,13 +2493,8 @@ void CLASS kodak_ycbcr_load_raw()
 	for (j=0; j < 2; j++)
 	  for (k=0; k < 2; k++) {
 	    if ((y[j][k] = y[j][k^1] + *bp++) >> 10) derror();
-#ifndef LIBRAW_LIBRARY_BUILD
 	    ip = image[(row+j)*width + col+i+k];
 	    FORC3 ip[c] = curve[LIM(y[j][k]+rgb[c], 0, 0xfff)];
-#else
-	    ip = color_image[(row+top_margin+j)*raw_width + col+i+k+left_margin];
-            FORC3 ip[c] = curve[LIM(y[j][k]+rgb[c], 0, 0xfff)];
-#endif
 	  }
       }
     }
@@ -2524,9 +2515,6 @@ void CLASS kodak_rgb_load_raw()
       len = MIN (256, width-col);
       kodak_65000_decode (buf, len*3);
       memset (rgb, 0, sizeof rgb);
-#ifdef LIBRAW_LIBRARY_BUILD
-      ip = &color_image[(row+top_margin)*raw_width+left_margin][0];
-#endif
       for (bp=buf, i=0; i < len; i++, ip+=4)
 	FORC3 if ((ip[c] = rgb[c] += *bp++) >> 12) derror();
     }
@@ -3573,14 +3561,21 @@ void CLASS foveon_interpolate()
 
 /* RESTRICTED code ends here */
 
+//@out COMMON
 void CLASS crop_masked_pixels()
 {
   int row, col;
-  unsigned r, c, m, mblack[8], zero, val;
+  unsigned 
+#ifndef LIBRAW_LIBRARY_BUILD
+    r,
+#endif
+    c, m, mblack[8], zero, val;
+  printf("Entering crop masked!\n");
 
   if (load_raw == &CLASS phase_one_load_raw ||
       load_raw == &CLASS phase_one_load_raw_c)
     phase_one_correct();
+#ifndef LIBRAW_LIBRARY_BUILD
   if (fuji_width) {
     for (row=0; row < raw_height-top_margin*2; row++) {
       for (col=0; col < fuji_width << !fuji_layout; col++) {
@@ -3600,6 +3595,7 @@ void CLASS crop_masked_pixels()
       for (col=0; col < width; col++)
 	BAYER2(row,col) = RAW(row+top_margin,col+left_margin);
   }
+#endif
   if (mask[0][3]) goto mask_set;
   if (load_raw == &CLASS canon_load_raw ||
       load_raw == &CLASS lossless_jpeg_load_raw) {
@@ -3644,7 +3640,6 @@ mask_set:
     FORC4 cblack[c] = mblack[c] / mblack[4+c];
 }
 
-//@out COMMON
 void CLASS remove_zeroes()
 {
   unsigned row, col, tot, n, r, c;

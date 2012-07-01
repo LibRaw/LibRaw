@@ -95,7 +95,8 @@ void CLASS cfa_impulse_gauss(float lclean, float cclean){}
 #include <dcraw_foveon.c>
 #else
 void CLASS foveon_interpolate(){}
-void CLASS foveon_load_raw(){}
+void CLASS foveon_dp_load_raw(){}
+void CLASS foveon_sd_load_raw(){}
 void CLASS parse_foveon(){}
 void CLASS foveon_thumb_loader(){}
 void CLASS foveon_thumb(){}

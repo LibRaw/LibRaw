@@ -202,6 +202,7 @@ protected:
     void        convert_to_rgb();
 	virtual		void convert_to_rgb_loop(float out_cam[3][4]);
     void        remove_zeroes();
+    void        crop_masked_pixels();
 #ifndef NO_LCMS
     void	apply_profile(const char*,const char*);
 #endif
