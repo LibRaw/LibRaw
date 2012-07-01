@@ -5733,6 +5733,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 6941,-1164,-857,-3825,11597,2534,-416,1540,6039 } },
     { "Canon EOS 600D", 0, 0x3510,
 	{ 6461,-907,-882,-4300,12184,2378,-819,1944,5931 } },
+    { "Canon EOS 650D", 0, 0x354d,
+	{ 6602,-841,-939,-4472,12458,2247,-975,2039,6148 } },
     { "Canon EOS 1000D", 0, 0xe43,
 	{ 6771,-1139,-977,-7818,15123,2928,-1244,1437,7533 } },
     { "Canon EOS 1100D", 0, 0x3510,
@@ -7135,6 +7137,12 @@ canon_a5:
     height -= top_margin = 45;
     left_margin = 142;
     width = 4916;
+  } else if (is_canon && raw_width == 5280) {
+    top_margin  = 52;
+    left_margin = 72;
+    if (unique_id == 0x80000301)
+      adobe_coeff ("Canon","EOS 650D");
+    goto canon_cr2;
   } else if (is_canon && raw_width == 5344) {
     top_margin = 51;
     left_margin = 142;
@@ -7443,7 +7451,7 @@ konica_400z:
     height -= top_margin = 8;
     width -= 2 * (left_margin = 8);
     load_flags = 32;
-  } else if (!strcmp(model,"NX200")) {
+  } else if (!strncmp(model,"NX2",3)) {
     order = 0x4949;
     height = 3694;
     top_margin = 2;
@@ -8052,7 +8060,7 @@ notraw:
   RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
 #endif
 }
-#line 9298 "dcraw/dcraw.c"
+#line 9306 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -8109,8 +8117,13 @@ void CLASS convert_to_rgb()
 #endif
   gamma_curve (gamm[0], gamm[1], 0, 0);
   memcpy (out_cam, rgb_cam, sizeof out_cam);
+#ifndef LIBRAW_LIBRARY_BUILD
   raw_color |= colors == 1 || document_mode ||
 		output_color < 1 || output_color > 5;
+#else
+  raw_color |= colors == 1 || 
+		output_color < 1 || output_color > 5;
+#endif
   if (!raw_color) {
     oprof = (unsigned *) calloc (phead[0], 1);
     merror (oprof, "convert_to_rgb()");
@@ -8170,7 +8183,9 @@ void CLASS convert_to_rgb()
     }
 #endif
   if (colors == 4 && output_color) colors = 3;
+#ifndef LIBRAW_LIBRARY_BUILD
   if (document_mode && filters) colors = 1;
+#endif
 #ifdef LIBRAW_LIBRARY_BUILD
   RUN_CALLBACK(LIBRAW_PROGRESS_CONVERT_RGB,1,2);
 #endif
@@ -8275,7 +8290,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 9546 "dcraw/dcraw.c"
+#line 9561 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

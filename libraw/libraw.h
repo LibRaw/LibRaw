@@ -76,7 +76,6 @@ DllDef    int                 libraw_get_decoder_info(libraw_data_t* lr,libraw_d
 
     /* DCRAW compatibility */
 DllDef    int                 libraw_adjust_sizes_info_only(libraw_data_t*);
-DllDef    int                 libraw_dcraw_document_mode_processing(libraw_data_t*);
 DllDef    int                 libraw_dcraw_ppm_tiff_writer(libraw_data_t* lr,const char *filename);
 DllDef    int                 libraw_dcraw_thumb_writer(libraw_data_t* lr,const char *fname);
 DllDef    int                 libraw_dcraw_process(libraw_data_t* lr);
@@ -127,7 +126,6 @@ class DllDef LibRaw
     static const char*          strprogress(enum LibRaw_progress);
     static const char*          strerror(int p);
     /* dcraw emulation */
-    int                         dcraw_document_mode_processing();
     int                         dcraw_ppm_tiff_writer(const char *filename);
     int                         dcraw_thumb_writer(const char *fname);
     int                         dcraw_process(void);

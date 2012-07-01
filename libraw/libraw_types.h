@@ -240,7 +240,6 @@ typedef struct
     float       threshold;      /*  -n */
     int         half_size;      /* -h */
     int         four_color_rgb; /* -f */
-    int         document_mode;  /* -d/-D */
     int         highlight;      /* -H */
     int         use_auto_wb;    /* -a */
     int         use_camera_wb;  /* -w */

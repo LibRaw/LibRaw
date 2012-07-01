@@ -9359,8 +9359,13 @@ void CLASS convert_to_rgb()
 #endif
   gamma_curve (gamm[0], gamm[1], 0, 0);
   memcpy (out_cam, rgb_cam, sizeof out_cam);
+#ifndef LIBRAW_LIBRARY_BUILD
   raw_color |= colors == 1 || document_mode ||
 		output_color < 1 || output_color > 5;
+#else
+  raw_color |= colors == 1 || 
+		output_color < 1 || output_color > 5;
+#endif
   if (!raw_color) {
     oprof = (unsigned *) calloc (phead[0], 1);
     merror (oprof, "convert_to_rgb()");
@@ -9420,7 +9425,9 @@ void CLASS convert_to_rgb()
     }
 #endif
   if (colors == 4 && output_color) colors = 3;
+#ifndef LIBRAW_LIBRARY_BUILD
   if (document_mode && filters) colors = 1;
+#endif
 #ifdef LIBRAW_LIBRARY_BUILD
   RUN_CALLBACK(LIBRAW_PROGRESS_CONVERT_RGB,1,2);
 #endif

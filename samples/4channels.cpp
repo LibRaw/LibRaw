@@ -67,7 +67,6 @@ int main(int ac, char *av[])
 #define P2 RawProcessor.imgdata.other
 #define OUT RawProcessor.imgdata.params
 
-    OUT.document_mode=2;
     OUT.output_bps=16;
     OUT.output_tiff=1;
     OUT.user_flip=0;

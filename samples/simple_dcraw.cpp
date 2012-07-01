@@ -59,7 +59,6 @@ int main(int ac, char *av[])
                 "simple_dcraw - LibRaw %s sample. Emulates dcraw [-D] [-T] [-v] [-e] [-E]\n"
                 " %d cameras supported\n"
                 "Usage: %s [-D] [-T] [-v] [-e] raw-files....\n"
-                "\t-D - document mode emulation\n"
                 "\t-4 - 16-bit mode\n"
                 "\t-v - verbose output\n"
                 "\t-T - output TIFF files instead of .pgm/ppm\n"
@@ -89,8 +88,6 @@ int main(int ac, char *av[])
                         verbose++;
                     if(av[i][1]=='e' && av[i][2]==0)
                         output_thumbs++;
-                    if(av[i][1]=='D' && av[i][2]==0)
-                        OUT.document_mode=2;
                     if(av[i][1]=='4' && av[i][2]==0)
                         OUT.output_bps=16;
                     if(av[i][1]=='C' && av[i][2]==0)
@@ -137,10 +134,7 @@ int main(int ac, char *av[])
                         }
                 }
             
-            if(OUT.document_mode)
-                ret = RawProcessor.dcraw_document_mode_processing();
-            else
-                ret = RawProcessor.dcraw_process();
+            ret = RawProcessor.dcraw_process();
                 
             if(LIBRAW_SUCCESS !=ret)
                 {

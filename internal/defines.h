@@ -29,7 +29,7 @@ it under the terms of the one of three licenses as you choose:
 #define NO_JASPER
 #endif
 #line 37 "dcraw/dcraw.c"
-#define DCRAW_VERSION "9.15"
+#define DCRAW_VERSION "9.16"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE

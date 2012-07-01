@@ -134,13 +134,6 @@ extern "C"
         LibRaw *ip = (LibRaw*) lr->parent_class;
         return ip->adjust_sizes_info_only();
     }
-    int  libraw_dcraw_document_mode_processing(libraw_data_t* lr)
-    {
-        if(!lr) return EINVAL;
-        LibRaw *ip = (LibRaw*) lr->parent_class;
-        return ip->dcraw_document_mode_processing();
-
-    }
     int  libraw_dcraw_ppm_tiff_writer(libraw_data_t* lr,const char *filename)
     {
         if(!lr) return EINVAL;
