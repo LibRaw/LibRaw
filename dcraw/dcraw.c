@@ -19,8 +19,8 @@
    *If you have not modified dcraw.c in any way, a link to my
    homepage qualifies as "full source code".
 
-   $Revision: 1.449 $
-   $Date: 2012/06/26 02:43:41 $
+   $Revision: 1.450 $
+   $Date: 2012/06/30 20:36:46 $
  */
 /*@out DEFINES
 #ifndef USE_JPEG
@@ -34,7 +34,7 @@
 #define NO_LCMS
 #define DCRAW_VERBOSE
 //@out DEFINES
-#define DCRAW_VERSION "9.15"
+#define DCRAW_VERSION "9.16"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -6886,6 +6886,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 6941,-1164,-857,-3825,11597,2534,-416,1540,6039 } },
     { "Canon EOS 600D", 0, 0x3510,
 	{ 6461,-907,-882,-4300,12184,2378,-819,1944,5931 } },
+    { "Canon EOS 650D", 0, 0x354d,
+	{ 6602,-841,-939,-4472,12458,2247,-975,2039,6148 } },
     { "Canon EOS 1000D", 0, 0xe43,
 	{ 6771,-1139,-977,-7818,15123,2928,-1244,1437,7533 } },
     { "Canon EOS 1100D", 0, 0x3510,
@@ -8288,6 +8290,12 @@ canon_a5:
     height -= top_margin = 45;
     left_margin = 142;
     width = 4916;
+  } else if (is_canon && raw_width == 5280) {
+    top_margin  = 52;
+    left_margin = 72;
+    if (unique_id == 0x80000301)
+      adobe_coeff ("Canon","EOS 650D");
+    goto canon_cr2;
   } else if (is_canon && raw_width == 5344) {
     top_margin = 51;
     left_margin = 142;
@@ -8596,7 +8604,7 @@ konica_400z:
     height -= top_margin = 8;
     width -= 2 * (left_margin = 8);
     load_flags = 32;
-  } else if (!strcmp(model,"NX200")) {
+  } else if (!strncmp(model,"NX2",3)) {
     order = 0x4949;
     height = 3694;
     top_margin = 2;
@@ -10068,7 +10076,7 @@ next:
     colorcheck();
 #endif
     if (is_foveon) {
-      if (document_mode || model[0] == 'D') {
+      if (document_mode || load_raw == &CLASS foveon_dp_load_raw) {
 	for (i=0; i < height*width*4; i++)
 	  if ((short) image[0][i] < 0) image[0][i] = 0;
       } else foveon_interpolate();

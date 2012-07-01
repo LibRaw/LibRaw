@@ -67,6 +67,14 @@ cannot decode JPEG files!!
 <H2>REPAIR OPTIONS</H2>
 
 <DL COMPACT>
+<DT><B>-I</B>
+
+<DD>
+Read the raw pixels from standard input in CPU byte order with
+no header.  Use
+<B>dcraw -E -4</B>
+
+to get the raw pixel values.
 <DT><B>-P deadpixels.txt</B>
 
 <DD>
@@ -251,7 +259,14 @@ Good for photographing black-and-white documents.
 Same as
 <B>-d</B>,
 
-but totally raw (no color scaling).
+but with the original unscaled pixel values.
+<DT><B>-E</B>
+
+<DD>
+Same as
+<B>-D</B>,
+
+but masked pixels are not cropped.
 <DT><B>-h</B>
 
 <DD>
@@ -420,6 +435,6 @@ Written by David Coffin, dcoffin a cybercom o net
 This document was created by
 <A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
 using the manual pages.<BR>
-Time: 17:32:08 GMT, December 26, 2011
+Time: 21:01:45 GMT, June 18, 2012
 </BODY>
 </HTML>
