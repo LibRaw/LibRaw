@@ -33,8 +33,8 @@ LDADD+=-L/usr/local/lib -ljasper
 
 
 # Demosaic Pack GPL2:
-#DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
-#CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
+DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
+CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
 
 # Demosaic Pack GPL3:
 #DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL3

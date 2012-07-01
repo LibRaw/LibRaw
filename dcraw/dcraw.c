@@ -2916,6 +2916,7 @@ void CLASS redcine_load_raw()
 #endif
 }
 //@end COMMON
+
 /* RESTRICTED code starts here */
 
 void CLASS foveon_decoder (unsigned size, unsigned code)
@@ -6724,6 +6725,7 @@ void CLASS parse_redcine()
 }
 //@end COMMON
 
+//@out COMMON
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
   int i;
@@ -6763,10 +6765,8 @@ void CLASS parse_foveon()
 	if (wide > raw_width && high > raw_height) {
 	  switch (pent) {
 	    case  5:  load_flags = 1;
-#if 0
 	    case  6:  load_raw = &CLASS foveon_sd_load_raw;  break;
 	    case 30:  load_raw = &CLASS foveon_dp_load_raw;  break;
-#endif
 	    default:  load_raw = 0;
 	  }
 	  raw_width  = wide;
@@ -6826,7 +6826,7 @@ void CLASS parse_foveon()
   }
   is_foveon = 1;
 }
-
+//@end COMMON
 
 //@out COMMON
 /*
@@ -7875,8 +7875,10 @@ void CLASS identify()
     parse_sinar_ia();
   else if (!memcmp (head,"\0MRM",4))
     parse_minolta(0);
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
   else if (!memcmp (head,"FOVb",4))
     parse_foveon();
+#endif
   else if (!memcmp (head,"CI",2))
     parse_cine();
   else

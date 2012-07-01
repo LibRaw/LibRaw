@@ -41,7 +41,7 @@ it under the terms of the one of three licenses as you choose:
 #include "internal/var_defines.h"
 
 
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2_ttt
 /*AHD-Mod*/
 #include <ahd_interpolate_mod.c>
 /*LMMSE*/
@@ -97,7 +97,6 @@ void CLASS cfa_impulse_gauss(float lclean, float cclean){}
 void CLASS foveon_interpolate(){}
 void CLASS foveon_dp_load_raw(){}
 void CLASS foveon_sd_load_raw(){}
-void CLASS parse_foveon(){}
 void CLASS foveon_thumb_loader(){}
 void CLASS foveon_thumb(){}
 #endif
