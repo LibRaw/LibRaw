@@ -2248,6 +2248,10 @@ void CLASS kodak_jpeg_load_raw() {}
 void CLASS lossy_dng_load_raw() {}
 #else
 
+#ifdef LIBRAW_LIBRARY_BUILD
+void CLASS kodak_jpeg_load_raw() {}
+#else
+
 METHODDEF(boolean)
 fill_input_buffer (j_decompress_ptr cinfo)
 {
@@ -2313,6 +2317,7 @@ void CLASS kodak_jpeg_load_raw()
   jpeg_destroy_decompress (&cinfo);
   maximum = 0xff << 1;
 }
+#endif
 
 void CLASS lossy_dng_load_raw()
 {
@@ -2322,7 +2327,7 @@ void CLASS lossy_dng_load_raw()
   JSAMPLE (*pixel)[3];
   unsigned sorder=order, ntags, opcode, deg, i, j, c;
   unsigned save=data_offset-4, trow=0, tcol=0, row, col;
-  ushort curve[3][256];
+  ushort t_curve[3][256];
   double coeff[9], tot;
 
   fseek (ifp, meta_offset, SEEK_SET);
@@ -2341,7 +2346,7 @@ void CLASS lossy_dng_load_raw()
     for (i=0; i < 256; i++) {
       for (tot=j=0; j <= deg; j++)
 	tot += coeff[j] * pow(i/255.0, j);
-      curve[c][i] = tot*0xffff;
+      t_curve[c][i] = tot*0xffff;
     }
   }
   order = sorder;
@@ -2351,7 +2356,15 @@ void CLASS lossy_dng_load_raw()
     fseek (ifp, save+=4, SEEK_SET);
     if (tile_length < INT_MAX)
       fseek (ifp, get4(), SEEK_SET);
+#ifdef LIBRAW_LIBRARY_BUILD
+    if(libraw_internal_data.internal_data.input->jpeg_src(&cinfo) == -1)
+      {
+        jpeg_destroy_decompress(&cinfo);
+        throw LIBRAW_EXCEPTION_DECODE_JPEG;
+      }
+#else
     jpeg_stdio_src (&cinfo, ifp);
+#endif
     jpeg_read_header (&cinfo, TRUE);
     jpeg_start_decompress (&cinfo);
     buf = (*cinfo.mem->alloc_sarray)
@@ -2361,7 +2374,7 @@ void CLASS lossy_dng_load_raw()
       jpeg_read_scanlines (&cinfo, buf, 1);
       pixel = (JSAMPLE (*)[3]) buf[0];
       for (col=0; col < cinfo.output_width && tcol+col < width; col++) {
-	FORC3 image[row*width+tcol+col][c] = curve[c][pixel[col][c]];
+	FORC3 image[row*width+tcol+col][c] = t_curve[c][pixel[col][c]];
       }
     }
     jpeg_abort_decompress (&cinfo);

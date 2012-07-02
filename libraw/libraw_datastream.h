@@ -66,6 +66,7 @@ class DllDef LibRaw_abstract_datastream
     virtual int         scanf_one(const char *, void *) = 0;
     virtual int         eof() = 0;
     virtual void *      make_jas_stream() = 0;
+    virtual int         jpeg_src(void *jpegdata) { return -1; }
     /* Make buffer from current offset */
     virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz);
 
@@ -98,8 +99,8 @@ class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
     const char *filename;
 #ifdef WIN32
 	const wchar_t *wfilename;
-	FILE *jas_file;
 #endif
+	FILE *jas_file;
   public:
     virtual             ~LibRaw_file_datastream();
                         LibRaw_file_datastream(const char *fname);
@@ -107,6 +108,7 @@ class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
 						LibRaw_file_datastream(const wchar_t *fname);
 #endif
     virtual void        *make_jas_stream();
+    virtual int         jpeg_src(void *jpegdata);
     virtual int         valid();
     virtual int         read(void * ptr,size_t size, size_t nmemb);
     virtual int         eof();
@@ -136,6 +138,7 @@ class DllDef  LibRaw_buffer_datastream : public LibRaw_abstract_datastream
     virtual             ~LibRaw_buffer_datastream();
     virtual int         valid();
     virtual void        *make_jas_stream();
+    virtual int         jpeg_src(void *jpegdata);
     virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz);
     virtual int         read(void * ptr,size_t sz, size_t nmemb);
     virtual int         eof();
@@ -165,7 +168,8 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
 #endif
     virtual             ~LibRaw_bigfile_datastream();
     virtual int         valid();
-    virtual void *make_jas_stream();
+    virtual int         jpeg_src(void *jpegdata);
+    virtual void        *make_jas_stream();
 
     virtual int         read(void * ptr,size_t size, size_t nmemb); 
     virtual int         eof();

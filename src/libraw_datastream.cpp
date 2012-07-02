@@ -15,6 +15,11 @@
 #else
 #define NO_JASPER
 #endif
+#ifdef USE_JPEG
+#include <jpeglib.h>
+#else
+#define NO_JPEG
+#endif
 
 
 LibRaw_byte_buffer::LibRaw_byte_buffer(unsigned sz) 
@@ -61,16 +66,15 @@ void	LibRaw_abstract_datastream::tempbuffer_close()
 
 LibRaw_file_datastream::~LibRaw_file_datastream()
 {
-#ifdef WIN32
-	if(jas_file) fclose(jas_file);
-#endif
+  if(jas_file) fclose(jas_file);
 }
 
 LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
     :filename(fname)
 #ifdef WIN32
-	,wfilename(NULL),jas_file(NULL)
+    ,wfilename(NULL)
 #endif
+    ,jas_file(NULL)
 {
     if (filename) {
         std::auto_ptr<std::filebuf> buf(new std::filebuf());
@@ -245,6 +249,34 @@ void * LibRaw_file_datastream::make_jas_stream()
 #endif
 }
 
+int LibRaw_file_datastream::jpeg_src(void *jpegdata)
+{
+#ifdef NO_JPEG
+  return -1; // not supported
+#else
+  if(jas_file) { fclose(jas_file); jas_file = NULL;}
+#ifdef WIN32
+  if(wfname())
+    {
+      jas_file = _wfopen(wfname(),L"rb");
+    }
+  else
+#endif
+    {
+      jas_file = fopen(fname(),"rb");
+    }
+  if(jas_file)
+    {
+      fseek(jas_file,tell(),SEEK_SET);
+      j_decompress_ptr cinfo = (j_decompress_ptr) jpegdata;
+      jpeg_stdio_src(cinfo,jas_file);
+      return 0; // OK
+    }
+  return -1;
+#endif
+}
+
+
 // == LibRaw_buffer_datastream
 LibRaw_buffer_datastream::LibRaw_buffer_datastream(void *buffer, size_t bsize)
 {    
@@ -393,9 +425,24 @@ void * LibRaw_buffer_datastream::make_jas_stream()
 #ifdef NO_JASPER
     return NULL;
 #else
-    return jas_stream_memopen((char*)buf,streamsize);
+    return jas_stream_memopen((char*)buf+streampos,streamsize-streampos);
 #endif
 }
+
+int LibRaw_buffer_datastream::jpeg_src(void *jpegdata)
+{
+#ifdef NO_JPEG
+  return -1;
+#else
+  j_decompress_ptr cinfo = (j_decompress_ptr) jpegdata;
+  jpeg_mem_src(cinfo,(unsigned char*)buf+streampos,streamsize-streampos);
+  return 0;
+#endif
+}
+
+
+//int LibRaw_buffer_datastream
+
 
 // == LibRaw_bigfile_datastream
 LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname): filename(fname)
@@ -560,6 +607,19 @@ void *LibRaw_bigfile_datastream::make_jas_stream()
     return jas_stream_fdopen(fileno(f),"rb");
 #endif
 }
+
+int LibRaw_bigfile_datastream::jpeg_src(void *jpegdata)
+{
+#ifdef NO_JPEG
+  return -1;
+#else
+  if(!f) return -1;
+  j_decompress_ptr cinfo = (j_decompress_ptr) jpegdata;
+  jpeg_stdio_src(cinfo,f);
+  return 0; // OK
+#endif
+}
+
 
 // == LibRaw_windows_datastream
 #ifdef WIN32
