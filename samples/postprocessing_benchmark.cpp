@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
                     OUT.shot_select = abs(atoi(argv[arg++])); 
                     break;
                 case 'B':  
-                    for(c=0; c<4;c++) OUT.cropbox[c]  = atoi(argv[arg++]); 
+                  //                    for(c=0; c<4;c++) OUT.cropbox[c]  = atoi(argv[arg++]); 
                     break;
                 case 'R':  
                     rep = abs(atoi(argv[arg++])); 
@@ -157,7 +157,11 @@ int main(int argc, char *argv[])
             if(c==rep) // no failure
                 {
                     unsigned int crop[4];
+#if 0
                     for(int i=0;i<4;i++) crop[i] = (OUT.cropbox[i])>>shrink;
+#else
+                    bzero(crop,sizeof(crop));
+#endif
                     if(crop[0]+crop[2]>S.iwidth) crop[2] = S.iwidth-crop[0];
                     if(crop[1]+crop[3]>S.iheight) crop[3] = S.iheight-crop[1];
 

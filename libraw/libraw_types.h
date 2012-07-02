@@ -107,7 +107,6 @@ typedef struct
     unsigned    zero_is_bad;
     ushort      shrink;
     ushort      fuji_width;
-    ushort      fwidth,fheight;
 } libraw_internal_output_params_t;
 
 
@@ -173,7 +172,7 @@ typedef struct
                 iwidth;
     double      pixel_aspect;
     int         flip;
-  int         mask[8][4];
+    int         mask[8][4];
 
 } libraw_image_sizes_t;
 
@@ -186,7 +185,7 @@ struct ph1_t
 typedef struct
 {
 	ushort      curve[0x10000]; 
-	unsigned    cblack[8];
+	unsigned    cblack[4];
 	unsigned    black;
 	unsigned    maximum;
 	unsigned    channel_maximum[4];
@@ -231,7 +230,7 @@ typedef struct
 typedef struct
 {
     unsigned    greybox[4];     /* -A  x1 y1 x2 y2 */
-    unsigned    cropbox[4];     /* -B x1 y1 x2 y2 */
+  //    unsigned    cropbox[4];     /* -B x1 y1 x2 y2 */
     double      aber[4];        /* -C */
     double      gamm[6];        /* -g */
     float       user_mul[4];    /* -r mul0 mul1 mul2 mul3 */

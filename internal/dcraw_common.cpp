@@ -3127,7 +3127,7 @@ skip_block: ;
   }
 #endif
   size = iheight*iwidth;
-#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef LIBRAW_LIBRARY_BUILD__1
   scale_colors_loop(scale_mul);
 #else
   for (i=0; i < size*4; i++) {

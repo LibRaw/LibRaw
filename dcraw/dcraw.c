@@ -4267,7 +4267,7 @@ skip_block: ;
   }
 #endif
   size = iheight*iwidth;
-#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef LIBRAW_LIBRARY_BUILD__1
   scale_colors_loop(scale_mul);
 #else
   for (i=0; i < size*4; i++) {
@@ -10002,6 +10002,7 @@ int CLASS main (int argc, const char **argv)
 	   width  = raw_width * 8 / tiff_bps;
       else width  = raw_width;
     }
+
     iheight = (height + shrink) >> shrink;
     iwidth  = (width  + shrink) >> shrink;
     if (identify_only) {
