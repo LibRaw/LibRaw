@@ -1,8 +1,76 @@
-﻿2012-04-11 Alex Tutubalin <lexa@lexa.ru>
+﻿2012-07-03 Alex Tutubalin <lexa@lexa.ru>
+    === LibRaw 0.15 (Alpha1) ===
+    1) Изменения в API:
+       Удалены т.к. никто не использует
+        * вызов LibRaw::dcraw_document_mode_processing (и соответствующий
+	   вызов C-API)
+        * Поле данных imgdata.color.color_flags
+
+       Удалены в связи с изменением логики:
+        * LIBRAW_DECODER_4COMPONENTS - теперь unpack() распаковывает в один
+	  из двух буферов:
+	   imgdata.rawdata.raw_image - байеровское изображение с черной рамкой
+	   (masked pixels)
+	   imgdata.rawdata.color_image - полноцветное (3 или 4-компонентное)
+	   изображение без рамки.
+
+       Изменены:
+        * imgdata.color.cblack[4] вместо [8], количество пикселов по которым
+	  рассчитан уровень черного - не считается и не хранится.
+	* Функция LibRaw::fc() переименована в LibRaw::fcol() для совместимости
+	  с dcraw internals
+
+       Временно не работают или отключены, будет исправлено в следующих 
+       альфа-версиях:
+         * imgdata.params.cropbox[] - кроппинга пока нет.
+	 * LibRaw::subtract_black() - не работает как надо (и, как следствие,
+	   не используется пока в LibRaw::raw2image()
+
+
+       Добавлены:
+         * WF debanding code (banding suppression):
+	   int imgdata.params.wf_debanding - включает подавление полосатости
+	   float imgdata.params.wf_deband_threshold[4] - задает пороги по 
+	   4-м каналам RAW
+         * LibRaw::open_wfile(wchar_t *filename) (WIN32 only) - открывает
+	   файл, имя которого задано в unicode-кодировке Windows
+	 * imgdata.params.user_cblack[4] - позволяет задать поканальный
+	   уровень черного.
+
+     2) Импортирована dcraw 9.16/1.450, добавлена поддержка новых камер:
+        Adobe DNG: поддержка Fast Load DNG (LightRoom 4.x), поддержка
+	  lossy-compressed DNG (LR 4.x, необходима сборка с libjpeg 8)
+        Canon: G1 X, SX220 HS, EOS 5D Mark III, EOS 650D, EOS 1D-X
+	Casio: EX-Z8
+	Fujifilm: X-S1, HS30EXR, X1-Pro
+	Nikon: D4, D3200, D800, D800E
+	Olympus: E-M5
+	Panasonic: DMC-GF5
+	Samsung: NX20, NX210, поддержка нового firmware NX100
+	Sigma: SD15,SD1, SD1 Merill, DP1, DP1S, DP1X, DP2, DP2S, DP2X (только 
+	 в Demosaic-pack-GPL2)
+        Sony: NEX-F3, SLT-A37, SLT-A57
+     3) Недоделки, будут исправлены в следующих альфа-версиях.
+        Помимо указанного выше (cropping, subtract_black):
+        
+         - Sony ARW2 Hack - выключает деление значений, распакованых из файлов
+	   формата Sony ARW2 на 4:
+	   int imgdata.params.sony_arw2_hack;
+	   Работает в LibRaw 0.15-PreAlpha, но не работает правильно в Alpha1
+         - Оптимизации, введенные в предыдущих версиях временно удалены:
+	    * OpenMP-код
+	    * однопроходное копирование данных, вычитание уровня черного
+	      и поворот для файлов Fuji HR (LibRaw::raw2image_ex() )
+            * callbacks для более эффективной (SSE2 и т.п.) реализации
+	      медленных операций.
+         - вычитание уровня черного для камер Phase One делается на этапе
+	   распаковки данных
+
+2012-04-11 Alex Tutubalin <lexa@lexa.ru>
         * Улучшено извлечение thumbnails из файлов (стало работать
           извлечение из DNG произведенных Adobe Lightroom 4)
 
-﻿2012-04-04 Alex Tutubalin <lexa@lexa.ru>
+2012-04-04 Alex Tutubalin <lexa@lexa.ru>
         * Поддержка камеры Casio EX-Z500   
         * Обработка исключений ввода-вывода при открытии файла
         * Исправлен (несуществующий) buffer overrun (readonly) в
@@ -14,7 +82,7 @@
           Leaf Aptus II
         * LibRaw 0.14.6-Release
 
-﻿2011-03-09 Alex Tutubalin <lexa@lexa.ru>
+2011-03-09 Alex Tutubalin <lexa@lexa.ru>
         * WIN32: Поддержан вызов LibRaw::open_file(wchar_t* filename)
         * импортирована обработка исключений из ветки 0.14
         * imgdata.params.user_cblack[4] позволяет задать поканальный

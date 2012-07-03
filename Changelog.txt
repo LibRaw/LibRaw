@@ -1,3 +1,70 @@
+2012-07-03 Alex Tutubalin <lexa@lexa.ru>
+    === LibRaw 0.15 (Alpha1) ===
+    1) API Changes:
+     =>  Removed, because no one uses it:
+          * LibRaw::dcraw_document_mode_processing (and C-API call)
+          * Data field imgdata.color.color_flags
+
+     =>  Removed, because internal logic changed:
+          * LIBRAW_DECODER_4COMPONENTS
+            Now unpack() unpacks RAW data in only two possible formats:
+             i. imgdata.rawdata.raw_image[] - flat buffer with bayer data
+              (one value per pixel) with masked pixels.
+             ii. imgdata.rawdata.color_image - 4-components array (similar
+              to imgdata.image) with 3 or 4 components per pixel and
+              without masked pixels.
+
+      =>  Changed:
+           * imgdata.color.cblack[4] instead of [8] - for now cblack[4..7]
+             (count of pixels used for black level calculation) is not used,
+             so removed
+            * LibRaw::fc() renamed to LibRaw::fcol() to maintain compatibility
+             with dcraw internals
+
+      => Temporary not working properly or disabled (to be fixed in next 
+         Alpha-versions, see also TODO section below)
+            * imgdata.params.cropbox[] - cropping not works yet, so disabled
+            * LibRaw::subtract_black() - don't works properly, so not used
+              in LibRaw internals until next Alpha
+
+       => Added:
+            * WF debanding code (banding suppression):
+              int imgdata.params.wf_debanding - enables debanding
+              float imgdata.params.wf_deband_threshold[4] - set threshold
+              levels for debanding (in pixel values, so usual value is several units)
+            * LibRaw::open_wfile(wchar_t *filename) (WIN32 only) - opens
+              RAW filename passed in Windows unicode encoding.
+            * imgdata.params.user_cblack[4] - allows to set per-channel
+              black levels
+
+     2) Imported dcraw 9.16/1.450, added support for several cameras:
+        Adobe DNG: Fast Load DNG (LightRoom 4.x),lossy-compressed DNG (LR 4.x,
+        you need to compile with -DUSE_JPEG and link with libjpeg 8)
+        Canon: G1 X, SX220 HS, EOS 5D Mark III, EOS 650D, EOS 1D-X
+        Casio: EX-Z8
+        Fujifilm: X-S1, HS30EXR, X1-Pro
+        Nikon: D4, D3200, D800, D800E
+        Olympus: E-M5
+        Panasonic: DMC-GF5
+        Samsung: NX20, NX210, ?>445@6:0 =>2>3> firmware NX100
+        Sigma: SD15,SD1, SD1 Merill, DP1, DP1S, DP1X, DP2, DP2S, DP2X 
+        (in LibRaw-demosaic-pack-GPL2)
+        Sony: NEX-F3, SLT-A37, SLT-A57
+
+    3) TODO (additional to 'not working' section above)
+         * Sony ARW2 Hack - turns off division by 4 of RAW values unpacked from
+             sony ARW2 files. 
+           int imgdata.params.sony_arw2_hack;
+         * Some optimizations introduced in previous LibRaw versions are
+           temporarilyy removed:
+            - OpenMP
+            - One pass data copy + black subtraction + fuji data rotation
+              (LibRaw::raw2image_ex() )
+            - Callbacks for more efficient data handling (SSE2 or multithreaded)
+              introduced in 0.15-PreAlpha
+         * Black level subtraction for Phase One files is performed on unpack()
+           stage, not on postprocessing one.
+
 2012-04-11 Alex Tutubalin <lexa@lexa.ru>
         * Fixed thumbnail processing (esp. for Adobe Lightroom DNGs)
 
