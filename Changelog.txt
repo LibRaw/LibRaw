@@ -36,6 +36,11 @@
               RAW filename passed in Windows unicode encoding.
             * imgdata.params.user_cblack[4] - allows to set per-channel
               black levels
+   	    * User-provided data streams (derived from 
+	      LibRaw_abstract_datastream) should implement jpeg_src() method 
+	      to provide data source for JPEG decoder used in lossy DNG 
+	      processing. See src/libraw_datastream.cpp for sample 
+	      implementation.   
 
      2) Imported dcraw 9.16/1.450, added support for several cameras:
         Adobe DNG: Fast Load DNG (LightRoom 4.x),lossy-compressed DNG (LR 4.x,
@@ -62,6 +67,7 @@
               (LibRaw::raw2image_ex() )
             - Callbacks for more efficient data handling (SSE2 or multithreaded)
               introduced in 0.15-PreAlpha
+	    - Fast LJPEG decoder
          * Black level subtraction for Phase One files is performed on unpack()
            stage, not on postprocessing one.
 
