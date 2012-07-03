@@ -1509,7 +1509,7 @@ int LibRaw::unpack_thumb(void)
                         ushort *t_thumb = (ushort*)calloc(T.tlength,2);
                         ID.input->read(t_thumb,2,T.tlength);
                         if ((libraw_internal_data.unpacker_data.order= 0x4949) == (ntohs(0x1234) == 0x1234))
-                          swab (t_thumb, t_thumb, T.tlength*2);
+                          swab ((char*)t_thumb, (char*)t_thumb, T.tlength*2);
 
                         if(T.thumb) free(T.thumb);
                         T.thumb = (char *) malloc (T.tlength);
