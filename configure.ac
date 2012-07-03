@@ -44,6 +44,28 @@ if test x$openmp = xtrue ; then
 	])
 fi
 
+# check for libjpeg v8
+AC_ARG_ENABLE([jpeg],
+	[  --enable-jpeg    Enable JPEG support for Lossy compressed DNG files],
+	[case "${enableval}" in
+		yes)	jpeg=true ;;
+		no)	jpeg=false ;;
+		*)	AC_MSG_ERROR([bad value ${enableval} for --enable-jpeg]) ;;
+	esac],[jpeg=true])
+
+if test x$jpeg = xtrue; then
+        AC_CHECK_LIB([jpeg], [jpeg_mem_src],
+                [
+                        AC_CHECK_HEADERS([jpeglib.h], [
+                                CPPFLAGS="$CPPFLAGS -DUSE_JPEG"
+                                LIBS="$LIBS -ljpeg"
+                        ], AC_MSG_WARN([no jpeg headers found]))
+                ],
+                AC_MSG_WARN([libjpeg not found])
+        )
+fi
+
+
 # check for Jasper (JPEG2000) support
 AC_ARG_ENABLE([jasper],
 	[  --enable-jasper    Enable Jasper (JPEG2000) support for RedCine files],

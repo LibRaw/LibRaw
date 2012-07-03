@@ -2479,6 +2479,10 @@ static const char  *static_camera_list[] =
 "Sony SLT-A77V",
 "Sony XCD-SX910CR",
 "STV680 VGA",
+"ptGrey GRAS-50S5C",
+"JaiPulnix BB-500CL",
+"JaiPulnix BB-500GE",
+"SVS SVS625CL",
    NULL
 };
 

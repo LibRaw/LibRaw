@@ -6466,6 +6466,11 @@ float CLASS find_green (int bps, int bite, int off0, int off1)
   return 100 * log(sum[0]/sum[1]);
 }
 
+
+#ifndef LIBRAW_LIBRARY_BUILD
+void CLASS identify2(unsigned fsize, unsigned flen, char *head);
+#endif
+
 /*
    Identify which camera created this file, and set global variables
    accordingly.
@@ -6587,6 +6592,10 @@ void CLASS identify()
     { 16215552, "SAMSUNG",  "S85"             ,1 },
     { 20487168, "SAMSUNG",  "WB550"           ,1 },
     { 24000000, "SAMSUNG",  "WB550"           ,1 },
+    { 9994240, "ptGrey", "GRAS-50S5C" ,0 }, // KC: SUPPORT GRASSHOPPER
+    { 10075968, "JaiPulnix","BB-500CL" ,0 }, // KC: SUPPORT BB-500CL
+    { 10108896, "JaiPulnix","BB-500GE" ,0 }, // KC: SUPPORT BB-500GE
+    { 10036800, "SVS", "SVS625CL" ,0 }, // KC: SUPPORT SVS625 cameralink
     { 12582980, "Sinar",    ""                ,0 },
     { 33292868, "Sinar",    ""                ,0 },
     { 44390468, "Sinar",    ""                ,0 } };
@@ -7709,7 +7718,80 @@ wb550:
       thumb_height = 480;
       thumb_width  = 640;
     }
-  } else if (!strcmp(model,"N Digital")) {
+  } 
+  else
+      identify2(fsize,flen,head); /* Avoid MS VS 2008/2010 bug */
+
+  if (!model[0])
+    sprintf (model, "%dx%d", width, height);
+  if (filters == UINT_MAX) filters = 0x94949494;
+  if (raw_color) adobe_coeff (make, model);
+  if (load_raw == &CLASS kodak_radc_load_raw)
+    if (raw_color) adobe_coeff ("Apple","Quicktake");
+  if (thumb_offset && !thumb_height) {
+    fseek (ifp, thumb_offset, SEEK_SET);
+    if (ljpeg_start (&jh, 1)) {
+      thumb_width  = jh.wide;
+      thumb_height = jh.high;
+    }
+  }
+dng_skip:
+  if (fuji_width) {
+    fuji_width = width >> !fuji_layout;
+    if (~fuji_width & 1) filters = 0x49494949;
+    width = (height >> fuji_layout) + fuji_width;
+    height = width - 1;
+    pixel_aspect = 1;
+  } else {
+    if (raw_height < height) raw_height = height;
+    if (raw_width  < width ) raw_width  = width;
+  }
+  if (!tiff_bps) tiff_bps = 12;
+  if (!maximum) maximum = (1 << tiff_bps) - 1;
+  if (!load_raw || height < 22) is_raw = 0;
+#ifdef NO_JASPER
+  if (load_raw == &CLASS redcine_load_raw) {
+#ifdef DCRAW_VERBOSE
+    fprintf (stderr,_("%s: You must link dcraw with %s!!\n"),
+	ifname, "libjasper");
+#endif
+    is_raw = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+    imgdata.process_warnings |= LIBRAW_WARN_NO_JASPER;
+#endif
+  }
+#endif
+#ifdef NO_JPEG
+  if (load_raw == &CLASS kodak_jpeg_load_raw ||
+      load_raw == &CLASS lossy_dng_load_raw) {
+#ifdef DCRAW_VERBOSE
+    fprintf (stderr,_("%s: You must link dcraw with %s!!\n"),
+	ifname, "libjpeg");
+#endif
+    is_raw = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+    imgdata.process_warnings |= LIBRAW_WARN_NO_JPEGLIB;
+#endif
+  }
+#endif
+  if (!cdesc[0])
+    strcpy (cdesc, colors == 3 ? "RGBG":"GMCY");
+  if (!raw_height) raw_height = height;
+  if (!raw_width ) raw_width  = width;
+  if (filters && colors == 3)
+    filters |= ((filters >> 2 & 0x22222222) |
+		(filters << 2 & 0x88888888)) & filters << 1;
+notraw:
+  if (flip == -1) flip = tiff_flip;
+  if (flip == -1) flip = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+  RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
+#endif
+}
+
+void CLASS identify2(unsigned fsize, unsigned flen, char *head)
+{
+  if (!strcmp(model,"N Digital")) {
     height = 2047;
     width  = 3072;
     filters = 0x61616161;
@@ -8007,73 +8089,43 @@ c603:
     width  = 3082;
     raw_width = 4672;
   }
-  if (!model[0])
-    sprintf (model, "%dx%d", width, height);
-  if (filters == UINT_MAX) filters = 0x94949494;
-  if (raw_color) adobe_coeff (make, model);
-  if (load_raw == &CLASS kodak_radc_load_raw)
-    if (raw_color) adobe_coeff ("Apple","Quicktake");
-  if (thumb_offset && !thumb_height) {
-    fseek (ifp, thumb_offset, SEEK_SET);
-    if (ljpeg_start (&jh, 1)) {
-      thumb_width  = jh.wide;
-      thumb_height = jh.high;
-    }
+  else if (!strcmp(model,"GRAS-50S5C")) {
+   height = 2048;
+   width = 2440;
+   load_raw = &CLASS unpacked_load_raw;
+   data_offset = 0;
+   filters = 0x49494949;
+   order = 0x4949;
+   maximum = 0xfffC;
+  } else if (!strcmp(model,"BB-500CL")) {
+   height = 2058;
+   width = 2448;
+   load_raw = &CLASS unpacked_load_raw;
+   data_offset = 0;
+   filters = 0x94949494;
+   order = 0x4949;
+   maximum = 0x3fff;
+  } else if (!strcmp(model,"BB-500GE")) {
+   height = 2058;
+   width = 2456;
+   load_raw = &CLASS unpacked_load_raw;
+   data_offset = 0;
+   filters = 0x94949494;
+   order = 0x4949;
+   maximum = 0x3fff;
+  } else if (!strcmp(model,"SVS625CL")) {
+   height = 2050;
+   width = 2448;
+   load_raw = &CLASS unpacked_load_raw;
+   data_offset = 0;
+   filters = 0x94949494;
+   order = 0x4949;
+   maximum = 0x0fff;
   }
-dng_skip:
-  if (fuji_width) {
-    fuji_width = width >> !fuji_layout;
-    if (~fuji_width & 1) filters = 0x49494949;
-    width = (height >> fuji_layout) + fuji_width;
-    height = width - 1;
-    pixel_aspect = 1;
-  } else {
-    if (raw_height < height) raw_height = height;
-    if (raw_width  < width ) raw_width  = width;
-  }
-  if (!tiff_bps) tiff_bps = 12;
-  if (!maximum) maximum = (1 << tiff_bps) - 1;
-  if (!load_raw || height < 22) is_raw = 0;
-#ifdef NO_JASPER
-  if (load_raw == &CLASS redcine_load_raw) {
-#ifdef DCRAW_VERBOSE
-    fprintf (stderr,_("%s: You must link dcraw with %s!!\n"),
-	ifname, "libjasper");
-#endif
-    is_raw = 0;
-#ifdef LIBRAW_LIBRARY_BUILD
-    imgdata.process_warnings |= LIBRAW_WARN_NO_JASPER;
-#endif
-  }
-#endif
-#ifdef NO_JPEG
-  if (load_raw == &CLASS kodak_jpeg_load_raw ||
-      load_raw == &CLASS lossy_dng_load_raw) {
-#ifdef DCRAW_VERBOSE
-    fprintf (stderr,_("%s: You must link dcraw with %s!!\n"),
-	ifname, "libjpeg");
-#endif
-    is_raw = 0;
-#ifdef LIBRAW_LIBRARY_BUILD
-    imgdata.process_warnings |= LIBRAW_WARN_NO_JPEGLIB;
-#endif
-  }
-#endif
-  if (!cdesc[0])
-    strcpy (cdesc, colors == 3 ? "RGBG":"GMCY");
-  if (!raw_height) raw_height = height;
-  if (!raw_width ) raw_width  = width;
-  if (filters && colors == 3)
-    filters |= ((filters >> 2 & 0x22222222) |
-		(filters << 2 & 0x88888888)) & filters << 1;
-notraw:
-  if (flip == -1) flip = tiff_flip;
-  if (flip == -1) flip = 0;
-#ifdef LIBRAW_LIBRARY_BUILD
-  RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
-#endif
 }
-#line 9319 "dcraw/dcraw.c"
+
+
+#line 9371 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -8303,7 +8355,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 9574 "dcraw/dcraw.c"
+#line 9626 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

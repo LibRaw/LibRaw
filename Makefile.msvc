@@ -17,6 +17,10 @@
 #LCMS_DEF=/DUSE_LCMS2 /DCMS_DLL /I..\lcms2-2.3\include
 #LCMS_LIB=..\lcms2-2.3\bin\lcms2_dll.lib
 
+# JPEG support for DNG
+JPEG_DEF=/DUSE_JPEG /I..\jpeg-8d
+JPEG_LIB=..\jpeg-8d\Release\jpeg.lib
+
 
 SAMPLES=bin\raw-identify.exe bin\simple_dcraw.exe  bin\dcraw_emu.exe bin\dcraw_half.exe bin\half_mt.exe bin\mem_image.exe bin\unprocessed_raw.exe bin\4channels.exe bin\multirender_test.exe bin\postprocessing_benchmark.exe
 
@@ -32,7 +36,7 @@ LIB_OBJECTS=object\dcraw_common_st.obj object\dcraw_fileio_st.obj  object\libraw
 DLL_OBJECTS=object\dcraw_common.obj object\dcraw_fileio.obj  object\libraw_cxx.obj object\libraw_datastream.obj object\libraw_c_api.obj  object\demosaic_packs.obj
 
 CC=cl.exe
-COPT=/EHsc /MP /MT /I. /DWIN32 /O2 /W0 /nologo $(COPT) $(CFLAGSG2) $(CFLAGSG3) $(LCMS_DEF) 
+COPT=/EHsc /MP /MT /I. /DWIN32 /O2 /W0 /nologo $(COPT) $(CFLAGSG2) $(CFLAGSG3) $(LCMS_DEF) $(JPEG_DEF)
 
 LINKLIB=$(LIBDLL)
 
@@ -75,7 +79,7 @@ bin\half_mt.exe: $(LINKLIB) samples\half_mt_win32.c
 
 $(DLL): $(DLL_OBJECTS)
 	-del /f $(DLL) $(LIBDLL)
-	cl $(COPT) /LD $(DLL_OBJECTS) $(LCMS_LIB) /link /out:"$(DLL)" /implib:"$(LIBDLL)"
+	cl $(COPT) /LD $(DLL_OBJECTS) $(LCMS_LIB) $(JPEG_LIB) /link /out:"$(DLL)" /implib:"$(LIBDLL)"
 
 object\dcraw_common.obj: internal\dcraw_common.cpp
 	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\dcraw_common.obj" /c internal\dcraw_common.cpp

@@ -11,6 +11,14 @@ all: library samples
 #CFLAGS_DP3=-I../LibRaw-demosaic-pack-GPL3
 #CFLAGS3=-DLIBRAW_DEMOSAIC_PACK_GPL3
 
+# Jasper support for RedCine
+#CFLAGS+=-DUSE_JASPER -I/usr/local/include
+#LDADD+=-L/usr/local/lib -ljasper
+
+# JPEG support for DNG
+#CFLAGS+=-DUSE_JPEG -I/usr/local/include
+#LDADD+=-L/usr/local/lib -ljpeg
+
 # LCMS support
 #LCMS_DEF=-DUSE_LCMS -I/usr/local/include
 #LCMS_LIB=-L/usr/local/lib -llcms

@@ -9,6 +9,10 @@ CFLAGS=-O4  -I. -w
 CFLAGS+=-DUSE_JASPER -I/usr/local/include
 LDADD+=-L/usr/local/lib -ljasper
 
+# JPEG support for DNG
+CFLAGS+=-DUSE_JPEG -I/usr/local/include
+LDADD+=-L/usr/local/lib -ljpeg
+
 # LCMS support
 #CFLAGS+=-DUSE_LCMS -I/usr/local/include
 #LDADD+=-L/usr/local/lib -llcms
