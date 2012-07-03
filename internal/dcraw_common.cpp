@@ -148,7 +148,7 @@ void CLASS read_shorts (ushort *pixel, int count)
 {
   if (fread (pixel, 2, count, ifp) < count) derror();
   if ((order == 0x4949) == (ntohs(0x1234) == 0x1234))
-    swab (pixel, pixel, count*2);
+    swab ((char*)pixel, (char*)pixel, count*2);
 }
 
 void CLASS canon_600_fixed_wb (int temp)
@@ -2076,7 +2076,7 @@ void CLASS lossy_dng_load_raw()
       coeff[i] = getreal(12);
     for (i=0; i < 256; i++) {
       for (tot=j=0; j <= deg; j++)
-	tot += coeff[j] * pow(i/255.0, j);
+	tot += coeff[j] * pow(i/255.0f, (int)j);
       t_curve[c][i] = tot*0xffff;
     }
   }
@@ -2952,7 +2952,7 @@ void CLASS wavelet_denoise()
   if ((nc = colors) == 3 && filters) nc++;
   FORC(nc) {			/* denoise R,G1,B,G3 individually */
     for (i=0; i < size; i++)
-      fimg[i] = 256 * sqrt(image[i][c] << scale);
+      fimg[i] = 256 * sqrt((float)(image[i][c] << scale));
     for (hpass=lev=0; lev < 5; lev++) {
       lpass = size*((lev & 1)+1);
       for (row=0; row < iheight; row++) {
@@ -2998,7 +2998,7 @@ void CLASS wavelet_denoise()
 		window[2][col-1] + window[2][col+1] - blk[~row & 1]*4 )
 	      * mul[row & 1] + (window[1][col] + blk[row & 1]) * 0.5;
 	avg = avg < 0 ? 0 : sqrt(avg);
-	diff = sqrt(BAYER(row,col)) - avg;
+	diff = sqrt((float)BAYER(row,col)) - avg;
 	if      (diff < -thold) diff += thold;
 	else if (diff >  thold) diff -= thold;
 	else diff = 0;
@@ -3534,7 +3534,7 @@ void CLASS ahd_interpolate()
 
   for (i=0; i < 0x10000; i++) {
     r = i / 65535.0;
-    cbrt[i] = r > 0.008856 ? pow(r,1/3.0) : 7.787*r + 16/116.0;
+    cbrt[i] = r > 0.008856 ? pow(r,1.0f/3.0f) : 7.787*r + 16/116.0;
   }
   for (i=0; i < 3; i++)
     for (j=0; j < colors; j++)
@@ -3736,7 +3736,7 @@ void CLASS recover_highlights()
   if (verbose) fprintf (stderr,_("Rebuilding highlights...\n"));
 #endif
 
-  grow = pow (2, 4-highlight);
+  grow = pow (2.0f, (int)(4-highlight));
   FORCC hsat[c] = 32000 * pre_mul[c];
   for (kc=0, c=1; c < colors; c++)
     if (pre_mul[kc] < pre_mul[c]) kc = c;
@@ -7688,37 +7688,7 @@ wb550:
       }
     filters = 0x01010101 * (uchar) "\x94\x61\x49\x16"
 	[((filters-1) ^ (left_margin & 1) ^ (top_margin << 1)) & 3];
-  } else if (!strcmp(model,"C770UZ")) {
-    height = 1718;
-    width  = 2304;
-    filters = 0x16161616;
-    load_raw = &CLASS packed_load_raw;
-    load_flags = 30;
-  } else if (!strcmp(make,"OLYMPUS")) {
-    height += height & 1;
-    filters = exif_cfa;
-    if (width == 4100) width -= 4;
-    if (width == 4080) width -= 24;
-    if (load_raw == &CLASS unpacked_load_raw)
-      load_flags = 4;
-    tiff_bps = 12;
-    if (!strcmp(model,"E-300") ||
-	!strcmp(model,"E-500")) {
-      width -= 20;
-      if (load_raw == &CLASS unpacked_load_raw) {
-	maximum = 0xfc3;
-	memset (cblack, 0, sizeof cblack);
-      }
-    } else if (!strcmp(model,"E-330")) {
-      width -= 30;
-      if (load_raw == &CLASS unpacked_load_raw)
-	maximum = 0xf79;
-    } else if (!strcmp(model,"SP550UZ")) {
-      thumb_length = flen - (thumb_offset = 0xa39800);
-      thumb_height = 480;
-      thumb_width  = 640;
-    }
-  } 
+  }
   else
       identify2(fsize,flen,head); /* Avoid MS VS 2008/2010 bug */
 
@@ -7791,7 +7761,37 @@ notraw:
 
 void CLASS identify2(unsigned fsize, unsigned flen, char *head)
 {
-  if (!strcmp(model,"N Digital")) {
+  if (!strcmp(model,"C770UZ")) {
+    height = 1718;
+    width  = 2304;
+    filters = 0x16161616;
+    load_raw = &CLASS packed_load_raw;
+    load_flags = 30;
+  } else if (!strcmp(make,"OLYMPUS")) {
+    height += height & 1;
+    filters = exif_cfa;
+    if (width == 4100) width -= 4;
+    if (width == 4080) width -= 24;
+    if (load_raw == &CLASS unpacked_load_raw)
+      load_flags = 4;
+    tiff_bps = 12;
+    if (!strcmp(model,"E-300") ||
+	!strcmp(model,"E-500")) {
+      width -= 20;
+      if (load_raw == &CLASS unpacked_load_raw) {
+	maximum = 0xfc3;
+	memset (cblack, 0, sizeof cblack);
+      }
+    } else if (!strcmp(model,"E-330")) {
+      width -= 30;
+      if (load_raw == &CLASS unpacked_load_raw)
+	maximum = 0xf79;
+    } else if (!strcmp(model,"SP550UZ")) {
+      thumb_length = flen - (thumb_offset = 0xa39800);
+      thumb_height = 480;
+      thumb_width  = 640;
+    }
+  } else if (!strcmp(model,"N Digital")) {
     height = 2047;
     width  = 3072;
     filters = 0x61616161;
@@ -8544,7 +8544,7 @@ void CLASS write_ppm_tiff()
 	   FORCC ppm [col*colors+c] = curve[image[soff][c]] >> 8;
       else FORCC ppm2[col*colors+c] = curve[image[soff][c]];
     if (output_bps == 16 && !output_tiff && htons(0x55aa) != 0x55aa)
-      swab (ppm2, ppm2, width*colors*2);
+      swab ((char*)ppm2, (char*)ppm2, width*colors*2);
     fwrite (ppm, colors*output_bps/8, width, ofp);
   }
   free (ppm);
