@@ -184,23 +184,23 @@ struct ph1_t
 
 typedef struct
 {
-	ushort      curve[0x10000]; 
-	unsigned    cblack[4];
-	unsigned    black;
-	unsigned    maximum;
-	unsigned    channel_maximum[4];
-    ushort      white[8][8];  
-    float       cam_mul[4]; 
-    float       pre_mul[4]; 
-    float       cmatrix[3][4]; 
-    float       rgb_cam[3][4]; 
-    float       cam_xyz[4][3]; 
-    struct ph1_t       phase_one_data;
-    float       flash_used; 
-    float       canon_ev; 
-    char        model2[64];
-    void        *profile;
-    unsigned    profile_length;
+  ushort      curve[0x10000]; 
+  unsigned    cblack[4];
+  unsigned    black;
+  unsigned    data_maximum;
+  unsigned    maximum;
+  ushort      white[8][8];  
+  float       cam_mul[4]; 
+  float       pre_mul[4]; 
+  float       cmatrix[3][4]; 
+  float       rgb_cam[3][4]; 
+  float       cam_xyz[4][3]; 
+  struct ph1_t       phase_one_data;
+  float       flash_used; 
+  float       canon_ev; 
+  char        model2[64];
+  void        *profile;
+  unsigned    profile_length;
 }libraw_colordata_t;
 
 typedef struct

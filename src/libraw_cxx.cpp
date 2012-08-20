@@ -481,7 +481,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "sony_arw2_load_raw()";
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
             d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
-			d_info->decoder_flags |= LIBRAW_DECODER_ITSASONY;
+            d_info->decoder_flags |= LIBRAW_DECODER_ITSASONY;
         }
     else if (load_raw == &LibRaw::smal_v6_load_raw )
         {
@@ -533,11 +533,7 @@ int LibRaw::adjust_maximum()
         auto_threshold = O.adjust_maximum_thr;
         
     
-    real_max = C.channel_maximum[0];
-    for(i = 1; i< 4; i++)
-        if(real_max < C.channel_maximum[i])
-            real_max = C.channel_maximum[i];
-
+    real_max = C.data_maximum;
     if (real_max > 0 && real_max < C.maximum && real_max > C.maximum* auto_threshold)
         {
             C.maximum = real_max;
@@ -826,59 +822,6 @@ int LibRaw::unpack(void)
                 imgdata.rawdata.color_image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
             }
 
-        // calculate channel maximum
-        {
-            for(int c=0;c<4;c++) C.channel_maximum[c] = 0;
-            if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
-                {
-                    for(int rc = 0; rc < S.iwidth*S.iheight; rc++)
-                        {
-                            if(C.channel_maximum[0]<imgdata.rawdata.color_image[rc][0]) 
-                                C.channel_maximum[0]=imgdata.rawdata.color_image[rc][0];
-                            if(C.channel_maximum[1]<imgdata.rawdata.color_image[rc][1]) 
-                                C.channel_maximum[1]=imgdata.rawdata.color_image[rc][1];
-                            if(C.channel_maximum[2]<imgdata.rawdata.color_image[rc][2]) 
-                                C.channel_maximum[2]=imgdata.rawdata.color_image[rc][2];
-                            if(C.channel_maximum[3]<imgdata.rawdata.color_image[rc][3]) 
-                                C.channel_maximum[3]=imgdata.rawdata.color_image[rc][3];
-                        }
-                }
-            else if (decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
-                {
-                  if(IO.fuji_width)
-                    {
-                      for(int row=0; row < S.raw_height-S.top_margin*2; row++)
-                            {
-                                int colors[4];
-                                for (int xx=0;xx<4;xx++)
-                                  colors[xx] = FCF(row,xx);
-                                for(int col=0; col < IO.fuji_width << !libraw_internal_data.unpacker_data.fuji_layout; col++)
-                                    {
-                                      int cc = colors[col&3];
-                                        if(C.channel_maximum[cc] 
-                                           < imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)])
-                                          C.channel_maximum[cc] = 
-                                                imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
-                                    }
-                            }
-                    }
-                  else
-                    {
-                      for (int row=0; row < S.height; row++)
-                        {
-                                int colors[48];
-                                for (int xx=0;xx<48;xx++)
-                                  colors[xx] =fcol(row,xx);
-                                for (int col=0; col < S.width; col++)
-                                  {
-                                      int cc = colors[col%48];
-                                      if(C.channel_maximum[cc]  < imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)])
-                                        C.channel_maximum[cc]  = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
-                                  }
-                        }
-                    }
-                }
-        }
         // recover image sizes
         S.iwidth = save_iwidth;
         S.iheight = save_iheight;
@@ -1001,6 +944,78 @@ int LibRaw::raw2image(void)
                   }
                 }
               } 
+              else {
+                int row,col;
+                for (row=0; row < S.height; row++)
+                  for (col=0; col < S.width; col++)
+                    imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][fcol(row,col)] 
+                        = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+              }
+            }
+        else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+            {
+                // legacy is always 4channel and not shrinked!
+                memmove(imgdata.image,imgdata.rawdata.color_image,S.width*S.height*sizeof(*imgdata.image));
+            }
+
+        // hack - clear later flags!
+        imgdata.progress_flags 
+            = LIBRAW_PROGRESS_START|LIBRAW_PROGRESS_OPEN
+            |LIBRAW_PROGRESS_IDENTIFY|LIBRAW_PROGRESS_SIZE_ADJUST|LIBRAW_PROGRESS_LOAD_RAW;
+        return 0;
+    }
+    catch ( LibRaw_exceptions err) {
+        EXCEPTION_HANDLER(err);
+    }
+}
+
+int LibRaw::raw2image_ex(void)
+{
+
+    CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
+
+    try {
+        raw2image_start();
+
+        // free and re-allocate image bitmap
+        if(imgdata.image)
+            {
+                imgdata.image = (ushort (*)[4]) realloc (imgdata.image,S.iheight*S.iwidth *sizeof (*imgdata.image));
+                memset(imgdata.image,0,S.iheight*S.iwidth *sizeof (*imgdata.image));
+            }
+        else
+            imgdata.image = (ushort (*)[4]) calloc (S.iheight*S.iwidth, sizeof (*imgdata.image));
+
+        merror (imgdata.image, "raw2image_ex()");
+
+        libraw_decoder_info_t decoder_info;
+        get_decoder_info(&decoder_info);
+        
+        // Move saved bitmap to imgdata.image
+        if(decoder_info.decoder_flags & LIBRAW_DECODER_FLATFIELD)
+            {
+              if (IO.fuji_width) {
+                unsigned r,c;
+                int row,col;
+                for (row=0; row < S.raw_height-S.top_margin*2; row++) 
+                  {
+                    for (col=0; col < IO.fuji_width << !libraw_internal_data.unpacker_data.fuji_layout; col++) 
+                      {
+                        if (libraw_internal_data.unpacker_data.fuji_layout) {
+                          r = IO.fuji_width - 1 - col + (row >> 1);
+                          c = col + ((row+1) >> 1);
+                        } else {
+                          r = IO.fuji_width - 1 + row - (col >> 1);
+                          c = row + ((col+1) >> 1);
+                        }
+                        if (r < S.height && c < S.width)
+                          {
+                            imgdata.image[((r)>>IO.shrink)*S.iwidth+((c)>>IO.shrink)][FC(r,c)] 
+                              = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+                          }
+                      }
+                  }
+              } // end Fuji
               else {
                 int row,col;
                 for (row=0; row < S.height; row++)
@@ -1619,15 +1634,13 @@ int LibRaw::adjust_sizes_info_only(void)
 
 void LibRaw::subtract_black()
 {
-#if 1
-#define BAYERC(row,col,c) imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][c] 
 
     if((C.cblack[0] || C.cblack[1] || C.cblack[2] || C.cblack[3]))
         {
+#define BAYERC(row,col,c) imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][c] 
             int cblk[4],i,row,col,val,cc;
             for(i=0;i<4;i++)
                 cblk[i] = C.cblack[i];
-            ZERO(C.channel_maximum);
 
             for(row=0;row<S.height;row++)
                 for(col=0;col<S.width;col++)
@@ -1638,32 +1651,24 @@ void LibRaw::subtract_black()
                             val -= cblk[cc];
                         else
                             val = 0;
-                        if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
+                        if(C.data_maximum < val) C.data_maximum = val;
                         BAYERC(row,col,cc) = val;
                     }
             C.maximum -= C.black;
             ZERO(C.cblack);
             C.black = 0;
+#undef BAYERC
         }
     else
         {
           // Nothing to Do, maximum is already calculated, black level is 0, so no change
-#if 0
             // only calculate channel maximum;
-            int row,col,cc;
-            ZERO(C.channel_maximum);
-            for(row=0;row<S.height;row++)
-                for(col=0;col<S.width;col++)
-                    for(cc = 0; cc< 4; cc++)
-                        {
-                            int val = BAYERC(row,col,cc);
-                            if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
-                        }
-#endif
-            
+            int idx;
+            ushort *p = (ushort*)imgdata.image;
+            C.data_maximum = 0;
+            for(idx=0;idx<S.height*S.width*4;idx++)
+              if(C.data_maximum < p[idx]) C.data_maximum = p[idx];
         }
-#undef BAYERC
-#endif
 }
 
 #define TBLN 65535
@@ -1715,8 +1720,8 @@ void LibRaw::exp_bef(float shift, float smooth)
             imgdata.image[i][2] = lut[imgdata.image[i][2]];
             imgdata.image[i][3] = lut[imgdata.image[i][3]];
         }
-    for(int i=0;i<4;i++)
-        C.channel_maximum[i] = lut[C.channel_maximum[i]];
+
+    C.data_maximum = lut[C.data_maximum];
     C.maximum = lut[C.maximum];
     // no need to adjust the minumum, black is already subtracted
     free(lut);
@@ -1787,7 +1792,8 @@ int LibRaw::dcraw_process(void)
         if (~O.cropbox[2] && ~O.cropbox[3])
             no_crop=0;
 #endif
-        raw2image(); // allocate imgdata.image and copy data!
+
+        raw2image_ex(); // allocate imgdata.image and copy data!
 
         int save_4color = O.four_color_rgb;
 
@@ -1821,7 +1827,6 @@ int LibRaw::dcraw_process(void)
 
         if (O.user_qual >= 0) quality = O.user_qual;
 
-#if 1
         i = C.cblack[3];
         int c;
         for(c=0;c<3;c++) if (i > C.cblack[c]) i = C.cblack[c];
@@ -1830,13 +1835,9 @@ int LibRaw::dcraw_process(void)
         if (O.user_black >= 0) C.black = O.user_black;
         for(c=0;c<4;c++) C.cblack[c] += C.black;
         // black to be subtracted in scale_colors
-        printf("I'm here!\n");
-#endif
+        printf("cblack calculated again: %d %d %d %d\n",C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
 
-#if 1
-        if(!IO.fuji_width)
-          subtract_black();
-#endif
+        subtract_black();
 
         adjust_maximum();
 
