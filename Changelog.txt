@@ -1,3 +1,9 @@
+2012-08-20 Alex Tutubalin <lexa@lexa.ru>
+   * reverted (internal) changes to PhaseOne processing
+   * Imported dcraw 1.452:
+     - Changed color data for Canon 1D-X camera
+     - New camera support: Samsung NX-1000, Sony DSC-RX100
+
 2012-07-03 Alex Tutubalin <lexa@lexa.ru>
     === LibRaw 0.15 (Alpha1) ===
     1) API Changes:

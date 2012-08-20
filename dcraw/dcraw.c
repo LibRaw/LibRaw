@@ -1766,11 +1766,7 @@ void CLASS phase_one_load_raw_c()
 	pixel[col] = curve[pixel[col]];
     }
     for (col=0; col < raw_width; col++) {
-#ifndef LIBRAW_LIBRARY_BUILD
       i = (pixel[col] << 2) - ph1.t_black + t_black[row][col >= ph1.split_col];
-#else
-      i = (pixel[col] << 2);
-#endif
 	if (i > 0) RAW(row,col) = i;
     }
   }
@@ -3648,10 +3644,10 @@ void CLASS crop_masked_pixels()
 #endif
     c, m, mblack[8], zero, val;
 
-#ifndef LIBRAW_LIBRARY_BUILD
   if (load_raw == &CLASS phase_one_load_raw ||
       load_raw == &CLASS phase_one_load_raw_c)
     phase_one_correct();
+#ifndef LIBRAW_LIBRARY_BUILD
   if (fuji_width) {
     for (row=0; row < raw_height-top_margin*2; row++) {
       for (col=0; col < fuji_width << !fuji_layout; col++) {
