@@ -1619,14 +1619,14 @@ int LibRaw::adjust_sizes_info_only(void)
 
 void LibRaw::subtract_black()
 {
-#if 0
+#if 1
 #define BAYERC(row,col,c) imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][c] 
 
-    if((C.black || C.cblack[0] || C.cblack[1] || C.cblack[2] || C.cblack[3]))
+    if((C.cblack[0] || C.cblack[1] || C.cblack[2] || C.cblack[3]))
         {
             int cblk[4],i,row,col,val,cc;
             for(i=0;i<4;i++)
-                cblk[i] = C.cblack[i]+C.black;
+                cblk[i] = C.cblack[i];
             ZERO(C.channel_maximum);
 
             for(row=0;row<S.height;row++)
@@ -1647,6 +1647,8 @@ void LibRaw::subtract_black()
         }
     else
         {
+          // Nothing to Do, maximum is already calculated, black level is 0, so no change
+#if 0
             // only calculate channel maximum;
             int row,col,cc;
             ZERO(C.channel_maximum);
@@ -1657,6 +1659,7 @@ void LibRaw::subtract_black()
                             int val = BAYERC(row,col,cc);
                             if(C.channel_maximum[cc] < val) C.channel_maximum[cc] = val;
                         }
+#endif
             
         }
 #undef BAYERC
@@ -1827,8 +1830,12 @@ int LibRaw::dcraw_process(void)
         if (O.user_black >= 0) C.black = O.user_black;
         for(c=0;c<4;c++) C.cblack[c] += C.black;
         // black to be subtracted in scale_colors
-#else
-        subtract_black();
+        printf("I'm here!\n");
+#endif
+
+#if 1
+        if(!IO.fuji_width)
+          subtract_black();
 #endif
 
         adjust_maximum();
