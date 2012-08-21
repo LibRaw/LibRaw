@@ -189,7 +189,7 @@ LibRaw:: LibRaw(unsigned int flags)
     memmove(&imgdata.params.aber,&aber,sizeof(aber));
     memmove(&imgdata.params.gamm,&gamm,sizeof(gamm));
     memmove(&imgdata.params.greybox,&greybox,sizeof(greybox));
-    //    memmove(&imgdata.params.cropbox,&cropbox,sizeof(cropbox));
+    memmove(&imgdata.params.cropbox,&cropbox,sizeof(cropbox));
     
     imgdata.params.bright=1;
     imgdata.params.use_camera_matrix=-1;
@@ -521,7 +521,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
 
 int LibRaw::adjust_maximum()
 {
-    int i;
     ushort real_max;
     float  auto_threshold;
 
@@ -812,6 +811,7 @@ int LibRaw::unpack(void)
 
 
         (this->*load_raw)();
+
         if(imgdata.rawdata.raw_image)
           crop_masked_pixels(); // calculate black levels
         
@@ -1638,22 +1638,27 @@ void LibRaw::subtract_black()
     if((C.cblack[0] || C.cblack[1] || C.cblack[2] || C.cblack[3]))
         {
 #define BAYERC(row,col,c) imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][c] 
-            int cblk[4],i,row,col,val,cc;
+            int cblk[4],i;
             for(i=0;i<4;i++)
                 cblk[i] = C.cblack[i];
 
-            for(row=0;row<S.height;row++)
-                for(col=0;col<S.width;col++)
-                    {
-                        cc=fcol(row,col);
-                        val = BAYERC(row,col,cc);
-                        if(val > cblk[cc])
-                            val -= cblk[cc];
-                        else
-                            val = 0;
-                        if(C.data_maximum < val) C.data_maximum = val;
-                        BAYERC(row,col,cc) = val;
-                    }
+            int size = S.iheight * S.iwidth;
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define LIM(x,min,max) MAX(min,MIN(x,max))
+#define CLIP(x) LIM(x,0,65535)
+
+            for(i=0; i< size*4; i++)
+              {
+                int val = imgdata.image[0][i];
+                val -= cblk[i & 3];
+                imgdata.image[0][i] = CLIP(val);
+                if(C.data_maximum < val) C.data_maximum = val;
+              }
+#undef MIN
+#undef MAX
+#undef LIM
+#undef CLIP
             C.maximum -= C.black;
             ZERO(C.cblack);
             C.black = 0;
@@ -1662,12 +1667,12 @@ void LibRaw::subtract_black()
     else
         {
           // Nothing to Do, maximum is already calculated, black level is 0, so no change
-            // only calculate channel maximum;
-            int idx;
-            ushort *p = (ushort*)imgdata.image;
-            C.data_maximum = 0;
-            for(idx=0;idx<S.height*S.width*4;idx++)
-              if(C.data_maximum < p[idx]) C.data_maximum = p[idx];
+          // only calculate channel maximum;
+          int idx;
+          ushort *p = (ushort*)imgdata.image;
+          C.data_maximum = 0;
+          for(idx=0;idx<S.iheight*S.iwidth*4;idx++)
+            if(C.data_maximum < p[idx]) C.data_maximum = p[idx];
         }
 }
 
@@ -1757,14 +1762,28 @@ void LibRaw::convert_to_rgb_loop(float out_cam[3][4])
 
 void LibRaw::scale_colors_loop(float scale_mul[4])
 {
-	unsigned size = S.iheight*S.iwidth;
-	for (unsigned i=0; i < size*4; i++) {
-		int val = imgdata.image[0][i];
-		if (!val) continue;
-		val -= C.cblack[i & 3];
-		val *= scale_mul[i & 3];
-		imgdata.image[0][i] = CLIP(val);
-	}
+  unsigned size = S.iheight*S.iwidth;
+  
+  if(C.cblack[0]||C.cblack[1]||C.cblack[2]||C.cblack[3])
+    {
+      for (unsigned i=0; i < size*4; i++) 
+        {
+          int val = imgdata.image[0][i];
+          if (!val) continue;
+          val -= C.cblack[i & 3];
+          val *= scale_mul[i & 3];
+          imgdata.image[0][i] = CLIP(val);
+        }
+    }
+  else // BL is zero
+    {
+      for (unsigned i=0; i < size*4; i++) 
+        {
+          int val = imgdata.image[0][i];
+          val *= scale_mul[i & 3];
+          imgdata.image[0][i] = CLIP(val);
+        }
+    }
 }
 
 int LibRaw::dcraw_process(void)
@@ -1834,8 +1853,6 @@ int LibRaw::dcraw_process(void)
         C.black += i;
         if (O.user_black >= 0) C.black = O.user_black;
         for(c=0;c<4;c++) C.cblack[c] += C.black;
-        // black to be subtracted in scale_colors
-        printf("cblack calculated again: %d %d %d %d\n",C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
 
         subtract_black();
 

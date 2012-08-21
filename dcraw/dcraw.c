@@ -2345,7 +2345,7 @@ void CLASS lossy_dng_load_raw()
       coeff[i] = getreal(12);
     for (i=0; i < 256; i++) {
       for (tot=j=0; j <= deg; j++)
-	tot += coeff[j] * pow(i/255.0f, (int)j);
+	tot += coeff[j] * pow(i/255.0, (int)j);
       t_curve[c][i] = tot*0xffff;
     }
   }
@@ -4389,7 +4389,7 @@ skip_block: ;
   }
 #endif
   size = iheight*iwidth;
-#ifdef LIBRAW_LIBRARY_BUILD__1
+#ifdef LIBRAW_LIBRARY_BUILD
   scale_colors_loop(scale_mul);
 #else
   for (i=0; i < size*4; i++) {

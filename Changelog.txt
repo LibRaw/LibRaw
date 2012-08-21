@@ -2,7 +2,8 @@
    * reverted (internal) changes to PhaseOne processing
    * Imported high-performance multithreaded AHD and
      wavelet denoising implementations from LibRaw 0.14 
-   * subtract_black() works again!
+   * subtract_black() works again
+   * Fixed minor problem in lossy DNG tone curve generation
    * Imported dcraw 1.452:
      - Changed color data for Canon 1D-X camera
      - New camera support: Samsung NX-1000, Sony DSC-RX100
