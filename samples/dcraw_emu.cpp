@@ -284,7 +284,7 @@ int main(int argc, char *argv[])
                       }
                   break;
               case 'A':  for(c=0; c<4;c++) OUT.greybox[c]  = atoi(argv[arg++]); break;
-                //              case 'B':  for(c=0; c<4;c++) OUT.cropbox[c]  = atoi(argv[arg++]); break;
+              case 'B':  for(c=0; c<4;c++) OUT.cropbox[c]  = atoi(argv[arg++]); break;
               case 'a':
                   if(!strcmp(optstr,"-aexpo"))			  
                       {
