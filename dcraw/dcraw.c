@@ -885,34 +885,6 @@ int CLASS ljpeg_diff (ushort *huff)
   return diff;
 }
 
-#ifdef LIBRAW_LIBRARY_BUILD
-int CLASS ljpeg_diff_new (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff)
-{
-  int len, diff;
-
-  len = bits._gethuff_lj(buf,*huff,huff+1);
-  if (len == 16 && (!dng_version || dng_version >= 0x1010000))
-    return -32768;
-  diff = bits._getbits_lj(buf,len);
-  if ((diff & (1 << (len-1))) == 0)
-    diff -= (1 << len) - 1;
-  return diff;
-}
-
-int CLASS ljpeg_diff_pef (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff)
-{
-  int len, diff;
-
-  len = bits._gethuff(buf,*huff,huff+1,zero_after_ff);
-  if (len == 16 && (!dng_version || dng_version >= 0x1010000))
-    return -32768;
-  diff = bits._getbits(buf,len,zero_after_ff);
-  if ((diff & (1 << (len-1))) == 0)
-    diff -= (1 << len) - 1;
-  return diff;
-}
-#endif
-
 ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
 {
   int col, c, diff, pred, spred=0;
@@ -951,46 +923,6 @@ ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
     }
   return row[2];
 }
-#ifdef LIBRAW_LIBRARY_BUILD
-ushort * CLASS ljpeg_row_new (int jrow, struct jhead *jh, LibRaw_bit_buffer& bits,LibRaw_byte_buffer* bytes)
-{
-  int col, c, diff, pred, spred=0;
-  ushort mark=0, *row[3];
-
-  if (jrow * jh->wide % jh->restart == 0) {
-    FORC(6) jh->vpred[c] = 1 << (jh->bits-1);
-    if (jrow) {
-        bytes->unseek2();
-        do mark = (mark << 8) + (c = bytes->get_byte());
-        while (c != EOF && mark >> 4 != 0xffd);
-    }
-    bits.reset();
-  }
-  FORC3 row[c] = jh->row + jh->wide*jh->clrs*((jrow+c) & 1);
-  for (col=0; col < jh->wide; col++)
-    FORC(jh->clrs) {
-        diff = ljpeg_diff_new (bits,bytes,jh->huff[c]);
-      if (jh->sraw && c <= jh->sraw && (col | c))
-		    pred = spred;
-      else if (col) pred = row[0][-jh->clrs];
-      else	    pred = (jh->vpred[c] += diff) - diff;
-      if (jrow && col) switch (jh->psv) {
-	case 1:	break;
-	case 2: pred = row[1][0];					break;
-	case 3: pred = row[1][-jh->clrs];				break;
-	case 4: pred = pred +   row[1][0] - row[1][-jh->clrs];		break;
-	case 5: pred = pred + ((row[1][0] - row[1][-jh->clrs]) >> 1);	break;
-	case 6: pred = row[1][0] + ((pred - row[1][-jh->clrs]) >> 1);	break;
-	case 7: pred = (pred + row[1][0]) >> 1;				break;
-	default: pred = 0;
-      }
-      if ((**row = pred + diff) >> jh->bits) derror();
-      if (c <= jh->sraw) spred = **row;
-      row[0]++; row[1]++;
-    }
-  return row[2];
-}
-#endif
 
 void CLASS lossless_jpeg_load_raw()
 {
@@ -3053,7 +2985,7 @@ void CLASS foveon_huff (ushort *huff)
 void CLASS foveon_dp_load_raw()
 {
   unsigned c, roff[4], row, col, diff;
-  ushort huff[258], vpred, hpred;
+  ushort huff[258], vpred[2][2], hpred[2];
 
   fseek (ifp, 8, SEEK_CUR);
   foveon_huff (huff);
@@ -3062,17 +2994,18 @@ void CLASS foveon_dp_load_raw()
   FORC3 {
     fseek (ifp, data_offset+roff[c], SEEK_SET);
     getbits(-1);
-    vpred = 1024;
+    vpred[0][0] = vpred[0][1] = vpred[1][0] = vpred[1][1] = 512;
     for (row=0; row < height; row++) {
       for (col=0; col < width; col++) {
-	diff = ljpeg_diff(huff);
-	if (col) hpred += diff;
-	else hpred = vpred += diff;
-	image[row*width+col][c] = hpred;
+       diff = ljpeg_diff(huff);
+       if (col < 2) hpred[col] = vpred[row & 1][col] += diff;
+       else hpred[col & 1] += diff;
+       image[row*width+col][c] = hpred[col & 1];
       }
     }
   }
 }
+
 
 void CLASS foveon_load_camf()
 {
@@ -4069,7 +4002,6 @@ void CLASS hat_transform (float *temp, float *base, int st, int size, int sc)
     temp[i] = 2*base[st*i] + base[st*(i-sc)] + base[st*(2*size-2-(i+sc))];
 }
 
-#if !defined(LIBRAW_USE_OPENMP)
 void CLASS wavelet_denoise()
 {
   float *fimg=0, *temp, thold, mul[2], avg, diff;
@@ -4149,114 +4081,6 @@ void CLASS wavelet_denoise()
   }
   free (fimg);
 }
-#else /* LIBRAW_USE_OPENMP */
-void CLASS wavelet_denoise()
-{
-  float *fimg=0, *temp, thold, mul[2], avg, diff;
-   int scale=1, size, lev, hpass, lpass, row, col, nc, c, i, wlast, blk[2];
-  ushort *window[4];
-  static const float noise[] =
-  { 0.8002,0.2735,0.1202,0.0585,0.0291,0.0152,0.0080,0.0044 };
-
-#ifdef DCRAW_VERBOSE
-  if (verbose) fprintf (stderr,_("Wavelet denoising...\n"));
-#endif
-
-  while (maximum << scale < 0x10000) scale++;
-  maximum <<= --scale;
-  black <<= scale;
-  FORC4 cblack[c] <<= scale;
-  if ((size = iheight*iwidth) < 0x15550000)
-    fimg = (float *) malloc ((size*3 + iheight + iwidth) * sizeof *fimg);
-  merror (fimg, "wavelet_denoise()");
-  temp = fimg + size*3;
-  if ((nc = colors) == 3 && filters) nc++;
-#ifdef LIBRAW_LIBRARY_BUILD
-#pragma omp parallel default(shared) private(i,col,row,thold,lev,lpass,hpass,temp,c) firstprivate(scale,size) 
-#endif
-  {
-      temp = (float*)malloc( (iheight + iwidth) * sizeof *fimg);
-    FORC(nc) {			/* denoise R,G1,B,G3 individually */
-#ifdef LIBRAW_LIBRARY_BUILD
-#pragma omp for
-#endif
-      for (i=0; i < size; i++)
-        fimg[i] = 256 * sqrt((double)(image[i][c] << scale));
-      for (hpass=lev=0; lev < 5; lev++) {
-	lpass = size*((lev & 1)+1);
-#ifdef LIBRAW_LIBRARY_BUILD
-#pragma omp for
-#endif
-	for (row=0; row < iheight; row++) {
-	  hat_transform (temp, fimg+hpass+row*iwidth, 1, iwidth, 1 << lev);
-	  for (col=0; col < iwidth; col++)
-	    fimg[lpass + row*iwidth + col] = temp[col] * 0.25;
-	}
-#ifdef LIBRAW_LIBRARY_BUILD
-#pragma omp for
-#endif
-	for (col=0; col < iwidth; col++) {
-	  hat_transform (temp, fimg+lpass+col, iwidth, iheight, 1 << lev);
-	  for (row=0; row < iheight; row++)
-	    fimg[lpass + row*iwidth + col] = temp[row] * 0.25;
-	}
-	thold = threshold * noise[lev];
-#ifdef LIBRAW_LIBRARY_BUILD
-#pragma omp for
-#endif
-	for (i=0; i < size; i++) {
-	  fimg[hpass+i] -= fimg[lpass+i];
-	  if	(fimg[hpass+i] < -thold) fimg[hpass+i] += thold;
-	  else if (fimg[hpass+i] >  thold) fimg[hpass+i] -= thold;
-	  else	 fimg[hpass+i] = 0;
-	  if (hpass) fimg[i] += fimg[hpass+i];
-	}
-	hpass = lpass;
-      }
-#ifdef LIBRAW_LIBRARY_BUILD
-#pragma omp for
-#endif
-      for (i=0; i < size; i++)
-	image[i][c] = CLIP(SQR(fimg[i]+fimg[lpass+i])/0x10000);
-    }
-    free(temp);
-  } /* end omp parallel */
-/* the following loops are hard to parallize, no idea yes,
- * problem is wlast which is carrying dependency
- * second part should be easyer, but did not yet get it right.
- */
-  if (filters && colors == 3) {  /* pull G1 and G3 closer together */
-   for (row=0; row < 2; row++){
-      mul[row] = 0.125 * pre_mul[FC(row+1,0) | 1] / pre_mul[FC(row,0) | 1];
-      blk[row] = cblack[FC(row,0) | 1];
-   }
-    for (i=0; i < 4; i++)
-      window[i] = (ushort *) fimg + width*i;
-    for (wlast=-1, row=1; row < height-1; row++) {
-      while (wlast < row+1) {
-	for (wlast++, i=0; i < 4; i++)
-	  window[(i+3) & 3] = window[i];
-	for (col = FC(wlast,1) & 1; col < width; col+=2)
-	  window[2][col] = BAYER(wlast,col);
-      }
-      thold = threshold/512;
-      for (col = (FC(row,0) & 1)+1; col < width-1; col+=2) {
-	avg = ( window[0][col-1] + window[0][col+1] +
-		window[2][col-1] + window[2][col+1] - blk[~row & 1]*4 )
-	      * mul[row & 1] + (window[1][col] + blk[row & 1]) * 0.5;
-	avg = avg < 0 ? 0 : sqrt(avg);
-	diff = sqrt((double)BAYER(row,col)) - avg;
-	if      (diff < -thold) diff += thold;
-	else if (diff >  thold) diff -= thold;
-	else diff = 0;
-	BAYER(row,col) = CLIP(SQR(avg+diff) + 0.5);
-      }
-    }
-  }
-  free (fimg);
-}
-
-#endif
 
 // green equilibration
 void CLASS green_matching()
@@ -4739,9 +4563,6 @@ void CLASS ppg_interpolate()
 /*  Calculate blue for red pixels and vice versa:		*/
 #ifdef LIBRAW_LIBRARY_BUILD
   RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE,2,3);
-#ifdef LIBRAW_USE_OPENMP
-#pragma omp parallel for default(shared) private(guess, diff, row, col, d, c, i, pix) schedule(static)
-#endif
 #endif
   for (row=1; row < height-1; row++)
     for (col=1+(FC(row,1) & 1), c=2-FC(row,col); col < width-1; col+=2) {
@@ -4760,7 +4581,6 @@ void CLASS ppg_interpolate()
     }
 }
 
-#ifndef LIBRAW_LIBRARY_BUILD
 /*
    Adaptive Homogeneity-Directed interpolation is based on
    the work of Keigo Hirakawa, Thomas Parks, and Paul Lee.
@@ -4784,7 +4604,7 @@ void CLASS ahd_interpolate()
 
   for (i=0; i < 0x10000; i++) {
     r = i / 65535.0;
-    cbrt[i] = r > 0.008856 ? pow(r,1.0f/3.0f) : 7.787*r + 16/116.0;
+    cbrt[i] = r > 0.008856 ? pow(r,1/3.0) : 7.787*r + 16/116.0;
   }
   for (i=0; i < 3; i++)
     for (j=0; j < colors; j++)
@@ -4893,297 +4713,6 @@ void CLASS ahd_interpolate()
   free (buffer);
 }
 #undef TS
-#else
-#define TS 256		/* Tile Size */
-static float dcraw_cbrt[0x10000] = {-1.0f};
-
-static inline float calc_64cbrt(float f)
-{
-  unsigned u;
-  static float lower = dcraw_cbrt[0];
-  static float upper = dcraw_cbrt[0xffff];
-
-  if (f <= 0) {
-    return lower;
-  }
-
-  u = (unsigned) f;
-  if (u >= 0xffff) {
-    return upper;
-  }
-  return dcraw_cbrt[u];
-}
-void CLASS ahd_interpolate_green_h_and_v(int top, int left, ushort (*out_rgb)[TS][TS][3])
-{
-  int row, col;
-  int c, val;
-  ushort (*pix)[4];
-  const int rowlimit = MIN(top+TS, height-2);
-  const int collimit = MIN(left+TS, width-2);
-
-  for (row = top; row < rowlimit; row++) {
-    col = left + (FC(row,left) & 1);
-    for (c = FC(row,col); col < collimit; col+=2) {
-      pix = image + row*width+col;
-      val = ((pix[-1][1] + pix[0][c] + pix[1][1]) * 2
-            - pix[-2][c] - pix[2][c]) >> 2;
-      out_rgb[0][row-top][col-left][1] = ULIM(val,pix[-1][1],pix[1][1]);
-      val = ((pix[-width][1] + pix[0][c] + pix[width][1]) * 2
-            - pix[-2*width][c] - pix[2*width][c]) >> 2;
-      out_rgb[1][row-top][col-left][1] = ULIM(val,pix[-width][1],pix[width][1]);
-    }
-  }
-}
-void CLASS ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[TS][3], short (*out_lab)[TS][3], const float (&xyz_cam)[3][4])
-{
-  unsigned row, col;
-  int c, val;
-  ushort (*pix)[4];
-  ushort (*rix)[3];
-  short (*lix)[3];
-  float xyz[3];
-  const unsigned num_pix_per_row = 4*width;
-  const unsigned rowlimit = MIN(top+TS-1, height-3);
-  const unsigned collimit = MIN(left+TS-1, width-3);
-  ushort *pix_above;
-  ushort *pix_below;
-  int t1, t2;
-
-  for (row = top+1; row < rowlimit; row++) {
-    pix = image + row*width + left;
-    rix = &inout_rgb[row-top][0];
-    lix = &out_lab[row-top][0];
-
-    for (col = left+1; col < collimit; col++) {
-      pix++;
-      pix_above = &pix[0][0] - num_pix_per_row;
-      pix_below = &pix[0][0] + num_pix_per_row;
-      rix++;
-      lix++;
-
-      c = 2 - FC(row, col);
-
-      if (c == 1) {
-        c = FC(row+1,col);
-	t1 = 2-c;
-        val = pix[0][1] + (( pix[-1][t1] + pix[1][t1]
-              - rix[-1][1] - rix[1][1] ) >> 1);
-        rix[0][t1] = CLIP(val);
-        val = pix[0][1] + (( pix_above[c] + pix_below[c]
-              - rix[-TS][1] - rix[TS][1] ) >> 1);
-      } else {
-	t1 = -4+c; /* -4+c: pixel of color c to the left */
-	t2 = 4+c; /* 4+c: pixel of color c to the right */
-        val = rix[0][1] + (( pix_above[t1] + pix_above[t2]
-              + pix_below[t1] + pix_below[t2]
-              - rix[-TS-1][1] - rix[-TS+1][1]
-              - rix[+TS-1][1] - rix[+TS+1][1] + 1) >> 2);
-      }
-      rix[0][c] = CLIP(val);
-      c = FC(row,col);
-      rix[0][c] = pix[0][c];
-      xyz[0] = xyz[1] = xyz[2] = 0.5;
-      FORC3 {
-	/*
-	 * Technically this ought to be FORCC, but the rest of
-	 * ahd_interpolate() assumes 3 colors so let's help the compiler.
-	 */
-        xyz[0] += xyz_cam[0][c] * rix[0][c];
-        xyz[1] += xyz_cam[1][c] * rix[0][c];
-        xyz[2] += xyz_cam[2][c] * rix[0][c];
-      }
-      FORC3 {
-	xyz[c] = calc_64cbrt(xyz[c]);
-      }
-      lix[0][0] = (116 * xyz[1] - 16);
-      lix[0][1] = 500 * (xyz[0] - xyz[1]);
-      lix[0][2] = 200 * (xyz[1] - xyz[2]);
-    }
-  }
-}
-void CLASS ahd_interpolate_r_and_b_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[TS][TS][3], short (*out_lab)[TS][TS][3], const float (&xyz_cam)[3][4])
-{
-  int direction;
-  for (direction = 0; direction < 2; direction++) {
-    ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(top, left, inout_rgb[direction], out_lab[direction], xyz_cam);
-  }
-}
-void CLASS ahd_interpolate_build_homogeneity_map(int top, int left, short (*lab)[TS][TS][3], char (*out_homogeneity_map)[TS][2])
-{
-  int row, col;
-  int tr, tc;
-  int direction;
-  int i;
-  short (*lix)[3];
-  short (*lixs[2])[3];
-  short *adjacent_lix;
-  unsigned ldiff[2][4], abdiff[2][4], leps, abeps;
-  static const int dir[4] = { -1, 1, -TS, TS };
-  const int rowlimit = MIN(top+TS-2, height-4);
-  const int collimit = MIN(left+TS-2, width-4);
-  int homogeneity;
-  char (*homogeneity_map_p)[2];
-
-  memset (out_homogeneity_map, 0, 2*TS*TS);
-
-  for (row=top+2; row < rowlimit; row++) {
-    tr = row-top;
-    homogeneity_map_p = &out_homogeneity_map[tr][1];
-    for (direction=0; direction < 2; direction++) {
-      lixs[direction] = &lab[direction][tr][1];
-    }
-
-    for (col=left+2; col < collimit; col++) {
-      tc = col-left;
-      homogeneity_map_p++;
-
-      for (direction=0; direction < 2; direction++) {
-        lix = ++lixs[direction];
-        for (i=0; i < 4; i++) {
-	  adjacent_lix = lix[dir[i]];
-          ldiff[direction][i] = ABS(lix[0][0]-adjacent_lix[0]);
-          abdiff[direction][i] = SQR(lix[0][1]-adjacent_lix[1])
-            + SQR(lix[0][2]-adjacent_lix[2]);
-        }
-      }
-      leps = MIN(MAX(ldiff[0][0],ldiff[0][1]),
-          MAX(ldiff[1][2],ldiff[1][3]));
-      abeps = MIN(MAX(abdiff[0][0],abdiff[0][1]),
-          MAX(abdiff[1][2],abdiff[1][3]));
-      for (direction=0; direction < 2; direction++) {
-	homogeneity = 0;
-        for (i=0; i < 4; i++) {
-          if (ldiff[direction][i] <= leps && abdiff[direction][i] <= abeps) {
-	    homogeneity++;
-	  }
-	}
-	homogeneity_map_p[0][direction] = homogeneity;
-      }
-    }
-  }
-}
-void CLASS ahd_interpolate_combine_homogeneous_pixels(int top, int left, ushort (*rgb)[TS][TS][3], char (*homogeneity_map)[TS][2])
-{
-  int row, col;
-  int tr, tc;
-  int i, j;
-  int direction;
-  int hm[2];
-  int c;
-  const int rowlimit = MIN(top+TS-3, height-5);
-  const int collimit = MIN(left+TS-3, width-5);
-
-  ushort (*pix)[4];
-  ushort (*rix[2])[3];
-
-  for (row=top+3; row < rowlimit; row++) {
-    tr = row-top;
-    pix = &image[row*width+left+2];
-    for (direction = 0; direction < 2; direction++) {
-      rix[direction] = &rgb[direction][tr][2];
-    }
-
-    for (col=left+3; col < collimit; col++) {
-      tc = col-left;
-      pix++;
-      for (direction = 0; direction < 2; direction++) {
-        rix[direction]++;
-      }
-
-      for (direction=0; direction < 2; direction++) {
-        hm[direction] = 0;
-        for (i=tr-1; i <= tr+1; i++) {
-          for (j=tc-1; j <= tc+1; j++) {
-            hm[direction] += homogeneity_map[i][j][direction];
-          }
-        }
-      }
-      if (hm[0] != hm[1]) {
-        memcpy(pix[0], rix[hm[1] > hm[0]][0], 3 * sizeof(ushort));
-      } else {
-        FORC3 {
-          pix[0][c] = (rix[0][0][c] + rix[1][0][c]) >> 1;
-        }
-      }
-    }
-  }
-}
-void CLASS ahd_interpolate()
-{
-  int i, j, k, top, left;
-  float xyz_cam[3][4],r;
-  char *buffer;
-  ushort (*rgb)[TS][TS][3];
-  short (*lab)[TS][TS][3];
-  char (*homo)[TS][2];
-  int terminate_flag = 0;
-
-  if(dcraw_cbrt[0]<-0.1){
-      for (i=0x10000-1; i >=0; i--) {
-          r = i / 65535.0;
-          dcraw_cbrt[i] = 64.0*(r > 0.008856 ? pow((double)r,1/3.0) : 7.787*r + 16/116.0);
-      }
-  }
-#ifdef DCRAW_VERBOSE
-  if (verbose) fprintf (stderr,_("AHD interpolation...\n"));
-#endif
-
-  for (i=0; i < 3; i++) {
-    for (j=0; j < colors; j++) {
-      xyz_cam[i][j] = 0;
-      for (k=0; k < 3; k++) {
-        xyz_cam[i][j] += xyz_rgb[i][k] * rgb_cam[k][j] / d65_white[i];
-      }
-    }
-  }
-
-  border_interpolate(5);
-
-#ifdef LIBRAW_LIBRARY_BUILD
-#ifdef LIBRAW_USE_OPENMP
-#pragma omp parallel private(buffer,rgb,lab,homo,top,left,i,j,k) shared(xyz_cam,terminate_flag)
-#endif
-#endif
-  {
-    buffer = (char *) malloc (26*TS*TS);		/* 1664 kB */
-    merror (buffer, "ahd_interpolate()");
-    rgb  = (ushort(*)[TS][TS][3]) buffer;
-    lab  = (short (*)[TS][TS][3])(buffer + 12*TS*TS);
-    homo = (char  (*)[TS][2])    (buffer + 24*TS*TS);
-
-#ifdef LIBRAW_LIBRARY_BUILD
-#ifdef LIBRAW_USE_OPENMP
-#pragma omp for schedule(dynamic)
-#endif
-#endif
-    for (top=2; top < height-5; top += TS-6){
-#ifdef LIBRAW_LIBRARY_BUILD
-#ifdef LIBRAW_USE_OPENMP
-        if(0== omp_get_thread_num())
-#endif
-           if(callbacks.progress_cb) {                                     
-               int rr = (*callbacks.progress_cb)(callbacks.progresscb_data,LIBRAW_PROGRESS_INTERPOLATE,top-2,height-7);
-               if(rr)
-                   terminate_flag = 1;
-           }
-#endif
-        for (left=2; !terminate_flag && (left < width-5); left += TS-6) {
-            ahd_interpolate_green_h_and_v(top, left, rgb);
-            ahd_interpolate_r_and_b_and_convert_to_cielab(top, left, rgb, lab, xyz_cam);
-            ahd_interpolate_build_homogeneity_map(top, left, lab, homo);
-            ahd_interpolate_combine_homogeneous_pixels(top, left, rgb, homo);
-      }
-    }
-    free (buffer);
-  }
-#ifdef LIBRAW_LIBRARY_BUILD 
-  if(terminate_flag)
-      throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
-#endif
-}
-#undef TS
-
-#endif
 
 void CLASS median_filter()
 {
@@ -5277,7 +4806,7 @@ void CLASS recover_highlights()
   if (verbose) fprintf (stderr,_("Rebuilding highlights...\n"));
 #endif
 
-  grow = pow (2.0f, (int)(4-highlight));
+  grow = pow (2.0, 4-highlight);
   FORCC hsat[c] = 32000 * pre_mul[c];
   for (kc=0, c=1; c < colors; c++)
     if (pre_mul[kc] < pre_mul[c]) kc = c;
