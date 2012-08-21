@@ -4025,7 +4025,7 @@ void CLASS wavelet_denoise()
   if ((nc = colors) == 3 && filters) nc++;
   FORC(nc) {			/* denoise R,G1,B,G3 individually */
     for (i=0; i < size; i++)
-      fimg[i] = 256 * sqrt((float)(image[i][c] << scale));
+      fimg[i] = 256 * sqrt((double)(image[i][c] << scale));
     for (hpass=lev=0; lev < 5; lev++) {
       lpass = size*((lev & 1)+1);
       for (row=0; row < iheight; row++) {
@@ -4071,7 +4071,7 @@ void CLASS wavelet_denoise()
 		window[2][col-1] + window[2][col+1] - blk[~row & 1]*4 )
 	      * mul[row & 1] + (window[1][col] + blk[row & 1]) * 0.5;
 	avg = avg < 0 ? 0 : sqrt(avg);
-	diff = sqrt((float)BAYER(row,col)) - avg;
+	diff = sqrt((double)BAYER(row,col)) - avg;
 	if      (diff < -thold) diff += thold;
 	else if (diff >  thold) diff -= thold;
 	else diff = 0;
@@ -4604,7 +4604,7 @@ void CLASS ahd_interpolate()
 
   for (i=0; i < 0x10000; i++) {
     r = i / 65535.0;
-    cbrt[i] = r > 0.008856 ? pow(r,1/3.0) : 7.787*r + 16/116.0;
+    cbrt[i] = r > 0.008856 ? pow((double)r,(double)(1/3.0)) : 7.787*r + 16/116.0;
   }
   for (i=0; i < 3; i++)
     for (j=0; j < colors; j++)

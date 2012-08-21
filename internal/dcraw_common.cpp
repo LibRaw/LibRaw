@@ -2591,7 +2591,7 @@ void CLASS redcine_load_raw()
   jas_stream_close (in);
 #endif
 }
-#line 3570 "dcraw/dcraw.c"
+#line 3571 "dcraw/dcraw.c"
 void CLASS crop_masked_pixels()
 {
   int row, col;
@@ -2692,7 +2692,7 @@ void CLASS remove_zeroes()
   RUN_CALLBACK(LIBRAW_PROGRESS_REMOVE_ZEROES,1,2);
 #endif
 }
-#line 3836 "dcraw/dcraw.c"
+#line 3837 "dcraw/dcraw.c"
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
 {
   int i;
@@ -2884,7 +2884,7 @@ void CLASS wavelet_denoise()
   if ((nc = colors) == 3 && filters) nc++;
   FORC(nc) {			/* denoise R,G1,B,G3 individually */
     for (i=0; i < size; i++)
-      fimg[i] = 256 * sqrt((float)(image[i][c] << scale));
+      fimg[i] = 256 * sqrt((double)(image[i][c] << scale));
     for (hpass=lev=0; lev < 5; lev++) {
       lpass = size*((lev & 1)+1);
       for (row=0; row < iheight; row++) {
@@ -2930,7 +2930,7 @@ void CLASS wavelet_denoise()
 		window[2][col-1] + window[2][col+1] - blk[~row & 1]*4 )
 	      * mul[row & 1] + (window[1][col] + blk[row & 1]) * 0.5;
 	avg = avg < 0 ? 0 : sqrt(avg);
-	diff = sqrt((float)BAYER(row,col)) - avg;
+	diff = sqrt((double)BAYER(row,col)) - avg;
 	if      (diff < -thold) diff += thold;
 	else if (diff >  thold) diff -= thold;
 	else diff = 0;
@@ -3422,9 +3422,6 @@ void CLASS ppg_interpolate()
 /*  Calculate blue for red pixels and vice versa:		*/
 #ifdef LIBRAW_LIBRARY_BUILD
   RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE,2,3);
-#ifdef LIBRAW_USE_OPENMP
-#pragma omp parallel for default(shared) private(guess, diff, row, col, d, c, i, pix) schedule(static)
-#endif
 #endif
   for (row=1; row < height-1; row++)
     for (col=1+(FC(row,1) & 1), c=2-FC(row,col); col < width-1; col+=2) {
@@ -3466,7 +3463,7 @@ void CLASS ahd_interpolate()
 
   for (i=0; i < 0x10000; i++) {
     r = i / 65535.0;
-    cbrt[i] = r > 0.008856 ? pow(r,1/3.0) : 7.787*r + 16/116.0;
+    cbrt[i] = r > 0.008856 ? pow((double)r,(double)(1/3.0)) : 7.787*r + 16/116.0;
   }
   for (i=0; i < 3; i++)
     for (j=0; j < colors; j++)
@@ -3760,7 +3757,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 4908 "dcraw/dcraw.c"
+#line 4906 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -4275,7 +4272,7 @@ void CLASS parse_kodak_ifd (int base)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 5428 "dcraw/dcraw.c"
+#line 5426 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -5519,7 +5516,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 6674 "dcraw/dcraw.c"
+#line 6672 "dcraw/dcraw.c"
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
   int i;
@@ -5620,7 +5617,7 @@ void CLASS parse_foveon()
   }
   is_foveon = 1;
 }
-#line 6777 "dcraw/dcraw.c"
+#line 6775 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -8063,7 +8060,7 @@ c603:
 }
 
 
-#line 9309 "dcraw/dcraw.c"
+#line 9307 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -8293,7 +8290,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 9564 "dcraw/dcraw.c"
+#line 9562 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
