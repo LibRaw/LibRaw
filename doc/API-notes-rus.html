@@ -213,11 +213,6 @@
       <dd>
         Влияет на загрузку матрицы баланса белого для задников Leaf.
       </dd>
-      <dt><b>imgdata.params.document_mode</b></dt>
-      <dd>
-        <b>В текущей версии LibRaw не влияет на чтение данных</b>. В dcraw -  влияет на данные thumbnails для
-        некоторых камер Kodak.
-      </dd>
       </dl>
     <a name="memory"></a>
     <h2>Использование памяти</h2>
@@ -285,8 +280,7 @@
         сжатия RAW-данных).</b><br/> 
     </p>
     <p>Буфер для раскодированного изображения аллоцируется при вызове 
-      <a  href="API-CXX-rus.html#dcraw_process">dcraw_process()</a>, 
-      <a  href="API-CXX-rus.html#dcraw_document_mode_processing">dcraw_document_mode_processing()</a>, 
+      <a  href="API-CXX-rus.html#dcraw_process">dcraw_process()</a>
       или <a href="API-CXX-rus.html#raw2image">raw2image()</a> и
       освобождается при <a href="API-CXX-rus.html#recycle">recycle()</a> или 
       <a href="API-CXX-rus.html#free_image">free_image()</a>
@@ -318,8 +312,7 @@
     <a name="mempostproces"></a>
     <h4>Память для постобработки</h4>
     <p>При постобработке изображений (унаследованной от dcraw) выделяется память под гистограмму (128 килобайт). Эта
-      память выделяется при вызове <a
-        href="API-CXX-rus.html#dcraw_document_mode_processing">dcraw_document_mode_processing()</a> и 
+      память выделяется при вызове 
       <a href="API-CXX-rus.html#dcraw_process">dcraw_process()</a>, а освобождается при вызове
       <a href="API-CXX-rus.html#recycle">recycle()</a>.
     </a>

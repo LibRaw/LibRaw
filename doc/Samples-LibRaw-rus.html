@@ -224,10 +224,7 @@ int main(int ac, char *av[])
         }
     }
    // Распаковка данных
-   if(OUT.document_mode)
-           ret = RawProcessor.dcraw_document_mode_processing();
-   else
-           ret = RawProcessor.dcraw_process();
+   ret = RawProcessor.dcraw_process();
 
     if(LIBRAW_SUCCESS != ret ) // ошибка на предыдущем шаге
           {

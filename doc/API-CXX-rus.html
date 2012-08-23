@@ -58,7 +58,6 @@
           <li><a href="#raw2image">int LibRaw::raw2image</a></li>
           <li><a href="#free_image">void LibRaw::free_image</a></li>
           <li><a  href="#adjust_sizes_info_only">int LibRaw::adjust_sizes_info_only(void)</a></li>
-          <li><a  href="#dcraw_document_mode_processing">int LibRaw::dcraw_document_mode_processing(void)</a></li>
           <li><a  href="#dcraw_process">int LibRaw::dcraw_process(void)</a></li>
         </ul>
       </li>
@@ -303,8 +302,8 @@
     <p>
       Вызов производит вычитание уровня черного из RAW-данных, если вычитание не произведено самой камерой.
       При этом соответствующим образом исправляются поля <a
-        href="API-datastruct-rus.html#libraw_colordata_t">colordata.channel_maximum</a>,
-      <b>colordata.channel_maximum</b> и даные об уровне черного (<a
+        href="API-datastruct-rus.html#libraw_colordata_t">colordata.data_maximum</a>,
+      <b>colordata.data_maximum</b> и даные об уровне черного (<a
         href="API-datastruct-rus.html#libraw_colordata_t">colordata.black</a> и <b>colordata.cblack</b>).
     </p>
     <p>
@@ -360,12 +359,12 @@
     </pre>
     <p>
       Пользователь может определить свою функцию, которая будет многократно (10-50 раз) вызываться в процессе
-      обработки данных  RAW-файла вызовами  dcraw_process()/dcraw_document_mode_processing();
+      обработки данных  RAW-файла вызовами  dcraw_process().
     </p>
     <p>
       Этот callback может сигнализировать о необходимости прекратить обработку путем возврата ненулевого значения. В
       этом случае обработка будет завершена, память освобождена вызовом recycle() и объект LibRaw будет готов к
-      обработке следующего файла. Текущий вызов dcraw_process()/dcraw_document_mode_processing() вернет код ошибки 
+      обработке следующего файла. Текущий вызов dcraw_process() вернет код ошибки 
       LIBRAW_CANCELLED_BY_CALLBACK.
       </p>
     <p>
@@ -530,25 +529,7 @@ int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int ex
       В перечисленных выше случаях, функция меняет значения полей выходного размера изображения, причем это изменение
       не может быть выполнено повторно.
     </p>
-    <p>
-      Функция должна использоваться в информационных целях, она несовместима с вызовами <a
-        href="#dcraw_document_mode_processing">dcraw_document_mode_processing()</a> и <a
-        href="#dcraw_process">dcraw_process()</a>. 
-    </p>
 
-
-    <a name="dcraw_document_mode_processing"></a>
-    <h3>int LibRaw::dcraw_document_mode_processing(void)</h3>
-    <p>
-      Функция эмулирует <b>dcraw -D</b> - отключение интерполяции, баланса белого и преобразования цветов.<br/> 
-      Вызывается после вызова LibRaw::unpack();
-    </p>
-    <p>Функция возвращает целое число в соответствии с <a href=API-notes-rus.html#errors>соглашением о кодах
-        возврата</a>: положительное число, если какой-то из системных вызовов вернул ошибку, отрицательное число (из
-      <a href=API-datastruct-rus.html#LibRaw_errors>списка ошибок LibRaw</a>) при ошибочной ситуации
-      внутри LibRaw.
-    </p>
-    
     <a name="dcraw_process"></a>
     <h3>int LibRaw::dcraw_process(void)</h3>
     <p>
@@ -658,7 +639,7 @@ LibRaw.
       LIBRAW_IMAGE_BITMAP).
     </p>
     <p>
-      Перед вызовом этой функции должна быть вызвана dcraw_process() или dcraw_document_mode_processing().
+      Перед вызовом этой функции должна быть вызвана dcraw_process().
     </p>
     <p>
       В случае ошибки возвращается NULL. Если в качестве аргумента errorcode передан ненулевой указатель, то по адресу
