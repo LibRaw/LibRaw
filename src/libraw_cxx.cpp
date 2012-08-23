@@ -909,8 +909,7 @@ int LibRaw::raw2image(void)
     try {
         raw2image_start();
 
-        if (load_raw == &CLASS phase_one_load_raw ||
-            load_raw == &CLASS phase_one_load_raw_c)
+        if (load_raw == &CLASS phase_one_load_raw_c && imgdata.rawdata.ph1_black)
           {
             phase_one_prepare_to_correct();
             phase_one_correct();
@@ -965,6 +964,12 @@ int LibRaw::raw2image(void)
                 memmove(imgdata.image,imgdata.rawdata.color_image,S.width*S.height*sizeof(*imgdata.image));
             }
 
+        // Free PhaseOne separate copy allocated at function start
+        if (load_raw == &CLASS phase_one_load_raw_c && imgdata.rawdata.ph1_black)
+          {
+            free(imgdata.rawdata.raw_image);
+            imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
+          }
         // hack - clear later flags!
         imgdata.progress_flags 
             = LIBRAW_PROGRESS_START|LIBRAW_PROGRESS_OPEN
@@ -981,8 +986,7 @@ void LibRaw::phase_one_prepare_to_correct()
   // Allocate temp raw_image buffer
   imgdata.rawdata.raw_image = (ushort*)calloc(S.raw_width*S.raw_height,sizeof(ushort));
   merror (imgdata.rawdata.raw_image, "phase_one_prepare_to_correct()");
-  printf("Preparing to correct\n");
-  if (load_raw == &CLASS phase_one_load_raw || !imgdata.rawdata.ph1_black)
+  if (!imgdata.rawdata.ph1_black)
     {
       // Phase one w/o black level
       memmove(imgdata.rawdata.raw_image,imgdata.rawdata.raw_alloc,S.raw_width*S.raw_height*sizeof(ushort));
@@ -1000,13 +1004,6 @@ void LibRaw::phase_one_prepare_to_correct()
             imgdata.rawdata.raw_image[idx] = val>bl?val-bl:0;
           }
     }
-    // Free PhaseOne separate copy allocated at function start
-    if (load_raw == &CLASS phase_one_load_raw ||
-        load_raw == &CLASS phase_one_load_raw_c)
-      {
-        free(imgdata.rawdata.raw_image);
-        imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
-      }
 }
 
 int LibRaw::raw2image_ex(void)
@@ -1017,8 +1014,8 @@ int LibRaw::raw2image_ex(void)
   try {
     raw2image_start();
 
-    if (load_raw == &CLASS phase_one_load_raw ||
-        load_raw == &CLASS phase_one_load_raw_c)
+    // Compressed P1 files with bl data!
+    if (load_raw == &CLASS phase_one_load_raw_c && imgdata.rawdata.ph1_black)
       {
         phase_one_prepare_to_correct();
         phase_one_correct();
@@ -1196,8 +1193,7 @@ int LibRaw::raw2image_ex(void)
       }
 
     // Free PhaseOne separate copy allocated at function start
-    if (load_raw == &CLASS phase_one_load_raw ||
-        load_raw == &CLASS phase_one_load_raw_c)
+    if (load_raw == &CLASS phase_one_load_raw_c && imgdata.rawdata.ph1_black)
       {
         free(imgdata.rawdata.raw_image);
         imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;

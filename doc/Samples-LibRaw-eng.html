@@ -220,10 +220,7 @@ int main(int ac, char *av[])
         }
     }
    // Data unpacking
-   if(OUT.document_mode)
-           ret = RawProcessor.dcraw_document_mode_processing();
-   else
-           ret = RawProcessor.dcraw_process();
+   ret = RawProcessor.dcraw_process();
 
     if(LIBRAW_SUCCESS != ret ) // error at the previous step
           {
@@ -252,7 +249,7 @@ end:
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 12:19:36 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Mon Jul 11 20:24:09 MSD 2011
+Last modified: Fri Aug 24 00:31:06 MSK 2012
 <!-- hhmts end -->
   </body>
 </html>

@@ -4,7 +4,8 @@
    * cropping works again (note: for Fuji SuperCCD files cropping is
      approximate)
    * color_data.channel_maximum[4] is replaced to color_data.data_maximum
-     (max value from all image color channels)
+     (max value from all image color channels). This value is calculated
+     on subtract_black() call.
    * PhaseOne (compressed RAW): black level subtracted on postprocessing
      stage (or in raw2image() call). It requires addtional memory 
      allocation.
@@ -12,6 +13,8 @@
    * Imported dcraw 1.452:
      - Changed color data for Canon 1D-X camera
      - New camera support: Samsung NX-1000, Sony DSC-RX100
+
+   * LibRaw 0.15.0-Alpha2
 
 2012-07-03 Alex Tutubalin <lexa@lexa.ru>
     === LibRaw 0.15 (Alpha1) ===

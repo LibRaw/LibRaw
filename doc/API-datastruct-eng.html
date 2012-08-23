@@ -240,9 +240,10 @@ or by the camera itself), calculated at the unpacking stage, read from the RAW f
         automated maximum adjustment (this adjustment performed if <b>params.adjust_maximum_thr</b>
         is set to nonzero).
       </dd>
-      <dt><b>unsigned    channel_maximum[4];</b></dt>
+      <dt><b>unsigned    data_maximum;</b></dt>
       <dd>
-       Per channel maximum pixel value. Calculated from RAW data on unpack stage.
+       Maximum pixel value in real image (not including masked area). Calculated from RAW data on black
+        subtraction stage.
       </dd>
       <dt><b>ph1_t       phase_one_data;</b></dt>
       <dd>
@@ -452,13 +453,6 @@ changes the output size.
       <dd>
         <b>dcraw keys:</b>  -f <br/>
      Switches on separate interpolations for two green components.
-      </dd>
-      <dt><b>int         document_mode;</b></dt>
-      <dd>
-        <b>dcraw keys:</b>   -d/-D <br/>
-         0: standard processing (with white balance)<br/>
-         1: corresponds to -d (without color processing or debayer)<br/>
-         2: corresponds to -D (-d without white balance).
       </dd>
       <dt><b>int         highlight;</b></dt>
       <dd>
@@ -1113,7 +1107,7 @@ data source is recorded. The possible values are listed below.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 14:42:41 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Wed Oct 19 13:10:59 MSD 2011
+Last modified: Fri Aug 24 00:29:35 MSK 2012
 <!-- hhmts end -->
   </body>
 </html>

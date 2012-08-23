@@ -56,7 +56,6 @@
           <li><a href="#raw2image">int LibRaw::raw2image</a></li>
           <li><a href="#free_image">void LibRaw::free_image</a></li>
           <li><a  href="#adjust_sizes_info_only">int LibRaw::adjust_sizes_info_only(void)</a></li>
-          <li><a  href="#dcraw_document_mode_processing">int LibRaw::dcraw_document_mode_processing(void)</a></li>
           <li><a  href="#dcraw_process">int LibRaw::dcraw_process(void)</a></li>
         </ul>
       </li>
@@ -299,7 +298,7 @@ LibRaw.
     <h4>void LibRaw::subtract_black()</h4>
     <p>
       This call will subtract black level values from RAW data (for suitable RAW data).
-      <a href="API-datastruct-eng.html#libraw_colordata_t">colordata.channel_maximum</a> and
+      <a href="API-datastruct-eng.html#libraw_colordata_t">colordata.data_maximum</a> and
       <b>colordata.maximum</b> and black level data (<a
         href="API-datastruct-eng.html#libraw_colordata_t">colordata.black</a> and colordata.cblack) will be adjusted
       too.  
@@ -353,12 +352,12 @@ the same processor. Repeated calls of recycle() are quite possible and do not co
     </pre>
     <p>
       LibRaw user can set own callback which will be called 10-50 times during RAW postprocessing
-       by dcraw_process()/dcraw_document_mode_processing();
+       by dcraw_process().
     </p>
     <p>
       This callback may terminate current image processing by returning of non-zero value. In such case all processing
       will be cancelled immediately and all resources will be returned to system by recycle() call.
-      Current call of dcraw_process()/dcraw_document_mode_processing() will return error code
+      Current call of dcraw_process() will return error code
       LIBRAW_CANCELLED_BY_CALLBACK.
       </p>
     <p>
@@ -521,24 +520,7 @@ Processing of a new file may be started in the usual way, by calling LibRaw::ope
       In the aforementioned cases, the function changes the fields of the image output size; note that
 this change cannot be repeated again.
     </p>
-    <p>
-      The function should be used for information purposes; it is incompatible with <a
-        href="#dcraw_document_mode_processing">dcraw_document_mode_processing()</a> and <a
-        href="#dcraw_process">dcraw_process()</a> calls. 
-    </p>
 
-    <a name="dcraw_document_mode_processing"></a>
-    <h3>int LibRaw::dcraw_document_mode_processing(void)</h3>
-    <p>
-     The function emulates <b>dcraw -D</b>: no interpolation, white balance, and color conversion.<br/> 
-It is called after calling LibRaw::unpack();
-    </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>error
-code convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
-LibRaw.
-    </p>
-    
     <a name="dcraw_process"></a>
     <h3>int LibRaw::dcraw_process(void)</h3>
     <p>
@@ -645,7 +627,7 @@ LibRaw.
     </p>
     <p>
       
-      dcraw_process() or dcraw_document_mode_processing() should be called before dcraw_make_mem_image();
+      dcraw_process() should be called before dcraw_make_mem_image();
     </p>
     <p>
       Returns NULL in case of an error. If caller has passed not-NULL value as errorcode parameter, than *errorcode
@@ -898,7 +880,7 @@ LibRaw.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Tue Jul 19 14:50:06 MSD 2011
+Last modified: Fri Aug 24 00:27:40 MSK 2012
 <!-- hhmts end -->
   </body>
 </html>

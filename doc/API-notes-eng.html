@@ -198,10 +198,6 @@
       <dd>
         Affects loading of white balance matrix for Leaf backs.
       </dd>
-      <dt><b>imgdata.params.document_mode</b></dt>
-      <dd>
-        <b>Does not affect data reading in the current version of LibRaw</b>. In dcraw, this parameter affects the thumbnail data for certain Kodak cameras.
-      </dd>
       </dl>
 
     <a name="memory"></a>
@@ -269,7 +265,6 @@
     <p>The buffer for the decoded image is allocated upon calling 
       <a href="API-CXX-eng.html#raw2image">raw2image()</a>,
       <a href="API-CXX-eng.html#dcraw_process">dcraw_process()</a> or
-      <a href="API-CXX-eng.html#dcraw_document_mode_processing">dcraw_mode_processing()</a> calls.
     </p>
     <p>The buffer freed upon calling <a href="API-CXX-eng.html#recycle">recycle()</a> 
       or 
@@ -301,8 +296,7 @@
     <a name="mempostproces"></a>
     <h4>Memory for Postprocessing</h4>
     <p>During image postprocessing (inherited from dcraw), memory for the histogram (128 Kb) is allocated.
-      This memory is allocated upon calling <a
-        href="API-CXX-eng.html#dcraw_document_mode_processing">dcraw_document_mode_processing()</a> and
+      This memory is allocated upon calling 
       <a href="API-CXX-eng.html#dcraw_process">dcraw_process()</a> and freed upon calling
       <a href="API-CXX-eng.html#recycle">recycle()</a>.
     </p>
@@ -359,7 +353,7 @@
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:05:08 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Mon Jul 11 20:33:38 MSD 2011
+Last modified: Fri Aug 24 00:31:09 MSK 2012
 <!-- hhmts end -->
   </body>
 </html>
