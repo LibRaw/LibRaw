@@ -102,7 +102,6 @@ it under the terms of the one of three licenses as you choose:
 #define threshold       (imgdata.params.threshold)
 #define half_size       (imgdata.params.half_size)
 #define four_color_rgb  (imgdata.params.four_color_rgb)
-#define document_mode   (imgdata.params.document_mode)
 #define highlight       (imgdata.params.highlight)
 //#define verbose         (imgdata.params.verbose)
 #define use_auto_wb     (imgdata.params.use_auto_wb)
