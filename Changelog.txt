@@ -1,7 +1,13 @@
 2012-08-20 Alex Tutubalin <lexa@lexa.ru>
    * reverted (internal) changes to PhaseOne processing
    * subtract_black() works again
-   * cropping works again
+   * cropping works again (note: for Fuji SuperCCD files cropping is
+     approximate)
+   * color_data.channel_maximum[4] is replaced to color_data.data_maximum
+     (max value from all image color channels)
+   * PhaseOne (compressed RAW): black level subtracted on postprocessing
+     stage (or in raw2image() call). It requires addtional memory 
+     allocation.
    * Fixed minor problem in lossy DNG tone curve generation
    * Imported dcraw 1.452:
      - Changed color data for Canon 1D-X camera

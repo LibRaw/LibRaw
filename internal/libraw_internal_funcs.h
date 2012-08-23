@@ -110,6 +110,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        phase_one_flat_field (int is_float, int nc);
     void        phase_one_correct();
     void        phase_one_load_raw();
+    void        phase_one_prepare_to_correct();
     unsigned    ph1_bits (int nbits);
     void        phase_one_load_raw_c();
     void        hasselblad_load_raw();

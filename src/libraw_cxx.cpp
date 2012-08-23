@@ -794,7 +794,7 @@ int LibRaw::unpack(void)
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
             {
               imgdata.rawdata.raw_alloc = malloc(rwidth*(rheight+7)*sizeof(imgdata.rawdata.raw_image[0]));
-                imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
+              imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
             }
         else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
             {
@@ -909,6 +909,13 @@ int LibRaw::raw2image(void)
     try {
         raw2image_start();
 
+        if (load_raw == &CLASS phase_one_load_raw ||
+            load_raw == &CLASS phase_one_load_raw_c)
+          {
+            phase_one_prepare_to_correct();
+            phase_one_correct();
+          }
+
         // free and re-allocate image bitmap
         if(imgdata.image)
             {
@@ -969,6 +976,39 @@ int LibRaw::raw2image(void)
     }
 }
 
+void LibRaw::phase_one_prepare_to_correct()
+{
+  // Allocate temp raw_image buffer
+  imgdata.rawdata.raw_image = (ushort*)calloc(S.raw_width*S.raw_height,sizeof(ushort));
+  merror (imgdata.rawdata.raw_image, "phase_one_prepare_to_correct()");
+  printf("Preparing to correct\n");
+  if (load_raw == &CLASS phase_one_load_raw || !imgdata.rawdata.ph1_black)
+    {
+      // Phase one w/o black level
+      memmove(imgdata.rawdata.raw_image,imgdata.rawdata.raw_alloc,S.raw_width*S.raw_height*sizeof(ushort));
+    }
+  else
+    {
+      ushort *src = (ushort*)imgdata.rawdata.raw_alloc;
+      for(int row = 0; row < S.raw_height; row++)
+        for(int col=0; col < S.raw_width; col++)
+          {
+            int idx  = row*S.raw_width + col;
+            ushort val = src[idx];
+            ushort bl = imgdata.color.phase_one_data.t_black 
+              - imgdata.rawdata.ph1_black[row][col >= imgdata.color.phase_one_data.split_col];
+            imgdata.rawdata.raw_image[idx] = val>bl?val-bl:0;
+          }
+    }
+    // Free PhaseOne separate copy allocated at function start
+    if (load_raw == &CLASS phase_one_load_raw ||
+        load_raw == &CLASS phase_one_load_raw_c)
+      {
+        free(imgdata.rawdata.raw_image);
+        imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
+      }
+}
+
 int LibRaw::raw2image_ex(void)
 {
 
@@ -976,6 +1016,14 @@ int LibRaw::raw2image_ex(void)
 
   try {
     raw2image_start();
+
+    if (load_raw == &CLASS phase_one_load_raw ||
+        load_raw == &CLASS phase_one_load_raw_c)
+      {
+        phase_one_prepare_to_correct();
+        phase_one_correct();
+      }
+
     // process cropping
     int do_crop = 0;
     unsigned save_width = S.width;
@@ -1145,6 +1193,14 @@ int LibRaw::raw2image_ex(void)
             // legacy is always 4channel and not shrinked!
             memmove(imgdata.image,imgdata.rawdata.color_image,S.width*S.height*sizeof(*imgdata.image));
           }
+      }
+
+    // Free PhaseOne separate copy allocated at function start
+    if (load_raw == &CLASS phase_one_load_raw ||
+        load_raw == &CLASS phase_one_load_raw_c)
+      {
+        free(imgdata.rawdata.raw_image);
+        imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
       }
 
     // hack - clear later flags!
