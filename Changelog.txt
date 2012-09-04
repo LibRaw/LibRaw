@@ -1,3 +1,8 @@
+2012-09-06 Alex Tutubalin <lexa@lexa.ru>
+   * OpenMP speedup for linear interpolation
+   * Disabled decoding JPEG (lossy DNG) data from memory buffer
+     for libjpeg version less than 8.
+
 2012-09-04 Alex Tutubalin <lexa@lexa.ru>
    * Backported improvements from LibRaw 0.14:
       - fast LJPEG decoder

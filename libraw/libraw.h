@@ -208,6 +208,7 @@ protected:
 #endif
     void        pre_interpolate();
     void        border_interpolate (int border);
+  virtual void lin_interpolate_loop(int code[16][16][32],int size);
     void        lin_interpolate();
     void        vng_interpolate();
     void        ppg_interpolate();

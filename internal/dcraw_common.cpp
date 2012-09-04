@@ -3593,11 +3593,35 @@ void CLASS border_interpolate (int border)
     }
 }
 
+void CLASS lin_interpolate_loop(int code[16][16][32],int size)
+{
+  int row;
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel default(shared)
+#endif
+  for (row=1; row < height-1; row++)
+    {
+      int col,*ip;
+      ushort *pix;
+      for (col=1; col < width-1; col++) {
+        int i;
+        int sum[4];
+        pix = image[row*width+col];
+        ip = code[row % size][col % size];
+        memset (sum, 0, sizeof sum);
+        for (i=*ip++; i--; ip+=3)
+          sum[ip[2]] += pix[ip[0]] << ip[1];
+        for (i=colors; --i; ip+=2)
+          pix[ip[0]] = sum[ip[0]] * ip[1] >> 8;
+      }
+    }
+}
+
 void CLASS lin_interpolate()
 {
   int code[16][16][32], size=16, *ip, sum[4];
-  int f, c, i, x, y, row, col, shift, color;
-  ushort *pix;
+  int f, c, x, y, row, col, shift, color;
+
 
 #ifdef DCRAW_VERBOSE
   if (verbose) fprintf (stderr,_("Bilinear interpolation...\n"));
@@ -3633,16 +3657,7 @@ void CLASS lin_interpolate()
 #ifdef LIBRAW_LIBRARY_BUILD
   RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE,1,3);
 #endif
-  for (row=1; row < height-1; row++)
-    for (col=1; col < width-1; col++) {
-      pix = image[row*width+col];
-      ip = code[row % size][col % size];
-      memset (sum, 0, sizeof sum);
-      for (i=*ip++; i--; ip+=3)
-	sum[ip[2]] += pix[ip[0]] << ip[1];
-      for (i=colors; --i; ip+=2)
-	pix[ip[0]] = sum[ip[0]] * ip[1] >> 8;
-    }
+  lin_interpolate_loop(code,size);
 #ifdef LIBRAW_LIBRARY_BUILD
   RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE,2,3);
 #endif
@@ -4481,7 +4496,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 5630 "dcraw/dcraw.c"
+#line 5645 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -4996,7 +5011,7 @@ void CLASS parse_kodak_ifd (int base)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 6150 "dcraw/dcraw.c"
+#line 6165 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6240,7 +6255,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 7396 "dcraw/dcraw.c"
+#line 7411 "dcraw/dcraw.c"
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
   int i;
@@ -6341,7 +6356,7 @@ void CLASS parse_foveon()
   }
   is_foveon = 1;
 }
-#line 7499 "dcraw/dcraw.c"
+#line 7514 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -8784,7 +8799,7 @@ c603:
 }
 
 
-#line 10033 "dcraw/dcraw.c"
+#line 10048 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -9015,7 +9030,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 10289 "dcraw/dcraw.c"
+#line 10304 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

@@ -30,6 +30,8 @@ LDADD+=-L/usr/local/lib -ljasper
 # JPEG support for DNG
 CFLAGS+=-DUSE_JPEG -I/usr/local/include
 LDADD+=-L/usr/local/lib -ljpeg
+# LIBJPEG8:
+CFLAGS+=-DUSE_JPEG8
 
 
 # Demosaic Pack GPL2:
