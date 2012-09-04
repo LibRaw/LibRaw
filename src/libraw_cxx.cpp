@@ -1006,6 +1006,51 @@ void LibRaw::phase_one_prepare_to_correct()
     }
 }
 
+void LibRaw::copy_fuji_uncropped(void)
+{
+                int row;
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for default(shared)
+#endif
+                for (row=0; row < S.raw_height-S.top_margin*2; row++) 
+                  {
+                    int col;
+                    for (col=0; col < IO.fuji_width << !libraw_internal_data.unpacker_data.fuji_layout; col++) 
+                      {
+                        unsigned r,c;
+                        if (libraw_internal_data.unpacker_data.fuji_layout) {
+                          r = IO.fuji_width - 1 - col + (row >> 1);
+                          c = col + ((row+1) >> 1);
+                        } else {
+                          r = IO.fuji_width - 1 + row - (col >> 1);
+                          c = row + ((col+1) >> 1);
+                        }
+                        if (r < S.height && c < S.width)
+                          {
+                            imgdata.image[((r)>>IO.shrink)*S.iwidth+((c)>>IO.shrink)][FC(r,c)] 
+                              = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+                          }
+                      }
+                  }
+}
+
+void LibRaw::copy_bayer(void)
+{
+  // Both cropped and uncropped
+  int row;
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for default(shared)
+#endif
+  for (row=0; row < S.height; row++)
+    {
+      int col;
+      for (col=0; col < S.width; col++)
+        imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][fcol(row,col)] 
+          = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+    }
+}
+
+
 int LibRaw::raw2image_ex(void)
 {
 
@@ -1144,36 +1189,12 @@ int LibRaw::raw2image_ex(void)
               }
             else
               {
-                unsigned r,c;
-                int row,col;
-                for (row=0; row < S.raw_height-S.top_margin*2; row++) 
-                  {
-                    for (col=0; col < IO.fuji_width << !libraw_internal_data.unpacker_data.fuji_layout; col++) 
-                      {
-                        if (libraw_internal_data.unpacker_data.fuji_layout) {
-                          r = IO.fuji_width - 1 - col + (row >> 1);
-                          c = col + ((row+1) >> 1);
-                        } else {
-                          r = IO.fuji_width - 1 + row - (col >> 1);
-                          c = row + ((col+1) >> 1);
-                        }
-                        if (r < S.height && c < S.width)
-                          {
-                            imgdata.image[((r)>>IO.shrink)*S.iwidth+((c)>>IO.shrink)][FC(r,c)] 
-                              = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
-                          }
-                      }
-                  }
+                copy_fuji_uncropped();
               }
           } // end Fuji
         else 
           {
-            // Both cropped and uncropped
-            int row,col;
-            for (row=0; row < S.height; row++)
-              for (col=0; col < S.width; col++)
-                imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][fcol(row,col)] 
-                  = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+            copy_bayer();
           }
       }
     else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)

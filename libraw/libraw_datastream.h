@@ -66,7 +66,7 @@ class DllDef LibRaw_abstract_datastream
     virtual int         scanf_one(const char *, void *) = 0;
     virtual int         eof() = 0;
     virtual void *      make_jas_stream() = 0;
-    virtual int         jpeg_src(void *jpegdata) { return -1; }
+    virtual int         jpeg_src(void *) { return -1; }
     /* Make buffer from current offset */
     virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz);
 

@@ -140,7 +140,7 @@ class DllDef LibRaw
 
     /* free all internal data structures */
     void         recycle(); 
-    ~LibRaw(void) { recycle(); delete tls; }
+    virtual ~LibRaw(void) { recycle(); delete tls; }
 
     int COLOR(int row, int col) { return libraw_internal_data.internal_output_params.fuji_width? FCF(row,col):FC(row,col);}
  
@@ -169,6 +169,8 @@ protected:
         return FC(rr,cc);
     }
 
+    virtual void copy_fuji_uncropped();
+    virtual void copy_bayer();
     void*        malloc(size_t t);
     void*        calloc(size_t n,size_t t);
     void*        realloc(void *p, size_t s);

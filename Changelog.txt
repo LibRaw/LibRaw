@@ -1,3 +1,15 @@
+2012-09-04 Alex Tutubalin <lexa@lexa.ru>
+   * Backported improvements from LibRaw 0.14:
+      - fast LJPEG decoder
+      - OpenMP support for PPG and AHD interpolations
+        and wavelet denoising
+      - OpenMP support in raw2image_ex() call
+      - LCMS1 compatibility patches
+      - Better way to set compiler flags in Makefile.msvc
+   * ABI changed, all programs using 0.15-Alpha2 should be
+     recompiled!
+   * LibRaw 0.15.0-Alpha3
+
 2012-08-20 Alex Tutubalin <lexa@lexa.ru>
    * reverted (internal) changes to PhaseOne processing
    * subtract_black() works again

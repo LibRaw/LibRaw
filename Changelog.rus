@@ -1,4 +1,16 @@
-﻿2012-08-24 Alex Tutubalin <lexa@lexa.ru>
+﻿2012-09-04 Alex Tutubalin <lexa@lexa.ru>
+   * Перенесены улучшения (ускорения) из LibRaw 0.14:
+     - Быстрый декодер LJPEG
+     - OpenMP в AHD/PPG-интерполяторах и в Wavelet Denoise
+     - OpenMP в вызове raw2image_ex()
+     - Патчи для совместимости с LCMS1
+     - Мелкие правки для удобства установки флагов компиляции
+       в Makefile.msvc
+   * ABI изменился, все программы использующие LibRaw 0.15 Alpha 1-2
+     должны быть пересобраны.
+   * LibRaw 0.15-Alpha3
+
+2012-08-24 Alex Tutubalin <lexa@lexa.ru>
    * subtract_black() работает (в Alpha1 это место было недоделано)
    * Кроппинг снова работает.
    * Удалено поле данных color_data.channel_maximum[4], вместо него
