@@ -157,6 +157,14 @@ class DllDef LibRaw
 
 protected:
 
+    /* Hotspots */
+    virtual void copy_fuji_uncropped(unsigned short cblack[4], unsigned short *dmaxp);
+    virtual void copy_bayer(unsigned short cblack[4], unsigned short *dmaxp);
+    virtual void fuji_rotate();
+    virtual void convert_to_rgb_loop(float out_cam[3][4]);
+    virtual void lin_interpolate_loop(int code[16][16][32],int size);
+    virtual void scale_colors_loop(float scale_mul[4]);
+
     int FCF(int row,int col) { 
         int rr,cc;
         if (libraw_internal_data.unpacker_data.fuji_layout) {
@@ -170,8 +178,6 @@ protected:
     }
 
     void adjust_bl();
-    virtual void copy_fuji_uncropped(unsigned short cblack[4], unsigned short *dmaxp);
-    virtual void copy_bayer(unsigned short cblack[4], unsigned short *dmaxp);
     void*        malloc(size_t t);
     void*        calloc(size_t n,size_t t);
     void*        realloc(void *p, size_t s);
@@ -201,7 +207,6 @@ protected:
     void        identify2(unsigned, unsigned, char*);
     void        write_ppm_tiff ();
     void        convert_to_rgb();
-	virtual		void convert_to_rgb_loop(float out_cam[3][4]);
     void        remove_zeroes();
     void        crop_masked_pixels();
 #ifndef NO_LCMS
@@ -209,7 +214,6 @@ protected:
 #endif
     void        pre_interpolate();
     void        border_interpolate (int border);
-  virtual void lin_interpolate_loop(int code[16][16][32],int size);
     void        lin_interpolate();
     void        vng_interpolate();
     void        ppg_interpolate();
@@ -237,13 +241,11 @@ protected:
     void        hat_transform (float *temp, float *base, int st, int size, int sc);
     void        wavelet_denoise();
     void        scale_colors();
-	virtual void scale_colors_loop(float scale_mul[4]);
     void        median_filter ();
     void        blend_highlights();
     void        recover_highlights();
     void        green_matching();
 
-    void        fuji_rotate();
     void        stretch();
 
     void        foveon_thumb ();
