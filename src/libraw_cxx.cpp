@@ -901,6 +901,11 @@ void LibRaw::raw2image_start()
 				C.cblack[i] = O.user_cblack[i];
 }
 
+int LibRaw::is_phaseone() 
+{ 
+  return (load_raw == &LibRaw::phase_one_load_raw_c && imgdata.rawdata.ph1_black); 
+}
+
 int LibRaw::raw2image(void)
 {
 
@@ -909,7 +914,7 @@ int LibRaw::raw2image(void)
     try {
         raw2image_start();
 
-        if (load_raw == &CLASS phase_one_load_raw_c && imgdata.rawdata.ph1_black)
+        if (is_phaseone())
           {
             phase_one_prepare_to_correct();
             phase_one_correct();
@@ -1094,7 +1099,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     raw2image_start();
 
     // Compressed P1 files with bl data!
-    if (load_raw == &CLASS phase_one_load_raw_c && imgdata.rawdata.ph1_black)
+    if (is_phaseone())
       {
         phase_one_prepare_to_correct();
         phase_one_correct();

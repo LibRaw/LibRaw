@@ -156,7 +156,7 @@ class DllDef LibRaw
 
 
 protected:
-
+    virtual int  is_phaseone();
     /* Hotspots */
     virtual void copy_fuji_uncropped(unsigned short cblack[4], unsigned short *dmaxp);
     virtual void copy_bayer(unsigned short cblack[4], unsigned short *dmaxp);
