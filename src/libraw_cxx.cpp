@@ -1006,7 +1006,7 @@ void LibRaw::phase_one_prepare_to_correct()
     }
 }
 
-void LibRaw::copy_fuji_uncropped(void)
+void LibRaw::copy_fuji_uncropped(unsigned short cblack[4],unsigned short *dmaxp)
 {
                 int row;
 #if defined(LIBRAW_USE_OPENMP)
@@ -1015,6 +1015,7 @@ void LibRaw::copy_fuji_uncropped(void)
                 for (row=0; row < S.raw_height-S.top_margin*2; row++) 
                   {
                     int col;
+                    unsigned short ldmax = 0;
                     for (col=0; col < IO.fuji_width << !libraw_internal_data.unpacker_data.fuji_layout; col++) 
                       {
                         unsigned r,c;
@@ -1027,14 +1028,29 @@ void LibRaw::copy_fuji_uncropped(void)
                         }
                         if (r < S.height && c < S.width)
                           {
-                            imgdata.image[((r)>>IO.shrink)*S.iwidth+((c)>>IO.shrink)][FC(r,c)] 
-                              = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+                            unsigned short val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+                            int cc = FC(r,c);
+                            if(val>cblack[cc])
+                              {
+                                val-=cblack[cc];
+                                if(val>ldmax)ldmax = val;
+                              }
+                            else
+                              val = 0;
+                            imgdata.image[((r)>>IO.shrink)*S.iwidth+((c)>>IO.shrink)][cc] = val; 
                           }
                       }
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp critical(dataupdate)
+#endif
+                    {
+                      if(*dmaxp < ldmax)
+                        *dmaxp = ldmax;
+                    }
                   }
 }
 
-void LibRaw::copy_bayer(void)
+void LibRaw::copy_bayer(unsigned short cblack[4],unsigned short *dmaxp)
 {
   // Both cropped and uncropped
   int row;
@@ -1044,14 +1060,32 @@ void LibRaw::copy_bayer(void)
   for (row=0; row < S.height; row++)
     {
       int col;
+      unsigned short ldmax = 0;
       for (col=0; col < S.width; col++)
-        imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][fcol(row,col)] 
-          = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+        {
+          unsigned short val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width+(col+S.left_margin)];
+          int cc = fcol(row,col);
+          if(val>cblack[cc])
+            {
+              val-=cblack[cc];
+              if(val>ldmax)ldmax = val;
+            }
+          else
+            val = 0;
+          imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][cc] = val; 
+        }
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp critical(dataupdate)
+#endif
+      {
+        if(*dmaxp < ldmax)
+          *dmaxp = ldmax;
+      }
     }
 }
 
 
-int LibRaw::raw2image_ex(void)
+int LibRaw::raw2image_ex(int do_subtract_black)
 {
 
   CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
@@ -1149,6 +1183,16 @@ int LibRaw::raw2image_ex(void)
 
     libraw_decoder_info_t decoder_info;
     get_decoder_info(&decoder_info);
+
+    // Adjust black levels
+    unsigned short cblack[4]={0,0,0,0};
+    unsigned short dmax = 0;
+    if(do_subtract_black)
+      {
+        adjust_bl();
+        for(int i=0; i< 4; i++)
+          cblack[i] = (unsigned short)C.cblack[i];
+      }
         
     // Move saved bitmap to imgdata.image
     if(decoder_info.decoder_flags & LIBRAW_DECODER_FLATFIELD)
@@ -1175,9 +1219,16 @@ int LibRaw::raw2image_ex(void)
                           c = row + ((col+1) >> 1);
                         }
                         
-                        int val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
+                        unsigned short val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_width
                                                             +(col+S.left_margin)];
                         int cc = FCF(row,col);
+                        if(val > cblack[cc])
+                          {
+                            val-=cblack[cc];
+                            if(dmax < val) dmax = val;
+                          }
+                        else
+                          val = 0;
                         imgdata.image[((r) >> IO.shrink)*alloc_width + ((c) >> IO.shrink)][cc] = val;
                       }
                   }
@@ -1189,12 +1240,12 @@ int LibRaw::raw2image_ex(void)
               }
             else
               {
-                copy_fuji_uncropped();
+                copy_fuji_uncropped(cblack,&dmax);
               }
           } // end Fuji
         else 
           {
-            copy_bayer();
+            copy_bayer(cblack,&dmax);
           }
       }
     else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
@@ -1218,6 +1269,14 @@ int LibRaw::raw2image_ex(void)
       {
         free(imgdata.rawdata.raw_image);
         imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
+      }
+
+    if(do_subtract_black)
+      {
+        C.data_maximum = (int)dmax;
+        C.maximum -= C.black;
+        ZERO(C.cblack);
+        C.black = 0;
       }
 
     // hack - clear later flags!
@@ -1974,6 +2033,17 @@ void LibRaw::scale_colors_loop(float scale_mul[4])
     }
 }
 
+void LibRaw::adjust_bl()
+{
+  int i = C.cblack[3];
+  int c;
+  for(c=0;c<3;c++) if (i > C.cblack[c]) i = C.cblack[c];
+  for(c=0;c<4;c++) C.cblack[c] -= i;
+  C.black += i;
+  if (O.user_black >= 0) C.black = O.user_black;
+  for(c=0;c<4;c++) C.cblack[c] += C.black;
+}
+
 int LibRaw::dcraw_process(void)
 {
     int quality,i;
@@ -1998,7 +2068,12 @@ int LibRaw::dcraw_process(void)
         if (~O.cropbox[2] && ~O.cropbox[3])
             no_crop=0;
 
-        raw2image_ex(); // allocate imgdata.image and copy data!
+        libraw_decoder_info_t di;
+        get_decoder_info(&di);
+
+        int subtract_inline = !O.bad_pixels && !O.dark_frame && !O.wf_debanding && !(di.decoder_flags & LIBRAW_DECODER_LEGACY);
+
+        raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
 
         int save_4color = O.four_color_rgb;
 
@@ -2032,15 +2107,11 @@ int LibRaw::dcraw_process(void)
 
         if (O.user_qual >= 0) quality = O.user_qual;
 
-        i = C.cblack[3];
-        int c;
-        for(c=0;c<3;c++) if (i > C.cblack[c]) i = C.cblack[c];
-        for(c=0;c<4;c++) C.cblack[c] -= i;
-        C.black += i;
-        if (O.user_black >= 0) C.black = O.user_black;
-        for(c=0;c<4;c++) C.cblack[c] += C.black;
-
-        subtract_black();
+        if(!subtract_inline || !C.data_maximum)
+          {
+            adjust_bl();
+            subtract_black();
+          }
 
         adjust_maximum();
 

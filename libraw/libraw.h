@@ -110,7 +110,7 @@ class DllDef LibRaw
     int                         adjust_sizes_info_only(void);
     void                        subtract_black();
     int                         raw2image();
-    int                         raw2image_ex();
+    int                         raw2image_ex(int do_subtract_black);
     void                        raw2image_start();
     void                        free_image();
     int                         adjust_maximum();
@@ -169,8 +169,9 @@ protected:
         return FC(rr,cc);
     }
 
-    virtual void copy_fuji_uncropped();
-    virtual void copy_bayer();
+    void adjust_bl();
+    virtual void copy_fuji_uncropped(unsigned short cblack[4], unsigned short *dmaxp);
+    virtual void copy_bayer(unsigned short cblack[4], unsigned short *dmaxp);
     void*        malloc(size_t t);
     void*        calloc(size_t n,size_t t);
     void*        realloc(void *p, size_t s);
