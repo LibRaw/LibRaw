@@ -243,7 +243,7 @@ protected:
     void        recover_highlights();
     void        green_matching();
 
-    void        fuji_rotate();
+    virtual void        fuji_rotate();
     void        stretch();
 
     void        foveon_thumb ();
