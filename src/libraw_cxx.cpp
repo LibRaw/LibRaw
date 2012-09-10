@@ -195,6 +195,7 @@ LibRaw:: LibRaw(unsigned int flags)
     imgdata.params.use_camera_matrix=-1;
     imgdata.params.user_flip=-1;
     imgdata.params.user_black=-1;
+	imgdata.params.user_cblack[0]=imgdata.params.user_cblack[1]=imgdata.params.user_cblack[2]=imgdata.params.user_cblack[3]=-1000001;
     imgdata.params.user_sat=-1;
     imgdata.params.user_qual=-1;
     imgdata.params.output_color=1;
@@ -894,14 +895,9 @@ void LibRaw::raw2image_start()
         S.iheight = (S.height + IO.shrink) >> IO.shrink;
         S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
 
-        if (O.user_black >= 0) 
-            C.black = O.user_black;
-		for(int i=0; i<4; i++)
-			if(O.user_cblack[i])
-				C.cblack[i] = O.user_cblack[i];
 }
 
-int LibRaw::is_phaseone() 
+int LibRaw::is_phaseone_compressed() 
 { 
   return (load_raw == &LibRaw::phase_one_load_raw_c && imgdata.rawdata.ph1_black); 
 }
@@ -914,10 +910,11 @@ int LibRaw::raw2image(void)
     try {
         raw2image_start();
 
-        if (is_phaseone())
+        if (is_phaseone_compressed())
           {
-            phase_one_prepare_to_correct();
-            phase_one_correct();
+			  phase_one_allocate_tempbuffer();
+			  phase_one_subtract_black((ushort*)imgdata.rawdata.raw_alloc,imgdata.rawdata.raw_image);
+	          phase_one_correct();
           }
 
         // free and re-allocate image bitmap
@@ -970,10 +967,9 @@ int LibRaw::raw2image(void)
             }
 
         // Free PhaseOne separate copy allocated at function start
-        if (load_raw == &CLASS phase_one_load_raw_c && imgdata.rawdata.ph1_black)
+        if (is_phaseone_compressed())
           {
-            free(imgdata.rawdata.raw_image);
-            imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
+			  phase_one_free_tempbuffer();
           }
         // hack - clear later flags!
         imgdata.progress_flags 
@@ -986,29 +982,58 @@ int LibRaw::raw2image(void)
     }
 }
 
-void LibRaw::phase_one_prepare_to_correct()
+void LibRaw::phase_one_allocate_tempbuffer()
 {
   // Allocate temp raw_image buffer
-  imgdata.rawdata.raw_image = (ushort*)calloc(S.raw_width*S.raw_height,sizeof(ushort));
+  imgdata.rawdata.raw_image = (ushort*)malloc(S.raw_width*S.raw_height*sizeof(ushort));
   merror (imgdata.rawdata.raw_image, "phase_one_prepare_to_correct()");
-  if (!imgdata.rawdata.ph1_black)
-    {
-      // Phase one w/o black level
-      memmove(imgdata.rawdata.raw_image,imgdata.rawdata.raw_alloc,S.raw_width*S.raw_height*sizeof(ushort));
-    }
-  else
-    {
-      ushort *src = (ushort*)imgdata.rawdata.raw_alloc;
-      for(int row = 0; row < S.raw_height; row++)
-        for(int col=0; col < S.raw_width; col++)
-          {
-            int idx  = row*S.raw_width + col;
-            ushort val = src[idx];
-            ushort bl = imgdata.color.phase_one_data.t_black 
-              - imgdata.rawdata.ph1_black[row][col >= imgdata.color.phase_one_data.split_col];
-            imgdata.rawdata.raw_image[idx] = val>bl?val-bl:0;
-          }
-    }
+}
+void LibRaw::phase_one_free_tempbuffer()
+{
+	free(imgdata.rawdata.raw_image);
+	imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
+}
+
+void LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
+{
+//	ushort *src = (ushort*)imgdata.rawdata.raw_alloc;
+	if(O.user_black<0 && O.user_cblack[0] <= -1000000 && O.user_cblack[1] <= -1000000 && O.user_cblack[2] <= -1000000 && O.user_cblack[3] <= -1000000)
+	{
+		for(int row = 0; row < S.raw_height; row++)
+		{
+			ushort bl = imgdata.color.phase_one_data.t_black - imgdata.rawdata.ph1_black[row][0];
+			for(int col=0; col < imgdata.color.phase_one_data.split_col && col < S.raw_width; col++)
+			{
+				int idx  = row*S.raw_width + col;
+				ushort val = src[idx];
+				dest[idx] = val>bl?val-bl:0;
+			}
+			bl = imgdata.color.phase_one_data.t_black - imgdata.rawdata.ph1_black[row][1];
+			for(int col=imgdata.color.phase_one_data.split_col; col < S.raw_width; col++)
+			{
+				int idx  = row*S.raw_width + col;
+				ushort val = src[idx];
+				dest[idx] = val>bl?val-bl:0;
+			}
+		}
+	}
+	else // black set by user interaction
+	{
+		// Black level in cblack!
+		for(int row = 0; row < S.raw_height; row++)
+		{
+			unsigned short cblk[16];
+			for(int cc=0; cc<16;cc++)
+				cblk[cc]=C.cblack[fcol(row,cc)];
+			for(int col = 0; col < S.raw_width; col++)
+			{
+				int idx  = row*S.raw_width + col;
+				ushort val = src[idx];
+				ushort bl = cblk[col&0xf];
+				dest[idx] = val>bl?val-bl:0;
+			}
+		}
+	}
 }
 
 void LibRaw::copy_fuji_uncropped(unsigned short cblack[4],unsigned short *dmaxp)
@@ -1099,10 +1124,11 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     raw2image_start();
 
     // Compressed P1 files with bl data!
-    if (is_phaseone())
+    if (is_phaseone_compressed())
       {
-        phase_one_prepare_to_correct();
-        phase_one_correct();
+		  phase_one_allocate_tempbuffer();
+		  phase_one_subtract_black((ushort*)imgdata.rawdata.raw_alloc,imgdata.rawdata.raw_image);
+          phase_one_correct();
       }
 
     // process cropping
@@ -1270,10 +1296,9 @@ int LibRaw::raw2image_ex(int do_subtract_black)
       }
 
     // Free PhaseOne separate copy allocated at function start
-    if (load_raw == &CLASS phase_one_load_raw_c && imgdata.rawdata.ph1_black)
+    if (is_phaseone_compressed())
       {
-        free(imgdata.rawdata.raw_image);
-        imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
+		  phase_one_free_tempbuffer();
       }
 
     if(do_subtract_black)
@@ -1887,7 +1912,7 @@ int LibRaw::adjust_sizes_info_only(void)
 void LibRaw::subtract_black()
 {
 
-    if((C.cblack[0] || C.cblack[1] || C.cblack[2] || C.cblack[3]))
+    if(!is_phaseone_compressed() && (C.cblack[0] || C.cblack[1] || C.cblack[2] || C.cblack[3]))
         {
 #define BAYERC(row,col,c) imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][c] 
             int cblk[4],i;
@@ -2040,12 +2065,19 @@ void LibRaw::scale_colors_loop(float scale_mul[4])
 
 void LibRaw::adjust_bl()
 {
+
+   if (O.user_black >= 0) 
+		C.black = O.user_black;
+   for(int i=0; i<4; i++)
+		if(O.user_cblack[i]>-1000000)
+			C.cblack[i] = O.user_cblack[i];
+
+  // remove common part from C.cblack[]
   int i = C.cblack[3];
   int c;
   for(c=0;c<3;c++) if (i > C.cblack[c]) i = C.cblack[c];
   for(c=0;c<4;c++) C.cblack[c] -= i;
   C.black += i;
-  if (O.user_black >= 0) C.black = O.user_black;
   for(c=0;c<4;c++) C.cblack[c] += C.black;
 }
 

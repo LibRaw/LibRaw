@@ -154,9 +154,14 @@ class DllDef LibRaw
     /* Debanding filter */
     int                         wf_remove_banding();
 
+	// Phase one correction/subtractBL calls
+	void LibRaw::phase_one_subtract_black(ushort *src, ushort *dest);
+
 
 protected:
-    virtual int  is_phaseone();
+	void LibRaw::phase_one_allocate_tempbuffer();
+	void LibRaw::phase_one_free_tempbuffer();
+    virtual int  is_phaseone_compressed();
     /* Hotspots */
     virtual void copy_fuji_uncropped(unsigned short cblack[4], unsigned short *dmaxp);
     virtual void copy_bayer(unsigned short cblack[4], unsigned short *dmaxp);

@@ -3,7 +3,8 @@
    * Disabled decoding JPEG (lossy DNG) data from memory buffer
      for libjpeg version less than 8.
    * hotspots moved to virtual functions
-   * is_phaseone() call
+   * is_phaseone_compressed() call
+   * Custom phase one black subtraction
 
 2012-09-04 Alex Tutubalin <lexa@lexa.ru>
    * Backported improvements from LibRaw 0.14:
