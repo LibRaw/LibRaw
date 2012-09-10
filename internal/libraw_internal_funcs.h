@@ -108,7 +108,6 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 //int         bayer (unsigned row, unsigned col);
     int         raw(unsigned,unsigned);
     void        phase_one_flat_field (int is_float, int nc);
-    void        phase_one_correct();
     void        phase_one_load_raw();
     unsigned    ph1_bits (int nbits);
     void        phase_one_load_raw_c();

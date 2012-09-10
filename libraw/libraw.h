@@ -156,6 +156,7 @@ class DllDef LibRaw
 
 	// Phase one correction/subtractBL calls
 	void LibRaw::phase_one_subtract_black(ushort *src, ushort *dest);
+    void        phase_one_correct();
 
 
 protected:
