@@ -3946,7 +3946,9 @@ mask_set:
   if (load_raw == &CLASS canon_600_load_raw && width < raw_width) {
     black = (mblack[0]+mblack[1]+mblack[2]+mblack[3]) /
 	    (mblack[4]+mblack[5]+mblack[6]+mblack[7]) - 4;
+#ifndef LIBRAW_LIBRARY_BUILD
     canon_600_correct();
+#endif
   } else if (zero < mblack[4] && mblack[5] && mblack[6] && mblack[7])
     FORC4 cblack[c] = mblack[c] / mblack[4+c];
 }

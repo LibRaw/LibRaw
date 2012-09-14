@@ -2970,7 +2970,9 @@ mask_set:
   if (load_raw == &CLASS canon_600_load_raw && width < raw_width) {
     black = (mblack[0]+mblack[1]+mblack[2]+mblack[3]) /
 	    (mblack[4]+mblack[5]+mblack[6]+mblack[7]) - 4;
+#ifndef LIBRAW_LIBRARY_BUILD
     canon_600_correct();
+#endif
   } else if (zero < mblack[4] && mblack[5] && mblack[6] && mblack[7])
     FORC4 cblack[c] = mblack[c] / mblack[4+c];
 }
@@ -2998,7 +3000,7 @@ void CLASS remove_zeroes()
   RUN_CALLBACK(LIBRAW_PROGRESS_REMOVE_ZEROES,1,2);
 #endif
 }
-#line 4143 "dcraw/dcraw.c"
+#line 4145 "dcraw/dcraw.c"
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
 {
   int i;
@@ -4496,7 +4498,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 5645 "dcraw/dcraw.c"
+#line 5647 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5011,7 +5013,7 @@ void CLASS parse_kodak_ifd (int base)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 6165 "dcraw/dcraw.c"
+#line 6167 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6255,7 +6257,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 7411 "dcraw/dcraw.c"
+#line 7413 "dcraw/dcraw.c"
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
   int i;
@@ -6356,7 +6358,7 @@ void CLASS parse_foveon()
   }
   is_foveon = 1;
 }
-#line 7514 "dcraw/dcraw.c"
+#line 7516 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -8799,7 +8801,7 @@ c603:
 }
 
 
-#line 10048 "dcraw/dcraw.c"
+#line 10050 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -9030,7 +9032,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 10304 "dcraw/dcraw.c"
+#line 10306 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

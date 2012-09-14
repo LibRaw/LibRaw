@@ -972,6 +972,12 @@ int LibRaw::raw2image(void)
 			  phase_one_free_tempbuffer();
           }
         // hack - clear later flags!
+
+        if (load_raw == &CLASS canon_600_load_raw && S.width < S.raw_width) 
+          {
+            canon_600_correct();
+          }
+
         imgdata.progress_flags 
             = LIBRAW_PROGRESS_START|LIBRAW_PROGRESS_OPEN
             |LIBRAW_PROGRESS_IDENTIFY|LIBRAW_PROGRESS_SIZE_ADJUST|LIBRAW_PROGRESS_LOAD_RAW;
@@ -1299,6 +1305,10 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     if (is_phaseone_compressed())
       {
 		  phase_one_free_tempbuffer();
+      }
+    if (load_raw == &CLASS canon_600_load_raw && S.width < S.raw_width) 
+      {
+        canon_600_correct();
       }
 
     if(do_subtract_black)
@@ -2108,14 +2118,15 @@ int LibRaw::dcraw_process(void)
         libraw_decoder_info_t di;
         get_decoder_info(&di);
 
-        int subtract_inline = !O.bad_pixels && !O.dark_frame && !O.wf_debanding && !(di.decoder_flags & LIBRAW_DECODER_LEGACY);
+        int subtract_inline = !O.bad_pixels && !O.dark_frame && !O.wf_debanding && !(di.decoder_flags & LIBRAW_DECODER_LEGACY) && !IO.zero_is_bad;
 
         raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
 
         int save_4color = O.four_color_rgb;
 
         if (IO.zero_is_bad) 
-            {
+          {
+            printf("Removing zeroes\n");
                 remove_zeroes();
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
             }
