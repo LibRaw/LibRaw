@@ -39,6 +39,7 @@ it under the terms of the one of three licenses as you choose:
 // imgdata.sizes
 #define raw_height      (imgdata.sizes.raw_height)
 #define raw_width       (imgdata.sizes.raw_width)
+#define raw_pitch       (imgdata.sizes.raw_pitch)
 #define height          (imgdata.sizes.height)
 #define width           (imgdata.sizes.width)
 #define top_margin      (imgdata.sizes.top_margin)
