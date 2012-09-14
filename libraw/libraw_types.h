@@ -163,7 +163,8 @@ typedef struct
 typedef struct
 {
     ushort      raw_height, 
-                raw_width, 
+                raw_width,
+                raw_pitch,
                 height, 
                 width, 
                 top_margin, 
