@@ -2115,7 +2115,7 @@ int LibRaw::dcraw_process(void)
         libraw_decoder_info_t di;
         get_decoder_info(&di);
 
-        int subtract_inline = !O.bad_pixels && !O.dark_frame && !O.wf_debanding && !(di.decoder_flags & LIBRAW_DECODER_LEGACY);
+        int subtract_inline = !O.bad_pixels && !O.dark_frame && !O.wf_debanding && !(di.decoder_flags & LIBRAW_DECODER_LEGACY) && !IO.zero_is_bad;
 
         raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
 
