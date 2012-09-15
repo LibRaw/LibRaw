@@ -1,3 +1,5 @@
+2012-09-15 Alex Tutubalin <lexa@lexa.ru>
+   * imgdata.sizes.raw_pitch
 2012-09-06 Alex Tutubalin <lexa@lexa.ru>
    * OpenMP speedup for linear interpolation
    * Disabled decoding JPEG (lossy DNG) data from memory buffer

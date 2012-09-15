@@ -149,7 +149,7 @@ typedef unsigned long long UINT64;
  */
 
 #define RAW(row,col) \
-	raw_image[(row)*raw_pitch+(col)]
+	raw_image[(row)*raw_width+(col)]
 #line 248 "dcraw/dcraw.c"
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]

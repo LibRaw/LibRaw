@@ -143,7 +143,7 @@ unsigned tiff_nifds, tiff_samples, tiff_bps, tiff_compress;
 unsigned black, cblack[4], maximum, mix_green, raw_color, zero_is_bad;
 unsigned zero_after_ff, is_raw, dng_version, is_foveon, data_error;
 unsigned tile_width, tile_length, gpsdata[32], load_flags;
-ushort raw_height, raw_width, raw_pitch, height, width, top_margin, left_margin;
+ushort raw_height, raw_width, height, width, top_margin, left_margin;
 ushort shrink, iheight, iwidth, fuji_width, thumb_width, thumb_height;
 ushort *raw_image, (*image)[4];
 ushort white[8][8], curve[0x10000], cr2_slice[3], sraw_mul[4];
@@ -238,7 +238,7 @@ struct ph1 {
  */
 
 #define RAW(row,col) \
-	raw_image[(row)*raw_pitch+(col)]
+	raw_image[(row)*raw_width+(col)]
 //@end DEFINES
 
 #define FC(row,col) \
@@ -529,7 +529,7 @@ void CLASS canon_600_load_raw()
 
   for (irow=row=0; irow < height; irow++) {
     if (fread (data, 1, 1120, ifp) < 1120) derror();
-    pix = raw_image + row*raw_pitch;
+    pix = raw_image + row*raw_width;
     for (dp=data; dp < data+1120;  dp+=10, pix+=8) {
       pix[0] = (dp[0] << 2) + (dp[1] >> 6    );
       pix[1] = (dp[2] << 2) + (dp[1] >> 4 & 3);
@@ -762,7 +762,7 @@ void CLASS canon_load_raw()
   zero_after_ff = 1;
   getbits(-1);
   for (row=0; row < raw_height; row+=8) {
-    pixel = raw_image + row*raw_pitch;
+    pixel = raw_image + row*raw_width;
     nblocks = MIN (8, raw_height-row) * raw_width >> 6;
     for (block=0; block < nblocks; block++) {
       memset (diffbuf, 0, sizeof diffbuf);
@@ -1675,11 +1675,7 @@ void CLASS rollei_load_raw()
       todo[i+1] = buffer >> (14-i)*5;
     }
     for (i=0; i < 16; i+=2)
-      {
-        int row = todo[i]/raw_width;
-        int col = todo[i]%raw_width;
-        RAW(row,col) = (todo[i+1] & 0x3ff);
-      }
+      raw_image[todo[i]] = (todo[i+1] & 0x3ff);
   }
   maximum = 0x3ff;
 }
@@ -1868,27 +1864,13 @@ void CLASS phase_one_load_raw()
   bkey = get2();
   t_mask = ph1.format == 1 ? 0x5555:0x1354;
   fseek (ifp, data_offset, SEEK_SET);
-#if 0
-  read_shorts (raw_image, raw_width*raw_height); // raw_pitch should be exactly raw_width
-#else
-  for(int row = 0; row < raw_height; row++)
-    read_shorts(raw_image+row*raw_pitch,raw_width);
-#endif
+  read_shorts (raw_image, raw_width*raw_height);
   if (ph1.format)
     for (i=0; i < raw_width*raw_height; i+=2) {
-#if 0
       a = raw_image[i+0] ^ akey;
       b = raw_image[i+1] ^ bkey;
       raw_image[i+0] = (a & t_mask) | (b & ~t_mask);
       raw_image[i+1] = (b & t_mask) | (a & ~t_mask);
-#else
-      int row = i/raw_width;
-      int col = i%raw_height;
-      a = RAW(row,col) ^ akey;
-      b = RAW(row,col+1) ^ bkey;
-      RAW(row,col) = (a & t_mask) | (b & ~t_mask);
-      RAW(row,col+1) = (b & t_mask) | (a & ~t_mask);
-#endif
     }
 }
 
@@ -1934,7 +1916,7 @@ void CLASS phase_one_load_raw_c()
 
   pixel = (ushort *) calloc (raw_width + raw_height*4, 2);
   merror (pixel, "phase_one_load_raw_c()");
-  offset = (int *) (pixel + raw_width); 
+  offset = (int *) (pixel + raw_width);
   fseek (ifp, strip_offset, SEEK_SET);
   for (row=0; row < raw_height; row++)
     offset[row] = get4();
@@ -2027,7 +2009,7 @@ void CLASS leaf_hdr_load_raw()
 	fseek (ifp, get4(), SEEK_SET);
       }
       if (filters && c != shot_select) continue;
-      if (filters) pixel = raw_image + r*raw_pitch;
+      if (filters) pixel = raw_image + r*raw_width;
       read_shorts (pixel, raw_width);
       if (!filters && (row = r - top_margin) < height)
 	for (col=0; col < width; col++)
@@ -2045,12 +2027,7 @@ void CLASS unpacked_load_raw()
   int row, col, bits=0;
 
   while (1 << ++bits < maximum);
-#if 0
   read_shorts (raw_image, raw_width*raw_height);
-#else
-  for(row=0;row<raw_height;row++)
-    read_shorts(raw_image+row*raw_pitch,raw_width);
-#endif
   for (row=0; row < raw_height; row++)
     for (col=0; col < raw_width; col++)
       if ((RAW(row,col) >>= load_flags) >> bits
@@ -2469,17 +2446,8 @@ void CLASS kodak_radc_load_raw()
 	  RAW(y,x) = val;
 	}
   }
-#if 0
   for (i=0; i < height*width; i++)
     raw_image[i] = curve[raw_image[i]];
-#else
-  for (i=0; i < height*width; i++)
-    {
-      int row = i/width;
-      int col = i%width;
-      RAW(row,col) = curve[RAW(row,col)];
-    }
-#endif
   maximum = 0x3fff;
 }
 
@@ -2887,7 +2855,7 @@ void CLASS sony_load_raw()
     key = key << 8 | head[i];
   fseek (ifp, data_offset, SEEK_SET);
   for (row=0; row < raw_height; row++) {
-    pixel = raw_image + row*raw_pitch;
+    pixel = raw_image + row*raw_width;
     if (fread (pixel, 2, raw_width, ifp) < raw_width) derror();
     sony_decrypt ((unsigned int *) pixel, raw_width/2, !row, key);
     for (col=0; col < raw_width; col++)
@@ -3056,11 +3024,7 @@ void CLASS smal_decode_segment (unsigned seg[2][2], int holes)
       diff = diff ? -diff : 0x80;
     if (ftell(ifp) + 12 >= seg[1][1])
       diff = 0;
-#if 0
     raw_image[pix] = pred[pix & 1] += diff;
-#else
-    RAW(pix/raw_width,pix%raw_width) = pred[pix & 1] += diff;
-#endif
     if (!(pix & 1) && HOLE(pix / raw_width)) pix += 2;
   }
   maximum = 0xff;
@@ -10832,9 +10796,7 @@ next:
       merror (meta_data, "main()");
     }
     if (filters || colors == 1) {
-      raw_pitch = ((raw_width*2+15)/16)*8; // !!! CHANGE ME
-      printf("ifname=%s raw_width=%d raw_pitch=%d\n",ifname,raw_width,raw_pitch);
-      raw_image = (ushort *) calloc ((raw_height+7)*raw_pitch, 2);
+      raw_image = (ushort *) calloc ((raw_height+7)*raw_width, 2);
       merror (raw_image, "main()");
     }
     if (verbose)

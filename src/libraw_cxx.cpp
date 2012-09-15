@@ -798,10 +798,7 @@ int LibRaw::unpack(void)
         S.raw_pitch = S.raw_width;
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
             {
-              S.raw_pitch = ((rwidth*2+15)/16)*8;
-              if(S.raw_pitch!=S.raw_width)
-                fprintf(stderr,"File %s pitch=%d width=%d\n",ID.input->fname(),S.raw_pitch,S.raw_width);
-              imgdata.rawdata.raw_alloc = malloc(S.raw_pitch*(rheight+7)*sizeof(imgdata.rawdata.raw_image[0]));
+              imgdata.rawdata.raw_alloc = malloc(rwidth*(rheight+7)*sizeof(imgdata.rawdata.raw_image[0]));
               imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
             }
         else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
