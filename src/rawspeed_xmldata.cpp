@@ -1,2351 +1,2352 @@
-const char _rawspeed_data_xml[]=
-"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
-"<?xml-stylesheet type=\"text/xsl\" href=\"showcameras.xsl\" ?>\n"
-"<!--\n"
-"\t\tLicense: CC-BY-SA 3.0\n"
-"\n"
-"\t\tThis work is licensed under a \n"
-"\t\tCreative Commons Attribution-ShareAlike 3.0 Unported License. \n"
-"\n"
-"\t\tSee more at:\n"
-"\t\thttp://creativecommons.org/licenses/by-sa/3.0/\n"
-"-->\n"
-"\n"
-"<!DOCTYPE Cameras [\n"
-"<!ELEMENT BlackAreas ( Vertical*, Horizontal* ) >\n"
-"\n"
-"<!ELEMENT Camera ( CFA?, Crop, Sensor+, BlackAreas?, Aliases?, Hints? ) >\n"
-"<!ATTLIST Camera make CDATA #REQUIRED >\n"
-"<!ATTLIST Camera model CDATA #REQUIRED >\n"
-"<!ATTLIST Camera supported CDATA #IMPLIED >\n"
-"<!ATTLIST Camera mode CDATA #IMPLIED >\n"
-"<!ATTLIST Camera decoder_version CDATA #IMPLIED >\n"
-"\n"
-"<!ELEMENT Cameras ( Camera+ ) >\n"
-"<!ATTLIST Cameras version CDATA #IMPLIED >\n"
-"\n"
-"<!ELEMENT CFA ( Color+ ) >\n"
-"<!ATTLIST CFA height NMTOKEN #REQUIRED >\n"
-"<!ATTLIST CFA width NMTOKEN #REQUIRED >\n"
-"\n"
-"<!ELEMENT Color ( #PCDATA ) >\n"
-"<!ATTLIST Color x NMTOKEN #REQUIRED >\n"
-"<!ATTLIST Color y NMTOKEN #REQUIRED >\n"
-"\n"
-"<!ELEMENT Crop EMPTY >\n"
-"<!ATTLIST Crop height NMTOKEN #REQUIRED >\n"
-"<!ATTLIST Crop width NMTOKEN #REQUIRED >\n"
-"<!ATTLIST Crop x NMTOKEN #REQUIRED >\n"
-"<!ATTLIST Crop y NMTOKEN #REQUIRED >\n"
-"\n"
-"<!ELEMENT Horizontal EMPTY >\n"
-"<!ATTLIST Horizontal height NMTOKEN #REQUIRED >\n"
-"<!ATTLIST Horizontal y NMTOKEN #REQUIRED >\n"
-"\n"
-"<!ELEMENT Sensor EMPTY >\n"
-"<!ATTLIST Sensor white NMTOKEN #REQUIRED >\n"
-"<!ATTLIST Sensor black NMTOKEN #REQUIRED >\n"
-"<!ATTLIST Sensor iso_list NMTOKENS #IMPLIED >\n"
-"<!ATTLIST Sensor iso_min NMTOKEN #IMPLIED >\n"
-"<!ATTLIST Sensor iso_max NMTOKEN #IMPLIED >\n"
-"\n"
-"<!ELEMENT Vertical EMPTY >\n"
-"<!ATTLIST Vertical width NMTOKEN #REQUIRED >\n"
-"<!ATTLIST Vertical x NMTOKEN #REQUIRED >\n"
-"\n"
-"<!ELEMENT Hints ( Hint+ ) >\n"
-"<!ELEMENT Hint EMPTY >\n"
-"<!ATTLIST Hint name CDATA #REQUIRED >\n"
-"<!ATTLIST Hint value CDATA #REQUIRED >\n"
-"\n"
-"<!ELEMENT Aliases ( Alias+ ) >\n"
-"<!ELEMENT Alias (#PCDATA) >\n"
-"]>\n"
-"\n"
-"<Cameras>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 20D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"74\" y=\"12\" width=\"3522\" height=\"2348\"/>\n"
-"\t\t<Sensor black=\"126\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"72\"/>\n"
-"		<Horizontal y=\"2\" height=\"8\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 30D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"74\" y=\"12\" width=\"3522\" height=\"2348\"/>\n"
-"\t\t<Sensor black=\"127\" white=\"3398\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"72\"/>\n"
-"		<Horizontal y=\"2\" height=\"8\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 350D DIGITAL\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"42\" y=\"14\" width=\"3474\" height=\"2314\"/>\n"
-"\t\t<Sensor black=\"255\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"40\"/>\n"
-"		<Horizontal y=\"0\" height=\"12\"/>\n"
-"	</BlackAreas>\n"
-"\t\t<Aliases>\n"
-"		<Alias>Canon EOS DIGITAL REBEL XT</Alias>\n"
-"		<Alias>Canon EOS Kiss Digital N</Alias>\n"
-"		<Alias>Canon EOS 350D</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 40D\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"30\" y=\"18\" width=\"3908\" height=\"2602\"/>\n"
-"\t\t<Sensor black=\"1021\" white=\"13600\"/>\n"
-"		<BlackAreas>\n"
-"			<Vertical x=\"0\" width=\"28\"/>\n"
-"			<Horizontal y=\"4\" height=\"12\"/>\n"
-"		</BlackAreas>\n"
-"		<Hints>\n"
-"			<Hint name=\"sraw_40d\" value=\"\"/>\n"
-"		</Hints>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 40D\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"1944\" height=\"1296\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 450D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"22\" y=\"18\" width=\"4290\" height=\"2856\"/>\n"
-"\t\t<Sensor black=\"1020\" white=\"14500\"/>\n"
-"\t\t<Aliases>\n"
-"		<Alias>Canon EOS DIGITAL REBEL XSi</Alias>\n"
-"		<Alias>Canon EOS Kiss Digital X2</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 50D\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"64\" y=\"52\" width=\"4752\" height=\"3158\"/>\n"
-"\t\t<Sensor black=\"1020\" white=\"16383\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"60\"/>\n"
-"		<Horizontal y=\"2\" height=\"46\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 50D\" mode=\"sRaw1\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3272\" height=\"2178\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 50D\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2376\" height=\"1584\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 60D\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"146\" y=\"54\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"2026\" white=\"14200\"/>\n"
-"		<BlackAreas>\n"
-"			<Vertical x=\"0\" width=\"140\"/>\n"
-"			<Horizontal y=\"4\" height=\"46\"/>\n"
-"		</BlackAreas>\n"
-"	\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 60D\" mode=\"sRaw1\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 60D\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 500D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"62\" y=\"30\" width=\"4722\" height=\"3142\"/>\n"
-"\t\t<Sensor black=\"1020\" white=\"16000\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"56\"/>\n"
-"		<Horizontal y=\"2\" height=\"22\"/>\n"
-"	</BlackAreas>\n"
-"\t\t<Aliases>\n"
-"		<Alias>Canon EOS REBEL T1i</Alias>\n"
-"		<Alias>Canon EOS Kiss X3</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 550D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"148\" y=\"54\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"2048\" white=\"15831\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"140\"/>\n"
-"		<Horizontal y=\"4\" height=\"44\"/>\n"
-"	</BlackAreas>\n"
-"\t\t<Aliases>\n"
-"		<Alias>Canon EOS REBEL T2i</Alias>\n"
-"		<Alias>Canon EOS Kiss X4</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 600D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"146\" y=\"54\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"2026\" white=\"13584\" iso_min=\"0\" iso_max = \"199\"/>\n"
-"\t\t<Sensor black=\"2026\" white=\"15304\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"140\"/>\n"
-"		<Horizontal y=\"4\" height=\"44\"/>\n"
-"	</BlackAreas>\n"
-"\t\t<Aliases>\n"
-"		<Alias>Canon EOS REBEL T3i</Alias>\n"
-"		<Alias>Canon EOS Kiss X5</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 650D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"76\" y=\"56\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"2026\" white=\"13584\" iso_min=\"0\" iso_max = \"199\"/>\n"
-"\t\t<Sensor black=\"2026\" white=\"15304\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"70\"/>\n"
-"		<Horizontal y=\"4\" height=\"44\"/>\n"
-"	</BlackAreas>\n"
-"\t\t<Aliases>\n"
-"		<Alias>Canon EOS REBEL T4i</Alias>\n"
-"		<Alias>Canon EOS Kiss X6i</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 5D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"90\" y=\"34\" width=\"4386\" height=\"2920\"/>\n"
-"\t\t<Sensor black=\"127\" white=\"3692\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"88\"/>\n"
-"		<Horizontal y=\"2\" height=\"30\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark II\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"158\" y=\"51\" width=\"5634\" height=\"3753\"/>\n"
-"\t\t<Sensor black=\"1024\" white=\"12995\" iso_list=\"160 320 640 1250\"/>\n"
-"\t\t<Sensor black=\"1024\" white=\"15950\"/>\n"
-"		<BlackAreas>\n"
-"			<Vertical x=\"0\" width=\"156\"/>\n"
-"			<Horizontal y=\"2\" height=\"48\"/>\n"
-"		</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark II\" mode=\"sRaw1\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3872\" height=\"2574\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"57200\" iso_list=\"160 320 640 1250\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"64948\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark II\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2808\" height=\"1872\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"57200\" iso_list=\"160 320 640 1250\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"64948\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark III\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"124\" y=\"82\" width=\"-2\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"1024\" white=\"16383\"/>\n"
-"\t<BlackAreas>\n"
-"\t\t<Vertical x=\"0\" width=\"120\"/>\n"
-"\t\t<Horizontal y=\"2\" height=\"78\"/>\n"
-"\t</BlackAreas>\n"
-"		<Hints>\n"
-"			<Hint name=\"sraw_new\" value=\"\"/>\n"
-"		</Hints>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark III\" mode=\"sRaw1\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark III\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 7D\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"158\" y=\"52\" width=\"5202\" height=\"3464\"/>\n"
-"\t\t<Sensor black=\"1025\" white=\"8150\" iso_min=\"12800\" iso_max=\"12800\"/>\n"
-"\t\t<Sensor black=\"2050\" white=\"16300\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"156\"/>\n"
-"		<Horizontal y=\"2\" height=\"48\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 7D\" mode=\"sRaw1\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"44200\" iso_list=\"100 125 160 320 640 1250\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"54000\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 7D\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"44200\" iso_list=\"100 125 160 320 640 1250\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"54000\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 1000D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"42\" y=\"18\" width=\"3906\" height=\"2602\"/>\n"
-"\t\t<Sensor black=\"255\" white=\"3650\" iso_min=\"0\" iso_max=\"199\"/>\n"
-"\t\t<Sensor black=\"255\" white=\"4036\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"41\"/>\n"
-"		<Horizontal y=\"2\" height=\"14\"/>\n"
-"	</BlackAreas>\n"
-"\t\t<Aliases>\n"
-"		<Alias>Canon EOS DIGITAL REBEL XS</Alias>\n"
-"		<Alias>Canon EOS Kiss Digital F</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 1100D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"64\" y=\"20\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"2036\" white=\"15500\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"58\"/>\n"
-"		<Horizontal y=\"4\" height=\"12\"/>\n"
-"	</BlackAreas>\n"
-"\t\t<Aliases>\n"
-"		<Alias>Canon EOS REBEL T3</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS 400D DIGITAL\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"42\" y=\"18\" width=\"3906\" height=\"2602\"/>\n"
-"\t\t<Sensor black=\"255\" white=\"3726\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"40\"/>\n"
-"		<Horizontal y=\"4\" height=\"12\"/>\n"
-"	</BlackAreas>\n"
-"\t\t<Aliases>\n"
-"		<Alias>Canon EOS DIGITAL REBEL XTi</Alias>\n"
-"		<Alias>Canon EOS Kiss Digital X</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark II\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"74\" y=\"12\" width=\"3522\" height=\"2348\"/>\n"
-"\t\t<Sensor black=\"127\" white=\"3700\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"72\"/>\n"
-"		<Horizontal y=\"2\" height=\"8\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark II N\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"74\" y=\"12\" width=\"3522\" height=\"2348\"/>\n"
-"\t\t<Sensor black=\"127\" white=\"3700\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"72\"/>\n"
-"		<Horizontal y=\"2\" height=\"8\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark III\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"78\" y=\"20\" width=\"3906\" height=\"2600\"/>\n"
-"\t\t<Sensor black=\"1023\" white=\"15100\"/>\n"
-"		<BlackAreas>\n"
-"			<Vertical x=\"2\" width=\"74\"/>\n"
-"			<Horizontal y=\"4\" height=\"14\"/>\n"
-"		</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark III\" mode=\"sRaw1\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark III\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark IV\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"144\" y=\"46\" width=\"-64\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"2000\" white=\"13000\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"140\"/>\n"
-"		<Horizontal y=\"26\" height=\"16\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark IV\" mode=\"sRaw1\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark IV\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1Ds Mark II\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"98\" y=\"13\" width=\"5010\" height=\"3336\"/>\n"
-"\t\t<Sensor black=\"126\" white=\"4060\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"96\"/>\n"
-"		<Horizontal y=\"2\" height=\"10\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1Ds Mark III\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"62\" y=\"20\" width=\"5640\" height=\"3752\"/>\n"
-"\t\t<Sensor black=\"1021\" white=\"15100\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"60\"/>\n"
-"		<Horizontal y=\"4\" height=\"14\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1Ds Mark III\" mode=\"sRaw1\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1Ds Mark III\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D X\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"128\" y=\"102\" width=\"0\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"2050\" white=\"15100\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"120\"/>\n"
-"		<Horizontal y=\"0\" height=\"98\"/>\n"
-"	</BlackAreas>\n"
-"</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D X\" mode=\"sRaw1\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon EOS-1D X\" mode=\"sRaw2\">\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon PowerShot G1 X\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"82\" y=\"52\" width=\"-14\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"16383\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"68\"/>\n"
-"		<Horizontal y=\"0\" height=\"46\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon PowerShot G12\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"54\" y=\"14\" width=\"-12\" height=\"-18\"/>\n"
-"\t\t<Sensor black=\"120\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"50\"/>\n"
-"		<Horizontal y=\"0\" height=\"10\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon PowerShot G11\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"10\" y=\"18\" width=\"-56\" height=\"-14\"/>\n"
-"\t\t<Sensor black=\"120\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"10\"/>\n"
-"		<Horizontal y=\"0\" height=\"14\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon PowerShot G10\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"12\" y=\"13\" width=\"4432\" height=\"3323\"/>\n"
-"\t\t<Sensor black=\"128\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"10\"/>\n"
-"		<Horizontal y=\"0\" height=\"8\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon PowerShot G9\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"48\" y=\"12\" width=\"4032\" height=\"3024\"/>\n"
-"\t\t<Sensor black=\"125\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"46\"/>\n"
-"		<Horizontal y=\"0\" height=\"8\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon PowerShot SX1 IS\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"192\" y=\"12\" width=\"3958\" height=\"2760\"/>\n"
-"\t\t<Sensor black=\"125\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"188\"/>\n"
-"		<Horizontal y=\"0\" height=\"10\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon PowerShot S90\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"10\" y=\"18\" width=\"-54\" height=\"-10\"/>\n"
-"\t\t<Sensor black=\"125\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"6\"/>\n"
-"		<Horizontal y=\"0\" height=\"14\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon PowerShot S95\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"66\" y=\"24\" width=\"-20\" height=\"-24\"/>\n"
-"\t\t<Sensor black=\"125\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"50\"/>\n"
-"		<Vertical x=\"3738\" width=\"6\"/>\n"
-"		<Horizontal y=\"0\" height=\"10\"/>\n"
-"		<Horizontal y=\"2774\" height=\"10\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Canon\" model=\"Canon PowerShot S100\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"104\" y=\"12\" width=\"-10\" height=\"-66\"/>\n"
-"\t\t<Sensor black=\"125\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"100\"/>\n"
-"		<Horizontal y=\"0\" height=\"10\"/>\n"
-"		<Horizontal y=\"3062\" height=\"60\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>	\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D100\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"2\" y=\"0\" width=\"3030\" height=\"2024\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2000\" height=\"1312\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D1H\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2012\" height=\"1324\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D1X\" supported=\"no\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4024\" height=\"1324\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D200\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"2\" y=\"0\" width=\"3898\" height=\"2616\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3880\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D2H\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"6\" y=\"0\" width=\"-8\" height=\"1648\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3880\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D2Hs\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t <Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"6\" y=\"0\" width=\"-8\" height=\"1648\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3880\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D2X\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-32\" height=\"-8\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3880\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"2\" y=\"0\" width=\"4282\" height=\"2844\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"16384\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3S\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"16384\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3X\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"6080\" height=\"4044\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"16384\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D300\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4320\" height=\"2868\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"15236\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D300S\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4320\" height=\"2868\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"15236\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3000\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3898\" height=\"2610\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"16383\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3200\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-48\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"16383\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D4\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"2\" y=\"0\" width=\"-50\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"16383\"/>\n"
-"		<BlackAreas>\n"
-"			<Vertical x=\"4984\" width=\"8\"/>\n"
-"		</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D5100\"\tdecoder_version=\"2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-46\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65536\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3100\"\tdecoder_version=\"2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"8\" y=\"2\" width=\"-24\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"16383\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D40\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3038\" height=\"2014\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3880\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D40X\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"4\" y=\"0\" width=\"3896\" height=\"2613\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3880\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D50\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-2\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3880\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D5000\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4310\" height=\"2868\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D60\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3900\" height=\"2613\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3880\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D70\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3038\" height=\"2014\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D700\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"2\" y=\"0\" width=\"4282\" height=\"2844\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3972\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D7000\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-46\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D70s\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3040\" height=\"2014\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D80\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3900\" height=\"2611\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3880\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D800\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"2\" y=\"0\" width=\"-48\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3972\"/>\n"
-"\t\t<Aliases><Alias>NIKON D800E</Alias></Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D90\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4310\" height=\"2868\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"3767\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON 1 J1\" supported=\"no\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"0\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON 1 V1\" supported=\"no\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"0\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON\" model=\"E5400\" decoder_version=\"3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2608\" height=\"1950\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"	<Hints>\n"
-"		<Hint name=\"coolpixsplit\" value=\"\"/>\n"
-"	</Hints>	\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON\" model=\"E5700\" supported=\"no\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2576\" height=\"1924\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"	<Hints>\n"
-"		<Hint name=\"coolpixsplit\" value=\"\"/>\n"
-"	</Hints>	\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON\" model=\"E8400\" decoder_version=\"3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2576\" height=\"1924\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"	<Hints>\n"
-"		<Hint name=\"coolpixsplit\" value=\"\"/>\n"
-"	</Hints>	\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON\" model=\"COOLPIX P6000\" supported=\"yes\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t<Hints>\n"
-"\t\t<Hint name=\"coolpixmangled\" value=\"\"/>\n"
-"\t</Hints>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"NIKON\" model=\"COOLPIX P7000\" supported=\"yes\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t<Hints>\n"
-"\t\t<Hint name=\"coolpixmangled\" value=\"\"/>\n"
-"\t</Hints>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"NIKON\" model=\"COOLPIX P7100\" supported=\"yes\" decoder_version=\"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t<Hints>\n"
-"\t\t<Hint name=\"coolpixmangled\" value=\"\"/>\n"
-"\t</Hints>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"NIKON\" model=\"E8800\" decoder_version=\"3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3280\" height=\"2454\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"	<Hints>\n"
-"		<Hint name=\"coolpixsplit\" value=\"\"/>\n"
-"	</Hints>	\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS CORPORATION\" model=\"C8080WZ\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3280\" height=\"2453\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS CORPORATION\" model=\"E-1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2624\" height=\"1966\"/>\n"
-"\t\t<Sensor black=\"65\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"C7070WZ\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3088\" height=\"2309\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n"
-"\t\t<Sensor black=\"65\" white=\"4015\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-30\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-6\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"65\" white=\"4015\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-300\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3340\" height=\"2504\"/>\n"
-"\t\t<Sensor black=\"63\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-330\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3250\" height=\"2450\"/>\n"
-"\t\t<Sensor black=\"77\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-400\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3768\" height=\"2840\"/>\n"
-"\t\t<Sensor black=\"96\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-410\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n"
-"\t\t<Sensor black=\"72\" white=\"3500\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-420\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n"
-"\t\t<Sensor black=\"68\" white=\"4015\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-500\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3340\" height=\"2504\"/>\n"
-"\t\t<Sensor black=\"63\" white=\"3967\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-510\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n"
-"\t\t<Sensor black=\"72\" white=\"3500\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-520\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n"
-"\t\t<Sensor black=\"69\" white=\"4015\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-620\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4096\" height=\"3072\"/>\n"
-"\t\t<Sensor black=\"64\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"SP350\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3280\" height=\"2453\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"SP500UZ\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2832\" height=\"2117\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-5\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-4\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"80\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS OPTICAL CO.,LTD\" model=\"E-10\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2256\" height=\"1684\"/>\n"
-"\t\t<Sensor black=\"32\" white=\"1023\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS OPTICAL CO.,LTD\" model=\"E-20,E-20N,E-20P\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"2576\" height=\"1924\"/>\n"
-"\t\t<Sensor black=\"32\" white=\"1023\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-M5\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"250\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-P1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4094\" height=\"3082\"/>\n"
-"\t\t<Sensor black=\"55\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-PL1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4094\" height=\"3082\"/>\n"
-"\t\t<Sensor black=\"55\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-PL2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-4\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"45\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"4097\" width=\"2\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-PL3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-30\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"45\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"4064\" width=\"6\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-PM1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-24\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"45\" white=\"4095\"/>\n"
-"		<BlackAreas>\n"
-"			<Vertical x=\"4064\" width=\"6\"/>\n"
-"		</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-P2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"55\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-P3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-26\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"XZ-1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"55\" white=\"3972\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FX150\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4429\" height=\"3324\"/>\n"
-"\t\t<Sensor black=\"15\" white=\"3986\"/>\n"
-"\t</Camera>\t\n"
-"	<Camera make=\"Panasonic\" model = \"DMC-FX150\" mode = \"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4429\" height=\"3324\"/>\n"
-"\t\t<Sensor black=\"15\" white=\"3986\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ28\" mode = \"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3668\" height=\"2754\"/>\n"
-"\t\t<Sensor black=\"15\" white=\"3986\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ28\" mode = \"16:9\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3668\" height=\"2754\"/>\n"
-"\t\t<Sensor black=\"15\" white=\"3986\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ28\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-56\" height=\"-4\"/>\n"
-"\t\t<Sensor black=\"15\" white=\"3986\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ150\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-128\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ150\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-128\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-G1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4018\" height=\"3016\" />\n"
-"\t\t<Sensor black=\"15\" white=\"3986\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-G1\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4018\" height=\"3016\" />\n"
-"\t\t<Sensor black=\"15\" white=\"3986\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-G1\" mode=\"16:9\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-32\" height=\"0\" />\n"
-"\t\t<Sensor black=\"15\" white=\"3986\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-G1\" mode=\"3:2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n"
-"\t\t<Sensor black=\"15\" white=\"3986\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-G2\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n"
-"\t\t<Sensor black=\"0\" white=\"5300\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-G2\">\n"
-"	<!-- Default Guess -->\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n"
-"\t\t<Sensor black=\"0\" white=\"5300\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-G10\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n"
-"\t\t<Sensor black=\"0\" white=\"4800\"/>\n"
-"\t</Camera>\t<Camera make=\"Panasonic\" model = \"DMC-G10\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n"
-"\t\t<Sensor black=\"0\" white=\"4800\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GH1\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"5111\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GH1\">\n"
-"	<!-- Default Guess -->\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"5111\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\" mode=\"16:9\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\" mode=\"3:2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\" mode=\"1:1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\" mode=\"16:9\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\" mode=\"3:2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\" mode=\"1:1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-G3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-154\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-G3\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-172\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-72\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF3\" mode= \"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-72\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF5\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-128\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4097\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GF5\" mode= \"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-128\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4097\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GH2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color><Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color><Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-216\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GH2\" mode=\"16:9\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color><Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color><Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-216\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GH2\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color><Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color><Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-140\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4096\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-GH1\" mode=\"16:9\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-28\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"5111\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ35\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4800\"/>\n"
-"\t\t<Aliases>\n"
-"		<Alias>DMC-FZ38</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ35\">\n"
-"	<!-- Default Guess -->\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4800\"/>\n"
-"\t\t<Aliases>\n"
-"		<Alias>DMC-FZ38</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ45\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-58\" height=\"-10\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4097\"/>\n"
-"\t\t<Aliases>\n"
-"		<Alias>DMC-FZ40</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ45\" mode = \"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-58\" height=\"-10\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4097\"/>\n"
-"\t\t<Aliases>\n"
-"		<Alias>DMC-FZ40</Alias>\n"
-"	</Aliases>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ50\" mode = \"4:3\" decoder_version = \"1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"20\" y=\"18\" width=\"-86\" height=\"-28\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"65535\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ100\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-200\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"120\" white=\"5400\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-FZ100\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-200\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"120\" white=\"5400\"/>\n"
-"\t</Camera>\n"
-"	<Camera make=\"Panasonic\" model = \"DMC-GX1\">\n"
-"\t <CFA width=\"2\" height=\"2\">\n"
-"\t\t <Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t <Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t </CFA>\n"
-"\t <Crop x=\"0\" y=\"0\" width=\"-154\" height=\"0\"/>\n"
-"\t <Sensor black=\"150\" white=\"4096\"/>\n"
-"	</Camera>\n"
-"	<Camera make=\"Panasonic\" model = \"DMC-LX3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-84\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-LX3\" mode=\"16:9\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3990\" height=\"2250\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-LX3\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3666\" height=\"2754\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-LX3\" mode=\"3:2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-LX5\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-200\" height=\"-4\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4095\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-LX5\" mode=\"4:3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-200\" height=\"-4\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4095\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-LX5\" mode=\"3:2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"-4\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"Panasonic\" model = \"DMC-LX5\" mode=\"1:1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-220\" height=\"-4\"/>\n"
-"\t\t<Sensor black=\"150\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"	<Camera make=\"PENTAX Corporation\" model=\"PENTAX K100D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3040\" height=\"2024\"/>\n"
-"\t\t<Sensor black=\"127\" white=\"3950\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX\" model=\"PENTAX K100D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3040\" height=\"2024\"/>\n"
-"\t\t<Sensor black=\"127\" white=\"3950\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX Corporation\" model=\"PENTAX K10D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3888\" height=\"2608\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX Corporation\" model=\"PENTAX K20D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4688\" height=\"3124\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX\" model=\"PENTAX K20D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4688\" height=\"3124\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX Corporation\" model=\"PENTAX K200D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3880\" height=\"2604\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX\" model=\"PENTAX K-5\" decoder_version=\"2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"12\" y=\"0\" width=\"-34\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"512\" white=\"16383\"/>\n"
-"	<BlackAreas>\n"
-"	\t\t<Vertical x=\"0\" width=\"8\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX\" model=\"PENTAX K-7\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4672\" height=\"3104\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX\" model=\"PENTAX K-m\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3900\" height=\"2616\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX\" model=\"PENTAX K-x\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"41\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"	\t\t<Vertical x=\"4310\" width=\"40\"/>\n"
-"	</BlackAreas>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX\" model=\"PENTAX K-r\" decoder_version=\"3\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"2\" y=\"2\" width=\"-44\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"64\" white=\"4000\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX\" model=\"PENTAX K200D\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-42\" height=\"-10\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"PENTAX\" model=\"PENTAX K2000\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3900\" height=\"2616\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SAMSUNG\" model=\"EX1\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"2\" width=\"-8\" height=\"-22\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"16383\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SAMSUNG\" model=\"NX10\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"17\" y=\"8\" width=\"4602\" height=\"3068\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"8\"/>\n"
-"		<Horizontal y=\"0\" height=\"2\"/>\n"
-"	</BlackAreas>\t\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SAMSUNG\" model=\"NX11\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"17\" y=\"8\" width=\"4602\" height=\"3068\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"8\"/>\n"
-"	</BlackAreas>\t\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SAMSUNG\" model=\"NX100\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"17\" y=\"8\" width=\"4602\" height=\"3068\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"8\"/>\n"
-"		<Horizontal y=\"0\" height=\"2\"/>\n"
-"	</BlackAreas>\t\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SAMSUNG\" model=\"NX1000\" decoder_version=\"2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"48\" y=\"4\" width=\"-60\" height=\"-28\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"		<Hints>\n"
-"			<Hint name=\"msb_override\" value=\"false\"/>\n"
-"		</Hints>		\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SAMSUNG\" model=\"NX20\" decoder_version=\"2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"48\" y=\"4\" width=\"-60\" height=\"-28\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"		<Hints>\n"
-"			<Hint name=\"msb_override\" value=\"false\"/>\n"
-"		</Hints>		\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SAMSUNG\" model=\"NX200\" decoder_version=\"2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"48\" y=\"4\" width=\"-60\" height=\"-60\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"		<Hints>\n"
-"			<Hint name=\"msb_override\" value=\"false\"/>\n"
-"		</Hints>		\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SAMSUNG\" model=\"NX210\" decoder_version=\"2\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"48\" y=\"4\" width=\"-60\" height=\"-60\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"		<Hints>\n"
-"			<Hint name=\"msb_override\" value=\"false\"/>\n"
-"		</Hints>		\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SAMSUNG\" model=\"NX5\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"17\" y=\"8\" width=\"4602\" height=\"3068\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"	<BlackAreas>\n"
-"		<Vertical x=\"0\" width=\"8\"/>\n"
-"	</BlackAreas>\t\n"
-"\t</Camera> \n"
-"\t<Camera make=\"SAMSUNG\" model=\"WB2000\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"2\" width=\"-10\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SONY\" model=\"DSC-RX100\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-12\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"800\" white=\"16620\"/>\n"
-"\t</Camera>	\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A100\" supported=\"no\">\n"
-"	<!-- Files doesn't have a valid TIFF structure -->\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3880\" height=\"2600\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A200\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3878\" height=\"2600\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A230\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A290\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A300\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3878\" height=\"2600\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A330\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"3878\" height=\"2600\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A350\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4599\" height=\"3064\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A390\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"0\" white=\"4095\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A450\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"500\" white=\"16000\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A500\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"500\" white=\"16600\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A550\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"512\" white=\"16372\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A560\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"476\" white=\"16596\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A580\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-2\" height=\"-2\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16596\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A700\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"4288\" height=\"2856\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16383\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A850\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"6080\" height=\"4048\"/>\n"
-"\t\t<Sensor black=\"500\" white=\"15000\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"DSLR-A900\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"6080\" height=\"4048\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16383\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"NEX-3\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16360\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SONY\" model=\"NEX-5\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16383\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"NEX-5N\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-12\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16596\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"NEX-7\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-26\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16383\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"NEX-C3\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"545\" white=\"16596\"/>\n"
-"\t</Camera>\t \n"
-"\t<Camera make=\"SONY\" model=\"NEX-F3\" supported=\"yes\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16360\"/>\n"
-"\t</Camera>\t\n"
-"\t<Camera make=\"SONY\" model=\"SLT-A33\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16596\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"SLT-A35\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"545\" white=\"16596\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"SLT-A37\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16500\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"SLT-A55V\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16596\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"SLT-A57\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16596\"/>\n"
-"\t</Camera>\n"
-"\t<Camera make=\"SONY\" model=\"SLT-A65V\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16596\"/>\n"
-"\t</Camera>	\n"
-"\t<Camera make=\"SONY\" model=\"SLT-A77V\">\n"
-"\t\t<CFA width=\"2\" height=\"2\">\n"
-"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n"
-"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n"
-"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n"
-"\t\t</CFA>\n"
-"\t\t<Crop x=\"0\" y=\"0\" width=\"-28\" height=\"0\"/>\n"
-"\t\t<Sensor black=\"520\" white=\"16596\"/>\n"
-"\t</Camera>\n"
-"</Cameras>\n"
-;
+const char *_rawspeed_data_xml[]={
+"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n",
+"<?xml-stylesheet type=\"text/xsl\" href=\"showcameras.xsl\" ?>\n",
+"<!--\n",
+"\t\tLicense: CC-BY-SA 3.0\n",
+"\n",
+"\t\tThis work is licensed under a \n",
+"\t\tCreative Commons Attribution-ShareAlike 3.0 Unported License. \n",
+"\n",
+"\t\tSee more at:\n",
+"\t\thttp://creativecommons.org/licenses/by-sa/3.0/\n",
+"-->\n",
+"\n",
+"<!DOCTYPE Cameras [\n",
+"<!ELEMENT BlackAreas ( Vertical*, Horizontal* ) >\n",
+"\n",
+"<!ELEMENT Camera ( CFA?, Crop, Sensor+, BlackAreas?, Aliases?, Hints? ) >\n",
+"<!ATTLIST Camera make CDATA #REQUIRED >\n",
+"<!ATTLIST Camera model CDATA #REQUIRED >\n",
+"<!ATTLIST Camera supported CDATA #IMPLIED >\n",
+"<!ATTLIST Camera mode CDATA #IMPLIED >\n",
+"<!ATTLIST Camera decoder_version CDATA #IMPLIED >\n",
+"\n",
+"<!ELEMENT Cameras ( Camera+ ) >\n",
+"<!ATTLIST Cameras version CDATA #IMPLIED >\n",
+"\n",
+"<!ELEMENT CFA ( Color+ ) >\n",
+"<!ATTLIST CFA height NMTOKEN #REQUIRED >\n",
+"<!ATTLIST CFA width NMTOKEN #REQUIRED >\n",
+"\n",
+"<!ELEMENT Color ( #PCDATA ) >\n",
+"<!ATTLIST Color x NMTOKEN #REQUIRED >\n",
+"<!ATTLIST Color y NMTOKEN #REQUIRED >\n",
+"\n",
+"<!ELEMENT Crop EMPTY >\n",
+"<!ATTLIST Crop height NMTOKEN #REQUIRED >\n",
+"<!ATTLIST Crop width NMTOKEN #REQUIRED >\n",
+"<!ATTLIST Crop x NMTOKEN #REQUIRED >\n",
+"<!ATTLIST Crop y NMTOKEN #REQUIRED >\n",
+"\n",
+"<!ELEMENT Horizontal EMPTY >\n",
+"<!ATTLIST Horizontal height NMTOKEN #REQUIRED >\n",
+"<!ATTLIST Horizontal y NMTOKEN #REQUIRED >\n",
+"\n",
+"<!ELEMENT Sensor EMPTY >\n",
+"<!ATTLIST Sensor white NMTOKEN #REQUIRED >\n",
+"<!ATTLIST Sensor black NMTOKEN #REQUIRED >\n",
+"<!ATTLIST Sensor iso_list NMTOKENS #IMPLIED >\n",
+"<!ATTLIST Sensor iso_min NMTOKEN #IMPLIED >\n",
+"<!ATTLIST Sensor iso_max NMTOKEN #IMPLIED >\n",
+"\n",
+"<!ELEMENT Vertical EMPTY >\n",
+"<!ATTLIST Vertical width NMTOKEN #REQUIRED >\n",
+"<!ATTLIST Vertical x NMTOKEN #REQUIRED >\n",
+"\n",
+"<!ELEMENT Hints ( Hint+ ) >\n",
+"<!ELEMENT Hint EMPTY >\n",
+"<!ATTLIST Hint name CDATA #REQUIRED >\n",
+"<!ATTLIST Hint value CDATA #REQUIRED >\n",
+"\n",
+"<!ELEMENT Aliases ( Alias+ ) >\n",
+"<!ELEMENT Alias (#PCDATA) >\n",
+"]>\n",
+"\n",
+"<Cameras>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 20D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"74\" y=\"12\" width=\"3522\" height=\"2348\"/>\n",
+"\t\t<Sensor black=\"126\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"72\"/>\n",
+"		<Horizontal y=\"2\" height=\"8\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 30D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"74\" y=\"12\" width=\"3522\" height=\"2348\"/>\n",
+"\t\t<Sensor black=\"127\" white=\"3398\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"72\"/>\n",
+"		<Horizontal y=\"2\" height=\"8\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 350D DIGITAL\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"42\" y=\"14\" width=\"3474\" height=\"2314\"/>\n",
+"\t\t<Sensor black=\"255\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"40\"/>\n",
+"		<Horizontal y=\"0\" height=\"12\"/>\n",
+"	</BlackAreas>\n",
+"\t\t<Aliases>\n",
+"		<Alias>Canon EOS DIGITAL REBEL XT</Alias>\n",
+"		<Alias>Canon EOS Kiss Digital N</Alias>\n",
+"		<Alias>Canon EOS 350D</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 40D\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"30\" y=\"18\" width=\"3908\" height=\"2602\"/>\n",
+"\t\t<Sensor black=\"1021\" white=\"13600\"/>\n",
+"		<BlackAreas>\n",
+"			<Vertical x=\"0\" width=\"28\"/>\n",
+"			<Horizontal y=\"4\" height=\"12\"/>\n",
+"		</BlackAreas>\n",
+"		<Hints>\n",
+"			<Hint name=\"sraw_40d\" value=\"\"/>\n",
+"		</Hints>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 40D\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"1944\" height=\"1296\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 450D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"22\" y=\"18\" width=\"4290\" height=\"2856\"/>\n",
+"\t\t<Sensor black=\"1020\" white=\"14500\"/>\n",
+"\t\t<Aliases>\n",
+"		<Alias>Canon EOS DIGITAL REBEL XSi</Alias>\n",
+"		<Alias>Canon EOS Kiss Digital X2</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 50D\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"64\" y=\"52\" width=\"4752\" height=\"3158\"/>\n",
+"\t\t<Sensor black=\"1020\" white=\"16383\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"60\"/>\n",
+"		<Horizontal y=\"2\" height=\"46\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 50D\" mode=\"sRaw1\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3272\" height=\"2178\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 50D\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2376\" height=\"1584\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 60D\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"146\" y=\"54\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"2026\" white=\"14200\"/>\n",
+"		<BlackAreas>\n",
+"			<Vertical x=\"0\" width=\"140\"/>\n",
+"			<Horizontal y=\"4\" height=\"46\"/>\n",
+"		</BlackAreas>\n",
+"	\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 60D\" mode=\"sRaw1\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 60D\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 500D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"62\" y=\"30\" width=\"4722\" height=\"3142\"/>\n",
+"\t\t<Sensor black=\"1020\" white=\"16000\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"56\"/>\n",
+"		<Horizontal y=\"2\" height=\"22\"/>\n",
+"	</BlackAreas>\n",
+"\t\t<Aliases>\n",
+"		<Alias>Canon EOS REBEL T1i</Alias>\n",
+"		<Alias>Canon EOS Kiss X3</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 550D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"148\" y=\"54\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"2048\" white=\"15831\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"140\"/>\n",
+"		<Horizontal y=\"4\" height=\"44\"/>\n",
+"	</BlackAreas>\n",
+"\t\t<Aliases>\n",
+"		<Alias>Canon EOS REBEL T2i</Alias>\n",
+"		<Alias>Canon EOS Kiss X4</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 600D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"146\" y=\"54\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"2026\" white=\"13584\" iso_min=\"0\" iso_max = \"199\"/>\n",
+"\t\t<Sensor black=\"2026\" white=\"15304\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"140\"/>\n",
+"		<Horizontal y=\"4\" height=\"44\"/>\n",
+"	</BlackAreas>\n",
+"\t\t<Aliases>\n",
+"		<Alias>Canon EOS REBEL T3i</Alias>\n",
+"		<Alias>Canon EOS Kiss X5</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 650D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"76\" y=\"56\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"2026\" white=\"13584\" iso_min=\"0\" iso_max = \"199\"/>\n",
+"\t\t<Sensor black=\"2026\" white=\"15304\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"70\"/>\n",
+"		<Horizontal y=\"4\" height=\"44\"/>\n",
+"	</BlackAreas>\n",
+"\t\t<Aliases>\n",
+"		<Alias>Canon EOS REBEL T4i</Alias>\n",
+"		<Alias>Canon EOS Kiss X6i</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 5D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"90\" y=\"34\" width=\"4386\" height=\"2920\"/>\n",
+"\t\t<Sensor black=\"127\" white=\"3692\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"88\"/>\n",
+"		<Horizontal y=\"2\" height=\"30\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark II\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"158\" y=\"51\" width=\"5634\" height=\"3753\"/>\n",
+"\t\t<Sensor black=\"1024\" white=\"12995\" iso_list=\"160 320 640 1250\"/>\n",
+"\t\t<Sensor black=\"1024\" white=\"15950\"/>\n",
+"		<BlackAreas>\n",
+"			<Vertical x=\"0\" width=\"156\"/>\n",
+"			<Horizontal y=\"2\" height=\"48\"/>\n",
+"		</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark II\" mode=\"sRaw1\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3872\" height=\"2574\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"57200\" iso_list=\"160 320 640 1250\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"64948\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark II\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2808\" height=\"1872\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"57200\" iso_list=\"160 320 640 1250\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"64948\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark III\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"124\" y=\"82\" width=\"-2\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"1024\" white=\"16383\"/>\n",
+"\t<BlackAreas>\n",
+"\t\t<Vertical x=\"0\" width=\"120\"/>\n",
+"\t\t<Horizontal y=\"2\" height=\"78\"/>\n",
+"\t</BlackAreas>\n",
+"		<Hints>\n",
+"			<Hint name=\"sraw_new\" value=\"\"/>\n",
+"		</Hints>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark III\" mode=\"sRaw1\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 5D Mark III\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 7D\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"158\" y=\"52\" width=\"5202\" height=\"3464\"/>\n",
+"\t\t<Sensor black=\"1025\" white=\"8150\" iso_min=\"12800\" iso_max=\"12800\"/>\n",
+"\t\t<Sensor black=\"2050\" white=\"16300\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"156\"/>\n",
+"		<Horizontal y=\"2\" height=\"48\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 7D\" mode=\"sRaw1\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"44200\" iso_list=\"100 125 160 320 640 1250\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"54000\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 7D\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"44200\" iso_list=\"100 125 160 320 640 1250\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"54000\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 1000D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"42\" y=\"18\" width=\"3906\" height=\"2602\"/>\n",
+"\t\t<Sensor black=\"255\" white=\"3650\" iso_min=\"0\" iso_max=\"199\"/>\n",
+"\t\t<Sensor black=\"255\" white=\"4036\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"41\"/>\n",
+"		<Horizontal y=\"2\" height=\"14\"/>\n",
+"	</BlackAreas>\n",
+"\t\t<Aliases>\n",
+"		<Alias>Canon EOS DIGITAL REBEL XS</Alias>\n",
+"		<Alias>Canon EOS Kiss Digital F</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 1100D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"64\" y=\"20\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"2036\" white=\"15500\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"58\"/>\n",
+"		<Horizontal y=\"4\" height=\"12\"/>\n",
+"	</BlackAreas>\n",
+"\t\t<Aliases>\n",
+"		<Alias>Canon EOS REBEL T3</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS 400D DIGITAL\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"42\" y=\"18\" width=\"3906\" height=\"2602\"/>\n",
+"\t\t<Sensor black=\"255\" white=\"3726\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"40\"/>\n",
+"		<Horizontal y=\"4\" height=\"12\"/>\n",
+"	</BlackAreas>\n",
+"\t\t<Aliases>\n",
+"		<Alias>Canon EOS DIGITAL REBEL XTi</Alias>\n",
+"		<Alias>Canon EOS Kiss Digital X</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark II\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"74\" y=\"12\" width=\"3522\" height=\"2348\"/>\n",
+"\t\t<Sensor black=\"127\" white=\"3700\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"72\"/>\n",
+"		<Horizontal y=\"2\" height=\"8\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark II N\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"74\" y=\"12\" width=\"3522\" height=\"2348\"/>\n",
+"\t\t<Sensor black=\"127\" white=\"3700\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"72\"/>\n",
+"		<Horizontal y=\"2\" height=\"8\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark III\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"78\" y=\"20\" width=\"3906\" height=\"2600\"/>\n",
+"\t\t<Sensor black=\"1023\" white=\"15100\"/>\n",
+"		<BlackAreas>\n",
+"			<Vertical x=\"2\" width=\"74\"/>\n",
+"			<Horizontal y=\"4\" height=\"14\"/>\n",
+"		</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark III\" mode=\"sRaw1\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark III\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark IV\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"144\" y=\"46\" width=\"-64\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"2000\" white=\"13000\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"140\"/>\n",
+"		<Horizontal y=\"26\" height=\"16\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark IV\" mode=\"sRaw1\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D Mark IV\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1Ds Mark II\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"98\" y=\"13\" width=\"5010\" height=\"3336\"/>\n",
+"\t\t<Sensor black=\"126\" white=\"4060\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"96\"/>\n",
+"		<Horizontal y=\"2\" height=\"10\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1Ds Mark III\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"62\" y=\"20\" width=\"5640\" height=\"3752\"/>\n",
+"\t\t<Sensor black=\"1021\" white=\"15100\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"60\"/>\n",
+"		<Horizontal y=\"4\" height=\"14\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1Ds Mark III\" mode=\"sRaw1\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1Ds Mark III\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D X\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"128\" y=\"102\" width=\"0\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"2050\" white=\"15100\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"120\"/>\n",
+"		<Horizontal y=\"0\" height=\"98\"/>\n",
+"	</BlackAreas>\n",
+"</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D X\" mode=\"sRaw1\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon EOS-1D X\" mode=\"sRaw2\">\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon PowerShot G1 X\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"82\" y=\"52\" width=\"-14\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"16383\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"68\"/>\n",
+"		<Horizontal y=\"0\" height=\"46\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon PowerShot G12\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"54\" y=\"14\" width=\"-12\" height=\"-18\"/>\n",
+"\t\t<Sensor black=\"120\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"50\"/>\n",
+"		<Horizontal y=\"0\" height=\"10\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon PowerShot G11\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"10\" y=\"18\" width=\"-56\" height=\"-14\"/>\n",
+"\t\t<Sensor black=\"120\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"10\"/>\n",
+"		<Horizontal y=\"0\" height=\"14\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon PowerShot G10\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"12\" y=\"13\" width=\"4432\" height=\"3323\"/>\n",
+"\t\t<Sensor black=\"128\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"10\"/>\n",
+"		<Horizontal y=\"0\" height=\"8\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon PowerShot G9\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"48\" y=\"12\" width=\"4032\" height=\"3024\"/>\n",
+"\t\t<Sensor black=\"125\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"46\"/>\n",
+"		<Horizontal y=\"0\" height=\"8\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon PowerShot SX1 IS\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"192\" y=\"12\" width=\"3958\" height=\"2760\"/>\n",
+"\t\t<Sensor black=\"125\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"188\"/>\n",
+"		<Horizontal y=\"0\" height=\"10\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon PowerShot S90\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"10\" y=\"18\" width=\"-54\" height=\"-10\"/>\n",
+"\t\t<Sensor black=\"125\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"6\"/>\n",
+"		<Horizontal y=\"0\" height=\"14\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon PowerShot S95\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"66\" y=\"24\" width=\"-20\" height=\"-24\"/>\n",
+"\t\t<Sensor black=\"125\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"50\"/>\n",
+"		<Vertical x=\"3738\" width=\"6\"/>\n",
+"		<Horizontal y=\"0\" height=\"10\"/>\n",
+"		<Horizontal y=\"2774\" height=\"10\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Canon\" model=\"Canon PowerShot S100\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"104\" y=\"12\" width=\"-10\" height=\"-66\"/>\n",
+"\t\t<Sensor black=\"125\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"100\"/>\n",
+"		<Horizontal y=\"0\" height=\"10\"/>\n",
+"		<Horizontal y=\"3062\" height=\"60\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>	\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D100\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"2\" y=\"0\" width=\"3030\" height=\"2024\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2000\" height=\"1312\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D1H\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2012\" height=\"1324\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D1X\" supported=\"no\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4024\" height=\"1324\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D200\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"2\" y=\"0\" width=\"3898\" height=\"2616\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3880\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D2H\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"6\" y=\"0\" width=\"-8\" height=\"1648\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3880\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D2Hs\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t <Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"6\" y=\"0\" width=\"-8\" height=\"1648\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3880\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D2X\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-32\" height=\"-8\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3880\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"2\" y=\"0\" width=\"4282\" height=\"2844\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"16384\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3S\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"16384\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3X\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"6080\" height=\"4044\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"16384\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D300\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4320\" height=\"2868\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"15236\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D300S\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4320\" height=\"2868\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"15236\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3000\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3898\" height=\"2610\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"16383\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3200\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-48\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"16383\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D4\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"2\" y=\"0\" width=\"-50\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"16383\"/>\n",
+"		<BlackAreas>\n",
+"			<Vertical x=\"4984\" width=\"8\"/>\n",
+"		</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D5100\"\tdecoder_version=\"2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-46\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65536\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D3100\"\tdecoder_version=\"2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"8\" y=\"2\" width=\"-24\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"16383\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D40\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3038\" height=\"2014\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3880\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D40X\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"4\" y=\"0\" width=\"3896\" height=\"2613\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3880\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D50\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-2\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3880\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D5000\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4310\" height=\"2868\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D60\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3900\" height=\"2613\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3880\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D70\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3038\" height=\"2014\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D700\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"2\" y=\"0\" width=\"4282\" height=\"2844\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3972\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D7000\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-46\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D70s\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3040\" height=\"2014\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D80\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3900\" height=\"2611\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3880\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D800\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"2\" y=\"0\" width=\"-48\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3972\"/>\n",
+"\t\t<Aliases><Alias>NIKON D800E</Alias></Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON D90\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4310\" height=\"2868\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"3767\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON 1 J1\" supported=\"no\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"0\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON CORPORATION\" model=\"NIKON 1 V1\" supported=\"no\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"0\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON\" model=\"E5400\" decoder_version=\"3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2608\" height=\"1950\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"	<Hints>\n",
+"		<Hint name=\"coolpixsplit\" value=\"\"/>\n",
+"	</Hints>	\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON\" model=\"E5700\" supported=\"no\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2576\" height=\"1924\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"	<Hints>\n",
+"		<Hint name=\"coolpixsplit\" value=\"\"/>\n",
+"	</Hints>	\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON\" model=\"E8400\" decoder_version=\"3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2576\" height=\"1924\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"	<Hints>\n",
+"		<Hint name=\"coolpixsplit\" value=\"\"/>\n",
+"	</Hints>	\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON\" model=\"COOLPIX P6000\" supported=\"yes\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t<Hints>\n",
+"\t\t<Hint name=\"coolpixmangled\" value=\"\"/>\n",
+"\t</Hints>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"NIKON\" model=\"COOLPIX P7000\" supported=\"yes\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t<Hints>\n",
+"\t\t<Hint name=\"coolpixmangled\" value=\"\"/>\n",
+"\t</Hints>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"NIKON\" model=\"COOLPIX P7100\" supported=\"yes\" decoder_version=\"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t<Hints>\n",
+"\t\t<Hint name=\"coolpixmangled\" value=\"\"/>\n",
+"\t</Hints>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"NIKON\" model=\"E8800\" decoder_version=\"3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3280\" height=\"2454\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"	<Hints>\n",
+"		<Hint name=\"coolpixsplit\" value=\"\"/>\n",
+"	</Hints>	\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS CORPORATION\" model=\"C8080WZ\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3280\" height=\"2453\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS CORPORATION\" model=\"E-1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2624\" height=\"1966\"/>\n",
+"\t\t<Sensor black=\"65\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"C7070WZ\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3088\" height=\"2309\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n",
+"\t\t<Sensor black=\"65\" white=\"4015\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-30\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-6\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"65\" white=\"4015\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-300\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3340\" height=\"2504\"/>\n",
+"\t\t<Sensor black=\"63\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-330\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3250\" height=\"2450\"/>\n",
+"\t\t<Sensor black=\"77\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-400\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3768\" height=\"2840\"/>\n",
+"\t\t<Sensor black=\"96\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-410\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n",
+"\t\t<Sensor black=\"72\" white=\"3500\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-420\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n",
+"\t\t<Sensor black=\"68\" white=\"4015\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-500\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3340\" height=\"2504\"/>\n",
+"\t\t<Sensor black=\"63\" white=\"3967\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-510\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n",
+"\t\t<Sensor black=\"72\" white=\"3500\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-520\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3720\" height=\"2800\"/>\n",
+"\t\t<Sensor black=\"69\" white=\"4015\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-620\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4096\" height=\"3072\"/>\n",
+"\t\t<Sensor black=\"64\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"SP350\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3280\" height=\"2453\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"SP500UZ\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2832\" height=\"2117\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-5\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-4\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"80\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS OPTICAL CO.,LTD\" model=\"E-10\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2256\" height=\"1684\"/>\n",
+"\t\t<Sensor black=\"32\" white=\"1023\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS OPTICAL CO.,LTD\" model=\"E-20,E-20N,E-20P\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"2576\" height=\"1924\"/>\n",
+"\t\t<Sensor black=\"32\" white=\"1023\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-M5\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"250\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-P1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4094\" height=\"3082\"/>\n",
+"\t\t<Sensor black=\"55\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-PL1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4094\" height=\"3082\"/>\n",
+"\t\t<Sensor black=\"55\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-PL2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-4\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"45\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"4097\" width=\"2\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-PL3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-30\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"45\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"4064\" width=\"6\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-PM1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-24\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"45\" white=\"4095\"/>\n",
+"		<BlackAreas>\n",
+"			<Vertical x=\"4064\" width=\"6\"/>\n",
+"		</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-P2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"55\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"E-P3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-26\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"OLYMPUS IMAGING CORP.\" model=\"XZ-1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"55\" white=\"3972\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FX150\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4429\" height=\"3324\"/>\n",
+"\t\t<Sensor black=\"15\" white=\"3986\"/>\n",
+"\t</Camera>\t\n",
+"	<Camera make=\"Panasonic\" model = \"DMC-FX150\" mode = \"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4429\" height=\"3324\"/>\n",
+"\t\t<Sensor black=\"15\" white=\"3986\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ28\" mode = \"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3668\" height=\"2754\"/>\n",
+"\t\t<Sensor black=\"15\" white=\"3986\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ28\" mode = \"16:9\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3668\" height=\"2754\"/>\n",
+"\t\t<Sensor black=\"15\" white=\"3986\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ28\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-56\" height=\"-4\"/>\n",
+"\t\t<Sensor black=\"15\" white=\"3986\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ150\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-128\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ150\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-128\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-G1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4018\" height=\"3016\" />\n",
+"\t\t<Sensor black=\"15\" white=\"3986\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-G1\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4018\" height=\"3016\" />\n",
+"\t\t<Sensor black=\"15\" white=\"3986\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-G1\" mode=\"16:9\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-32\" height=\"0\" />\n",
+"\t\t<Sensor black=\"15\" white=\"3986\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-G1\" mode=\"3:2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n",
+"\t\t<Sensor black=\"15\" white=\"3986\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-G2\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n",
+"\t\t<Sensor black=\"0\" white=\"5300\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-G2\">\n",
+"	<!-- Default Guess -->\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n",
+"\t\t<Sensor black=\"0\" white=\"5300\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-G10\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n",
+"\t\t<Sensor black=\"0\" white=\"4800\"/>\n",
+"\t</Camera>\t<Camera make=\"Panasonic\" model = \"DMC-G10\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\" />\n",
+"\t\t<Sensor black=\"0\" white=\"4800\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GH1\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"5111\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GH1\">\n",
+"	<!-- Default Guess -->\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"5111\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\" mode=\"16:9\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\" mode=\"3:2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF1\" mode=\"1:1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\" mode=\"16:9\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\" mode=\"3:2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF2\" mode=\"1:1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-G3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-154\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-G3\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-172\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-72\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF3\" mode= \"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-72\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF5\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-128\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4097\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GF5\" mode= \"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-128\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4097\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GH2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color><Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color><Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-216\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GH2\" mode=\"16:9\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color><Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color><Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-216\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GH2\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color><Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color><Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-140\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4096\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-GH1\" mode=\"16:9\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-28\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"5111\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ35\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4800\"/>\n",
+"\t\t<Aliases>\n",
+"		<Alias>DMC-FZ38</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ35\">\n",
+"	<!-- Default Guess -->\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4800\"/>\n",
+"\t\t<Aliases>\n",
+"		<Alias>DMC-FZ38</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ45\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-58\" height=\"-10\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4097\"/>\n",
+"\t\t<Aliases>\n",
+"		<Alias>DMC-FZ40</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ45\" mode = \"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-58\" height=\"-10\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4097\"/>\n",
+"\t\t<Aliases>\n",
+"		<Alias>DMC-FZ40</Alias>\n",
+"	</Aliases>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ50\" mode = \"4:3\" decoder_version = \"1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"20\" y=\"18\" width=\"-86\" height=\"-28\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"65535\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ100\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-200\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"120\" white=\"5400\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-FZ100\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-200\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"120\" white=\"5400\"/>\n",
+"\t</Camera>\n",
+"	<Camera make=\"Panasonic\" model = \"DMC-GX1\">\n",
+"\t <CFA width=\"2\" height=\"2\">\n",
+"\t\t <Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t <Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t </CFA>\n",
+"\t <Crop x=\"0\" y=\"0\" width=\"-154\" height=\"0\"/>\n",
+"\t <Sensor black=\"150\" white=\"4096\"/>\n",
+"	</Camera>\n",
+"	<Camera make=\"Panasonic\" model = \"DMC-LX3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-84\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-LX3\" mode=\"16:9\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3990\" height=\"2250\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-LX3\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3666\" height=\"2754\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-LX3\" mode=\"3:2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-LX5\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-200\" height=\"-4\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4095\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-LX5\" mode=\"4:3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-200\" height=\"-4\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4095\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-LX5\" mode=\"3:2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-74\" height=\"-4\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"Panasonic\" model = \"DMC-LX5\" mode=\"1:1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-220\" height=\"-4\"/>\n",
+"\t\t<Sensor black=\"150\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"	<Camera make=\"PENTAX Corporation\" model=\"PENTAX K100D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3040\" height=\"2024\"/>\n",
+"\t\t<Sensor black=\"127\" white=\"3950\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX\" model=\"PENTAX K100D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3040\" height=\"2024\"/>\n",
+"\t\t<Sensor black=\"127\" white=\"3950\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX Corporation\" model=\"PENTAX K10D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3888\" height=\"2608\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX Corporation\" model=\"PENTAX K20D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4688\" height=\"3124\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX\" model=\"PENTAX K20D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4688\" height=\"3124\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX Corporation\" model=\"PENTAX K200D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3880\" height=\"2604\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX\" model=\"PENTAX K-5\" decoder_version=\"2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"12\" y=\"0\" width=\"-34\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"512\" white=\"16383\"/>\n",
+"	<BlackAreas>\n",
+"	\t\t<Vertical x=\"0\" width=\"8\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX\" model=\"PENTAX K-7\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4672\" height=\"3104\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX\" model=\"PENTAX K-m\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3900\" height=\"2616\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX\" model=\"PENTAX K-x\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-44\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"41\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"	\t\t<Vertical x=\"4310\" width=\"40\"/>\n",
+"	</BlackAreas>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX\" model=\"PENTAX K-r\" decoder_version=\"3\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"2\" y=\"2\" width=\"-44\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"64\" white=\"4000\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX\" model=\"PENTAX K200D\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-42\" height=\"-10\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"PENTAX\" model=\"PENTAX K2000\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3900\" height=\"2616\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SAMSUNG\" model=\"EX1\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"2\" width=\"-8\" height=\"-22\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"16383\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SAMSUNG\" model=\"NX10\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"17\" y=\"8\" width=\"4602\" height=\"3068\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"8\"/>\n",
+"		<Horizontal y=\"0\" height=\"2\"/>\n",
+"	</BlackAreas>\t\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SAMSUNG\" model=\"NX11\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"17\" y=\"8\" width=\"4602\" height=\"3068\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"8\"/>\n",
+"	</BlackAreas>\t\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SAMSUNG\" model=\"NX100\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"17\" y=\"8\" width=\"4602\" height=\"3068\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"8\"/>\n",
+"		<Horizontal y=\"0\" height=\"2\"/>\n",
+"	</BlackAreas>\t\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SAMSUNG\" model=\"NX1000\" decoder_version=\"2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"48\" y=\"4\" width=\"-60\" height=\"-28\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"		<Hints>\n",
+"			<Hint name=\"msb_override\" value=\"false\"/>\n",
+"		</Hints>		\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SAMSUNG\" model=\"NX20\" decoder_version=\"2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">BLUE</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">RED</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"48\" y=\"4\" width=\"-60\" height=\"-28\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"		<Hints>\n",
+"			<Hint name=\"msb_override\" value=\"false\"/>\n",
+"		</Hints>		\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SAMSUNG\" model=\"NX200\" decoder_version=\"2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"48\" y=\"4\" width=\"-60\" height=\"-60\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"		<Hints>\n",
+"			<Hint name=\"msb_override\" value=\"false\"/>\n",
+"		</Hints>		\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SAMSUNG\" model=\"NX210\" decoder_version=\"2\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color><Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color><Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"48\" y=\"4\" width=\"-60\" height=\"-60\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"		<Hints>\n",
+"			<Hint name=\"msb_override\" value=\"false\"/>\n",
+"		</Hints>		\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SAMSUNG\" model=\"NX5\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">BLUE</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"17\" y=\"8\" width=\"4602\" height=\"3068\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"	<BlackAreas>\n",
+"		<Vertical x=\"0\" width=\"8\"/>\n",
+"	</BlackAreas>\t\n",
+"\t</Camera> \n",
+"\t<Camera make=\"SAMSUNG\" model=\"WB2000\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color><Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color><Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"2\" width=\"-10\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SONY\" model=\"DSC-RX100\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-12\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"800\" white=\"16620\"/>\n",
+"\t</Camera>	\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A100\" supported=\"no\">\n",
+"	<!-- Files doesn't have a valid TIFF structure -->\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">GREEN</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3880\" height=\"2600\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A200\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3878\" height=\"2600\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A230\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A290\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A300\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3878\" height=\"2600\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A330\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"3878\" height=\"2600\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A350\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4599\" height=\"3064\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A390\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"0\" white=\"4095\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A450\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"500\" white=\"16000\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A500\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"500\" white=\"16600\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A550\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"512\" white=\"16372\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A560\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"476\" white=\"16596\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A580\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-2\" height=\"-2\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16596\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A700\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"4288\" height=\"2856\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16383\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A850\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"6080\" height=\"4048\"/>\n",
+"\t\t<Sensor black=\"500\" white=\"15000\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"DSLR-A900\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"6080\" height=\"4048\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16383\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"NEX-3\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16360\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SONY\" model=\"NEX-5\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16383\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"NEX-5N\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-12\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16596\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"NEX-7\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-26\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16383\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"NEX-C3\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"545\" white=\"16596\"/>\n",
+"\t</Camera>\t \n",
+"\t<Camera make=\"SONY\" model=\"NEX-F3\" supported=\"yes\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16360\"/>\n",
+"\t</Camera>\t\n",
+"\t<Camera make=\"SONY\" model=\"SLT-A33\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16596\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"SLT-A35\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"545\" white=\"16596\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"SLT-A37\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16500\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"SLT-A55V\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16596\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"SLT-A57\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16596\"/>\n",
+"\t</Camera>\n",
+"\t<Camera make=\"SONY\" model=\"SLT-A65V\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"0\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16596\"/>\n",
+"\t</Camera>	\n",
+"\t<Camera make=\"SONY\" model=\"SLT-A77V\">\n",
+"\t\t<CFA width=\"2\" height=\"2\">\n",
+"\t\t\t<Color x=\"0\" y=\"0\">RED</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"0\">GREEN</Color>\n",
+"\t\t\t<Color x=\"0\" y=\"1\">GREEN</Color>\n",
+"\t\t\t<Color x=\"1\" y=\"1\">BLUE</Color>\n",
+"\t\t</CFA>\n",
+"\t\t<Crop x=\"0\" y=\"0\" width=\"-28\" height=\"0\"/>\n",
+"\t\t<Sensor black=\"520\" white=\"16596\"/>\n",
+"\t</Camera>\n",
+"</Cameras>\n",
+0
+};
