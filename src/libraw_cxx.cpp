@@ -748,6 +748,18 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     return LIBRAW_SUCCESS;
 }
 
+#if 0
+void LibRaw::fix_after_rawspeed()
+{
+  if(load_raw == &LibRaw::canon_sraw_load_raw)
+    C.maximum = 0x3fff;
+  else if (load_raw == &LibRaw::lossy_dng_load_raw)
+    C.maximum = 0xffff;
+  else if (load_raw == &LibRaw::sony_load_raw)
+    C.maximum = 0x3ff0;
+}
+#endif
+
 int LibRaw::unpack(void)
 {
     CHECK_ORDER_HIGH(LIBRAW_PROGRESS_LOAD_RAW);
@@ -2130,7 +2142,6 @@ int LibRaw::dcraw_process(void)
 
         if (IO.zero_is_bad) 
           {
-            printf("Removing zeroes\n");
                 remove_zeroes();
                 SET_PROC_FLAG(LIBRAW_PROGRESS_REMOVE_ZEROES);
             }

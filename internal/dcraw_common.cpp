@@ -2903,7 +2903,7 @@ void CLASS crop_masked_pixels()
   int row, col;
   unsigned 
 #ifndef LIBRAW_LIBRARY_BUILD
-    r,
+    r, raw_pitch = raw_width,
 #endif
     c, m, mblack[8], zero, val;
 
@@ -2963,7 +2963,7 @@ mask_set:
     for (row=mask[m][0]; row < mask[m][2]; row++)
       for (col=mask[m][1]; col < mask[m][3]; col++) {
 	c = FC(row-top_margin,col-left_margin);
-	mblack[c] += val = RAW(row,col);
+	mblack[c] += val = raw_image[(row)*raw_pitch+(col)];
 	mblack[4+c]++;
 	zero += !val;
       }
