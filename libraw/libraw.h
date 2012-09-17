@@ -96,7 +96,6 @@ class DllDef LibRaw
     int verbose;
 
     LibRaw(unsigned int flags = LIBRAW_OPTIONS_NONE);
-    
     libraw_output_params_t*     output_params_ptr() { return &imgdata.params;}
     int                         open_file(const char *fname, INT64 max_buffered_sz=LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE);
 #ifdef WIN32
@@ -140,7 +139,7 @@ class DllDef LibRaw
 
     /* free all internal data structures */
     void         recycle(); 
-    virtual ~LibRaw(void) { recycle(); delete tls; }
+    virtual ~LibRaw(void); 
 
     int COLOR(int row, int col) { return libraw_internal_data.internal_output_params.fuji_width? FCF(row,col):FC(row,col);}
  
@@ -157,6 +156,7 @@ class DllDef LibRaw
 	// Phase one correction/subtractBL calls
     void phase_one_subtract_black(ushort *src, ushort *dest);
     void        phase_one_correct();
+	int set_rawspeed_camerafile(char *filename);
 
 
 protected:
@@ -199,6 +199,7 @@ protected:
     libraw_callbacks_t callbacks;
 
     LibRaw_constants rgb_constants;
+
     void        (LibRaw:: *write_thumb)();
     void        (LibRaw:: *write_fun)();
     void        (LibRaw:: *load_raw)();
@@ -268,6 +269,11 @@ protected:
 
     int         flip_index (int row, int col);
     void        gamma_curve (double pwr, double ts, int mode, int imax);
+
+	// RawSpeed data
+	void		*_rawspeed_camerameta;
+	void	    *_rawspeed_decoder;
+	void		fix_after_rawspeed();
 
 
 #ifdef LIBRAW_LIBRARY_BUILD 

@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
                 "-s <num>       Select one raw image from input file\n"
                 "-B <x y w h>   Crop output image\n"
                 "-R <num>       Number of repetitions\n"
+				"-c             Dont use rawspeed\n"
                 ,LibRaw::version(), LibRaw::cameraCount(),
                 argv[0]);
             return 0;
@@ -112,6 +113,9 @@ int main(int argc, char *argv[])
                     rep = abs(atoi(argv[arg++])); 
                     if(rep<1) rep = 1;
                     break;
+				case 'c':
+					OUT.use_rawspeed = 0;
+					break;
                 default:
                     fprintf (stderr,"Unknown option \"-%c\".\n", opt);
                     return 1;
@@ -120,7 +124,8 @@ int main(int argc, char *argv[])
     for ( ; arg < argc; arg++)
         {
             printf("Processing file %s\n",argv[arg]);
-            if( (ret = RawProcessor.open_file(argv[arg])) != LIBRAW_SUCCESS)
+			timerstart();
+			if( (ret = RawProcessor.open_file(argv[arg])) != LIBRAW_SUCCESS)
                 {
                     fprintf(stderr,"Cannot open_file %s: %s\n",argv[arg],libraw_strerror(ret));
                     continue; // no recycle b/c open file will recycle itself
@@ -131,6 +136,8 @@ int main(int argc, char *argv[])
                     fprintf(stderr,"Cannot unpack %s: %s\n",argv[arg],libraw_strerror(ret));
                     continue;
                 }
+			float qsec = timerend();
+			printf("\n%.1f msec for unpack\n",qsec);
             float mpix,rmpix;
             timerstart();
             for(c=0; c < rep; c++)

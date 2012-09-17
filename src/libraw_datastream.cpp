@@ -10,6 +10,7 @@
 #include "libraw/libraw.h"
 #include "libraw/libraw_datastream.h"
 #include "internal/libraw_bytebuffer.h"
+#include <sys/stat.h>
 #ifdef USE_JASPER
 #include <jasper/jasper.h>	/* Decode RED camera movies */
 #else
@@ -74,9 +75,19 @@ LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
 #ifdef WIN32
     ,wfilename(NULL)
 #endif
-    ,jas_file(NULL)
+    ,jas_file(NULL),_fsize(0)
 {
     if (filename) {
+#ifndef WIN32
+		struct stat st;
+		if(!stat(filename,&st))
+			fsize = st.st_size;	
+#else
+		struct _stati64 st;
+		if(!_stati64(filename,&st))
+			_fsize = st.st_size;
+#endif
+
         std::auto_ptr<std::filebuf> buf(new std::filebuf());
         buf->open(filename, std::ios_base::in | std::ios_base::binary);
         if (buf->is_open()) {
@@ -85,9 +96,12 @@ LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
     }
 }
 #ifdef WIN32
-LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname) : filename(NULL),wfilename(fname),jas_file(NULL)
+LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname) : filename(NULL),wfilename(fname),jas_file(NULL),_fsize(0)
 {
 	if (fname) {
+		struct _stati64 st;
+		if(!_wstati64(fname,&st))
+			_fsize = st.st_size;
 		std::auto_ptr<std::filebuf> buf(new std::filebuf());
 		buf->open(fname, std::ios_base::in | std::ios_base::binary);
 		if (buf->is_open()) {
@@ -452,6 +466,16 @@ LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname): filenam
 { 
     if(fname)
         {
+#ifndef WIN32
+			struct stat st;
+			if(!stat(fname,&st))
+				fsize = st.st_size;	
+#else
+			struct _stati64 st;
+			if(!_stati64(fname,&st))
+				_fsize = st.st_size;
+#endif
+
 #ifndef WIN32SECURECALLS
             f = fopen(fname,"rb");
 #else
@@ -469,6 +493,9 @@ LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const wchar_t *fname) : fil
 { 
 	if(fname)
 	{
+		struct _stati64 st;
+		if(!_wstati64(fname,&st))
+			_fsize = st.st_size;
 #ifndef WIN32SECURECALLS
 		f = _wfopen(fname,L"rb");
 #else

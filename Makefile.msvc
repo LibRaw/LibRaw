@@ -1,6 +1,10 @@
 # Additional compiler flags (OpenMP, SSEx, AVX, ...)
 #COPT_OPT=/openmp /arch:SSE2 /arch:AVX
 
+# Compile with RawSpeed support
+CFLAGS_RAWSPEED=/DUSE_RAWSPEED /I"..\\RawSpeed" /I"..\\RawSpeed\include" /I"..\\RawSpeed\include\libjpeg"
+LDFLAGS_RAWSPEED=..\RawSpeed\lib\rawspeed.lib ..\RawSpeed\lib\libxml2.lib ..\RawSpeed\lib\iconv.lib ..\RawSpeed\lib\charset.lib ..\RawSpeed\lib\turbojpeg-static.lib
+
 # Demosaic Pack GPL2:
 #CFLAGS_DP2=/I"..\\LibRaw-demosaic-pack-GPL2"
 #CFLAGSG2=/DLIBRAW_DEMOSAIC_PACK_GPL2
@@ -18,8 +22,8 @@
 #LCMS_LIB=..\lcms2-2.3\bin\lcms2_dll.lib
 
 # JPEG support for DNG
-JPEG_DEF=/DUSE_JPEG /I..\jpeg-8d
-JPEG_LIB=..\jpeg-8d\Release\jpeg.lib
+#JPEG_DEF=/DUSE_JPEG /I..\jpeg-8d
+#JPEG_LIB=..\jpeg-8d\Release\jpeg.lib
 
 
 SAMPLES=bin\raw-identify.exe bin\simple_dcraw.exe  bin\dcraw_emu.exe bin\dcraw_half.exe bin\half_mt.exe bin\mem_image.exe bin\unprocessed_raw.exe bin\4channels.exe bin\multirender_test.exe bin\postprocessing_benchmark.exe
@@ -36,9 +40,9 @@ LIB_OBJECTS=object\dcraw_common_st.obj object\dcraw_fileio_st.obj  object\libraw
 DLL_OBJECTS=object\dcraw_common.obj object\dcraw_fileio.obj  object\libraw_cxx.obj object\libraw_datastream.obj object\libraw_c_api.obj  object\demosaic_packs.obj
 
 CC=cl.exe
-COPT=/EHsc /MP /MT /I. /DWIN32 /O2 /W0 /nologo $(COPT_OPT) $(CFLAGSG2) $(CFLAGSG3) $(LCMS_DEF) $(JPEG_DEF)
+COPT=/EHsc /MP /MT /I. /DWIN32 /O2 /W0 /nologo $(COPT_OPT) $(CFLAGSG2) $(CFLAGSG3) $(LCMS_DEF) $(JPEG_DEF) $(CFLAGS_RAWSPEED)
 
-LINKLIB=$(LIBDLL)
+LINKLIB=$(LIBDLL) $(LDFLAGS_RAWSPEED)
 
 # Samples - default to dynamic (DLL) link, uncomment next lines 
 #CFLAGS2=/DLIBRAW_NODLL
@@ -79,7 +83,7 @@ bin\half_mt.exe: $(LINKLIB) samples\half_mt_win32.c
 
 $(DLL): $(DLL_OBJECTS)
 	-del /f $(DLL) $(LIBDLL)
-	cl $(COPT) /LD $(DLL_OBJECTS) $(LCMS_LIB) $(JPEG_LIB) /link /out:"$(DLL)" /implib:"$(LIBDLL)"
+	cl $(COPT) /LD $(DLL_OBJECTS) $(LDFLAGS_RAWSPEED) $(LCMS_LIB) $(JPEG_LIB) /link /out:"$(DLL)" /implib:"$(LIBDLL)"
 
 object\dcraw_common.obj: internal\dcraw_common.cpp
 	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\dcraw_common.obj" /c internal\dcraw_common.cpp

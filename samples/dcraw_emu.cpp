@@ -119,7 +119,8 @@ void usage(const char *prog)
 "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
 #endif
 "-mem	   Use memory buffer instead of FILE I/O\n"
-        );
+"-disars   Do not use RawSpeed library\n"
+);
     exit(1);
 }
 
@@ -334,13 +335,15 @@ int main(int argc, char *argv[])
               case 'd':
                   if(!strcmp(optstr,"-dcbi"))
                       OUT.dcb_iterations = atoi(argv[arg++]);
+				  else if(!strcmp(optstr,"-disars"))
+					  OUT.use_rawspeed=0;
                   else if(!strcmp(optstr,"-dcbe"))
                       OUT.dcb_enhance_fl = 1;
                   else if(!strcmp(optstr,"-dbnd"))
                   {
                   	for(c=0; c<4; c++)
                             OUT.wf_deband_treshold[c] = (float)atof(argv[arg++]);
-			OUT.wf_debanding = 1;
+					OUT.wf_debanding = 1;
                   }
                   else
                       fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);

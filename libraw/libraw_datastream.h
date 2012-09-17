@@ -61,6 +61,7 @@ class DllDef LibRaw_abstract_datastream
     virtual int         read(void *,size_t, size_t ) = 0;
     virtual int         seek(INT64 , int ) = 0;
     virtual INT64       tell() = 0;
+    virtual INT64 	size() = 0;
     virtual int         get_char() = 0;
     virtual char*       gets(char *, int) = 0;
     virtual int         scanf_one(const char *, void *) = 0;
@@ -97,6 +98,7 @@ class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
     std::auto_ptr<std::streambuf> f; /* will close() automatically through dtor */
     std::auto_ptr<std::streambuf> saved_f; /* when *f is a subfile, *saved_f is the master file */
     const char *filename;
+	INT64 _fsize;
 #ifdef WIN32
 	const wchar_t *wfilename;
 #endif
@@ -114,6 +116,7 @@ class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
     virtual int         eof();
     virtual int         seek(INT64 o, int whence);
     virtual INT64       tell();
+    virtual INT64	size() { return _fsize;}
     virtual int         get_char()
         { 
             if(substream) return substream->get_char();
@@ -144,6 +147,7 @@ class DllDef  LibRaw_buffer_datastream : public LibRaw_abstract_datastream
     virtual int         eof();
     virtual int         seek(INT64 o, int whence);
     virtual INT64       tell();
+    virtual INT64	size() { return streamsize;}
     virtual char*       gets(char *s, int sz);
     virtual int         scanf_one(const char *fmt, void* val);
     virtual int         get_char()
@@ -175,6 +179,7 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
     virtual int         eof();
     virtual int         seek(INT64 o, int whence);
     virtual INT64       tell();
+    virtual INT64	size() { return _fsize;}
     virtual char*       gets(char *str, int sz);
     virtual int         scanf_one(const char *fmt, void*val);
     virtual const char *fname();
@@ -193,9 +198,10 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
 #endif
     }
 
-  private:
+protected:
     FILE *f,*sav;
     const char *filename;
+	INT64 _fsize;
 #ifdef WIN32
 	const wchar_t *wfilename;
 #endif
@@ -211,6 +217,7 @@ public:
     LibRaw_windows_datastream(HANDLE hFile);
     /* dtor: unmap and close the mapping handle */
     virtual ~LibRaw_windows_datastream();
+    virtual INT64 size() { return cbView_;}
 
 protected:
     void Open(HANDLE hFile);

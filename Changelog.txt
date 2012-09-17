@@ -1,9 +1,37 @@
+2012-09-17  Alex Tutubalin <lexa@lexa.ru>
+
+   * Alpha-quality RawSpeed library support (http://rawstudio.org/blog/?p=800)
+
+     - imgdata.params.use_rawspeed run-time configuration option (default to Yes!)
+
+     - LibRaw::set_rawspeed_camerafile(char *path_to_cameras_xml) - call to set
+ 	camera information on runtime (cameras.xml from release 453 is compiled in).
+
+     - New call Libraw*datastream::size() returns full size of data file (needed for
+	RawSpeed support). Implemented for all datastreams provided with LibRaw.
+
+     - Use -DUSE_RAWSPEED define to turn RawSpeed support on. You'll need to compile
+	and install RawSpeed on your system. Also, you'll need libxml2, iconv, and
+	jpeg library (libjpeg-turbo is recommended). On Win32 systems you'll need
+	posix threads library. 
+     - RawSpeed support uses double buffering either for LibRaw_buffer_datastream,
+	to be changed later.
+
+     - RawSpeed is not used for  non-bayer images (e.g. Canon sRAW or 3-color DNGs),
+       to be changed later.
+
+   * ABI and API changed, all programs using 0.15-Alpha2 should be
+     recompiled!
+
 2012-09-15 Alex Tutubalin <lexa@lexa.ru>
-   * imgdata.sizes.raw_pitch
+   * imgdata.sizes.raw_pitch - row pitch in imgdata.rawdata.raw_image
+     Use raw_image[row*raw_pitch+col] instead of [row*raw_width+col]
+     if your code accesses raw_image[] array.
+
 2012-09-06 Alex Tutubalin <lexa@lexa.ru>
    * OpenMP speedup for linear interpolation
    * Disabled decoding JPEG (lossy DNG) data from memory buffer
-     for libjpeg version less than 8.
+     for libjpeg version less than 8. Use -DUSE_JPEG8 if your jpeg is v8+
    * hotspots moved to virtual functions
    * is_phaseone_compressed() call
    * Custom phase one black subtraction
