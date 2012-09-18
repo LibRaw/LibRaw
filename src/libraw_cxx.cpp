@@ -36,7 +36,7 @@ it under the terms of the one of three licenses as you choose:
 #include "internal/defines.h"
 
 #ifdef USE_RAWSPEED
-#include "rawspeed_xmldata.cpp"
+#include "../RawSpeed/rawspeed_xmldata.cpp"
 #include <RawSpeed/StdAfx.h>
 #include <RawSpeed/FileReader.h>
 #include <RawSpeed/RawParser.h>

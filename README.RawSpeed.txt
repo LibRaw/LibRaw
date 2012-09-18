@@ -11,7 +11,7 @@ information at http://rawstudio.org/blog/?p=800 for details)
 Win32: you need to build RawSpeed library from sources. If you wish to
 build it as .DLL, you need to add __declspec() to external C++ classes 
 declarations. You may use rawspeed.win32-dll.patch  provided with LibRaw
-to patch RawSpeed sources.
+to patch RawSpeed sources (the patches resides in RawSpeed folder)
 On Windows system you need POSIX Threads library (sources.redhat.com/pthreads-win32/)
 
 

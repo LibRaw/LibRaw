@@ -2,8 +2,8 @@
 #COPT_OPT=/openmp /arch:SSE2 /arch:AVX
 
 # Compile with RawSpeed support
-CFLAGS_RAWSPEED=/DUSE_RAWSPEED /I"..\\RawSpeed" /I"..\\RawSpeed\include" /I"..\\RawSpeed\include\libjpeg"
-LDFLAGS_RAWSPEED=..\RawSpeed\lib\rawspeed.lib ..\RawSpeed\lib\libxml2.lib ..\RawSpeed\lib\iconv.lib ..\RawSpeed\lib\charset.lib ..\RawSpeed\lib\turbojpeg-static.lib
+#CFLAGS_RAWSPEED=/DUSE_RAWSPEED /I"..\\RawSpeed" /I"..\\RawSpeed\include" /I"..\\RawSpeed\include\libjpeg"
+#LDFLAGS_RAWSPEED=..\RawSpeed\lib\rawspeed.lib ..\RawSpeed\lib\libxml2.lib ..\RawSpeed\lib\iconv.lib ..\RawSpeed\lib\charset.lib ..\RawSpeed\lib\turbojpeg-static.lib
 
 # Demosaic Pack GPL2:
 #CFLAGS_DP2=/I"..\\LibRaw-demosaic-pack-GPL2"
