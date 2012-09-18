@@ -5,17 +5,15 @@ PP=./internal/preprocess.pl
 CC=gcc
 CXX=g++
 
-#CFLAGS=-O4 -march=core2 -march=core2 -mtune=core2 -fomit-frame-pointer -ffast-math -fstrict-aliasing -funsafe-math-optimizations -mfpmath=sse -msse2 -I. 
-#CFLAGS=-g -Wall -I.
-#CFLAGS=-g -I. -Wall
-CFLAGS= -O4 -g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -Wno-overflow -fpack-struct=8 -fopenmp
-#CFLAGS=-g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
+# RawSpeed Support
+CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
+LDADD+=-L../RawSpeed/RawSpeed -lrawspeed -L/usr/local/include -ljpeg -lxml2
+RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
-# GCC 4.6 section
-#CC=gcc46
-#CXX=g++46
-#CFLAGS= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse4.2 -mfpmath=sse  -fopenmp 
-#CFLAGS= -O -I. -pedantic  -Wno-long-long -Wno-overflow -g
+
+CC=gcc46
+CXX=g++46
+CFLAGS+= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse4.2 -mfpmath=sse  -fopenmp 
 
 
 # LCMS support
@@ -32,7 +30,6 @@ CFLAGS+=-DUSE_JPEG -I/usr/local/include
 LDADD+=-L/usr/local/lib -ljpeg
 # LIBJPEG8:
 CFLAGS+=-DUSE_JPEG8
-
 
 # Demosaic Pack GPL2:
 DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
@@ -53,6 +50,11 @@ library: lib/libraw.a lib/libraw_r.a
 
 all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin/half_mt bin/mem_image \
         bin/unprocessed_raw bin/4channels bin/multirender_test bin/postprocessing_benchmark
+
+## RawSpeed xml file
+
+RawSpeed/rawspeed_xmldata.cpp: ${RAWSPEED_DATA}
+	./rsxml2c.sh ${RAWSPEED_DATA} > RawSpeed/rawspeed_xmldata.cpp
 
 ## Demosaic Pack(s)
 
@@ -118,7 +120,7 @@ object/dcraw_common.o: internal/dcraw_common.cpp ${LR_INCLUDES}
 object/dcraw_fileio.o: internal/dcraw_fileio.cpp ${LR_INCLUDES}
 	$(CXX) -c -DLIBRAW_NOTHREADS ${CFLAGS} ${LCMS_DEF} -o object/dcraw_fileio.o internal/dcraw_fileio.cpp
 
-object/libraw_cxx.o: src/libraw_cxx.cpp ${LR_INCLUDES}
+object/libraw_cxx.o: src/libraw_cxx.cpp ${LR_INCLUDES} RawSpeed/rawspeed_xmldata.cpp
 	$(CXX) -c -DLIBRAW_NOTHREADS ${LCMS_DEF} ${CFLAGS} -o object/libraw_cxx.o src/libraw_cxx.cpp
 
 object/libraw_datastream.o: src/libraw_datastream.cpp ${LR_INCLUDES}

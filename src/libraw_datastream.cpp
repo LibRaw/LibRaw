@@ -81,7 +81,7 @@ LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
 #ifndef WIN32
 		struct stat st;
 		if(!stat(filename,&st))
-			fsize = st.st_size;	
+			_fsize = st.st_size;	
 #else
 		struct _stati64 st;
 		if(!_stati64(filename,&st))
@@ -467,24 +467,24 @@ LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname): filenam
     if(fname)
         {
 #ifndef WIN32
-			struct stat st;
-			if(!stat(fname,&st))
-				fsize = st.st_size;	
+          struct stat st;
+          if(!stat(fname,&st))
+            _fsize = st.st_size;	
 #else
-			struct _stati64 st;
-			if(!_stati64(fname,&st))
-				_fsize = st.st_size;
+          struct _stati64 st;
+          if(!_stati64(fname,&st))
+            _fsize = st.st_size;
 #endif
 
 #ifndef WIN32SECURECALLS
-            f = fopen(fname,"rb");
+          f = fopen(fname,"rb");
 #else
-            if(fopen_s(&f,fname,"rb"))
-                f = 0;
+          if(fopen_s(&f,fname,"rb"))
+            f = 0;
 #endif
         }
     else 
-        {filename=0;f=0;}
+      {filename=0;f=0;}
     sav=0;
 }
 

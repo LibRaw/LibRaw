@@ -160,7 +160,7 @@ index 9ef86e3..1b3cb83 100644
    RawParser(FileMap* input);
 diff --git a/RawSpeed/dlldef.h b/RawSpeed/dlldef.h
 new file mode 100644
-index 0000000..471a22b
+index 0000000..c806451
 --- /dev/null
 +++ b/RawSpeed/dlldef.h
 @@ -0,0 +1,20 @@
@@ -184,4 +184,3 @@ index 0000000..471a22b
 +#  define DllDef
 +#endif
 +#endif
-\ No newline at end of file

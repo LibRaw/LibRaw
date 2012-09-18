@@ -153,10 +153,10 @@ class DllDef LibRaw
     /* Debanding filter */
     int                         wf_remove_banding();
 
-	// Phase one correction/subtractBL calls
-    void phase_one_subtract_black(ushort *src, ushort *dest);
-    void        phase_one_correct();
-	int set_rawspeed_camerafile(char *filename);
+  /* Phase one correction/subtractBL calls */
+  void phase_one_subtract_black(ushort *src, ushort *dest);
+  void        phase_one_correct();
+  int set_rawspeed_camerafile(char *filename);
 
 
 protected:
@@ -270,10 +270,10 @@ protected:
     int         flip_index (int row, int col);
     void        gamma_curve (double pwr, double ts, int mode, int imax);
 
-	// RawSpeed data
-	void		*_rawspeed_camerameta;
-	void	    *_rawspeed_decoder;
-	void		fix_after_rawspeed();
+  /* RawSpeed data */
+  void		*_rawspeed_camerameta;
+  void	    *_rawspeed_decoder;
+  void		fix_after_rawspeed();
 
 
 #ifdef LIBRAW_LIBRARY_BUILD 

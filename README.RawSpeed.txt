@@ -1,40 +1,54 @@
-======================= Compile LibRaw with RawSpeed support ===============================
+================= Compile LibRaw with RawSpeed support ========================
+
 
 1) Prerequisites
 
 To build RawSpeed you need libxml2, iconv, and JPEG library installed on your 
 system.
 
-Unix: you need to build RawSpeed library from sources (See RawSpeed developer 
-information at http://rawstudio.org/blog/?p=800 for details)
+2) Build RawSpeed:
 
-Win32: you need to build RawSpeed library from sources. If you wish to
-build it as .DLL, you need to add __declspec() to external C++ classes 
-declarations. You may use rawspeed.win32-dll.patch  provided with LibRaw
-to patch RawSpeed sources (the patches resides in RawSpeed folder)
-On Windows system you need POSIX Threads library (sources.redhat.com/pthreads-win32/)
+  -- consult http://rawstudio.org/blog/?p=800 for details
 
+  -- Win32: you need POSIX Threads for Win32 installed on your system
+     (http://sources.redhat.com/pthreads-win32/)
 
-2) Build: Generic
-  - You need to specify -DUSE_RAWSPEED compile-time define when you compile LibRaw
-  - You may specify -DNOARW2_RAWSPEED define if you do not want to use RawSpeed's
-    Sony ARW2 format decoder (because result of this decoder is different from
-    LibRaw's built-in decoder)
-  - You need to link with RawSpeed library and additional libraries (libxml2, iconv)
+  -- you may use qmake .pro files supplied in LibRaw distribution
+     (RawSpeed/rawspeed.qmake-pro-files.patch)
+     Adjust path to libraries/includes according to your setup.
 
-3) Build: Unix
+  -- Win32: you need to add __declspec(..) to external C++ classes.
+     Use patch provided with LibRaw (RawSpeed/rawspeed.win32-dll.patch)
 
+  -- Unix: you need to define rawspeed_get_number_of_processor_cores() call
+     For most unix systems (Linux, MacOS X 10.4+, FreeBSD) patch provided
+     with LibRaw (RawSpeed/rawspeed.cpucount-unix.patch) should work.
 
-4) Build: Win32
- - Place RawSpeed in ..\RawSpeed folder (relative to LibRaw sources folder) and compile it.
- - Place all 3rd party libraries (libxml2, iconv, libjpeg, pthreads) in
-    ..\RawSpeed\include - include files
-    ..\RawSpeed\lib - library files
- - Uncomment CFLAGS_RAWSPEED and LDFLAGS_RAWSPEED lines in Makefile.msvc
- - use nmake -f Makefile.msvc to build LibRaw with RawSpeed support
+3) Build LibRaw with RawSpeed support:
  
-You'll need to have rawspeed.dll, libxml2.dll, iconv.dll, jpeg.dll and charset.dll in your
-PATH when you're running application linked with LibRaw.
+   Win32: 
+     --Uncomment CFLAGS_RAWSPEED and LDFLAGS_RAWSPEED lines in
+       Makefile.msvc. Adjust paths to libraries/includes if needed.
+     -- run nmake -f Makefile.msvc
 
+   Unix/MacOS:
+     -- Uncomment CFLAGS/LDADD lines in RawSpeed section in Makefile.dist
+     -- Uncomment RAWSPEED_DATA line if you wish to rebuild
+	internal copy of RawSpeed's cameras.xml
+     -- run make -f Makefile.dist
 
+   Compile options:
+    -- You may specify -DNOSONY_RAWSPEED define if you do not want to use 
+        RawSpeed's Sony formats decoder (because result of this decoder is 
+        different from  LibRaw's built-in decoder)
 
+4) Build/run your Apps with LibRaw+RawSpeed
+   
+   -- Build as usual, no changes required in your apps unless you
+      access LibRaw::imgdata.rawdata.raw_image[] directly
+
+   -- you may turn off RawSpeed support on runtime by setting 
+      imgdata.params.use_rawspeed to 0.
+
+   -- You'll need all shared libraries you linked to at runtime (libxml2,
+      iconv, LibJPEG, and posix threads on Win32).

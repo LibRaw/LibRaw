@@ -534,7 +534,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::packed_load_raw )
         {
             d_info->decoder_name = "packed_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD  | LIBRAW_DECODER_TRYRAWSPEED;
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+#ifndef NOSONY_RAWSPEED
+            d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+#endif
+
         }
     else if (load_raw == &LibRaw::nokia_load_raw )
         {
@@ -632,15 +636,18 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::sony_arw_load_raw )
         {
             d_info->decoder_name = "sony_arw_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_TRYRAWSPEED;
+            d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+#ifndef NOSONY_RAWSPEED
+            d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+#endif
         }
     else if (load_raw == &LibRaw::sony_arw2_load_raw )
         {
             d_info->decoder_name = "sony_arw2_load_raw()";
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
             d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
-#ifndef NOARW2_RAWSPEED
-			d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+#ifndef NOSONY_RAWSPEED
+            d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
 #endif
             d_info->decoder_flags |= LIBRAW_DECODER_ITSASONY;
         }
@@ -913,7 +920,7 @@ void LibRaw::fix_after_rawspeed()
     C.maximum = 0xffff;
   else if (load_raw == &LibRaw::sony_load_raw)
     C.maximum = 0x3ff0;
-else if (load_raw == &LibRaw::sony_arw2_load_raw)
+  else if (load_raw == &LibRaw::sony_arw2_load_raw || load_raw == &LibRaw::packed_load_raw )
 	{
 		C.maximum *=4;
 		C.black *=4;
@@ -979,78 +986,79 @@ int LibRaw::unpack(void)
                     rheight = S.height + S.top_margin;
             }
         S.raw_pitch = S.raw_width;
-		imgdata.rawdata.raw_image = 0;
-		imgdata.rawdata.color_image = 0;
+        imgdata.rawdata.raw_image = 0;
+        imgdata.rawdata.color_image = 0;
 #ifdef USE_RAWSPEED
-		// RawSpeed Supported, 
-		if(O.use_rawspeed && (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
-		{
-			INT64 spos = ID.input->tell();
-			try 
-			{
-				ID.input->seek(0,SEEK_SET);
-				INT64 _rawspeed_buffer_sz = ID.input->size();
-				void *_rawspeed_buffer = malloc(_rawspeed_buffer_sz);
-				if(!_rawspeed_buffer) throw LIBRAW_EXCEPTION_ALLOC;
-				ID.input->read(_rawspeed_buffer,_rawspeed_buffer_sz,1);
-				FileMap map((uchar8*)_rawspeed_buffer,_rawspeed_buffer_sz);
-				RawParser t(&map);
-				RawDecoder *d = 0;
-				CameraMetaDataLR *meta = static_cast<CameraMetaDataLR*>(_rawspeed_camerameta);
-				d = t.getDecoder();
-				d->checkSupport(meta);
-			    d->decodeRaw();
-			    d->decodeMetaData(meta);
-				RawImage r = d->mRaw;
-				if (r->isCFA) {
-					// Save pointer to decoder
-					_rawspeed_decoder = static_cast<void*>(d);
-					imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
-					S.raw_pitch = r->pitch/2;
-					fix_after_rawspeed();
-				}
-				else
-				{
-					delete d;
-				}
-				free(_rawspeed_buffer);
-			} catch (...) {
-				imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
-				// no other actions: if raw_image is not set we'll try usual load_raw call
-			}
-			ID.input->seek(spos,SEEK_SET);
-		}
+        // RawSpeed Supported, 
+        if(O.use_rawspeed && (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
+          {
+            INT64 spos = ID.input->tell();
+            try 
+              {
+                //                printf("Using rawspeed\n");
+                ID.input->seek(0,SEEK_SET);
+                INT64 _rawspeed_buffer_sz = ID.input->size();
+                void *_rawspeed_buffer = malloc(_rawspeed_buffer_sz);
+                if(!_rawspeed_buffer) throw LIBRAW_EXCEPTION_ALLOC;
+                ID.input->read(_rawspeed_buffer,_rawspeed_buffer_sz,1);
+                FileMap map((uchar8*)_rawspeed_buffer,_rawspeed_buffer_sz);
+                RawParser t(&map);
+                RawDecoder *d = 0;
+                CameraMetaDataLR *meta = static_cast<CameraMetaDataLR*>(_rawspeed_camerameta);
+                d = t.getDecoder();
+                d->checkSupport(meta);
+                d->decodeRaw();
+                d->decodeMetaData(meta);
+                RawImage r = d->mRaw;
+                if (r->isCFA) {
+                  // Save pointer to decoder
+                  _rawspeed_decoder = static_cast<void*>(d);
+                  imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
+                  S.raw_pitch = r->pitch/2;
+                  fix_after_rawspeed();
+                }
+                else
+                  {
+                    delete d;
+                  }
+                free(_rawspeed_buffer);
+              } catch (...) {
+              imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
+              // no other actions: if raw_image is not set we'll try usual load_raw call
+            }
+            ID.input->seek(spos,SEEK_SET);
+          }
 #endif
-		if(!imgdata.rawdata.raw_image && !imgdata.rawdata.color_image)
-			{
-				// Not allocated on RawSpeed call, try call LibRaw
-				if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
-				{
-					imgdata.rawdata.raw_alloc = malloc(rwidth*(rheight+7)*sizeof(imgdata.rawdata.raw_image[0]));
-					imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
-				}
-				else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
-				{
-					// sRAW and Foveon only, so extra buffer size is just 1/4
-					// Legacy converters does not supports half mode!
-					S.iwidth = S.width;
-					S.iheight= S.height;
-					IO.shrink = 0;
-					// allocate image as temporary buffer, size 
-					imgdata.rawdata.raw_alloc = calloc(S.iwidth*S.iheight,sizeof(*imgdata.image));
-					imgdata.image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
-				}
-		        ID.input->seek(libraw_internal_data.unpacker_data.data_offset, SEEK_SET);
-				(this->*load_raw)();
-			}
+        if(!imgdata.rawdata.raw_image && !imgdata.rawdata.color_image)
+          {
+            // Not allocated on RawSpeed call, try call LibRaw
+            if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
+              {
+                imgdata.rawdata.raw_alloc = malloc(rwidth*(rheight+7)*sizeof(imgdata.rawdata.raw_image[0]));
+                imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
+              }
+            else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+              {
+                // sRAW and Foveon only, so extra buffer size is just 1/4
+                // Legacy converters does not supports half mode!
+                S.iwidth = S.width;
+                S.iheight= S.height;
+                IO.shrink = 0;
+                // allocate image as temporary buffer, size 
+                imgdata.rawdata.raw_alloc = calloc(S.iwidth*S.iheight,sizeof(*imgdata.image));
+                imgdata.image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
+              }
+            ID.input->seek(libraw_internal_data.unpacker_data.data_offset, SEEK_SET);
+            (this->*load_raw)();
+          }
 	    
         if(imgdata.rawdata.raw_image)
           crop_masked_pixels(); // calculate black levels
 
 #if 0
-		printf("B=%d,%d,%d,%d,%d M=%d\n",C.black,C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3],C.maximum);
-		if(imgdata.rawdata.raw_image)
-			printf("V=%d %d %d %d %d",imgdata.rawdata.raw_image[0],imgdata.rawdata.raw_image[17],imgdata.rawdata.raw_image[40000],imgdata.rawdata.raw_image[64000],imgdata.rawdata.raw_image[200000]);
+        printf("B=%d,%d,%d,%d,%d M=%d\n",C.black,C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3],C.maximum);
+        if(imgdata.rawdata.raw_image)
+          printf("V=%d %d %d %d %d\n",imgdata.rawdata.raw_image[0],imgdata.rawdata.raw_image[17],imgdata.rawdata.raw_image[1000001],imgdata.rawdata.raw_image[1000002],imgdata.rawdata.raw_image[1000003]);
 #endif
         // recover saved
         if( decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
@@ -1074,14 +1082,14 @@ int LibRaw::unpack(void)
         C.black += i;
 
 #if 0
-		if(imgdata.rawdata.raw_image)
-		{
-			char fnbuf[25];
-			sprintf(fnbuf,"%d.dat",time(NULL));
-			FILE *f = fopen(fnbuf,"wb");
-			fwrite(imgdata.rawdata.raw_image,S.raw_pitch*sizeof(ushort),S.raw_height,f);
-			fclose(f);
-		}
+        if(imgdata.rawdata.raw_image)
+          {
+            char fnbuf[25];
+            sprintf(fnbuf,"%d.dat",time(NULL));
+            FILE *f = fopen(fnbuf,"wb");
+            fwrite(imgdata.rawdata.raw_image,S.raw_pitch*sizeof(ushort),S.raw_height,f);
+            fclose(f);
+          }
 #endif
         // Save color,sizes and internal data into raw_image fields
         memmove(&imgdata.rawdata.color,&imgdata.color,sizeof(imgdata.color));
