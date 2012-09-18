@@ -38,7 +38,7 @@ it under the terms of the one of three licenses as you choose:
 #ifdef USE_RAWSPEED
 #include "../RawSpeed/rawspeed_xmldata.cpp"
 #include <RawSpeed/StdAfx.h>
-#include <RawSpeed/FileReader.h>
+#include <RawSpeed/FileMap.h>
 #include <RawSpeed/RawParser.h>
 #include <RawSpeed/RawDecoder.h>
 #include <RawSpeed/CameraMetaData.h>
