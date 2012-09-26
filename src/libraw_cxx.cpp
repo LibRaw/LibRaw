@@ -900,8 +900,10 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     if(imgdata.idata.filters == 303979333U)
      {
-    	//printf("Filters=%d",imgdata.idata.filters);
-	imgdata.idata.filters = 2;	
+    	//printf("BL=%d [%d,%d,%d,%d]\n",C.black,C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
+		C.black = C.cblack[0];
+		C.cblack[0]=C.cblack[1]=C.cblack[2]=C.cblack[3];
+		imgdata.idata.filters = 2;	
      }
     // Save color,sizes and internal data into raw_image fields
     memmove(&imgdata.rawdata.color,&imgdata.color,sizeof(imgdata.color));
