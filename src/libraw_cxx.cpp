@@ -898,7 +898,11 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     S.iheight = (S.height + IO.shrink) >> IO.shrink;
     S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
 
-
+    if(imgdata.idata.filters == 303979333U)
+     {
+    	//printf("Filters=%d",imgdata.idata.filters);
+	imgdata.idata.filters = 2;	
+     }
     // Save color,sizes and internal data into raw_image fields
     memmove(&imgdata.rawdata.color,&imgdata.color,sizeof(imgdata.color));
     memmove(&imgdata.rawdata.sizes,&imgdata.sizes,sizeof(imgdata.sizes));
