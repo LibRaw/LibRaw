@@ -6,6 +6,7 @@
    * New warning flag LIBRAW_WARN_RAWSPEED_UNSUPPORTED, this bit in
      process_warnings is set (with LIBRAW_WARN_RAWSPEED_PROBLEM) if
      RawSpeed's checkSupported() fails.
+   * Disabled RawSpeed processing of several RAW formats.
    * LibRaw 0.15.0-Beta1
 
 2012-09-17  Alex Tutubalin <lexa@lexa.ru>

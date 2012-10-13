@@ -6,6 +6,7 @@
    * Новый бит warning LIBRAW_WARN_RAWSPEED_UNSUPPORTED, устанавливается
      (вместе с LIBRAW_WARN_RAWSPEED_PROBLEM) если RawSpeed сообщила, 
      что камера не поддерживается.
+   * Запрещена распаковка библиотекой RawSpeed для некоторых форматов.
    * LibRaw 0.15.0-Beta1
 
 2012-09-17  Alex Tutubalin <lexa@lexa.ru>
