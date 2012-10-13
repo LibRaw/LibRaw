@@ -1032,6 +1032,7 @@ int LibRaw::unpack(void)
                     delete d;
                   }
                 free(_rawspeed_buffer);
+              imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROCESSED;
               } catch (...) {
               imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
               // no other actions: if raw_image is not set we'll try usual load_raw call
