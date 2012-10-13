@@ -1,7 +1,7 @@
 2012-10-13  Alex Tutubalin <lexa@lexa.ru>
    * Corrected D800E margins
    * Support for DNGs made from Fuji X-Pro1 RAWs
-   * updated RawSpeed's camera list to r479
+   * updated RawSpeed's camera list to r488
    * Win32/C-API: libraw_open_wfile/libraw_open_wfile_ex() calls
    * New warning flag LIBRAW_WARN_RAWSPEED_UNSUPPORTED, this bit in
      process_warnings is set (with LIBRAW_WARN_RAWSPEED_PROBLEM) if
