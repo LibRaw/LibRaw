@@ -73,42 +73,47 @@ LibRaw_file_datastream::~LibRaw_file_datastream()
 LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
     :filename(fname)
 #ifdef WIN32
-    ,wfilename(NULL)
+    ,wfilename()
 #endif
     ,jas_file(NULL),_fsize(0)
 {
-    if (filename) {
+  if (filename.size()>0) 
+    {
 #ifndef WIN32
-		struct stat st;
-		if(!stat(filename,&st))
-			_fsize = st.st_size;	
+      struct stat st;
+      if(!stat(filename.c_str(),&st))
+        _fsize = st.st_size;	
 #else
-		struct _stati64 st;
-		if(!_stati64(filename,&st))
-			_fsize = st.st_size;
+      struct _stati64 st;
+      if(!_stati64(filename.c_str(),&st))
+        _fsize = st.st_size;
 #endif
-
-        std::auto_ptr<std::filebuf> buf(new std::filebuf());
-        buf->open(filename, std::ios_base::in | std::ios_base::binary);
-        if (buf->is_open()) {
-            f = buf;
-        }
+      
+      std::auto_ptr<std::filebuf> buf(new std::filebuf());
+      buf->open(filename.c_str(), std::ios_base::in | std::ios_base::binary);
+      if (buf->is_open()) {
+        f = buf;
+      }
     }
 }
 #ifdef WIN32
-LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname) : filename(NULL),wfilename(fname),jas_file(NULL),_fsize(0)
+LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname) : filename(),wfilename(fname),jas_file(NULL),_fsize(0)
 {
-	if (fname) {
-		struct _stati64 st;
-		if(!_wstati64(fname,&st))
-			_fsize = st.st_size;
-		std::auto_ptr<std::filebuf> buf(new std::filebuf());
-		buf->open(fname, std::ios_base::in | std::ios_base::binary);
-		if (buf->is_open()) {
-			f = buf;
-		}
-	}
-
+  if (wfilename.size()>0) 
+    {
+      struct _stati64 st;
+      if(!_wstati64(wfilename.c_str(),&st))
+        _fsize = st.st_size;
+      std::auto_ptr<std::filebuf> buf(new std::filebuf());
+      buf->open(wfilename.c_str(), std::ios_base::in | std::ios_base::binary);
+      if (buf->is_open()) {
+        f = buf;
+      }
+    }
+}
+wchar_t *LibRaw_file_datastream::wfname()
+{
+  return wfilename.size()>0?wfilename.c_str():NULL;
 }
 #endif
 
@@ -193,7 +198,7 @@ int LibRaw_file_datastream::scanf_one(const char *fmt, void*val)
 
 const char* LibRaw_file_datastream::fname() 
 { 
-    return filename; 
+  return filename.size()>0?filename.c_str():NULL; 
 }
     
 /* You can't have a "subfile" and a "tempfile" at the same time. */
@@ -461,51 +466,58 @@ int LibRaw_buffer_datastream::jpeg_src(void *jpegdata)
 // == LibRaw_bigfile_datastream
 LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname): filename(fname)
 #ifdef WIN32
-	,wfilename(NULL)
+	,wfilename()
 #endif
 { 
-    if(fname)
-        {
+  if(filename.size()>0)
+    {
 #ifndef WIN32
-          struct stat st;
-          if(!stat(fname,&st))
-            _fsize = st.st_size;	
+      struct stat st;
+      if(!stat(filename.c_str(),&st))
+        _fsize = st.st_size;	
 #else
-          struct _stati64 st;
-          if(!_stati64(fname,&st))
-            _fsize = st.st_size;
+      struct _stati64 st;
+      if(!_stati64(filename.c_str(),&st))
+        _fsize = st.st_size;
 #endif
 
 #ifndef WIN32SECURECALLS
-          f = fopen(fname,"rb");
+      f = fopen(fname,"rb");
 #else
-          if(fopen_s(&f,fname,"rb"))
-            f = 0;
+      if(fopen_s(&f,fname,"rb"))
+        f = 0;
 #endif
-        }
+    }
     else 
-      {filename=0;f=0;}
+      {filename=std::string();f=0;}
     sav=0;
 }
 
 #ifdef WIN32
-LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const wchar_t *fname) : filename(NULL),wfilename(fname)
+LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const wchar_t *fname) : filename(),wfilename(fname)
 { 
-	if(fname)
-	{
-		struct _stati64 st;
-		if(!_wstati64(fname,&st))
-			_fsize = st.st_size;
+  if(wfilename.size()>0)
+    {
+      struct _stati64 st;
+      if(!_wstati64(wfilename.c_str(),&st))
+        _fsize = st.st_size;
 #ifndef WIN32SECURECALLS
-		f = _wfopen(fname,L"rb");
+      f = _wfopen(wfilename.c_str(),L"rb");
 #else
-		if(_wfopen_s(&f,fname,L"rb"))
-			f = 0;
+      if(_wfopen_s(&f,fname,L"rb"))
+        f = 0;
 #endif
-	}
-	else 
-	{filename=0;f=0;}
-	sav=0;
+    }
+  else 
+    {
+      wfilename=std::wstring();
+      f=0;
+    }
+  sav=0;
+}
+wchar_t *LibRaw_bigfile_datastream::wfname()
+{
+  return wfilename.size()>0?wfilename.c_str():NULL;
 }
 #endif
 
@@ -574,7 +586,7 @@ int LibRaw_bigfile_datastream::scanf_one(const char *fmt, void*val)
 
 const char *LibRaw_bigfile_datastream::fname() 
 { 
-    return filename; 
+  return filename.size()>0?filename.c_str():NULL; 
 }
 
 int LibRaw_bigfile_datastream::subfile_open(const char *fn)

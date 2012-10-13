@@ -97,17 +97,17 @@ class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
   protected:
     std::auto_ptr<std::streambuf> f; /* will close() automatically through dtor */
     std::auto_ptr<std::streambuf> saved_f; /* when *f is a subfile, *saved_f is the master file */
-    const char *filename;
-	INT64 _fsize;
+    std::string filename;
+    INT64 _fsize;
 #ifdef WIN32
-	const wchar_t *wfilename;
+    std::wstring wfilename;
 #endif
-	FILE *jas_file;
+    FILE *jas_file;
   public:
-    virtual             ~LibRaw_file_datastream();
-                        LibRaw_file_datastream(const char *fname);
+    virtual     ~LibRaw_file_datastream();
+                LibRaw_file_datastream(const char *fname);
 #ifdef WIN32
-						LibRaw_file_datastream(const wchar_t *fname);
+                LibRaw_file_datastream(const wchar_t *fname);
 #endif
     virtual void        *make_jas_stream();
     virtual int         jpeg_src(void *jpegdata);
@@ -126,8 +126,8 @@ class DllDef  LibRaw_file_datastream: public LibRaw_abstract_datastream
     virtual int         scanf_one(const char *fmt, void*val); 
     virtual const char* fname();
 #ifdef WIN32
-	virtual const wchar_t* wfname() { return wfilename;}
-	virtual int         subfile_open(const wchar_t *fn);
+    virtual const wchar_t* wfname();
+    virtual int         subfile_open(const wchar_t *fn);
 #endif
     virtual int         subfile_open(const char *fn);
     virtual void        subfile_close();
@@ -184,8 +184,8 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
     virtual int         scanf_one(const char *fmt, void*val);
     virtual const char *fname();
 #ifdef WIN32
-	virtual const wchar_t* wfname() { return wfilename;}
-	virtual int         subfile_open(const wchar_t *fn);
+    virtual const wchar_t* wfname();
+    virtual int         subfile_open(const wchar_t *fn);
 #endif
     virtual int         subfile_open(const char *fn);
     virtual void        subfile_close();
@@ -200,10 +200,10 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
 
 protected:
     FILE *f,*sav;
-    const char *filename;
-	INT64 _fsize;
+    std::string filename;
+    INT64 _fsize;
 #ifdef WIN32
-	const wchar_t *wfilename;
+    std::wstring wfilename;
 #endif
 };
 
