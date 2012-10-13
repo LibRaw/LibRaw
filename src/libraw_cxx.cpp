@@ -535,7 +535,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
         {
             d_info->decoder_name = "packed_load_raw()";
             d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
-            //d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+            d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
         }
     else if (load_raw == &LibRaw::nokia_load_raw )
         {
@@ -923,7 +923,7 @@ void LibRaw::fix_after_rawspeed()
     C.maximum = 0xffff;
   else if (load_raw == &LibRaw::sony_load_raw)
     C.maximum = 0x3ff0;
-  else if (load_raw == &LibRaw::sony_arw2_load_raw || load_raw == &LibRaw::packed_load_raw )
+  else if (load_raw == &LibRaw::sony_arw2_load_raw || (load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")))
     {
       C.maximum *=4;
       C.black *=4;
