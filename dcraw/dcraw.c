@@ -4739,9 +4739,6 @@ void CLASS border_interpolate (int border)
 void CLASS lin_interpolate_loop(int code[16][16][32],int size)
 {
   int row;
-#if defined(LIBRAW_USE_OPENMP)
-#pragma omp parallel default(shared)
-#endif
   for (row=1; row < height-1; row++)
     {
       int col,*ip;

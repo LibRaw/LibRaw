@@ -1,6 +1,7 @@
 2012-10-26  Alex Tutubalin <lexa@lexa.ru>
    * New warning flag LIBRAW_WARN_RAWSPEED_PROCESSED
      - not really a warning, but information that rawspeed used
+   * Removed OpenMP support for linear interpolation
 
 2012-10-13  Alex Tutubalin <lexa@lexa.ru>
    * Corrected D800E margins
