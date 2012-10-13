@@ -1,4 +1,14 @@
-﻿2012-09-17  Alex Tutubalin <lexa@lexa.ru>
+﻿2012-10-13  Alex Tutubalin <lexa@lexa.ru>
+   * Правильная установка размеров видимой области для Nikon D800E
+   * Поддержка DNG-файлов сделанных из RAW Fuji X-Pro1 
+   * Встроенные описания камер для RawSpeed обновлены до версии r479
+   * Win32/C-API: добавлены вызовы libraw_open_wfile/libraw_open_wfile_ex() 
+   * Новый бит warning LIBRAW_WARN_RAWSPEED_UNSUPPORTED, устанавливается
+     (вместе с LIBRAW_WARN_RAWSPEED_PROBLEM) если RawSpeed сообщила, 
+     что камера не поддерживается.
+   * LibRaw 0.15.0-Beta1
+
+2012-09-17  Alex Tutubalin <lexa@lexa.ru>
 
    * Поддержка сборки с библиотекой RawSpeed (http://rawstudio.org/blog/?p=800)
      Раскодирование (LibRaw::unpack()) поддерживаемых форматов стало в 1.5-3

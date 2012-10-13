@@ -9054,6 +9054,7 @@ canon_cr2:
 	     !strcmp(model,"D7000")) {
     width -= 44;
   } else if (!strcmp(model,"D3200") ||
+	     !strcmp(model,"D800E") ||
 	     !strcmp(model,"D800")) {
     width -= 46;
   } else if (!strcmp(model,"D4")) {

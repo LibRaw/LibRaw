@@ -7900,6 +7900,7 @@ canon_cr2:
 	     !strcmp(model,"D7000")) {
     width -= 44;
   } else if (!strcmp(model,"D3200") ||
+	     !strcmp(model,"D800E") ||
 	     !strcmp(model,"D800")) {
     width -= 46;
   } else if (!strcmp(model,"D4")) {
@@ -8801,7 +8802,7 @@ c603:
 }
 
 
-#line 10050 "dcraw/dcraw.c"
+#line 10051 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -9032,7 +9033,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 10306 "dcraw/dcraw.c"
+#line 10307 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

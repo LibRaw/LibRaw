@@ -1,3 +1,13 @@
+2012-10-13  Alex Tutubalin <lexa@lexa.ru>
+   * Corrected D800E margins
+   * Support for DNGs made from Fuji X-Pro1 RAWs
+   * updated RawSpeed's camera list to r479
+   * Win32/C-API: libraw_open_wfile/libraw_open_wfile_ex() calls
+   * New warning flag LIBRAW_WARN_RAWSPEED_UNSUPPORTED, this bit in
+     process_warnings is set (with LIBRAW_WARN_RAWSPEED_PROBLEM) if
+     RawSpeed's checkSupported() fails.
+   * LibRaw 0.15.0-Beta1
+
 2012-09-17  Alex Tutubalin <lexa@lexa.ru>
 
    * Alpha-quality RawSpeed library support (http://rawstudio.org/blog/?p=800)

@@ -68,12 +68,28 @@ extern "C"
         LibRaw *ip = (LibRaw*) lr->parent_class;
         return ip->open_file(file);
     }
+
     int libraw_open_file_ex(libraw_data_t* lr, const char *file,INT64 sz)
     {
         if(!lr) return EINVAL;
         LibRaw *ip = (LibRaw*) lr->parent_class;
         return ip->open_file(file,sz);
     }
+#ifdef WIN32
+    int libraw_open_wfile(libraw_data_t* lr, const wchar_t *file)
+    {
+        if(!lr) return EINVAL;
+        LibRaw *ip = (LibRaw*) lr->parent_class;
+        return ip->open_file(file);
+    }
+
+    int libraw_open_wfile_ex(libraw_data_t* lr, const wchar_t *file,INT64 sz)
+    {
+        if(!lr) return EINVAL;
+        LibRaw *ip = (LibRaw*) lr->parent_class;
+        return ip->open_file(file,sz);
+    }
+#endif
     int libraw_open_buffer(libraw_data_t* lr, void *buffer, size_t size)
     {
         if(!lr) return EINVAL;

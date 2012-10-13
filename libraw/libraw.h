@@ -53,6 +53,10 @@ DllDef    const char          *libraw_strprogress(enum LibRaw_progress);
 DllDef    libraw_data_t       *libraw_init(unsigned int flags);
 DllDef    int                 libraw_open_file(libraw_data_t*, const char *);
 DllDef    int                 libraw_open_file_ex(libraw_data_t*, const char *, INT64 max_buff_sz);
+#ifdef WIN32
+DllDef    int                 libraw_open_wfile(libraw_data_t*, const wchar_t *);
+DllDef    int                 libraw_open_wfile_ex(libraw_data_t*, const wchar_t *, INT64 max_buff_sz);
+#endif
 DllDef    int                 libraw_open_buffer(libraw_data_t*, void * buffer, size_t size);
 DllDef    int                 libraw_unpack(libraw_data_t*);
 DllDef    int                 libraw_unpack_thumb(libraw_data_t*);

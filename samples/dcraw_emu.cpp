@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
           char *optstr = argv[arg];
           opt = argv[arg++][1];
           if ((cp = strchr (sp=(char*)"cnbrkStqmHABCgU", opt))!=0)
-              for (i=0; i < "111411111142"[cp-sp]-'0'; i++)
+              for (i=0; i < "111411111144221"[cp-sp]-'0'; i++)
                   if (!isdigit(argv[arg+i][0]) && !optstr[2]) 
                       {
                           fprintf (stderr,"Non-numeric argument to \"-%c\"\n", opt);

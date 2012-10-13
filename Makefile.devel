@@ -7,7 +7,7 @@ CXX=g++
 
 # RawSpeed Support
 CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
-LDADD+=-L../RawSpeed/RawSpeed -lrawspeed -L/usr/local/include -ljpeg -lxml2
+LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/usr/local/include -ljpeg -lxml2
 RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
 
