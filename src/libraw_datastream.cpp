@@ -111,7 +111,7 @@ LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname) : filename(
       }
     }
 }
-wchar_t *LibRaw_file_datastream::wfname()
+const wchar_t *LibRaw_file_datastream::wfname()
 {
   return wfilename.size()>0?wfilename.c_str():NULL;
 }
@@ -515,7 +515,7 @@ LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const wchar_t *fname) : fil
     }
   sav=0;
 }
-wchar_t *LibRaw_bigfile_datastream::wfname()
+const wchar_t *LibRaw_bigfile_datastream::wfname()
 {
   return wfilename.size()>0?wfilename.c_str():NULL;
 }
