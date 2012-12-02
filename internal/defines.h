@@ -21,14 +21,14 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
-#line 26 "dcraw/dcraw.c"
+#line 27 "dcraw/dcraw.c"
 #ifndef USE_JPEG
 #define NO_JPEG
 #endif
 #ifndef USE_JASPER
 #define NO_JASPER
 #endif
-#line 37 "dcraw/dcraw.c"
+#line 38 "dcraw/dcraw.c"
 #define DCRAW_VERSION "9.16"
 
 #ifndef _GNU_SOURCE
@@ -59,14 +59,14 @@ it under the terms of the one of three licenses as you choose:
 #ifndef NO_JPEG
 #include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
 #endif				/* and Adobe Lossy DNGs */
-#line 72 "dcraw/dcraw.c"
+#line 73 "dcraw/dcraw.c"
 #ifdef LOCALEDIR
 #include <libintl.h>
 #define _(String) gettext(String)
 #else
 #define _(String) (String)
 #endif
-#line 86 "dcraw/dcraw.c"
+#line 87 "dcraw/dcraw.c"
 #ifdef __CYGWIN__
 #include <io.h>
 #endif
@@ -77,7 +77,7 @@ it under the terms of the one of three licenses as you choose:
 #define snprintf _snprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
-#line 100 "dcraw/dcraw.c"
+#line 101 "dcraw/dcraw.c"
 #else
 #include <unistd.h>
 #include <utime.h>
@@ -94,7 +94,7 @@ typedef unsigned long long UINT64;
 #ifndef LONG_BIT
 #define LONG_BIT (8 * sizeof (long))
 #endif
-#line 187 "dcraw/dcraw.c"
+#line 188 "dcraw/dcraw.c"
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
@@ -150,7 +150,7 @@ typedef unsigned long long UINT64;
 
 #define RAW(row,col) \
 	raw_image[(row)*raw_width+(col)]
-#line 248 "dcraw/dcraw.c"
+#line 249 "dcraw/dcraw.c"
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 

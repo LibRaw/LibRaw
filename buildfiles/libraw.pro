@@ -16,7 +16,7 @@ win32: {
 PREPROCESS_FILES=../dcraw/dcraw.c
 preprocess.name=dcraw.c preprocess
 preprocess.input=PREPROCESS_FILES
-preprocess.output+=../internal/dcraw_common.cpp 
+preprocess.output+=../internal/dcraw_common_fake.cpp 
 preprocess.commands=..\\win32pre.cmd
 preprocess.CONFIG+= no_link
 preprocess.clean=
@@ -31,6 +31,7 @@ macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.5
 DEFINES+=LIBRAW_BUILDLIB
 
 SOURCES+= \
+	 ../internal/dcraw_common.cpp \
 	 ../internal/dcraw_fileio.cpp \
 	../internal/demosaic_packs.cpp \
 	../src/libraw_cxx.cpp \

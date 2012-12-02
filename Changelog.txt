@@ -1,3 +1,13 @@
+2012-12-02  Alex Tutubalin <lexa@lexa.ru>
+   * Preliminary support for new cameras:
+     Canon: G15, S110, SX50
+     Fujifilm: F800EXR, XF1
+     Nikon: 1 J2, 1 V2, D600
+     Olympus: E-PL5, E-PM2
+     Panasonic: FZ200, GH3, LX7
+     Pentax: K-5 II, K-5 IIs, K-30, Q10
+     Sony: SLT-A99, NEX-5R, NEX-6
+
 2012-10-26  Alex Tutubalin <lexa@lexa.ru>
    * New warning flag LIBRAW_WARN_RAWSPEED_PROCESSED
      - not really a warning, but information that rawspeed used
