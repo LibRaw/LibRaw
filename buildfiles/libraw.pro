@@ -12,6 +12,11 @@ HEADERS=../libraw/libraw.h \
 	../internal/var_defines.h \
 	../internal/libraw_internal_funcs.h
 
+win32:srcbuild.commands=..\\win32pre.cmd
+win32:srcbuild.target=../internal/dcraw_common.cpp
+win32:srcbuild.depends=../dcraw/dcraw.c
+win32:QMAKE_EXTRA_TARGETS+=srcbuild
+
 CONFIG-=qt
 CONFIG+=warn_off
 macx: CONFIG+= static x86 x86_64
