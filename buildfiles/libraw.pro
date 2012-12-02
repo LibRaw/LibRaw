@@ -12,10 +12,17 @@ HEADERS=../libraw/libraw.h \
 	../internal/var_defines.h \
 	../internal/libraw_internal_funcs.h
 
-win32:srcbuild.commands=..\\win32pre.cmd
-win32:srcbuild.target=../internal/dcraw_common.cpp
-win32:srcbuild.depends=../dcraw/dcraw.c
-win32:QMAKE_EXTRA_TARGETS+=srcbuild
+win32: {
+PREPROCESS_FILES=../dcraw/dcraw.c
+preprocess.name=dcraw.c preprocess
+preprocess.input=PREPROCESS_FILES
+preprocess.output+=../internal/dcraw_common.cpp 
+preprocess.commands=..\\win32pre.cmd
+preprocess.CONFIG+= no_link
+preprocess.clean=
+preprocess.variable_out=SOURCES
+QMAKE_EXTRA_COMPILERS+=preprocess
+}
 
 CONFIG-=qt
 CONFIG+=warn_off
@@ -23,8 +30,8 @@ macx: CONFIG+= static x86 x86_64
 macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.5
 DEFINES+=LIBRAW_BUILDLIB
 
-SOURCES=../internal/dcraw_common.cpp \
-	../internal/dcraw_fileio.cpp \
+SOURCES+= \
+	 ../internal/dcraw_fileio.cpp \
 	../internal/demosaic_packs.cpp \
 	../src/libraw_cxx.cpp \
 	../src/libraw_datastream.cpp \
