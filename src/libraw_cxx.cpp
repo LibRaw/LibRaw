@@ -984,7 +984,7 @@ int LibRaw::unpack(void)
                 if(rheight < S.height + S.top_margin)
                     rheight = S.height + S.top_margin;
             }
-        S.raw_pitch = S.raw_width;
+        S.raw_pitch = S.raw_width*2;
         imgdata.rawdata.raw_image = 0;
         imgdata.rawdata.color4_image = 0;
 		imgdata.rawdata.color3_image = 0;
@@ -1021,19 +1021,19 @@ int LibRaw::unpack(void)
                   // Save pointer to decoder
                   _rawspeed_decoder = static_cast<void*>(d);
                   imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
-                  S.raw_pitch = r->pitch/2;
+                  S.raw_pitch = r->pitch;
                   fix_after_rawspeed();
                 } else if(r->getCpp()==4) {
 					_rawspeed_decoder = static_cast<void*>(d);
 					imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
-					S.raw_pitch = r->pitch/8;
+					S.raw_pitch = r->pitch;
 					C.maximum = r->whitePoint;
 					fix_after_rawspeed();
 				} else if(r->getCpp() == 3)
 				{
 					_rawspeed_decoder = static_cast<void*>(d);
 					imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
-					S.raw_pitch = r->pitch/6;
+					S.raw_pitch = r->pitch;
 					C.maximum = r->whitePoint;
 					fix_after_rawspeed();
 				}
@@ -1065,7 +1065,7 @@ int LibRaw::unpack(void)
                 S.iwidth = S.width;
                 S.iheight= S.height;
                 IO.shrink = 0;
-		S.raw_pitch = S.width;
+				S.raw_pitch = S.width*8;
                 // allocate image as temporary buffer, size 
                 imgdata.rawdata.raw_alloc = calloc(S.iwidth*S.iheight,sizeof(*imgdata.image));
                 imgdata.image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
@@ -1208,7 +1208,7 @@ int LibRaw::raw2image(void)
                     }
                     if (r < S.height && c < S.width)
                       imgdata.image[((r)>>IO.shrink)*S.iwidth+((c)>>IO.shrink)][FC(r,c)] 
-                        = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch+(col+S.left_margin)];
+                        = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch/2+(col+S.left_margin)];
                   }
                 }
               } 
@@ -1217,23 +1217,38 @@ int LibRaw::raw2image(void)
                 for (row=0; row < S.height; row++)
                   for (col=0; col < S.width; col++)
                     imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][fcol(row,col)] 
-                        = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch+(col+S.left_margin)];
+                        = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch/2+(col+S.left_margin)];
               }
             }
         else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
             {
-                if(imgdata.rawdata.color4_image)
-		{
-			if(S.width == S.raw_pitch)
-				memmove(imgdata.image,imgdata.rawdata.color4_image,S.width*S.height*sizeof(*imgdata.image));
-			else
-			{
-				for(int row = 0; row < S.height; row++)
-					memmove(&imgdata.image[row*S.width],
-					&imgdata.rawdata.color4_image[(row+S.top_margin)*S.raw_pitch+S.left_margin],
-					S.width*sizeof(*imgdata.image));
-			}
-		}
+               if(imgdata.rawdata.color4_image)
+				{
+					if(S.width*8 == S.raw_pitch)
+						memmove(imgdata.image,imgdata.rawdata.color4_image,S.width*S.height*sizeof(*imgdata.image));
+					else
+					{
+						for(int row = 0; row < S.height; row++)
+							memmove(&imgdata.image[row*S.width],
+							&imgdata.rawdata.color4_image[(row+S.top_margin)*S.raw_pitch/8+S.left_margin],
+							S.width*sizeof(*imgdata.image));
+					}
+				}
+			   else if(imgdata.rawdata.color3_image)
+			   {
+				   for(int row = 0; row < S.height; row++)
+					   for(int col=0; col < S.width; col++)
+					   {
+						   for(int c=0; c< 3; c++)
+							   imgdata.image[row*S.width+col][c] = imgdata.rawdata.color3_image[(row+S.top_margin)*S.raw_pitch+S.left_margin+col][c];
+						   imgdata.image[row*S.width+col][3]=0;
+					   }
+			   }
+			   else
+			   {
+				   // legacy decoder, but no data?
+				   throw LIBRAW_EXCEPTION_DECODE_RAW;
+			   }
             }
 
         // Free PhaseOne separate copy allocated at function start
@@ -1261,7 +1276,7 @@ int LibRaw::raw2image(void)
 void LibRaw::phase_one_allocate_tempbuffer()
 {
   // Allocate temp raw_image buffer
-  imgdata.rawdata.raw_image = (ushort*)malloc(S.raw_pitch*S.raw_height*sizeof(ushort));
+  imgdata.rawdata.raw_image = (ushort*)malloc(S.raw_pitch*S.raw_height);
   merror (imgdata.rawdata.raw_image, "phase_one_prepare_to_correct()");
 }
 void LibRaw::phase_one_free_tempbuffer()
@@ -1334,7 +1349,7 @@ void LibRaw::copy_fuji_uncropped(unsigned short cblack[4],unsigned short *dmaxp)
                         }
                         if (r < S.height && c < S.width)
                           {
-                            unsigned short val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch+(col+S.left_margin)];
+                            unsigned short val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch/2+(col+S.left_margin)];
                             int cc = FC(r,c);
                             if(val>cblack[cc])
                               {
@@ -1370,7 +1385,7 @@ void LibRaw::copy_bayer(unsigned short cblack[4],unsigned short *dmaxp)
       unsigned short ldmax = 0;
       for (col=0; col < S.width; col++)
         {
-          unsigned short val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch+(col+S.left_margin)];
+          unsigned short val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch/2+(col+S.left_margin)];
           int cc = fcol(row,col);
           if(val>cblack[cc])
             {
@@ -1527,7 +1542,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
                           c = row + ((col+1) >> 1);
                         }
                         
-                        unsigned short val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch
+                        unsigned short val = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch/2
                                                             +(col+S.left_margin)];
                         int cc = FCF(row,col);
                         if(val > cblack[cc])
@@ -1561,11 +1576,11 @@ int LibRaw::raw2image_ex(int do_subtract_black)
 		if(imgdata.rawdata.color4_image)
 		{
 			// 4-component decoded, move as is
-			if(S.raw_pitch != S.width)
+			if(S.raw_pitch != S.width*8)
 			{
 				for(int row = 0; row < S.height; row++)
 					memmove(&imgdata.image[row*S.width],
-					&imgdata.rawdata.color4_image[(row+S.top_margin)*S.raw_pitch+S.left_margin],
+					&imgdata.rawdata.color4_image[(row+S.top_margin)*S.raw_pitch/8+S.left_margin],
 					S.width*sizeof(*imgdata.image));
 			}
 			else
@@ -1576,13 +1591,18 @@ int LibRaw::raw2image_ex(int do_subtract_black)
 		}
 		else if(imgdata.rawdata.color3_image)
 		{
+			unsigned char *c3image = (unsigned char*) imgdata.rawdata.color3_image;
 			for(int row = 0; row < S.height; row++)
+			{
+				ushort (*srcrow)[3] = (ushort (*)[3]) &c3image[(row+S.top_margin)*S.raw_pitch];
+				ushort (*dstrow)[4] = (ushort (*)[4]) &imgdata.image[row*S.width];
 				for(int col=0; col < S.width; col++)
 				{
 					for(int c=0; c< 3; c++)
-						imgdata.image[row*S.width+col][c] = imgdata.rawdata.color3_image[(row+S.top_margin)*S.raw_pitch+S.left_margin+col][c];
-					imgdata.image[row*S.width+col][3]=0;
+						dstrow[col][c] = srcrow[S.left_margin+col][c];
+					dstrow[col][3]=0;
 				}
+			}
 		}
 		else
 		{

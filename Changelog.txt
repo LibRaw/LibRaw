@@ -25,9 +25,9 @@
       - ushort (*)[4] color4_image for 4-component color raws (Sinar 4shot,
         Kodak RAWs and so on).
 
-   * imgdata.idata.sizes.raw_pitch should be used for right access to
-     color3_image/color4_image buffers. To access (row,col) pixel use
-      color4_image[row*raw_pitch + col][..]
+   * imgdata.idata.sizes.raw_pitch is now in *bytes*
+     This value should be used for access rows in imgdata.rawdata.*_image 
+     buffers.
 
    * Enabled RawSpeed processing for non-bayer DNGs and sRAW.
 
