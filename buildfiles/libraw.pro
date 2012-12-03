@@ -1,6 +1,14 @@
 TEMPLATE=lib
 TARGET=libraw
 INCLUDEPATH+=../
+include (libraw-common-lib.pro)
+## RawSpeed section
+DEFINES+=USE_RAWSPEED
+INCLUDEPATH+=../../RawSpeed/
+win32:INCLUDEPATH+=d:/Qt/local/include d:/Qt/local/include/libxml2
+win32:LIBS+=-lrawspeed -Ld:/Qt/local/lib/$$SUFF -llibxml2 -ljpeg -lpthreadVC2 
+
+
 HEADERS=../libraw/libraw.h \
 	 ../libraw/libraw_alloc.h \
 	../libraw/libraw_const.h \
@@ -38,4 +46,3 @@ SOURCES+= \
 	../src/libraw_datastream.cpp \
 	../src/libraw_c_api.cpp
 
-include (libraw-common-lib.pro)
