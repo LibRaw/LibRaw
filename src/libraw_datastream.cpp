@@ -96,7 +96,7 @@ LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
       }
     }
 }
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
 LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname) : filename(),wfilename(fname),jas_file(NULL),_fsize(0)
 {
   if (wfilename.size()>0) 
@@ -220,7 +220,7 @@ int LibRaw_file_datastream::subfile_open(const char *fn)
         return 0;
 }
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
 int LibRaw_file_datastream::subfile_open(const wchar_t *fn)
 {
 	LR_STREAM_CHK();
@@ -493,7 +493,7 @@ LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname): filenam
     sav=0;
 }
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
 LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const wchar_t *fname) : filename(),wfilename(fname)
 { 
   if(wfilename.size()>0)
@@ -607,7 +607,7 @@ int LibRaw_bigfile_datastream::subfile_open(const char *fn)
     else
         return 0;
 }
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
 int LibRaw_bigfile_datastream::subfile_open(const wchar_t *fn)
 {
 	if(sav) return EBUSY;

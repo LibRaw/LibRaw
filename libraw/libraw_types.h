@@ -305,9 +305,11 @@ typedef struct
     /* really allocated bitmap */
     void        *raw_alloc;
     /* alias to single_channel variant */
-    ushort                      *raw_image;
+    ushort      *raw_image;
     /* alias to 4-channel variant */
-    ushort                      (*color_image)[4] ;
+    ushort      (*color4_image)[4] ;
+	/* alias to 3-color variand decoded by RawSpeed */
+	ushort		(*color3_image)[3];
     
     /* Phase One black level data; */
     short  (*ph1_black)[2];

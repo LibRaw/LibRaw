@@ -2,6 +2,9 @@ TEMPLATE=lib
 TARGET=libraw
 INCLUDEPATH+=../
 include (libraw-common-lib.pro)
+# JPEG section (libjpeg is linked later)
+DEFINES+=USE_JPEG
+
 ## RawSpeed section
 DEFINES+=USE_RAWSPEED
 INCLUDEPATH+=../../RawSpeed/

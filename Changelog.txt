@@ -1,4 +1,5 @@
-2012-12-02  Alex Tutubalin <lexa@lexa.ru>
+2012-12-03  Alex Tutubalin <lexa@lexa.ru>
+
    * Preliminary support for new cameras:
      Canon: G15, S110, SX50
      Fujifilm: F800EXR, XF1
@@ -8,10 +9,39 @@
      Pentax: K-5 II, K-5 IIs, K-30, Q10
      Sony: SLT-A99, NEX-5R, NEX-6
 
-2012-10-26  Alex Tutubalin <lexa@lexa.ru>
+   * LibRaw::subtract_black() return type is now integer. Function returns
+     errorcode according to libraw error conversion.
+
+   * New processing stage LIBRAW_PROGRESS_RAW2_IMAGE (this flag is set
+     by LibRaw::raw2image() call)
+
    * New warning flag LIBRAW_WARN_RAWSPEED_PROCESSED
-     - not really a warning, but information that rawspeed used
-   * Removed OpenMP support for linear interpolation
+     - not really a warning, but information that RawSpeed library was used 
+	for image decoding.
+
+   * imgdata.rawdata.color_image is now split to two pointers:
+      - ushort (*)[3] color3_image for 3-component RAW images (color DNGs,
+        sRAW)
+      - ushort (*)[4] color4_image for 4-component color raws (Sinar 4shot,
+        Kodak RAWs and so on).
+
+   * imgdata.idata.sizes.raw_pitch should be used for right access to
+     color3_image/color4_image buffers. To access (row,col) pixel use
+      color4_image[row*raw_pitch + col][..]
+
+   * Enabled RawSpeed processing for non-bayer DNGs and sRAW.
+
+   * Removed OpenMP support for linear interpolation because of problems
+     on some compilers.
+
+   * Disabled wchar_t * interface if LibRaw compiled by MinGW because no
+     wchar_t strings in MinGW STL
+
+   * ABI and API changed, all programs using 0.15-Beta1 and older should be 
+     recompiled!
+
+   * LibRaw 0.15.0-Beta2
+
 
 2012-10-13  Alex Tutubalin <lexa@lexa.ru>
    * Corrected D800E margins
