@@ -30,6 +30,10 @@
      buffers.
 
    * Enabled RawSpeed processing for non-bayer DNGs and sRAW.
+     Note: there is a bug in RawStudio r499, 3-color (linear) uncompressed DNGs
+     are read incorrectly. Filed to RawStudio bugzilla
+     Use RawSpeed/rawspeed.uncompressed-color-dng.patch until this bug is not
+     fixed in main RawSpeed source repository.
 
    * Removed OpenMP support for linear interpolation because of problems
      on some compilers.
