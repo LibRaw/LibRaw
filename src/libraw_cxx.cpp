@@ -1236,13 +1236,18 @@ int LibRaw::raw2image(void)
 				}
 			   else if(imgdata.rawdata.color3_image)
 			   {
+				   unsigned char *c3image = (unsigned char*) imgdata.rawdata.color3_image;
 				   for(int row = 0; row < S.height; row++)
+				   {
+					   ushort (*srcrow)[3] = (ushort (*)[3]) &c3image[(row+S.top_margin)*S.raw_pitch];
+					   ushort (*dstrow)[4] = (ushort (*)[4]) &imgdata.image[row*S.width];
 					   for(int col=0; col < S.width; col++)
 					   {
 						   for(int c=0; c< 3; c++)
-							   imgdata.image[row*S.width+col][c] = imgdata.rawdata.color3_image[(row+S.top_margin)*S.raw_pitch+S.left_margin+col][c];
-						   imgdata.image[row*S.width+col][3]=0;
+							   dstrow[col][c] = srcrow[S.left_margin+col][c];
+						   dstrow[col][3]=0;
 					   }
+				   }
 			   }
 			   else
 			   {
@@ -1575,7 +1580,6 @@ int LibRaw::raw2image_ex(int do_subtract_black)
       {
 		if(imgdata.rawdata.color4_image)
 		{
-			// 4-component decoded, move as is
 			if(S.raw_pitch != S.width*8)
 			{
 				for(int row = 0; row < S.height; row++)
