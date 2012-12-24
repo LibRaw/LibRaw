@@ -224,7 +224,7 @@
              sony ARW2 files. 
            int imgdata.params.sony_arw2_hack;
          * Some optimizations introduced in previous LibRaw versions are
-           temporarilyy removed:
+           temporarily removed:
             - OpenMP
             - One pass data copy + black subtraction + fuji data rotation
               (LibRaw::raw2image_ex() )
