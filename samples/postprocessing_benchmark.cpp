@@ -42,6 +42,9 @@ int main(int argc, char *argv[])
 {
     int  i, ret,rep=1;
     LibRaw RawProcessor;
+#ifdef OUT
+#undef OUT
+#endif
 #define OUT RawProcessor.imgdata.params
 #define S RawProcessor.imgdata.sizes
 
