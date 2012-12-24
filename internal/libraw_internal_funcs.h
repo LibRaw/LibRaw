@@ -114,6 +114,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        leaf_hdr_load_raw();
     void        sinar_4shot_load_raw();
     void        imacon_full_load_raw();
+    void        hasselblad_full_load_raw();
     void        packed_load_raw();
     float	find_green(int,int,int,int);
     void        unpacked_load_raw();

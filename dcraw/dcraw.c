@@ -6418,6 +6418,7 @@ int CLASS parse_tiff_ifd (int base)
 	strcpy (make, "Imacon");
 	data_offset = ftell(ifp);
 	ima_len = len;
+        printf("Data len: %d\n",ima_len);
 	break;
       case 46279:
 	if (!ima_len) break;
@@ -6430,7 +6431,12 @@ int CLASS parse_tiff_ifd (int base)
 	width = raw_width - left_margin - (get4() & 7);
 	top_margin = get4() & 7;
 	height = raw_height - top_margin - (get4() & 7);
-	if (raw_width == 7262) {
+	if (raw_width == 7262 && ima_len == 234317952 ) {
+	  height = 5412;
+	  width  = 7216;
+	  left_margin = 7;
+          filters=0;
+	} else 	if (raw_width == 7262) {
 	  height = 5444;
 	  width  = 7244;
 	  left_margin = 7;

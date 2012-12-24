@@ -5267,6 +5267,7 @@ int CLASS parse_tiff_ifd (int base)
 	strcpy (make, "Imacon");
 	data_offset = ftell(ifp);
 	ima_len = len;
+        printf("Data len: %d\n",ima_len);
 	break;
       case 46279:
 	if (!ima_len) break;
@@ -5279,7 +5280,12 @@ int CLASS parse_tiff_ifd (int base)
 	width = raw_width - left_margin - (get4() & 7);
 	top_margin = get4() & 7;
 	height = raw_height - top_margin - (get4() & 7);
-	if (raw_width == 7262) {
+	if (raw_width == 7262 && ima_len == 234317952 ) {
+	  height = 5412;
+	  width  = 7216;
+	  left_margin = 7;
+          filters=0;
+	} else 	if (raw_width == 7262) {
 	  height = 5444;
 	  width  = 7244;
 	  left_margin = 7;
@@ -6242,7 +6248,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 7399 "dcraw/dcraw.c"
+#line 7405 "dcraw/dcraw.c"
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
   int i;
@@ -6343,7 +6349,7 @@ void CLASS parse_foveon()
   }
   is_foveon = 1;
 }
-#line 7502 "dcraw/dcraw.c"
+#line 7508 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -8891,7 +8897,7 @@ c603:
 }
 
 
-#line 10141 "dcraw/dcraw.c"
+#line 10147 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -9122,7 +9128,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 10397 "dcraw/dcraw.c"
+#line 10403 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

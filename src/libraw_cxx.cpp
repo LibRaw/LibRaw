@@ -529,6 +529,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
             d_info->decoder_name = "imacon_full_load_raw()"; 
             d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
         }
+    else if (load_raw == &LibRaw::hasselblad_full_load_raw )
+        {
+            d_info->decoder_name = "hasselblad_full_load_raw()"; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
+        }
     else if (load_raw == &LibRaw::packed_load_raw )
         {
             d_info->decoder_name = "packed_load_raw()";
@@ -838,6 +843,19 @@ int LibRaw::open_buffer(void *buffer, size_t size)
     return ret;
 }
 
+void LibRaw::hasselblad_full_load_raw()
+{
+  int row, col;
+
+  for (row=0; row < S.height; row++)
+    for (col=0; col < S.width; col++)
+      {
+        read_shorts (&imgdata.image[row*S.width+col][2], 1); // B
+        read_shorts (&imgdata.image[row*S.width+col][1], 1); // G
+        read_shorts (&imgdata.image[row*S.width+col][0], 1); // R
+      }
+}
+
 
 int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 {
@@ -856,7 +874,23 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
             O.use_camera_matrix = O.use_camera_wb;
 
         identify();
-
+#if 0
+        size_t bytes = ID.input->size()-libraw_internal_data.unpacker_data.data_offset;
+        float bpp = float(bytes)/float(S.raw_width)/float(S.raw_height);
+        float bpp2 = float(bytes)/float(S.width)/float(S.height);
+        printf("RawSize: %dx%d data offset: %d data size:%d bpp: %g bpp2: %g\n",S.raw_width,S.raw_height,libraw_internal_data.unpacker_data.data_offset,bytes,bpp,bpp2);
+        if(!strcasecmp(imgdata.idata.make,"Hasselblad") && bpp == 6.0f)
+          {
+            load_raw = &LibRaw::hasselblad_full_load_raw;
+            S.width = S.raw_width;
+            S.height = S.raw_height;
+            P1.filters = 0;
+            P1.colors=3;
+            P1.raw_count=1;
+            C.maximum=0xffff;
+            printf("3 channel hassy found\n");
+          }
+#endif
         if(C.profile_length)
             {
                 if(C.profile) free(C.profile);
@@ -958,11 +992,11 @@ int LibRaw::unpack(void)
                 free(imgdata.image);
                 imgdata.image = 0;
             }
-	    if(imgdata.rawdata.raw_alloc)
-		{
-			free(imgdata.rawdata.raw_alloc);
-			imgdata.rawdata.raw_alloc = 0;
-		}
+        if(imgdata.rawdata.raw_alloc)
+          {
+            free(imgdata.rawdata.raw_alloc);
+            imgdata.rawdata.raw_alloc = 0;
+          }
         if (libraw_internal_data.unpacker_data.meta_length) 
             {
                 libraw_internal_data.internal_data.meta_data = 
@@ -987,7 +1021,7 @@ int LibRaw::unpack(void)
         S.raw_pitch = S.raw_width*2;
         imgdata.rawdata.raw_image = 0;
         imgdata.rawdata.color4_image = 0;
-		imgdata.rawdata.color3_image = 0;
+	imgdata.rawdata.color3_image = 0;
 #ifdef USE_RAWSPEED
         // RawSpeed Supported, 
         if(O.use_rawspeed && (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
@@ -1024,19 +1058,19 @@ int LibRaw::unpack(void)
                   S.raw_pitch = r->pitch;
                   fix_after_rawspeed();
                 } else if(r->getCpp()==4) {
-					_rawspeed_decoder = static_cast<void*>(d);
-					imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
-					S.raw_pitch = r->pitch;
-					C.maximum = r->whitePoint;
-					fix_after_rawspeed();
-				} else if(r->getCpp() == 3)
-				{
-					_rawspeed_decoder = static_cast<void*>(d);
-					imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
-					S.raw_pitch = r->pitch;
-					C.maximum = r->whitePoint;
-					fix_after_rawspeed();
-				}
+                  _rawspeed_decoder = static_cast<void*>(d);
+                  imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
+                  S.raw_pitch = r->pitch;
+                  C.maximum = r->whitePoint;
+                  fix_after_rawspeed();
+                } else if(r->getCpp() == 3)
+                  {
+                    _rawspeed_decoder = static_cast<void*>(d);
+                    imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
+                    S.raw_pitch = r->pitch;
+                    C.maximum = r->whitePoint;
+                    fix_after_rawspeed();
+                  }
                 else
                   {
                     delete d;

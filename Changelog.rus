@@ -1,4 +1,7 @@
-﻿2012-12-24  Alex Tutubalin <lexa@lexa.ru>
+﻿2013-01-18  Alex Tutubalin <lexa@lexa.ru>
+   * Поддержаны Multishot-файлы Imacon Ixpress 39Mpix
+
+2012-12-24  Alex Tutubalin <lexa@lexa.ru>
    * Импортирована dcraw 9.17, поддержаны 11 новых камер:
      Canon 6D и EOS M, Casio EX-ZR100, Fujifilm X-E1, Leica D-LUX6 и V-LUX4,
      Nikon P7700, Olympus XZ-2, Panasonic G5, Samsung EX2F, Sony RX-1
