@@ -85,7 +85,6 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 // Nikon (and Minolta Z2)
     void        nikon_load_raw();
 //void        nikon_load_raw();
-    int         nikon_is_compressed();
     int         nikon_e995();
     int         nikon_e2100();
     void        nikon_3700();

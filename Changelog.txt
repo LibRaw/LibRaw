@@ -1,3 +1,13 @@
+2012-12-24  Alex Tutubalin <lexa@lexa.ru>
+   * Dcraw 9.17 imported, support for new cameras:
+     Canon 6D and EOS M, Casio EX-ZR100, Fujifilm X-E1, Leica D-LUX6 and
+     V-LUX4, Nikon P7700, Olympus XZ-2, Panasonic G5, Samsung EX2F,
+     Sony RX-1
+   * New API call LibRaw::is_fuji_rotated() returns true for files
+     needs 'fuji_rotate()' call on postprocessing.
+   * LibRaw 0.15.0-Beta3
+
+
 2012-12-03  Alex Tutubalin <lexa@lexa.ru>
 
    * Preliminary support for new cameras:
