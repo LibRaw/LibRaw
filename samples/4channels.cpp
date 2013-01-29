@@ -48,7 +48,7 @@ int main(int ac, char *av[])
         {
           usage:
             printf(
-                "4channeld - LibRaw %s sample. %d cameras supported\n"
+                "4channels - LibRaw %s sample. %d cameras supported\n"
                 "Usage: %s [-s N] [-g] [-A] [-B] [-N] raw-files....\n"
                 "\t-s N - select Nth image in file (default=0)\n"
                 "\t-g - use gamma correction with gamma 2.2 (not precise,use for visual inspection only)\n"
