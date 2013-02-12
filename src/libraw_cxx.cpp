@@ -80,6 +80,8 @@ extern "C"
                 return "No thumbnail in file";
             case    LIBRAW_UNSUPPORTED_THUMBNAIL:
                 return "Unsupported thumbnail format";
+			case LIBRAW_INPUT_CLOSED:
+				return "No input stream, or input stream closed";
             case    LIBRAW_UNSUFFICIENT_MEMORY:
                 return "Unsufficient memory";
             case    LIBRAW_DATA_ERROR:
@@ -384,15 +386,18 @@ void  LibRaw::      free(void *p)
     memmgr.free(p);
 }
 
-
+void LibRaw:: recycle_datastream() 
+{
+	if(libraw_internal_data.internal_data.input && libraw_internal_data.internal_data.input_internal) 
+	{ 
+		delete libraw_internal_data.internal_data.input; 
+		libraw_internal_data.internal_data.input = NULL;
+	}
+	libraw_internal_data.internal_data.input_internal = 0;
+}
 void LibRaw:: recycle() 
 {
-    if(libraw_internal_data.internal_data.input && libraw_internal_data.internal_data.input_internal) 
-        { 
-            delete libraw_internal_data.internal_data.input; 
-            libraw_internal_data.internal_data.input = NULL;
-        }
-    libraw_internal_data.internal_data.input_internal = 0;
+	recycle_datastream();
 #define FREE(a) do { if(a) { free(a); a = NULL;} }while(0)
             
     FREE(imgdata.image); 
@@ -973,6 +978,9 @@ int LibRaw::unpack(void)
     CHECK_ORDER_HIGH(LIBRAW_PROGRESS_LOAD_RAW);
     CHECK_ORDER_LOW(LIBRAW_PROGRESS_IDENTIFY);
     try {
+
+		if(!libraw_internal_data.internal_data.input)
+			return LIBRAW_INPUT_CLOSED;
 
         RUN_CALLBACK(LIBRAW_PROGRESS_LOAD_RAW,0,2);
         if (O.shot_select >= P1.raw_count)
@@ -2113,6 +2121,9 @@ int LibRaw::unpack_thumb(void)
     CHECK_ORDER_BIT(LIBRAW_PROGRESS_THUMB_LOAD);
 
     try {
+		if(!libraw_internal_data.internal_data.input)
+			return LIBRAW_INPUT_CLOSED;
+
         if ( !ID.toffset) 
             {
                 return LIBRAW_NO_THUMBNAIL;

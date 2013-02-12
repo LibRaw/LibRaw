@@ -1,4 +1,15 @@
-﻿2013-01-18  Alex Tutubalin <lexa@lexa.ru>
+﻿2013-02-12  Alex Tutubalin <lexa@lexa.ru>
+   * Добавлены новые методы
+     C++ API: LibRaw::recycle_datastream(), 
+     C API: libraw_recycle_datastream() 
+     и новый код ошибки LIBRAW_INPUT_CLOSED для вызовов unpack/unpack_thumb()
+
+     Эти методы/вызовы позволяют освободить file handle (и ассоциированные
+     буферы), если ваше приложение больше не собирается вызывать unpack()
+     или unpack_thumb() и, сдедовательно, может разблокировать файл и
+     освободить память, которая использовалась для чтения RAW-файла.
+
+2013-01-18  Alex Tutubalin <lexa@lexa.ru>
    * Поддержаны Multishot-файлы Imacon Ixpress 39Mpix
 
 2012-12-24  Alex Tutubalin <lexa@lexa.ru>

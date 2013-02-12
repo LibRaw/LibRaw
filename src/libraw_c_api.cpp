@@ -108,6 +108,12 @@ extern "C"
         LibRaw *ip = (LibRaw*) lr->parent_class;
         return ip->unpack_thumb();
     }
+	void libraw_recycle_datastream(libraw_data_t* lr)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->recycle_datastream();
+	}
     void libraw_recycle(libraw_data_t* lr)
     {
         if(!lr) return;

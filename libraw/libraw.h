@@ -60,6 +60,7 @@ DllDef    int                 libraw_open_wfile_ex(libraw_data_t*, const wchar_t
 DllDef    int                 libraw_open_buffer(libraw_data_t*, void * buffer, size_t size);
 DllDef    int                 libraw_unpack(libraw_data_t*);
 DllDef    int                 libraw_unpack_thumb(libraw_data_t*);
+DllDef    void                libraw_recycle_datastream(libraw_data_t*);
 DllDef    void                libraw_recycle(libraw_data_t*);
 DllDef    void                libraw_close(libraw_data_t*);
 DllDef    void                libraw_subtract_black(libraw_data_t*);
@@ -107,6 +108,7 @@ class DllDef LibRaw
 #endif
     int                         open_buffer(void *buffer, size_t size);
     int                         open_datastream(LibRaw_abstract_datastream *);
+	void							recycle_datastream();
     int                         unpack(void);
     int                         unpack_thumb(void);
 
