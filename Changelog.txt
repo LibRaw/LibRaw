@@ -1,3 +1,5 @@
+2013-02-13  Alex Tutubalin <lexa@lexa.ru>
+   * Fixed possible buffer overrun when RawSpeed library used
 2013-02-12  Alex Tutubalin <lexa@lexa.ru>
    * Added new C++ API Call LibRaw::recycle_datastream(), C API call 
      libraw_recycle_datastream() and new errorcode LIBRAW_INPUT_CLOSED

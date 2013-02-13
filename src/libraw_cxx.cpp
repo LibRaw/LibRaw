@@ -1039,7 +1039,7 @@ int LibRaw::unpack(void)
               {
                 //                printf("Using rawspeed\n");
                 ID.input->seek(0,SEEK_SET);
-                INT64 _rawspeed_buffer_sz = ID.input->size();
+                INT64 _rawspeed_buffer_sz = ID.input->size()+32;
                 void *_rawspeed_buffer = malloc(_rawspeed_buffer_sz);
                 if(!_rawspeed_buffer) throw LIBRAW_EXCEPTION_ALLOC;
                 ID.input->read(_rawspeed_buffer,_rawspeed_buffer_sz,1);

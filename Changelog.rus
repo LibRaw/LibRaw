@@ -1,4 +1,8 @@
-﻿2013-02-12  Alex Tutubalin <lexa@lexa.ru>
+﻿2013-02-13  Alex Tutubalin <lexa@lexa.ru>
+   * Исправлен возможный buffer overrun, возникавший при использовании
+     библиотеки RawSpeed
+
+2013-02-12  Alex Tutubalin <lexa@lexa.ru>
    * Добавлены новые методы
      C++ API: LibRaw::recycle_datastream(), 
      C API: libraw_recycle_datastream() 
