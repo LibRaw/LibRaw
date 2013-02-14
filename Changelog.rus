@@ -1,8 +1,7 @@
-﻿2013-02-13  Alex Tutubalin <lexa@lexa.ru>
+﻿2013-02-14  Alex Tutubalin <lexa@lexa.ru>
    * Исправлен возможный buffer overrun, возникавший при использовании
      библиотеки RawSpeed
 
-2013-02-12  Alex Tutubalin <lexa@lexa.ru>
    * Добавлены новые методы
      C++ API: LibRaw::recycle_datastream(), 
      C API: libraw_recycle_datastream() 
@@ -13,8 +12,9 @@
      или unpack_thumb() и, сдедовательно, может разблокировать файл и
      освободить память, которая использовалась для чтения RAW-файла.
 
-2013-01-18  Alex Tutubalin <lexa@lexa.ru>
    * Поддержаны Multishot-файлы Imacon Ixpress 39Mpix
+
+   * LibRaw 0.15.0-Beta4
 
 2012-12-24  Alex Tutubalin <lexa@lexa.ru>
    * Импортирована dcraw 9.17, поддержаны 11 новых камер:
