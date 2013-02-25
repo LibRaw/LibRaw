@@ -1113,7 +1113,13 @@ int LibRaw::unpack(void)
                 imgdata.image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
               }
             ID.input->seek(libraw_internal_data.unpacker_data.data_offset, SEEK_SET);
+
+			unsigned m_save = C.maximum;
+			if(load_raw == &LibRaw::unpacked_load_raw && !strcasecmp(imgdata.idata.make,"Nikon"))
+				C.maximum=65535;
             (this->*load_raw)();
+			if(load_raw == &LibRaw::unpacked_load_raw && !strcasecmp(imgdata.idata.make,"Nikon"))
+				C.maximum = m_save;
           }
 	    
         if(imgdata.rawdata.raw_image)
