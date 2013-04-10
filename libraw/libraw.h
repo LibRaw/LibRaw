@@ -233,6 +233,7 @@ protected:
     void        vng_interpolate();
     void        ppg_interpolate();
     void        ahd_interpolate();
+    void        dht_interpolate();
 
     /* from demosaic pack */
     void        ahd_interpolate_mod();

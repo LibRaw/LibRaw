@@ -2604,6 +2604,9 @@ int LibRaw::dcraw_process(void)
 // LIBRAW_DEMOSAIC_PACK_GPL3
                 else if (quality == 10)
                     amaze_demosaic_RT();
+// LGPL2
+                else if (quality == 11)
+                    dht_interpolate();
  // fallback to AHD
                 else
                     ahd_interpolate();

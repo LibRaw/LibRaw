@@ -36,6 +36,8 @@ it under the terms of the one of three licenses as you choose:
 
 /* WF filtering is allowed to triple libraw license */
 #include "./wf_filtering.cpp"
+/* DHT is LGPL licensed, so include it */
+#include "./dht_demosaic.cpp"
 
 
 #include "internal/var_defines.h"
