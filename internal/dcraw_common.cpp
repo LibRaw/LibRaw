@@ -7118,7 +7118,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
       if (table[i].t_black)   black   = (ushort) table[i].t_black;
       if (table[i].t_maximum) maximum = (ushort) table[i].t_maximum;
       if (table[i].trans[0]) {
-	for (j=0; j < 12; j++)
+	for (j=0; j < 3; j++)
 #ifdef LIBRAW_LIBRARY_BUILD
           imgdata.color.cam_xyz[0][j] = 
 #endif
