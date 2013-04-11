@@ -52,35 +52,55 @@ struct DHT {
 	/*
 	 * вычисление параметров для цвета, который окружён известными цветами горизонтально и вертикально
 	 */
-	void set(ecdir &e, int x, int y, int l, int al, signed char dx, signed char dy, signed char dx2,
+	void set_g(ecdir &e, int x, int y, int al, signed char dx, signed char dy, signed char dx2,
 			signed char dy2) {
 		if ((nraw[nr_offset(y + dy * 2, x + dx * 2)][al] + nraw[nr_offset(y, x)][al])
-				> 2 * nraw[nr_offset(y + dy, x + dx)][l])
+				> 2 * nraw[nr_offset(y + dy, x + dx)][1])
 			/*
-			 * смещение оттенка пытаемся вычислять всегда так, чтобы коэффициента получался меньше 1
+			 * смещение оттенка пытаемся вычислять всегда так, чтобы коэффициент получался меньше 1
 			 */
 			e.hue_diff = fabs(
-					(nraw[nr_offset(y + dy, x + dx)][l]
+					(nraw[nr_offset(y + dy, x + dx)][1]
 							/ (nraw[nr_offset(y + dy * 2, x + dx * 2)][al]
 									+ nraw[nr_offset(y, x)][al]))
-							- (nraw[nr_offset(y + dy2, x + dx2)][l]
+							- (nraw[nr_offset(y + dy2, x + dx2)][1]
 									/ (nraw[nr_offset(y + dy2 * 2, x + dx2 * 2)][al]
 											+ nraw[nr_offset(y, x)][al]))) * 2;
 		else
 			e.hue_diff = fabs(
 					((nraw[nr_offset(y + dy * 2, x + dx * 2)][al] + nraw[nr_offset(y, x)][al])
-							/ nraw[nr_offset(y + dy, x + dx)][l])
+							/ nraw[nr_offset(y + dy, x + dx)][1])
 							- ((nraw[nr_offset(y + dy2 * 2, x + dx2 * 2)][al]
 									+ nraw[nr_offset(y, x)][al])
-									/ nraw[nr_offset(y + dy2, x + dx2)][l])) / 2;
+									/ nraw[nr_offset(y + dy2, x + dx2)][1])) / 2;
 		/*
 		 * дистанция учитывает разницу не только непосредственно прилегающих горизонтальных или вертикальных значений,
 		 * но и разницу между известными цветами соответствующих направлений. это помогает фильтровать stripe pattern
 		 */
-		e.dist = calc_dist(nraw[nr_offset(y + dy, x + dx)][l], nraw[nr_offset(y + dy2, x + dx2)][l])
+		float c = calc_dist(nraw[nr_offset(y + dy, x + dx)][1],
+				nraw[nr_offset(y + dy2, x + dx2)][1]);
+		e.dist = c
 				* calc_dist(nraw[nr_offset(y + dy * 2, x + dx * 2)][al], nraw[nr_offset(y, x)][al])
 				* calc_dist(nraw[nr_offset(y + dy2 * 2, x + dx2 * 2)][al],
 						nraw[nr_offset(y, x)][al]);
+		e.set(dx, dy, dx2, dy2);
+	}
+	void set_atg(ecdir &e, int x, int y, int al, signed char dx, signed char dy, signed char dx2,
+			signed char dy2) {
+		if (nraw[nr_offset(y + dy, x + dx)][al] > nraw[nr_offset(y + dy, x + dx)][1])
+			e.hue_diff = fabs(
+					nraw[nr_offset(y + dy, x + dx)][1] / nraw[nr_offset(y + dy, x + dx)][al]
+							- nraw[nr_offset(y + dy2, x + dx2)][1]
+									/ nraw[nr_offset(y + dy2, x + dx2)][al]);
+		else
+			e.hue_diff = fabs(
+					nraw[nr_offset(y + dy, x + dx)][al] / nraw[nr_offset(y + dy, x + dx)][1]
+							- nraw[nr_offset(y + dy2, x + dx2)][al]
+									/ nraw[nr_offset(y + dy2, x + dx2)][1]);
+		e.dist = calc_dist(nraw[nr_offset(y + dy, x + dx)][al],
+				nraw[nr_offset(y + dy2, x + dx2)][al])
+				* calc_dist(nraw[nr_offset(y + dy, x + dx)][1], nraw[nr_offset(y, x)][1])
+				* calc_dist(nraw[nr_offset(y + dy2, x + dx2)][1], nraw[nr_offset(y, x)][1]);
 		e.set(dx, dy, dx2, dy2);
 	}
 	/*
@@ -98,9 +118,11 @@ struct DHT {
 					nraw[nr_offset(y + dy, x + dx)][al] / nraw[nr_offset(y + dy, x + dx)][1]
 							- nraw[nr_offset(y + dy2, x + dx2)][al]
 									/ nraw[nr_offset(y + dy2, x + dx2)][1]);
-		e.dist = calc_dist(nraw[nr_offset(y + dy, x + dx)][1], nraw[nr_offset(y + dy2, x + dx2)][1])
-				* calc_dist(nraw[nr_offset(y + dy, x + dx)][al], nraw[nr_offset(y, x)][al])
-				* calc_dist(nraw[nr_offset(y + dy2, x + dx2)][al], nraw[nr_offset(y, x)][al]);
+		e.dist = calc_dist(nraw[nr_offset(y + dy, x + dx)][al],
+				nraw[nr_offset(y + dy2, x + dx2)][al])
+				* calc_dist(nraw[nr_offset(y + dy, x + dx)][1],
+						nraw[nr_offset(y + dy2, x + dx2)][1])
+				* calc_dist(nraw[nr_offset(y + dy, x + dx)][1], nraw[nr_offset(y, x)][1]);
 		e.set(dx, dy, dx2, dy2);
 	}
 	DHT(LibRaw &_libraw);
@@ -154,7 +176,7 @@ DHT::DHT(LibRaw& _libraw) :
  */
 void DHT::make_greens() {
 #if defined(LIBRAW_USE_OPENMP)
-#pragma omp parallel for
+#pragma omp parallel for schedule(guided)
 #endif
 	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
 		int js = libraw.COLOR(i, 0) & 1;
@@ -163,29 +185,30 @@ void DHT::make_greens() {
 		 * js -- начальная х-координата, которая попадает мимо известного зелёного
 		 * al -- известный цвет в точке интерполирования
 		 */
-		for (int j = js; j < libraw.imgdata.sizes.iwidth; j += 2) {
+		int iwidth = libraw.imgdata.sizes.iwidth;
+		for (int j = js; j < iwidth; j += 2) {
 			ecdir gd[6];
 			int nrx = j + nr_leftmargin;
 			int nry = i + nr_topmargin;
 			/*
 			 * горизонтальные и вертикальные направления
 			 */
-			set(gd[0], nrx, nry, 1, al, 0, -1, 0, 1);
-			set(gd[1], nrx, nry, 1, al, -1, 0, 1, 0);
+			set_g(gd[0], nrx, nry, al, 0, -1, 0, 1);
+			set_g(gd[1], nrx, nry, al, -1, 0, 1, 0);
 			/*
 			 * направления уголком
 			 */
-			set(gd[2], nrx, nry, 1, al, 0, -1, 1, 0);
-			set(gd[3], nrx, nry, 1, al, 0, -1, -1, 0);
-			set(gd[4], nrx, nry, 1, al, 0, 1, 1, 0);
-			set(gd[5], nrx, nry, 1, al, 0, 1, -1, 0);
+			set_g(gd[2], nrx, nry, al, 0, -1, 1, 0);
+			set_g(gd[3], nrx, nry, al, 1, 0, 0, 1);
+			set_g(gd[4], nrx, nry, al, 0, 1, -1, 0);
+			set_g(gd[5], nrx, nry, al, -1, 0, 0, -1);
 			/*
 			 * массив направлений для интерполяции.
 			 * сначала данные были общими, но вертикальные и горизонтальные направления дают намного меньше артефактов.
 			 * причина, скорее всего, в том, что направление интерполяции должно проходить через интерполируемую точку.
 			 */
 
-			if (gd[0].hue_diff > gd[1].hue_diff) {
+			if (gd[0].dist > gd[1].dist) {
 				ecdir t = gd[1];
 				gd[1] = gd[0];
 				gd[0] = t;
@@ -193,14 +216,10 @@ void DHT::make_greens() {
 			/*
 			 * в случае, когда изменение оттенка не очень существенно, то выбираем более подходящую дистанцию
 			 *
-			 * коэффициент 0.5 выбран достаточно произвольно.
-			 * не имею ни малейшего понятия, какой коэффициент на самом деле можно считать
-			 * "не очень существенное визуальное изменение оттенка".
-			 * нужны какие-то эксперименты с хорошими тестовыми изображениями.
 			 *
 			 * хорошо бы свести два условия в одно
 			 */
-			if (gd[1].hue_diff < 0.5 && gd[0].dist > gd[1].dist) {
+			if (gd[0].hue_diff > 1 && gd[1].hue_diff < 1) {
 				ecdir t = gd[1];
 				gd[1] = gd[0];
 				gd[0] = t;
@@ -210,33 +229,41 @@ void DHT::make_greens() {
 			 * сортировка уголковых направлений. подлинная сортировка не нужна, достаточно вычислить наилучшее направление.
 			 */
 			for (int n = 4; n > 1; --n) {
-				if (gd[n].hue_diff > gd[n + 1].hue_diff) {
+				if (gd[n].dist > gd[n + 1].dist) {
 					ecdir t = gd[n + 1];
 					gd[n + 1] = gd[n];
 					gd[n] = t;
 				}
 			}
-			for (int n = 4; n > 1; --n) {
-				if (gd[n + 1].hue_diff < 0.5 && gd[n].dist > gd[n + 1].dist) {
-					ecdir t = gd[n + 1];
-					gd[n + 1] = gd[n];
-					gd[n] = t;
+			for (int n = 2; n < 5; ++n) {
+				if (gd[n].hue_diff < 1) {
+					if (n != 2) {
+						ecdir t = gd[2];
+						gd[2] = gd[n];
+						gd[n] = t;
+						break;
+					}
 				}
 			}
 			float eg;
 			/*
-			 * интерполяция по усреднённмоу оттенку.
-			 * nraw[nr_offset(nry + dy * 2, nrx + dx * 2, al)] + 3 * nraw[nr_offset(nry, nrx, al)]
-			 * коэффициент 3 перед значением известного цвета в точке позволяет уменьшить паразитное изменение оттенка,
-			 * если переход между известными не-зелёными цветами был резкий, известный цвет в точке получит больший вес.
+			 * интерполяция по перенесённому оттенку с коэффициентами соответственно дистанции.
 			 */
+			float b1 = 1
+					/ calc_dist(nraw[nr_offset(nry, nrx)][al],
+							nraw[nr_offset(nry + gd[0].dy * 2, nrx + gd[0].dx * 2)][al]);
+			float b2 = 1
+					/ calc_dist(nraw[nr_offset(nry, nrx)][al],
+							nraw[nr_offset(nry + gd[0].dy2 * 2, nrx + gd[0].dx2 * 2)][al]);
+//			b1 *= b1;
+//			b2 *= b2;
 			eg = nraw[nr_offset(nry, nrx)][al]
-					* (nraw[nr_offset(nry + gd[0].dy, nrx + gd[0].dx)][1]
+					* (b1 * nraw[nr_offset(nry + gd[0].dy, nrx + gd[0].dx)][1]
 							/ (nraw[nr_offset(nry + gd[0].dy * 2, nrx + gd[0].dx * 2)][al]
-									+ 3 * nraw[nr_offset(nry, nrx)][al])
-							+ nraw[nr_offset(nry + gd[0].dy2, nrx + gd[0].dx2)][1]
+									+ nraw[nr_offset(nry, nrx)][al])
+							+ b2 * nraw[nr_offset(nry + gd[0].dy2, nrx + gd[0].dx2)][1]
 									/ (nraw[nr_offset(nry + gd[0].dy2 * 2, nrx + gd[0].dx2 * 2)][al]
-											+ 3 * nraw[nr_offset(nry, nrx)][al])) * 2;
+											+ nraw[nr_offset(nry, nrx)][al])) / (b1 + b2) * 2;
 			/*
 			 * если изменение оттенка по уголковому направлению "не существенно", то его учтём с коэффициентом 1:3.
 			 *
@@ -249,11 +276,11 @@ void DHT::make_greens() {
 						nraw[nr_offset(nry, nrx)][al]
 								* (nraw[nr_offset(nry + gd[2].dy, nrx + gd[2].dx)][1]
 										/ (nraw[nr_offset(nry + gd[2].dy * 2, nrx + gd[2].dx * 2)][al]
-												+ 2 * nraw[nr_offset(nry, nrx)][al])
+												+ nraw[nr_offset(nry, nrx)][al])
 										+ nraw[nr_offset(nry + gd[2].dy2, nrx + gd[2].dx2)][1]
 												/ (nraw[nr_offset(nry + gd[2].dy2 * 2,
 														nrx + gd[2].dx2 * 2)][al]
-														+ 2 * nraw[nr_offset(nry, nrx)][al])) * 1.5;
+														+ nraw[nr_offset(nry, nrx)][al]));
 				eg /= 4;
 			}
 			nraw[nr_offset(nry, nrx)][1] = eg < channel_maximum[1] ? eg : channel_maximum[1];
@@ -269,7 +296,7 @@ void DHT::make_greens() {
  */
 void DHT::make_rb() {
 #if defined(LIBRAW_USE_OPENMP)
-#pragma omp parallel for
+#pragma omp parallel for schedule(guided)
 #endif
 	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
 		int js = libraw.COLOR(i, 0) & 1;
@@ -280,7 +307,8 @@ void DHT::make_rb() {
 		 * al -- известный цвет (кроме зелёного) в точке интерполирования
 		 * cl -- неизвестный цвет
 		 */
-		for (int j = js; j < libraw.imgdata.sizes.iwidth; j += 2) {
+		int iwidth = libraw.imgdata.sizes.iwidth;
+		for (int j = js; j < iwidth; j += 2) {
 			ecdir rb[6];
 			int nrx = j + nr_leftmargin;
 			int nry = i + nr_topmargin;
@@ -289,58 +317,34 @@ void DHT::make_rb() {
 			 */
 			set_rb(rb[0], nrx, nry, cl, -1, -1, 1, 1);
 			set_rb(rb[1], nrx, nry, cl, -1, 1, 1, -1);
-			/*
-			 * уголковые направления
-			 */
-			set_rb(rb[2], nrx, nry, cl, -1, -1, 1, -1);
-			set_rb(rb[3], nrx, nry, cl, 1, -1, 1, 1);
-			set_rb(rb[4], nrx, nry, cl, 1, 1, -1, 1);
-			set_rb(rb[5], nrx, nry, cl, -1, 1, -1, -1);
-			if (rb[0].hue_diff > rb[1].hue_diff) {
+			if (rb[0].dist > rb[1].dist) {
 				ecdir t = rb[1];
 				rb[1] = rb[0];
 				rb[0] = t;
 			}
-			if (rb[1].hue_diff < 0.5 && rb[0].dist > rb[1].dist) {
+			if (rb[1].hue_diff > 1 && rb[1].hue_diff < 1) {
 				ecdir t = rb[1];
 				rb[1] = rb[0];
 				rb[0] = t;
 			}
-			for (int n = 4; n > 1; --n) {
-				if (rb[n].hue_diff > rb[n + 1].hue_diff) {
-					ecdir t = rb[n + 1];
-					rb[n + 1] = rb[n];
-					rb[n] = t;
-				}
-			}
-			for (int n = 4; n > 1; --n) {
-				if (rb[n + 1].hue_diff < 0.5 && rb[n].dist > rb[n + 1].dist) {
-					ecdir t = rb[n + 1];
-					rb[n + 1] = rb[n];
-					rb[n] = t;
-				}
-			}
+			float g1 = 1
+					/ calc_dist(nraw[nr_offset(nry, nrx)][1],
+							nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx2)][1]);
+			float g2 = 1
+					/ calc_dist(nraw[nr_offset(nry, nrx)][1],
+							nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]);
+//			g1 *= g1;
+//			g2 *= g2;
 			float eg;
 			/*
 			 * интерполируется переносом оттенка по наилучшей диагонали
 			 */
 			eg = nraw[nr_offset(nry, nrx)][1]
-					* (nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][cl]
+					* (g1 * nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][cl]
 							/ nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1]
-							+ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][cl]
-									/ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]) / 2;
-			/*
-			 * дополнительный учёт уголкового направления
-			 */
-			if (fabs(rb[0].hue_diff - rb[2].hue_diff) < 0.05) {
-				eg *= 3;
-				eg += nraw[nr_offset(nry, nrx)][1]
-						* (nraw[nr_offset(nry + rb[2].dy, nrx + rb[2].dx)][cl]
-								/ nraw[nr_offset(nry + rb[2].dy, nrx + rb[2].dx)][1]
-								+ nraw[nr_offset(nry + rb[2].dy2, nrx + rb[2].dx2)][cl]
-										/ nraw[nr_offset(nry + rb[2].dy2, nrx + rb[2].dx2)][1]) / 2;
-				eg /= 4;
-			}
+							+ g2 * nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][cl]
+									/ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1])
+					/ (g1 + g2);
 			nraw[nr_offset(nry, nrx)][cl] = eg < channel_maximum[1] ? eg : channel_maximum[1];
 		}
 	}
@@ -348,11 +352,12 @@ void DHT::make_rb() {
 	 * интерполяция красных и синих в точках где был известен только зелёный
 	 */
 #if defined(LIBRAW_USE_OPENMP)
-#pragma omp parallel for
+#pragma omp parallel for schedule(guided)
 #endif
 	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
 		int js = (libraw.COLOR(i, 0) & 1) ^ 1;
-		for (int j = js; j < libraw.imgdata.sizes.iwidth; j += 2) {
+		int iwidth = libraw.imgdata.sizes.iwidth;
+		for (int j = js; j < iwidth; j += 2) {
 			ecdir rb[4];
 			int nrx = j + nr_leftmargin;
 			int nry = i + nr_topmargin;
@@ -360,38 +365,55 @@ void DHT::make_rb() {
 			 * поскольку сверху-снизу и справа-слева уже есть все необходимые красные и синие,
 			 * то можно выбрать наилучшее направление исходя из информации по обоим цветам.
 			 */
-			set(rb[0], nrx, nry, 0, 1, 0, -1, 0, 1);
-			set(rb[1], nrx, nry, 0, 1, -1, 0, 1, 0);
-			set(rb[2], nrx, nry, 2, 1, 0, -1, 0, 1);
-			set(rb[3], nrx, nry, 2, 1, -1, 0, 1, 0);
-			for (int n = 2; n > -1; --n) {
-				if (rb[n].hue_diff > rb[n + 1].hue_diff) {
-					ecdir t = rb[n + 1];
-					rb[n + 1] = rb[n];
-					rb[n] = t;
+			set_atg(rb[0], nrx, nry, 0, 0, -1, 0, 1);
+			set_atg(rb[1], nrx, nry, 0, -1, 0, 1, 0);
+			set_atg(rb[2], nrx, nry, 2, 0, -1, 0, 1);
+			set_atg(rb[3], nrx, nry, 2, -1, 0, 1, 0);
+			for (int k = -1; k < 2; ++k) {
+				bool go = true;
+				for (int n = 2; n > k; --n) {
+					if (rb[n].dist > rb[n + 1].dist) {
+						ecdir t = rb[n + 1];
+						rb[n + 1] = rb[n];
+						rb[n] = t;
+						go = false;
+					}
 				}
+				if (go)
+					break;
 			}
-			for (int n = 2; n > -1; --n) {
-				if (rb[n + 1].hue_diff < 0.5 && rb[n].dist > rb[n + 1].dist) {
-					ecdir t = rb[n + 1];
-					rb[n + 1] = rb[n];
-					rb[n] = t;
+			for (int n = 0; n < 4; ++n) {
+				if (rb[n].hue_diff < 1) {
+					if (n != 0) {
+						rb[0] = rb[n];
+						break;
+					}
 				}
 			}
 			/*
 			 * поскольку направление выбирается синхронно для синих и красных, это должно минимизировать ошибки в оттенках
 			 */
+			float g1 = 1
+					/ calc_dist(nraw[nr_offset(nry, nrx)][1],
+							nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx2)][1]);
+			float g2 = 1
+					/ calc_dist(nraw[nr_offset(nry, nrx)][1],
+							nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]);
+//			g1 *= g1;
+//			g2 *= g2;
 			float eg_r, eg_b;
 			eg_r = nraw[nr_offset(nry, nrx)][1]
-					* (nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][0]
+					* (g1 * nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][0]
 							/ nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1]
-							+ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][0]
-									/ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]) / 2;
+							+ g2 * nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][0]
+									/ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1])
+					/ (g1 + g2);
 			eg_b = nraw[nr_offset(nry, nrx)][1]
-					* (nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][2]
+					* (g1 * nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][2]
 							/ nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1]
-							+ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][2]
-									/ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]) / 2;
+							+ g2 * nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][2]
+									/ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1])
+					/ (g1 + g2);
 			nraw[nr_offset(nry, nrx)][0] = eg_r < channel_maximum[0] ? eg_r : channel_maximum[0];
 			nraw[nr_offset(nry, nrx)][2] = eg_b < channel_maximum[2] ? eg_b : channel_maximum[2];
 
@@ -404,6 +426,13 @@ void DHT::make_rb() {
  * перенос изображения в выходной массив
  */
 void DHT::copy_to_image() {
+#if defined(LIBRAW_USE_OPENMP)
+#ifdef WIN32
+#pragma omp parallel for
+#else
+#pragma omp parallel for schedule(guided) collapse(2)
+#endif
+#endif
 	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
 		for (int j = 0; j < libraw.imgdata.sizes.iwidth; ++j) {
 			libraw.imgdata.image[i * libraw.imgdata.sizes.iwidth + j][0] =
