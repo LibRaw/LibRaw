@@ -10,7 +10,7 @@
 
 struct ecdir {
 	float dist;
-	float hue_diff;
+	float hue_1, hue_2;
 	signed char dx;
 	signed char dy;
 	signed char dx2;
@@ -34,112 +34,95 @@ static inline float calc_dist(float c1, float c2) {
 	return c1 > c2 ? c1 / c2 : c2 / c1;
 }
 
-#if 0
-static inline float abs(float c) {
-	return c > 0 ? c : -c;
-}
-#endif
-
 struct DHT {
 	int nr_height, nr_width;
-	static const int nr_topmargin = 2, nr_leftmargin = 2;
+	static const int nr_topmargin = 4, nr_leftmargin = 4;
 	float (*nraw)[3];
-	ushort channel_maximum[3], channel_minimum[3];
+	ushort channel_maximum[3];
+	float channel_minimum[3];
 	LibRaw &libraw;
+	static const int HOR = 2, VER = 4, HORSH = 3, VERSH = 5, LURD = 16, RULD = 32, LURDSH = 24,
+			RULDSH = 40;
+	static const float T = 1.41;
+	char *ndir;
 	int nr_offset(int row, int col) {
 		return (row * nr_width + col);
 	}
-	/*
-	 * вычисление параметров для цвета, который окружён известными цветами горизонтально и вертикально
-	 */
-	void set_g(ecdir &e, int x, int y, int al, signed char dx, signed char dy, signed char dx2,
-			signed char dy2) {
-		if ((nraw[nr_offset(y + dy * 2, x + dx * 2)][al] + nraw[nr_offset(y, x)][al])
-				> 2 * nraw[nr_offset(y + dy, x + dx)][1])
-			/*
-			 * смещение оттенка пытаемся вычислять всегда так, чтобы коэффициент получался меньше 1
-			 */
-			e.hue_diff = fabs(
-					(nraw[nr_offset(y + dy, x + dx)][1]
-							/ (nraw[nr_offset(y + dy * 2, x + dx * 2)][al]
-									+ nraw[nr_offset(y, x)][al]))
-							- (nraw[nr_offset(y + dy2, x + dx2)][1]
-									/ (nraw[nr_offset(y + dy2 * 2, x + dx2 * 2)][al]
-											+ nraw[nr_offset(y, x)][al]))) * 2;
-		else
-			e.hue_diff = fabs(
-					((nraw[nr_offset(y + dy * 2, x + dx * 2)][al] + nraw[nr_offset(y, x)][al])
-							/ nraw[nr_offset(y + dy, x + dx)][1])
-							- ((nraw[nr_offset(y + dy2 * 2, x + dx2 * 2)][al]
-									+ nraw[nr_offset(y, x)][al])
-									/ nraw[nr_offset(y + dy2, x + dx2)][1])) / 2;
-		/*
-		 * дистанция учитывает разницу не только непосредственно прилегающих горизонтальных или вертикальных значений,
-		 * но и разницу между известными цветами соответствующих направлений. это помогает фильтровать stripe pattern
-		 */
-		float c = calc_dist(nraw[nr_offset(y + dy, x + dx)][1],
-				nraw[nr_offset(y + dy2, x + dx2)][1]);
-		e.dist = c // * c * c
-		* calc_dist(nraw[nr_offset(y + dy * 2, x + dx * 2)][al], nraw[nr_offset(y, x)][al])
-				* calc_dist(nraw[nr_offset(y + dy2 * 2, x + dx2 * 2)][al],
-						nraw[nr_offset(y, x)][al])
-
-						;
-//		if (dx == 0 && dx2 == 0)
-//			e.dist *= calc_dist(nraw[nr_offset(y + dy, x - 1)][al ^ 2],
-//					nraw[nr_offset(y + dy2, x - 1)][al ^ 2])
-//					* calc_dist(nraw[nr_offset(y + dy, x + 1)][al ^ 2],
-//							nraw[nr_offset(y + dy2, x + 1)][al ^ 2]);
-//		else if (dy == 0 && dy2 == 0)
-//			e.dist *= calc_dist(nraw[nr_offset(y - 1, x + dx)][al ^ 2],
-//					nraw[nr_offset(y - 1, x + dx2)][al ^ 2])
-//					* calc_dist(nraw[nr_offset(y + 1, x + dx)][al ^ 2],
-//							nraw[nr_offset(y + 1, x + +dx2)][al ^ 2]);
-		e.set(dx, dy, dx2, dy2);
+	int get_hv_grb(int x, int y, int kc) {
+		float hv1 = 2 * nraw[nr_offset(y - 1, x)][1]
+				/ (nraw[nr_offset(y - 2, x)][kc] + nraw[nr_offset(y, x)][kc]);
+		float hv2 = 2 * nraw[nr_offset(y + 1, x)][1]
+				/ (nraw[nr_offset(y + 2, x)][kc] + nraw[nr_offset(y, x)][kc]);
+		float dv = calc_dist(hv1, hv2)
+				* calc_dist(nraw[nr_offset(y - 2, x)][kc] * nraw[nr_offset(y + 2, x)][kc],
+						nraw[nr_offset(y, x)][kc] * nraw[nr_offset(y, x)][kc]);
+		float hh1 = 2 * nraw[nr_offset(y, x - 1)][1]
+				/ (nraw[nr_offset(y, x - 2)][kc] + nraw[nr_offset(y, x)][kc]);
+		float hh2 = 2 * nraw[nr_offset(y, x + 1)][1]
+				/ (nraw[nr_offset(y, x + 2)][kc] + nraw[nr_offset(y, x)][kc]);
+		float dh = calc_dist(hh1, hh2)
+				* calc_dist(nraw[nr_offset(y, x - 2)][kc] * nraw[nr_offset(y, x + 2)][kc],
+						nraw[nr_offset(y, x)][kc] * nraw[nr_offset(y, x)][kc]);
+		float e = calc_dist(dh, dv);
+		char d = dh < dv ? (e > T ? HORSH : HOR) : (e > T ? VERSH : VER);
+		return d;
 	}
-	void set_atg(ecdir &e, int x, int y, int al, signed char dx, signed char dy, signed char dx2,
-			signed char dy2) {
-		if (nraw[nr_offset(y + dy, x + dx)][al] > nraw[nr_offset(y + dy, x + dx)][1])
-			e.hue_diff = fabs(
-					nraw[nr_offset(y + dy, x + dx)][1] / nraw[nr_offset(y + dy, x + dx)][al]
-							- nraw[nr_offset(y + dy2, x + dx2)][1]
-									/ nraw[nr_offset(y + dy2, x + dx2)][al]);
-		else
-			e.hue_diff = fabs(
-					nraw[nr_offset(y + dy, x + dx)][al] / nraw[nr_offset(y + dy, x + dx)][1]
-							- nraw[nr_offset(y + dy2, x + dx2)][al]
-									/ nraw[nr_offset(y + dy2, x + dx2)][1]);
-		e.dist = calc_dist(nraw[nr_offset(y + dy, x + dx)][al],
-				nraw[nr_offset(y + dy2, x + dx2)][al])
-				* calc_dist(nraw[nr_offset(y + dy, x + dx)][1], nraw[nr_offset(y, x)][1])
-				* calc_dist(nraw[nr_offset(y + dy2, x + dx2)][1], nraw[nr_offset(y, x)][1]);
-		e.set(dx, dy, dx2, dy2);
+	int get_hv_rbg(int x, int y, int hc) {
+		float hv1 = 2 * nraw[nr_offset(y - 1, x)][hc ^ 2]
+				/ (nraw[nr_offset(y - 2, x)][1] + nraw[nr_offset(y, x)][1]);
+		float hv2 = 2 * nraw[nr_offset(y + 1, x)][hc ^ 2]
+				/ (nraw[nr_offset(y + 2, x)][1] + nraw[nr_offset(y, x)][1]);
+		float dv = calc_dist(hv1, hv2)
+				* calc_dist(nraw[nr_offset(y - 2, x)][1] * nraw[nr_offset(y + 2, x)][1],
+						nraw[nr_offset(y, x)][1] * nraw[nr_offset(y, x)][1]);
+		float hh1 = 2 * nraw[nr_offset(y, x - 1)][hc]
+				/ (nraw[nr_offset(y, x - 2)][1] + nraw[nr_offset(y, x)][1]);
+		float hh2 = 2 * nraw[nr_offset(y, x + 1)][hc]
+				/ (nraw[nr_offset(y, x + 2)][1] + nraw[nr_offset(y, x)][1]);
+		float dh = calc_dist(hh1, hh2)
+				* calc_dist(nraw[nr_offset(y, x - 2)][1] * nraw[nr_offset(y, x + 2)][1],
+						nraw[nr_offset(y, x)][1] * nraw[nr_offset(y, x)][1]);
+		float e = calc_dist(dh, dv);
+		char d = dh > dv ? e > T ? VERSH : VER : e > T ? HORSH : HOR;
+		return d;
 	}
-	/*
-	 * вычисление параметров для цвета, который окружён известными цветами по диагонали на основе известного зелёного цвета
-	 */
-	void set_rb(ecdir &e, int x, int y, int al, signed char dx, signed char dy, signed char dx2,
-			signed char dy2) {
-//		if (nraw[nr_offset(y + dy, x + dx)][1] < nraw[nr_offset(y + dy, x + dx)][al])
-//			e.hue_diff = fabs(
-//					nraw[nr_offset(y + dy, x + dx)][1] / nraw[nr_offset(y + dy, x + dx)][al]
-//							- nraw[nr_offset(y + dy2, x + dx2)][1]
-//									/ nraw[nr_offset(y + dy2, x + dx2)][al]);
-//		else
-//			e.hue_diff = fabs(
-//					nraw[nr_offset(y + dy, x + dx)][al] / nraw[nr_offset(y + dy, x + dx)][1]
-//							- nraw[nr_offset(y + dy2, x + dx2)][al]
-//									/ nraw[nr_offset(y + dy2, x + dx2)][1]);
-		e.dist = calc_dist(nraw[nr_offset(y + dy, x + dx)][al],
-				nraw[nr_offset(y + dy2, x + dx2)][al])
-				* calc_dist(nraw[nr_offset(y + dy, x + dx)][1],
-						nraw[nr_offset(y + dy2, x + dx2)][1])
-				* calc_dist(nraw[nr_offset(y + dy, x + dx)][1], nraw[nr_offset(y, x)][1]);
-		e.set(dx, dy, dx2, dy2);
+	int get_diag_grb(int x, int y, int kc) {
+		float hlu = nraw[nr_offset(y - 1, x - 1)][1] / nraw[nr_offset(y - 1, x - 1)][kc];
+		float hrd = nraw[nr_offset(y + 1, x + 1)][1] / nraw[nr_offset(y + 1, x + 1)][kc];
+		float hru = nraw[nr_offset(y - 1, x + 1)][1] / nraw[nr_offset(y - 1, x + 1)][kc];
+		float hld = nraw[nr_offset(y + 1, x - 1)][1] / nraw[nr_offset(y + 1, x - 1)][kc];
+		float dlurd = calc_dist(hlu, hrd)
+				* calc_dist(nraw[nr_offset(y - 1, x - 1)][1] * nraw[nr_offset(y + 1, x + 1)][1],
+						nraw[nr_offset(y, x)][1] * nraw[nr_offset(y, x)][1]);
+		float druld = calc_dist(hlu, hrd)
+				* calc_dist(nraw[nr_offset(y - 1, x + 1)][1] * nraw[nr_offset(y + 1, x - 1)][1],
+						nraw[nr_offset(y, x)][1] * nraw[nr_offset(y, x)][1]);
+		float e = calc_dist(dlurd, druld);
+		char d = druld < dlurd ? (e > T ? RULDSH : RULD) : (e > T ? LURDSH : LURD);
+		return d;
+	}
+	int get_diag_rbg(int x, int y, int hc) {
+		float dlurd = calc_dist(nraw[nr_offset(y - 1, x - 1)][1] * nraw[nr_offset(y + 1, x + 1)][1],
+				nraw[nr_offset(y, x)][1] * nraw[nr_offset(y, x)][1]);
+		float druld = calc_dist(nraw[nr_offset(y - 1, x + 1)][1] * nraw[nr_offset(y + 1, x - 1)][1],
+				nraw[nr_offset(y, x)][1] * nraw[nr_offset(y, x)][1]);
+		float e = calc_dist(dlurd, druld);
+		char d = druld < dlurd ? (e > T ? RULDSH : RULD) : (e > T ? LURDSH : LURD);
+		return d;
 	}
 	DHT(LibRaw &_libraw);
 	void copy_to_image();
 	void make_greens();
+	void make_diag_dirs();
+	void make_hv_dirs();
+	void refine_hv_dirs(int i, int js);
+	void refine_diag_dirs(int i, int js);
+	void refine_ihv_dirs(int i);
+	void refine_idiag_dirs(int i);
+	void illustrate_dirs();
+	void illustrate_dline(int i);
+	void make_hv_dline(int i);
+	void make_diag_dline(int i);
 	void make_gline(int i);
 	void make_rbdiag(int i);
 	void make_rbhv(int i);
@@ -165,6 +148,8 @@ DHT::DHT(LibRaw& _libraw) :
 	nr_height = libraw.imgdata.sizes.iheight + nr_topmargin * 2;
 	nr_width = libraw.imgdata.sizes.iwidth + nr_leftmargin * 2;
 	nraw = (float3*) malloc(nr_height * nr_width * sizeof(float3));
+	int iwidth = libraw.imgdata.sizes.iwidth;
+	ndir = (char*) calloc(nr_height * nr_width, 1);
 	channel_maximum[0] = channel_maximum[1] = channel_maximum[2] = 0;
 	channel_minimum[0] = libraw.imgdata.image[0][0];
 	channel_minimum[1] = libraw.imgdata.image[0][1];
@@ -173,20 +158,231 @@ DHT::DHT(LibRaw& _libraw) :
 		nraw[i][0] = nraw[i][1] = nraw[i][2] = 0.5;
 	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
 		int col_cache[48];
-		for (int j = 0; j < 48; ++j)
-			col_cache[j] = libraw.COLOR(i, j);
-		for (int j = 0; j < libraw.imgdata.sizes.iwidth; ++j) {
+		for (int j = 0; j < 48; ++j) {
+			int l = libraw.COLOR(i, j);
+			if (l == 3)
+				l = 1;
+			col_cache[j] = l;
+		}
+		for (int j = 0; j < iwidth; ++j) {
 			int l = col_cache[j % 48];
-			unsigned short c = libraw.imgdata.image[i * libraw.imgdata.sizes.iwidth + j][l];
+			unsigned short c = libraw.imgdata.image[i * iwidth + j][l];
 			if (c != 0) {
-				if (l == 3)
-					l = 1;
 				if (channel_maximum[l] < c)
 					channel_maximum[l] = c;
 				if (channel_minimum[l] > c)
 					channel_minimum[l] = c;
 				nraw[nr_offset(i + nr_topmargin, j + nr_leftmargin)][l] = (float) c;
 			}
+		}
+	}
+	channel_minimum[0] += .5;
+	channel_minimum[1] += .5;
+	channel_minimum[2] += .5;
+}
+
+void DHT::make_diag_dirs() {
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		make_diag_dline(i);
+	}
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		refine_diag_dirs(i, i & 1);
+	}
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		refine_diag_dirs(i, (i & 1) ^ 1);
+	}
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		refine_idiag_dirs(i);
+	}
+}
+
+void DHT::make_hv_dirs() {
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		make_hv_dline(i);
+	}
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		refine_hv_dirs(i, i & 1);
+	}
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		refine_hv_dirs(i, (i & 1) ^ 1);
+	}
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		refine_ihv_dirs(i);
+	}
+}
+
+void DHT::refine_hv_dirs(int i, int js) {
+	int iwidth = libraw.imgdata.sizes.iwidth;
+	for (int j = js; j < iwidth; j += 2) {
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
+		if (ndir[nr_offset(y, x)] & 1)
+			continue;
+		int nv = (ndir[nr_offset(y - 1, x)] & VER) + (ndir[nr_offset(y + 1, x)] & VER)
+				+ (ndir[nr_offset(y, x - 1)] & VER) + (ndir[nr_offset(y, x + 1)] & VER);
+		int nh = (ndir[nr_offset(y - 1, x)] & HOR) + (ndir[nr_offset(y + 1, x)] & HOR)
+				+ (ndir[nr_offset(y, x - 1)] & HOR) + (ndir[nr_offset(y, x + 1)] & HOR);
+		bool codir =
+				(ndir[nr_offset(y, x)] & VER) ?
+						((ndir[nr_offset(y - 1, x)] & VER) || (ndir[nr_offset(y + 1, x)] & VER)) :
+						((ndir[nr_offset(y, x - 1)] & HOR) || (ndir[nr_offset(y, x + 1)] & HOR));
+		nv /= VER;
+		nh /= HOR;
+		if ((ndir[nr_offset(y, x)] & VER) && (nh > 2 && !codir))
+			ndir[nr_offset(y, x)] = HOR;
+		if ((ndir[nr_offset(y, x)] & HOR) && (nv > 2 && !codir))
+			ndir[nr_offset(y, x)] = VER;
+	}
+}
+
+void DHT::refine_ihv_dirs(int i) {
+	int iwidth = libraw.imgdata.sizes.iwidth;
+	for (int j = 0; j < iwidth; j++) {
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
+		if (ndir[nr_offset(y, x)] & 1)
+			continue;
+		int nv = (ndir[nr_offset(y - 1, x)] & VER) + (ndir[nr_offset(y + 1, x)] & VER)
+				+ (ndir[nr_offset(y, x - 1)] & VER) + (ndir[nr_offset(y, x + 1)] & VER);
+		int nh = (ndir[nr_offset(y - 1, x)] & HOR) + (ndir[nr_offset(y + 1, x)] & HOR)
+				+ (ndir[nr_offset(y, x - 1)] & HOR) + (ndir[nr_offset(y, x + 1)] & HOR);
+		nv /= VER;
+		nh /= HOR;
+		if ((ndir[nr_offset(y, x)] & VER) && nh > 3)
+			ndir[nr_offset(y, x)] = HOR;
+		if ((ndir[nr_offset(y, x)] & HOR) && nv > 3)
+			ndir[nr_offset(y, x)] = VER;
+
+	}
+}
+void DHT::make_hv_dline(int i) {
+	int iwidth = libraw.imgdata.sizes.iwidth;
+	int js = libraw.COLOR(i, 0) & 1;
+	int kc = libraw.COLOR(i, js);
+	/*
+	 * js -- начальная х-координата, которая попадает мимо известного зелёного
+	 * kc -- известный цвет в точке интерполирования
+	 */
+	for (int j = 0; j < iwidth; j++) {
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
+		char d = 0;
+		if ((j & 1) == js)
+			d = get_hv_grb(x, y, kc);
+		else
+			d = get_hv_rbg(x, y, kc);
+		ndir[nr_offset(y, x)] = d;
+	}
+}
+
+void DHT::make_diag_dline(int i) {
+	int iwidth = libraw.imgdata.sizes.iwidth;
+	int js = libraw.COLOR(i, 0) & 1;
+	int kc = libraw.COLOR(i, js);
+	/*
+	 * js -- начальная х-координата, которая попадает мимо известного зелёного
+	 * kc -- известный цвет в точке интерполирования
+	 */
+	for (int j = 0; j < iwidth; j++) {
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
+		char d = 0;
+		if ((j & 1) == js)
+			d = get_diag_grb(x, y, kc);
+		else
+			d = get_diag_rbg(x, y, kc);
+		ndir[nr_offset(y, x)] |= d;
+	}
+}
+
+void DHT::refine_diag_dirs(int i, int js) {
+	int iwidth = libraw.imgdata.sizes.iwidth;
+	for (int j = js; j < iwidth; j += 2) {
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
+		if (ndir[nr_offset(y, x)] & 8)
+			continue;
+		int nv = (ndir[nr_offset(y - 1, x)] & LURD) + (ndir[nr_offset(y + 1, x)] & LURD)
+				+ (ndir[nr_offset(y, x - 1)] & LURD) + (ndir[nr_offset(y, x + 1)] & LURD)
+				+ (ndir[nr_offset(y - 1, x - 1)] & LURD) + (ndir[nr_offset(y - 1, x + 1)] & LURD)
+				+ (ndir[nr_offset(y + 1, x - 1)] & LURD) + (ndir[nr_offset(y + 1, x + 1)] & LURD);
+		int nh = (ndir[nr_offset(y - 1, x)] & RULD) + (ndir[nr_offset(y + 1, x)] & RULD)
+				+ (ndir[nr_offset(y, x - 1)] & RULD) + (ndir[nr_offset(y, x + 1)] & RULD)
+				+ (ndir[nr_offset(y - 1, x - 1)] & RULD) + (ndir[nr_offset(y - 1, x + 1)] & RULD)
+				+ (ndir[nr_offset(y + 1, x - 1)] & RULD) + (ndir[nr_offset(y + 1, x + 1)] & RULD);
+		bool codir =
+				(ndir[nr_offset(y, x)] & LURD) ?
+						((ndir[nr_offset(y - 1, x - 1)] & LURD)
+								|| (ndir[nr_offset(y + 1, x + 1)] & LURD)) :
+						((ndir[nr_offset(y - 1, x + 1)] & RULD)
+								|| (ndir[nr_offset(y + 1, x - 1)] & RULD));
+		nv /= LURD;
+		nh /= RULD;
+		if ((ndir[nr_offset(y, x)] & LURD) && (nh > 4 && !codir)) {
+			ndir[nr_offset(y, x)] &= ~LURD;
+			ndir[nr_offset(y, x)] |= RULD;
+		}
+		if ((ndir[nr_offset(y, x)] & RULD) && (nv > 4 && !codir)) {
+			ndir[nr_offset(y, x)] &= ~RULD;
+			ndir[nr_offset(y, x)] |= LURD;
+		}
+	}
+}
+
+void DHT::refine_idiag_dirs(int i) {
+	int iwidth = libraw.imgdata.sizes.iwidth;
+	for (int j = 0; j < iwidth; j++) {
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
+		if (ndir[nr_offset(y, x)] & 8)
+			continue;
+		int nv = (ndir[nr_offset(y - 1, x)] & LURD) + (ndir[nr_offset(y + 1, x)] & LURD)
+				+ (ndir[nr_offset(y, x - 1)] & LURD) + (ndir[nr_offset(y, x + 1)] & LURD)
+				+ (ndir[nr_offset(y - 1, x - 1)] & LURD) + (ndir[nr_offset(y - 1, x + 1)] & LURD)
+				+ (ndir[nr_offset(y + 1, x - 1)] & LURD) + (ndir[nr_offset(y + 1, x + 1)] & LURD);
+		int nh = (ndir[nr_offset(y - 1, x)] & RULD) + (ndir[nr_offset(y + 1, x)] & RULD)
+				+ (ndir[nr_offset(y, x - 1)] & RULD) + (ndir[nr_offset(y, x + 1)] & RULD)
+				+ (ndir[nr_offset(y - 1, x - 1)] & RULD) + (ndir[nr_offset(y - 1, x + 1)] & RULD)
+				+ (ndir[nr_offset(y + 1, x - 1)] & RULD) + (ndir[nr_offset(y + 1, x + 1)] & RULD);
+		bool codir =
+				(ndir[nr_offset(y, x)] & LURD) ?
+						((ndir[nr_offset(y - 1, x - 1)] & LURD)
+								|| (ndir[nr_offset(y + 1, x + 1)] & LURD)) :
+						((ndir[nr_offset(y - 1, x + 1)] & RULD)
+								|| (ndir[nr_offset(y + 1, x - 1)] & RULD));
+		nv /= LURD;
+		nh /= RULD;
+		if ((ndir[nr_offset(y, x)] & LURD) && nh > 7) {
+			ndir[nr_offset(y, x)] &= ~LURD;
+			ndir[nr_offset(y, x)] |= RULD;
+		}
+		if ((ndir[nr_offset(y, x)] & RULD) && nv > 7) {
+			ndir[nr_offset(y, x)] &= ~RULD;
+			ndir[nr_offset(y, x)] |= LURD;
 		}
 	}
 }
@@ -204,113 +400,76 @@ void DHT::make_greens() {
 }
 
 void DHT::make_gline(int i) {
+	int iwidth = libraw.imgdata.sizes.iwidth;
 	int js = libraw.COLOR(i, 0) & 1;
-	int al = libraw.COLOR(i, js);
+	int kc = libraw.COLOR(i, js);
 	/*
 	 * js -- начальная х-координата, которая попадает мимо известного зелёного
-	 * al -- известный цвет в точке интерполирования
+	 * kc -- известный цвет в точке интерполирования
 	 */
-	int iwidth = libraw.imgdata.sizes.iwidth;
 	for (int j = js; j < iwidth; j += 2) {
-		ecdir gd[6];
-		int nrx = j + nr_leftmargin;
-		int nry = i + nr_topmargin;
-		/*
-		 * горизонтальные и вертикальные направления
-		 */
-		set_g(gd[0], nrx, nry, al, 0, -1, 0, 1);
-		set_g(gd[1], nrx, nry, al, -1, 0, 1, 0);
-		/*
-		 * направления уголком
-		 */
-		set_g(gd[2], nrx, nry, al, 0, -1, 1, 0);
-		set_g(gd[3], nrx, nry, al, 1, 0, 0, 1);
-		set_g(gd[4], nrx, nry, al, 0, 1, -1, 0);
-		set_g(gd[5], nrx, nry, al, -1, 0, 0, -1);
-		/*
-		 * массив направлений для интерполяции.
-		 * сначала данные были общими, но вертикальные и горизонтальные направления дают намного меньше артефактов.
-		 * причина, скорее всего, в том, что направление интерполяции должно проходить через интерполируемую точку.
-		 */
-
-		if (gd[0].dist > gd[1].dist) {
-			ecdir t = gd[1];
-			gd[1] = gd[0];
-			gd[0] = t;
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
+		int dx, dy, dx2, dy2;
+		float h1, h2;
+		if (ndir[nr_offset(y, x)] & VER) {
+			dx = dx2 = 0;
+			dy = -1;
+			dy2 = 1;
+			h1 = 2 * nraw[nr_offset(y - 1, x)][1]
+					/ (nraw[nr_offset(y - 2, x)][kc] + nraw[nr_offset(y, x)][kc]);
+			h2 = 2 * nraw[nr_offset(y + 1, x)][1]
+					/ (nraw[nr_offset(y + 2, x)][kc] + nraw[nr_offset(y, x)][kc]);
+		} else {
+			dy = dy2 = 0;
+			dx = 1;
+			dx2 = -1;
+			h1 = 2 * nraw[nr_offset(y, x + 1)][1]
+					/ (nraw[nr_offset(y, x + 2)][kc] + nraw[nr_offset(y, x)][kc]);
+			h2 = 2 * nraw[nr_offset(y, x - 1)][1]
+					/ (nraw[nr_offset(y, x - 2)][kc] + nraw[nr_offset(y, x)][kc]);
 		}
-		/*
-		 * в случае, когда изменение оттенка не очень существенно, то выбираем более подходящую дистанцию
-		 *
-		 *
-		 * хорошо бы свести два условия в одно
-		 */
-		if (gd[0].hue_diff > 0.5 && gd[1].hue_diff < 0.5) {
-			ecdir t = gd[1];
-			gd[1] = gd[0];
-			gd[0] = t;
-		}
-
-		/*
-		 * сортировка уголковых направлений. подлинная сортировка не нужна, достаточно вычислить наилучшее направление.
-		 */
-		for (int n = 4; n > 1; --n) {
-			if (gd[n].dist > gd[n + 1].dist) {
-				ecdir t = gd[n + 1];
-				gd[n + 1] = gd[n];
-				gd[n] = t;
-			}
-		}
-		for (int n = 2; n < 5; ++n) {
-			if (gd[n].hue_diff < 0.5) {
-				if (n != 2) {
-					ecdir t = gd[2];
-					gd[2] = gd[n];
-					gd[n] = t;
-					break;
-				}
-			}
-		}
-		float eg;
-		/*
-		 * интерполяция по перенесённому оттенку с коэффициентами соответственно дистанции.
-		 */
 		float b1 = 1
-				/ calc_dist(nraw[nr_offset(nry, nrx)][al],
-						nraw[nr_offset(nry + gd[0].dy * 2, nrx + gd[0].dx * 2)][al]);
+				/ calc_dist(nraw[nr_offset(y, x)][kc], nraw[nr_offset(y + dy * 2, x + dx * 2)][kc]);
 		float b2 = 1
-				/ calc_dist(nraw[nr_offset(nry, nrx)][al],
-						nraw[nr_offset(nry + gd[0].dy2 * 2, nrx + gd[0].dx2 * 2)][al]);
+				/ calc_dist(nraw[nr_offset(y, x)][kc],
+						nraw[nr_offset(y + dy2 * 2, x + dx2 * 2)][kc]);
 		b1 *= b1;
 		b2 *= b2;
-		eg = nraw[nr_offset(nry, nrx)][al]
-				* (b1 * nraw[nr_offset(nry + gd[0].dy, nrx + gd[0].dx)][1]
-						/ (nraw[nr_offset(nry + gd[0].dy * 2, nrx + gd[0].dx * 2)][al]
-								+ nraw[nr_offset(nry, nrx)][al])
-						+ b2 * nraw[nr_offset(nry + gd[0].dy2, nrx + gd[0].dx2)][1]
-								/ (nraw[nr_offset(nry + gd[0].dy2 * 2, nrx + gd[0].dx2 * 2)][al]
-										+ nraw[nr_offset(nry, nrx)][al])) / (b1 + b2) * 2;
-		/*
-		 * если изменение оттенка по уголковому направлению "не существенно", то его учтём с коэффициентом 1:3.
-		 *
-		 * коэффициент 0.05 выбран достаточно произвольно.
-		 */
-
-		if (fabs(gd[0].hue_diff - gd[2].hue_diff) < 0.05) {
-			eg *= 3;
-			eg += nraw[nr_offset(nry, nrx)][al]
-					* (nraw[nr_offset(nry + gd[2].dy, nrx + gd[2].dx)][1]
-							/ (nraw[nr_offset(nry + gd[2].dy * 2, nrx + gd[2].dx * 2)][al]
-									+ nraw[nr_offset(nry, nrx)][al])
-							+ nraw[nr_offset(nry + gd[2].dy2, nrx + gd[2].dx2)][1]
-									/ (nraw[nr_offset(nry + gd[2].dy2 * 2, nrx + gd[2].dx2 * 2)][al]
-											+ nraw[nr_offset(nry, nrx)][al]));
-			eg /= 4;
-		}
+		float eg = nraw[nr_offset(y, x)][kc] * (b1 * h1 + b2 * h2) / (b1 + b2);
 		if (eg > channel_maximum[1])
 			eg = channel_maximum[1];
 		else if (eg < channel_minimum[1])
 			eg = channel_minimum[1];
-		nraw[nr_offset(nry, nrx)][1] = eg;
+		nraw[nr_offset(y, x)][1] = eg;
+	}
+}
+
+/*
+ * отладочная функция
+ */
+
+void DHT::illustrate_dirs() {
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		illustrate_dline(i);
+	}
+}
+
+void DHT::illustrate_dline(int i) {
+	int iwidth = libraw.imgdata.sizes.iwidth;
+	for (int j = 0; j < iwidth; j++) {
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
+		nraw[nr_offset(y, x)][0] = nraw[nr_offset(y, x)][1] = nraw[nr_offset(y, x)][2] = 0.5;
+		int l = ndir[nr_offset(y, x)] & 8;
+		l >>= 3;
+		if (ndir[nr_offset(y, x)] & RULD)
+			nraw[nr_offset(y, x)][0] = l * channel_maximum[0] / 4 + channel_maximum[0] / 4;
+		else
+			nraw[nr_offset(y, x)][2] = l * channel_maximum[2] / 4 + channel_maximum[2] / 4;
 	}
 
 }
@@ -323,69 +482,59 @@ void DHT::make_gline(int i) {
  */
 
 void DHT::make_rbdiag(int i) {
+	int iwidth = libraw.imgdata.sizes.iwidth;
 	int js = libraw.COLOR(i, 0) & 1;
-	int al = libraw.COLOR(i, js);
-	int cl = al ^ 2;
+	int uc = libraw.COLOR(i, js);
+	int cl = uc ^ 2;
 	/*
 	 * js -- начальная х-координата, которая попадает на уже интерполированный зелёный
 	 * al -- известный цвет (кроме зелёного) в точке интерполирования
 	 * cl -- неизвестный цвет
 	 */
-	int iwidth = libraw.imgdata.sizes.iwidth;
 	for (int j = js; j < iwidth; j += 2) {
-		ecdir rb[4];
-		int nrx = j + nr_leftmargin;
-		int nry = i + nr_topmargin;
-		set_rb(rb[0], nrx, nry, cl, -1, -1, 1, 1);
-		set_rb(rb[1], nrx, nry, cl, -1, 1, 1, -1);
-		if (rb[0].dist > rb[1].dist) {
-			ecdir t = rb[1];
-			rb[1] = rb[0];
-			rb[0] = t;
-		}
-		float eg;
-		if (nraw[nr_offset(nry, nrx)][1] > 1.4 * nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1]
-				&& nraw[nr_offset(nry, nrx)][1]
-						> 1.4 * nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]) {
-			/* неизбежно усиление оттенка */
-			rb[0].dist = nraw[nr_offset(nry, nrx)][1] / nraw[nr_offset(nry - 1, nrx - 1)][1];
-			rb[0].set(-1, -1, 0, 0);
-			rb[1].dist = nraw[nr_offset(nry, nrx)][1] / nraw[nr_offset(nry - 1, nrx + 1)][1];
-			rb[1].set(1, -1, 0, 0);
-			rb[2].dist = nraw[nr_offset(nry, nrx)][1] / nraw[nr_offset(nry + 1, nrx + 1)][1];
-			rb[2].set(1, 1, 0, 0);
-			rb[3].dist = nraw[nr_offset(nry, nrx)][1] / nraw[nr_offset(nry + 1, nrx - 1)][1];
-			rb[3].set(-1, 1, 0, 0);
-			for (int n = 2; n > -1; --n) {
-				if (fabs(rb[n].dist - 1) > fabs(rb[n + 1].dist - 1)) {
-					ecdir t = rb[n + 1];
-					rb[n + 1] = rb[n];
-					rb[n] = t;
-				}
-			}
-			eg = nraw[nr_offset(nry, nrx)][1] * nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][cl]
-					/ nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1];
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
+		int dx, dy, dx2, dy2;
+		if (ndir[nr_offset(y, x)] & LURD) {
+			dx = -1;
+			dx2 = 1;
+			dy = -1;
+			dy2 = 1;
 		} else {
-			float g1 = 1
-					/ calc_dist(nraw[nr_offset(nry, nrx)][1],
-							nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1]);
-			float g2 = 1
-					/ calc_dist(nraw[nr_offset(nry, nrx)][1],
-							nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]);
-			g1 *= g1;
-			g2 *= g2;
-			eg = nraw[nr_offset(nry, nrx)][1]
-					* (g1 * nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][cl]
-							/ nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1]
-							+ g2 * nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][cl]
-									/ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1])
-					/ (g1 + g2);
+			dx = -1;
+			dx2 = 1;
+			dy = 1;
+			dy2 = -1;
 		}
+		float g1 = 1 / calc_dist(nraw[nr_offset(y, x)][1], nraw[nr_offset(y + dy, x + dx)][1]);
+		float g2 = 1 / calc_dist(nraw[nr_offset(y, x)][1], nraw[nr_offset(y + dy2, x + dx2)][1]);
+		g1 *= g1;
+		g2 *= g2;
+
+		float eg;
+		eg = nraw[nr_offset(y, x)][1]
+				* (g1 * nraw[nr_offset(y + dy, x + dx)][cl] / nraw[nr_offset(y + dy, x + dx)][1]
+						+ g2 * nraw[nr_offset(y + dy2, x + dx2)][cl]
+								/ nraw[nr_offset(y + dy2, x + dx2)][1]) / (g1 + g2);
+		float max = nraw[nr_offset(y - 1, x - 1)][cl], min = nraw[nr_offset(y + 1, x + 1)][cl];
+		for (int n = -1; n < 2; n += 2)
+			for (int k = -1; k < 2; k += 2) {
+				if (nraw[nr_offset(y + n, x + k)][cl] < min)
+					min = nraw[nr_offset(y + n, x + k)][cl];
+				if (nraw[nr_offset(y + n, x + k)][cl] > max)
+					max = nraw[nr_offset(y + n, x + k)][cl];
+			}
+		max *= 1.4;
+		min /= 1.4;
+		if (eg > max)
+			eg = max;
+		else if (eg < min)
+			eg = min;
 		if (eg > channel_maximum[cl])
 			eg = channel_maximum[cl];
 		else if (eg < channel_minimum[cl])
 			eg = channel_minimum[cl];
-		nraw[nr_offset(nry, nrx)][cl] = eg;
+		nraw[nr_offset(y, x)][cl] = eg;
 	}
 
 }
@@ -396,71 +545,77 @@ void DHT::make_rbdiag(int i) {
  */
 
 void DHT::make_rbhv(int i) {
-	int js = (libraw.COLOR(i, 0) & 1) ^ 1;
 	int iwidth = libraw.imgdata.sizes.iwidth;
+	int js = (libraw.COLOR(i, 0) & 1) ^ 1;
 	for (int j = js; j < iwidth; j += 2) {
-		ecdir rb[4];
-		int nrx = j + nr_leftmargin;
-		int nry = i + nr_topmargin;
+		int x = j + nr_leftmargin;
+		int y = i + nr_topmargin;
 		/*
 		 * поскольку сверху-снизу и справа-слева уже есть все необходимые красные и синие,
 		 * то можно выбрать наилучшее направление исходя из информации по обоим цветам.
 		 */
-		set_atg(rb[0], nrx, nry, 0, 0, -1, 0, 1);
-		set_atg(rb[1], nrx, nry, 0, -1, 0, 1, 0);
-		set_atg(rb[2], nrx, nry, 2, 0, -1, 0, 1);
-		set_atg(rb[3], nrx, nry, 2, -1, 0, 1, 0);
-		for (int k = -1; k < 2; ++k) {
-			bool go = true;
-			for (int n = 2; n > k; --n) {
-				if (rb[n].dist > rb[n + 1].dist) {
-					ecdir t = rb[n + 1];
-					rb[n + 1] = rb[n];
-					rb[n] = t;
-					go = false;
-				}
-			}
-			if (go)
-				break;
+		int dx, dy, dx2, dy2;
+		float h1, h2;
+		if (ndir[nr_offset(y, x)] & VER) {
+			dx = dx2 = 0;
+			dy = -1;
+			dy2 = 1;
+		} else {
+			dy = dy2 = 0;
+			dx = 1;
+			dx2 = -1;
 		}
-		for (int n = 0; n < 4; ++n) {
-			if (rb[n].hue_diff < 0.5) {
-				if (n != 0) {
-					rb[0] = rb[n];
-					break;
-				}
-			}
-		}
-		float g1 = 1
-				/ calc_dist(nraw[nr_offset(nry, nrx)][1],
-						nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1]);
-		float g2 = 1
-				/ calc_dist(nraw[nr_offset(nry, nrx)][1],
-						nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]);
+		float g1 = 1 / calc_dist(nraw[nr_offset(y, x)][1], nraw[nr_offset(y + dy, x + dx)][1]);
+		float g2 = 1 / calc_dist(nraw[nr_offset(y, x)][1], nraw[nr_offset(y + dy2, x + dx2)][1]);
 		g1 *= g1;
 		g2 *= g2;
 		float eg_r, eg_b;
-		eg_r = nraw[nr_offset(nry, nrx)][1]
-				* (g1 * nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][0]
-						/ nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1]
-						+ g2 * nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][0]
-								/ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]) / (g1 + g2);
-		eg_b = nraw[nr_offset(nry, nrx)][1]
-				* (g1 * nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][2]
-						/ nraw[nr_offset(nry + rb[0].dy, nrx + rb[0].dx)][1]
-						+ g2 * nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][2]
-								/ nraw[nr_offset(nry + rb[0].dy2, nrx + rb[0].dx2)][1]) / (g1 + g2);
-
+		eg_r = nraw[nr_offset(y, x)][1]
+				* (g1 * nraw[nr_offset(y + dy, x + dx)][0] / nraw[nr_offset(y + dy, x + dx)][1]
+						+ g2 * nraw[nr_offset(y + dy2, x + dx2)][0]
+								/ nraw[nr_offset(y + dy2, x + dx2)][1]) / (g1 + g2);
+		eg_b = nraw[nr_offset(y, x)][1]
+				* (g1 * nraw[nr_offset(y + dy, x + dx)][2] / nraw[nr_offset(y + dy, x + dx)][1]
+						+ g2 * nraw[nr_offset(y + dy2, x + dx2)][2]
+								/ nraw[nr_offset(y + dy2, x + dx2)][1]) / (g1 + g2);
+		float max = nraw[nr_offset(y - 1, x)][0], min = nraw[nr_offset(y - 1, x)][0];
+		for (int n = -1; n < 2; n++)
+			for (int k = -1 + ((n + 2) & 1); k < 2; k += 2) {
+				if (nraw[nr_offset(y + n, x + k)][0] < min)
+					min = nraw[nr_offset(y + n, x + k)][0];
+				if (nraw[nr_offset(y + n, x + k)][0] > max)
+					max = nraw[nr_offset(y + n, x + k)][0];
+			}
+		max *= 1.4;
+		min /= 1.4;
+		if (eg_r > max)
+			eg_r = max;
+		else if (eg_r < min)
+			eg_r = min;
 		if (eg_r > channel_maximum[0])
 			eg_r = channel_maximum[0];
 		else if (eg_r < channel_minimum[0])
 			eg_r = channel_minimum[0];
+		max = nraw[nr_offset(y - 1, x)][2], min = nraw[nr_offset(y - 1, x)][2];
+		for (int n = -1; n < 2; n++)
+			for (int k = -1 + ((n + 2) & 1); k < 2; k += 2) {
+				if (nraw[nr_offset(y + n, x + k)][2] < min)
+					min = nraw[nr_offset(y + n, x + k)][2];
+				if (nraw[nr_offset(y + n, x + k)][2] > max)
+					max = nraw[nr_offset(y + n, x + k)][2];
+			}
+		max *= 1.4;
+		min /= 1.4;
+		if (eg_b > max)
+			eg_b = max;
+		else if (eg_b < min)
+			eg_b = min;
 		if (eg_b > channel_maximum[2])
 			eg_b = channel_maximum[2];
 		else if (eg_b < channel_minimum[2])
 			eg_b = channel_minimum[2];
-		nraw[nr_offset(nry, nrx)][0] = eg_r;
-		nraw[nr_offset(nry, nrx)][2] = eg_b;
+		nraw[nr_offset(y, x)][0] = eg_r;
+		nraw[nr_offset(y, x)][2] = eg_b;
 	}
 }
 
@@ -486,6 +641,7 @@ void DHT::make_rb() {
  * перенос изображения в выходной массив
  */
 void DHT::copy_to_image() {
+	int iwidth = libraw.imgdata.sizes.iwidth;
 #if defined(LIBRAW_USE_OPENMP)
 #ifdef WIN32
 #pragma omp parallel for
@@ -494,23 +650,27 @@ void DHT::copy_to_image() {
 #endif
 #endif
 	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
-		for (int j = 0; j < libraw.imgdata.sizes.iwidth; ++j) {
-			libraw.imgdata.image[i * libraw.imgdata.sizes.iwidth + j][0] =
-					(unsigned short) (nraw[nr_offset(i + nr_topmargin, j + nr_leftmargin)][0]);
-			libraw.imgdata.image[i * libraw.imgdata.sizes.iwidth + j][2] =
-					(unsigned short) (nraw[nr_offset(i + nr_topmargin, j + nr_leftmargin)][2]);
-			libraw.imgdata.image[i * libraw.imgdata.sizes.iwidth + j][1] = libraw.imgdata.image[i
-					* libraw.imgdata.sizes.iwidth + j][3] = (unsigned short) (nraw[nr_offset(
-					i + nr_topmargin, j + nr_leftmargin)][1]);
+		for (int j = 0; j < iwidth; ++j) {
+			libraw.imgdata.image[i * iwidth + j][0] = (unsigned short) (nraw[nr_offset(
+					i + nr_topmargin, j + nr_leftmargin)][0]);
+			libraw.imgdata.image[i * iwidth + j][2] = (unsigned short) (nraw[nr_offset(
+					i + nr_topmargin, j + nr_leftmargin)][2]);
+			libraw.imgdata.image[i * iwidth + j][1] = libraw.imgdata.image[i * iwidth + j][3] =
+					(unsigned short) (nraw[nr_offset(i + nr_topmargin, j + nr_leftmargin)][1]);
 		}
 	}
 	free(nraw);
+	free(ndir);
 }
 
 void LibRaw::dht_interpolate() {
 	printf("DHT interpolating\n");
 	DHT dht(*this);
+	dht.make_hv_dirs();
+//	dht.illustrate_dirs();
 	dht.make_greens();
+	dht.make_diag_dirs();
+//	dht.illustrate_dirs();
 	dht.make_rb();
 	dht.copy_to_image();
 
