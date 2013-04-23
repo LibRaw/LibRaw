@@ -43,7 +43,7 @@ struct DHT {
 	LibRaw &libraw;
 	static const int HOR = 2, VER = 4, HORSH = 3, VERSH = 5, LURD = 16, RULD = 32, LURDSH = 24,
 			RULDSH = 40;
-	static const float T = 1.41;
+	static const float T;
 	char *ndir;
 	int nr_offset(int row, int col) {
 		return (row * nr_width + col);
@@ -128,6 +128,8 @@ struct DHT {
 	void make_rbhv(int i);
 	void make_rb();
 };
+
+const float DHT::T= 1.41f;
 
 typedef float float3[3];
 
