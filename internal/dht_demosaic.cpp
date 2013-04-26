@@ -47,7 +47,7 @@ struct DHT {
 		HOT = 64
 	};
 	static inline float Thot(void) throw () {
-		return 16.0f;
+		return 64.0f;
 	}
 	static inline float Tg(void) throw () {
 		return 256.0f;
@@ -144,12 +144,6 @@ struct DHT {
 		float e = calc_dist(dlurd, druld);
 		char d = druld < dlurd ? (e > T() ? RULDSH : RULD) : (e > T() ? LURDSH : LURD);
 		return d;
-	}
-	bool is_hot_rb(int x, int y, int kc) {
-		return false;
-	}
-	bool is_hot_g(int x, int y, int kc) {
-		return false;
 	}
 	static inline float scale_over(float ec, float base) {
 		float s = base * .4;
@@ -250,35 +244,101 @@ void DHT::hide_hots() {
 		for (int j = js; j < iwidth; j += 2) {
 			int x = j + nr_leftmargin;
 			int y = i + nr_topmargin;
-			if (nraw[nr_offset(y, x)][kc] > nraw[nr_offset(y, x + 2)][kc]
-					&& nraw[nr_offset(y, x)][kc] > nraw[nr_offset(y, x - 2)][kc]
-					&& nraw[nr_offset(y, x)][kc] > nraw[nr_offset(y - 2, x)][kc]
-					&& nraw[nr_offset(y, x)][kc] > nraw[nr_offset(y + 2, x)][kc]
-					&& nraw[nr_offset(y, x)][kc] / nraw[nr_offset(y, x + 2)][kc] > Thot()
-					&& nraw[nr_offset(y, x)][kc] / nraw[nr_offset(y, x - 2)][kc] > Thot()
-					&& nraw[nr_offset(y, x)][kc] / nraw[nr_offset(y + 2, x)][kc] > Thot()
-					&& nraw[nr_offset(y, x)][kc] / nraw[nr_offset(y - 2, x)][kc] > Thot()) {
-				ndir[nr_offset(y, x)] |= HOT;
-				nraw[nr_offset(y, x)][kc] = (nraw[nr_offset(y, x + 2)][kc]
-						+ nraw[nr_offset(y, x - 2)][kc] + nraw[nr_offset(y - 2, x)][kc]
-						+ nraw[nr_offset(y + 2, x)][kc]) / 4;
+			float c = nraw[nr_offset(y, x)][kc];
+			if ((c > nraw[nr_offset(y, x + 2)][kc] && c > nraw[nr_offset(y, x - 2)][kc]
+					&& c > nraw[nr_offset(y - 2, x)][kc] && c > nraw[nr_offset(y + 2, x)][kc]
+					&& c > nraw[nr_offset(y, x + 1)][1] && c > nraw[nr_offset(y, x - 1)][1]
+					&& c > nraw[nr_offset(y - 1, x)][1] && c > nraw[nr_offset(y + 1, x)][1])
+					|| (c < nraw[nr_offset(y, x + 2)][kc] && c < nraw[nr_offset(y, x - 2)][kc]
+							&& c < nraw[nr_offset(y - 2, x)][kc]
+							&& c < nraw[nr_offset(y + 2, x)][kc] && c < nraw[nr_offset(y, x + 1)][1]
+							&& c < nraw[nr_offset(y, x - 1)][1] && c < nraw[nr_offset(y - 1, x)][1]
+							&& c < nraw[nr_offset(y + 1, x)][1])) {
+				float avg = 0;
+				for (int k = -2; k < 3; k += 2)
+					for (int m = -2; m < 3; m += 2)
+						if (m == 0 && m == 0)
+							continue;
+						else
+							avg += nraw[nr_offset(y + k, x + m)][kc];
+				avg /= 8;
+//				float dev = 0;
+//				for (int k = -2; k < 3; k += 2)
+//					for (int l = -2; l < 3; l += 2)
+//						if (k == 0 && l == 0)
+//							continue;
+//						else {
+//							float t = nraw[nr_offset(y + k, x + l)][kc] - avg;
+//							dev += t * t;
+//						}
+//				dev /= 8;
+//				dev = sqrt(dev);
+				if (calc_dist(c, avg) > Thot()) {
+					ndir[nr_offset(y, x)] |= HOT;
+					float dv = calc_dist(
+							nraw[nr_offset(y - 2, x)][kc] * nraw[nr_offset(y - 1, x)][1],
+							nraw[nr_offset(y + 2, x)][kc] * nraw[nr_offset(y + 1, x)][1]);
+					float dh = calc_dist(
+							nraw[nr_offset(y, x - 2)][kc] * nraw[nr_offset(y, x - 1)][1],
+							nraw[nr_offset(y, x + 2)][kc] * nraw[nr_offset(y, x + 1)][1]);
+					if (dv > dh)
+						nraw[nr_offset(y, x)][kc] = (nraw[nr_offset(y, x + 2)][kc]
+								+ nraw[nr_offset(y, x - 2)][kc]) / 2;
+					else
+						nraw[nr_offset(y, x)][kc] = (nraw[nr_offset(y - 2, x)][kc]
+								+ nraw[nr_offset(y + 2, x)][kc]) / 2;
+				}
 			}
 		}
 		for (int j = js ^ 1; j < iwidth; j += 2) {
 			int x = j + nr_leftmargin;
 			int y = i + nr_topmargin;
-			if (nraw[nr_offset(y, x)][1] > nraw[nr_offset(y, x + 2)][1]
-					&& nraw[nr_offset(y, x)][1] > nraw[nr_offset(y, x - 2)][1]
-					&& nraw[nr_offset(y, x)][1] > nraw[nr_offset(y - 2, x)][1]
-					&& nraw[nr_offset(y, x)][1] > nraw[nr_offset(y + 2, x)][1]
-					&& nraw[nr_offset(y, x)][1] / nraw[nr_offset(y, x + 2)][1] > Thot()
-					&& nraw[nr_offset(y, x)][1] / nraw[nr_offset(y, x - 2)][1] > Thot()
-					&& nraw[nr_offset(y, x)][1] / nraw[nr_offset(y + 2, x)][1] > Thot()
-					&& nraw[nr_offset(y, x)][1] / nraw[nr_offset(y - 2, x)][1] > Thot()) {
-				ndir[nr_offset(y, x)] |= HOT;
-				nraw[nr_offset(y, x)][1] = (nraw[nr_offset(y, x + 2)][1]
-						+ nraw[nr_offset(y, x - 2)][1] + nraw[nr_offset(y - 2, x)][1]
-						+ nraw[nr_offset(y + 2, x)][1]) / 4;
+			float c = nraw[nr_offset(y, x)][1];
+			if ((c > nraw[nr_offset(y, x + 2)][1] && c > nraw[nr_offset(y, x - 2)][1]
+					&& c > nraw[nr_offset(y - 2, x)][1] && c > nraw[nr_offset(y + 2, x)][1]
+					&& c > nraw[nr_offset(y, x + 1)][kc] && c > nraw[nr_offset(y, x - 1)][kc]
+					&& c > nraw[nr_offset(y - 1, x)][kc ^ 2]
+					&& c > nraw[nr_offset(y + 1, x)][kc ^ 2])
+					|| (c < nraw[nr_offset(y, x + 2)][1] && c < nraw[nr_offset(y, x - 2)][1]
+							&& c < nraw[nr_offset(y - 2, x)][1] && c < nraw[nr_offset(y + 2, x)][1]
+							&& c < nraw[nr_offset(y, x + 1)][kc]
+							&& c < nraw[nr_offset(y, x - 1)][kc]
+							&& c < nraw[nr_offset(y - 1, x)][kc ^ 2]
+							&& c < nraw[nr_offset(y + 1, x)][kc ^ 2])) {
+				float avg = 0;
+				for (int k = -2; k < 3; k += 2)
+					for (int m = -2; m < 3; m += 2)
+						if (k == 0 && m == 0)
+							continue;
+						else
+							avg += nraw[nr_offset(y + k, x + m)][1];
+				avg /= 8;
+//				float dev = 0;
+//				for (int k = -2; k < 3; k += 2)
+//					for (int l = -2; l < 3; l += 2)
+//						if (k == 0 && l == 0)
+//							continue;
+//						else {
+//							float t = nraw[nr_offset(y + k, x + l)][1] - avg;
+//							dev += t * t;
+//						}
+//				dev /= 8;
+//				dev = sqrt(dev);
+				if (calc_dist(c, avg) > Thot()) {
+					ndir[nr_offset(y, x)] |= HOT;
+					float dv = calc_dist(
+							nraw[nr_offset(y - 2, x)][1] * nraw[nr_offset(y - 1, x)][kc ^ 2],
+							nraw[nr_offset(y + 2, x)][1] * nraw[nr_offset(y + 1, x)][kc ^ 2]);
+					float dh = calc_dist(
+							nraw[nr_offset(y, x - 2)][1] * nraw[nr_offset(y, x - 1)][kc],
+							nraw[nr_offset(y, x + 2)][1] * nraw[nr_offset(y, x + 1)][kc]);
+					if (dv > dh)
+						nraw[nr_offset(y, x)][1] = (nraw[nr_offset(y, x + 2)][1]
+								+ nraw[nr_offset(y, x - 2)][1]) / 2;
+					else
+						nraw[nr_offset(y, x)][1] = (nraw[nr_offset(y - 2, x)][1]
+								+ nraw[nr_offset(y + 2, x)][1]) / 2;
+				}
 			}
 		}
 	}
@@ -605,7 +665,8 @@ void DHT::illustrate_dline(int i) {
 		nraw[nr_offset(y, x)][0] = nraw[nr_offset(y, x)][1] = nraw[nr_offset(y, x)][2] = 0.5;
 		int l = ndir[nr_offset(y, x)] & 8;
 		l >>= 3;
-		if (ndir[nr_offset(y, x)] & RULD)
+		l = 1;
+		if (ndir[nr_offset(y, x)] & HOT)
 			nraw[nr_offset(y, x)][0] = l * channel_maximum[0] / 4 + channel_maximum[0] / 4;
 		else
 			nraw[nr_offset(y, x)][2] = l * channel_maximum[2] / 4 + channel_maximum[2] / 4;
@@ -787,8 +848,7 @@ void DHT::copy_to_image() {
 	}
 }
 
-DHT::~DHT()
-{
+DHT::~DHT() {
 	free(nraw);
 	free(ndir);
 }
