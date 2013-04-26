@@ -33,8 +33,22 @@ struct DHT {
 	ushort channel_maximum[3];
 	float channel_minimum[3];
 	LibRaw &libraw;
-	static const int HOR = 2, VER = 4, HORSH = 3, VERSH = 5, LURD = 16, RULD = 32, LURDSH = 24,
-			RULDSH = 40;
+	enum {
+		HVSH = 1,
+		HOR = 2,
+		VER = 4,
+		HORSH = HOR | HVSH,
+		VERSH = VER | HVSH,
+		DIASH = 8,
+		LURD = 16,
+		RULD = 32,
+		LURDSH = LURD | DIASH,
+		RULDSH = RULD | DIASH,
+		HOT = 64
+	};
+	static inline float Thot(void) throw () {
+		return 16.0f;
+	}
 	static inline float Tg(void) throw () {
 		return 256.0f;
 	}
@@ -131,6 +145,12 @@ struct DHT {
 		char d = druld < dlurd ? (e > T() ? RULDSH : RULD) : (e > T() ? LURDSH : LURD);
 		return d;
 	}
+	bool is_hot_rb(int x, int y, int kc) {
+		return false;
+	}
+	bool is_hot_g(int x, int y, int kc) {
+		return false;
+	}
 	static inline float scale_over(float ec, float base) {
 		float s = base * .4;
 		float o = ec - base;
@@ -141,6 +161,7 @@ struct DHT {
 		float o = base - ec;
 		return base - sqrt(s * (o + s)) + s;
 	}
+	~DHT();
 	DHT(LibRaw &_libraw);
 	void copy_to_image();
 	void make_greens();
@@ -158,6 +179,8 @@ struct DHT {
 	void make_rbdiag(int i);
 	void make_rbhv(int i);
 	void make_rb();
+	void hide_hots();
+	void restore_hots();
 };
 
 typedef float float3[3];
@@ -210,6 +233,73 @@ DHT::DHT(LibRaw& _libraw) :
 	channel_minimum[0] += .5;
 	channel_minimum[1] += .5;
 	channel_minimum[2] += .5;
+}
+
+void DHT::hide_hots() {
+	int iwidth = libraw.imgdata.sizes.iwidth;
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided) firstprivate(iwidth)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		int js = libraw.COLOR(i, 0) & 1;
+		int kc = libraw.COLOR(i, js);
+		/*
+		 * js -- начальная х-координата, которая попадает мимо известного зелёного
+		 * kc -- известный цвет в точке интерполирования
+		 */
+		for (int j = js; j < iwidth; j += 2) {
+			int x = j + nr_leftmargin;
+			int y = i + nr_topmargin;
+			if (nraw[nr_offset(y, x)][kc] > nraw[nr_offset(y, x + 2)][kc]
+					&& nraw[nr_offset(y, x)][kc] > nraw[nr_offset(y, x - 2)][kc]
+					&& nraw[nr_offset(y, x)][kc] > nraw[nr_offset(y - 2, x)][kc]
+					&& nraw[nr_offset(y, x)][kc] > nraw[nr_offset(y + 2, x)][kc]
+					&& nraw[nr_offset(y, x)][kc] / nraw[nr_offset(y, x + 2)][kc] > Thot()
+					&& nraw[nr_offset(y, x)][kc] / nraw[nr_offset(y, x - 2)][kc] > Thot()
+					&& nraw[nr_offset(y, x)][kc] / nraw[nr_offset(y + 2, x)][kc] > Thot()
+					&& nraw[nr_offset(y, x)][kc] / nraw[nr_offset(y - 2, x)][kc] > Thot()) {
+				ndir[nr_offset(y, x)] |= HOT;
+				nraw[nr_offset(y, x)][kc] = (nraw[nr_offset(y, x + 2)][kc]
+						+ nraw[nr_offset(y, x - 2)][kc] + nraw[nr_offset(y - 2, x)][kc]
+						+ nraw[nr_offset(y + 2, x)][kc]) / 4;
+			}
+		}
+		for (int j = js ^ 1; j < iwidth; j += 2) {
+			int x = j + nr_leftmargin;
+			int y = i + nr_topmargin;
+			if (nraw[nr_offset(y, x)][1] > nraw[nr_offset(y, x + 2)][1]
+					&& nraw[nr_offset(y, x)][1] > nraw[nr_offset(y, x - 2)][1]
+					&& nraw[nr_offset(y, x)][1] > nraw[nr_offset(y - 2, x)][1]
+					&& nraw[nr_offset(y, x)][1] > nraw[nr_offset(y + 2, x)][1]
+					&& nraw[nr_offset(y, x)][1] / nraw[nr_offset(y, x + 2)][1] > Thot()
+					&& nraw[nr_offset(y, x)][1] / nraw[nr_offset(y, x - 2)][1] > Thot()
+					&& nraw[nr_offset(y, x)][1] / nraw[nr_offset(y + 2, x)][1] > Thot()
+					&& nraw[nr_offset(y, x)][1] / nraw[nr_offset(y - 2, x)][1] > Thot()) {
+				ndir[nr_offset(y, x)] |= HOT;
+				nraw[nr_offset(y, x)][1] = (nraw[nr_offset(y, x + 2)][1]
+						+ nraw[nr_offset(y, x - 2)][1] + nraw[nr_offset(y - 2, x)][1]
+						+ nraw[nr_offset(y + 2, x)][1]) / 4;
+			}
+		}
+	}
+}
+
+void DHT::restore_hots() {
+	int iwidth = libraw.imgdata.sizes.iwidth;
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp parallel for schedule(guided) firstprivate(iwidth) collapse(2)
+#endif
+	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+		for (int j = 0; j < iwidth; ++j) {
+			int x = j + nr_leftmargin;
+			int y = i + nr_topmargin;
+			if (ndir[nr_offset(y, x)] & HOT) {
+				int l = libraw.COLOR(i, j);
+				nraw[nr_offset(i + nr_topmargin, j + nr_leftmargin)][l] = libraw.imgdata.image[i
+						* iwidth + j][l];
+			}
+		}
+	}
 }
 
 void DHT::make_diag_dirs() {
@@ -271,7 +361,7 @@ void DHT::refine_hv_dirs(int i, int js) {
 	for (int j = js; j < iwidth; j += 2) {
 		int x = j + nr_leftmargin;
 		int y = i + nr_topmargin;
-		if (ndir[nr_offset(y, x)] & 1)
+		if (ndir[nr_offset(y, x)] & HVSH)
 			continue;
 		int nv = (ndir[nr_offset(y - 1, x)] & VER) + (ndir[nr_offset(y + 1, x)] & VER)
 				+ (ndir[nr_offset(y, x - 1)] & VER) + (ndir[nr_offset(y, x + 1)] & VER);
@@ -283,10 +373,14 @@ void DHT::refine_hv_dirs(int i, int js) {
 						((ndir[nr_offset(y, x - 1)] & HOR) || (ndir[nr_offset(y, x + 1)] & HOR));
 		nv /= VER;
 		nh /= HOR;
-		if ((ndir[nr_offset(y, x)] & VER) && (nh > 2 && !codir))
-			ndir[nr_offset(y, x)] = HOR;
-		if ((ndir[nr_offset(y, x)] & HOR) && (nv > 2 && !codir))
-			ndir[nr_offset(y, x)] = VER;
+		if ((ndir[nr_offset(y, x)] & VER) && (nh > 2 && !codir)) {
+			ndir[nr_offset(y, x)] &= ~VER;
+			ndir[nr_offset(y, x)] |= HOR;
+		}
+		if ((ndir[nr_offset(y, x)] & HOR) && (nv > 2 && !codir)) {
+			ndir[nr_offset(y, x)] &= ~HOR;
+			ndir[nr_offset(y, x)] |= VER;
+		}
 	}
 }
 
@@ -295,7 +389,7 @@ void DHT::refine_ihv_dirs(int i) {
 	for (int j = 0; j < iwidth; j++) {
 		int x = j + nr_leftmargin;
 		int y = i + nr_topmargin;
-		if (ndir[nr_offset(y, x)] & 1)
+		if (ndir[nr_offset(y, x)] & HVSH)
 			continue;
 		int nv = (ndir[nr_offset(y - 1, x)] & VER) + (ndir[nr_offset(y + 1, x)] & VER)
 				+ (ndir[nr_offset(y, x - 1)] & VER) + (ndir[nr_offset(y, x + 1)] & VER);
@@ -303,11 +397,14 @@ void DHT::refine_ihv_dirs(int i) {
 				+ (ndir[nr_offset(y, x - 1)] & HOR) + (ndir[nr_offset(y, x + 1)] & HOR);
 		nv /= VER;
 		nh /= HOR;
-		if ((ndir[nr_offset(y, x)] & VER) && nh > 3)
-			ndir[nr_offset(y, x)] = HOR;
-		if ((ndir[nr_offset(y, x)] & HOR) && nv > 3)
-			ndir[nr_offset(y, x)] = VER;
-
+		if ((ndir[nr_offset(y, x)] & VER) && nh > 3) {
+			ndir[nr_offset(y, x)] &= ~VER;
+			ndir[nr_offset(y, x)] |= HOR;
+		}
+		if ((ndir[nr_offset(y, x)] & HOR) && nv > 3) {
+			ndir[nr_offset(y, x)] &= ~HOR;
+			ndir[nr_offset(y, x)] |= VER;
+		}
 	}
 }
 void DHT::make_hv_dline(int i) {
@@ -322,11 +419,12 @@ void DHT::make_hv_dline(int i) {
 		int x = j + nr_leftmargin;
 		int y = i + nr_topmargin;
 		char d = 0;
-		if ((j & 1) == js)
+		if ((j & 1) == js) {
 			d = get_hv_grb(x, y, kc);
-		else
+		} else {
 			d = get_hv_rbg(x, y, kc);
-		ndir[nr_offset(y, x)] = d;
+		}
+		ndir[nr_offset(y, x)] |= d;
 	}
 }
 
@@ -342,10 +440,11 @@ void DHT::make_diag_dline(int i) {
 		int x = j + nr_leftmargin;
 		int y = i + nr_topmargin;
 		char d = 0;
-		if ((j & 1) == js)
+		if ((j & 1) == js) {
 			d = get_diag_grb(x, y, kc);
-		else
+		} else {
 			d = get_diag_rbg(x, y, kc);
+		}
 		ndir[nr_offset(y, x)] |= d;
 	}
 }
@@ -355,7 +454,7 @@ void DHT::refine_diag_dirs(int i, int js) {
 	for (int j = js; j < iwidth; j += 2) {
 		int x = j + nr_leftmargin;
 		int y = i + nr_topmargin;
-		if (ndir[nr_offset(y, x)] & 8)
+		if (ndir[nr_offset(y, x)] & DIASH)
 			continue;
 		int nv = (ndir[nr_offset(y - 1, x)] & LURD) + (ndir[nr_offset(y + 1, x)] & LURD)
 				+ (ndir[nr_offset(y, x - 1)] & LURD) + (ndir[nr_offset(y, x + 1)] & LURD)
@@ -389,7 +488,7 @@ void DHT::refine_idiag_dirs(int i) {
 	for (int j = 0; j < iwidth; j++) {
 		int x = j + nr_leftmargin;
 		int y = i + nr_topmargin;
-		if (ndir[nr_offset(y, x)] & 8)
+		if (ndir[nr_offset(y, x)] & DIASH)
 			continue;
 		int nv = (ndir[nr_offset(y - 1, x)] & LURD) + (ndir[nr_offset(y + 1, x)] & LURD)
 				+ (ndir[nr_offset(y, x - 1)] & LURD) + (ndir[nr_offset(y, x + 1)] & LURD)
@@ -686,6 +785,10 @@ void DHT::copy_to_image() {
 					(unsigned short) (nraw[nr_offset(i + nr_topmargin, j + nr_leftmargin)][1]);
 		}
 	}
+}
+
+DHT::~DHT()
+{
 	free(nraw);
 	free(ndir);
 }
@@ -693,12 +796,14 @@ void DHT::copy_to_image() {
 void LibRaw::dht_interpolate() {
 	printf("DHT interpolating\n");
 	DHT dht(*this);
+	dht.hide_hots();
 	dht.make_hv_dirs();
 //	dht.illustrate_dirs();
 	dht.make_greens();
 	dht.make_diag_dirs();
 //	dht.illustrate_dirs();
 	dht.make_rb();
+	dht.restore_hots();
 	dht.copy_to_image();
 
 }
