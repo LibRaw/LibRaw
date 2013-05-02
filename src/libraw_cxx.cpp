@@ -463,7 +463,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     else if (load_raw == &LibRaw::canon_sraw_load_raw) 
         {
             d_info->decoder_name = "canon_sraw_load_raw()";
-            d_info->decoder_flags = LIBRAW_DECODER_LEGACY | LIBRAW_DECODER_TRYRAWSPEED; 
+            d_info->decoder_flags = LIBRAW_DECODER_LEGACY ;//| LIBRAW_DECODER_TRYRAWSPEED; 
         }
     else if (load_raw == &LibRaw::lossless_dng_load_raw) 
         {
@@ -925,6 +925,16 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
             S.height += S.height & 1;
             S.width  += S.width  & 1;
         }
+	libraw_decoder_info_t dinfo;
+	get_decoder_info(&dinfo);
+	if(dinfo.decoder_flags & LIBRAW_DECODER_LEGACY)
+	{
+		// Adjust sizes according to image buffer size
+		S.raw_width = S.width;
+		S.left_margin = 0;
+		S.raw_height = S.height;
+		S.top_margin = 0;
+	}
 
     IO.shrink = P1.filters && (O.half_size ||
 	((O.threshold || O.aber[0] != 1 || O.aber[2] != 1) ));
@@ -936,7 +946,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
      {
     	//printf("BL=%d [%d,%d,%d,%d]\n",C.black,C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
 		C.black = C.cblack[0];
-		C.cblack[0]=C.cblack[1]=C.cblack[2]=C.cblack[3];
+		C.cblack[0]=C.cblack[1]=C.cblack[2]=C.cblack[3]=0;
 		imgdata.idata.filters = 2;	
      }
     // Save color,sizes and internal data into raw_image fields
