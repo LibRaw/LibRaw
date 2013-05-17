@@ -6595,10 +6595,14 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 13690,-5358,-1474,-3369,11600,1998,-132,1554,4395 } },
     { "FUJIFILM HS3", 0, 0,
 	{ 13690,-5358,-1474,-3369,11600,1998,-132,1554,4395 } },
+	{ "FUJIFILM X100S", 0, 0,
+	{ 10592,-4262,-1008,-3514,11355,2465,-870,2025,6386 } },
     { "FUJIFILM X100", 0, 0,
 	{ 12161,-4457,-1069,-5034,12874,2400,-795,1724,6904 } },
     { "FUJIFILM X10", 0, 0,
 	{ 13509,-6199,-1254,-4430,12733,1865,-331,1441,5022 } },
+	{ "FUJIFILM X20", 0, 0,
+	{ 11768,-4971,-1133,-4904,12927,2183,-480,1723,4605 } },
     { "FUJIFILM XF1", 0, 0,
 	{ 13509,-6199,-1254,-4430,12733,1865,-331,1441,5022 } },
     { "FUJIFILM X-Pro1", 0, 0,
@@ -8104,6 +8108,28 @@ cp_e2500:
       left_margin = 0;
       filters = 2;
     }
+	if(!strcmp(model,"X20"))
+	{
+		left_margin = 2;
+		top_margin=2;
+		width = 4030;
+		height = 3010;
+		raw_height = 3012;
+		filters = 2;
+	}
+	if(!strcmp(model,"X100S"))
+	{
+		left_margin = 2;
+		top_margin = 1;
+		width = 4934;
+		height = 3290;
+		raw_height = 3295;
+		filters = 2;
+		data_offset +=8;
+		load_raw = &CLASS unpacked_load_raw;
+		load_flags = 0;
+		maximum = 16383;
+	}
     if (fuji_layout) raw_width *= is_raw;
   } else if (!strcmp(model,"RD175")) {
     height = 986;
@@ -8897,7 +8923,7 @@ c603:
 }
 
 
-#line 10147 "dcraw/dcraw.c"
+#line 10173 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -9128,7 +9154,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 10403 "dcraw/dcraw.c"
+#line 10429 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
