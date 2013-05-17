@@ -1,5 +1,6 @@
 ﻿2013-05-20  Alex Tutubalin <lexa@lexa.ru>
-   * В функции sony_decrypt() обойдена ошибка, имеющаяся в gcc 4.8
+   * В функции sony_decrypt() исправлено неопределенное поведение
+     (проявлялось в gcc 4.8)
    * Для gcc 4.8+ выключена aggressive-loop-optimization
 
 2013-05-18  Alex Tutubalin <lexa@lexa.ru>
