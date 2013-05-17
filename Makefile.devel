@@ -11,10 +11,10 @@ CXX=g++
 CFLAGS= -O4 -g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -Wno-overflow -fpack-struct=8 -fopenmp
 #CFLAGS=-g -I. -Wall -Wno-long-long -Wno-conversion -Wno-sign-compare -fpack-struct=8 -fopenmp
 
-# GCC 4.6 section
-#CC=gcc46
-#CXX=g++46
-#CFLAGS= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse4.2 -mfpmath=sse  -fopenmp 
+# GCC 4.8 section
+CC=gcc48
+CXX=g++48
+CFLAGS= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse4.2 -mfpmath=sse  -fopenmp 
 #CFLAGS= -O -I. -pedantic  -Wno-long-long -Wno-overflow -g
 
 

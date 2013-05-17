@@ -1,3 +1,9 @@
+2013-05-21 Alex Tutubalin <lexa@lexa.ru>
+	* Fixed undefined behaviour in sony_decrypt() function.
+	  This bug causes incorrect camera WB read for Sony cameras.
+	* Disabled 'aggressive loop optimization' for gcc 4.8+
+        * LibRaw 0.14.8-Release
+
 2012-06-27 Alex Tutubalin <lexa@lexa.ru>
         * Imported dcraw 9.15 (1.449):
           - New cameras supported: Canon 5D Mark III, G1 X, 1D X and Powershot SX200;

@@ -2394,6 +2394,13 @@ void CLASS quicktake_100_load_raw()
 #define PREDICTOR (c ? (buf[c][y-1][x] + buf[c][y][x+1]) / 2 \
 : (buf[c][y-1][x+1] + 2*buf[c][y-1][x] + buf[c][y][x+1]) / 4)
 
+#ifdef __GNUC__
+# if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)
+# pragma GCC optimize("no-aggressive-loop-optimizations")
+# endif
+#endif
+
+
 void CLASS kodak_radc_load_raw()
 {
   static const char src[] = {
@@ -2908,7 +2915,10 @@ void CLASS sony_decrypt (unsigned *data, int len, int start, int key)
       pad[p] = htonl(pad[p]);
   }
   while (len--)
-    *data++ ^= pad[p++ & 127] = pad[(p+1) & 127] ^ pad[(p+65) & 127];
+  {
+    *data++ ^= pad[p & 127] = pad[(p+1) & 127] ^ pad[(p+65) & 127];
+    p++;
+  }
 #ifndef LIBRAW_NOTHREADS
 #undef pad
 #undef p
@@ -3261,7 +3271,7 @@ void CLASS redcine_load_raw()
   jas_stream_close (in);
 #endif
 }
-#line 3735 "dcraw/dcraw.c"
+#line 3745 "dcraw/dcraw.c"
 
 
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
@@ -4630,7 +4640,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-#line 5107 "dcraw/dcraw.c"
+#line 5117 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5214,7 +5224,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 
-#line 5695 "dcraw/dcraw.c"
+#line 5705 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6574,7 +6584,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 7061 "dcraw/dcraw.c"
+#line 7071 "dcraw/dcraw.c"
 void CLASS adobe_coeff (const char *p_make, const char *p_model)
 {
   static const struct {
@@ -7341,7 +7351,7 @@ short CLASS guess_byte_order (int words)
   return sum[0] < sum[1] ? 0x4d4d : 0x4949;
 }
 
-#line 7831 "dcraw/dcraw.c"
+#line 7841 "dcraw/dcraw.c"
 
 float CLASS find_green (int bps, int bite, int off0, int off1)
 {
@@ -9065,7 +9075,7 @@ else if (!strcmp(model,"QV-2000UX")) {
   }
 }
 
-#line 9648 "dcraw/dcraw.c"
+#line 9658 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
   int row, col, c, i, j, k;
@@ -9284,7 +9294,7 @@ int CLASS flip_index (int row, int col)
   return row * iwidth + col;
 }
 
-#line 9891 "dcraw/dcraw.c"
+#line 9901 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
