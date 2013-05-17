@@ -2607,6 +2607,8 @@ int LibRaw::dcraw_process(void)
 // LGPL2
                 else if (quality == 11)
                     dht_interpolate();
+                else if (quality == 12)
+                    aahd_interpolate();
  // fallback to AHD
                 else
                     ahd_interpolate();
