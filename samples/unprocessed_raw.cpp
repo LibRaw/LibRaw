@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: unprocessed_raw.cpp
- * Copyright 2009-2011 LibRaw LLC (info@libraw.org)
+ * Copyright 2009-2013 LibRaw LLC (info@libraw.org)
  * Created: Fri Jan 02, 2009
  *
  * LibRaw sample

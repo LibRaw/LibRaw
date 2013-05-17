@@ -1,7 +1,7 @@
 #!/usr/bin/perl
  
 # File: preprocess.pl
-# Copyright 2008-2010 Alex Tutubalin <lexa@lexa.ru>
+# Copyright 2008-2013 LibRaw LLC (info@libraw.org)
 # Created: Sat Mar  8, 2008
 # LibRaw preprocessor for dcraw source
 #
@@ -28,7 +28,7 @@ sub process_file
     my $date = scalar localtime;
 print <<EOM;
 /* 
-  Copyright 2008-2010 LibRaw LLC (info\@libraw.org)
+  Copyright 2008-2013 LibRaw LLC (info\@libraw.org)
 
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of three licenses as you choose:

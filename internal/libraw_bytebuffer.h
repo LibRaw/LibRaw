@@ -1,5 +1,7 @@
 /* -*- C -*-
  * File: libraw_bytebuffer.h
+   Copyright 2008-2013 LibRaw LLC (info@libraw.org)
+
  *
  * Created: Fri Aug 12 14:41:45 2011
 
