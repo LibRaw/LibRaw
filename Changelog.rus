@@ -1,4 +1,9 @@
-﻿2013-05-23 Alex Tutubalin <lexa@lexa.ru>
+﻿2013-05-25 Alex Tutubalin <lexa@lexa.ru>
+  * Исправле неверный расчет максимума данных для файлов Panasonic
+  * Проверка на выход за пределы буфера в коде коррекции экспозиции
+  * LibRaw 0.15.1
+
+2013-05-23 Alex Tutubalin <lexa@lexa.ru>
 
   LibRaw 0.15.0 Release:
 
