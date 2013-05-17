@@ -1003,7 +1003,7 @@ void LibRaw::fix_after_rawspeed(int bl)
     }
 }
 #else
-void LibRaw::fix_after_rawspeed()
+void LibRaw::fix_after_rawspeed(int)
 {
 }
 #endif

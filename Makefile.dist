@@ -6,9 +6,9 @@ CFLAGS=-O4  -I. -w
 #CFLAGS+=-fopenmp
 
 # RawSpeed Support
-CFLAGS+=-pthread -DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
-LDADD+=-L../RawSpeed/RawSpeed -lrawspeed -L/usr/local/include -ljpeg -lxml2
-RAWSPEED_DATA=../RawSpeed/data/cameras.xml
+#CFLAGS+=-pthread -DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
+#LDADD+=-L../RawSpeed/RawSpeed -lrawspeed -L/usr/local/include -ljpeg -lxml2
+#RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
 
 # Jasper support for RedCine
