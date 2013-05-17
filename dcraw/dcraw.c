@@ -2337,6 +2337,12 @@ void CLASS quicktake_100_load_raw()
 #define PREDICTOR (c ? (buf[c][y-1][x] + buf[c][y][x+1]) / 2 \
 : (buf[c][y-1][x+1] + 2*buf[c][y-1][x] + buf[c][y][x+1]) / 4)
 
+#ifdef __GNUC__
+# if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)
+# pragma GCC optimize("no-aggressive-loop-optimizations")
+# endif
+#endif
+
 void CLASS kodak_radc_load_raw()
 {
   static const char src[] = {
@@ -2813,8 +2819,16 @@ void CLASS sony_decrypt (unsigned *data, int len, int start, int key)
     for (p=0; p < 127; p++)
       pad[p] = htonl(pad[p]);
   }
+#if 1 // Avoid gcc 4.8 bug
+  while (len--)
+    {
+      *data++ ^= pad[p & 127] = pad[(p+1) & 127] ^ pad[(p+65) & 127];
+      p++;     
+    }
+#else
   while (len--)
     *data++ ^= pad[p++ & 127] = pad[(p+1) & 127] ^ pad[(p+65) & 127];
+#endif
 #ifndef LIBRAW_NOTHREADS
 #undef pad
 #undef p

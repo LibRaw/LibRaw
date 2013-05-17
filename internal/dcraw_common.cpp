@@ -2067,6 +2067,12 @@ void CLASS quicktake_100_load_raw()
 #define PREDICTOR (c ? (buf[c][y-1][x] + buf[c][y][x+1]) / 2 \
 : (buf[c][y-1][x+1] + 2*buf[c][y-1][x] + buf[c][y][x+1]) / 4)
 
+#ifdef __GNUC__
+# if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)
+# pragma GCC optimize("no-aggressive-loop-optimizations")
+# endif
+#endif
+
 void CLASS kodak_radc_load_raw()
 {
   static const char src[] = {
@@ -2543,8 +2549,17 @@ void CLASS sony_decrypt (unsigned *data, int len, int start, int key)
     for (p=0; p < 127; p++)
       pad[p] = htonl(pad[p]);
   }
+#if 0 // Avoid gcc 4.8 bug
+  while (len--)
+    {
+      pad[p & 127] = pad[(p+1) & 127] ^ pad[(p+65) & 127];
+      *data++ ^= pad[p & 127];
+      p++;     
+    }
+#else
   while (len--)
     *data++ ^= pad[p++ & 127] = pad[(p+1) & 127] ^ pad[(p+65) & 127];
+#endif
 #ifndef LIBRAW_NOTHREADS
 #undef pad
 #undef p
@@ -2879,7 +2894,7 @@ void CLASS redcine_load_raw()
   jas_stream_close (in);
 #endif
 }
-#line 3860 "dcraw/dcraw.c"
+#line 3875 "dcraw/dcraw.c"
 void CLASS crop_masked_pixels()
 {
   int row, col;
@@ -2979,7 +2994,7 @@ void CLASS remove_zeroes()
   RUN_CALLBACK(LIBRAW_PROGRESS_REMOVE_ZEROES,1,2);
 #endif
 }
-#line 4125 "dcraw/dcraw.c"
+#line 4140 "dcraw/dcraw.c"
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax)
 {
   int i;
@@ -4474,7 +4489,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 5624 "dcraw/dcraw.c"
+#line 5639 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -4989,7 +5004,7 @@ void CLASS parse_kodak_ifd (int base)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 6144 "dcraw/dcraw.c"
+#line 6159 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6248,7 +6263,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 7405 "dcraw/dcraw.c"
+#line 7420 "dcraw/dcraw.c"
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
   int i;
@@ -6349,7 +6364,7 @@ void CLASS parse_foveon()
   }
   is_foveon = 1;
 }
-#line 7508 "dcraw/dcraw.c"
+#line 7523 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -8967,7 +8982,7 @@ c603:
 }
 
 
-#line 10217 "dcraw/dcraw.c"
+#line 10232 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -9198,7 +9213,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 10473 "dcraw/dcraw.c"
+#line 10488 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
