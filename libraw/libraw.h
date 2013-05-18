@@ -281,7 +281,7 @@ protected:
   /* RawSpeed data */
   void		*_rawspeed_camerameta;
   void	    *_rawspeed_decoder;
-  void		fix_after_rawspeed();
+  void		fix_after_rawspeed(int bl);
 
 
 #ifdef LIBRAW_LIBRARY_BUILD 

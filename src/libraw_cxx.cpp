@@ -985,13 +985,16 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 }
 
 #ifdef USE_RAWSPEED
-void LibRaw::fix_after_rawspeed()
+void LibRaw::fix_after_rawspeed(int bl)
 {
   if (load_raw == &LibRaw::lossy_dng_load_raw)
     C.maximum = 0xffff;
   else if (load_raw == &LibRaw::sony_load_raw)
     C.maximum = 0x3ff0;
-  else if (load_raw == &LibRaw::sony_arw2_load_raw || (load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")))
+  else if (
+	  (load_raw == &LibRaw::sony_arw2_load_raw || (load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")))
+	  && bl >= (C.black+C.cblack[0])*2
+	  )
     {
       C.maximum *=4;
       C.black *=4;
@@ -1004,7 +1007,6 @@ void LibRaw::fix_after_rawspeed()
 {
 }
 #endif
-
 
 int LibRaw::unpack(void)
 {
@@ -1097,20 +1099,20 @@ int LibRaw::unpack(void)
                   _rawspeed_decoder = static_cast<void*>(d);
                   imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
                   S.raw_pitch = r->pitch;
-                  fix_after_rawspeed();
+                  fix_after_rawspeed(r->blackLevel);
                 } else if(r->getCpp()==4) {
                   _rawspeed_decoder = static_cast<void*>(d);
                   imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
                   S.raw_pitch = r->pitch;
                   C.maximum = r->whitePoint;
-                  fix_after_rawspeed();
+                  fix_after_rawspeed(r->blackLevel);
                 } else if(r->getCpp() == 3)
                   {
                     _rawspeed_decoder = static_cast<void*>(d);
                     imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
                     S.raw_pitch = r->pitch;
                     C.maximum = r->whitePoint;
-                    fix_after_rawspeed();
+                    fix_after_rawspeed(r->blackLevel);
                   }
                 else
                   {
