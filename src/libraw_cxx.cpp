@@ -949,6 +949,29 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		C.cblack[0]=C.cblack[1]=C.cblack[2]=C.cblack[3]=0;
 		imgdata.idata.filters = 2;	
      }
+	// X20
+	if(imgdata.idata.filters == 0x5bb8445b)
+	{
+		C.black = 257;
+		C.cblack[0]=C.cblack[1]=C.cblack[2]=C.cblack[3]=0;
+		imgdata.idata.filters = 2;	
+		S.width = 4030;
+		S.height = 3010;
+		S.top_margin = 2;
+		S.left_margin = 2;
+	}
+	// X100S
+	if(imgdata.idata.filters == 0x5145bb84)
+	{
+		C.black = 1024;
+		C.cblack[0]=C.cblack[1]=C.cblack[2]=C.cblack[3]=0;
+		S.left_margin = 2;
+		S.top_margin = 1;
+		S.width = 4934;
+		S.height = 3290;
+		imgdata.idata.filters = 2;
+	}
+
     // Save color,sizes and internal data into raw_image fields
     memmove(&imgdata.rawdata.color,&imgdata.color,sizeof(imgdata.color));
     memmove(&imgdata.rawdata.sizes,&imgdata.sizes,sizeof(imgdata.sizes));
@@ -1131,7 +1154,7 @@ int LibRaw::unpack(void)
 			if(load_raw == &LibRaw::unpacked_load_raw && !strcasecmp(imgdata.idata.make,"Nikon"))
 				C.maximum = m_save;
           }
-	    
+
         if(imgdata.rawdata.raw_image)
           crop_masked_pixels(); // calculate black levels
 
