@@ -7566,6 +7566,10 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 6461,-907,-882,-4300,12184,2378,-819,1944,5931 } },
     { "Canon EOS 650D", 0, 0x354d,
 	{ 6602,-841,-939,-4472,12458,2247,-975,2039,6148 } },
+	{ "Canon EOS 700D", 0, 0x354d,
+	{ 6602,-841,-939,-4472,12458,2247,-975,2039,6148 } },
+	{ "Canon EOS REBEL T5i", 0, 0x354d,
+	{ 6602,-841,-939,-4472,12458,2247,-975,2039,6148 } },
     { "Canon EOS 1000D", 0, 0xe43,
 	{ 6771,-1139,-977,-7818,15123,2928,-1244,1437,7533 } },
     { "Canon EOS 1100D", 0, 0x3510,
@@ -7590,6 +7594,10 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 6847,-614,-1014,-4669,12737,2139,-1197,2488,6846 } },
     { "Canon EOS-1D", 0, 0xe20,
 	{ 6806,-179,-1020,-8097,16415,1687,-3267,4236,7690 } },
+	{ "Canon EOS 100D", 0, 0x3cf0,
+	{ 6602,-841,-939,-4472,12458,2247,-975,2039,6148 } },
+	{ "Canon EOS REBEL SL1", 0, 0x3cf0,
+	{ 6602,-841,-939,-4472,12458,2247,-975,2039,6148 } },
     { "Canon EOS", 0, 0,
 	{ 8197,-2000,-1118,-6714,14335,2592,-2536,3178,8266 } },
     { "Canon PowerShot A530", 0, 0,
@@ -7750,6 +7758,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 13690,-5358,-1474,-3369,11600,1998,-132,1554,4395 } },
     { "FUJIFILM HS3", 0, 0,
 	{ 13690,-5358,-1474,-3369,11600,1998,-132,1554,4395 } },
+	{ "FUJIFILM HS50EXR", 0, 0,
+	{ 12085,-4727,-953,-3257,11489,2002,-511,2046,4592 } },
 	{ "FUJIFILM SL1000", 0, 0,
 	{ 11705,-4262,-1107,-2282,10791,1709,-555,1713,4945 } },
 	{ "FUJIFILM X100S", 0, 0,
@@ -8044,6 +8054,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 10915,-3677,-982,-5587,12986,2911,-1168,1968,6223 } },
     { "OLYMPUS SP570UZ", 0, 0,
 	{ 11522,-4044,-1146,-4736,12172,2904,-988,1829,6039 } },
+	{ "OLYMPUS XZ-10", 0, 0,
+	{ 9777,-3483,-925,-2886,11297,1800,-602,1663,5134 } },
     { "OLYMPUS XZ-1", 0, 0,
 	{ 10901,-4095,-1074,-1141,9208,2293,-62,1417,5158 } },
     { "OLYMPUS XZ-2", 0, 0,
@@ -8162,6 +8174,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 6763,-1919,-863,-3868,11515,2684,-1216,2387,5879 } },
     { "Panasonic DMC-G5", 143, 0xfff,
 	{ 7798,-2562,-740,-3879,11584,2613,-1055,2248,5434 } },
+	{ "Panasonic DMC-G6", 143, 0xfff,
+	{ 8294,-2891,-651,-3869,11590,2595,-1183,2267,5352 } },
     { "Panasonic DMC-GF1", 15, 0xf92,
 	{ 7888,-1902,-1011,-8106,16085,2099,-2353,2866,7330 } },
     { "Panasonic DMC-GF2", 143, 0xfff,
@@ -9283,6 +9297,11 @@ cp_e2500:
       left_margin = 0;
       filters = 2;
     }
+	if(!strcmp(model,"HS50EXR"))
+	{
+		filters = 0x1e1e1e1e;
+		width=3230;
+	}
 	if(!strcmp(model,"X20"))
 	{
 		left_margin = 2;
@@ -9406,6 +9425,8 @@ konica_400z:
     top_margin = 2;
     width  = 5574 - (left_margin = 32 + tiff_bps);
     if (tiff_bps == 12) load_flags = 80;
+  } else if (!strcmp(make,"SAMSUNG") && !strcmp(model,"NX300")) {
+	  is_raw =0;
   } else if (!strcmp(model,"EX1")) {
     order = 0x4949;
     height -= 20;
@@ -9752,6 +9773,9 @@ void CLASS identify2(unsigned fsize, unsigned flen, char *head)
       thumb_height = 480;
       thumb_width  = 640;
     } else if (!strcmp(model,"XZ-2")) {
+      load_raw = &CLASS packed_load_raw;
+      load_flags = 24;
+    } else if (!strcmp(model,"XZ-10")) {
       load_raw = &CLASS packed_load_raw;
       load_flags = 24;
     }

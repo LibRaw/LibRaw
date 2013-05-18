@@ -1,8 +1,11 @@
 ﻿2013-05-18  Alex Tutubalin <lexa@lexa.ru>
-   * Поддержка Fujifilm X20 и X100S (в виде DNG и в виде RAF),
-     SL1000,
+   * Поддержка новых камер:
+     Canon 100D (Rebel SL1), 700D (Rebel T5i)
+     Fujifilm: X20 и X100S,SL1000, HS50EXR
      Sony SLT-A58
      Nikon 1 J3, 1 S1, Coolpix A, Coolpix P330, D7100
+     Olympus XZ-10
+     Panasonic G6
      Pentax MX-1
 
 2013-02-14  Alex Tutubalin <lexa@lexa.ru>
