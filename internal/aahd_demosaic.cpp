@@ -39,8 +39,9 @@ struct AAHD {
 	ushort3 *rgb_ahd[2];
 	int3 *yuv[2];
 	char *ndir, *homo[2];
-	ushort channel_maximum[3];
+	ushort channel_maximum[3], channels_max;
 	ushort channel_minimum[3];
+	static const float yuv_coeff[3][3];
 	LibRaw &libraw;
 	enum {
 		HVSH = 1, HOR = 2, VER = 4, HORSH = HOR | HVSH, VERSH = VER | HVSH, HOT = 8
@@ -49,14 +50,14 @@ struct AAHD {
 	static inline float calc_dist(int c1, int c2) throw () {
 		return c1 > c2 ? (float) c1 / c2 : (float) c2 / c1;
 	}
-	static int inline Y(ushort3 &rgb) throw () {
-		return 0.299f * rgb[0] + 0.587f * rgb[1] + 0.114f * rgb[2];
+	int inline Y(ushort3 &rgb) throw () {
+		return yuv_coeff[0][0] * rgb[0] + yuv_coeff[0][1] * rgb[1] + yuv_coeff[0][2] * rgb[2];
 	}
-	static int inline U(ushort3 &rgb) throw () {
-		return -0.168736 * rgb[0] - 0.331264f * rgb[1] + 0.5 * rgb[2];
+	int inline U(ushort3 &rgb) throw () {
+		return yuv_coeff[1][0] * rgb[0] + yuv_coeff[1][1] * rgb[1] + yuv_coeff[1][2] * rgb[2];
 	}
-	static int inline V(ushort3 &rgb) throw () {
-		return 0.5 * rgb[0] - 0.418688f * rgb[1] - 0.081312f * rgb[2];
+	int inline V(ushort3 &rgb) throw () {
+		return yuv_coeff[2][0] * rgb[0] + yuv_coeff[2][1] * rgb[1] + yuv_coeff[2][2] * rgb[2];
 	}
 	inline int nr_offset(int row, int col) throw () {
 		return (row * nr_width + col);
@@ -76,6 +77,40 @@ struct AAHD {
 	void refine_ihv_dirs(int i);
 	void illustrate_dirs();
 	void illustrate_dline(int i);
+};
+
+const float AAHD::yuv_coeff[3][3] = {
+// YPbPr
+//	{
+//		0.299f,
+//		0.587f,
+//		0.114f },
+//	{
+//		-0.168736,
+//		-0.331264f,
+//		0.5f },
+//	{
+//		0.5f,
+//		-0.418688f,
+//		-0.081312f }
+//
+//	Rec. 2020
+//	Y'= 0,2627R' + 0,6780G' + 0,0593B'
+//	U = (B-Y)/1.8814 =  (-0,2627R' - 0,6780G' + 0.9407B) / 1.8814 = -0.13963R - 0.36037G + 0.5B
+//	V = (R-Y)/1.4647 = (0.7373R - 0,6780G - 0,0593B) / 1.4647 = 0.5R - 0.4629G - 0.04049B
+	{
+		+0.2627f,
+		+0.6780f,
+		+0.0593f },
+	{
+		-0.13963f,
+		-0.36037f,
+		+0.5f },
+	{
+		+0.5034f,
+		-0.4629f,
+		-0.04049f }
+
 };
 
 AAHD::AAHD(LibRaw& _libraw) :
@@ -116,6 +151,7 @@ AAHD::AAHD(LibRaw& _libraw) :
 			}
 		}
 	}
+	channels_max = MAX(MAX(channel_maximum[0], channel_maximum[1]), channel_maximum[2]);
 }
 
 void AAHD::hide_hots() {
@@ -206,59 +242,86 @@ void AAHD::hide_hots() {
 
 const static double xyz_rgb[3][3] = {
 	{
-		0.412453, 0.357580, 0.180423 }, {
-		0.212671, 0.715160, 0.072169 }, {
-		0.019334, 0.119193, 0.950227 } };
+		0.412453,
+		0.357580,
+		0.180423 },
+	{
+		0.212671,
+		0.715160,
+		0.072169 },
+	{
+		0.019334,
+		0.119193,
+		0.950227 } };
 
 const static float d65_white[3] = {
-	0.950456f, 1.0f, 1.088754f };
+	0.950456f,
+	1.0f,
+	1.088754f };
 
 void AAHD::evaluate_ahd() {
 	int hvdir[4] = {
-		Pw, Pe, Pn, Ps };
+		Pw,
+		Pe,
+		Pn,
+		Ps };
 	/*
 	 * YUV
-	 for (int d = 0; d < 2; ++d) {
-	 for (int i = 0; i < nr_width * nr_height; ++i) {
-	 yuv[d][i][0] = Y(rgb_ahd[d][i]);
-	 yuv[d][i][1] = U(rgb_ahd[d][i]);
-	 yuv[d][i][2] = V(rgb_ahd[d][i]);
-	 }
-	 }
+	 *
 	 */
+	float r, cbrt[0x10000];
+	for (int i = 0; i < 0x10000; i++) {
+		r = (float) i / 0x10000;
+		cbrt[i] = i * pow(r, 0.42);
+	}
+	for (int d = 0; d < 2; ++d) {
+		for (int i = 0; i < nr_width * nr_height; ++i) {
+			ushort3 rgb;
+			for (int c = 0; c < 3; ++c) {
+				int val = libraw.imgdata.color.rgb_cam[c][0] * rgb_ahd[d][i][0]
+						+ libraw.imgdata.color.rgb_cam[c][1] * rgb_ahd[d][i][1]
+						+ libraw.imgdata.color.rgb_cam[c][2] * rgb_ahd[d][i][2];
+				rgb[c] = cbrt[(int)CLIP(val / d65_white[c])]; // cbrt[CLIP(val)];
+			}
+			yuv[d][i][0] = Y(rgb);
+			yuv[d][i][1] = U(rgb);
+			yuv[d][i][2] = V(rgb);
+		}
+	}
+	/* */
 	/*
 	 * Lab
-	 */
-	float r, cbrt[0x10000], xyz[3], xyz_cam[3][4];
-	for (int i = 0; i < 0x10000; i++) {
-		r = i / 65535.0;
-		cbrt[i] = r > 0.008856 ? pow((double) r, (double) (1 / 3.0)) : 7.787 * r + 16 / 116.0;
-	}
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++) {
-			xyz_cam[i][j] = 0;
-			for (int k = 0; k < 3; k++)
-				xyz_cam[i][j] += xyz_rgb[i][k] * libraw.imgdata.color.rgb_cam[k][j] / d65_white[i];
-		}
-	for (int d = 0; d < 2; ++d)
-		for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
-			int moff = nr_offset(i + nr_margin, nr_margin);
-			for (int j = 0; j < libraw.imgdata.sizes.iwidth; j++, ++moff) {
-				xyz[0] = xyz[1] = xyz[2] = 0.5;
-				for (int c = 0; c < 3; c++) {
-					xyz[0] += xyz_cam[0][c] * rgb_ahd[d][moff][c];
-					xyz[1] += xyz_cam[1][c] * rgb_ahd[d][moff][c];
-					xyz[2] += xyz_cam[2][c] * rgb_ahd[d][moff][c];
-				}
-				xyz[0] = cbrt[CLIP((int) xyz[0])];
-				xyz[1] = cbrt[CLIP((int) xyz[1])];
-				xyz[2] = cbrt[CLIP((int) xyz[2])];
-				yuv[d][moff][0] = 64 * (116 * xyz[1] - 16);
-				yuv[d][moff][1] = 64 * 500 * (xyz[0] - xyz[1]);
-				yuv[d][moff][2] = 64 * 200 * (xyz[1] - xyz[2]);
-			}
-		}
-	/* Lab */
+	 *
+	 float r, cbrt[0x10000], xyz[3], xyz_cam[3][4];
+	 for (int i = 0; i < 0x10000; i++) {
+	 r = i / 65535.0;
+	 cbrt[i] = r > 0.008856 ? pow((double) r, (double) (1 / 3.0)) : 7.787 * r + 16 / 116.0;
+	 }
+	 for (int i = 0; i < 3; i++)
+	 for (int j = 0; j < 3; j++) {
+	 xyz_cam[i][j] = 0;
+	 for (int k = 0; k < 3; k++)
+	 xyz_cam[i][j] += xyz_rgb[i][k] * libraw.imgdata.color.rgb_cam[k][j] / d65_white[i];
+	 }
+	 for (int d = 0; d < 2; ++d)
+	 for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
+	 int moff = nr_offset(i + nr_margin, nr_margin);
+	 for (int j = 0; j < libraw.imgdata.sizes.iwidth; j++, ++moff) {
+	 xyz[0] = xyz[1] = xyz[2] = 0.5;
+	 for (int c = 0; c < 3; c++) {
+	 xyz[0] += xyz_cam[0][c] * rgb_ahd[d][moff][c];
+	 xyz[1] += xyz_cam[1][c] * rgb_ahd[d][moff][c];
+	 xyz[2] += xyz_cam[2][c] * rgb_ahd[d][moff][c];
+	 }
+	 xyz[0] = cbrt[CLIP((int) xyz[0])];
+	 xyz[1] = cbrt[CLIP((int) xyz[1])];
+	 xyz[2] = cbrt[CLIP((int) xyz[2])];
+	 yuv[d][moff][0] = 64 * (116 * xyz[1] - 16);
+	 yuv[d][moff][1] = 64 * 500 * (xyz[0] - xyz[1]);
+	 yuv[d][moff][2] = 64 * 200 * (xyz[1] - xyz[2]);
+	 }
+	 }
+	 * Lab */
 	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
 		int moff = nr_offset(i + nr_margin, nr_margin);
 		for (int j = 0; j < libraw.imgdata.sizes.iwidth; j++, ++moff) {
@@ -447,7 +510,8 @@ void AAHD::make_ahd_gline(int i) {
 	 * kc -- известный цвет в точке интерполирования
 	 */
 	int hvdir[2] = {
-		Pe, Ps };
+		Pe,
+		Ps };
 	for (int d = 0; d < 2; ++d) {
 		int moff = nr_offset(i + nr_margin, nr_margin + js);
 		for (int j = js; j < iwidth; j += 2, moff += 2) {
@@ -508,7 +572,8 @@ void AAHD::make_ahd_rb_hv(int i) {
 	int kc = libraw.COLOR(i, js);
 	js ^= 1; // начальная координата зелёного
 	int hvdir[2] = {
-		1, nr_width };
+		1,
+		nr_width };
 	// интерполяция вертикальных вертикально и горизонтальных горизонтально
 	for (int j = js; j < iwidth; j += 2) {
 		int x = j + nr_margin;
@@ -558,8 +623,13 @@ void AAHD::make_ahd_rb_last(int i) {
 	 */
 	int dirs[2][3] = {
 		{
-			Pnw, Pn, Pne }, {
-			Pnw, Pw, Psw } };
+			Pnw,
+			Pn,
+			Pne },
+		{
+			Pnw,
+			Pw,
+			Psw } };
 	int moff = nr_offset(i + nr_margin, nr_margin);
 	for (int j = 0; j < iwidth; j++) {
 		for (int d = 0; d < 2; ++d) {
