@@ -32,7 +32,7 @@ typedef int int3[3];
 
 struct AAHD {
 	int nr_height, nr_width;
-	static const int nr_margin = 2;
+	static const int nr_margin = 4;
 	static const int Thot = 4;
 	static const int Tdead = 4;
 	static const int OverFraction = 8;
@@ -109,7 +109,7 @@ const float AAHD::yuv_coeff[3][3] = {
 	{
 		+0.5034f,
 		-0.4629f,
-		-0.04049f }
+		-0.0405f }
 
 };
 
@@ -272,7 +272,7 @@ void AAHD::evaluate_ahd() {
 	float r, cbrt[0x10000];
 	for (int i = 0; i < 0x10000; i++) {
 		r = (float) i / 0x10000;
-		cbrt[i] = i * pow(r, 0.42);
+		cbrt[i] = 0x10000 * (r < 0.0181 ? 4.5 * r : (1.0993f * pow(r, 0.45f) - .0993f));
 	}
 	for (int d = 0; d < 2; ++d) {
 		for (int i = 0; i < nr_width * nr_height; ++i) {
@@ -281,7 +281,7 @@ void AAHD::evaluate_ahd() {
 				int val = libraw.imgdata.color.rgb_cam[c][0] * rgb_ahd[d][i][0]
 						+ libraw.imgdata.color.rgb_cam[c][1] * rgb_ahd[d][i][1]
 						+ libraw.imgdata.color.rgb_cam[c][2] * rgb_ahd[d][i][2];
-				rgb[c] = cbrt[(int)CLIP(val / d65_white[c])]; // cbrt[CLIP(val)];
+				rgb[c] = cbrt[(int) CLIP(val / d65_white[c])]; // cbrt[CLIP(val)];
 			}
 			yuv[d][i][0] = Y(rgb);
 			yuv[d][i][1] = U(rgb);
@@ -345,11 +345,14 @@ void AAHD::evaluate_ahd() {
 						homo[d][moff + hvdir[k]]++;
 						if (k / 2 == d) {
 							// если в сонаправленном направлении интеполяции следующие точки так же гомогенны, учтём их тоже
-							int hvd = 2 * hvdir[k];
-							if (ABS(ynr[0][0] - ynr[hvd][0]) < yeps
-									&& SQR(ynr[0][1] - ynr[hvd][1]) + SQR(ynr[0][2] - ynr[hvd][2])
-											< uveps) {
-								homo[d][moff + hvd]++;
+							for (int m = 2; m < 4; ++m) {
+								int hvd = m * hvdir[k];
+								if (ABS(ynr[0][0] - ynr[hvd][0]) < yeps
+										&& SQR(ynr[0][1] - ynr[hvd][1])
+												+ SQR(ynr[0][2] - ynr[hvd][2]) < uveps) {
+									homo[d][moff + hvd]++;
+								} else
+									break;
 							}
 						}
 					}
@@ -572,8 +575,8 @@ void AAHD::make_ahd_rb_hv(int i) {
 	int kc = libraw.COLOR(i, js);
 	js ^= 1; // начальная координата зелёного
 	int hvdir[2] = {
-		1,
-		nr_width };
+		Pe,
+		Ps };
 	// интерполяция вертикальных вертикально и горизонтальных горизонтально
 	for (int j = js; j < iwidth; j += 2) {
 		int x = j + nr_margin;
