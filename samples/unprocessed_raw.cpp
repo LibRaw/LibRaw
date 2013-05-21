@@ -57,7 +57,7 @@ int main(int ac, char *av[])
           usage:
             printf(
                 "unprocessed_raw - LibRaw %s sample. %d cameras supported\n"
-                "Usage: %s [-q] [-A] [-g] [-s N] [-N] raw-files....\n"
+                "Usage: %s [-q] [-A] [-g] [-s N] raw-files....\n"
                 "\t-q - be quiet\n"
                 "\t-s N - select Nth image in file (default=0)\n"
                 "\t-g - use gamma correction with gamma 2.2 (not precise,use for visual inspection only)\n"
