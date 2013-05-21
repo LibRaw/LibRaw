@@ -42,6 +42,8 @@ struct AAHD {
 	ushort channel_maximum[3], channels_max;
 	ushort channel_minimum[3];
 	static const float yuv_coeff[3][3];
+	static float gammaLUT[0x10000];
+	float yuv_cam[3][3];
 	LibRaw &libraw;
 	enum {
 		HVSH = 1, HOR = 2, VER = 4, HORSH = HOR | HVSH, VERSH = VER | HVSH, HOT = 8
@@ -51,13 +53,13 @@ struct AAHD {
 		return c1 > c2 ? (float) c1 / c2 : (float) c2 / c1;
 	}
 	int inline Y(ushort3 &rgb) throw () {
-		return yuv_coeff[0][0] * rgb[0] + yuv_coeff[0][1] * rgb[1] + yuv_coeff[0][2] * rgb[2];
+		return yuv_cam[0][0] * rgb[0] + yuv_cam[0][1] * rgb[1] + yuv_cam[0][2] * rgb[2];
 	}
 	int inline U(ushort3 &rgb) throw () {
-		return yuv_coeff[1][0] * rgb[0] + yuv_coeff[1][1] * rgb[1] + yuv_coeff[1][2] * rgb[2];
+		return yuv_cam[1][0] * rgb[0] + yuv_cam[1][1] * rgb[1] + yuv_cam[1][2] * rgb[2];
 	}
 	int inline V(ushort3 &rgb) throw () {
-		return yuv_coeff[2][0] * rgb[0] + yuv_coeff[2][1] * rgb[1] + yuv_coeff[2][2] * rgb[2];
+		return yuv_cam[2][0] * rgb[0] + yuv_cam[2][1] * rgb[1] + yuv_cam[2][2] * rgb[2];
 	}
 	inline int nr_offset(int row, int col) throw () {
 		return (row * nr_width + col);
@@ -113,6 +115,9 @@ const float AAHD::yuv_coeff[3][3] = {
 
 };
 
+float AAHD::gammaLUT[0x10000] = {
+	-1.f };
+
 AAHD::AAHD(LibRaw& _libraw) :
 		libraw(_libraw) {
 	nr_height = libraw.imgdata.sizes.iheight + nr_margin * 2;
@@ -130,6 +135,19 @@ AAHD::AAHD(LibRaw& _libraw) :
 	channel_minimum[1] = libraw.imgdata.image[0][1];
 	channel_minimum[2] = libraw.imgdata.image[0][2];
 	int iwidth = libraw.imgdata.sizes.iwidth;
+	for (int i = 0; i < 3; ++i)
+		for (int j = 0; j < 3; ++j) {
+			yuv_cam[i][j] = 0;
+			for (int k = 0; k < 3; ++k)
+				yuv_cam[i][j] += yuv_coeff[i][k] * libraw.imgdata.color.rgb_cam[k][j];
+		}
+	if (gammaLUT[0] < -0.1f) {
+		float r;
+		for (int i = 0; i < 0x10000; i++) {
+			r = (float) i / 0x10000;
+			gammaLUT[i] = 0x10000 * (r < 0.0181 ? 4.5f * r : 1.0993f * pow(r, 0.45f) - .0993f);
+		}
+	}
 	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
 		int col_cache[48];
 		for (int j = 0; j < 48; ++j) {
@@ -269,19 +287,11 @@ void AAHD::evaluate_ahd() {
 	 * YUV
 	 *
 	 */
-	float r, cbrt[0x10000];
-	for (int i = 0; i < 0x10000; i++) {
-		r = (float) i / 0x10000;
-		cbrt[i] = 0x10000 * (r < 0.0181 ? 4.5 * r : (1.0993f * pow(r, 0.45f) - .0993f));
-	}
 	for (int d = 0; d < 2; ++d) {
 		for (int i = 0; i < nr_width * nr_height; ++i) {
 			ushort3 rgb;
 			for (int c = 0; c < 3; ++c) {
-				int val = libraw.imgdata.color.rgb_cam[c][0] * rgb_ahd[d][i][0]
-						+ libraw.imgdata.color.rgb_cam[c][1] * rgb_ahd[d][i][1]
-						+ libraw.imgdata.color.rgb_cam[c][2] * rgb_ahd[d][i][2];
-				rgb[c] = cbrt[(int) CLIP(val / d65_white[c])]; // cbrt[CLIP(val)];
+				rgb[c] = gammaLUT[rgb_ahd[d][i][c]];
 			}
 			yuv[d][i][0] = Y(rgb);
 			yuv[d][i][1] = U(rgb);
