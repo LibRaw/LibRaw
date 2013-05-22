@@ -19,7 +19,6 @@
           <li><a href="#libraw_iparams_t">Structure libraw_iparams_t: Main Parameters of the Image</a></li>
           <li><a href="#libraw_image_sizes_t">Structure libraw_image_sizes_t: Image Dimensions</a></li>
           <li><a href="#libraw_colordata_t">Structure libraw_colordata_t: Color Information</a></li>
-          <li><a href="#color_data_state_t">Structure  color_data_state_t: Description of Color Data Source</a></li>
           <li><a href="#libraw_imgother_t">Structure  libraw_imgother_t: Other Parameters of the Image</a></li>
           <li><a href="#libraw_rawdata_t">Structure  libraw_rawdata_t: holds unpacked RAW data</a></li>
           <li><a href="#libraw_thumbnail_t">Structure libraw_thumbnail_t: Description of Thumbnail</a></li>
@@ -40,7 +39,6 @@
           <li><a href="#progress">enum LibRaw_progress: Current State of LibRaw Object</a></li>
           <li><a href="#LibRaw_thumbnail_formats">enum LibRaw_thumbnail_formats: Thumbnail Data Formats</a></li>
           <li><a href="#warnings">Nonstandard Situations (Warnings) during RAW Data Processing</a></li>
-          <li><a href="#LibRaw_colorstate">enum LibRaw_colorstate: Type of Color Data Source</a>.</li> 
           <li><a href="#LibRaw_image_formats">enum LibRaw_image_formats - possible types of data, contains in  libraw_processed_image_t structure</a>
         </ol>
       </li>
@@ -173,6 +171,10 @@ which returns the number of the active color for a given pixel.
       <dd>
         Size of the output image (may differ from height/width for cameras that require image rotation or have non-square pixels). 
       </dd>
+       <dt><b>unsigned raw_pitch;</b></dt>
+	<dd>
+	Full size of raw data row in bytes.
+	</dd>
       <dt><b>double      pixel_aspect;</b></dt>
       <dd>
       Pixel width/height ratio. If it is not unity, scaling of the image along one of the axes is required during output. 
@@ -189,10 +191,6 @@ image itself. For different cameras, there are different ways of color handling.
      Data fields:
     </p>
     <dl>
-      <dt><b>color_data_state_t   color_flags;</b></dt>
-      <dd>
-        Data structure describing the sources of color data. Described <a href="#color_data_state_t">below</a> in more detail.
-      </dd>
       <dt><b>ushort      white[8][8];</b></dt>
       <dd>
      Block of white pixels extracted from files CIFF/CRW. Not extracted for other formats. Used to calculate white
@@ -229,9 +227,9 @@ or taken from hardcoded constants.
       Black level. Depending on the camera, it may be zero (this means that black has been subtracted at the unpacking stage 
 or by the camera itself), calculated at the unpacking stage, read from the RAW file, or hardcoded. 
       </dd>
-      <dt><b>unsigned    cblack[8];</b></dt>
+      <dt><b>unsigned    cblack[4];</b></dt>
       <dd>
-        Per-channel black level. Items 0-3 are black pixels values (averaged), items 4-7 are per-channel counts.
+        Per-channel black level correction. Final black level in channel N equals black + cblack[N]
       </dd>
       <dt><b>unsigned    maximum;</b></dt>
       <dd>
@@ -267,22 +265,6 @@ or by the camera itself), calculated at the unpacking stage, read from the RAW f
         Length of ICC profile in bytes.
       </dd>
     </dl>
-    <a name="color_data_state_t"></a>
-    <h3>Structure  color_data_state_t: Description of Color Data Source</h3>
-    <p>This structure (actually, a bit field) describes the source of color data for each field of structure <a
- href="#libraw_colordata_t">libraw_colordata_t</a>, which may be obtained from different data sources.<br/>
-      Data fields:
-    </p>
-    <pre>
-        unsigned curve_state        : 3;
-        unsigned rgb_cam_state      : 3;
-        unsigned cmatrix_state      : 3;
-        unsigned pre_mul_state      : 3;
-        unsigned cam_mul_state      : 3;
-    </pre>
-    <p>
-   Each field assumes one of the values that are possible for enum <a href="#LibRaw_colorstate">LibRaw_colorstate</a>. 
-    </p>
     <a name="libraw_imgother_t"></a>
     <h3>Structure  libraw_imgother_t: Other Parameters of the Image</h3>
     <p>
@@ -333,7 +315,7 @@ or by the camera itself), calculated at the unpacking stage, read from the RAW f
       Structure libraw_rawdata_t holds:
     </p>
     <ul>
-      <li>RAW-data from sensor, readed and unpacked by the <a href="API-CXX-rus.html#unpack">unpack()</a> call.
+      <li>RAW-data from sensor, readed and unpacked by the <a href="API-CXX-eng.html#unpack">unpack()</a> call.
       </li>
       <li>"backup" copy of color and over data modified during postprocessing. When postprocessing calls repeats,
          the needed data is restored from this backup.
@@ -346,9 +328,13 @@ or by the camera itself), calculated at the unpacking stage, read from the RAW f
       <dd>Buffer allocated to hold RAW-data</dd>
       <dt>    unsigned short                      *raw_image;</dt>
       <dd>Pointer to buffer with one-component (bayer) data.</dd>
-      <dt>    unsigned short                      (*color_image)[4] ;</dt>
-      <dd>Pointer to buffer with 4-component (full-color) data</dd>
+      <dt>    unsigned short                      (*color3_image)[3] ;</dt>
+      <dd>Pointer to 3-component pixel array.</dd>
+      <dt>    unsigned short                      (*color4_image)[4] ;</dt>
+      <dd>Pointer to buffer with 4-component pixel data data</dd>
     </dl>
+    After call to <a href="API-CXX-eng.html#unpack">unpack()</a> only one of these fields is non-NULL. 
+<p>
     All other fields of this structure are for internal use and should not be touched by user code.
     
     <a name="libraw_thumbnail_t"></a>
@@ -397,7 +383,7 @@ correspond to command line keys of dcraw.<br/>
       </dd>
       <dt><b>unsigned    cropbox[4];</b></dt>
       <dd>
-        <b> Î˛˜Ë dcraw:</b>ÌÂÚ <br/>
+        <b>dcraw keys:</b>none<br/>
         This field sets the image cropping rectangle. Cropbox[0] and cropbox[1] are the rectangle's top-left
         corner coordinates, remaining two values are width and height respectively. All coordinates are
         applied before any image rotation.
@@ -428,11 +414,10 @@ changes the output size.
         <b>dcraw keys:</b>     -r mul0 mul1 mul2 mul3 <br/>
         4 multipliers (r,g,b,g) of the user's white balance.
       </dd>
-      <dt><b>unsigned    shot_select, multi_out;</b></dt>
+      <dt><b>unsigned    shot_select;</b></dt>
       <dd>
         <b>dcraw keys:</b>  -s <br/>
-        Selection of image number for processing (for formats that contain several RAW images in one file). The
-        multi_out ( -s all) mode should be programmed by the user, since dcraw_process() does not support it. 
+        Selection of image number for processing (for formats that contain several RAW images in one file). 
       </dd>
       <dt><b>float       bright;</b></dt>
       <dd>
@@ -544,7 +529,19 @@ changes the output size.
       <dd>
         <b>dcraw keys:</b>      -k <br/>
         User black level.
+     </dd>
+      <dt><b>int         user_cblack[4];</b></dt>
+      <dd>
+        <b>dcraw keys:</b>      none<br/>
+        Per-channel corrections to user_black.
       </dd>
+      <dt><b>int         sony_arw2_hack;</b></dt>
+      <dd>
+        <b>dcraw keys:</b>      none<br/>
+        Turns off division by four for Sony ARW (2nd version) data. This is incompatible with old
+        LibRaw/dcraw, but adds one significant bit to data (only one, because of tone curve values).
+      </dd>
+
       <dt><b>int         user_sat;</b></dt>
       <dd>
         <b>dcraw keys:</b>        -S <br/>
@@ -584,16 +581,6 @@ changes the output size.
       <dd>
         <b>dcraw keys:</b> -j <br/>
          Default -1 (use), 0 - don't use rotation for cameras on a Fuji sensor.
-      </dd>
-      <dt><b>char        *bpfile;</b></dt>
-      <dd>
-        <b>dcraw keys:</b>         -P <br/>
-        Name of file with bad pixel map.
-      </dd>
-      <dt><b>char        *dark_frame;</b></dt>
-      <dd>
-        <b>dcraw keys:</b>     -K <br/>
-         Name of file with dark frame.
       </dd>
       <dt><b>int         green_matching;</b></dt>
       <dd>
@@ -635,12 +622,12 @@ changes the output size.
       </dd>
       <dt><b>int ca_correc</b></dt>
       <dd>
-        <b>ÎÃ¿ﬁ… dcraw:</b> Œ≈‘ <br/>
+        <b>dcraw keys:</b>none<br/>
         positive value turns on chromatic aberrations suppression (default:0 i.e. off).
       </dd>
       <dt><b>float cared,cablue</b></dt>
       <dd>
-        <b>ÎÃ¿ﬁ… dcraw:</b> Œ≈‘ <br/>
+        <b>dcraw keys:</b> none <br/>
         If one of these fields is non-zero, then these values will be used instead of automatic ones.
         Useable range is +-0.1..+-4.0.
       </dd>
@@ -678,6 +665,17 @@ changes the output size.
             8.0 (3-stop lighter). Default: 1.0 (no exposure shift).</li>
           <li>exp_preser: preserve highlights when lighten the image. Usable range from 0.0 (no preservation) to 1.0
             (full preservation). 0.0 is the default value.
+      </dd>
+
+      <dt><b>int wf_debanding; float wf_deband_treshold[4];</b></dt>
+      <dd>
+          wf_debanding: 1 turns on banding suppression (slow!), 0 turns it off.
+<p>
+	  wf_deband_treshold[] - per channel debanding thresholds.
+      </dd>
+      <dt><b>int use_rawspeed;</b></dt>
+      <dd>
+        Turns on using RawSpeed library for data unpacking (only if RawSpeed support compiled in).
       </dd>
 
     </dl>
@@ -900,6 +898,11 @@ object will be brought to the state &quot;right after creation.&quot;
     </dl>
     <p><b>The following flags are set during usage of image processing that has been taken from dcraw.</b></p>
     <dl>
+      <dt><b>LIBRAW_PROGRESS_RAW2_IMAGE</b></dt>
+      <dd>
+	imgdata.image array allocated and filled with data.
+      </dd>
+
       <dt><b>LIBRAW_PROGRESS_REMOVE_ZEROES</b></dt>
       <dd>
         Zero values removed for cameras that require such removal (Panasonic cameras).
@@ -1053,39 +1056,20 @@ retrieval or postprocessing. Such states are indicated by setting a bit in the i
         Dark frame file either differs in dimensions from RAW-file processed, or have wrong format.
         Dark frame should be in 16-bit PGM format (one can generate it using simple_dcraw -4 -D).
       </dd>
+      <dt><b>LIBRAW_WARN_RAWSPEED_PROBLEM</b></dt>
+	<dd>
+	Problems detected in RawSpeed decompressor. The image data processed by LibRaw own decoder.
+        </dd>
+    <dt><b>LIBRAW_WARN_RAWSPEED_UNSUPPORTED</b></dt>
+	<dd>
+	This file not supported by RawSpeed (although compatible decoder exists).
+        </dd>
+    <dt><b>LIBRAW_WARN_RAWSPEED_PROCESSED</b></dt>
+	<dd>
+	  Not warning, but information. The file was decoded by RawSpeed.
+	</dd>
     </dl>
 
-    <a name="LibRaw_colorstate"></a>
-    <h3>enum LibRaw_colorstate:  Types of Color Data Source</h3>
-    <p>For each type of retrieved color information (see above for description of structure imgdata.color.color_flags), the
-data source is recorded. The possible values are listed below. 
-    </p>
-    <dl>
-      <dt><b>LIBRAW_COLORSTATE_UNKNOWN</b></dt>  
-      <dd>
-        Data source unknown.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_INIT</b></dt>  
-      <dd>
-        Data field initialized by default (the same value for all cameras) before opening the RAW file.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_CONST</b></dt>    
-      <dd>
-        Data source is a hardcoded constant.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_LOADED</b></dt>   
-      <dd>
-        Data loaded from RAW file.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_CALCULATED</b></dt>
-      <dd>
-        Data calculated on the basis of RAW data.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_RESERVED1-LIBRAW_COLORSTATE_RESERVED3</b></dt>
-      <dd>
-        Reserved.
-      </dd>
-    </dl>
     <a name="LibRaw_image_formats"></a>
     <h3>enum LibRaw_image_formats - possible types of data, contains in  libraw_processed_image_t structure</h3>
     <p><b>type</b> field of  libraw_processed_image_t structure may have one of these values:

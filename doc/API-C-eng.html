@@ -47,6 +47,8 @@ In all other cases, the <a href="API-CXX-eng.html#return">C++ API return code</a
     <dl>
       <dt>int libraw_open_file(libraw_data_t*, const char *)</dt>
       <dt>int libraw_open_file_ex(libraw_data_t*, const char *,INT64 bigfile_size)</dt>
+      <dt>WIN32: int libraw_open_wfile(libraw_data_t*, const wchar_t *)</dt>
+      <dt>WIN32: int libraw_open_wfile_ex(libraw_data_t*, const wchar_t *,INT64 bigfile_size)</dt>
       <dd>
         See <a href="API-CXX-eng.html#open_file">LibRaw::open_file()</a>
       </dd>
@@ -98,6 +100,10 @@ In all other cases, the <a href="API-CXX-eng.html#return">C++ API return code</a
       <dt>void                libraw_subtract_black(libraw_data_t*);</dt>
       <dd>
         See <a href="API-CXX-eng.html#add_subtract_black">LibRaw::subtract_black()</a>
+      </dd>
+      <dt>void                libraw_recycle_datastream(libraw_data_t*);</dt>
+      <dd>
+        See <a href="API-CXX-eng.html#recycle_datastream">LibRaw::recycle_datastream()</a>
       </dd>
     <dt>void                libraw_recycle(libraw_data_t*);</dt>
       <dd>

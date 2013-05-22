@@ -20,7 +20,6 @@
           <li><a href="#libraw_iparams_t">Структура libraw_iparams_t - основные параметры изображения</a></li>
           <li><a href="#libraw_image_sizes_t">Структура libraw_image_sizes_t - размеры изображения</a></li>
           <li><a href="#libraw_colordata_t">Структура libraw_colordata_t - информация о цвете</a></li>
-          <li><a href="#color_data_state_t">Структура  color_data_state_t - описание источника цветовых данных</a></li>
           <li><a href="#libraw_imgother_t">Структура  libraw_imgother_t - прочие параметры изображения</a></li>
           <li><a href="#libraw_rawdata_t">Структура libraw_rawdata_t - хранение распакованых RAW-данных</a></li>
           <li><a href="#libraw_thumbnail_t">Структура libraw_thumbnail_t - описание Thumbnail</a></li>
@@ -43,8 +42,6 @@
           <li><a href="#decoder_flags">enum LibRaw_decoder_flags - описание layout данных конкретного распаковщика форматов</a></li>
           <li><a href="#progress">enum LibRaw_progress - текущее состояние объекта LibRaw</a></li>
           <li><a href="#LibRaw_thumbnail_formats">enum LibRaw_thumbnail_formats - форматы данных Thumbnails</a></li>
-          <li><a href="#LibRaw_colorstate">enum LibRaw_colorstate - описание источника данных о цветовой
-              информации</a></li> 
           <li><a href="#LibRaw_image_formats">enum LibRaw_image_formats - описание типов данных, содержащихся в
               структуре libraw_processed_image_t</a> </li>
         </ol>
@@ -173,6 +170,10 @@
       <dd>
         Полный размер RAW-изображения (включая рамку) в пикселах.
       </dd>
+       <dt><b>unsigned raw_pitch;</b></dt>
+	<dd>
+	Полный размер строки raw-данных в байтах. Он может быть больше, чем raw_width*размер пикселя.
+	</dd>
       <dt><b>ushort    height, width;</b></dt>
       <dd>
         Размер видимой (содержательной) части изображения (без рамки).
@@ -205,12 +206,6 @@
       Поля данных:
     </p>
     <dl>
-      <dt><b>color_data_state_t   color_flags;</b></dt>
-      <dd>
-        Структура данных, описывающая источники получения цветовых данных. Подробнее <a
-          href="#color_data_state_t">описана ниже</a>
-        <br/>
-      </dd>
       <dt><b>ushort      white[8][8];</b></dt>
       <dd>
       Блок белых пикселей, извлекаемый из файлов CIFF/CRW. Для других форматов не извлекается, используется для
@@ -249,11 +244,9 @@
         распаковки или самой камерой), для некоторых камер рассчитывается на этапе распаковки, для некоторых -
         считывается из RAW-файла, для некоторых - hardcoded. 
       </dd>
-      <dt><b>unsigned    cblack[8];</b></dt>
+      <dt><b>unsigned    cblack[4];</b></dt>
       <dd>
-        Поканальные данные об уровне черного. Элементы массива с номерами 0-3 - сами поканальные данные
-        (суммы на этапе распаковки, усредненные данные после распаковки), элементы с номерами 4-7 - поканальные
-        счетчики черных пикселов для усреднения.
+        Поканальные поправки уровня черного. Уровень черного в i-м канале равен black+cblack[i];
       </dd>
       <dt><b>unsigned    maximum;</b></dt>
       <dd>
@@ -290,25 +283,6 @@
         Длина ICC-профиля в байтах.
       </dd>
     </dl>
-    <a name="color_data_state_t"></a>
-    <h3>Структура  color_data_state_t - описание источника цветовых данных</h3>
-    <p>Структура (на самом деле - битовое поле) описывает источник получения цветовых данных для каждого из полей
-      структуры  <a href="#libraw_colordata_t">libraw_colordata_t</a>, для которых возможны разные источники
-      получения.<br/>
-      Поля данных:
-    </p>
-    <pre>
-        unsigned curve_state        : 3;
-        unsigned rgb_cam_state      : 3;
-        unsigned cmatrix_state      : 3;
-        unsigned pre_mul_state      : 3;
-        unsigned cam_mul_state      : 3;
-    </pre>
-    <p>
-      Каждое из полей принимает одно из значений, возможных для enum <a
-        href="#LibRaw_colorstate">LibRaw_colorstate</a>. 
-    </p>
-
     <a name="libraw_imgother_t"></a>
     <h3>Структура  libraw_imgother_t - прочие параметры изображения</h3>
     <p>
@@ -374,10 +348,15 @@
       <dd>Буфер, аллоцированный для хранения RAW-данных.</dd>
       <dt>    unsigned short                      *raw_image;</dt>
       <dd>Указатель на буфер для хранения 1-компонентных (байеровских) данных.</dd>
-      <dt>    unsigned short                      (*color_image)[4] ;</dt>
+      <dt>    unsigned short                      (*color3_image)[3] ;</dt>
+      <dd>Указатель на буфер для хранение 3-компонентных (полноцветных) raw-данных.</dd>
+      <dt>    unsigned short                      (*color4_image)[4] ;</dt>
       <dd>Указатель на буфер для хранение 4-компонентных (полноцветных) raw-данных.</dd>
     </dl>
     Все прочие поля являются служебными и не предназначены для использования в пользовательских программах.
+<p>
+    После вызова <a href="API-CXX-rus.html#unpack">unpack()</a> только одно из полей raw_image/color3_image/color4_image
+    будет ненулевым. 
     
     <a name="libraw_thumbnail_t"></a>
     <h3>Структура libraw_thumbnail_t - описание Thumbnail</h3>
@@ -458,11 +437,10 @@
         <b>Ключи dcraw:</b>     -r mul0 mul1 mul2 mul3 <br/>
         4 множителя (r,g,b,g)  пользовательского баланса белого
       </dd>
-      <dt><b>unsigned    shot_select, multi_out;</b></dt>
+      <dt><b>unsigned    shot_select;</b></dt>
       <dd>
         <b>Ключи dcraw:</b>  -s <br/>
         выбор номера изображения для обработки (для форматов, содержащих несколько  RAW-изображений в одном файле)
-        Режим multi_out ( -s all) нужно программировать самостоятельно, dcraw_process() его не поддерживает.
       </dd>
       <dt><b>float       bright;</b></dt>
       <dd>
@@ -578,6 +556,17 @@
         <b>Ключи dcraw:</b>      -k <br/>
         Пользовательский уровень черного.
       </dd>
+      <dt><b>int         user_cblack;</b></dt>
+      <dd>
+        <b>Ключи dcraw:</b>      нет<br/>
+        Пользовательские поканальные поправки к уровню черного.
+      </dd>
+      <dt><b>int         sony_arw2_hack;</b></dt>
+      <dd>
+        <b>Ключи dcraw:</b>        нет<br/>
+        Выключает деление данных, полученных из файлов Sony ARW (вторая версия: современные камеры
+        NEX и SLT) на 4, увеличивая количество значащих битов в теневой части изображения.
+      </dd>
       <dt><b>int         user_sat;</b></dt>
       <dd>
         <b>Ключи dcraw:</b>        -S <br/>
@@ -621,16 +610,6 @@
       <dd>
         <b>Ключи dcraw:</b> -j <br/>
          Умолчание - 1 (использовать), 0 - отключает поворот для камер на сенсоре Fuji.
-      </dd>
-      <dt><b>char        *bpfile;</b></dt>
-      <dd>
-        <b>Ключи dcraw:</b>         -P <br/>
-        Имя файла с картой плохих пикселов.
-      </dd>
-      <dt><b>char        *dark_frame;</b></dt>
-      <dd>
-        <b>Ключи dcraw:</b>     -K <br/>
-         Имя файла с dark frame.
       </dd>
       <dt><b>int         green_matching;</b></dt>
       <dd>
@@ -718,7 +697,16 @@
             (линейный сдвиг экспозиции с вылетом светов) до 1.0 (максимальное сохранение деталей в светах). Умолчание:
             0.0.
       </dd>
-
+      <dt><b>int wf_debanding; float wf_deband_treshold[4];</b></dt>
+      <dd>
+          wf_debanding: 1 включает подавление полосатости, 0 - выключает.
+<p>
+	  wf_deband_treshold[] - поканальные пороги подавления.
+      </dd>
+      <dt><b>int use_rawspeed;</b></dt>
+      <dd>
+        Включает использование библиотеки RawSpeed (только если LibRaw собрана с поддержкой этой библиотеки)
+      </dd>
     </dl>
     <a name="libraw_decoder_info_t"></a>
     <h3>Структура libraw_decoder_info_t - информация о декодере RAW-изображения</h3>
@@ -875,6 +863,8 @@ protected:
       <dd>Возвращается при попытке получить thumbnail из файла, не содержащего preview.</dd>
       <dt><b>LIBRAW_UNSUPPORTED_THUMBNAIL</b></dt>
       <dd>RAW-файл содержит preview неподдерживаемого формата.</dd>
+      <dt><b>LIBRAW_INPUT_CLOSED</b></dt>
+      <dd>Была сделана попытка вызвать unpack() или unpack_thumb() при уже закрытом потоке данных.</dd>
     </dl>
     <a name="decoder_flags"></a>    
     <h3>enum LibRaw_decoder_flags - описание layout данных конкретного распаковщика форматов</h3>
@@ -933,6 +923,10 @@ protected:
     </dl>
     <p><b>Следующие флаги выставляются при использовании обработки изображений, позаимствованной у dcraw.</b></p>
     <dl>
+      <dt><b>LIBRAW_PROGRESS_RAW2_IMAGE</b></dt>
+      <dd>
+	Аллоцирован и заполнен массив imgdata.image
+      </dd>
       <dt><b>LIBRAW_PROGRESS_REMOVE_ZEROES</b></dt>
       <dd>
         Удалены нулевые значения для тех камер, для которых это нужно (камеры Panasonic).
@@ -1091,38 +1085,20 @@ protected:
         Темновой кадр либо имеет размеры, отличающиеся от обрабатываемого кадра, либо имеет неверный формат (нужен
         16-bit PGM, можно сгенерировать запуском примера simple_dcraw -4 -D)
       </dd>
-    </dl>
-    <a name="LibRaw_colorstate"></a>
-    <h3>enum LibRaw_colorstate - описание источника данных о цветовой информации</h3>
-    <p>Для каждого типа извлекаемой цветовой информации (см. выше описание структуры imgdata.color.color_flags)
-      записывается источник получения данных. Возможные значения перечислены ниже.
-    </p>
-    <dl>
-      <dt><b>LIBRAW_COLORSTATE_UNKNOWN</b></dt>  
-      <dd>
-        Источник данных неизвестен.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_INIT</b></dt>  
-      <dd>
-        Поле данных инициализировано в умолчание (общее для всех
-        камер) перед открытием  RAW-файла.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_CONST</b></dt>    
-      <dd>
-        Источник данных - константа, забитая в код.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_LOADED</b></dt>   
-      <dd>
-        Данные загружены из  RAW-файла.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_CALCULATED</b></dt>
-      <dd>
-        Данные рассчитаны на основании RAW-данных.
-      </dd>
-      <dt><b>LIBRAW_COLORSTATE_RESERVED1-LIBRAW_COLORSTATE_RESERVED3</b></dt>
-      <dd>
-        Зарезервировано.
-      </dd>
+      <dt><b>LIBRAW_WARN_RAWSPEED_PROBLEM</b></dt>
+	<dd>
+	При декодировании файла библиотекой RawSpeed возникла проблема. Файл был декодирован
+        собственным декодером	LibRaw
+        </dd>
+    <dt><b>LIBRAW_WARN_RAWSPEED_UNSUPPORTED</b></dt>
+	<dd>
+	Файл не поддерживается RawSpeed и был декодирован декодером LibRaw
+        </dd>
+    <dt><b>LIBRAW_WARN_RAWSPEED_PROCESSED</b></dt>
+	<dd>
+	(не warning, информационный флаг) Файл был декодирован библиотекой RawSpeed
+	</dd>
+
     </dl>
     <a name="LibRaw_image_formats"></a>
     <h3>enum LibRaw_image_formats - описание типов данных, содержащихся в структуре libraw_processed_image_t</h3>

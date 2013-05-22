@@ -1,256 +1,52 @@
-2013-02-14  Alex Tutubalin <lexa@lexa.ru>
-   * Fixed possible buffer overrun when RawSpeed library used
+2013-05-23 Alex Tutubalin <lexa@lexa.ru>
+
+  LibRaw 0.15.0 Release:
+
+  * 75 new cameras supported:
+     Adobe DNG: Fast Load DNG (LightRoom 4.x), 
+	  lossy-compressed DNG (LR 4.x, build with libjpeg 6+)
+     Canon: 	G1 X, SX220 HS, EOS 5D Mark III, EOS 650D, EOS 1D-X,
+		100D (Rebel SL1), 700D (Rebel T5i),6D,EOS M,G15, S110, SX50
+     Casio: 	X-S1, HS30EXR, X1-Pro,EX-ZR100,EX-Z8
+     Fujifilm: 	X-E1,X20, X100S,SL1000, HS50EXR,F800EXR, XF1
+     Imacon Ixpress 39Mpix:  Multishot files
+     Leica: 	D-LUX6 and V-LUX4
+     Nikon: 	D4, D3200, D800, D800E,1 J2, 1 V2, D600,1 J3, 1 S1, Coolpix A, 
+           	Coolpix P330, Coolpix P7700, D7100
+     Olympus: 	E-M5, XZ-2, XZ-10, E-PL5, E-PM2
+     Panasonic: G5, G6, DMC-GF5, FZ200, GH3, LX7
+     Pentax: 	MX-1, K-5 II, K-5 IIs, K-30, Q10
+     Samsung:	EX2F, NX20, NX210, support for new NX100 firmware.
+     Sigma: 	SD15,SD1, SD1 Merill, DP1, DP1S, DP1X, DP2, DP2S, DP2X 
+		(in Demosaic-pack-GPL2)
+     Sony: 	SLT-A58, RX-1, SLT-A99, NEX-5R, NEX-6, NEX-F3, SLT-A37, SLT-A57
+
+  * API changes
+    1. dcraw_process() and other processing calls can be used multiple times
+      (with different output parameters) without calls to LibRaw::open_file()
+
+    2. Removed, because no one uses it:
+        * LibRaw::dcraw_document_mode_processing call.
+        * Data field imgdata.color.color_flags
+
+    3. LibRaw::unpack() decodes data into separate buffer, depending on data 
+ 	type:
+       imgdata.rawdata.raw_image - 1 color component per pixel (Bayer and 
+         monochrome cameras)
+       imgdata.rawdata.color3_image - 3 color components per pixel 
+        (Linear DNGs, sRAW/mRAW decoded by RawSpeed library /see below/).
+       imgdata.rawdata.color4_image - 4 color components per pixel (4th may
+         be unused)
+
+   4. Decoding RAW data using RawSpeed library (http://rawstudio.org/blog/?p=800)
+      See README.RawSpeed for more details.
    
-   * Added new C++ API Call LibRaw::recycle_datastream(), C API call 
-     libraw_recycle_datastream() and new errorcode LIBRAW_INPUT_CLOSED
-     for unpack/unpack_thumb() calls.
+   5. WF debanding suppression.
 
-     These new API calls may be used to free file handle (and associated
-     file buffer) if your application will not call unpack*() on this
-     LibRaw handle, so file may be unlocked.    
+   6. New API calls (see documentation)
+       recycle_datastream()
+       open_file(wchar_t*) (Win32)
 
-   * Support for Imacon Ixpress 39Mpix Multi-shot files
-   
-   * LibRaw 0.15.0-Beta3
-
-2012-12-24  Alex Tutubalin <lexa@lexa.ru>
-   * Dcraw 9.17 imported, support for new cameras:
-     Canon 6D and EOS M, Casio EX-ZR100, Fujifilm X-E1, Leica D-LUX6 and
-     V-LUX4, Nikon P7700, Olympus XZ-2, Panasonic G5, Samsung EX2F,
-     Sony RX-1
-   * New API call LibRaw::is_fuji_rotated() returns true for files
-     needs 'fuji_rotate()' call on postprocessing.
-   * LibRaw 0.15.0-Beta3
-
-
-2012-12-03  Alex Tutubalin <lexa@lexa.ru>
-
-   * Preliminary support for new cameras:
-     Canon: G15, S110, SX50
-     Fujifilm: F800EXR, XF1
-     Nikon: 1 J2, 1 V2, D600
-     Olympus: E-PL5, E-PM2
-     Panasonic: FZ200, GH3, LX7
-     Pentax: K-5 II, K-5 IIs, K-30, Q10
-     Sony: SLT-A99, NEX-5R, NEX-6
-
-   * LibRaw::subtract_black() return type is now integer. Function returns
-     errorcode according to libraw error conversion.
-
-   * New processing stage LIBRAW_PROGRESS_RAW2_IMAGE (this flag is set
-     by LibRaw::raw2image() call)
-
-   * New warning flag LIBRAW_WARN_RAWSPEED_PROCESSED
-     - not really a warning, but information that RawSpeed library was used 
-	for image decoding.
-
-   * imgdata.rawdata.color_image is now split to two pointers:
-      - ushort (*)[3] color3_image for 3-component RAW images (color DNGs,
-        sRAW)
-      - ushort (*)[4] color4_image for 4-component color raws (Sinar 4shot,
-        Kodak RAWs and so on).
-
-   * imgdata.idata.sizes.raw_pitch is now in *bytes*
-     This value should be used for access rows in imgdata.rawdata.*_image 
-     buffers.
-
-   * Enabled RawSpeed processing for non-bayer DNGs and sRAW.
-     Note: there is a bug in RawStudio r499, 3-color (linear) uncompressed DNGs
-     are read incorrectly. Filed to RawStudio bugzilla
-     Use RawSpeed/rawspeed.uncompressed-color-dng.patch until this bug is not
-     fixed in main RawSpeed source repository.
-
-   * Removed OpenMP support for linear interpolation because of problems
-     on some compilers.
-
-   * Disabled wchar_t * interface if LibRaw compiled by MinGW because no
-     wchar_t strings in MinGW STL
-
-   * ABI and API changed, all programs using 0.15-Beta1 and older should be 
-     recompiled!
-
-   * LibRaw 0.15.0-Beta2
-
-
-2012-10-13  Alex Tutubalin <lexa@lexa.ru>
-   * Corrected D800E margins
-   * Support for DNGs made from Fuji X-Pro1 RAWs
-   * updated RawSpeed's camera list to r488
-   * Win32/C-API: libraw_open_wfile/libraw_open_wfile_ex() calls
-   * New warning flag LIBRAW_WARN_RAWSPEED_UNSUPPORTED, this bit in
-     process_warnings is set (with LIBRAW_WARN_RAWSPEED_PROBLEM) if
-     RawSpeed's checkSupported() fails.
-   * Disabled RawSpeed processing of several RAW formats.
-   * LibRaw 0.15.0-Beta1
-
-2012-09-17  Alex Tutubalin <lexa@lexa.ru>
-
-   * Alpha-quality RawSpeed library support (http://rawstudio.org/blog/?p=800)
-     Decoding (LibRaw::unpack()) of supported formats is 1.5-3x times faster.
-  
-    = API changes:
-     -- imgdata.params.use_rawspeed run-time configuration option 
-	 (default to Yes!)
-
-     -- LibRaw::set_rawspeed_camerafile(char *path_to_cameras_xml) - call to 
-	set camera information on runtime (cameras.xml from latest release is 
-	compiled in). If you do not use this call, compile-time cameras.xml
-        will be used.
-
-     -- New call Libraw*datastream::size() returns full size of data file 
-       (needed for RawSpeed support). Implemented for all datastreams provided 
-       with LibRaw.
-
-     -- imgdata.sizes.raw_pitch - row pitch in imgdata.rawdata.raw_image
-        Use raw_image[row*raw_pitch+col] instead of [row*raw_width+col]
-        if your code accesses raw_image[] array.
-    
-    == Other changes:
-      -- dcraw_emu: command line switch -disars disables RawSpeed use
-      -- postprocessing_benchmark: use -c to disable RawSpeed use
-
-    = RawSpeed support uses buffer for full RAW file, so memory usage is higher.        
-
-    = Compilation:
-     - Use -DUSE_RAWSPEED define to turn RawSpeed support on. You'll need to 
-       compile and install RawSpeed on your system.
-       See README.RawSpeed.txt for details
-
-     - set -DNOSONY_RAWSPEED to disable Sony files decoding by RawSpeed
-	
-     - ./configure do not supported yet, use Makefile.dist on Unix/Mac and 
-       Makefile.msvc on Win32
-
-     - (Unix only) Set RAWSPEED_XMLDATA=../path/to/cameras.xml to re-build 
-       internal copy of RawSpeed's cameras.xml file
-
-    = TODO:
-        -- RawSpeed decode support for non-bayer images
-        -- Remove double-buffering if LibRaw_buffer_datstream is used
-        -- Documentation and samples Update
-
-  Other changes:
-   * OpenMP speedup for linear interpolation
-
-   * Disabled decoding JPEG (lossy DNG) data from memory buffer
-     for libjpeg version less than 8. Use -DUSE_JPEG8 if your jpeg is v8+
-
-   * hotspots moved to virtual functions
-
-   * is_phaseone_compressed() call
-
-   * PhaseOne RAWs: for user-specified black level(s) black subtraction
-     works as expected.
-
-   * ABI and API changed, all programs using 0.15-Alpha1-3 should be recompiled!
-
-   * LibRaw 0.15.0-Alpha4
-
-2012-09-04 Alex Tutubalin <lexa@lexa.ru>
-   * Backported improvements from LibRaw 0.14:
-      - fast LJPEG decoder
-      - OpenMP support for PPG and AHD interpolations
-        and wavelet denoising
-      - OpenMP support in raw2image_ex() call
-      - LCMS1 compatibility patches
-      - Better way to set compiler flags in Makefile.msvc
-   * ABI changed, all programs using 0.15-Alpha2 should be
-     recompiled!
-   * LibRaw 0.15.0-Alpha3
-
-2012-08-20 Alex Tutubalin <lexa@lexa.ru>
-   * reverted (internal) changes to PhaseOne processing
-   * subtract_black() works again
-   * cropping works again (note: for Fuji SuperCCD files cropping is
-     approximate)
-   * color_data.channel_maximum[4] is replaced to color_data.data_maximum
-     (max value from all image color channels). This value is calculated
-     on subtract_black() call.
-   * PhaseOne (compressed RAW): black level subtracted on postprocessing
-     stage (or in raw2image() call). It requires addtional memory 
-     allocation.
-   * Fixed minor problem in lossy DNG tone curve generation
-   * Imported dcraw 1.452:
-     - Changed color data for Canon 1D-X camera
-     - New camera support: Samsung NX-1000, Sony DSC-RX100
-
-   * LibRaw 0.15.0-Alpha2
-
-2012-07-03 Alex Tutubalin <lexa@lexa.ru>
-    === LibRaw 0.15 (Alpha1) ===
-    1) API Changes:
-     =>  Removed, because no one uses it:
-          * LibRaw::dcraw_document_mode_processing (and C-API call)
-          * Data field imgdata.color.color_flags
-
-     =>  Removed, because internal logic changed:
-          * LIBRAW_DECODER_4COMPONENTS
-            Now unpack() unpacks RAW data in only two possible formats:
-             i. imgdata.rawdata.raw_image[] - flat buffer with bayer data
-              (one value per pixel) with masked pixels.
-             ii. imgdata.rawdata.color_image - 4-components array (similar
-              to imgdata.image) with 3 or 4 components per pixel and
-              without masked pixels.
-
-      =>  Changed:
-           * imgdata.color.cblack[4] instead of [8] - for now cblack[4..7]
-             (count of pixels used for black level calculation) is not used,
-             so removed
-            * LibRaw::fc() renamed to LibRaw::fcol() to maintain compatibility
-             with dcraw internals
-
-      => Temporary not working properly or disabled (to be fixed in next 
-         Alpha-versions, see also TODO section below)
-            * imgdata.params.cropbox[] - cropping not works yet, so disabled
-            * LibRaw::subtract_black() - don't works properly, so not used
-              in LibRaw internals until next Alpha
-
-       => Added:
-            * WF debanding code (banding suppression):
-              int imgdata.params.wf_debanding - enables debanding
-              float imgdata.params.wf_deband_threshold[4] - set threshold
-              levels for debanding (in pixel values, so usual value is several units)
-            * LibRaw::open_wfile(wchar_t *filename) (WIN32 only) - opens
-              RAW filename passed in Windows unicode encoding.
-            * imgdata.params.user_cblack[4] - allows to set per-channel
-              black levels
-   	    * User-provided data streams (derived from 
-	      LibRaw_abstract_datastream) should implement jpeg_src() method 
-	      to provide data source for JPEG decoder used in lossy DNG 
-	      processing. See src/libraw_datastream.cpp for sample 
-	      implementation.   
-
-     2) Imported dcraw 9.16/1.450, added support for several cameras:
-        Adobe DNG: Fast Load DNG (LightRoom 4.x),lossy-compressed DNG (LR 4.x,
-        you need to compile with -DUSE_JPEG and link with libjpeg 8)
-        Canon: G1 X, SX220 HS, EOS 5D Mark III, EOS 650D, EOS 1D-X
-        Casio: EX-Z8
-        Fujifilm: X-S1, HS30EXR, X1-Pro
-        Nikon: D4, D3200, D800, D800E
-        Olympus: E-M5
-        Panasonic: DMC-GF5
-        Samsung: NX20, NX210, ?>445@6:0 =>2>3> firmware NX100
-        Sigma: SD15,SD1, SD1 Merill, DP1, DP1S, DP1X, DP2, DP2S, DP2X 
-        (in LibRaw-demosaic-pack-GPL2)
-        Sony: NEX-F3, SLT-A37, SLT-A57
-
-    3) TODO (additional to 'not working' section above)
-         * Sony ARW2 Hack - turns off division by 4 of RAW values unpacked from
-             sony ARW2 files. 
-           int imgdata.params.sony_arw2_hack;
-         * Some optimizations introduced in previous LibRaw versions are
-           temporarily removed:
-            - OpenMP
-            - One pass data copy + black subtraction + fuji data rotation
-              (LibRaw::raw2image_ex() )
-            - Callbacks for more efficient data handling (SSE2 or multithreaded)
-              introduced in 0.15-PreAlpha
-	    - Fast LJPEG decoder
-         * Black level subtraction for Phase One files is performed on unpack()
-           stage, not on postprocessing one.
-
-2012-04-11 Alex Tutubalin <lexa@lexa.ru>
-        * Fixed thumbnail processing (esp. for Adobe Lightroom DNGs)
 
 2012-04-05 Alex Tutubalin <lexa@lexa.ru>
         * Casio EX-Z500 support

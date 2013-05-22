@@ -36,9 +36,11 @@
               <li><a href="#cameraList">const char** LibRaw::cameraList()</a></li>
             </ul>
           </li>
+          <li><a href="#set_rawspeed_camerafile">int LibRaw::set_rawspeed_camerafile(char *path_to_cameras_xml)</a></li>
           <li><a href="#get_decoder_info">int LibRaw::get_decoder_info(libraw_decoder_info_t *)</a></li>
           <li><a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
-          <li><a href="#subtract_black">void LibRaw::subtract_black()</a>
+          <li><a href="#subtract_black">int LibRaw::subtract_black()</a>
+          <li><a  href="#recycle">void LibRaw::recycle_datastream(void)</a></li>
           <li><a  href="#recycle">void LibRaw::recycle(void)</a></li>
           <li><a  href="#~LibRaw">LibRaw::~LibRaw()</a></li>
           <li><a href="#strprogress">const char* LibRaw::strprogress(enum LibRaw_progress code)</a></li>
@@ -183,6 +185,7 @@
     </p>
     <a name=open_file></a>
     <h3>int LibRaw::open_file(const char *filename[,INT64 bigfile_size])</h3>
+    <h3>Win32 only: int LibRaw::open_file(const wchar_t *filename[,INT64 bigfile_size])</h3>
     <p>
       Создает объект <a href="#file_datastream">LibRaw_file_datastream</a> или <a
         href="#bigfile_datastream">LibRaw_bigfile_datastream</a>,  вызывает <a
@@ -281,6 +284,12 @@
       последнем элементе списка содержится NULL.
     </p>
     <h3>Прочие вспомогательные функции</h3>
+    <a name="#set_rawspeed_camerafile"></a>
+    <h4>int LibRaw::set_rawspeed_camerafile(char *path_to_cameras_xml)</h4>
+    <p>
+     (Только для LibRaw, скомпилированной с поддержкой библиотеки RawSpeed)
+    <p>
+    Получает имя файла, содержащего  Читает XML-описание камер (cameras.xml)
     <a name="get_decoder_info"></a>
     <h4>int LibRaw::get_decoder_info(libraw_decoder_info_t *)</h4>
     <p>
@@ -311,7 +320,20 @@
       самостоятельно. Встроенные в LibRaw <a href="#dcrawemu">функции постпроцессинга</a> вызовут
       <b>subtract_black()</b> самостоятельно.
     </p>
+    <p>Функция возвращает целое число в соответствии с <a href=API-notes-rus.html#errors>соглашением о кодах
+        возврата</a>: положительное число, если какой-то из системных вызовов вернул ошибку, отрицательное число (из
+      <a href=API-datastruct-rus.html#LibRaw_errors>списка ошибок LibRaw</a>) при ошибочной ситуации
+      внутри LibRaw.
+    </p>
 
+    <a name="recycle_datastream"></a>
+    <h4>void LibRaw::recycle_datastream(void)</h4>
+    <p>
+     Этот вызов позволяет освободить file handle (и ассоциированные
+     буферы), если ваше приложение больше не собирается вызывать unpack()
+     или unpack_thumb() и, следовательно, может разблокировать файл и
+     освободить память, которая использовалась для чтения RAW-файла.
+ 
     <a name="recycle"></a>
     <h4>void LibRaw::recycle(void)</h4>
     <p>
@@ -737,6 +759,20 @@ LibRaw.
         Упрощенный аналог fscanf(file,fmt,val): формат всегда описывает один аргумент, в результате функция с
         переменным числом параметров не нужна: указатель в который считываются данные всегда один.
       </dd>
+      <dt><b>    virtual int     jpeg_src(void * p);</b></dt>
+      <dd>
+        Инициализирует объект j_decompress_ptr, полученный через void *p; Дальше этот объект используется
+	libjpeg для чтения данных из JPEG-потока. Подробности смотрите в документации на LibJPEG
+        <p>
+        Возвращает: -1 если чтение JPEG-данных не поддержано или произошла ошибка, 0 при успехе.
+      </dd>
+      <dt><b>    virtual void *      make_jas_stream();</b></dt>
+	<dd>
+	Создает объект ввода-вывода LibJasper (распаковка JPEG2000). 
+	<p>
+	Возвращает: NULL если создать поток не удалось, указатель на поток если он создан.
+	</dd>
+
     </dl>
     <a name="datastream_methods_other"></a>
     <h5>Прочие методы</h5>

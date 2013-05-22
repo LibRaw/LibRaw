@@ -35,8 +35,11 @@
               <li><a href="#cameraList">const char** LibRaw::cameraList()</a></li>
             </ul>
           </li>
+          <li><a href="#set_rawspeed_camerafile">int LibRaw::set_rawspeed_camerafile(char *path_to_cameras_xml)</a></li>
           <li><a href="#get_decoder_info">int LibRaw::get_decoder_info(libraw_decoder_info_t *)</a></li>
           <li><a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
+          <li><a href="#subtract_black">int LibRaw::subtract_black()</a>
+          <li><a  href="#recycle">void LibRaw::recycle_datastream(void)</a></li>
           <li><a href="#recycle">void LibRaw::recycle(void)</a></li>
           <li><a href="#~LibRaw">LibRaw::~LibRaw()</a></li>
           <li><a href="#strprogress">const char* LibRaw::strprogress(enum LibRaw_progress code)</a></li>
@@ -183,6 +186,7 @@ are processed in the batch mode, there is no need to call recycle() at the end o
     </p>
     <a name=open_file></a>
     <h3>int LibRaw::open_file(const char *filename[,INT64 bigfile_size])</h3>
+    <h3>Win32 only: int LibRaw::open_file(const wchar_t *filename[,INT64 bigfile_size])</h3>
     <p>
       Creates an <a href="#file_datastream">LibRaw_file_datastream</a> object, calls 
       <a href="#open_datastream">open_datastream()</a>. If succeed, sets internal flag which signals
@@ -276,6 +280,13 @@ LibRaw.
     <p>
       Returns list of supported cameras. Latest item of list is set to NULL (for easy printing).
     </p>
+    <a name="#set_rawspeed_camerafile"></a>
+    <h4>int LibRaw::set_rawspeed_camerafile(char *path_to_cameras_xml)</h4>
+    <p>
+     (Only if LibRaw was built with RawSpeed support).
+    <p>
+    Loads XML file with RawSpeed camera description data (cameras.xml) specified by path_to_cameras_xml.
+    Returns 0 on success, nonzero on error.
     <a name="get_decoder_info"></a>
     <h4>int LibRaw::get_decoder_info(libraw_decoder_info_t *)</h4>
     <p>
@@ -307,7 +318,17 @@ LibRaw.
       This call should be used if you postprocess RAW data by your own code. LibRaw 
       <a href="#dcrawemu">postprocessing functions</a> will call <b>subtract_black()</b> by oneself.
     </p>
+    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return code
+        convention</a>: positive if any system call has returned an error, negative (from the
+      <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+      LibRaw. 
+    </p>
 
+    <a name="recycle_datastream"></a>
+    <h4>void LibRaw::recycle_datastream(void)</h4>
+    <p>
+     This call closes input datastream with associated data buffer and unblocks opened file.
+ 
     <a name="recycle"></a>
     <h3>void LibRaw::recycle(void)</h3>
     <p>Frees the allocated data of LibRaw instance, enabling one to process the next file using
@@ -481,8 +502,8 @@ Processing of a new file may be started in the usual way, by calling LibRaw::ope
     <a name="raw2image"></a>
     <h3>int LibRaw::raw2image</h3>
     <p>
-      This functions allocates buffer for postprocessing (imgdata.image) and fills it with data layout compatible
-      with LibRaw 0.13 and below. If the buffer is already allocated, it will be free()ed and allocated again.
+      This function allocates buffer for postprocessing (imgdata.image) and fills it with data layout compatible
+      with LibRaw 0.13/0.14 and below. If the buffer is already allocated, it will be free()ed and allocated again.
     </p>
     <p>
       This function should be called only if your code do postprocessing stage. If you use LibRaw's postprocessing
@@ -723,6 +744,19 @@ LibRaw.
         Simplified variant of fscanf(file,fmt,val): format string is always contains one argument to read. So,
         variable args call is not needed and only one pointer to data passed.
       </dd>
+      <dt><b>    virtual int     jpeg_src(void * p);</b></dt>
+      <dd>
+        Initializes read structures in  j_decompress_ptr object passed as *p.
+	This object is used by libjpeg for JPEG data reading from datastream.
+        <p>
+        Retuens -1 on error and 0 on success.
+      </dd>
+      <dt><b>    virtual void *      make_jas_stream();</b></dt>
+	<dd>
+	Creates LibJasper input stream (for JPEG2000 decoding). 
+	<p>
+	returns NULL on error or data pointer on success.
+	</dd>
     </dl>
     <a name="datastream_methods_other"></a>
     <h5>Other methods</h5>
