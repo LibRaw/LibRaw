@@ -143,6 +143,14 @@ Fields of this structure are described in detail <a href="#libraw_iparams_t">bel
 (8 rows with two pixels in each, from left to right and from top to bottom). Each two bits have values 0 to 3, which
 correspond to four possible colors. Convenient work with this field is ensured by the COLOR(row,column) function,
 which returns the number of the active color for a given pixel.
+<p>
+	values less than 1000 are reserved as special cases:
+<ul>
+<li><b>1</b> - Leaf Catchlight with 16x16 bayer matrix;
+<li><b>2</b> - Fuji X-Trans (6x6 matrix)
+<li>3..999 - unused.
+</ul>
+
       </dd>
       <dt><b>char        cdesc[5];</b></dt>
       <dd>
