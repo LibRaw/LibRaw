@@ -539,9 +539,9 @@ void AAHD::make_ahd_gline(int i) {
 			min -= min / OverFraction;
 			max += max / OverFraction;
 			if (eg < min)
-				eg = min - sqrt(min - eg);
+				eg = min - sqrt(float(min - eg));
 			else if (eg > max)
-				eg = max + sqrt(eg - max);
+				eg = max + sqrt(float(eg - max));
 			if (eg > channel_maximum[1])
 				eg = channel_maximum[1];
 			else if (eg < channel_minimum[1])
