@@ -2336,14 +2336,15 @@ int LibRaw::subtract_black()
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIM(x,min,max) MAX(min,MIN(x,max))
 #define CLIP(x) LIM(x,0,65535)
-
-            for(i=0; i< size*4; i++)
+			int dmax = 0;
+			for(i=0; i< size*4; i++)
               {
                 int val = imgdata.image[0][i];
                 val -= cblk[i & 3];
                 imgdata.image[0][i] = CLIP(val);
-                if(C.data_maximum < val) C.data_maximum = val;
+                if(dmax < val) dmax = val;
               }
+			C.data_maximum = dmax & 0xffff;
 #undef MIN
 #undef MAX
 #undef LIM
@@ -2359,9 +2360,10 @@ int LibRaw::subtract_black()
           // only calculate channel maximum;
           int idx;
           ushort *p = (ushort*)imgdata.image;
-          C.data_maximum = 0;
+		  int dmax = 0;
           for(idx=0;idx<S.iheight*S.iwidth*4;idx++)
-            if(C.data_maximum < p[idx]) C.data_maximum = p[idx];
+            if(dmax < p[idx]) dmax = p[idx];
+		  C.data_maximum = dmax;
         }
 		return 0;
 	}
@@ -2421,8 +2423,10 @@ void LibRaw::exp_bef(float shift, float smooth)
             imgdata.image[i][3] = lut[imgdata.image[i][3]];
         }
 
-    C.data_maximum = lut[C.data_maximum];
-    C.maximum = lut[C.maximum];
+	if(C.data_maximum <=TBLN)
+		C.data_maximum = lut[C.data_maximum];
+	if(C.maximum <= TBLN)
+		C.maximum = lut[C.maximum];
     // no need to adjust the minumum, black is already subtracted
     free(lut);
 }
@@ -2530,7 +2534,7 @@ int LibRaw::dcraw_process(void)
 
         raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
 
-        int save_4color = O.four_color_rgb;
+		int save_4color = O.four_color_rgb;
 
         if (IO.zero_is_bad) 
           {
