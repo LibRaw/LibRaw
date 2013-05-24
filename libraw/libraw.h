@@ -73,11 +73,13 @@ DllDef    int                 libraw_versionNumber();
 DllDef    const char**        libraw_cameraList();
 DllDef    int                 libraw_cameraCount();
 
+  /* helpers */
 DllDef    void                libraw_set_memerror_handler(libraw_data_t*, memory_callback cb, void *datap);
 DllDef    void                libraw_set_dataerror_handler(libraw_data_t*,data_callback func,void *datap);
 DllDef    void                libraw_set_progress_handler(libraw_data_t*,progress_callback cb,void *datap);
 DllDef    const char *        libraw_unpack_function_name(libraw_data_t* lr);
 DllDef    int                 libraw_get_decoder_info(libraw_data_t* lr,libraw_decoder_info_t* d);
+DllDef    int libraw_COLOR(libraw_data_t*,int row, int col);
 
     /* DCRAW compatibility */
 DllDef    int                 libraw_adjust_sizes_info_only(libraw_data_t*);

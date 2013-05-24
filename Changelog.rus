@@ -1,4 +1,17 @@
-﻿2013-05-23 Alex Tutubalin <lexa@lexa.ru>
+﻿2013-05-27 Alex Tutubalin <lexa@lexa.ru>
+  * Новые алгоритмы демозаики:
+  	DHT Demosaic by Anton Petrusevich
+  	Modified AHD Demosaic by Anton Petrusevich
+    Включаются через params.user_qual (11 и 12, соответственно)
+
+  * Новый вызов C-API libraw_COLOR(libraw_data_t *t, int row,int col)
+    Это LibRaw::COLOR(row,col), но для пользователей C API
+
+  * Новый параметр постобработкеи params.no_auto_scale
+    Если его поставить в не-0, то при постобработке в dcraw_process()
+    не будет вызываться scale_colors()
+
+2013-05-23 Alex Tutubalin <lexa@lexa.ru>
 
   LibRaw 0.15.0 Release:
 

@@ -297,7 +297,9 @@ typedef struct
     int   wf_debanding;
     float wf_deband_treshold[4];
 	/* Raw speed */
-	int use_rawspeed;
+    int use_rawspeed;
+  /* Disable Auto-scale */
+    int no_auto_scale;
 }libraw_output_params_t;
 
 typedef struct

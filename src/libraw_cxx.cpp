@@ -289,7 +289,7 @@ LibRaw:: LibRaw(unsigned int flags)
     ZERO(libraw_internal_data);
     ZERO(callbacks);
 
-	_rawspeed_camerameta = _rawspeed_decoder = NULL;
+    _rawspeed_camerameta = _rawspeed_decoder = NULL;
 
 #ifdef USE_RAWSPEED
 	CameraMetaDataLR *camerameta = make_camera_metadata(); // May be NULL in case of exception in make_camera_metadata()
@@ -315,7 +315,8 @@ LibRaw:: LibRaw(unsigned int flags)
     imgdata.params.exp_shift = 1.0;
     imgdata.params.auto_bright_thr = LIBRAW_DEFAULT_AUTO_BRIGHTNESS_THRESHOLD;
     imgdata.params.adjust_maximum_thr= LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD;
-	imgdata.params.use_rawspeed = 1;
+    imgdata.params.use_rawspeed = 1;
+    imgdata.params.no_auto_scale = 0;
     imgdata.params.green_matching = 0;
     imgdata.parent_class = this;
     imgdata.progress_flags = 0;
@@ -2599,7 +2600,7 @@ int LibRaw::dcraw_process(void)
                 green_matching();
             }
 
-        if (!P1.is_foveon)
+        if (!P1.is_foveon && !O.no_auto_scale)
             {
                 scale_colors();
                 SET_PROC_FLAG(LIBRAW_PROGRESS_SCALE_COLORS);
