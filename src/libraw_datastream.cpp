@@ -274,7 +274,7 @@ void * LibRaw_file_datastream::make_jas_stream()
 #ifdef NO_JASPER
     return NULL;
 #else
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
 	if(wfname())
 	{
 		jas_file = _wfopen(wfname(),L"rb");
@@ -294,7 +294,7 @@ int LibRaw_file_datastream::jpeg_src(void *jpegdata)
   return -1; // not supported
 #else
   if(jas_file) { fclose(jas_file); jas_file = NULL;}
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
   if(wfname())
     {
       jas_file = _wfopen(wfname(),L"rb");

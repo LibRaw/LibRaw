@@ -1,3 +1,9 @@
+2013-05-26 Alex Tutubalin <lexa@lexa.ru>
+  * Fixed possible double-free() on error recovery on damaged full-color
+    (Foveon, sRAW) files.
+  * wchar_t* file interface disabled for MinGW32 compilation
+  * LibRaw 0.15.2
+
 2013-05-25 Alex Tutubalin <lexa@lexa.ru>
   * fixed wrong data maximum calculation for Panasonic files
   * check for possible buffer overrun in exposure correction code

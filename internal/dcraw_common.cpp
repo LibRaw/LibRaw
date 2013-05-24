@@ -5699,7 +5699,7 @@ void CLASS parse_external_jpeg()
 #ifndef LIBRAW_LIBRARY_BUILD
   FILE *save=ifp;
 #else
-#ifdef WIN32
+#if defined (WIN32) && !defined(__MINGW32__)
   if(ifp->wfname())
   {
 	  std::wstring rawfile(ifp->wfname());
