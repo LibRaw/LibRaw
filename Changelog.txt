@@ -1,3 +1,7 @@
+2013-05-31 Alex Tutubalin <lexa@lexa.ru>
+	* Fixed double call to free() on broken legacy-layout images
+	  (backport from 0.15.x)
+
 2013-05-21 Alex Tutubalin <lexa@lexa.ru>
 	* Fixed undefined behaviour in sony_decrypt() function.
 	  This bug causes incorrect camera WB read for Sony cameras.

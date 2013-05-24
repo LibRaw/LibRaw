@@ -1,4 +1,8 @@
-﻿2013-05-21 Alex Tutubalin <lexa@lexa.ru>
+﻿2013-05-31 Alex Tutubalin <lexa@lexa.ru>
+	* Исправлена ошибка при обработке поврежденных полноцветных
+	  файлов (sRAW, Foveon)
+
+2013-05-21 Alex Tutubalin <lexa@lexa.ru>
 	* Исправлена ошибка в коде функции sony_decrypt(), приводившая 
 	  к неверному чтению камерного баланса белого на камерах Sony
 	  если LibRaw была собрана gcc 4.8
