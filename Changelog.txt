@@ -1,3 +1,14 @@
+2013-05-27 Alex Tutubalin <lexa@lexa.ru>
+  * New demosaic code: DHT Demosaic by Anton Petrusevich
+    Set params.user_qual=11 to use.
+  * New demosaic code: Modified AHD Demosaic by Anton Petrusevich
+    Set params.user_qual=12 to use.
+  * New C-API call libraw_COLOR(libraw_data_t *t, int row,int col)
+    LibRaw::COLOR(row,col) exosed to C-API users.
+
+  * New output tuning parameter params.no_auto_scale
+    Set it to non-zero to disable call to scale_colors() in dcraw_process()
+
 2013-05-23 Alex Tutubalin <lexa@lexa.ru>
 
  LibRaw 0.15-Release
