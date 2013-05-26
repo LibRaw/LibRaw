@@ -1144,8 +1144,8 @@ int LibRaw::unpack(void)
                 IO.shrink = 0;
 				S.raw_pitch = S.width*8;
                 // allocate image as temporary buffer, size 
-                imgdata.rawdata.raw_alloc = calloc(S.iwidth*S.iheight,sizeof(*imgdata.image));
-                imgdata.image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
+                imgdata.rawdata.raw_alloc = 0;
+                imgdata.image = (ushort (*)[4]) calloc(S.iwidth*S.iheight,sizeof(*imgdata.image));
               }
             ID.input->seek(libraw_internal_data.unpacker_data.data_offset, SEEK_SET);
 
@@ -1155,6 +1155,12 @@ int LibRaw::unpack(void)
             (this->*load_raw)();
 			if(load_raw == &LibRaw::unpacked_load_raw && !strcasecmp(imgdata.idata.make,"Nikon"))
 				C.maximum = m_save;
+			if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+			{
+				// successfully decoded legacy image, attach image to raw_alloc
+				imgdata.rawdata.raw_alloc = imgdata.image;
+				imgdata.image = 0; 
+			}
           }
 
         if(imgdata.rawdata.raw_image)
