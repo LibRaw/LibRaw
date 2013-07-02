@@ -271,7 +271,6 @@ int main(int argc, char *argv[])
                   break;
               case 'h':  
                   OUT.half_size         = 1;		
-                  OUT.four_color_rgb    = 1;  
                   break;
               case 'f':  
                   if(!strcmp(optstr,"-fbdd"))

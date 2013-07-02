@@ -29,7 +29,6 @@
 #include "libraw/libraw_types.h"
 #include "libraw/libraw.h"
 #include "libraw/libraw_datastream.h"
-#include "internal/libraw_bytebuffer.h"
 #include <sys/stat.h>
 #ifdef USE_JASPER
 #include <jasper/jasper.h>	/* Decode RED camera movies */
@@ -41,33 +40,6 @@
 #else
 #define NO_JPEG
 #endif
-
-
-LibRaw_byte_buffer::LibRaw_byte_buffer(unsigned sz) 
-{ 
-    buf=0; size=sz; offt=0; do_free=0; 
-    if(size)
-        { 
-            buf = (unsigned char*)malloc(size); do_free=1;
-        }
-}
-
-void LibRaw_byte_buffer::set_buffer(void *bb, unsigned int sz) 
-{ 
-    buf = (unsigned char*)bb; size = sz; offt=0; do_free=0;
-}
-
-LibRaw_byte_buffer::~LibRaw_byte_buffer() 
-{ 
-    if(do_free) free(buf);
-}
-
-LibRaw_byte_buffer *LibRaw_abstract_datastream::make_byte_buffer(unsigned int sz)
-{
-    LibRaw_byte_buffer *ret = new LibRaw_byte_buffer(sz);
-    read(ret->get_buffer(),sz,1);
-    return ret;
-}
 
 int LibRaw_abstract_datastream::tempbuffer_open(void  *buf, size_t size)
 {
@@ -174,7 +146,7 @@ int LibRaw_file_datastream::seek(INT64 o, int whence)
         case SEEK_END: dir = std::ios_base::end; break;
         default: dir = std::ios_base::beg;
         }
-    return (int)f->pubseekoff((long)o, dir);
+    return f->pubseekoff((long)o, dir) < 0;
 }
 
 INT64 LibRaw_file_datastream::tell()     
@@ -437,15 +409,6 @@ int LibRaw_buffer_datastream::scanf_one(const char *fmt, void* val)
                 }
         }
     return scanf_res;
-}
-
-LibRaw_byte_buffer *LibRaw_buffer_datastream::make_byte_buffer(unsigned int sz)
-{
-    LibRaw_byte_buffer *ret = new LibRaw_byte_buffer(0);
-    if(streampos + sz > streamsize)
-        sz = streamsize - streampos;
-    ret->set_buffer(buf+streampos,sz);
-    return ret;
 }
 
 int LibRaw_buffer_datastream::eof()

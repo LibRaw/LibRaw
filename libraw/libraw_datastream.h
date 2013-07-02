@@ -49,7 +49,6 @@ it under the terms of the one of three licenses as you choose:
 #define IOERROR() do { throw LIBRAW_EXCEPTION_IO_EOF; } while(0)
 
 class LibRaw_buffer_datastream;
-class LibRaw_byte_buffer;
 class LibRaw_bit_buffer;
 
 class DllDef LibRaw_abstract_datastream
@@ -69,7 +68,6 @@ class DllDef LibRaw_abstract_datastream
     virtual void *      make_jas_stream() = 0;
     virtual int         jpeg_src(void *) { return -1; }
     /* Make buffer from current offset */
-    virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz);
 
     /* subfile parsing not implemented in base class */
     virtual const char* fname(){ return NULL;};
@@ -142,7 +140,6 @@ class DllDef  LibRaw_buffer_datastream : public LibRaw_abstract_datastream
     virtual int         valid();
     virtual void        *make_jas_stream();
     virtual int         jpeg_src(void *jpegdata);
-    virtual LibRaw_byte_buffer *make_byte_buffer(unsigned int sz);
     virtual int         read(void * ptr,size_t sz, size_t nmemb);
     virtual int         eof();
     virtual int         seek(INT64 o, int whence);

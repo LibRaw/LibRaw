@@ -29,7 +29,7 @@ it under the terms of the one of three licenses as you choose:
 #define NO_JASPER
 #endif
 #line 38 "dcraw/dcraw.c"
-#define DCRAW_VERSION "9.17"
+#define DCRAW_VERSION "9.19"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -47,26 +47,7 @@ it under the terms of the one of three licenses as you choose:
 #include <string.h>
 #include <time.h>
 #include <sys/types.h>
-
-#ifdef NODEPS
-#define NO_JASPER
-#define NO_JPEG
-#define NO_LCMS
-#endif
-#ifndef NO_JASPER
-#include <jasper/jasper.h>	/* Decode RED camera movies */
-#endif
-#ifndef NO_JPEG
-#include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
-#endif				/* and Adobe Lossy DNGs */
-#line 73 "dcraw/dcraw.c"
-#ifdef LOCALEDIR
-#include <libintl.h>
-#define _(String) gettext(String)
-#else
-#define _(String) (String)
-#endif
-#line 87 "dcraw/dcraw.c"
+#line 65 "dcraw/dcraw.c"
 #ifdef __CYGWIN__
 #include <io.h>
 #endif
@@ -77,13 +58,34 @@ it under the terms of the one of three licenses as you choose:
 #define snprintf _snprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
-#line 101 "dcraw/dcraw.c"
+#line 79 "dcraw/dcraw.c"
 #else
 #include <unistd.h>
 #include <utime.h>
 #include <netinet/in.h>
 typedef long long INT64;
 typedef unsigned long long UINT64;
+#endif
+
+#ifdef NODEPS
+#define NO_JASPER
+#define NO_JPEG
+#define NO_LCMS
+#endif
+#ifndef NO_JASPER
+#include <jasper/jasper.h>	/* Decode Red camera movies */
+#endif
+#ifndef NO_JPEG
+#include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
+#endif				/* and Adobe Lossy DNGs */
+#ifndef NO_LCMS
+#include <lcms.h>		/* Support color profiles */
+#endif
+#ifdef LOCALEDIR
+#include <libintl.h>
+#define _(String) gettext(String)
+#else
+#define _(String) (String)
 #endif
 
 #ifdef LJPEG_DECODE

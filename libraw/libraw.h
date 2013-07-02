@@ -234,6 +234,8 @@ protected:
     void        lin_interpolate();
     void        vng_interpolate();
     void        ppg_interpolate();
+    void        cielab(ushort rgb[3], short lab[3]);
+    void        xtrans_interpolate(int);
     void        ahd_interpolate();
     void        dht_interpolate();
     void        aahd_interpolate();

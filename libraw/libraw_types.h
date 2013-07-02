@@ -155,7 +155,8 @@ typedef struct
     unsigned    is_foveon;
     int         colors;
 
-    unsigned    filters; 
+    unsigned    filters;
+    char        xtrans[6][6];
     char        cdesc[5];
 
 }libraw_iparams_t;

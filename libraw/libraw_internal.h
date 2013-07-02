@@ -66,12 +66,17 @@ public:
         uchar buf[0x4000];
         int vbits, padding;
     }pana_bits;
-	uchar jpeg_buffer[4096];
+    uchar jpeg_buffer[4096];
+    struct 
+    {
+      float cbrt[0x10000], xyz_cam[3][4];
+    }ahd_data;
     void init() 
         { 
             getbits.bitbuf = 0; getbits.vbits = getbits.reset = 0;
             ph1_bits.bitbuf = 0; ph1_bits.vbits = 0;
             pana_bits.vbits = 0;
+            ahd_data.cbrt[0]=-2.0f;
         }
 };
 

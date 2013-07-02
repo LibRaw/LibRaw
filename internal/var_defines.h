@@ -30,6 +30,7 @@ it under the terms of the one of three licenses as you choose:
 #define colors          (imgdata.idata.colors)
 #define cdesc           (imgdata.idata.cdesc)
 #define filters         (imgdata.idata.filters)
+#define xtrans         (imgdata.idata.xtrans)
 
 //imgdata image
 #define image           (imgdata.image)

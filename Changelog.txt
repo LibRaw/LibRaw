@@ -1,3 +1,24 @@
+2013-07-03 Alex Tutubalin <lexa@lexa.ru>
+  * Imported dcraw 9.19/1.456
+    + Support for new cameras:
+      Baumer TXG14
+      Canon EOS C500
+      Nikon D5200
+      OmniVision OV5647 (Raspberry Pi)
+      Panasonic DMC-GF6
+      Samsung NX300, NX1100, NX2000
+      Sony NEX-3N
+    + New interpolation code for Fuji X-Trans sensor
+    + imgdata.iparams.filters value is now 9 for Fuji X-Trans (instead of 2)
+  * New imgdata.iparams.xtrans[6][6] matrix contains row/col to color mapping
+    for Fuji X-Trans sensor.
+  * Removed OpenMP speedup for AHD interpolation (to be returned later)
+  * Removed faster lossless jpeg decoder ported from RawSpeed library
+    some years ago. Build LibRaw with RawSpeed to get fast decoding.
+  * Removed make_byte_buffer() call from LibRaw*datastream interface.
+  * Fixed decoding error for some Canon sRAW files.
+  * Updated RawSpeed supported camera list
+
 2013-05-27 Alex Tutubalin <lexa@lexa.ru>
   * New demosaic code: DHT Demosaic by Anton Petrusevich
     Set params.user_qual=11 to use.

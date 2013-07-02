@@ -1,4 +1,27 @@
-﻿2013-05-27 Alex Tutubalin <lexa@lexa.ru>
+﻿2013-07-03 Alex Tutubalin <lexa@lexa.ru>
+  * Импортирована dcraw 9.19/1.456
+    + Поддержка новых камер
+      Baumer TXG14
+      Canon EOS C500
+      Nikon D5200
+      OmniVision OV5647 (Raspberry Pi)
+      Panasonic DMC-GF6
+      Samsung NX300, NX1100, NX2000
+      Sony NEX-3N
+    + Новый код интерполяции для сенсоров Fuji X-Trans
+    + Для сенсоров Fuji X-Trans поле imgdata.iparams.filters имеет
+      значение 9 (было 2)
+  * Новое поле данных imgdata.iparams.xtrans[6][6] содержащее 
+    значения цветов для матриц Fuji X-Trans
+  * Временно удалено OpenMP-ускорение для ahd-демозаики.
+  * Удален быстрый декодер Lossless JPEG, перенесенный в свое время из
+    библиотеки RawSpeed. Для использования быстрых декодеров, используйте
+    LibRaw вместе с RawSpeed
+  * Для классов LibRaw*datastream удален метод make_byte_buffer() 
+    и сопутствующий код.
+  * Исправлена ошибка при декодировании некоторых файлов Canon sRAW.
+
+2013-05-27 Alex Tutubalin <lexa@lexa.ru>
   * Новые алгоритмы демозаики:
   	DHT Demosaic by Anton Petrusevich
   	Modified AHD Demosaic by Anton Petrusevich

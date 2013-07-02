@@ -5,15 +5,17 @@ PP=./internal/preprocess.pl
 CC=gcc
 CXX=g++
 
+CFLAGS=
+
 # RawSpeed Support
 CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
 LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/usr/local/include -ljpeg -lxml2
 RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
 
-CC=gcc48
-CXX=g++48
-CFLAGS+= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse4.2 -mfpmath=sse  -fopenmp 
+CC=gcc46
+CXX=g++46
+CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  
 
 
 # LCMS support
@@ -36,9 +38,8 @@ DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
 CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
 
 # Demosaic Pack GPL3:
-DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL3
-CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
-
+#DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL3
+#CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL3
 
 DCRAW_GEN= internal/dcraw_common.cpp internal/dcraw_fileio.cpp
 DCRAW_LIB_OBJECTS=object/dcraw_common.o object/libraw_cxx.o object/libraw_datastream.o object/libraw_c_api.o object/dcraw_fileio.o object/demosaic_packs.o
@@ -109,7 +110,7 @@ internal/defines.h: dcraw/dcraw.c  ${PP}
 	${PP} -DDEFINES dcraw/dcraw.c  >internal/defines.h
 
 internal/dcraw_common.cpp: dcraw/dcraw.c internal/defines.h  ${PP} Makefile.devel
-	${PP} -DCOMMON dcraw/dcraw.c >internal/dcraw_common.cpp
+	${PP} -N -DCOMMON dcraw/dcraw.c >internal/dcraw_common.cpp
 
 internal/dcraw_fileio.cpp: dcraw/dcraw.c internal/defines.h  ${PP} Makefile.devel
 	${PP} -DFILEIO dcraw/dcraw.c >internal/dcraw_fileio.cpp

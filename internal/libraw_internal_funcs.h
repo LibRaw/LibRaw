@@ -47,7 +47,7 @@ it under the terms of the one of three licenses as you choose:
     void        canon_600_load_raw();
     void        canon_600_correct();
     int         canon_s2is();
-    void        parse_ciff (int offset, int length);
+void        parse_ciff (int offset, int length, int);
     void        ciff_block_1030();
 
 // LJPEG decoder
@@ -57,11 +57,7 @@ it under the terms of the one of three licenses as you choose:
     int         ljpeg_start (struct jhead *jh, int info_only);
     void        ljpeg_end(struct jhead *jh);
     int         ljpeg_diff (ushort *huff); 
-    int         ljpeg_diff_new (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff);
-    int         ljpeg_diff_pef (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff);
     ushort *    ljpeg_row (int jrow, struct jhead *jh);
-    ushort *    ljpeg_row_new (int jrow, struct jhead *jh, LibRaw_bit_buffer& bits,LibRaw_byte_buffer* bytes);
-
     unsigned    ph1_bithuff (int nbits, ushort *huff);
 
 // Canon DSLRs
@@ -71,8 +67,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        lossless_jpeg_load_raw();
     void        canon_sraw_load_raw();
 // Adobe DNG
-    void        adobe_copy_pixel_raw (unsigned int row, unsigned int col, ushort **rp);
-    void        adobe_copy_pixel_color (unsigned int row, unsigned int col, ushort **rp);
+    void        adobe_copy_pixel (unsigned int row, unsigned int col, ushort **rp);
     void        lossless_dng_load_raw();
     void        packed_dng_load_raw();
     void        lossy_dng_load_raw();
@@ -123,6 +118,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 
 // Misc P&S cameras
     void        nokia_load_raw();
+    void        canon_rmf_load_raw();
     unsigned    pana_bits (int nbits);
     void        panasonic_load_raw();
     void        olympus_load_raw();
@@ -160,6 +156,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        sony_load_raw();
     void        sony_arw_load_raw();
     void        sony_arw2_load_raw();
+    void        samsung_load_raw();
     void        parse_minolta (int base);
 
 // Foveon/Sigma
