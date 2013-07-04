@@ -174,7 +174,7 @@ int LibRaw_file_datastream::seek(INT64 o, int whence)
         case SEEK_END: dir = std::ios_base::end; break;
         default: dir = std::ios_base::beg;
         }
-    return (int)f->pubseekoff((long)o, dir);
+    return (int)f->pubseekoff((long)o, dir)<0?-1:0;
 }
 
 INT64 LibRaw_file_datastream::tell()     

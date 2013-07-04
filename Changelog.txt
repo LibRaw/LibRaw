@@ -1,3 +1,11 @@
+2013-07-04 Alex Tutubalin <lexa@lexa.ru>
+  * New camera/format support:
+     OmniVision OV5647 (Raspberry Pi)
+     Nikon D5200
+     Panasonic DMC-GF6
+  * Fixed decoding error for some Canon sRAW files.
+  * LibRaw 0.15.3
+
 2013-05-26 Alex Tutubalin <lexa@lexa.ru>
   * Fixed possible double-free() on error recovery on damaged full-color
     (Foveon, sRAW) files.
