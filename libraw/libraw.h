@@ -138,6 +138,7 @@ class DllDef LibRaw
     int                         dcraw_process(void);
     /* information calls */
     int is_fuji_rotated(){return libraw_internal_data.internal_output_params.fuji_width;}
+    int is_sraw();
     /* memory writers */
     virtual libraw_processed_image_t*   dcraw_make_mem_image(int *errcode=NULL);  
     virtual libraw_processed_image_t*   dcraw_make_mem_thumb(int *errcode=NULL);

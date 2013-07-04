@@ -179,6 +179,8 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t* p)
     if(p) ::free(p);
 }
 
+int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw; }
+
 #ifdef USE_RAWSPEED
 using namespace RawSpeed;
 class CameraMetaDataLR : public CameraMetaData
@@ -317,6 +319,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.adjust_maximum_thr= LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD;
   imgdata.params.use_rawspeed = 1;
   imgdata.params.no_auto_scale = 0;
+  imgdata.params.sraw_ycc = 0;
   imgdata.params.green_matching = 0;
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
@@ -1038,7 +1041,9 @@ int LibRaw::unpack(void)
     imgdata.rawdata.color3_image = 0;
 #ifdef USE_RAWSPEED
     // RawSpeed Supported, 
-    if(O.use_rawspeed && (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
+    if(O.use_rawspeed 
+       && !(is_sraw() && O.sraw_ycc)
+       && (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
       {
         INT64 spos = ID.input->tell();
         try 

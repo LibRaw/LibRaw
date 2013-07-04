@@ -1,3 +1,5 @@
+2013-07-08 Alex Tutubalin <lexa@lexa.ru>
+    * imgdata.params.sraw_ycc
 2013-07-03 Alex Tutubalin <lexa@lexa.ru>
   * Imported dcraw 9.19/1.456
     + Support for new cameras:
