@@ -1128,7 +1128,7 @@ void CLASS pentax_load_raw()
       huff[++i] = bit[1][c] << 8 | c;
   huff[0] = 12;
   fseek (ifp, data_offset, SEEK_SET);
-#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef LIBRAW_LIBRARY_BUILDA
   if(!data_size)
       throw LIBRAW_EXCEPTION_IO_BADFILE;
   LibRaw_byte_buffer *buf = ifp->make_byte_buffer(data_size);
@@ -1139,7 +1139,7 @@ void CLASS pentax_load_raw()
 #endif
   for (row=0; row < raw_height; row++)
     for (col=0; col < raw_width; col++) {
-#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef LIBRAW_LIBRARY_BUILDA
       diff = ljpeg_diff_pef(bits,buf,huff);
 #else
       diff = ljpeg_diff (huff);
@@ -1149,7 +1149,7 @@ void CLASS pentax_load_raw()
       RAW(row,col) = hpred[col & 1];
       if (hpred[col & 1] >> tiff_bps) derror();
     }
-#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef LIBRAW_LIBRARY_BUILDA
   delete buf;
 #endif
 }
@@ -5281,7 +5281,6 @@ int CLASS parse_tiff_ifd (int base)
 	strcpy (make, "Imacon");
 	data_offset = ftell(ifp);
 	ima_len = len;
-        printf("Data len: %d\n",ima_len);
 	break;
       case 46279:
 	if (!ima_len) break;
@@ -6262,7 +6261,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 7419 "dcraw/dcraw.c"
+#line 7418 "dcraw/dcraw.c"
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
   int i;
@@ -6363,7 +6362,7 @@ void CLASS parse_foveon()
   }
   is_foveon = 1;
 }
-#line 7522 "dcraw/dcraw.c"
+#line 7521 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -7169,10 +7168,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
   int i, j;
 
   sprintf (name, "%s %s", t_make, t_model);
-  printf("Check coeff for %s\n",name);
   for (i=0; i < sizeof table / sizeof *table; i++)
     if (!strncmp (name, table[i].prefix, strlen(table[i].prefix))) {
-      printf("Found coeff for %s\n",name);
       if (table[i].t_black)   black   = (ushort) table[i].t_black;
       if (table[i].t_maximum) maximum = (ushort) table[i].t_maximum;
       if (table[i].trans[0]) {
@@ -9002,7 +8999,7 @@ c603:
 }
 
 
-#line 10252 "dcraw/dcraw.c"
+#line 10249 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -9233,7 +9230,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 10508 "dcraw/dcraw.c"
+#line 10505 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

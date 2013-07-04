@@ -900,19 +900,6 @@ int CLASS ljpeg_diff_new (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushor
   return diff;
 }
 
-int CLASS ljpeg_diff_pef (LibRaw_bit_buffer& bits, LibRaw_byte_buffer* buf,ushort *huff)
-{
-  int len, diff;
-
-  len = bits._gethuff(buf,*huff,huff+1,zero_after_ff);
-  if (len == 16 && (!dng_version || dng_version >= 0x1010000))
-    return -32768;
-  diff = bits._getbits(buf,len,zero_after_ff);
-  if ((diff & (1 << (len-1))) == 0)
-    diff -= (1 << len) - 1;
-  return diff;
-}
-
 ushort * CLASS ljpeg_row_new (int jrow, struct jhead *jh, LibRaw_bit_buffer& bits,LibRaw_byte_buffer* bytes)
 {
   int col, c, diff, pred, spred=0;
@@ -1394,30 +1381,16 @@ void CLASS pentax_load_raw()
       huff[++i] = bit[1][c] << 8 | c;
   huff[0] = 12;
   fseek (ifp, data_offset, SEEK_SET);
-#ifdef LIBRAW_LIBRARY_BUILD
-  if(!data_size)
-      throw LIBRAW_EXCEPTION_IO_BADFILE;
-  LibRaw_byte_buffer *buf = ifp->make_byte_buffer(data_size);
-  LibRaw_bit_buffer bits;
-  bits.reset();
-#else
   getbits(-1);
-#endif
   for (row=0; row < raw_height; row++)
     for (col=0; col < raw_width; col++) {
-#ifdef LIBRAW_LIBRARY_BUILD
-      diff = ljpeg_diff_pef(bits,buf,huff);
-#else
       diff = ljpeg_diff (huff);
-#endif
       if (col < 2) hpred[col] = vpred[row & 1][col] += diff;
       else	   hpred[col & 1] += diff;
       RAW(row,col) = hpred[col & 1];
       if (hpred[col & 1] >> tiff_bps) derror();
     }
-#ifdef LIBRAW_LIBRARY_BUILD
   delete buf;
-#endif
 }
 
 void CLASS nikon_load_raw()
@@ -6432,7 +6405,6 @@ int CLASS parse_tiff_ifd (int base)
 	strcpy (make, "Imacon");
 	data_offset = ftell(ifp);
 	ima_len = len;
-        printf("Data len: %d\n",ima_len);
 	break;
       case 46279:
 	if (!ima_len) break;
@@ -8324,10 +8296,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
   int i, j;
 
   sprintf (name, "%s %s", t_make, t_model);
-  printf("Check coeff for %s\n",name);
   for (i=0; i < sizeof table / sizeof *table; i++)
     if (!strncmp (name, table[i].prefix, strlen(table[i].prefix))) {
-      printf("Found coeff for %s\n",name);
       if (table[i].t_black)   black   = (ushort) table[i].t_black;
       if (table[i].t_maximum) maximum = (ushort) table[i].t_maximum;
       if (table[i].trans[0]) {
