@@ -1390,7 +1390,6 @@ void CLASS pentax_load_raw()
       RAW(row,col) = hpred[col & 1];
       if (hpred[col & 1] >> tiff_bps) derror();
     }
-  delete buf;
 }
 
 void CLASS nikon_load_raw()
