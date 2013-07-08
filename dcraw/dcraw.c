@@ -4749,7 +4749,7 @@ void CLASS cielab (ushort rgb[3], short lab[3])
 #endif
     for (i=0; i < 0x10000; i++) {
       r = i / 65535.0;
-      cbrt[i] = r > 0.008856 ? pow(r,1/3.0) : 7.787*r + 16/116.0;
+      cbrt[i] = r > 0.008856 ? pow(r,1.f/3.0f) : 7.787f*r + 16.f/116.0f;
     }
     for (i=0; i < 3; i++)
       for (j=0; j < colors; j++)
