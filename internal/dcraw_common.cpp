@@ -710,17 +710,43 @@ void CLASS canon_sraw_load_raw()
 	if ((jcol %= jwide) == 0)
 	  rp = (short *) ljpeg_row (jrow++, &jh);
 	if (col >= width) continue;
-	FORC (jh.clrs-2)
-	  ip[col + (c >> 1)*width + (c & 1)][0] = rp[jcol+c];
-	ip[col][1] = rp[jcol+jh.clrs-2] - 16384;
-	ip[col][2] = rp[jcol+jh.clrs-1] - 16384;
+#ifdef LIBRAW_LIBRARY_BUILD
+        if(imgdata.params.sraw_ycc>=2)
+          {
+            FORC (jh.clrs-2)
+              {
+                ip[col + (c >> 1)*width + (c & 1)][0] = rp[jcol+c];
+                ip[col + (c >> 1)*width + (c & 1)][1] = ip[col + (c >> 1)*width + (c & 1)][2] = 8192;
+              }
+            ip[col][1] = rp[jcol+jh.clrs-2] - 8192;
+            ip[col][2] = rp[jcol+jh.clrs-1] - 8192;
+          }
+        else if(imgdata.params.sraw_ycc)
+          {
+            FORC (jh.clrs-2)
+                ip[col + (c >> 1)*width + (c & 1)][0] = rp[jcol+c];
+            ip[col][1] = rp[jcol+jh.clrs-2] - 8192;
+            ip[col][2] = rp[jcol+jh.clrs-1] - 8192;
+          }
+        else
+#endif
+          {
+            FORC (jh.clrs-2)
+              ip[col + (c >> 1)*width + (c & 1)][0] = rp[jcol+c];
+            ip[col][1] = rp[jcol+jh.clrs-2] - 16384;
+            ip[col][2] = rp[jcol+jh.clrs-1] - 16384;
+          }
       }
     }
   }
 
 #ifdef LIBRAW_LIBRARY_BUILD
-  if(imgdata.params.sraw_ycc)
-    return;
+  if(imgdata.params.sraw_ycc>=2)
+    {
+      ljpeg_end (&jh);
+      maximum = 0x3fff;
+      return;
+    }
 #endif
 
   for (cp=model2; *cp && !isdigit(*cp); cp++);
@@ -744,25 +770,28 @@ void CLASS canon_sraw_load_raw()
 	     ip[col][c] =  ip[col-1][c];
 	else ip[col][c] = (ip[col-1][c] + ip[col+1][c] + 1) >> 1;
   }
-  for ( ; rp < ip[0]; rp+=4) {
-    if (unique_id == 0x80000218 ||
-	unique_id == 0x80000250 ||
-	unique_id == 0x80000261 ||
-	unique_id == 0x80000281 ||
-	unique_id == 0x80000287) {
-      rp[1] = (rp[1] << 2) + hue;
-      rp[2] = (rp[2] << 2) + hue;
-      pix[0] = rp[0] + ((   50*rp[1] + 22929*rp[2]) >> 14);
-      pix[1] = rp[0] + ((-5640*rp[1] - 11751*rp[2]) >> 14);
-      pix[2] = rp[0] + ((29040*rp[1] -   101*rp[2]) >> 14);
-    } else {
-      if (unique_id < 0x80000218) rp[0] -= 512;
-      pix[0] = rp[0] + rp[2];
-      pix[2] = rp[0] + rp[1];
-      pix[1] = rp[0] + ((-778*rp[1] - (rp[2] << 11)) >> 12);
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!imgdata.params.sraw_ycc)
+#endif
+    for ( ; rp < ip[0]; rp+=4) {
+      if (unique_id == 0x80000218 ||
+          unique_id == 0x80000250 ||
+          unique_id == 0x80000261 ||
+          unique_id == 0x80000281 ||
+          unique_id == 0x80000287) {
+        rp[1] = (rp[1] << 2) + hue;
+        rp[2] = (rp[2] << 2) + hue;
+        pix[0] = rp[0] + ((   50*rp[1] + 22929*rp[2]) >> 14);
+        pix[1] = rp[0] + ((-5640*rp[1] - 11751*rp[2]) >> 14);
+        pix[2] = rp[0] + ((29040*rp[1] -   101*rp[2]) >> 14);
+      } else {
+        if (unique_id < 0x80000218) rp[0] -= 512;
+        pix[0] = rp[0] + rp[2];
+        pix[2] = rp[0] + rp[1];
+        pix[1] = rp[0] + ((-778*rp[1] - (rp[2] << 11)) >> 12);
+      }
+      FORC3 rp[c] = CLIP(pix[c] * sraw_mul[c] >> 10);
     }
-    FORC3 rp[c] = CLIP(pix[c] * sraw_mul[c] >> 10);
-  }
   ljpeg_end (&jh);
   maximum = 0x3fff;
 }

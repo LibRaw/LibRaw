@@ -120,7 +120,8 @@ void usage(const char *prog)
 #endif
 "-mem	   Use memory buffer instead of FILE I/O\n"
 "-disars   Do not use RawSpeed library\n"
-"-dsrawrgb Disable YCbCr to RGB conversion for sRAW\n"
+"-dsrawrgb1 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation enabled)\n"
+"-dsrawrgb2 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation disabled)\n"
 );
     exit(1);
 }
@@ -339,8 +340,10 @@ int main(int argc, char *argv[])
 					  OUT.use_rawspeed=0;
                   else if(!strcmp(optstr,"-dcbe"))
                       OUT.dcb_enhance_fl = 1;
-                  else if(!strcmp(optstr,"-dsrawrgb"))
+                  else if(!strcmp(optstr,"-dsrawrgb1"))
                       OUT.sraw_ycc = 1;
+                  else if(!strcmp(optstr,"-dsrawrgb2"))
+                      OUT.sraw_ycc = 2;
                   else if(!strcmp(optstr,"-dbnd"))
                   {
                   	for(c=0; c<4; c++)
