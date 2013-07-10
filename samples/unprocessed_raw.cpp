@@ -87,7 +87,7 @@ int main(int ac, char *av[])
                     else if(av[i][1]=='s' && av[i][2]==0)
                         {
                             i++;
-                            OUT.shot_select=atoi(av[i]);
+                            OUT.shot_select=av[i]?atoi(av[i]):0;
                         }
                     else
                         goto usage;
