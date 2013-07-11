@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
                 "-s <num>       Select one raw image from input file\n"
                 "-B <x y w h>   Crop output image\n"
                 "-R <num>       Number of repetitions\n"
-				"-c             Dont use rawspeed\n"
+		"-c             Do not use rawspeed\n"
                 ,LibRaw::version(), LibRaw::cameraCount(),
                 argv[0]);
             return 0;
