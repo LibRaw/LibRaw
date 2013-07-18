@@ -1070,21 +1070,21 @@ int LibRaw::unpack(void)
             d->decodeRaw();
             d->decodeMetaData(meta);
             RawImage r = d->mRaw;
-			iPoint2D rsdim = r->getUncroppedDim();
+            iPoint2D rsdim = r->getUncroppedDim();
             if (r->isCFA) {
               // Save pointer to decoder
               _rawspeed_decoder = static_cast<void*>(d);
               imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
               S.raw_pitch = r->pitch;
-			  S.raw_width = rsdim.x;
-			  S.raw_height = rsdim.y;
+              S.raw_width = rsdim.x;
+              S.raw_height = rsdim.y;
               fix_after_rawspeed(r->blackLevel);
             } else if(r->getCpp()==4) {
               _rawspeed_decoder = static_cast<void*>(d);
               imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
               S.raw_pitch = r->pitch;
-			  S.raw_width = rsdim.x;
-			  S.raw_height = rsdim.y;
+              S.raw_width = rsdim.x;
+              S.raw_height = rsdim.y;
               C.maximum = r->whitePoint;
               fix_after_rawspeed(r->blackLevel);
             } else if(r->getCpp() == 3)
@@ -1092,8 +1092,8 @@ int LibRaw::unpack(void)
                 _rawspeed_decoder = static_cast<void*>(d);
                 imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
                 S.raw_pitch = r->pitch;
-				S.raw_width = rsdim.x;
-				S.raw_height = rsdim.y;
+                S.raw_width = rsdim.x;
+                S.raw_height = rsdim.y;
                 C.maximum = r->whitePoint;
                 fix_after_rawspeed(r->blackLevel);
               }
@@ -1110,7 +1110,7 @@ int LibRaw::unpack(void)
         ID.input->seek(spos,SEEK_SET);
       }
 #endif
-    if(!imgdata.rawdata.raw_image && !imgdata.rawdata.color4_image && !imgdata.rawdata.color3_image) // RawSpeed failed!
+    if(!imgdata.rawdata.raw_image && !imgdata.rawdata.color4_image && !imgdata.rawdata.color3_image) //RawSpeed failed!
       {
         // Not allocated on RawSpeed call, try call LibRaw
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
