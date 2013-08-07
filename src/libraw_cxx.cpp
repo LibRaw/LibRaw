@@ -2619,7 +2619,6 @@ int LibRaw::dcraw_process(void)
         else if (P1.filters == 9)
           {
             // Fuji X-Trans
-            fprintf(stderr,"Xtrans int\n");
             xtrans_interpolate(quality>2?3:1);
           }
         else if (quality == 3) 
@@ -2805,6 +2804,7 @@ static const char  *static_camera_list[] =
 "Canon EOS 40D",
 "Canon EOS 50D",
 "Canon EOS 60D",
+"Canon EOS 70D",
 "Canon EOS 300D / Digital Rebel / Kiss Digital",
 "Canon EOS 350D / Digital Rebel XT / Kiss Digital N",
 "Canon EOS 400D / Digital Rebel XTi / Kiss Digital X",
@@ -3095,6 +3095,7 @@ static const char  *static_camera_list[] =
 "Olympus E-P1",
 "Olympus E-P2",
 "Olympus E-P3",
+"Olympus E-P5",
 "Olympus E-PL1",
 "Olympus E-PL1s",
 "Olympus E-PL2",
@@ -3145,6 +3146,7 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-L10",
 "Panasonic DMC-LC1",
 "Panasonic DMC-LX1",
+"Panasonic DMC-LF1",
 "Panasonic DMC-LX2",
 "Panasonic DMC-LX3",
 "Panasonic DMC-LX5",
@@ -3239,7 +3241,9 @@ static const char  *static_camera_list[] =
 "Sony DSC-F828",
 "Sony DSC-R1",
 "Sony DSC-RX1",
+"Sony DSC-RX1R",
 "Sony DSC-RX100",
+"Sony DSC-RX100II",
 "Sony DSC-V3",
 "Sony DSLR-A100",
 "Sony DSLR-A200",

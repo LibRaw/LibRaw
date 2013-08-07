@@ -1,5 +1,15 @@
+2013-08-07 Alex Tutubalin <lexa@lexa.ru>
+  * New camera/format support:
+     Richon GR
+     Panasonic LF1
+     Fujifilm X-M1
+     Canon EOS 70D
+     Sony RX100II, RX1R
+     Olympus E-P5
+
 2013-07-08 Alex Tutubalin <lexa@lexa.ru>
     * imgdata.params.sraw_ycc
+
 2013-07-03 Alex Tutubalin <lexa@lexa.ru>
   * Imported dcraw 9.19/1.456
     + Support for new cameras:

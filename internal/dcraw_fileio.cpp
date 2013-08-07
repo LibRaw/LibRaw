@@ -154,7 +154,7 @@ void CLASS subtract (const char *fname)
   RUN_CALLBACK(LIBRAW_PROGRESS_DARK_FRAME,1,2);
 #endif
 }
-#line 9302 "dcraw/dcraw.c"
+#line 9314 "dcraw/dcraw.c"
 #ifndef NO_LCMS
 void CLASS apply_profile (const char *input, const char *output)
 {
