@@ -1088,31 +1088,27 @@ int LibRaw::unpack(void)
               // Save pointer to decoder
               _rawspeed_decoder = static_cast<void*>(d);
               imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
-              S.raw_pitch = r->pitch;
-              S.raw_width = r->dim.x;
-              S.raw_height = r->dim.y;
-              fix_after_rawspeed(r->blackLevel);
             } else if(r->getCpp()==4) {
               _rawspeed_decoder = static_cast<void*>(d);
               imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
-              S.raw_pitch = r->pitch;
-              S.raw_width = r->dim.x;
-              S.raw_height = r->dim.y;
-              C.maximum = r->whitePoint;
-              fix_after_rawspeed(r->blackLevel);
             } else if(r->getCpp() == 3)
               {
                 _rawspeed_decoder = static_cast<void*>(d);
                 imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
-                S.raw_pitch = r->pitch;
-                S.raw_width = r->dim.x;
-                S.raw_height = r->dim.y;
-                C.maximum = r->whitePoint;
-                fix_after_rawspeed(r->blackLevel);
               }
             else
               {
                 delete d;
+                d = NULL;
+              }
+            if(d) // not deleted
+              {
+                iPoint2D rsdim = r->getUncroppedDim();
+                S.raw_pitch = r->pitch;
+                S.raw_width = rsdim.x;
+                S.raw_height = rsdim.y;
+                C.maximum = r->whitePoint;
+                fix_after_rawspeed(r->blackLevel);
               }
             free(_rawspeed_buffer);
             imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROCESSED;
@@ -2814,6 +2810,7 @@ static const char  *static_camera_list[] =
 "Canon EOS 40D",
 "Canon EOS 50D",
 "Canon EOS 60D",
+"Canon EOS 70D",
 "Canon EOS 100D/ Digital Rebel SL1",
 "Canon EOS 300D / Digital Rebel / Kiss Digital",
 "Canon EOS 350D / Digital Rebel XT / Kiss Digital N",
@@ -3103,6 +3100,7 @@ static const char  *static_camera_list[] =
 "Olympus E-P1",
 "Olympus E-P2",
 "Olympus E-P3",
+"Olympus E-P5",
 "Olympus E-PL1",
 "Olympus E-PL1s",
 "Olympus E-PL2",
@@ -3151,6 +3149,7 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-L1",
 "Panasonic DMC-L10",
 "Panasonic DMC-LC1",
+"Panasonic DMC-LF1",
 "Panasonic DMC-LX1",
 "Panasonic DMC-LX2",
 "Panasonic DMC-LX3",
@@ -3243,7 +3242,9 @@ static const char  *static_camera_list[] =
 "Sony DSC-F828",
 "Sony DSC-R1",
 "Sony DSC-RX1",
+"Sony DSC-RX1R",
 "Sony DSC-RX100",
+"Sony DSC-RX100II",
 "Sony DSC-V3",
 "Sony DSLR-A100",
 "Sony DSLR-A200",

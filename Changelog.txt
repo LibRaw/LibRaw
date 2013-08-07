@@ -1,3 +1,12 @@
+2013-08-07 Alex Tutubalin <lexa@lexa.ru>
+  * New camera/format support:
+     Richon GR
+     Panasonic LF1
+     Canon EOS 70D
+     Sony RX100II, RX1R
+     Olympus E-P5
+  * Generalized size copy from RawSpeed data
+
 2013-07-04 Alex Tutubalin <lexa@lexa.ru>
   * New camera/format support:
      OmniVision OV5647 (Raspberry Pi)
