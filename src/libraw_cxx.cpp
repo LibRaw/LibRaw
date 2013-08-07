@@ -2739,6 +2739,7 @@ static const char  *static_camera_list[] =
 "AVT F-510C",
 "AVT F-810C",
 "Baumer TXG14",
+"BlackMagic Cinema Camera",
 "Canon PowerShot 600",
 "Canon PowerShot A5",
 "Canon PowerShot A5 Zoom",

@@ -1,5 +1,6 @@
 2013-08-07 Alex Tutubalin <lexa@lexa.ru>
   * New camera/format support:
+     Blackmagic Cinema
      Richon GR
      Panasonic LF1
      Fujifilm X-M1
