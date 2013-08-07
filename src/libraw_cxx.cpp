@@ -3191,6 +3191,8 @@ static const char  *static_camera_list[] =
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
 "Polaroid x530",
 #endif
+"Ricoh GR",
+"Ricoh GXR",
 #ifndef NO_JASPER
 "Redcode R3D format",
 #endif
