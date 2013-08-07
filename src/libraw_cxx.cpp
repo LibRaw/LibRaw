@@ -3269,7 +3269,7 @@ static const char  *static_camera_list[] =
 "Sinar 4080x5440",
 "Sinar STI format",
 "Sinar Hy6",
-"Sinar eSpririt",
+"Sinar eSpirit",
 "SMaL Ultra-Pocket 3",
 "SMaL Ultra-Pocket 4",
 "SMaL Ultra-Pocket 5",
