@@ -1088,6 +1088,8 @@ int LibRaw::unpack(void)
             RawDecoder *d = 0;
             CameraMetaDataLR *meta = static_cast<CameraMetaDataLR*>(_rawspeed_camerameta);
             d = t.getDecoder();
+            if(!d) throw "Unable to find decoder";
+            d->failOnUnknown=true;
             try {
               d->checkSupport(meta);
             }
@@ -1141,10 +1143,10 @@ int LibRaw::unpack(void)
             // We may get here due to cancellation flag
             imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
             if(_rawspeed_buffer)
-			{
-              free(_rawspeed_buffer);
-			  _rawspeed_buffer = 0;
-			}
+              {
+                free(_rawspeed_buffer);
+                _rawspeed_buffer = 0;
+              }
           }
         ID.input->seek(spos,SEEK_SET);
       }
