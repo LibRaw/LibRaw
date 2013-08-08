@@ -1096,6 +1096,8 @@ int LibRaw::unpack(void)
                 imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_UNSUPPORTED;
                 throw e;
               }
+            d->interpolateBadPixels = FALSE;
+            d->applyStage1DngOpcodes = FALSE;
             _rawspeed_decoder = static_cast<void*>(d);
             d->decodeRaw();
             d->decodeMetaData(meta);
