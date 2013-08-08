@@ -1070,6 +1070,11 @@ int LibRaw::unpack(void)
             d->decodeRaw();
             d->decodeMetaData(meta);
             RawImage r = d->mRaw;
+            if( r->errors.size()>0)
+              {
+                delete d;
+                throw; 
+              }
             iPoint2D rsdim = r->getUncroppedDim();
             if (r->isCFA) {
               // Save pointer to decoder
