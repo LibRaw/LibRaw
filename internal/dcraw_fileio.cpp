@@ -21,7 +21,7 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
-#line 3866 "dcraw/dcraw.c"
+#line 4060 "dcraw/dcraw.c"
 #include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
@@ -29,7 +29,7 @@ it under the terms of the one of three licenses as you choose:
 #include "libraw/libraw.h"
 #include "internal/defines.h"
 #include "internal/var_defines.h"
-#line 3877 "dcraw/dcraw.c"
+#line 4071 "dcraw/dcraw.c"
 /*
    Seach from the current directory up to the root looking for
    a ".badpixels" file, and fix those pixels now.
@@ -54,7 +54,7 @@ void CLASS bad_pixels (const char *cfname)
 #endif
   if (cfname)
     fp = fopen (cfname, "r");
-#line 3927 "dcraw/dcraw.c"
+#line 4121 "dcraw/dcraw.c"
   if (!fp)
       {
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -154,7 +154,7 @@ void CLASS subtract (const char *fname)
   RUN_CALLBACK(LIBRAW_PROGRESS_DARK_FRAME,1,2);
 #endif
 }
-#line 9711 "dcraw/dcraw.c"
+#line 9905 "dcraw/dcraw.c"
 #ifndef NO_LCMS
 void CLASS apply_profile (const char *input, const char *output)
 {
