@@ -168,9 +168,10 @@ class DllDef LibRaw
   void phase_one_subtract_black(ushort *src, ushort *dest);
   void        phase_one_correct();
   int set_rawspeed_camerafile(char *filename);
-
+  void setCancelFlag();
 
 protected:
+    void checkCancel();
     void phase_one_allocate_tempbuffer();
     void phase_one_free_tempbuffer();
     virtual int  is_phaseone_compressed();
@@ -287,8 +288,10 @@ protected:
 
   /* RawSpeed data */
   void		*_rawspeed_camerameta;
-  void	    *_rawspeed_decoder;
+  void          *_rawspeed_decoder;
   void		fix_after_rawspeed(int bl);
+  /* Fast cancel flag */
+  long          _exitflag;
 
 
 #ifdef LIBRAW_LIBRARY_BUILD 

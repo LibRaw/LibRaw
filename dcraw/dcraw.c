@@ -530,6 +530,9 @@ void CLASS canon_600_load_raw()
   int irow, row;
 
   for (irow=row=0; irow < height; irow++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if (fread (data, 1, 1120, ifp) < 1120) derror();
     pix = raw_image + row*raw_width;
     for (dp=data; dp < data+1120;  dp+=10, pix+=8) {
@@ -553,10 +556,15 @@ void CLASS canon_600_correct()
   { { 1141,1145 }, { 1128,1109 }, { 1178,1149 }, { 1128,1109 } };
 
   for (row=0; row < height; row++)
+    {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < width; col++) {
       if ((val = BAYER(row,col) - black) < 0) val = 0;
       val = val * mul[row & 3][col & 1] >> 9;
       BAYER(row,col) = val;
+    }
     }
   canon_600_fixed_wb(1311);
   canon_600_auto_wb();
@@ -761,6 +769,9 @@ void CLASS canon_load_raw()
   zero_after_ff = 1;
   getbits(-1);
   for (row=0; row < raw_height; row+=8) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     pixel = raw_image + row*raw_width;
     nblocks = MIN (8, raw_height-row) * raw_width >> 6;
     for (block=0; block < nblocks; block++) {
@@ -935,6 +946,9 @@ void CLASS lossless_jpeg_load_raw()
   jwide = jh.wide * jh.clrs;
 
   for (jrow=0; jrow < jh.high; jrow++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     rp = ljpeg_row (jrow, &jh);
     if (load_flags & 1)
       row = jrow & 1 ? height-1-jrow/2 : jrow/2;
@@ -975,6 +989,9 @@ void CLASS canon_sraw_load_raw()
     ecol += cr2_slice[1] * 2 / jh.clrs;
     if (!cr2_slice[0] || ecol > raw_width-1) ecol = raw_width & -2;
     for (row=0; row < height; row += (jh.clrs >> 1) - 1) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
       ip = (short (*)[4]) image + row*width;
       for (col=scol; col < ecol; col+=2, jcol+=jh.clrs) {
 	if ((jcol %= jwide) == 0)
@@ -1028,6 +1045,9 @@ void CLASS canon_sraw_load_raw()
   ip = (short (*)[4]) image;
   rp = ip[0];
   for (row=0; row < height; row++, ip+=width) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if (row & (jh.sraw >> 1))
       for (col=0; col < width; col+=2)
 	for (c=1; c < 3; c++)
@@ -1091,6 +1111,9 @@ void CLASS lossless_dng_load_raw()
   ushort *rp;
 
   while (trow < raw_height) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     save = ftell(ifp);
     if (tile_length < INT_MAX)
       fseek (ifp, get4(), SEEK_SET);
@@ -1121,6 +1144,9 @@ void CLASS packed_dng_load_raw()
   pixel = (ushort *) calloc (raw_width, tiff_samples*sizeof *pixel);
   merror (pixel, "packed_dng_load_raw()");
   for (row=0; row < raw_height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if (tiff_bps == 16)
       read_shorts (pixel, raw_width * tiff_samples);
     else {
@@ -1152,6 +1178,10 @@ void CLASS pentax_load_raw()
   fseek (ifp, data_offset, SEEK_SET);
   getbits(-1);
   for (row=0; row < raw_height; row++)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < raw_width; col++) {
       diff = ljpeg_diff (huff);
       if (col < 2) hpred[col] = vpred[row & 1][col] += diff;
@@ -1159,6 +1189,7 @@ void CLASS pentax_load_raw()
       RAW(row,col) = hpred[col & 1];
       if (hpred[col & 1] >> tiff_bps) derror();
     }
+  }
 }
 
 void CLASS nikon_load_raw()
@@ -1205,6 +1236,9 @@ void CLASS nikon_load_raw()
   fseek (ifp, data_offset, SEEK_SET);
   getbits(-1);
   for (min=row=0; row < height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if (split && row == split) {
       free (huff);
       huff = make_decoder (nikon_tree[tree+1]);
@@ -1373,6 +1407,9 @@ void CLASS rollei_load_raw()
 
   isix = raw_width * raw_height * 5 / 8;
   while (fread (pixel, 1, 10, ifp) == 10) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (i=0; i < 10; i+=2) {
       todo[i]   = iten++;
       todo[i+1] = pixel[i] << 8 | pixel[i+1];
@@ -1642,6 +1679,9 @@ void CLASS phase_one_load_raw_c()
   for (i=0; i < 256; i++)
     curve[i] = i*i / 3.969 + 0.5;
   for (row=0; row < raw_height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     fseek (ifp, data_offset + offset[row], SEEK_SET);
     ph1_bits(-1);
     pred[0] = pred[1] = 0;
@@ -1683,6 +1723,9 @@ void CLASS hasselblad_load_raw()
   order = 0x4949;
   ph1_bits(-1);
   for (row=0; row < raw_height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     pred[0] = pred[1] = 0x8000 + load_flags;
     for (col=0; col < raw_width; col+=2) {
       FORC(2) len[c] = ph1_huff(jh.huff[0]);
@@ -1710,6 +1753,9 @@ void CLASS leaf_hdr_load_raw()
   }
   FORC(tiff_samples)
     for (r=0; r < raw_height; r++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
       if (r % tile_length == 0) {
 	fseek (ifp, data_offset + 4*tile++, SEEK_SET);
 	fseek (ifp, get4(), SEEK_SET);
@@ -1735,10 +1781,15 @@ void CLASS unpacked_load_raw()
   while (1 << ++bits < maximum);
   read_shorts (raw_image, raw_width*raw_height);
   for (row=0; row < raw_height; row++)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < raw_width; col++)
       if ((RAW(row,col) >>= load_flags) >> bits
 	&& (unsigned) (row-top_margin) < height
 	&& (unsigned) (col-left_margin) < width) derror();
+  }
 }
 
 void CLASS sinar_4shot_load_raw()
@@ -1768,6 +1819,9 @@ void CLASS sinar_4shot_load_raw()
     fseek (ifp, data_offset + shot*4, SEEK_SET);
     fseek (ifp, get4(), SEEK_SET);
     for (row=0; row < raw_height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
       read_shorts (pixel, raw_width);
       if ((r = row-top_margin - (shot >> 1 & 1)) >= height) continue;
       for (col=0; col < raw_width; col++) {
@@ -1786,8 +1840,13 @@ void CLASS imacon_full_load_raw()
 
   if (!image) return;
   for (row=0; row < height; row++)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < width; col++)
       read_shorts (image[row*width+col], 3);
+  }
 }
 
 void CLASS packed_load_raw()
@@ -1802,6 +1861,9 @@ void CLASS packed_load_raw()
   bite = 8 + (load_flags & 24);
   half = (raw_height+1) >> 1;
   for (irow=0; irow < raw_height; irow++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     row = irow;
     if (load_flags & 2 &&
 	(row = irow % half * 2 + irow / half) == 1 &&
@@ -1838,6 +1900,9 @@ void CLASS nokia_load_raw()
   data = (uchar *) malloc (dwide*2);
   merror (data, "nokia_load_raw()");
   for (row=0; row < raw_height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if (fread (data+dwide, 1, dwide, ifp) < dwide) derror();
     FORC(dwide) data[c] = data[dwide+(c ^ rev)];
     for (dp=data, col=0; col < raw_width; dp+=5, col+=4)
@@ -1852,6 +1917,10 @@ void CLASS canon_rmf_load_raw()
   int row, col, bits, orow, ocol, c;
 
   for (row=0; row < raw_height; row++)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < raw_width-2; col+=3) {
       bits = get4();
       FORC3 {
@@ -1864,6 +1933,7 @@ void CLASS canon_rmf_load_raw()
 	RAW(orow,ocol) = bits >> (10*c+2) & 0x3ff;
       }
     }
+  }  
   maximum = 0x3ff;
 }
 
@@ -1898,6 +1968,10 @@ void CLASS panasonic_load_raw()
 
   pana_bits(0);
   for (row=0; row < height; row++)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < raw_width; col++) {
       if ((i = col % 14) == 0)
 	pred[0] = pred[1] = nonz[0] = nonz[1] = 0;
@@ -1912,6 +1986,7 @@ void CLASS panasonic_load_raw()
 	pred[i & 1] = nonz[i & 1] << 4 | pana_bits(4);
       if ((RAW(row,col) = pred[col & 1]) > 4098 && col < width) derror();
     }
+  }
 }
 
 void CLASS olympus_load_raw()
@@ -1926,6 +2001,9 @@ void CLASS olympus_load_raw()
   fseek (ifp, 7, SEEK_CUR);
   getbits(-1);
   for (row=0; row < height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     memset (acarry, 0, sizeof acarry);
     for (col=0; col < raw_width; col++) {
       carry = acarry[col & 1];
@@ -1964,6 +2042,9 @@ void CLASS minolta_rd175_load_raw()
   unsigned irow, box, row, col;
 
   for (irow=0; irow < 1481; irow++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if (fread (pixel, 1, 768, ifp) < 768) derror();
     box = irow / 82;
     row = irow % 82 * 12 + ((box < 12) ? box | 1 : (box-12)*2);
@@ -2013,6 +2094,9 @@ void CLASS quicktake_100_load_raw()
   getbits(-1);
   memset (pixel, 0x80, sizeof pixel);
   for (row=2; row < height+2; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=2+(row & 1); col < width+2; col+=2) {
       val = ((pixel[row-1][col-1] + 2*pixel[row-1][col+1] +
 		pixel[row][col-2]) >> 2) + gstep[getbits(4)];
@@ -2026,6 +2110,10 @@ void CLASS quicktake_100_load_raw()
   }
   for (rb=0; rb < 2; rb++)
     for (row=2+rb; row < height+2; row+=2)
+    {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
       for (col=3-(row & 1); col < width+2; col+=2) {
 	if (row < 4 || col < 4) sharp = 2;
 	else {
@@ -2041,15 +2129,26 @@ void CLASS quicktake_100_load_raw()
 	if (row < 4) pixel[row-2][col+2] = val;
 	if (col < 4) pixel[row+2][col-2] = val;
       }
+    }
   for (row=2; row < height+2; row++)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=3-(row & 1); col < width+2; col+=2) {
       val = ((pixel[row][col-1] + (pixel[row][col] << 2) +
 	      pixel[row][col+1]) >> 1) - 0x100;
       pixel[row][col] = LIM(val,0,255);
     }
+  }
   for (row=0; row < height; row++)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < width; col++)
       RAW(row,col) = t_curve[pixel[row+2][col+2]];
+  }
   maximum = 0x3ff;
 }
 
@@ -2107,6 +2206,9 @@ void CLASS kodak_radc_load_raw()
   for (i=0; i < sizeof(buf)/sizeof(short); i++)
     buf[0][0][i] = 2048;
   for (row=0; row < height; row+=4) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     FORC3 mul[c] = getbits(6);
     FORC3 {
       val = ((0x1000000/last[c] + 0x7ff) >> 12) * mul[c];
@@ -2226,6 +2328,9 @@ void CLASS kodak_jpeg_load_raw()
 		((j_common_ptr) &cinfo, JPOOL_IMAGE, width*3, 1);
 
   while (cinfo.output_scanline < cinfo.output_height) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     row = cinfo.output_scanline * 2;
     jpeg_read_scanlines (&cinfo, buf, 1);
     pixel = (JSAMPLE (*)[3]) buf[0];
@@ -2294,6 +2399,9 @@ void CLASS lossy_dng_load_raw()
 	((j_common_ptr) &cinfo, JPOOL_IMAGE, cinfo.output_width*3, 1);
     while (cinfo.output_scanline < cinfo.output_height &&
 	(row = trow + cinfo.output_scanline) < height) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
       jpeg_read_scanlines (&cinfo, buf, 1);
       pixel = (JSAMPLE (*)[3]) buf[0];
       for (col=0; col < cinfo.output_width && tcol+col < width; col++) {
@@ -2317,6 +2425,9 @@ void CLASS kodak_dc120_load_raw()
   int row, shift, col;
 
   for (row=0; row < height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if (fread (pixel, 1, 848, ifp) < 848) derror();
     shift = row * mul[row & 3] + add[row & 3];
     for (col=0; col < width; col++)
@@ -2333,6 +2444,9 @@ void CLASS eight_bit_load_raw()
   pixel = (uchar *) calloc (raw_width, sizeof *pixel);
   merror (pixel, "eight_bit_load_raw()");
   for (row=0; row < raw_height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if (fread (pixel, 1, raw_width, ifp) < raw_width) derror();
     for (col=0; col < raw_width; col++)
       RAW(row,col) = curve[pixel[col]];
@@ -2349,6 +2463,9 @@ void CLASS kodak_yrgb_load_raw()
   pixel = (uchar *) calloc (raw_width, 3*sizeof *pixel);
   merror (pixel, "kodak_yrgb_load_raw()");
   for (row=0; row < height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if (~row & 1)
       if (fread (pixel, raw_width, 3, ifp) < 3) derror();
     for (col=0; col < raw_width; col++) {
@@ -2382,6 +2499,9 @@ void CLASS kodak_262_load_raw()
   order = 0x4d4d;
   FORC(ns) strip[c] = get4();
   for (row=0; row < raw_height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     if ((row & 31) == 0) {
       fseek (ifp, strip[row >> 5], SEEK_SET);
       getbits(-1);
@@ -2458,6 +2578,10 @@ void CLASS kodak_65000_load_raw()
   int row, col, len, pred[2], ret, i;
 
   for (row=0; row < height; row++)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < width; col+=256) {
       pred[0] = pred[1] = 0;
       len = MIN (256, width-col);
@@ -2466,6 +2590,7 @@ void CLASS kodak_65000_load_raw()
 	if ((RAW(row,col+i) =	curve[ret ? buf[i] :
 		(pred[i & 1] += buf[i])]) >> 12) derror();
     }
+  }
 }
 
 void CLASS kodak_ycbcr_load_raw()
@@ -2476,6 +2601,10 @@ void CLASS kodak_ycbcr_load_raw()
 
   if (!image) return;
   for (row=0; row < height; row+=2)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < width; col+=128) {
       len = MIN (128, width-col);
       kodak_65000_decode (buf, len*3);
@@ -2494,6 +2623,7 @@ void CLASS kodak_ycbcr_load_raw()
 	  }
       }
     }
+  }
 }
 
 void CLASS kodak_rgb_load_raw()
@@ -2507,6 +2637,10 @@ void CLASS kodak_rgb_load_raw()
   raw_image = 0;
 #endif
   for (row=0; row < height; row++)
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (col=0; col < width; col+=256) {
       len = MIN (256, width-col);
       kodak_65000_decode (buf, len*3);
@@ -2514,6 +2648,7 @@ void CLASS kodak_rgb_load_raw()
       for (bp=buf, i=0; i < len; i++, ip+=4)
 	FORC3 if ((ip[c] = rgb[c] += *bp++) >> 12) derror();
     }
+  }
 }
 
 void CLASS kodak_thumb_load_raw()
@@ -2576,6 +2711,9 @@ void CLASS sony_load_raw()
     key = key << 8 | head[i];
   fseek (ifp, data_offset, SEEK_SET);
   for (row=0; row < raw_height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     pixel = raw_image + row*raw_width;
     if (fread (pixel, 2, raw_width, ifp) < raw_width) derror();
     sony_decrypt ((unsigned int *) pixel, raw_width/2, !row, key);
@@ -2597,6 +2735,10 @@ void CLASS sony_arw_load_raw()
     FORC(32768 >> (tab[i] >> 8)) huff[n++] = tab[i];
   getbits(-1);
   for (col = raw_width; col--; )
+  {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (row=0; row < raw_height+1; row+=2) {
       if (row == raw_height) row = 1;
       len = getbithuff(15,huff);
@@ -2606,6 +2748,7 @@ void CLASS sony_arw_load_raw()
       if ((sum += diff) >> 12) derror();
       if (row < height) RAW(row,col) = sum;
     }
+  }
 }
 
 void CLASS sony_arw2_load_raw()
@@ -2617,6 +2760,9 @@ void CLASS sony_arw2_load_raw()
   data = (uchar *) malloc (raw_width);
   merror (data, "sony_arw2_load_raw()");
   for (row=0; row < height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     fread (data, 1, raw_width, ifp);
     for (dp=data, col=0; col < raw_width-30; dp+=16) {
       max = 0x7ff & (val = sget4(dp));
@@ -2666,6 +2812,9 @@ void CLASS samsung_load_raw()
 
   order = 0x4949;
   for (row=0; row < raw_height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     fseek (ifp, strip_offset+row*4, SEEK_SET);
     fseek (ifp, data_offset+get4(), SEEK_SET);
     ph1_bits(-1);
@@ -2974,6 +3123,9 @@ void CLASS foveon_sd_load_raw()
   if (!load_flags) foveon_decoder (1024, 0);
 
   for (row=0; row < height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     memset (pred, 0, sizeof pred);
     if (!bit && !load_flags && atoi(model+2) < 14) get4();
     for (col=bit=0; col < width; col++) {
@@ -3024,6 +3176,9 @@ void CLASS foveon_dp_load_raw()
     getbits(-1);
     vpred[0][0] = vpred[0][1] = vpred[1][0] = vpred[1][1] = 512;
     for (row=0; row < height; row++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
       for (col=0; col < width; col++) {
        diff = ljpeg_diff(huff);
        if (col < 2) hpred[col] = vpred[row & 1][col] += diff;

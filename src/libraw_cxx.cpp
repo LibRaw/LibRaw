@@ -323,6 +323,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.green_matching = 0;
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
+  _exitflag = 0;
   tls = new LibRaw_TLS;
   tls->init();
 }
@@ -418,7 +419,7 @@ void LibRaw:: recycle()
   ZERO(imgdata.sizes);
   ZERO(imgdata.color);
   ZERO(libraw_internal_data);
-
+  _exitflag = 0;
 #ifdef USE_RAWSPEED
   if(_rawspeed_decoder)
     {
@@ -982,6 +983,33 @@ void LibRaw::fix_after_rawspeed(int)
 }
 #endif
 
+void LibRaw::setCancelFlag()
+{
+#ifdef WIN32
+  InterlockedExchangeAdd(&_exitflag,1);
+#else
+  __sync_fetch_and_add(&_exitflag,1);
+#endif
+#ifdef RAWSPEED_FASTEXIT
+  if(_rawspeed_decoder)
+    {
+      RawDecoder *d = static_cast<RawDecoder*>(_rawspeed_decoder);
+      d->cancelProcessing();
+    }
+#endif
+}
+
+void LibRaw::checkCancel()
+{
+#ifdef WIN32
+  if(InterlockedExchangeAdd(&_exitflag,0))
+    throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
+#else
+  if( __sync_add_and_fetch(&_exitflag,0))
+    throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
+#endif
+}
+
 int LibRaw::unpack(void)
 {
   CHECK_ORDER_HIGH(LIBRAW_PROGRESS_LOAD_RAW);
@@ -1046,12 +1074,13 @@ int LibRaw::unpack(void)
        && (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
       {
         INT64 spos = ID.input->tell();
+        void *_rawspeed_buffer = 0;
         try 
           {
             //                printf("Using rawspeed\n");
             ID.input->seek(0,SEEK_SET);
             INT64 _rawspeed_buffer_sz = ID.input->size()+32;
-            void *_rawspeed_buffer = malloc(_rawspeed_buffer_sz);
+            _rawspeed_buffer = malloc(_rawspeed_buffer_sz);
             if(!_rawspeed_buffer) throw LIBRAW_EXCEPTION_ALLOC;
             ID.input->read(_rawspeed_buffer,_rawspeed_buffer_sz,1);
             FileMap map((uchar8*)_rawspeed_buffer,_rawspeed_buffer_sz);
@@ -1067,51 +1096,50 @@ int LibRaw::unpack(void)
                 imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_UNSUPPORTED;
                 throw e;
               }
+            _rawspeed_decoder = static_cast<void*>(d);
             d->decodeRaw();
             d->decodeMetaData(meta);
             RawImage r = d->mRaw;
             if( r->errors.size()>0)
               {
                 delete d;
+                _rawspeed_decoder = 0;
                 throw; 
               }
-            iPoint2D rsdim = r->getUncroppedDim();
             if (r->isCFA) {
-              // Save pointer to decoder
-              _rawspeed_decoder = static_cast<void*>(d);
               imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
-              S.raw_pitch = r->pitch;
-              S.raw_width = rsdim.x;
-              S.raw_height = rsdim.y;
-              fix_after_rawspeed(r->blackLevel);
             } else if(r->getCpp()==4) {
-              _rawspeed_decoder = static_cast<void*>(d);
               imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
-              S.raw_pitch = r->pitch;
-              S.raw_width = rsdim.x;
-              S.raw_height = rsdim.y;
-              C.maximum = r->whitePoint;
-              fix_after_rawspeed(r->blackLevel);
             } else if(r->getCpp() == 3)
               {
-                _rawspeed_decoder = static_cast<void*>(d);
                 imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
+              }
+            else
+              {
+                delete d;
+                _rawspeed_decoder = 0;
+              }
+            if(_rawspeed_decoder)
+              {
+                // set sizes
+                iPoint2D rsdim = r->getUncroppedDim();
                 S.raw_pitch = r->pitch;
                 S.raw_width = rsdim.x;
                 S.raw_height = rsdim.y;
                 C.maximum = r->whitePoint;
                 fix_after_rawspeed(r->blackLevel);
               }
-            else
-              {
-                delete d;
-              }
             free(_rawspeed_buffer);
+            _rawspeed_buffer = 0;
             imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROCESSED;
-          } catch (...) {
-          imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
-          // no other actions: if raw_image is not set we'll try usual load_raw call
-        }
+          } 
+        catch (...) 
+          {
+            // We may get here due to cancellation flag
+            imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
+            if(_rawspeed_buffer)
+              free(_rawspeed_buffer);
+          }
         ID.input->seek(spos,SEEK_SET);
       }
 #endif
