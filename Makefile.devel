@@ -13,9 +13,11 @@ LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/usr/local/include -ljpeg -lx
 RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
 
-CC=gcc46
-CXX=g++46
-CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  
+CC=gcc48
+CXX=g++48
+CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4 -fopenmp
+# Haswell:
+CFLAGS+=-march=core-avx2 -mtune=core-avx2 -mavx2
 
 
 # LCMS support

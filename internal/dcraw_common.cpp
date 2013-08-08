@@ -3879,6 +3879,247 @@ void CLASS xtrans_interpolate (int passes)
    Adaptive Homogeneity-Directed interpolation is based on
    the work of Keigo Hirakawa, Thomas Parks, and Paul Lee.
  */
+#ifdef LIBRAW_LIBRARY_BUILD
+
+void CLASS ahd_interpolate_green_h_and_v(int top, int left, ushort (*out_rgb)[TS][TS][3])
+{
+  int row, col;
+  int c, val;
+  ushort (*pix)[4];
+  const int rowlimit = MIN(top+TS, height-2);
+  const int collimit = MIN(left+TS, width-2);
+
+  for (row = top; row < rowlimit; row++) {
+    col = left + (FC(row,left) & 1);
+    for (c = FC(row,col); col < collimit; col+=2) {
+      pix = image + row*width+col;
+      val = ((pix[-1][1] + pix[0][c] + pix[1][1]) * 2
+            - pix[-2][c] - pix[2][c]) >> 2;
+      out_rgb[0][row-top][col-left][1] = ULIM(val,pix[-1][1],pix[1][1]);
+      val = ((pix[-width][1] + pix[0][c] + pix[width][1]) * 2
+            - pix[-2*width][c] - pix[2*width][c]) >> 2;
+      out_rgb[1][row-top][col-left][1] = ULIM(val,pix[-width][1],pix[width][1]);
+    }
+  }
+}
+void CLASS ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[TS][3], short (*out_lab)[TS][3])
+{
+  unsigned row, col;
+  int c, val;
+  ushort (*pix)[4];
+  ushort (*rix)[3];
+  short (*lix)[3];
+  float xyz[3];
+  const unsigned num_pix_per_row = 4*width;
+  const unsigned rowlimit = MIN(top+TS-1, height-3);
+  const unsigned collimit = MIN(left+TS-1, width-3);
+  ushort *pix_above;
+  ushort *pix_below;
+  int t1, t2;
+
+  for (row = top+1; row < rowlimit; row++) {
+    pix = image + row*width + left;
+    rix = &inout_rgb[row-top][0];
+    lix = &out_lab[row-top][0];
+
+    for (col = left+1; col < collimit; col++) {
+      pix++;
+      pix_above = &pix[0][0] - num_pix_per_row;
+      pix_below = &pix[0][0] + num_pix_per_row;
+      rix++;
+      lix++;
+
+      c = 2 - FC(row, col);
+
+      if (c == 1) {
+        c = FC(row+1,col);
+	t1 = 2-c;
+        val = pix[0][1] + (( pix[-1][t1] + pix[1][t1]
+              - rix[-1][1] - rix[1][1] ) >> 1);
+        rix[0][t1] = CLIP(val);
+        val = pix[0][1] + (( pix_above[c] + pix_below[c]
+              - rix[-TS][1] - rix[TS][1] ) >> 1);
+      } else {
+	t1 = -4+c; /* -4+c: pixel of color c to the left */
+	t2 = 4+c; /* 4+c: pixel of color c to the right */
+        val = rix[0][1] + (( pix_above[t1] + pix_above[t2]
+              + pix_below[t1] + pix_below[t2]
+              - rix[-TS-1][1] - rix[-TS+1][1]
+              - rix[+TS-1][1] - rix[+TS+1][1] + 1) >> 2);
+      }
+      rix[0][c] = CLIP(val);
+      c = FC(row,col);
+      rix[0][c] = pix[0][c];
+      cielab(rix[0],lix[0]);
+    }
+  }
+}
+void CLASS ahd_interpolate_r_and_b_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[TS][TS][3], short (*out_lab)[TS][TS][3])
+{
+  int direction;
+  for (direction = 0; direction < 2; direction++) {
+    ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(top, left, inout_rgb[direction], out_lab[direction]);
+  }
+}
+
+void CLASS ahd_interpolate_build_homogeneity_map(int top, int left, short (*lab)[TS][TS][3], char (*out_homogeneity_map)[TS][2])
+{
+  int row, col;
+  int tr, tc;
+  int direction;
+  int i;
+  short (*lix)[3];
+  short (*lixs[2])[3];
+  short *adjacent_lix;
+  unsigned ldiff[2][4], abdiff[2][4], leps, abeps;
+  static const int dir[4] = { -1, 1, -TS, TS };
+  const int rowlimit = MIN(top+TS-2, height-4);
+  const int collimit = MIN(left+TS-2, width-4);
+  int homogeneity;
+  char (*homogeneity_map_p)[2];
+
+  memset (out_homogeneity_map, 0, 2*TS*TS);
+
+  for (row=top+2; row < rowlimit; row++) {
+    tr = row-top;
+    homogeneity_map_p = &out_homogeneity_map[tr][1];
+    for (direction=0; direction < 2; direction++) {
+      lixs[direction] = &lab[direction][tr][1];
+    }
+
+    for (col=left+2; col < collimit; col++) {
+      tc = col-left;
+      homogeneity_map_p++;
+
+      for (direction=0; direction < 2; direction++) {
+        lix = ++lixs[direction];
+        for (i=0; i < 4; i++) {
+	  adjacent_lix = lix[dir[i]];
+          ldiff[direction][i] = ABS(lix[0][0]-adjacent_lix[0]);
+          abdiff[direction][i] = SQR(lix[0][1]-adjacent_lix[1])
+            + SQR(lix[0][2]-adjacent_lix[2]);
+        }
+      }
+      leps = MIN(MAX(ldiff[0][0],ldiff[0][1]),
+          MAX(ldiff[1][2],ldiff[1][3]));
+      abeps = MIN(MAX(abdiff[0][0],abdiff[0][1]),
+          MAX(abdiff[1][2],abdiff[1][3]));
+      for (direction=0; direction < 2; direction++) {
+	homogeneity = 0;
+        for (i=0; i < 4; i++) {
+          if (ldiff[direction][i] <= leps && abdiff[direction][i] <= abeps) {
+	    homogeneity++;
+	  }
+	}
+	homogeneity_map_p[0][direction] = homogeneity;
+      }
+    }
+  }
+}
+void CLASS ahd_interpolate_combine_homogeneous_pixels(int top, int left, ushort (*rgb)[TS][TS][3], char (*homogeneity_map)[TS][2])
+{
+  int row, col;
+  int tr, tc;
+  int i, j;
+  int direction;
+  int hm[2];
+  int c;
+  const int rowlimit = MIN(top+TS-3, height-5);
+  const int collimit = MIN(left+TS-3, width-5);
+
+  ushort (*pix)[4];
+  ushort (*rix[2])[3];
+
+  for (row=top+3; row < rowlimit; row++) {
+    tr = row-top;
+    pix = &image[row*width+left+2];
+    for (direction = 0; direction < 2; direction++) {
+      rix[direction] = &rgb[direction][tr][2];
+    }
+
+    for (col=left+3; col < collimit; col++) {
+      tc = col-left;
+      pix++;
+      for (direction = 0; direction < 2; direction++) {
+        rix[direction]++;
+      }
+
+      for (direction=0; direction < 2; direction++) {
+        hm[direction] = 0;
+        for (i=tr-1; i <= tr+1; i++) {
+          for (j=tc-1; j <= tc+1; j++) {
+            hm[direction] += homogeneity_map[i][j][direction];
+          }
+        }
+      }
+      if (hm[0] != hm[1]) {
+        memcpy(pix[0], rix[hm[1] > hm[0]][0], 3 * sizeof(ushort));
+      } else {
+        FORC3 {
+          pix[0][c] = (rix[0][0][c] + rix[1][0][c]) >> 1;
+        }
+      }
+    }
+  }
+}
+void CLASS ahd_interpolate()
+{
+  int i, j, k, top, left;
+  float xyz_cam[3][4],r;
+  char *buffer;
+  ushort (*rgb)[TS][TS][3];
+  short (*lab)[TS][TS][3];
+  char (*homo)[TS][2];
+  int terminate_flag = 0;
+
+
+  cielab(0,0);
+  border_interpolate(5);
+
+#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef LIBRAW_USE_OPENMP
+#pragma omp parallel private(buffer,rgb,lab,homo,top,left,i,j,k) shared(xyz_cam,terminate_flag)
+#endif
+#endif
+  {
+    buffer = (char *) malloc (26*TS*TS);		/* 1664 kB */
+    merror (buffer, "ahd_interpolate()");
+    rgb  = (ushort(*)[TS][TS][3]) buffer;
+    lab  = (short (*)[TS][TS][3])(buffer + 12*TS*TS);
+    homo = (char  (*)[TS][2])    (buffer + 24*TS*TS);
+
+#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef LIBRAW_USE_OPENMP
+#pragma omp for schedule(dynamic)
+#endif
+#endif
+    for (top=2; top < height-5; top += TS-6){
+#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef LIBRAW_USE_OPENMP
+        if(0== omp_get_thread_num())
+#endif
+           if(callbacks.progress_cb) {                                     
+               int rr = (*callbacks.progress_cb)(callbacks.progresscb_data,LIBRAW_PROGRESS_INTERPOLATE,top-2,height-7);
+               if(rr)
+                   terminate_flag = 1;
+           }
+#endif
+        for (left=2; !terminate_flag && (left < width-5); left += TS-6) {
+            ahd_interpolate_green_h_and_v(top, left, rgb);
+            ahd_interpolate_r_and_b_and_convert_to_cielab(top, left, rgb, lab);
+            ahd_interpolate_build_homogeneity_map(top, left, lab, homo);
+            ahd_interpolate_combine_homogeneous_pixels(top, left, rgb, homo);
+      }
+    }
+    free (buffer);
+  }
+#ifdef LIBRAW_LIBRARY_BUILD 
+  if(terminate_flag)
+      throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
+#endif
+}
+
+#else
 void CLASS ahd_interpolate()
 {
   int i, j, top, left, row, col, tr, tc, c, d, val, hm[2];
@@ -3984,6 +4225,7 @@ void CLASS ahd_interpolate()
     }
   free (buffer);
 }
+#endif
 #undef TS
 
 void CLASS median_filter()

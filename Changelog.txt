@@ -1,3 +1,6 @@
+2013-08-08 Alex Tutubalin <lexa@lexa.ru>
+  * OpenMP AHD code backported from 0.15 branch
+
 2013-08-07 Alex Tutubalin <lexa@lexa.ru>
   * New camera/format support:
      Blackmagic Cinema
