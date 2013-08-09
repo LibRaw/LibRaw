@@ -34,6 +34,7 @@ enum LibRaw_decoder_flags
     LIBRAW_DECODER_NOTSET = 1<<15
 };
 
+#define LIBRAW_XTRANS 9
 
 enum LibRaw_constructor_flags
 {

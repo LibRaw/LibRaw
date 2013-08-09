@@ -1570,7 +1570,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
             crop[0] = (crop[0]/16)*16;
             crop[1] = (crop[1]/16)*16;
           }
-        else if(imgdata.idata.filters == 9)
+        else if(imgdata.idata.filters == LIBRAW_XTRANS)
           {
             crop[0] = (crop[0]/6)*6;
             crop[1] = (crop[1]/6)*6;
@@ -2651,7 +2651,7 @@ int LibRaw::dcraw_process(void)
           vng_interpolate();
         else if (quality == 2 && P1.filters > 1000)
           ppg_interpolate();
-        else if (P1.filters == 9)
+        else if (P1.filters == LIBRAW_XTRANS)
           {
             // Fuji X-Trans
             xtrans_interpolate(quality>2?3:1);
