@@ -1112,6 +1112,7 @@ int LibRaw::unpack(void)
               imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
             } else if(r->getCpp()==4) {
               imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
+			  C.maximum = r->whitePoint;
             } else if(r->getCpp() == 3)
               {
                 imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
@@ -1128,7 +1129,7 @@ int LibRaw::unpack(void)
                 S.raw_pitch = r->pitch;
                 S.raw_width = rsdim.x;
                 S.raw_height = rsdim.y;
-                C.maximum = r->whitePoint;
+                //C.maximum = r->whitePoint;
                 fix_after_rawspeed(r->blackLevel);
               }
             free(_rawspeed_buffer);
