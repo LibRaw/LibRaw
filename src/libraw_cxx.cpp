@@ -1140,7 +1140,10 @@ int LibRaw::unpack(void)
             // We may get here due to cancellation flag
             imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
             if(_rawspeed_buffer)
+			{
               free(_rawspeed_buffer);
+			  _rawspeed_buffer = 0;
+			}
           }
         ID.input->seek(spos,SEEK_SET);
       }
