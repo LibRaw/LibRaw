@@ -8801,10 +8801,11 @@ void CLASS identify()
     { 0x270, "EOS 550D" },   { 0x218, "EOS 5D Mark II" },
     { 0x286, "EOS 600D" },   { 0x285, "EOS 5D Mark III" },
     { 0x301, "EOS 650D" },   { 0x302, "EOS 6D" },
-    { 0x326, "EOS 700D" },   { 0x250, "EOS 7D" },
+    { 0x325, "EOS 70D" },    { 0x326, "EOS 700D" },   { 0x250, "EOS 7D" },
     { 0x254, "EOS 1000D" },
     { 0x288, "EOS 1100D" },
     { 0x346, "EOS 100D" },
+    { 0x331, "EOS M" },
   };
   static const struct {
     unsigned fsize;
@@ -9186,7 +9187,10 @@ void CLASS identify()
   }
   for (i=0; i < sizeof unique / sizeof *unique; i++)
     if (unique_id == 0x80000000 + unique[i].id)
-      adobe_coeff ("Canon", unique[i].t_model);
+      {
+        adobe_coeff ("Canon", unique[i].t_model);
+        strcpy(model,unique[i].t_model);
+      }
   if (!strcmp(make,"Nikon")) {
     if (!load_raw)
       load_raw = &CLASS packed_load_raw;
