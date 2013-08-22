@@ -1,4 +1,5 @@
-2013-08-07 Alex Tutubalin <lexa@lexa.ru>
+2013-08-28 Alex Tutubalin <lexa@lexa.ru>
+  * Additional checks to data to prevent broken file opening
   * New camera/format support:
      Richon GR
      Panasonic LF1
@@ -6,6 +7,7 @@
      Sony RX100II, RX1R
      Olympus E-P5
   * Generalized size copy from RawSpeed data
+  * LibRaw 0.15.4
 
 2013-07-04 Alex Tutubalin <lexa@lexa.ru>
   * New camera/format support:

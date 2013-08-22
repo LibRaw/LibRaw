@@ -4,16 +4,17 @@ PP=./internal/preprocess.pl
 
 CC=gcc
 CXX=g++
+CFLAGS+= -O -g -I.
 
 # RawSpeed Support
-CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
-LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/usr/local/include -ljpeg -lxml2
-RAWSPEED_DATA=../RawSpeed/data/cameras.xml
+#CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
+#LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/usr/local/include -ljpeg -lxml2
+#RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
 
-CC=gcc48
-CXX=g++48
-CFLAGS+= -O4 -g -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse4.2 -mfpmath=sse  -fopenmp 
+#CC=gcc48
+#CXX=g++48
+#CFLAGS+= -O -g -I. -march=corei7 -mtune=corei7 -I. -pedantic  -Wno-long-long -Wno-overflow -msse4.2 -mfpmath=sse  -fopenmp 
 
 
 # LCMS support
