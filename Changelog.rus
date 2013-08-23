@@ -1,4 +1,16 @@
-﻿2013-07-04 Alex Tutubalin <lexa@lexa.ru>
+﻿2013-08-28 Alex Tutubalin <lexa@lexa.ru>
+  * Дополнительные проверки целостности данных
+  * New camera/format support:
+     Richon GR
+     Panasonic LF1
+     Canon EOS 70D
+     Sony RX100II, RX1R
+     Olympus E-P5
+  * Размеры raw-данных копируются из RawSpeed (если
+    эта библиотека использовалась при декодировании)
+  * LibRaw 0.15.4
+
+2013-07-04 Alex Tutubalin <lexa@lexa.ru>
   * Поддержка новых камер:
       OmniVision OV5647 (Raspberry Pi)
       Nikon D5200
