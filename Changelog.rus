@@ -1,4 +1,6 @@
-﻿2013-05-31 Alex Tutubalin <lexa@lexa.ru>
+﻿2013-08-29 Alex Tutubalin <lexa@lexa.ru>
+	* Дополнительные проверки входных данных.
+2013-05-31 Alex Tutubalin <lexa@lexa.ru>
 	* Исправлена ошибка при обработке поврежденных полноцветных
 	  файлов (sRAW, Foveon)
 

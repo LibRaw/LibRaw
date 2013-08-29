@@ -1,3 +1,7 @@
+2013-08-29 Alex Tutubalin <lexa@lexa.ru>
+        * Additional input data checks to prevent opening broken files
+	  (backport from 0.15.x)
+
 2013-05-31 Alex Tutubalin <lexa@lexa.ru>
 	* Fixed double call to free() on broken legacy-layout images
 	  (backport from 0.15.x)
