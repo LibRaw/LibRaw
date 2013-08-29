@@ -120,6 +120,7 @@ void usage(const char *prog)
 #endif
 "-mem	   Use memory buffer instead of FILE I/O\n"
 "-disars   Do not use RawSpeed library\n"
+"-disinterp Do not run interpolation step\n"
 "-dsrawrgb1 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation enabled)\n"
 "-dsrawrgb2 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation disabled)\n"
 );
@@ -335,9 +336,11 @@ int main(int argc, char *argv[])
               case 'F':  use_bigfile=1; break;
               case 'd':
                   if(!strcmp(optstr,"-dcbi"))
-                      OUT.dcb_iterations = atoi(argv[arg++]);
-				  else if(!strcmp(optstr,"-disars"))
-					  OUT.use_rawspeed=0;
+                    OUT.dcb_iterations = atoi(argv[arg++]);
+                  else if(!strcmp(optstr,"-disars"))
+                    OUT.use_rawspeed=0;
+                  else if(!strcmp(optstr,"-disinterp"))
+                    OUT.no_interpolation=1;
                   else if(!strcmp(optstr,"-dcbe"))
                       OUT.dcb_enhance_fl = 1;
                   else if(!strcmp(optstr,"-dsrawrgb1"))

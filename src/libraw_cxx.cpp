@@ -319,6 +319,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.adjust_maximum_thr= LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD;
   imgdata.params.use_rawspeed = 1;
   imgdata.params.no_auto_scale = 0;
+  imgdata.params.no_interpolation = 0;
   imgdata.params.sraw_ycc = 0;
   imgdata.params.green_matching = 0;
   imgdata.parent_class = this;
@@ -2648,7 +2649,7 @@ int LibRaw::dcraw_process(void)
     if (O.cfaline >0 ) {linenoise=O.linenoise; cfa_linedn(linenoise);}
     if (O.cfa_clean >0 ) {lclean=O.lclean; cclean=O.cclean; cfa_impulse_gauss(lclean,cclean);}
 
-    if (P1.filters) 
+    if (P1.filters  && !O.no_interpolation) 
       {
         if (noiserd>0 && P1.colors==3 && P1.filters) fbdd(noiserd);
         if (quality == 0)
