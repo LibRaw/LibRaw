@@ -1,5 +1,6 @@
 2013-08-28 Alex Tutubalin <lexa@lexa.ru>
   * Additional checks to data to prevent broken file opening
+    more details: http://www.openwall.com/lists/oss-security/2013/08/29/3
   * New camera/format support:
      Richon GR
      Panasonic LF1
