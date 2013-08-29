@@ -1,3 +1,5 @@
+2013-09-04 Alex Tutubalin <lexa@lexa.ru>
+  * Panasonic GX7 color data
 2013-09-03 Alex Tutubalin <lexa@lexa.ru>
   * imgdata.params.no_interpolation - disables
     interpolation step in dcraw_process()
