@@ -896,6 +896,13 @@ void CLASS ljpeg_end (struct jhead *jh)
 int CLASS ljpeg_diff (ushort *huff)
 {
   int len, diff;
+  if(!huff)
+#ifdef LIBRAW_LIBRARY_BUILD
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#else
+    longjmp (failure, 2);
+#endif
+
 
   len = gethuff(huff);
   if (len == 16 && (!dng_version || dng_version >= 0x1010000))
@@ -952,6 +959,13 @@ void CLASS lossless_jpeg_load_raw()
   ushort *rp;
 
   if (!ljpeg_start (&jh, 0)) return;
+
+  if(jh.wide<1 || jh.high<1 || jh.clrs<1 || jh.bits <1)
+#ifdef LIBRAW_LIBRARY_BUILD
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#else
+    longjmp (failure, 2);
+#endif
   jwide = jh.wide * jh.clrs;
 
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -977,6 +991,12 @@ void CLASS lossless_jpeg_load_raw()
       }
       if (raw_width == 3984 && (col -= 2) < 0)
 	col += (row--,raw_width);
+      if(row>raw_height)
+#ifdef LIBRAW_LIBRARY_BUILD
+        throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#else
+        longjmp (failure, 3);
+#endif
       if ((unsigned) row < raw_height) RAW(row,col) = val;
       if (++col >= raw_width)
 	col = (row++,0);
@@ -6610,6 +6630,7 @@ int CLASS parse_tiff_ifd (int base)
 	  data_offset = get4()+base;
 	  ifd++;  break;
 	}
+        if(len > 1000) len=1000; /* 1000 SubIFDs is enough */
 	while (len--) {
 	  i = ftell(ifp);
 	  fseek (ifp, get4()+base, SEEK_SET);
@@ -6833,7 +6854,7 @@ guess_cfa_pc:
 	break;
       case 50715:			/* BlackLevelDeltaH */
       case 50716:			/* BlackLevelDeltaV */
-	for (num=i=0; i < len; i++)
+	for (num=i=0; i < len && i < 65536; i++)
 	  num += getreal(type);
 	black += num/len + 0.5;
 	break;
@@ -6966,9 +6987,12 @@ void CLASS apply_tiff()
   if (thumb_offset) {
     fseek (ifp, thumb_offset, SEEK_SET);
     if (ljpeg_start (&jh, 1)) {
-      thumb_misc   = jh.bits;
-      thumb_width  = jh.wide;
-      thumb_height = jh.high;
+      if((unsigned)jh.bits<17 && (unsigned)jh.wide < 0x10000 && (unsigned)jh.high < 0x10000)
+        {
+          thumb_misc   = jh.bits;
+          thumb_width  = jh.wide;
+          thumb_height = jh.high;
+        }
     }
   }
   for (i=0; i < tiff_nifds; i++) {
@@ -6976,7 +7000,8 @@ void CLASS apply_tiff()
 	max_samp = tiff_ifd[i].samples;
     if (max_samp > 3) max_samp = 3;
     if ((tiff_ifd[i].comp != 6 || tiff_ifd[i].samples != 3) &&
-	(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
+        unsigned(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
+        (unsigned)tiff_ifd[i].bps < 33 && (unsigned)tiff_ifd[i].samples < 13 &&
 	tiff_ifd[i].t_width*tiff_ifd[i].t_height > raw_width*raw_height) {
       raw_width     = tiff_ifd[i].t_width;
       raw_height    = tiff_ifd[i].t_height;
@@ -7066,6 +7091,8 @@ void CLASS apply_tiff()
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
     if (i != raw && tiff_ifd[i].samples == max_samp &&
+        tiff_ifd[i].bps>0 && tiff_ifd[i].bps < 33 &&
+        unsigned(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
 	tiff_ifd[i].t_width * tiff_ifd[i].t_height / (SQR(tiff_ifd[i].bps)+1) >
 	      thumb_width *       thumb_height / (SQR(thumb_misc)+1)
 	&& tiff_ifd[i].comp != 34892) {
