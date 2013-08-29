@@ -1,3 +1,6 @@
+2013-08-29 Alex Tutubalin <lexa@lexa.ru>
+  * Backported 0.15.4 input data checks
+    http://www.openwall.com/lists/oss-security/2013/08/29/3
 2013-08-23 Alex Tutubalin <lexa@lexa.ru>
   * EOS M and EOS 70D added to unique ID table
   * Canon EOS model name normalized by unique ID table
