@@ -400,7 +400,7 @@ INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw.h
 INSTALL(TARGETS raw ${INSTALL_TARGET_STANDARD_ARGS})
 
 # Install find cmake script to the system for client applications.
-INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/FindLibRaw.cmake
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/FindLibRaw.cmake
         DESTINATION ${CMAKE_ROOT}/Modules)
 
 # Uninstall rules
