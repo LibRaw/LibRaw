@@ -93,39 +93,27 @@ ENDIF(NOT WIN32)
 
 # LCMS version 1 and 2 library handling
 
-IF (ENABLE_LCMS2)
-    MESSAGE(STATUS "Check for LCMS2 availability...")
+MESSAGE(STATUS "Check for LCMS1 availability...")
+FIND_PACKAGE(LCMS)
+IF (LCMS_FOUND)
+    MESSAGE(STATUS "Found LCMS1: ${LCMS_LIBRARIES} ${LCMS_INCLUDE_DIR}")
+    INCLUDE_DIRECTORIES(${LCMS_INCLUDE_DIR})
+    MACRO_LOG_FEATURE(LCMS_FOUND "LCMS1" "A small-footprint color management engine" "http://www.littlecms.com" TRUE "" "Needed by libkdcraw")
+    # Flag to compile Little CMS version 1 with LibRaw
+    ADD_DEFINITIONS(-DUSE_LCMS)
+    # For compatibility
+    SET(LCMS2_LIBRARIES ${LCMS_LIBRARIES})
+ELSE (LCMS_FOUND)
+    MESSAGE(STATUS "Check for LCMS2 availability instead LCMS1...")
     FIND_PACKAGE(LCMS2)
     IF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
-        MESSAGE(STATUS "Found LCMS2: ${LCMS2_LIBRARIES} ${LCMS2_INCLUDE_DIR}")
+        MESSAGE(STATUS "Found LCMS2 instead LCMS1: ${LCMS2_LIBRARIES} ${LCMS2_INCLUDE_DIR}")
         INCLUDE_DIRECTORIES(${LCMS2_INCLUDE_DIR})
         MACRO_LOG_FEATURE(LCMS2_FOUND "LCMS2" "A small-footprint color management engine" "http://www.littlecms.com" FALSE "" "Needed by libkdcraw")
         # Flag to compile Little CMS version 2 with LibRaw
         ADD_DEFINITIONS(-DUSE_LCMS2)
     ENDIF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
-ELSE (ENABLE_LCMS2)
-    MESSAGE(STATUS "Check for LCMS1 availability...")
-    FIND_PACKAGE(LCMS)
-    IF (LCMS_FOUND)
-        MESSAGE(STATUS "Found LCMS1: ${LCMS_LIBRARIES} ${LCMS_INCLUDE_DIR}")
-        INCLUDE_DIRECTORIES(${LCMS_INCLUDE_DIR})
-        MACRO_LOG_FEATURE(LCMS_FOUND "LCMS1" "A small-footprint color management engine" "http://www.littlecms.com" TRUE "" "Needed by libkdcraw")
-        # Flag to compile Little CMS version 1 with LibRaw
-        ADD_DEFINITIONS(-DUSE_LCMS)
-        # For compatibility
-        SET(LCMS2_LIBRARIES ${LCMS_LIBRARIES})
-    ELSE (LCMS_FOUND)
-        MESSAGE(STATUS "Check for LCMS2 availability instead LCMS1...")
-        FIND_PACKAGE(LCMS2)
-        IF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
-            MESSAGE(STATUS "Found LCMS2 instead LCMS1: ${LCMS2_LIBRARIES} ${LCMS2_INCLUDE_DIR}")
-            INCLUDE_DIRECTORIES(${LCMS2_INCLUDE_DIR})
-            MACRO_LOG_FEATURE(LCMS2_FOUND "LCMS2" "A small-footprint color management engine" "http://www.littlecms.com" FALSE "" "Needed by libkdcraw")
-            # Flag to compile Little CMS version 2 with LibRaw
-            ADD_DEFINITIONS(-DUSE_LCMS2)
-        ENDIF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
-    ENDIF (LCMS_FOUND)
-ENDIF (ENABLE_LCMS2)
+ENDIF (LCMS_FOUND)
 
 # JPEG library check
 
@@ -154,7 +142,13 @@ IF(JPEG_FOUND)
     ADD_DEFINITIONS(-DUSE_JPEG)
     ADD_DEFINITIONS(-DUSE_JPEG8)
     INCLUDE_DIRECTORIES(${JPEG_INCLUDE_DIR})
+    MESSAGE(STATUS "LibRaw will be compiled with DNG lossy codec support")
+ELSE()
+    MESSAGE(STATUS "LibRaw will not be compiled with DNG lossy codec support")
 ENDIF()
+
+# For registration to libraw_config.h
+MACRO_BOOL_TO_01(JPEG_FOUND LIBRAW_USE_DNGLOSSYCODEC)
 
 # OpenMP library detection (requires CMake >= 2.6.3)
 # NOTE: OpenMP under MacOSX do not support multithreading.
@@ -184,7 +178,13 @@ FIND_PACKAGE(Jasper)
 IF(JASPER_FOUND)
     ADD_DEFINITIONS(-DUSE_JASPER)
     INCLUDE_DIRECTORIES(${JASPER_INCLUDE_DIR})
+    MESSAGE(STATUS "LibRaw will be compiled with RedCine codec support")
+ELSE()
+    MESSAGE(STATUS "LibRaw will not be compiled with RedCine codec support")
 ENDIF()
+
+# For registration to libraw_config.h
+MACRO_BOOL_TO_01(JASPER_FOUND LIBRAW_USE_REDCINECODEC)
 
 # For RawSpeed Codec Support
 FIND_PACKAGE(LibXml2)
