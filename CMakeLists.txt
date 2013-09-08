@@ -322,8 +322,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_config.h.cmake ${CMAKE_
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/
                     ${CMAKE_CURRENT_SOURCE_DIR}/
-                    ${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL2
-                    ${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL3
                    )
 
 SET(libraw_LIB_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/internal/dcraw_common.cpp
