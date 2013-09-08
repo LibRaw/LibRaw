@@ -18,7 +18,7 @@ cd build
 cmake -G "Unix Makefiles" . \
       -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" \
+      -DENABLE_RAWSPEED=OFF \
+      -DENABLE_DEMOSAIC_PACK_GPL2=ON \
+      -DENABLE_DEMOSAIC_PACK_GPL3=ON \
       ..
-#      -DENABLE_API_DOC=OFF \
-#      -Wno-dev \
-#      ..

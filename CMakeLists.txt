@@ -436,7 +436,7 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
     ADD_EXECUTABLE(${_target} ${${_target}_SRCS})
 
-    TARGET_LINK_LIBRARIES(${_target} raw ${OPENMP_LDFLAGS})
+    TARGET_LINK_LIBRARIES(${_target} raw ${OPENMP_LDFLAGS} ${PTHREADS_LIBRARY})
 
     IF(WIN32)
         TARGET_LINK_LIBRARIES(${_target} ws2_32)
