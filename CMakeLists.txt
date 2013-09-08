@@ -343,24 +343,67 @@ FOREACH(_curentfile ${libraw_LIB_SRCS})
     ENDIF(WIN32 AND MSVC)
 ENDFOREACH(_curentfile ${libraw_LIB_SRCS})
 
-ADD_LIBRARY(libraw STATIC ${libraw_LIB_SRCS})
+ADD_LIBRARY(raw STATIC ${libraw_LIB_SRCS})
 
-TARGET_LINK_LIBRARIES(libraw
+TARGET_LINK_LIBRARIES(raw
                       ${MATH_LIBRARY}
                       ${LCMS2_LIBRARIES}
                       ${OPENMP_LDFLAGS}
                      )
 IF(JPEG_FOUND)
-    TARGET_LINK_LIBRARIES(libraw ${JPEG_LIBRARY})
+    TARGET_LINK_LIBRARIES(raw ${JPEG_LIBRARY})
 ENDIF()
 
 IF(JASPER_FOUND)
-    TARGET_LINK_LIBRARIES(libraw ${JASPER_LIBRARIES})
+    TARGET_LINK_LIBRARIES(raw ${JASPER_LIBRARIES})
 ENDIF()
 
 IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
-    TARGET_LINK_LIBRARIES(libraw ${LIBXML2_LIBRARIES} ${PTHREADS_LIBRARY})
+    TARGET_LINK_LIBRARIES(raw ${LIBXML2_LIBRARIES} ${PTHREADS_LIBRARY})
 ENDIF()
+
+SET_TARGET_PROPERTIES(raw PROPERTIES
+                          VERSION ${RAW_LIB_SO_VERSION_STRING}
+                          SOVERSION ${RAW_LIB_SO_CUR_VERSION}
+                     )
+
+# -- Files to install -------------------------------------------------------------------------------------
+
+SET(INSTALL_TARGET_STANDARD_ARGS
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+   )
+
+IF(NOT WIN32)
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libraw.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw.pc @ONLY)
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libraw.pc DESTINATION lib/pkgconfig)
+
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libraw.lsm.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw.lsm)
+ENDIF(NOT WIN32)
+
+INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw.h
+                    ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_alloc.h
+                    ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_const.h
+                    ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_datastream.h
+                    ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_internal.h
+                    ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_types.h
+                    ${CMAKE_CURRENT_BINARY_DIR}/libraw_version.h
+                    ${CMAKE_CURRENT_BINARY_DIR}/libraw_config.h
+        DESTINATION include/libraw
+        COMPONENT   Devel
+       )
+
+INSTALL(TARGETS raw ${INSTALL_TARGET_STANDARD_ARGS})
+
+# Install find cmake script to the system for client applications.
+
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/FindPGF.cmake
+        DESTINATION ${CMAKE_ROOT}/Modules)
+
+# Uninstall rules
+CONFIGURE_FILE(libraw.uninstall.cmake ${CMAKE_BINARY_DIR}/cmake_uninstall.cmake COPYONLY)
+ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake_uninstall.cmake")
 
 # -- Compile LibRaw Samples --------------------------------------------------------------------------------
 
@@ -376,7 +419,7 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
     ADD_EXECUTABLE(${_target} ${${_target}_SRCS})
 
-    TARGET_LINK_LIBRARIES(${_target} libraw ${OPENMP_LDFLAGS})
+    TARGET_LINK_LIBRARIES(${_target} raw ${OPENMP_LDFLAGS})
 
     IF(WIN32)
         TARGET_LINK_LIBRARIES(${_target} ws2_32)
