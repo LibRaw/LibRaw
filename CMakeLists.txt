@@ -281,7 +281,7 @@ IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
 
 ENDIF()
 
-# -- Compile LibRaw library --------------------------------------------------------------------------------
+# -- Common LibRaw library compilation rules ------------------------------------------------------------------
 
 IF(ENABLE_DEMOSAIC_PACK_GPL2)
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL2)
@@ -310,9 +310,6 @@ MACRO_BOOL_TO_01(ENABLE_DEMOSAIC_PACK_GPL3 LIBRAW_USE_DEMOSIAC_PACK_GPL3)
 # Flag to debug LibRaw
 ADD_DEFINITIONS(-DDCRAW_VERBOSE)
 
-# Flag used by default into LibRaw to not use dedicated external thread
-ADD_DEFINITIONS(-DLIBRAW_NOTHREADS)
-
 # Flag to export library symbols
 IF (WIN32)
     ADD_DEFINITIONS(-DLIBRAW_BUILDLIB)
@@ -323,6 +320,8 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_config.h.cmake ${CMAKE_
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/
                     ${CMAKE_CURRENT_SOURCE_DIR}/
                    )
+
+# -- Dedicated libraw target which not support multi-threading ---------------------------------------
 
 SET(libraw_LIB_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/internal/dcraw_common.cpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/internal/dcraw_fileio.cpp
@@ -337,13 +336,14 @@ IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
 ENDIF()
 
 # Disable compilation warnings from LibRaw. Just to be clear on the console.
+# Add flag to not support re-entrancy. Faster but cannot be used in multi-threading.
 # Adjust flag for static lib and 64 bits computers using -fPIC for GCC compiler
 # Use O4 GCC compilation option to prevent artifacts with OpenMP
 FOREACH(_curentfile ${libraw_LIB_SRCS})
     IF(WIN32 AND MSVC)
-        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w")
+        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -DLIBRAW_NOTHREADS")
     ELSE(WIN32 AND MSVC)
-        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -fPIC -O4")
+        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -DLIBRAW_NOTHREADS -fPIC -O4 ")
     ENDIF(WIN32 AND MSVC)
 ENDFOREACH(_curentfile ${libraw_LIB_SRCS})
 
@@ -363,12 +363,47 @@ IF(JASPER_FOUND)
 ENDIF()
 
 IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
-    TARGET_LINK_LIBRARIES(raw ${LIBXML2_LIBRARIES} ${PTHREADS_LIBRARY})
+    TARGET_LINK_LIBRARIES(raw ${LIBXML2_LIBRARIES})
 ENDIF()
 
 SET_TARGET_PROPERTIES(raw PROPERTIES VERSION     ${RAW_LIB_SO_VERSION_STRING})
 SET_TARGET_PROPERTIES(raw PROPERTIES SOVERSION   ${RAW_LIB_SO_CUR_VERSION})
 SET_TARGET_PROPERTIES(raw PROPERTIES OUTPUT_NAME "raw")
+
+# -- Dedicated libraw target to support multi-threading ---------------------------------------------
+
+SET(libraw_r_LIB_SRCS ${libraw_LIB_SRCS})
+
+FOREACH(_curentfile ${libraw_r_LIB_SRCS})
+    IF(WIN32 AND MSVC)
+        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w")
+    ELSE(WIN32 AND MSVC)
+        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -fPIC -O4")
+    ENDIF(WIN32 AND MSVC)
+ENDFOREACH(_curentfile ${libraw_r_LIB_SRCS})
+
+ADD_LIBRARY(raw_r SHARED ${libraw_r_LIB_SRCS})
+
+TARGET_LINK_LIBRARIES(raw_r
+                      ${MATH_LIBRARY}
+                      ${LCMS2_LIBRARIES}
+                      ${OPENMP_LDFLAGS}
+                     )
+IF(JPEG_FOUND)
+    TARGET_LINK_LIBRARIES(raw_r ${JPEG_LIBRARY})
+ENDIF()
+
+IF(JASPER_FOUND)
+    TARGET_LINK_LIBRARIES(raw_r ${JASPER_LIBRARIES})
+ENDIF()
+
+IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
+    TARGET_LINK_LIBRARIES(raw_r ${LIBXML2_LIBRARIES} ${PTHREADS_LIBRARY})
+ENDIF()
+
+SET_TARGET_PROPERTIES(raw_r PROPERTIES VERSION     ${RAW_LIB_SO_VERSION_STRING})
+SET_TARGET_PROPERTIES(raw_r PROPERTIES SOVERSION   ${RAW_LIB_SO_CUR_VERSION})
+SET_TARGET_PROPERTIES(raw_r PROPERTIES OUTPUT_NAME "raw_r")
 
 # -- Files to install -------------------------------------------------------------------------------------
 
@@ -376,6 +411,9 @@ SET_TARGET_PROPERTIES(raw PROPERTIES OUTPUT_NAME "raw")
 IF(NOT WIN32)
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/data/libraw.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw.pc @ONLY)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libraw.pc DESTINATION lib/pkgconfig)
+
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/data/libraw_r.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw_r.pc @ONLY)
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libraw_r.pc DESTINATION lib/pkgconfig)
 
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/data/libraw.lsm.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw.lsm)
 ENDIF(NOT WIN32)
@@ -395,6 +433,12 @@ INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw.h
 
 # Install Shared binary files.
 INSTALL(TARGETS raw
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+       )
+
+INSTALL(TARGETS raw_r
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
@@ -426,6 +470,7 @@ ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake_uni
 MACRO(LIBRAW_BUILD_SAMPLES)
 
     SET(_filename ${ARGV0})
+    SET(_rawlib ${ARGV1})
     STRING(REPLACE "." ";" _temp ${_filename})
     LIST(GET _temp 0 _target)
 
@@ -434,7 +479,7 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
     ADD_EXECUTABLE(${_target} ${${_target}_SRCS})
 
-    TARGET_LINK_LIBRARIES(${_target} raw ${OPENMP_LDFLAGS} ${PTHREADS_LIBRARY})
+    TARGET_LINK_LIBRARIES(${_target} ${_rawlib} ${OPENMP_LDFLAGS} ${PTHREADS_LIBRARY})
 
     IF(WIN32)
         TARGET_LINK_LIBRARIES(${_target} ws2_32)
@@ -442,21 +487,21 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
 ENDMACRO(LIBRAW_BUILD_SAMPLES)
 
-LIBRAW_BUILD_SAMPLES(simple_dcraw.cpp)
-LIBRAW_BUILD_SAMPLES(mem_image.cpp)
-LIBRAW_BUILD_SAMPLES(dcraw_emu.cpp)
-LIBRAW_BUILD_SAMPLES(4channels.cpp)
-LIBRAW_BUILD_SAMPLES(unprocessed_raw.cpp)
-LIBRAW_BUILD_SAMPLES(raw-identify.cpp)
-LIBRAW_BUILD_SAMPLES(multirender_test.cpp)
-LIBRAW_BUILD_SAMPLES(postprocessing_benchmark.cpp)
+LIBRAW_BUILD_SAMPLES(simple_dcraw.cpp raw)
+LIBRAW_BUILD_SAMPLES(mem_image.cpp raw)
+LIBRAW_BUILD_SAMPLES(dcraw_emu.cpp raw)
+LIBRAW_BUILD_SAMPLES(4channels.cpp raw)
+LIBRAW_BUILD_SAMPLES(unprocessed_raw.cpp raw)
+LIBRAW_BUILD_SAMPLES(raw-identify.cpp raw)
+LIBRAW_BUILD_SAMPLES(multirender_test.cpp raw)
+LIBRAW_BUILD_SAMPLES(postprocessing_benchmark.cpp raw)
 
-# C sample files will be compiled only if LCMS v2 is detected, to prevent broken compilation
+# These C sample files will be compiled only if LCMS v2 is detected, to prevent broken compilation
 IF(LCMS2_FOUND)
    IF(WIN32)
-        LIBRAW_BUILD_SAMPLES(half_mt_win32.c)
+        LIBRAW_BUILD_SAMPLES(half_mt_win32.c raw_r)
    ELSE(WIN32)
-        LIBRAW_BUILD_SAMPLES(dcraw_half.c)
-        LIBRAW_BUILD_SAMPLES(half_mt.c)
+        LIBRAW_BUILD_SAMPLES(dcraw_half.c raw_r)
+        LIBRAW_BUILD_SAMPLES(half_mt.c raw_r)
    ENDIF(WIN32)
 ENDIF(LCMS2_FOUND)
