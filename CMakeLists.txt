@@ -402,7 +402,7 @@ INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/FindPGF.cmake
         DESTINATION ${CMAKE_ROOT}/Modules)
 
 # Uninstall rules
-CONFIGURE_FILE(libraw.uninstall.cmake ${CMAKE_BINARY_DIR}/cmake_uninstall.cmake COPYONLY)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/Uninstall.cmake ${CMAKE_BINARY_DIR}/cmake_uninstall.cmake COPYONLY)
 ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake_uninstall.cmake")
 
 # -- Compile LibRaw Samples --------------------------------------------------------------------------------
