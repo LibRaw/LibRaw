@@ -173,7 +173,7 @@ IF(NOT APPLE)
     ENDIF(OPENMP_FOUND)
 ENDIF(NOT APPLE)
 
-# For registration to config-libraw.h
+# For registration to libraw_config.h
 MACRO_BOOL_TO_01(OPENMP_FOUND LIBRAW_USE_OPENMP)
 
 # Jasper library check
@@ -217,7 +217,7 @@ ELSE()
 
 ENDIF()
 
-# For registration to config-libraw.h
+# For registration to libraw_config.h
 MACRO_BOOL_TO_01(RAWSPEED_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_RAWSPEED)
 
 # -- Compile RAWSpeed library --------------------------------------------------------------------------------
@@ -292,6 +292,9 @@ ELSE()
     MESSAGE(STATUS "LibRaw will not be compiled with Demosaic pack GPL2")
 ENDIF()
 
+# For registration to libraw_config.h
+MACRO_BOOL_TO_01(ENABLE_DEMOSAIC_PACK_GPL2 LIBRAW_USE_DEMOSIAC_PACK_GPL2)
+
 IF(ENABLE_DEMOSAIC_PACK_GPL3)
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL3)
     # Flag to include demosaic pack GPL3
@@ -300,6 +303,9 @@ IF(ENABLE_DEMOSAIC_PACK_GPL3)
 ELSE()
     MESSAGE(STATUS "LibRaw will not be compiled with Demosaic pack GPL3")
 ENDIF()
+
+# For registration to libraw_config.h
+MACRO_BOOL_TO_01(ENABLE_DEMOSAIC_PACK_GPL3 LIBRAW_USE_DEMOSIAC_PACK_GPL3)
 
 # Flag to debug LibRaw
 ADD_DEFINITIONS(-DDCRAW_VERBOSE)
