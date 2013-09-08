@@ -284,11 +284,13 @@ ENDIF()
 # -- Compile LibRaw library --------------------------------------------------------------------------------
 
 IF(ENABLE_DEMOSAIC_PACK_GPL2)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL2)
     # Flag to include demosaic pack GPL2
     ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL2)
 ENDIF()
 
 IF(ENABLE_DEMOSAIC_PACK_GPL3)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL3)
     # Flag to include demosaic pack GPL3
     ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL3)
 ENDIF()
