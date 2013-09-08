@@ -307,7 +307,7 @@ ENDIF()
 # For registration to libraw_config.h
 MACRO_BOOL_TO_01(ENABLE_DEMOSAIC_PACK_GPL3 LIBRAW_USE_DEMOSIAC_PACK_GPL3)
 
-# Flag to debug LibRaw
+# Flag to add debug print on the console 
 ADD_DEFINITIONS(-DDCRAW_VERBOSE)
 
 # Flag to export library symbols
