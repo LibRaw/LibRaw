@@ -349,7 +349,7 @@ FOREACH(_curentfile ${libraw_LIB_SRCS})
     ENDIF(WIN32 AND MSVC)
 ENDFOREACH(_curentfile ${libraw_LIB_SRCS})
 
-ADD_LIBRARY(raw STATIC ${libraw_LIB_SRCS})
+ADD_LIBRARY(raw SHARED ${libraw_LIB_SRCS})
 
 TARGET_LINK_LIBRARIES(raw
                       ${MATH_LIBRARY}
@@ -368,18 +368,11 @@ IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
     TARGET_LINK_LIBRARIES(raw ${LIBXML2_LIBRARIES} ${PTHREADS_LIBRARY})
 ENDIF()
 
-SET_TARGET_PROPERTIES(raw PROPERTIES
-                          VERSION ${RAW_LIB_SO_VERSION_STRING}
-                          SOVERSION ${RAW_LIB_SO_CUR_VERSION}
-                     )
+SET_TARGET_PROPERTIES(raw PROPERTIES VERSION     ${RAW_LIB_SO_VERSION_STRING})
+SET_TARGET_PROPERTIES(raw PROPERTIES SOVERSION   ${RAW_LIB_SO_CUR_VERSION})
+SET_TARGET_PROPERTIES(raw PROPERTIES OUTPUT_NAME "raw")
 
 # -- Files to install -------------------------------------------------------------------------------------
-
-SET(INSTALL_TARGET_STANDARD_ARGS
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-   )
 
 # Configure and install data file for packaging.
 IF(NOT WIN32)
@@ -403,11 +396,27 @@ INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw.h
        )
 
 # Install Shared binary files.
-INSTALL(TARGETS raw ${INSTALL_TARGET_STANDARD_ARGS})
+INSTALL(TARGETS raw
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+       )
 
 # Install find cmake script to the system for client applications.
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/FindLibRaw.cmake
         DESTINATION ${CMAKE_ROOT}/Modules)
+
+# Install doc data files.
+IF(NOT WIN32)
+    INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/COPYRIGHT
+                        ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.CDDL
+                        ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.LGPL
+                        ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.LibRaw.pdf
+                        ${CMAKE_CURRENT_SOURCE_DIR}/Changelog.txt
+            DESTINATION share/libraw
+            COMPONENT main
+           )
+ENDIF()
 
 # Uninstall rules
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/Uninstall.cmake ${CMAKE_BINARY_DIR}/cmake_uninstall.cmake COPYONLY)

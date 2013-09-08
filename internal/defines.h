@@ -79,7 +79,11 @@ typedef unsigned long long UINT64;
 #include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
 #endif				/* and Adobe Lossy DNGs */
 #ifndef NO_LCMS
+#ifdef USE_LCMS
+#include <lcms.h>		/* Support color profiles */
+#else
 #include <lcms2.h>		/* Support color profiles */
+#endif
 #endif
 #ifdef LOCALEDIR
 #include <libintl.h>
@@ -96,7 +100,7 @@ typedef unsigned long long UINT64;
 #ifndef LONG_BIT
 #define LONG_BIT (8 * sizeof (long))
 #endif
-#line 188 "dcraw/dcraw.c"
+#line 192 "dcraw/dcraw.c"
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
@@ -152,7 +156,7 @@ typedef unsigned long long UINT64;
 
 #define RAW(row,col) \
 	raw_image[(row)*raw_width+(col)]
-#line 249 "dcraw/dcraw.c"
+#line 253 "dcraw/dcraw.c"
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 
