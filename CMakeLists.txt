@@ -375,6 +375,7 @@ SET(INSTALL_TARGET_STANDARD_ARGS
     ARCHIVE DESTINATION lib
    )
 
+# Configure and install data file for packaging.
 IF(NOT WIN32)
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libraw.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw.pc @ONLY)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libraw.pc DESTINATION lib/pkgconfig)
@@ -382,6 +383,7 @@ IF(NOT WIN32)
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libraw.lsm.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw.lsm)
 ENDIF(NOT WIN32)
 
+# Install Shared header files.
 INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw.h
                     ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_alloc.h
                     ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_const.h
@@ -394,11 +396,11 @@ INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw.h
         COMPONENT   Devel
        )
 
+# Install Shared binary files.
 INSTALL(TARGETS raw ${INSTALL_TARGET_STANDARD_ARGS})
 
 # Install find cmake script to the system for client applications.
-
-INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/FindPGF.cmake
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/FindLibRaw.cmake
         DESTINATION ${CMAKE_ROOT}/Modules)
 
 # Uninstall rules
