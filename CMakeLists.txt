@@ -29,6 +29,11 @@ PROJECT(libraw)
 # ==================================================================================================
 # Project Options
 
+# NOTE: extra source code to handle at compilation time must be copie to:
+# -RawSpeed codec    : 'RawSpeed' sub-dir.
+# -Demosaic pack GPL2: 'demosaic-pack-GPL2' sub-dir
+# -Demosaic pack GPL3: 'demosaic-pack-GPL3' sub-dir
+
 OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"  OFF)
 OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2 (default=OFF)"      OFF)
 OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3 (default=OFF)"      OFF)
