@@ -39,9 +39,12 @@ it under the terms of the one of three licenses as you choose:
 #cmakedefine LIBRAW_USE_RAWSPEED 1
 
 /* Define to 1 if LibRaw have been compiled with Demosaic pack GPL2 support */
-#cmakedefine LIBRAW_USE_DEMOSIAC_PACK_GPL2 1
+#cmakedefine LIBRAW_USE_DEMOSAIC_PACK_GPL2 1
 
 /* Define to 1 if LibRaw have been compiled with Demosaic pack GPL3 support */
-#cmakedefine LIBRAW_USE_DEMOSIAC_PACK_GPL3 1
+#cmakedefine LIBRAW_USE_DEMOSAIC_PACK_GPL3 1
+
+/* Define to 1 if LibRaw have been compiled with debug message from dcraw */
+#cmakedefine LIBRAW_USE_DCRAW_DEBUG 1
 
 #endif

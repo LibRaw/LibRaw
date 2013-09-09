@@ -21,12 +21,14 @@ cmake -G "Unix Makefiles" . \
       -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
       -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
       -DCMAKE_OSX_ARCHITECTURES=${TARGET_TYPE} \
-      -DENABLE_RAWSPEED=OFF \
-      -DENABLE_DEMOSAIC_PACK_GPL2=OFF \
-      -DENABLE_DEMOSAIC_PACK_GPL3=OFF \
       -DCMAKE_COLOR_MAKEFILE=ON \
       -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
       -DCMAKE_INSTALL_NAME_DIR=/opt/local/lib \
       -DCMAKE_SYSTEM_PREFIX_PATH="/opt/local;/usr" \
       -DCMAKE_MODULE_PATH="/opt/local/share/cmake-2.8/Modules;/opt/local/share/cmake/modules" \
+      -DENABLE_RAWSPEED=OFF \
+      -DENABLE_DEMOSAIC_PACK_GPL2=OFF \
+      -DENABLE_DEMOSAIC_PACK_GPL3=OFF \
+      -DENABLE_DCRAW_DEBUG=ON \
+      -DENABLE_SAMPLES=ON \
       ..

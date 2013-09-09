@@ -37,6 +37,8 @@ PROJECT(libraw)
 OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"  OFF)
 OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2 (default=OFF)"      OFF)
 OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3 (default=OFF)"      OFF)
+OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw (default=OFF)"      OFF)
+OPTION(ENABLE_SAMPLES              "Build library with sample command-line programs (default=ON)"   ON)
 
 # ==================================================================================================
 # Library version info extraction
@@ -311,7 +313,7 @@ IF(ENABLE_DEMOSAIC_PACK_GPL2)
 ENDIF()
 
 # For registration to libraw_config.h
-MACRO_BOOL_TO_01(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_DEMOSIAC_PACK_GPL2)
+MACRO_BOOL_TO_01(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_DEMOSAIC_PACK_GPL2)
 
 SET(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED false)
 
@@ -327,10 +329,15 @@ IF(ENABLE_DEMOSAIC_PACK_GPL3)
 ENDIF()
 
 # For registration to libraw_config.h
-MACRO_BOOL_TO_01(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_DEMOSIAC_PACK_GPL3)
+MACRO_BOOL_TO_01(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_DEMOSAIC_PACK_GPL3)
 
 # Flag to add debug print on the console 
-ADD_DEFINITIONS(-DDCRAW_VERBOSE)
+IF(ENABLE_DCRAW_DEBUG)
+    ADD_DEFINITIONS(-DDCRAW_VERBOSE)
+ENDIF()
+
+# For registration to libraw_config.h
+MACRO_BOOL_TO_01(ENABLE_DCRAW_DEBUG LIBRAW_USE_DCRAW_DEBUG)
 
 # Flag to export library symbols
 IF (WIN32)
@@ -391,6 +398,18 @@ IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
     MESSAGE(STATUS " Libraw will be compiled with RawSpeed support ................ YES")
 ELSE()
     MESSAGE(STATUS " Libraw will be compiled with RawSpeed support ................ NO")
+ENDIF()
+
+IF(ENABLE_DCRAW_DEBUG)
+    MESSAGE(STATUS " Libraw will be compiled with debug message from dcraw ........ YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with debug message from dcraw ........ NO")
+ENDIF()
+
+IF(ENABLE_SAMPLES)
+    MESSAGE(STATUS " Libraw will be compiled with sample command-line programs .... YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with sample command-line programs .... NO")
 ENDIF()
 
 MESSAGE(STATUS "----------------------------------------------------------------------------------")
@@ -562,21 +581,24 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
 ENDMACRO(LIBRAW_BUILD_SAMPLES)
 
-LIBRAW_BUILD_SAMPLES(simple_dcraw.cpp raw)
-LIBRAW_BUILD_SAMPLES(mem_image.cpp raw)
-LIBRAW_BUILD_SAMPLES(dcraw_emu.cpp raw)
-LIBRAW_BUILD_SAMPLES(4channels.cpp raw)
-LIBRAW_BUILD_SAMPLES(unprocessed_raw.cpp raw)
-LIBRAW_BUILD_SAMPLES(raw-identify.cpp raw)
-LIBRAW_BUILD_SAMPLES(multirender_test.cpp raw)
-LIBRAW_BUILD_SAMPLES(postprocessing_benchmark.cpp raw)
+IF(ENABLE_SAMPLES)
 
-# These C sample files will be compiled only if LCMS v2 is detected, to prevent broken compilation
-IF(LCMS2_FOUND)
-   IF(WIN32)
-        LIBRAW_BUILD_SAMPLES(half_mt_win32.c raw_r)
-   ELSE(WIN32)
-        LIBRAW_BUILD_SAMPLES(dcraw_half.c raw_r)
-        LIBRAW_BUILD_SAMPLES(half_mt.c raw_r)
-   ENDIF(WIN32)
-ENDIF(LCMS2_FOUND)
+    LIBRAW_BUILD_SAMPLES(simple_dcraw.cpp raw)
+    LIBRAW_BUILD_SAMPLES(mem_image.cpp raw)
+    LIBRAW_BUILD_SAMPLES(dcraw_emu.cpp raw)
+    LIBRAW_BUILD_SAMPLES(4channels.cpp raw)
+    LIBRAW_BUILD_SAMPLES(unprocessed_raw.cpp raw)
+    LIBRAW_BUILD_SAMPLES(raw-identify.cpp raw)
+    LIBRAW_BUILD_SAMPLES(multirender_test.cpp raw)
+    LIBRAW_BUILD_SAMPLES(postprocessing_benchmark.cpp raw)
+
+    # These C sample files will be compiled only if LCMS v2 is detected, to prevent broken compilation
+    IF(LCMS2_FOUND)
+        IF(WIN32)
+            LIBRAW_BUILD_SAMPLES(half_mt_win32.c raw_r)
+        ELSE(WIN32)
+            LIBRAW_BUILD_SAMPLES(dcraw_half.c raw_r)
+            LIBRAW_BUILD_SAMPLES(half_mt.c raw_r)
+        ENDIF(WIN32)
+    ENDIF(LCMS2_FOUND)
+ENDIF()

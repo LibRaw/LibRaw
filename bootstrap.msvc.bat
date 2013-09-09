@@ -20,4 +20,6 @@ cmake -G "NMake Makefiles" . ^
       -DENABLE_RAWSPEED=OFF ^
       -DENABLE_DEMOSAIC_PACK_GPL2=OFF ^
       -DENABLE_DEMOSAIC_PACK_GPL3=OFF ^
+      -DENABLE_DCRAW_DEBUG=ON ^
+      -DENABLE_SAMPLES=ON ^
       ..
