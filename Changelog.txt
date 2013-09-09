@@ -1,3 +1,10 @@
+2013-09-04 Alex Tutubalin <lexa@lexa.ru>
+  * Panasonic GX7 color data
+2013-09-03 Alex Tutubalin <lexa@lexa.ru>
+  * imgdata.params.no_interpolation - disables
+    interpolation step in dcraw_process()
+    use -disinterp switch to dcraw_sample to test
+
 2013-08-29 Alex Tutubalin <lexa@lexa.ru>
   * Backported 0.15.4 input data checks
     http://www.openwall.com/lists/oss-security/2013/08/29/3

@@ -301,6 +301,8 @@ typedef struct
     int use_rawspeed;
   /* Disable Auto-scale */
     int no_auto_scale;
+  /* Disable intepolation */
+    int no_interpolation;
   /* Disable sRAW YCC to RGB conversion */
   int sraw_ycc;
 }libraw_output_params_t;
