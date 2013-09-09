@@ -104,6 +104,8 @@ ENDIF(NOT WIN32)
 
 # LCMS version 1 and 2 library handling
 
+SET(LCMS_SUPPORT_CAN_BE_COMPILED false)
+
 MESSAGE(STATUS "Check for LCMS1 availability...")
 FIND_PACKAGE(LCMS)
 IF (LCMS_FOUND)
@@ -114,6 +116,7 @@ IF (LCMS_FOUND)
     ADD_DEFINITIONS(-DUSE_LCMS)
     # For compatibility
     SET(LCMS2_LIBRARIES ${LCMS_LIBRARIES})
+    SET(LCMS_SUPPORT_CAN_BE_COMPILED true)
 ELSE (LCMS_FOUND)
     MESSAGE(STATUS "Check for LCMS2 availability instead LCMS1...")
     FIND_PACKAGE(LCMS2)
@@ -123,8 +126,12 @@ ELSE (LCMS_FOUND)
         MACRO_LOG_FEATURE(LCMS2_FOUND "LCMS2" "A small-footprint color management engine" "http://www.littlecms.com" FALSE "" "Needed by libkdcraw")
         # Flag to compile Little CMS version 2 with LibRaw
         ADD_DEFINITIONS(-DUSE_LCMS2)
+        SET(LCMS_SUPPORT_CAN_BE_COMPILED true)
     ENDIF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
 ENDIF (LCMS_FOUND)
+
+# For registration to libraw_config.h
+MACRO_BOOL_TO_01(LCMS_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_LCMS)
 
 # JPEG library check
 
@@ -153,9 +160,6 @@ IF(JPEG_FOUND)
     ADD_DEFINITIONS(-DUSE_JPEG)
     ADD_DEFINITIONS(-DUSE_JPEG8)
     INCLUDE_DIRECTORIES(${JPEG_INCLUDE_DIR})
-    MESSAGE(STATUS "LibRaw will be compiled with DNG lossy codec support")
-ELSE()
-    MESSAGE(STATUS "LibRaw will not be compiled with DNG lossy codec support")
 ENDIF()
 
 # For registration to libraw_config.h
@@ -189,25 +193,30 @@ FIND_PACKAGE(Jasper)
 IF(JASPER_FOUND)
     ADD_DEFINITIONS(-DUSE_JASPER)
     INCLUDE_DIRECTORIES(${JASPER_INCLUDE_DIR})
-    MESSAGE(STATUS "LibRaw will be compiled with RedCine codec support")
-ELSE()
-    MESSAGE(STATUS "LibRaw will not be compiled with RedCine codec support")
 ENDIF()
 
 # For registration to libraw_config.h
 MACRO_BOOL_TO_01(JASPER_FOUND LIBRAW_USE_REDCINECODEC)
 
 # For RawSpeed Codec Support
+
+SET(RAWSPEED_FOUND false)
+SET(RAWSPEED_SUPPORT_CAN_BE_COMPILED false)
+
 FIND_PACKAGE(LibXml2)
 FIND_PACKAGE(Pthreads)
 
-IF(ENABLE_RAWSPEED AND JPEG_FOUND AND LIBXML2_FOUND AND PTHREADS_FOUND)
+IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/Common.cpp)
+    SET(RAWSPEED_FOUND true)
+ELSE()
+    MESSAGE(STATUS "RawSpeed source code not found. LibRaw cannot be compiled with it")
+ENDIF()
 
-    MESSAGE(STATUS "LibRaw will be compiled with RawSpeed codec")
+IF(ENABLE_RAWSPEED AND RAWSPEED_FOUND AND JPEG_FOUND AND LIBXML2_FOUND AND PTHREADS_FOUND)
+
     SET(RAWSPEED_SUPPORT_CAN_BE_COMPILED true)
 
 ELSE()
-
     IF (NOT JPEG_FOUND)
         MESSAGE(STATUS "LibJPEG depency not resolved. LibRaw cannot be compiled with RawSpeed codec")
     ENDIF()
@@ -220,18 +229,12 @@ ELSE()
         MESSAGE(STATUS "Pthreads depency not resolved. LibRaw cannot be compiled with RawSpeed codec")
     ENDIF()
 
-    IF (NOT ENABLE_RAWSPEED)
-        MESSAGE(STATUS "LibRaw will not be compiled with RawSpeed codec")
-    ENDIF()
-
-    SET(RAWSPEED_SUPPORT_CAN_BE_COMPILED false)
-
 ENDIF()
 
 # For registration to libraw_config.h
 MACRO_BOOL_TO_01(RAWSPEED_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_RAWSPEED)
 
-# -- Compile RAWSpeed library --------------------------------------------------------------------------------
+# -- Compilation rules for RawSpeed library -------------------------------------------------------------
 
 IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
 
@@ -294,29 +297,37 @@ ENDIF()
 
 # -- Common LibRaw library compilation rules ------------------------------------------------------------------
 
+SET(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED false)
+
 IF(ENABLE_DEMOSAIC_PACK_GPL2)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL2)
-    # Flag to include demosaic pack GPL2
-    ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL2)
-    MESSAGE(STATUS "LibRaw will be compiled with Demosaic pack GPL2")
-ELSE()
-    MESSAGE(STATUS "LibRaw will not be compiled with Demosaic pack GPL2")
+    IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL2/dcraw_foveon.c)
+        INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL2)
+        # Flag to include demosaic pack GPL2
+        ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL2)
+        SET(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED true)
+    ELSE()
+        MESSAGE(STATUS "Demosaic pack GPL2 source code not found. LibRaw cannot be compiled with it")
+    ENDIF()
 ENDIF()
 
 # For registration to libraw_config.h
-MACRO_BOOL_TO_01(ENABLE_DEMOSAIC_PACK_GPL2 LIBRAW_USE_DEMOSIAC_PACK_GPL2)
+MACRO_BOOL_TO_01(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_DEMOSIAC_PACK_GPL2)
+
+SET(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED false)
 
 IF(ENABLE_DEMOSAIC_PACK_GPL3)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL3)
-    # Flag to include demosaic pack GPL3
-    ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL3)
-    MESSAGE(STATUS "LibRaw will be compiled with Demosaic pack GPL3")
-ELSE()
-    MESSAGE(STATUS "LibRaw will not be compiled with Demosaic pack GPL3")
+    IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL3/green_equi.c)
+        INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL3)
+        # Flag to include demosaic pack GPL3
+        ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL3)
+        SET(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED true)
+    ELSE()
+        MESSAGE(STATUS "Demosaic pack GPL3 source code not found. LibRaw cannot be compiled with it")
+    ENDIF()
 ENDIF()
 
 # For registration to libraw_config.h
-MACRO_BOOL_TO_01(ENABLE_DEMOSAIC_PACK_GPL3 LIBRAW_USE_DEMOSIAC_PACK_GPL3)
+MACRO_BOOL_TO_01(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_DEMOSIAC_PACK_GPL3)
 
 # Flag to add debug print on the console 
 ADD_DEFINITIONS(-DDCRAW_VERBOSE)
@@ -332,6 +343,58 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/data/libraw_config.h.cmake ${CM
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/
                     ${CMAKE_CURRENT_SOURCE_DIR}/
                    )
+
+# -- Log messages -------------------------------------------------------------------------------------
+
+MESSAGE(STATUS "")
+MESSAGE(STATUS "----------------------------------------------------------------------------------")
+MESSAGE(STATUS " Libraw ${RAW_LIB_VERSION_STRING} dependencies results   <http://www.libraw.org>")
+MESSAGE(STATUS "")
+
+IF(OPENMP_FOUND)
+    MESSAGE(STATUS " Libraw will be compiled with OpenMP support .................. YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with OpenMP support .................. NO")
+ENDIF()
+
+IF(LCMS_SUPPORT_CAN_BE_COMPILED)
+    MESSAGE(STATUS " Libraw will be compiled with LCMS support .................... YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with LCMS support .................... NO")
+ENDIF()
+
+IF(JASPER_FOUND)
+    MESSAGE(STATUS " Libraw will be compiled with RedCine codec support ........... YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with RedCine codec support ........... NO")
+ENDIF()
+
+IF(JPEG_FOUND)
+    MESSAGE(STATUS " Libraw will be compiled with DNG lossy codec support ......... YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with DNG lossy codec support ......... NO")
+ENDIF()
+              
+IF(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED)
+    MESSAGE(STATUS " Libraw will be compiled with Demosaic Pack GPL2 support ...... YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with Demosaic Pack GPL2 support ...... NO")
+ENDIF()
+
+IF(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED)
+    MESSAGE(STATUS " Libraw will be compiled with Demosaic Pack GPL3 support ...... YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with Demosaic Pack GPL3 support ...... NO")
+ENDIF()
+
+IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
+    MESSAGE(STATUS " Libraw will be compiled with RawSpeed support ................ YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with RawSpeed support ................ NO")
+ENDIF()
+
+MESSAGE(STATUS "----------------------------------------------------------------------------------")
+MESSAGE(STATUS "")
 
 # -- Dedicated libraw target which not support multi-threading ---------------------------------------
 

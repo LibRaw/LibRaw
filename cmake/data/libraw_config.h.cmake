@@ -29,6 +29,9 @@ it under the terms of the one of three licenses as you choose:
 /* Define to 1 if LibRaw have been compiled with OpenMP support */
 #cmakedefine LIBRAW_USE_OPENMP 1
 
+/* Define to 1 if LibRaw have been compiled with LCMS support */
+#cmakedefine LIBRAW_USE_LCMS 1
+
 /* Define to 1 if LibRaw have been compiled with RedCine codec support */
 #cmakedefine LIBRAW_USE_REDCINECODEC 1
 
