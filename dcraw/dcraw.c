@@ -96,7 +96,11 @@ typedef unsigned long long UINT64;
 #include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
 #endif				/* and Adobe Lossy DNGs */
 #ifndef NO_LCMS
+#ifdef USE_LCMS
 #include <lcms.h>		/* Support color profiles */
+#else
+#include <lcms2.h>		/* Support color profiles */
+#endif
 #endif
 #ifdef LOCALEDIR
 #include <libintl.h>
