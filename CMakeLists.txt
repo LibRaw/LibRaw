@@ -4,7 +4,7 @@
 # <a href="http://www.libraw.org">http://www.libraw.org</a>
 #
 # @date   2013-09-07
-# @brief  Library for reading and processing of RAW digicam images
+# @brief  Library for reading and processing of RAW images
 #
 # @author Copyright (C) 2013 by Gilles Caulier
 #         <a href="mailto:caulier dot gilles at gmail dot com">caulier dot gilles at gmail dot com</a>
@@ -34,33 +34,39 @@ OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2 
 OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3 (default=OFF)"      OFF)
 
 # ==================================================================================================
-# Information to update before to release this library.
+# Library version info extraction
 
-# Library version history:
-# API        ABI
-# 0.16.0 => 10.0.0    (Cmake port)
+FILE(READ ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_version.h _libraw_version_content)
 
-# Library API version
-SET(RAW_LIB_MAJOR_VERSION "0")
-SET(RAW_LIB_MINOR_VERSION "16")
-SET(RAW_LIB_PATCH_VERSION "0")
-SET(RAW_LIB_TAIL_VERSION "Alpha0")
+# API version strings
+STRING(REGEX MATCH "#define LIBRAW_MAJOR_VERSION[ \t]*([0-9]*)\n" _version_major_match ${_libraw_version_content})
+SET(RAW_LIB_MAJOR_VERSION "${CMAKE_MATCH_1}")
 
-# Library ABI version used by linker.
-# For details : http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
-SET(RAW_LIB_SO_CUR_VERSION "10")
-SET(RAW_LIB_SO_REV_VERSION "0")
-SET(RAW_LIB_SO_AGE_VERSION "0")
+STRING(REGEX MATCH "#define LIBRAW_MINOR_VERSION[ \t]*([0-9]*)\n" _version_minor_match ${_libraw_version_content})
+SET(RAW_LIB_MINOR_VERSION "${CMAKE_MATCH_1}")
 
-# ==================================================================================================
+STRING(REGEX MATCH "#define LIBRAW_PATCH_VERSION[ \t]*([0-9]*)\n" _version_patch_match ${_libraw_version_content})
+SET(RAW_LIB_PATCH_VERSION "${CMAKE_MATCH_1}")
+
+# ABI version strings
+
+STRING(REGEX MATCH "#define LIBRAW_SHLIB_CURRENT[ \t]*([0-9]*)\n" _version_socur_match ${_libraw_version_content})
+SET(RAW_LIB_SO_CUR_VERSION "${CMAKE_MATCH_1}")
+
+STRING(REGEX MATCH "#define LIBRAW_SHLIB_REVISION[ \t]*([0-9]*)\n" _version_sorev_match ${_libraw_version_content})
+SET(RAW_LIB_SO_REV_VERSION "${CMAKE_MATCH_1}")
+
+STRING(REGEX MATCH "#define LIBRAW_SHLIB_AGE[ \t]*([0-9]*)\n" _version_soage_match ${_libraw_version_content})
+SET(RAW_LIB_SO_AGE_VERSION "${CMAKE_MATCH_1}")
+
 # Set env. variables accordinly.
-
 SET(RAW_LIB_VERSION_STRING "${RAW_LIB_MAJOR_VERSION}.${RAW_LIB_MINOR_VERSION}.${RAW_LIB_PATCH_VERSION}")
 SET(RAW_LIB_VERSION_ID "0x${RAW_LIB_MAJOR_VERSION}${RAW_LIB_MINOR_VERSION}${RAW_LIB_PATCH_VERSION}")
-
 SET(RAW_LIB_SO_VERSION_STRING "${RAW_LIB_SO_CUR_VERSION}.${RAW_LIB_SO_REV_VERSION}.${RAW_LIB_SO_AGE_VERSION}")
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_version.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw_version.h)
+MESSAGE(STATUS "LibRaw string version: ${RAW_LIB_VERSION_STRING}")
+MESSAGE(STATUS "LibRaw ID version:     ${RAW_LIB_VERSION_ID}")
+MESSAGE(STATUS "LibRaw SO version:     ${RAW_LIB_SO_VERSION_STRING}")
 
 # ==================================================================================================
 # General definitions rules
@@ -315,7 +321,8 @@ IF (WIN32)
     ADD_DEFINITIONS(-DLIBRAW_BUILDLIB)
 ENDIF()
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw_config.h)
+# Create a config header for client application.
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/data/libraw_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw_config.h)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/
                     ${CMAKE_CURRENT_SOURCE_DIR}/
