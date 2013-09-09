@@ -529,7 +529,7 @@ INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw.h
                     ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_datastream.h
                     ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_internal.h
                     ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_types.h
-                    ${CMAKE_CURRENT_BINARY_DIR}/libraw_version.h
+                    ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_version.h
                     ${CMAKE_CURRENT_BINARY_DIR}/libraw_config.h
         DESTINATION include/libraw
         COMPONENT   Devel
@@ -568,7 +568,7 @@ ENDIF()
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/Uninstall.cmake ${CMAKE_BINARY_DIR}/cmake_uninstall.cmake COPYONLY)
 ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake_uninstall.cmake")
 
-# -- Compile LibRaw Samples --------------------------------------------------------------------------------
+# -- Compile LibRaw Examples --------------------------------------------------------------------------------
 
 # add a small macro so that this is a bit cleaner
 MACRO(LIBRAW_BUILD_SAMPLES)
@@ -588,6 +588,11 @@ MACRO(LIBRAW_BUILD_SAMPLES)
     IF(WIN32)
         TARGET_LINK_LIBRARIES(${_target} ws2_32)
     ENDIF(WIN32)
+
+    INSTALL(TARGETS ${_target}
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib)
 
 ENDMACRO(LIBRAW_BUILD_SAMPLES)
 
