@@ -201,7 +201,7 @@ IF(ENABLE_OPENMP)
         ENDIF(OPENMP_FOUND)
     ENDIF(NOT APPLE)
 ENDIF()
-    
+
 # For registration to libraw_config.h
 MACRO_BOOL_TO_01(OPENMP_FOUND LIBRAW_USE_OPENMP)
 
@@ -229,7 +229,7 @@ IF(ENABLE_RAWSPEED)
     FIND_PACKAGE(Pthreads)
 
     MESSAGE(STATUS "RawSpeed codec path: ${RAWSPEED_PATH}")
-        
+
     IF(EXISTS "${RAWSPEED_PATH}/Common.cpp")
         SET(RAWSPEED_FOUND true)
     ELSE()
@@ -344,7 +344,7 @@ SET(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED false)
 
 IF(ENABLE_DEMOSAIC_PACK_GPL3)
     MESSAGE(STATUS "Demosaic pack GPL3 path: ${DEMOSAIC_PACK_GPL3_PATH}")
-    
+
     IF(EXISTS "${DEMOSAIC_PACK_GPL3_PATH}/green_equi.c")
         INCLUDE_DIRECTORIES(${DEMOSAIC_PACK_GPL3_PATH})
         # Flag to include demosaic pack GPL3
@@ -414,7 +414,7 @@ IF(JPEG_FOUND)
 ELSE()
     MESSAGE(STATUS " Libraw will be compiled with DNG lossy codec support ......... NO")
 ENDIF()
-              
+
 IF(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED)
     MESSAGE(STATUS " Libraw will be compiled with Demosaic Pack GPL2 support ...... YES")
 ELSE()
@@ -472,9 +472,13 @@ ADD_LIBRARY(raw SHARED ${libraw_LIB_SRCS})
 
 TARGET_LINK_LIBRARIES(raw
                       ${MATH_LIBRARY}
-                      ${LCMS2_LIBRARIES}
                       ${OPENMP_LDFLAGS}
                      )
+
+IF(LCMS_SUPPORT_CAN_BE_COMPILED)
+    TARGET_LINK_LIBRARIES(raw ${LCMS2_LIBRARIES})
+ENDIF()
+
 IF(JPEG_FOUND)
     TARGET_LINK_LIBRARIES(raw ${JPEG_LIBRARY})
 ENDIF()
@@ -507,9 +511,13 @@ ADD_LIBRARY(raw_r SHARED ${libraw_r_LIB_SRCS})
 
 TARGET_LINK_LIBRARIES(raw_r
                       ${MATH_LIBRARY}
-                      ${LCMS2_LIBRARIES}
                       ${OPENMP_LDFLAGS}
                      )
+
+IF(LCMS_SUPPORT_CAN_BE_COMPILED)
+    TARGET_LINK_LIBRARIES(raw_r ${LCMS2_LIBRARIES})
+ENDIF()
+
 IF(JPEG_FOUND)
     TARGET_LINK_LIBRARIES(raw_r ${JPEG_LIBRARY})
 ENDIF()
@@ -600,7 +608,11 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
     ADD_EXECUTABLE(${_target} ${${_target}_SRCS})
 
-    TARGET_LINK_LIBRARIES(${_target} ${_rawlib} ${OPENMP_LDFLAGS} ${PTHREADS_LIBRARY})
+    IF (${_rawlib} MATCHES "raw")
+        TARGET_LINK_LIBRARIES(${_target} ${_rawlib} ${OPENMP_LDFLAGS})
+    ELSE()
+        TARGET_LINK_LIBRARIES(${_target} ${_rawlib} ${OPENMP_LDFLAGS} ${PTHREADS_LIBRARY})
+    ENDIF()
 
     IF(WIN32)
         TARGET_LINK_LIBRARIES(${_target} ws2_32)
@@ -625,12 +637,12 @@ IF(ENABLE_EXAMPLES)
     LIBRAW_BUILD_SAMPLES(postprocessing_benchmark.cpp raw)
 
     # These C sample files will be compiled only if LCMS v2 is detected, to prevent broken compilation
-    IF(LCMS2_FOUND)
+    IF(LCMS_SUPPORT_CAN_BE_COMPILED AND PTHREADS_FOUND)
         IF(WIN32)
             LIBRAW_BUILD_SAMPLES(half_mt_win32.c raw_r)
-        ELSE(WIN32)
+        ELSE()
             LIBRAW_BUILD_SAMPLES(dcraw_half.c raw_r)
             LIBRAW_BUILD_SAMPLES(half_mt.c raw_r)
-        ENDIF(WIN32)
-    ENDIF(LCMS2_FOUND)
+        ENDIF()
+    ENDIF()
 ENDIF()
