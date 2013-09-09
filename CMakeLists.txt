@@ -381,9 +381,9 @@ ELSE()
 ENDIF()
 
 IF(ENABLE_EXAMPLES)
-    MESSAGE(STATUS " Libraw will be compiled with sample command-line programs .... YES")
+    MESSAGE(STATUS " Libraw will be compiled with example command-line programs ... YES")
 ELSE()
-    MESSAGE(STATUS " Libraw will be compiled with sample command-line programs .... NO")
+    MESSAGE(STATUS " Libraw will be compiled with example command-line programs ... NO")
 ENDIF()
 
 IF(JASPER_FOUND)
