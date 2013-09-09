@@ -34,11 +34,13 @@ PROJECT(libraw)
 # -Demosaic pack GPL2: 'demosaic-pack-GPL2' sub-dir
 # -Demosaic pack GPL3: 'demosaic-pack-GPL3' sub-dir
 
+OPTION(ENABLE_OPENMP               "Build library with OpenMP support               (default=ON)"   ON)
+OPTION(ENABLE_LCMS                 "Build library with LCMS support                 (default=ON)"   ON)
+OPTION(ENABLE_EXAMPLES             "Build library with sample command-line programs (default=ON)"   ON)
 OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"  OFF)
-OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2 (default=OFF)"      OFF)
-OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3 (default=OFF)"      OFF)
-OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw (default=OFF)"      OFF)
-OPTION(ENABLE_SAMPLES              "Build library with sample command-line programs (default=ON)"   ON)
+OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2     (default=OFF)"  OFF)
+OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"  OFF)
+OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"  OFF)
 
 # ==================================================================================================
 # Library version info extraction
@@ -104,33 +106,35 @@ IF(NOT WIN32)
     FIND_LIBRARY(MATH_LIBRARY m)
 ENDIF(NOT WIN32)
 
-# LCMS version 1 and 2 library handling
+# LCMS version 1 and 2 library check
 
 SET(LCMS_SUPPORT_CAN_BE_COMPILED false)
 
-MESSAGE(STATUS "Check for LCMS1 availability...")
-FIND_PACKAGE(LCMS)
-IF (LCMS_FOUND)
-    MESSAGE(STATUS "Found LCMS1: ${LCMS_LIBRARIES} ${LCMS_INCLUDE_DIR}")
-    INCLUDE_DIRECTORIES(${LCMS_INCLUDE_DIR})
-    MACRO_LOG_FEATURE(LCMS_FOUND "LCMS1" "A small-footprint color management engine" "http://www.littlecms.com" TRUE "" "Needed by libkdcraw")
-    # Flag to compile Little CMS version 1 with LibRaw
-    ADD_DEFINITIONS(-DUSE_LCMS)
-    # For compatibility
-    SET(LCMS2_LIBRARIES ${LCMS_LIBRARIES})
-    SET(LCMS_SUPPORT_CAN_BE_COMPILED true)
-ELSE (LCMS_FOUND)
-    MESSAGE(STATUS "Check for LCMS2 availability instead LCMS1...")
-    FIND_PACKAGE(LCMS2)
-    IF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
-        MESSAGE(STATUS "Found LCMS2 instead LCMS1: ${LCMS2_LIBRARIES} ${LCMS2_INCLUDE_DIR}")
-        INCLUDE_DIRECTORIES(${LCMS2_INCLUDE_DIR})
-        MACRO_LOG_FEATURE(LCMS2_FOUND "LCMS2" "A small-footprint color management engine" "http://www.littlecms.com" FALSE "" "Needed by libkdcraw")
-        # Flag to compile Little CMS version 2 with LibRaw
-        ADD_DEFINITIONS(-DUSE_LCMS2)
+IF (ENABLE_LCMS)
+    MESSAGE(STATUS "Check for LCMS1 availability...")
+    FIND_PACKAGE(LCMS)
+    IF (LCMS_FOUND)
+        MESSAGE(STATUS "Found LCMS1: ${LCMS_LIBRARIES} ${LCMS_INCLUDE_DIR}")
+        INCLUDE_DIRECTORIES(${LCMS_INCLUDE_DIR})
+        MACRO_LOG_FEATURE(LCMS_FOUND "LCMS1" "A small-footprint color management engine" "http://www.littlecms.com" TRUE "" "Needed by libkdcraw")
+        # Flag to compile Little CMS version 1 with LibRaw
+        ADD_DEFINITIONS(-DUSE_LCMS)
+        # For compatibility
+        SET(LCMS2_LIBRARIES ${LCMS_LIBRARIES})
         SET(LCMS_SUPPORT_CAN_BE_COMPILED true)
-    ENDIF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
-ENDIF (LCMS_FOUND)
+    ELSE (LCMS_FOUND)
+        MESSAGE(STATUS "Check for LCMS2 availability instead LCMS1...")
+        FIND_PACKAGE(LCMS2)
+        IF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
+            MESSAGE(STATUS "Found LCMS2 instead LCMS1: ${LCMS2_LIBRARIES} ${LCMS2_INCLUDE_DIR}")
+            INCLUDE_DIRECTORIES(${LCMS2_INCLUDE_DIR})
+            MACRO_LOG_FEATURE(LCMS2_FOUND "LCMS2" "A small-footprint color management engine" "http://www.littlecms.com" FALSE "" "Needed by libkdcraw")
+            # Flag to compile Little CMS version 2 with LibRaw
+            ADD_DEFINITIONS(-DUSE_LCMS2)
+            SET(LCMS_SUPPORT_CAN_BE_COMPILED true)
+        ENDIF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
+    ENDIF (LCMS_FOUND)
+ENDIF()
 
 # For registration to libraw_config.h
 MACRO_BOOL_TO_01(LCMS_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_LCMS)
@@ -167,23 +171,29 @@ ENDIF()
 # For registration to libraw_config.h
 MACRO_BOOL_TO_01(JPEG_FOUND LIBRAW_USE_DNGLOSSYCODEC)
 
-# OpenMP library detection (requires CMake >= 2.6.3)
-# NOTE: OpenMP under MacOSX do not support multithreading.
+# OpenMP library check
 
-IF(NOT APPLE)
-    MACRO_OPTIONAL_FIND_PACKAGE(OpenMP)
+SET(OPENMP_FOUND false)
 
-    IF(OPENMP_FOUND)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-        IF("${OpenMP_CXX_FLAGS}" STREQUAL "-fopenmp")
-            SET(OPENMP_LDFLAGS "-lgomp")
-        ENDIF("${OpenMP_CXX_FLAGS}" STREQUAL "-fopenmp")
-        IF("${OpenMP_CXX_FLAGS}" STREQUAL "-xopenmp")
-            SET(OPENMP_LDFLAGS "-xopenmp")
-        ENDIF("${OpenMP_CXX_FLAGS}" STREQUAL "-xopenmp")
-    ENDIF(OPENMP_FOUND)
-ENDIF(NOT APPLE)
+IF(ENABLE_OPENMP)
+    # OpenMP library detection (requires CMake >= 2.6.3)
+    # NOTE: OpenMP under MacOSX do not support multithreading.
 
+    IF(NOT APPLE)
+        MACRO_OPTIONAL_FIND_PACKAGE(OpenMP)
+
+        IF(OPENMP_FOUND)
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+            IF("${OpenMP_CXX_FLAGS}" STREQUAL "-fopenmp")
+                SET(OPENMP_LDFLAGS "-lgomp")
+            ENDIF("${OpenMP_CXX_FLAGS}" STREQUAL "-fopenmp")
+            IF("${OpenMP_CXX_FLAGS}" STREQUAL "-xopenmp")
+                SET(OPENMP_LDFLAGS "-xopenmp")
+            ENDIF("${OpenMP_CXX_FLAGS}" STREQUAL "-xopenmp")
+        ENDIF(OPENMP_FOUND)
+    ENDIF(NOT APPLE)
+ENDIF()
+    
 # For registration to libraw_config.h
 MACRO_BOOL_TO_01(OPENMP_FOUND LIBRAW_USE_OPENMP)
 
@@ -351,11 +361,11 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/
                     ${CMAKE_CURRENT_SOURCE_DIR}/
                    )
 
-# -- Log messages -------------------------------------------------------------------------------------
+# -- Log messages about configuration ------------------------------------------------------------------
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "----------------------------------------------------------------------------------")
-MESSAGE(STATUS " Libraw ${RAW_LIB_VERSION_STRING} dependencies results   <http://www.libraw.org>")
+MESSAGE(STATUS " Libraw ${RAW_LIB_VERSION_STRING} configuration            <http://www.libraw.org>")
 MESSAGE(STATUS "")
 
 IF(OPENMP_FOUND)
@@ -368,6 +378,12 @@ IF(LCMS_SUPPORT_CAN_BE_COMPILED)
     MESSAGE(STATUS " Libraw will be compiled with LCMS support .................... YES")
 ELSE()
     MESSAGE(STATUS " Libraw will be compiled with LCMS support .................... NO")
+ENDIF()
+
+IF(ENABLE_EXAMPLES)
+    MESSAGE(STATUS " Libraw will be compiled with sample command-line programs .... YES")
+ELSE()
+    MESSAGE(STATUS " Libraw will be compiled with sample command-line programs .... NO")
 ENDIF()
 
 IF(JASPER_FOUND)
@@ -404,12 +420,6 @@ IF(ENABLE_DCRAW_DEBUG)
     MESSAGE(STATUS " Libraw will be compiled with debug message from dcraw ........ YES")
 ELSE()
     MESSAGE(STATUS " Libraw will be compiled with debug message from dcraw ........ NO")
-ENDIF()
-
-IF(ENABLE_SAMPLES)
-    MESSAGE(STATUS " Libraw will be compiled with sample command-line programs .... YES")
-ELSE()
-    MESSAGE(STATUS " Libraw will be compiled with sample command-line programs .... NO")
 ENDIF()
 
 MESSAGE(STATUS "----------------------------------------------------------------------------------")
@@ -581,7 +591,7 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
 ENDMACRO(LIBRAW_BUILD_SAMPLES)
 
-IF(ENABLE_SAMPLES)
+IF(ENABLE_EXAMPLES)
 
     LIBRAW_BUILD_SAMPLES(simple_dcraw.cpp raw)
     LIBRAW_BUILD_SAMPLES(mem_image.cpp raw)

@@ -26,9 +26,11 @@ cmake -G "Unix Makefiles" . \
       -DCMAKE_INSTALL_NAME_DIR=/opt/local/lib \
       -DCMAKE_SYSTEM_PREFIX_PATH="/opt/local;/usr" \
       -DCMAKE_MODULE_PATH="/opt/local/share/cmake-2.8/Modules;/opt/local/share/cmake/modules" \
+      -DENABLE_OPENMP=ON \
+      -DENABLE_LCMS=ON \
+      -DENABLE_EXAMPLES=ON \
       -DENABLE_RAWSPEED=OFF \
       -DENABLE_DEMOSAIC_PACK_GPL2=OFF \
       -DENABLE_DEMOSAIC_PACK_GPL3=OFF \
       -DENABLE_DCRAW_DEBUG=ON \
-      -DENABLE_SAMPLES=ON \
       ..

@@ -17,9 +17,11 @@ REM Microsoft Visual C++ command line compiler.
 cmake -G "NMake Makefiles" . ^
       -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
       -DCMAKE_INSTALL_PREFIX=%INSTALL_PREFIX% ^
+      -DENABLE_OPENMP=ON ^
+      -DENABLE_LCMS=ON ^
+      -DENABLE_EXAMPLES=ON ^
       -DENABLE_RAWSPEED=OFF ^
       -DENABLE_DEMOSAIC_PACK_GPL2=OFF ^
       -DENABLE_DEMOSAIC_PACK_GPL3=OFF ^
       -DENABLE_DCRAW_DEBUG=ON ^
-      -DENABLE_SAMPLES=ON ^
       ..
