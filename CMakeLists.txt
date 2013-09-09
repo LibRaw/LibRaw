@@ -27,30 +27,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3)
 PROJECT(libraw)
 
 # ==================================================================================================
-# Project Options
-
-OPTION(ENABLE_OPENMP               "Build library with OpenMP support               (default=ON)"                 ON)
-OPTION(ENABLE_LCMS                 "Build library with LCMS support                 (default=ON)"                 ON)
-OPTION(ENABLE_EXAMPLES             "Build library with sample command-line programs (default=ON)"                 ON)
-OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"                OFF)
-OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2     (default=OFF)"                OFF)
-OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"                OFF)
-OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"                OFF)
-
-SET(DEMOSAIC_PACK_GPL2_RPATH "demosaic-pack-GPL2" CACHE STRING
-    "Relavive path to extra Demosaic pack GPL2 (default=demosaic-pack-GPL2)")
-
-SET(DEMOSAIC_PACK_GPL3_RPATH "demosaic-pack-GPL3" CACHE STRING 
-    "Relavive path to extra Demosaic pack GPL3 (default=demosaic-pack-GPL3)")
-
-SET(RAWSPEED_RPATH           "RawSpeed"           CACHE STRING 
-    "Relavive path to extra RawSpeed codec     (default=RawSpeed)")
-
-SET(DEMOSAIC_PACK_GPL2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL2_RPATH}")
-SET(DEMOSAIC_PACK_GPL3_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL3_RPATH}")
-SET(RAWSPEED_PATH           "${CMAKE_CURRENT_SOURCE_DIR}/${RAWSPEED_RPATH}")
-
-# ==================================================================================================
 # Library version info extraction
 
 FILE(READ ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_version.h _libraw_version_content)
@@ -84,6 +60,30 @@ SET(RAW_LIB_SO_VERSION_STRING "${RAW_LIB_SO_CUR_VERSION}.${RAW_LIB_SO_REV_VERSIO
 MESSAGE(STATUS "LibRaw string version: ${RAW_LIB_VERSION_STRING}")
 MESSAGE(STATUS "LibRaw ID version:     ${RAW_LIB_VERSION_ID}")
 MESSAGE(STATUS "LibRaw SO version:     ${RAW_LIB_SO_VERSION_STRING}")
+
+# ==================================================================================================
+# Project Options
+
+OPTION(ENABLE_OPENMP               "Build library with OpenMP support               (default=ON)"                 ON)
+OPTION(ENABLE_LCMS                 "Build library with LCMS support                 (default=ON)"                 ON)
+OPTION(ENABLE_EXAMPLES             "Build library with sample command-line programs (default=ON)"                 ON)
+OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"                OFF)
+OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2     (default=OFF)"                OFF)
+OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"                OFF)
+OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"                OFF)
+
+SET(DEMOSAIC_PACK_GPL2_RPATH "LibRaw-demosaic-pack-GPL2-${RAW_LIB_VERSION_STRING}" CACHE STRING
+    "Relavive path to extra Demosaic pack GPL2 (default=LibRaw-demosaic-pack-GPL2-M.m.p)")
+
+SET(DEMOSAIC_PACK_GPL3_RPATH "LibRaw-demosaic-pack-GPL3-${RAW_LIB_VERSION_STRING}" CACHE STRING 
+    "Relavive path to extra Demosaic pack GPL3 (default=LibRaw-demosaic-pack-GPL3-M.m.p)")
+
+SET(RAWSPEED_RPATH           "RawSpeed"           CACHE STRING 
+    "Relavive path to extra RawSpeed codec     (default=RawSpeed)")
+
+SET(DEMOSAIC_PACK_GPL2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL2_RPATH}")
+SET(DEMOSAIC_PACK_GPL3_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL3_RPATH}")
+SET(RAWSPEED_PATH           "${CMAKE_CURRENT_SOURCE_DIR}/${RAWSPEED_RPATH}")
 
 # ==================================================================================================
 # General definitions rules
