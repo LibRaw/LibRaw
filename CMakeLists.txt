@@ -29,19 +29,27 @@ PROJECT(libraw)
 # ==================================================================================================
 # Project Options
 
-# NOTE: extra source code to handle at compilation time must be copie to:
-# -RawSpeed codec    : 'RawSpeed' sub-dir.
-# -Demosaic pack GPL2: 'demosaic-pack-GPL2' sub-dir
-# -Demosaic pack GPL3: 'demosaic-pack-GPL3' sub-dir
+OPTION(ENABLE_OPENMP               "Build library with OpenMP support               (default=ON)"                 ON)
+OPTION(ENABLE_LCMS                 "Build library with LCMS support                 (default=ON)"                 ON)
+OPTION(ENABLE_EXAMPLES             "Build library with sample command-line programs (default=ON)"                 ON)
+OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"                OFF)
+OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2     (default=OFF)"                OFF)
+OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"                OFF)
+OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"                OFF)
 
-OPTION(ENABLE_OPENMP               "Build library with OpenMP support               (default=ON)"   ON)
-OPTION(ENABLE_LCMS                 "Build library with LCMS support                 (default=ON)"   ON)
-OPTION(ENABLE_EXAMPLES             "Build library with sample command-line programs (default=ON)"   ON)
-OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"  OFF)
-OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2     (default=OFF)"  OFF)
-OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"  OFF)
-OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"  OFF)
+SET(DEMOSAIC_PACK_GPL2_RPATH "demosaic-pack-GPL2" CACHE STRING 
+    "Relavive path to extra Demosaic pack GPL2 (default=demosaic-pack-GPL2)")
+    
+SET(DEMOSAIC_PACK_GPL3_RPATH "demosaic-pack-GPL3" CACHE STRING 
+    "Relavive path to extra Demosaic pack GPL3 (default=demosaic-pack-GPL3)")
+    
+SET(RAWSPEED_RPATH           "RawSpeed"           CACHE STRING 
+    "Relavive path to extra RawSpeed codec     (default=RawSpeed)")
 
+SET(DEMOSAIC_PACK_GPL2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL2_RPATH}")
+SET(DEMOSAIC_PACK_GPL3_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL3_RPATH}")
+SET(RAWSPEED_PATH           "${CMAKE_CURRENT_SOURCE_DIR}/${RAWSPEED_RPATH}")
+    
 # ==================================================================================================
 # Library version info extraction
 
@@ -215,32 +223,37 @@ MACRO_BOOL_TO_01(JASPER_FOUND LIBRAW_USE_REDCINECODEC)
 SET(RAWSPEED_FOUND false)
 SET(RAWSPEED_SUPPORT_CAN_BE_COMPILED false)
 
-FIND_PACKAGE(LibXml2)
-FIND_PACKAGE(Pthreads)
+IF(ENABLE_RAWSPEED)
 
-IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/Common.cpp)
-    SET(RAWSPEED_FOUND true)
-ELSE()
-    MESSAGE(STATUS "RawSpeed source code not found. LibRaw cannot be compiled with it")
-ENDIF()
+    FIND_PACKAGE(LibXml2)
+    FIND_PACKAGE(Pthreads)
 
-IF(ENABLE_RAWSPEED AND RAWSPEED_FOUND AND JPEG_FOUND AND LIBXML2_FOUND AND PTHREADS_FOUND)
-
-    SET(RAWSPEED_SUPPORT_CAN_BE_COMPILED true)
-
-ELSE()
-    IF (NOT JPEG_FOUND)
-        MESSAGE(STATUS "LibJPEG depency not resolved. LibRaw cannot be compiled with RawSpeed codec")
+    MESSAGE(STATUS "RawSpeed codec path: ${RAWSPEED_PATH}")
+        
+    IF(EXISTS "${RAWSPEED_PATH}/Common.cpp")
+        SET(RAWSPEED_FOUND true)
+    ELSE()
+        MESSAGE(STATUS "RawSpeed source code not found. LibRaw cannot be compiled with it")
     ENDIF()
 
-    IF (NOT LIBXML2_FOUND)
-        MESSAGE(STATUS "LibXML2 depency not resolved. LibRaw cannot be compiled with RawSpeed codec")
-    ENDIF()
+    IF(ENABLE_RAWSPEED AND RAWSPEED_FOUND AND JPEG_FOUND AND LIBXML2_FOUND AND PTHREADS_FOUND)
 
-    IF (NOT PTHREADS_FOUND)
-        MESSAGE(STATUS "Pthreads depency not resolved. LibRaw cannot be compiled with RawSpeed codec")
-    ENDIF()
+        SET(RAWSPEED_SUPPORT_CAN_BE_COMPILED true)
 
+    ELSE()
+        IF (NOT JPEG_FOUND)
+            MESSAGE(STATUS "LibJPEG dependency not resolved. LibRaw cannot be compiled with RawSpeed codec")
+        ENDIF()
+
+        IF (NOT LIBXML2_FOUND)
+            MESSAGE(STATUS "LibXML2 dependency not resolved. LibRaw cannot be compiled with RawSpeed codec")
+        ENDIF()
+
+        IF (NOT PTHREADS_FOUND)
+            MESSAGE(STATUS "Pthreads dependency not resolved. LibRaw cannot be compiled with RawSpeed codec")
+        ENDIF()
+
+    ENDIF()
 ENDIF()
 
 # For registration to libraw_config.h
@@ -250,7 +263,7 @@ MACRO_BOOL_TO_01(RAWSPEED_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_RAWSPEED)
 
 IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
 
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed)
+    INCLUDE_DIRECTORIES(${RAWSPEED_PATH})
 
     INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${PTHREADS_INCLUDE_DIR})
 
@@ -259,50 +272,50 @@ IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
 
     ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${PTHREADS_DEFINITIONS})
 
-    SET(librawspeed_LIB_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/ArwDecoder.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/BitPumpJPEG.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/BitPumpMSB.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/BitPumpMSB32.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/BitPumpPlain.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/BlackArea.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/ByteStream.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/ByteStreamSwap.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/Camera.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/CameraMetaData.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/CameraMetadataException.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/CameraSensorInfo.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/ColorFilterArray.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/Common.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/Cr2Decoder.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/DngDecoder.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/DngDecoderSlices.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/DngOpcodes.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/FileIOException.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/FileMap.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/IOException.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/LJpegDecompressor.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/LJpegPlain.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/NefDecoder.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/NikonDecompressor.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/OrfDecoder.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/PefDecoder.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/PentaxDecompressor.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/RawDecoder.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/RawDecoderException.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/RawImage.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/RawImageDataFloat.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/RawImageDataU16.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/RawParser.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/Rw2Decoder.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/SrwDecoder.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/TiffEntry.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/TiffEntryBE.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/TiffIFD.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/TiffIFDBE.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/TiffParser.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/TiffParserException.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/TiffParserHeaderless.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/TiffParserOlympus.cpp
+    SET(librawspeed_LIB_SRCS ${RAWSPEED_PATH}/ArwDecoder.cpp
+                             ${RAWSPEED_PATH}/BitPumpJPEG.cpp
+                             ${RAWSPEED_PATH}/BitPumpMSB.cpp
+                             ${RAWSPEED_PATH}/BitPumpMSB32.cpp
+                             ${RAWSPEED_PATH}/BitPumpPlain.cpp
+                             ${RAWSPEED_PATH}/BlackArea.cpp
+                             ${RAWSPEED_PATH}/ByteStream.cpp
+                             ${RAWSPEED_PATH}/ByteStreamSwap.cpp
+                             ${RAWSPEED_PATH}/Camera.cpp
+                             ${RAWSPEED_PATH}/CameraMetaData.cpp
+                             ${RAWSPEED_PATH}/CameraMetadataException.cpp
+                             ${RAWSPEED_PATH}/CameraSensorInfo.cpp
+                             ${RAWSPEED_PATH}/ColorFilterArray.cpp
+                             ${RAWSPEED_PATH}/Common.cpp
+                             ${RAWSPEED_PATH}/Cr2Decoder.cpp
+                             ${RAWSPEED_PATH}/DngDecoder.cpp
+                             ${RAWSPEED_PATH}/DngDecoderSlices.cpp
+                             ${RAWSPEED_PATH}/DngOpcodes.cpp
+                             ${RAWSPEED_PATH}/FileIOException.cpp
+                             ${RAWSPEED_PATH}/FileMap.cpp
+                             ${RAWSPEED_PATH}/IOException.cpp
+                             ${RAWSPEED_PATH}/LJpegDecompressor.cpp
+                             ${RAWSPEED_PATH}/LJpegPlain.cpp
+                             ${RAWSPEED_PATH}/NefDecoder.cpp
+                             ${RAWSPEED_PATH}/NikonDecompressor.cpp
+                             ${RAWSPEED_PATH}/OrfDecoder.cpp
+                             ${RAWSPEED_PATH}/PefDecoder.cpp
+                             ${RAWSPEED_PATH}/PentaxDecompressor.cpp
+                             ${RAWSPEED_PATH}/RawDecoder.cpp
+                             ${RAWSPEED_PATH}/RawDecoderException.cpp
+                             ${RAWSPEED_PATH}/RawImage.cpp
+                             ${RAWSPEED_PATH}/RawImageDataFloat.cpp
+                             ${RAWSPEED_PATH}/RawImageDataU16.cpp
+                             ${RAWSPEED_PATH}/RawParser.cpp
+                             ${RAWSPEED_PATH}/Rw2Decoder.cpp
+                             ${RAWSPEED_PATH}/SrwDecoder.cpp
+                             ${RAWSPEED_PATH}/TiffEntry.cpp
+                             ${RAWSPEED_PATH}/TiffEntryBE.cpp
+                             ${RAWSPEED_PATH}/TiffIFD.cpp
+                             ${RAWSPEED_PATH}/TiffIFDBE.cpp
+                             ${RAWSPEED_PATH}/TiffParser.cpp
+                             ${RAWSPEED_PATH}/TiffParserException.cpp
+                             ${RAWSPEED_PATH}/TiffParserHeaderless.cpp
+                             ${RAWSPEED_PATH}/TiffParserOlympus.cpp
     )
 
 ENDIF()
@@ -312,8 +325,10 @@ ENDIF()
 SET(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED false)
 
 IF(ENABLE_DEMOSAIC_PACK_GPL2)
-    IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL2/dcraw_foveon.c)
-        INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL2)
+    MESSAGE(STATUS "Demosaic pack GPL2 path: ${DEMOSAIC_PACK_GPL2_PATH}")
+
+    IF(EXISTS "${DEMOSAIC_PACK_GPL2_PATH}/dcraw_foveon.c")
+        INCLUDE_DIRECTORIES(${DEMOSAIC_PACK_GPL2_PATH})
         # Flag to include demosaic pack GPL2
         ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL2)
         SET(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED true)
@@ -328,8 +343,10 @@ MACRO_BOOL_TO_01(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_DEMOSAIC_
 SET(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED false)
 
 IF(ENABLE_DEMOSAIC_PACK_GPL3)
-    IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL3/green_equi.c)
-        INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/demosaic-pack-GPL3)
+    MESSAGE(STATUS "Demosaic pack GPL3 path: ${DEMOSAIC_PACK_GPL3_PATH}")
+    
+    IF(EXISTS "${DEMOSAIC_PACK_GPL3_PATH}/green_equi.c")
+        INCLUDE_DIRECTORIES(${DEMOSAIC_PACK_GPL3_PATH})
         # Flag to include demosaic pack GPL3
         ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL3)
         SET(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED true)
