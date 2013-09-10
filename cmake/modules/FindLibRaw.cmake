@@ -1,12 +1,13 @@
 # - Find LibRaw
 # Find the LibRaw library <http://www.libraw.org>
 # This module defines
-#  LibRaw_INCLUDE_DIR, where to find libraw.h
-#  LibRaw_LIBRARIES, the libraries needed to use LibRaw
 #  LibRaw_VERSION_STRING, the version string of LibRaw
-#  LibRaw_DEFINITIONS, the definitions needed to use LibRaw
-
-
+#  LibRaw_INCLUDE_DIR, where to find libraw.h
+#  LibRaw_LIBRARIES, the libraries needed to use LibRaw (non-thread-safe)
+#  LibRaw_r_LIBRARIES, the libraries needed to use LibRaw (thread-safe)
+#  LibRaw_DEFINITIONS, the definitions needed to use LibRaw (non-thread-safe)
+#  LibRaw_r_DEFINITIONS, the definitions needed to use LibRaw (thread-safe)
+#
 # Copyright (c) 2013, Pino Toscano <pino at kde dot org>
 # Copyright (c) 2013, Gilles Caulier <caulier dot gilles at gmail dot com>
 #
@@ -18,6 +19,9 @@ FIND_PACKAGE(PkgConfig)
 IF(PKG_CONFIG_FOUND)
    PKG_CHECK_MODULES(PC_LIBRAW libraw)
    SET(LibRaw_DEFINITIONS ${PC_LIBRAW_CFLAGS_OTHER})
+
+   PKG_CHECK_MODULES(PC_LIBRAW_R libraw_r)
+   SET(LibRaw_r_DEFINITIONS ${PC_LIBRAW_R_CFLAGS_OTHER})   
 ENDIF()
 
 FIND_PATH(LibRaw_INCLUDE_DIR libraw.h
@@ -33,16 +37,22 @@ FIND_LIBRARY(LibRaw_LIBRARIES NAMES raw
              ${PC_LIBRAW_LIBRARY_DIRS}
             )
 
+FIND_LIBRARY(LibRaw_r_LIBRARIES NAMES raw_r
+             HINTS
+             ${PC_LIBRAW_R_LIBDIR}
+             ${PC_LIBRAW_R_LIBRARY_DIRS}
+            )
+
 IF(LibRaw_INCLUDE_DIR)
    FILE(READ ${LibRaw_INCLUDE_DIR}/libraw_version.h _libraw_version_content)
    
-   STRING(REGEX MATCH "#define LIBRAW_MAJOR_VERSION[ ]*([0-9]*)\n" _version_major_match ${_libraw_version_content})
+   STRING(REGEX MATCH "#define LIBRAW_MAJOR_VERSION[ \t]*([0-9]*)\n" _version_major_match ${_libraw_version_content})
    SET(_libraw_version_major "${CMAKE_MATCH_1}")
    
-   STRING(REGEX MATCH "#define LIBRAW_MINOR_VERSION[ ]*([0-9]*)\n" _version_minor_match ${_libraw_version_content})
+   STRING(REGEX MATCH "#define LIBRAW_MINOR_VERSION[ \t]*([0-9]*)\n" _version_minor_match ${_libraw_version_content})
    SET(_libraw_version_minor "${CMAKE_MATCH_1}")
    
-   STRING(REGEX MATCH "#define LIBRAW_PATCH_VERSION[ ]*([0-9]*)\n" _version_patch_match ${_libraw_version_content})
+   STRING(REGEX MATCH "#define LIBRAW_PATCH_VERSION[ \t]*([0-9]*)\n" _version_patch_match ${_libraw_version_content})
    SET(_libraw_version_patch "${CMAKE_MATCH_1}")
    
    IF(_version_major_match AND _version_minor_match AND _version_patch_match)
@@ -60,8 +70,10 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibRaw
                                   VERSION_VAR LibRaw_VERSION_STRING
                                  )
 
-MARK_AS_ADVANCED(LibRaw_INCLUDE_DIR
+MARK_AS_ADVANCED(LibRaw_VERSION_STRING
+                 LibRaw_INCLUDE_DIR
                  LibRaw_LIBRARIES
-                 LibRaw_VERSION_STRING
+                 LibRaw_r_LIBRARIES
                  LibRaw_DEFINITIONS
-                )
+                 LibRaw_r_DEFINITIONS
+                 )
