@@ -470,10 +470,11 @@ ENDFOREACH(_curentfile ${libraw_LIB_SRCS})
 
 ADD_LIBRARY(raw SHARED ${libraw_LIB_SRCS})
 
-TARGET_LINK_LIBRARIES(raw
-                      ${MATH_LIBRARY}
-                      ${OPENMP_LDFLAGS}
-                     )
+TARGET_LINK_LIBRARIES(raw ${MATH_LIBRARY})
+
+IF(OPENMP_FOUND)
+    TARGET_LINK_LIBRARIES(raw ${OPENMP_LDFLAGS})
+ENDIF()
 
 IF(LCMS_SUPPORT_CAN_BE_COMPILED)
     TARGET_LINK_LIBRARIES(raw ${LCMS2_LIBRARIES})
@@ -509,10 +510,11 @@ ENDFOREACH(_curentfile ${libraw_r_LIB_SRCS})
 
 ADD_LIBRARY(raw_r SHARED ${libraw_r_LIB_SRCS})
 
-TARGET_LINK_LIBRARIES(raw_r
-                      ${MATH_LIBRARY}
-                      ${OPENMP_LDFLAGS}
-                     )
+TARGET_LINK_LIBRARIES(raw_r ${MATH_LIBRARY})
+
+IF(OPENMP_FOUND)
+    TARGET_LINK_LIBRARIES(raw_r ${OPENMP_LDFLAGS})
+ENDIF()
 
 IF(LCMS_SUPPORT_CAN_BE_COMPILED)
     TARGET_LINK_LIBRARIES(raw_r ${LCMS2_LIBRARIES})
@@ -608,15 +610,19 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
     ADD_EXECUTABLE(${_target} ${${_target}_SRCS})
 
-    IF (${_rawlib} MATCHES "raw")
-        TARGET_LINK_LIBRARIES(${_target} ${_rawlib} ${OPENMP_LDFLAGS})
-    ELSE()
-        TARGET_LINK_LIBRARIES(${_target} ${_rawlib} ${OPENMP_LDFLAGS} ${PTHREADS_LIBRARY})
+    TARGET_LINK_LIBRARIES(${_target} ${_rawlib})
+
+    IF(OPENMP_FOUND)
+        TARGET_LINK_LIBRARIES(${_target} ${OPENMP_LDFLAGS})
+    ENDIF()
+
+    IF (${_rawlib} MATCHES "raw_r")
+        TARGET_LINK_LIBRARIES(${_target} ${PTHREADS_LIBRARY})
     ENDIF()
 
     IF(WIN32)
         TARGET_LINK_LIBRARIES(${_target} ws2_32)
-    ENDIF(WIN32)
+    ENDIF()
 
     INSTALL(TARGETS ${_target}
             RUNTIME DESTINATION bin
@@ -636,8 +642,7 @@ IF(ENABLE_EXAMPLES)
     LIBRAW_BUILD_SAMPLES(multirender_test.cpp raw)
     LIBRAW_BUILD_SAMPLES(postprocessing_benchmark.cpp raw)
 
-    # These C sample files will be compiled only if LCMS v2 is detected, to prevent broken compilation
-    IF(LCMS_SUPPORT_CAN_BE_COMPILED AND PTHREADS_FOUND)
+    IF (PTHREADS_FOUND)
         IF(WIN32)
             LIBRAW_BUILD_SAMPLES(half_mt_win32.c raw_r)
         ELSE()
