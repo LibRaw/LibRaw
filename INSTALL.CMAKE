@@ -51,10 +51,10 @@ II. ./cmake options
   You need to download and unpack LibRaw-demosaic-pack-GPL2 archive to use 
   this feature.
   ./cmake will try to find demosaic pack in:
-     
+
      a) If folder is specified via  -DDDEMOSAIC_PACK_GPL2_RPATH=FOLDERNAME 
         command-line option, then only this folder will be checked.
-        
+
      b) If no folder is specified in -DDENABLE_DEMOSAIC_PACK_GPL2 switch:
 
           ./LibRaw-demosaic-pack-GPL2 (in LibRaw folder)
@@ -62,7 +62,7 @@ II. ./cmake options
 
 -DENABLE_DEMOSAIC_PACK_GPL3=ON/OFF
 -DDEMOSAIC_PACK_GPL3_RPATH=FOLDERNAME
-        
+
         Same as above, but for GPL3-licensed demosaic pack.
 
 
@@ -73,14 +73,14 @@ II. ./cmake options
   You need to download RawSpeed source code to use this feature.
   See README.RawSpeed.txt for details.
   ./cmake will try to find RawSpeed code in:
-     
+
      a) If folder is specified via  -DRAWSPEED_RPATH=FOLDERNAME 
         command-line option, then only this folder will be checked.
-        
+
      b) If no folder is specified in -DENABLE_RAWSPEED switch:
 
           ./RawSpeed (in LibRaw folder)
-          
+
 -DENABLE_DCRAW_DEBUG=ON/OFF
 
   Enables/disables support of additional debug traces from dcraw operations. Disabled by default
