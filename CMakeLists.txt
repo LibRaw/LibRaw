@@ -27,30 +27,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3)
 PROJECT(libraw)
 
 # ==================================================================================================
-# Project Options
-
-OPTION(ENABLE_OPENMP               "Build library with OpenMP support               (default=ON)"                 ON)
-OPTION(ENABLE_LCMS                 "Build library with LCMS support                 (default=ON)"                 ON)
-OPTION(ENABLE_EXAMPLES             "Build library with sample command-line programs (default=ON)"                 ON)
-OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"                OFF)
-OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2     (default=OFF)"                OFF)
-OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"                OFF)
-OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"                OFF)
-
-SET(DEMOSAIC_PACK_GPL2_RPATH "demosaic-pack-GPL2" CACHE STRING 
-    "Relavive path to extra Demosaic pack GPL2 (default=demosaic-pack-GPL2)")
-    
-SET(DEMOSAIC_PACK_GPL3_RPATH "demosaic-pack-GPL3" CACHE STRING 
-    "Relavive path to extra Demosaic pack GPL3 (default=demosaic-pack-GPL3)")
-    
-SET(RAWSPEED_RPATH           "RawSpeed"           CACHE STRING 
-    "Relavive path to extra RawSpeed codec     (default=RawSpeed)")
-
-SET(DEMOSAIC_PACK_GPL2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL2_RPATH}")
-SET(DEMOSAIC_PACK_GPL3_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL3_RPATH}")
-SET(RAWSPEED_PATH           "${CMAKE_CURRENT_SOURCE_DIR}/${RAWSPEED_RPATH}")
-    
-# ==================================================================================================
 # Library version info extraction
 
 FILE(READ ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw_version.h _libraw_version_content)
@@ -77,13 +53,37 @@ STRING(REGEX MATCH "#define LIBRAW_SHLIB_AGE[ \t]*([0-9]*)\n" _version_soage_mat
 SET(RAW_LIB_SO_AGE_VERSION "${CMAKE_MATCH_1}")
 
 # Set env. variables accordinly.
-SET(RAW_LIB_VERSION_STRING "${RAW_LIB_MAJOR_VERSION}.${RAW_LIB_MINOR_VERSION}.${RAW_LIB_PATCH_VERSION}")
-SET(RAW_LIB_VERSION_ID "0x${RAW_LIB_MAJOR_VERSION}${RAW_LIB_MINOR_VERSION}${RAW_LIB_PATCH_VERSION}")
+SET(RAW_LIB_VERSION_STRING    "${RAW_LIB_MAJOR_VERSION}.${RAW_LIB_MINOR_VERSION}.${RAW_LIB_PATCH_VERSION}")
+SET(RAW_LIB_VERSION_ID        "0x${RAW_LIB_MAJOR_VERSION}${RAW_LIB_MINOR_VERSION}${RAW_LIB_PATCH_VERSION}")
 SET(RAW_LIB_SO_VERSION_STRING "${RAW_LIB_SO_CUR_VERSION}.${RAW_LIB_SO_REV_VERSION}.${RAW_LIB_SO_AGE_VERSION}")
 
 MESSAGE(STATUS "LibRaw string version: ${RAW_LIB_VERSION_STRING}")
 MESSAGE(STATUS "LibRaw ID version:     ${RAW_LIB_VERSION_ID}")
 MESSAGE(STATUS "LibRaw SO version:     ${RAW_LIB_SO_VERSION_STRING}")
+
+# ==================================================================================================
+# Project Options
+
+OPTION(ENABLE_OPENMP               "Build library with OpenMP support               (default=ON)"                 ON)
+OPTION(ENABLE_LCMS                 "Build library with LCMS support                 (default=ON)"                 ON)
+OPTION(ENABLE_EXAMPLES             "Build library with sample command-line programs (default=ON)"                 ON)
+OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"                OFF)
+OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2     (default=OFF)"                OFF)
+OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"                OFF)
+OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"                OFF)
+
+SET(DEMOSAIC_PACK_GPL2_RPATH "LibRaw-demosaic-pack-GPL2-${RAW_LIB_VERSION_STRING}" CACHE STRING
+    "Relavive path to extra Demosaic pack GPL2 (default=LibRaw-demosaic-pack-GPL2-M.m.p)")
+
+SET(DEMOSAIC_PACK_GPL3_RPATH "LibRaw-demosaic-pack-GPL3-${RAW_LIB_VERSION_STRING}" CACHE STRING 
+    "Relavive path to extra Demosaic pack GPL3 (default=LibRaw-demosaic-pack-GPL3-M.m.p)")
+
+SET(RAWSPEED_RPATH           "RawSpeed"           CACHE STRING 
+    "Relavive path to extra RawSpeed codec     (default=RawSpeed)")
+
+SET(DEMOSAIC_PACK_GPL2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL2_RPATH}")
+SET(DEMOSAIC_PACK_GPL3_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DEMOSAIC_PACK_GPL3_RPATH}")
+SET(RAWSPEED_PATH           "${CMAKE_CURRENT_SOURCE_DIR}/${RAWSPEED_RPATH}")
 
 # ==================================================================================================
 # General definitions rules
@@ -93,12 +93,12 @@ IF(WIN32 AND MSVC)
     ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
     ADD_DEFINITIONS(-D_ATL_SECURE_NO_WARNINGS)
     ADD_DEFINITIONS(-D_AFX_SECURE_NO_WARNINGS)
-ENDIF(WIN32 AND MSVC)
+ENDIF()
 
 # Under Windows, use specific flag to compile.
 IF(WIN32)
     ADD_DEFINITIONS(-DDJGPP)
-ENDIF(WIN32)
+ENDIF()
 
 # -- Check dependencies --------------------------------------------------------------------------------
 
@@ -112,7 +112,7 @@ INCLUDE(MacroOptionalFindPackage)
 
 IF(NOT WIN32)
     FIND_LIBRARY(MATH_LIBRARY m)
-ENDIF(NOT WIN32)
+ENDIF()
 
 # LCMS version 1 and 2 library check
 
@@ -130,7 +130,7 @@ IF (ENABLE_LCMS)
         # For compatibility
         SET(LCMS2_LIBRARIES ${LCMS_LIBRARIES})
         SET(LCMS_SUPPORT_CAN_BE_COMPILED true)
-    ELSE (LCMS_FOUND)
+    ELSE ()
         MESSAGE(STATUS "Check for LCMS2 availability instead LCMS1...")
         FIND_PACKAGE(LCMS2)
         IF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
@@ -140,8 +140,8 @@ IF (ENABLE_LCMS)
             # Flag to compile Little CMS version 2 with LibRaw
             ADD_DEFINITIONS(-DUSE_LCMS2)
             SET(LCMS_SUPPORT_CAN_BE_COMPILED true)
-        ENDIF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
-    ENDIF (LCMS_FOUND)
+        ENDIF ()
+    ENDIF ()
 ENDIF()
 
 # For registration to libraw_config.h
@@ -165,7 +165,7 @@ IF(JPEG_FOUND)
         MESSAGE(STATUS "Identified libjpeg version less than 80 (too low)")
         SET(JPEG_FOUND FALSE)
     ENDIF()
-ENDIF(JPEG_FOUND)
+ENDIF()
 
 MACRO_LOG_FEATURE(JPEG_FOUND "libjpeg" "JPEG image format support" "http://www.ijg.org" FALSE "80" "needed for the LibRaw DNG lossy codec")
 
@@ -194,14 +194,14 @@ IF(ENABLE_OPENMP)
             SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
             IF("${OpenMP_CXX_FLAGS}" STREQUAL "-fopenmp")
                 SET(OPENMP_LDFLAGS "-lgomp")
-            ENDIF("${OpenMP_CXX_FLAGS}" STREQUAL "-fopenmp")
+            ENDIF()
             IF("${OpenMP_CXX_FLAGS}" STREQUAL "-xopenmp")
                 SET(OPENMP_LDFLAGS "-xopenmp")
-            ENDIF("${OpenMP_CXX_FLAGS}" STREQUAL "-xopenmp")
-        ENDIF(OPENMP_FOUND)
-    ENDIF(NOT APPLE)
+            ENDIF()
+        ENDIF()
+    ENDIF()
 ENDIF()
-    
+
 # For registration to libraw_config.h
 MACRO_BOOL_TO_01(OPENMP_FOUND LIBRAW_USE_OPENMP)
 
@@ -229,11 +229,11 @@ IF(ENABLE_RAWSPEED)
     FIND_PACKAGE(Pthreads)
 
     MESSAGE(STATUS "RawSpeed codec path: ${RAWSPEED_PATH}")
-        
+
     IF(EXISTS "${RAWSPEED_PATH}/Common.cpp")
         SET(RAWSPEED_FOUND true)
     ELSE()
-        MESSAGE(STATUS "RawSpeed source code not found. LibRaw cannot be compiled with it")
+        MESSAGE(STATUS "RawSpeed source code not found. Please checkout source code from RawStudio project website.")
     ENDIF()
 
     IF(ENABLE_RAWSPEED AND RAWSPEED_FOUND AND JPEG_FOUND AND LIBXML2_FOUND AND PTHREADS_FOUND)
@@ -333,7 +333,7 @@ IF(ENABLE_DEMOSAIC_PACK_GPL2)
         ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL2)
         SET(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED true)
     ELSE()
-        MESSAGE(STATUS "Demosaic pack GPL2 source code not found. LibRaw cannot be compiled with it")
+        MESSAGE(STATUS "Demosaic pack GPL2 source code not found. Please checkout source code from Libraw project website.")
     ENDIF()
 ENDIF()
 
@@ -344,14 +344,14 @@ SET(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED false)
 
 IF(ENABLE_DEMOSAIC_PACK_GPL3)
     MESSAGE(STATUS "Demosaic pack GPL3 path: ${DEMOSAIC_PACK_GPL3_PATH}")
-    
+
     IF(EXISTS "${DEMOSAIC_PACK_GPL3_PATH}/green_equi.c")
         INCLUDE_DIRECTORIES(${DEMOSAIC_PACK_GPL3_PATH})
         # Flag to include demosaic pack GPL3
         ADD_DEFINITIONS(-DLIBRAW_DEMOSAIC_PACK_GPL3)
         SET(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED true)
     ELSE()
-        MESSAGE(STATUS "Demosaic pack GPL3 source code not found. LibRaw cannot be compiled with it")
+        MESSAGE(STATUS "Demosaic pack GPL3 source code not found. Please checkout source code from Libraw project website.")
     ENDIF()
 ENDIF()
 
@@ -414,7 +414,7 @@ IF(JPEG_FOUND)
 ELSE()
     MESSAGE(STATUS " Libraw will be compiled with DNG lossy codec support ......... NO")
 ENDIF()
-              
+
 IF(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED)
     MESSAGE(STATUS " Libraw will be compiled with Demosaic Pack GPL2 support ...... YES")
 ELSE()
@@ -463,18 +463,23 @@ ENDIF()
 FOREACH(_curentfile ${libraw_LIB_SRCS})
     IF(WIN32 AND MSVC)
         SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -DLIBRAW_NOTHREADS")
-    ELSE(WIN32 AND MSVC)
+    ELSE()
         SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -DLIBRAW_NOTHREADS -fPIC -O4 ")
-    ENDIF(WIN32 AND MSVC)
+    ENDIF()
 ENDFOREACH(_curentfile ${libraw_LIB_SRCS})
 
 ADD_LIBRARY(raw SHARED ${libraw_LIB_SRCS})
 
-TARGET_LINK_LIBRARIES(raw
-                      ${MATH_LIBRARY}
-                      ${LCMS2_LIBRARIES}
-                      ${OPENMP_LDFLAGS}
-                     )
+TARGET_LINK_LIBRARIES(raw ${MATH_LIBRARY})
+
+IF(OPENMP_FOUND)
+    TARGET_LINK_LIBRARIES(raw ${OPENMP_LDFLAGS})
+ENDIF()
+
+IF(LCMS_SUPPORT_CAN_BE_COMPILED)
+    TARGET_LINK_LIBRARIES(raw ${LCMS2_LIBRARIES})
+ENDIF()
+
 IF(JPEG_FOUND)
     TARGET_LINK_LIBRARIES(raw ${JPEG_LIBRARY})
 ENDIF()
@@ -498,18 +503,23 @@ SET(libraw_r_LIB_SRCS ${libraw_LIB_SRCS})
 FOREACH(_curentfile ${libraw_r_LIB_SRCS})
     IF(WIN32 AND MSVC)
         SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w")
-    ELSE(WIN32 AND MSVC)
+    ELSE()
         SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -fPIC -O4")
-    ENDIF(WIN32 AND MSVC)
+    ENDIF()
 ENDFOREACH(_curentfile ${libraw_r_LIB_SRCS})
 
 ADD_LIBRARY(raw_r SHARED ${libraw_r_LIB_SRCS})
 
-TARGET_LINK_LIBRARIES(raw_r
-                      ${MATH_LIBRARY}
-                      ${LCMS2_LIBRARIES}
-                      ${OPENMP_LDFLAGS}
-                     )
+TARGET_LINK_LIBRARIES(raw_r ${MATH_LIBRARY})
+
+IF(OPENMP_FOUND)
+    TARGET_LINK_LIBRARIES(raw_r ${OPENMP_LDFLAGS})
+ENDIF()
+
+IF(LCMS_SUPPORT_CAN_BE_COMPILED)
+    TARGET_LINK_LIBRARIES(raw_r ${LCMS2_LIBRARIES})
+ENDIF()
+
 IF(JPEG_FOUND)
     TARGET_LINK_LIBRARIES(raw_r ${JPEG_LIBRARY})
 ENDIF()
@@ -537,7 +547,7 @@ IF(NOT WIN32)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libraw_r.pc DESTINATION lib/pkgconfig)
 
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/data/libraw.lsm.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw.lsm)
-ENDIF(NOT WIN32)
+ENDIF()
 
 # Install Shared header files.
 INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw.h
@@ -600,11 +610,19 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
     ADD_EXECUTABLE(${_target} ${${_target}_SRCS})
 
-    TARGET_LINK_LIBRARIES(${_target} ${_rawlib} ${OPENMP_LDFLAGS} ${PTHREADS_LIBRARY})
+    TARGET_LINK_LIBRARIES(${_target} ${_rawlib})
+
+    IF(OPENMP_FOUND)
+        TARGET_LINK_LIBRARIES(${_target} ${OPENMP_LDFLAGS})
+    ENDIF()
+
+    IF (${_rawlib} MATCHES "raw_r")
+        TARGET_LINK_LIBRARIES(${_target} ${PTHREADS_LIBRARY})
+    ENDIF()
 
     IF(WIN32)
         TARGET_LINK_LIBRARIES(${_target} ws2_32)
-    ENDIF(WIN32)
+    ENDIF()
 
     INSTALL(TARGETS ${_target}
             RUNTIME DESTINATION bin
@@ -624,13 +642,12 @@ IF(ENABLE_EXAMPLES)
     LIBRAW_BUILD_SAMPLES(multirender_test.cpp raw)
     LIBRAW_BUILD_SAMPLES(postprocessing_benchmark.cpp raw)
 
-    # These C sample files will be compiled only if LCMS v2 is detected, to prevent broken compilation
-    IF(LCMS2_FOUND)
+    IF (PTHREADS_FOUND)
         IF(WIN32)
             LIBRAW_BUILD_SAMPLES(half_mt_win32.c raw_r)
-        ELSE(WIN32)
+        ELSE()
             LIBRAW_BUILD_SAMPLES(dcraw_half.c raw_r)
             LIBRAW_BUILD_SAMPLES(half_mt.c raw_r)
-        ENDIF(WIN32)
-    ENDIF(LCMS2_FOUND)
+        ENDIF()
+    ENDIF()
 ENDIF()
