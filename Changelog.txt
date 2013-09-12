@@ -1,3 +1,7 @@
+2013-09-12 Alex Tutubalin <lexa@lexa.ru>
+  * Olympus E-M1 support
+2013-09-10 Alex Tutubalin <lexa@lexa.ru>
+  * Imported CMake stuff
 2013-09-04 Alex Tutubalin <lexa@lexa.ru>
   * Panasonic GX7 color data
 2013-09-03 Alex Tutubalin <lexa@lexa.ru>
