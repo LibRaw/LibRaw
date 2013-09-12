@@ -71,6 +71,7 @@ OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec supp
 OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2     (default=OFF)"                OFF)
 OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"                OFF)
 OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"                OFF)
+OPTION(CHECKOUT_RAWSPEED           "Checkout extra RawSpeed codec source code       (default=OFF)"                OFF)
 
 SET(DEMOSAIC_PACK_GPL2_RPATH "LibRaw-demosaic-pack-GPL2-${RAW_LIB_VERSION_STRING}" CACHE STRING
     "Relavive path to extra Demosaic pack GPL2 (default=LibRaw-demosaic-pack-GPL2-M.m.p)")
@@ -224,6 +225,18 @@ SET(RAWSPEED_FOUND false)
 SET(RAWSPEED_SUPPORT_CAN_BE_COMPILED false)
 
 IF(ENABLE_RAWSPEED)
+
+    IF(CHECKOUT_RAWSPEED)
+        IF(EXISTS ${RAWSPEED_PATH})
+#            REMOVE_DIRECTORY(${RAWSPEED_PATH})
+        ENDIF()
+
+        FILE(MAKE_DIRECTORY ${RAWSPEED_PATH})
+        EXECUTE_PROCESS(WORKING_DIRECTORY ${RAWSPEED_PATH}
+                        COMMAND svn co http://rawstudio.org/svn/rawspeed/RawSpeed)
+        EXECUTE_PROCESS(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/rawspeed.cpucount-unix.patch -d ${RAWSPEED_PATH})
+    ENDIF()
 
     FIND_PACKAGE(LibXml2)
     FIND_PACKAGE(Pthreads)
