@@ -21,11 +21,11 @@ cmake -G "Unix Makefiles" . \
       -DENABLE_OPENMP=ON \
       -DENABLE_LCMS=ON \
       -DENABLE_EXAMPLES=ON \
-      -DENABLE_RAWSPEED=ON \
+      -DENABLE_RAWSPEED=OFF \
       -DRAWSPEED_RPATH=../RawSpeed \
-      -DENABLE_DEMOSAIC_PACK_GPL2=ON \
+      -DENABLE_DEMOSAIC_PACK_GPL2=OFF \
       -DDEMOSAIC_PACK_GPL2_RPATH=../LibRaw-demosaic-pack-GPL2/ \
-      -DENABLE_DEMOSAIC_PACK_GPL3=ON \
+      -DENABLE_DEMOSAIC_PACK_GPL3=OFF \
       -DDEMOSAIC_PACK_GPL3_RPATH=../LibRaw-demosaic-pack-GPL3/ \
       -DENABLE_DCRAW_DEBUG=ON \
       ..
