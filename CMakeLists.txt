@@ -227,15 +227,29 @@ SET(RAWSPEED_SUPPORT_CAN_BE_COMPILED false)
 IF(ENABLE_RAWSPEED)
 
     IF(CHECKOUT_RAWSPEED)
+    
+        FIND_PACKAGE(Subversion REQUIRED)
+        FIND_PACKAGE(Patch REQUIRED)
+        
         IF(EXISTS ${RAWSPEED_PATH})
             FILE(REMOVE_RECURSE ${RAWSPEED_PATH})
         ENDIF()
-
         FILE(MAKE_DIRECTORY ${RAWSPEED_PATH})
+
+        # Checkout source from subversion repository
         EXECUTE_PROCESS(WORKING_DIRECTORY ${RAWSPEED_PATH}
-                        COMMAND svn co http://rawstudio.org/svn/rawspeed/RawSpeed)
+                        COMMAND ${Subversion_SVN_EXECUTABLE} co http://rawstudio.org/svn/rawspeed/RawSpeed)
+
+        # Apply patches to be compatible with libraw
         EXECUTE_PROCESS(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/rawspeed.cpucount-unix.patch -d ${RAWSPEED_PATH})
+                        COMMAND ${PATCH_EXECUTABLE} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/rawspeed.cpucount-unix.patch -d ${RAWSPEED_PATH})
+                        
+        IF(WIN32)
+            EXECUTE_PROCESS(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                            COMMAND ${PATCH_EXECUTABLE} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/RawSpeed/rawspeed.win32-dll.patch -d ${RAWSPEED_PATH})
+
+        ENDIF()
+                        
     ENDIF()
 
     FIND_PACKAGE(LibXml2)
