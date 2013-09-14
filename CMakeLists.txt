@@ -72,6 +72,8 @@ OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2 
 OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"                OFF)
 OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"                OFF)
 OPTION(CHECKOUT_RAWSPEED           "Checkout extra RawSpeed codec source code       (default=OFF)"                OFF)
+OPTION(CHECKOUT_DEMOSAIC_PACK_GPL2 "Checkout extra Demosaic pack GPL2 source code   (default=OFF)"                OFF)
+OPTION(CHECKOUT_DEMOSAIC_PACK_GPL3 "Checkout extra Demosaic pack GPL3 source code   (default=OFF)"                OFF)
 
 SET(DEMOSAIC_PACK_GPL2_RPATH "LibRaw-demosaic-pack-GPL2-${RAW_LIB_VERSION_STRING}" CACHE STRING
     "Relavive path to extra Demosaic pack GPL2 (default=LibRaw-demosaic-pack-GPL2-M.m.p)")
@@ -352,6 +354,22 @@ ENDIF()
 SET(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED false)
 
 IF(ENABLE_DEMOSAIC_PACK_GPL2)
+
+    IF(CHECKOUT_DEMOSAIC_PACK_GPL2)
+    
+        FIND_PACKAGE(Git REQUIRED)
+        
+        IF(EXISTS ${DEMOSAIC_PACK_GPL2_PATH})
+            FILE(REMOVE_RECURSE ${DEMOSAIC_PACK_GPL2_PATH})
+        ENDIF()
+        FILE(MAKE_DIRECTORY ${DEMOSAIC_PACK_GPL2_PATH})
+
+        # Checkout source from git repository
+        EXECUTE_PROCESS(WORKING_DIRECTORY ${DEMOSAIC_PACK_GPL2_PATH}
+                        COMMAND ${GIT_EXECUTABLE} clone https://github.com/LibRaw/LibRaw-demosaic-pack-GPL2.git ./)
+
+    ENDIF()
+
     MESSAGE(STATUS "Demosaic pack GPL2 path: ${DEMOSAIC_PACK_GPL2_PATH}")
 
     IF(EXISTS "${DEMOSAIC_PACK_GPL2_PATH}/dcraw_foveon.c")
@@ -370,6 +388,22 @@ MACRO_BOOL_TO_01(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_DEMOSAIC_
 SET(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED false)
 
 IF(ENABLE_DEMOSAIC_PACK_GPL3)
+
+    IF(CHECKOUT_DEMOSAIC_PACK_GPL3)
+    
+        FIND_PACKAGE(Git REQUIRED)
+        
+        IF(EXISTS ${DEMOSAIC_PACK_GPL3_PATH})
+            FILE(REMOVE_RECURSE ${DEMOSAIC_PACK_GPL3_PATH})
+        ENDIF()
+        FILE(MAKE_DIRECTORY ${DEMOSAIC_PACK_GPL3_PATH})
+
+        # Checkout source from git repository
+        EXECUTE_PROCESS(WORKING_DIRECTORY ${DEMOSAIC_PACK_GPL3_PATH}
+                        COMMAND ${GIT_EXECUTABLE} clone https://github.com/LibRaw/LibRaw-demosaic-pack-GPL3.git ./)
+
+    ENDIF()
+    
     MESSAGE(STATUS "Demosaic pack GPL3 path: ${DEMOSAIC_PACK_GPL3_PATH}")
 
     IF(EXISTS "${DEMOSAIC_PACK_GPL3_PATH}/green_equi.c")
