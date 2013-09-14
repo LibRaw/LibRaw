@@ -67,20 +67,27 @@ MESSAGE(STATUS "LibRaw SO version:     ${RAW_LIB_SO_VERSION_STRING}")
 OPTION(ENABLE_OPENMP               "Build library with OpenMP support               (default=ON)"                 ON)
 OPTION(ENABLE_LCMS                 "Build library with LCMS support                 (default=ON)"                 ON)
 OPTION(ENABLE_EXAMPLES             "Build library with sample command-line programs (default=ON)"                 ON)
-OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"                OFF)
+OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"                OFF)
+
 OPTION(ENABLE_DEMOSAIC_PACK_GPL2   "Build library with extra Demosaic pack GPL2     (default=OFF)"                OFF)
 OPTION(ENABLE_DEMOSAIC_PACK_GPL3   "Build library with extra Demosaic pack GPL3     (default=OFF)"                OFF)
-OPTION(ENABLE_DCRAW_DEBUG          "Build library with debug message from dcraw     (default=OFF)"                OFF)
-OPTION(CHECKOUT_RAWSPEED           "Checkout extra RawSpeed codec source code       (default=OFF)"                OFF)
+OPTION(ENABLE_RAWSPEED             "Build library with extra RawSpeed codec support (default=OFF)"                OFF)
+
 OPTION(CHECKOUT_DEMOSAIC_PACK_GPL2 "Checkout extra Demosaic pack GPL2 source code   (default=OFF)"                OFF)
 OPTION(CHECKOUT_DEMOSAIC_PACK_GPL3 "Checkout extra Demosaic pack GPL3 source code   (default=OFF)"                OFF)
+OPTION(CHECKOUT_RAWSPEED           "Checkout extra RawSpeed codec source code       (default=OFF)"                OFF)
+
+SET(DEMOSAIC_PACK_GPL2_REVISION "tags/${RAW_LIB_VERSION_STRING}" CACHE STRING
+    "Git repository revision of extra Demosaic pack GPL2 (default=tags/M.m.p)")
+SET(DEMOSAIC_PACK_GPL3_REVISION "tags/${RAW_LIB_VERSION_STRING}" CACHE STRING
+    "Git repository revision of extra Demosaic pack GPL2 (default=tags/M.m.p)")
+SET(RAWSPEED_REVISION "HEAD" CACHE STRING
+    "Subversion repository revision of extra RawSPeed codec (default=HEAD)")
 
 SET(DEMOSAIC_PACK_GPL2_RPATH "LibRaw-demosaic-pack-GPL2-${RAW_LIB_VERSION_STRING}" CACHE STRING
     "Relavive path to extra Demosaic pack GPL2 (default=LibRaw-demosaic-pack-GPL2-M.m.p)")
-
 SET(DEMOSAIC_PACK_GPL3_RPATH "LibRaw-demosaic-pack-GPL3-${RAW_LIB_VERSION_STRING}" CACHE STRING 
     "Relavive path to extra Demosaic pack GPL3 (default=LibRaw-demosaic-pack-GPL3-M.m.p)")
-
 SET(RAWSPEED_RPATH           "RawSpeed"           CACHE STRING 
     "Relavive path to extra RawSpeed codec     (default=RawSpeed)")
 
@@ -240,7 +247,7 @@ IF(ENABLE_RAWSPEED)
 
         # Checkout source from subversion repository
         EXECUTE_PROCESS(WORKING_DIRECTORY ${RAWSPEED_PATH}
-                        COMMAND ${Subversion_SVN_EXECUTABLE} co http://rawstudio.org/svn/rawspeed/RawSpeed)
+                        COMMAND ${Subversion_SVN_EXECUTABLE} co http://rawstudio.org/svn/rawspeed/RawSpeed@${RAWSPEED_REVISION})
 
         # Apply patches to be compatible with libraw
         EXECUTE_PROCESS(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -349,7 +356,7 @@ IF(RAWSPEED_SUPPORT_CAN_BE_COMPILED)
 
 ENDIF()
 
-# -- Common LibRaw library compilation rules ------------------------------------------------------------------
+# -- GPL2 and GPL3 pexrae packs compilation rules ------------------------------------------------------------------
 
 SET(DEMOSAIC_PACK_GPL2_SUPPORT_CAN_BE_COMPILED false)
 
@@ -368,6 +375,8 @@ IF(ENABLE_DEMOSAIC_PACK_GPL2)
         EXECUTE_PROCESS(WORKING_DIRECTORY ${DEMOSAIC_PACK_GPL2_PATH}
                         COMMAND ${GIT_EXECUTABLE} clone https://github.com/LibRaw/LibRaw-demosaic-pack-GPL2.git ./)
 
+        EXECUTE_PROCESS(WORKING_DIRECTORY ${DEMOSAIC_PACK_GPL2_PATH}
+                        COMMAND ${GIT_EXECUTABLE} checkout ${DEMOSAIC_PACK_GPL2_REVISION})
     ENDIF()
 
     MESSAGE(STATUS "Demosaic pack GPL2 path: ${DEMOSAIC_PACK_GPL2_PATH}")
@@ -401,6 +410,9 @@ IF(ENABLE_DEMOSAIC_PACK_GPL3)
         # Checkout source from git repository
         EXECUTE_PROCESS(WORKING_DIRECTORY ${DEMOSAIC_PACK_GPL3_PATH}
                         COMMAND ${GIT_EXECUTABLE} clone https://github.com/LibRaw/LibRaw-demosaic-pack-GPL3.git ./)
+                        
+        EXECUTE_PROCESS(WORKING_DIRECTORY ${DEMOSAIC_PACK_GPL3_PATH}
+                        COMMAND ${GIT_EXECUTABLE} checkout ${DEMOSAIC_PACK_GPL3_REVISION})                        
 
     ENDIF()
     
@@ -418,6 +430,8 @@ ENDIF()
 
 # For registration to libraw_config.h
 MACRO_BOOL_TO_01(DEMOSAIC_PACK_GPL3_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_DEMOSAIC_PACK_GPL3)
+
+# -- Common LibRaw library compilation rules ------------------------------------------------------------------
 
 # Flag to add debug print on the console 
 IF(ENABLE_DCRAW_DEBUG)
