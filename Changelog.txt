@@ -1,3 +1,5 @@
+2013-09-15 Alex Tutubalin <lexa@lexa.ru>
+  * Olympus E-M1 support updated
 2013-09-12 Alex Tutubalin <lexa@lexa.ru>
   * Olympus E-M1 support
 2013-09-10 Alex Tutubalin <lexa@lexa.ru>
