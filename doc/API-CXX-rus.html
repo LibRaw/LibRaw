@@ -39,6 +39,8 @@
           <li><a href="#set_rawspeed_camerafile">int LibRaw::set_rawspeed_camerafile(char *path_to_cameras_xml)</a></li>
           <li><a href="#get_decoder_info">int LibRaw::get_decoder_info(libraw_decoder_info_t *)</a></li>
           <li><a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
+          <li><a href="#COLOR">int LibRaw::COLOR()</a>
+          <li><a href="#setCancelFlag">void LibRaw::setCancelFlag()</a>
           <li><a href="#subtract_black">int LibRaw::subtract_black()</a>
           <li><a  href="#recycle">void LibRaw::recycle_datastream(void)</a></li>
           <li><a  href="#recycle">void LibRaw::recycle(void)</a></li>
@@ -305,6 +307,23 @@
     <p>
       Возвращает имя функции-распаковщика файла. Интересна только разработчикам тестов для LibRaw, чтобы проверить
       test coverage.
+    </p>
+    <a name="setCancelFlag"></a>
+    <h4>void LibRaw::setCancelFlag()</h4>
+    <p>
+      Этот вызов устанавливает внутренний флаг быстрого завершения декодера.
+      Если флаг установлен, то декодер будет завершен так быстро, насколько 
+      это возможно.
+      Данный флаг предназначен для ситуации, когда вам нужно быстро завершить
+      все декодеры LibRaw, например для быстрого завершения программы.
+    </p>
+
+    <a name="COLOR"></a>
+    <h4>int LibRaw::COLOR(int row, int col)</h4>
+    <p>
+      Этот вызов возвращает цвет (номер цветового компонента) пиксела с
+      координатами row,col. Для 4-цветных файлов (CMYG, RGBG2) возвращается
+      число в диапазоне 0..3, для 3-цветных файлов - в диапазоне 0..2.
     </p>
     <a name="subtract_black"></a>
     <h4>void LibRaw::subtract_black()</h4>

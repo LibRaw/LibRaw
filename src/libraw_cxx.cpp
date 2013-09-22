@@ -3452,7 +3452,11 @@ void LibRaw::x3f_load_raw()
       for (int row=0; row < ID->rows; row++) {
           for (int col=0; col < ID->columns; col++) {
               for (int color=0; color < 3; color++)
-                imgdata.image[row*S.width+col][color] = data[3 * (ID->columns * row + col) + color];
+                {
+                  imgdata.image[row*S.width+col][color] = data[3 * (ID->columns * row + col) + color];
+                  if((short)imgdata.image[row*S.width+col][color] < 0)
+                    imgdata.image[row*S.width+col][color] = 0;
+                }
               imgdata.image[row*S.width+col][3]=0;
           }
         }

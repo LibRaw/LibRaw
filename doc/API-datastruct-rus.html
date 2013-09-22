@@ -158,8 +158,12 @@
 	Специальные значения данного поля:
 <ul>
 <li><b>1</b> - Leaf Catchlight с байеровской матрицей 16x16
-<li><b>2</b> - Fuji X-Trans с матрицей 6x6
+<li><b>9</b> - Fuji X-Trans с матрицей 6x6
 </ul>
+      </dd>
+      <dt><b>char        xtrans[6][6];</b></dt>
+      <dd>
+        Эта матрица содержит мэппинг цветов в блоке 6x6 сенсора Fuji X-Trans.
       </dd>
       <dt><b>char        cdesc[5];</b></dt>
       <dd>
@@ -501,7 +505,7 @@
       </dd>
       <dt><b>char*         camera_profile;</b></dt>
       <dd>
-        <b>Ключи dcraw:</b>    -o имя файла<br/>
+        <b>Ключи dcraw:</b>    -p имя файла<br/>
         Путь к ICC-файлу профиля камеры (используется только если библиотека собрана с поддержкой LCMS)
       </dd>
       <dt><b>char*         bad_pixels;</b></dt>
@@ -549,6 +553,8 @@
           <li>8 - Смешанная VCD/измененная AHD</li>
           <li>9 - LMMSE-интерполяция</li>
           <li>10 - AMaZE-интерполяция</li>
+      	  <li>11 - DHT-интерполяция</li>
+          <li>12 - Еще одна модицифицированная AHD</li>
           </ul>
         Значения 5-9 имеют смысл только если LibRaw скомпилирована с "LibRaw demosaic pack GPL2"
         (файл README.demosaic-packs в вашем дистрибутиве LibRaw описывает это в подробностях).
@@ -712,6 +718,19 @@
       <dt><b>int use_rawspeed;</b></dt>
       <dd>
         Включает использование библиотеки RawSpeed (только если LibRaw собрана с поддержкой этой библиотеки)
+      </dd>
+      <dt><b>int no_auto_scale;</b></dt>
+      <dd>
+        Запрещает масштабирование значений пикселов (LibRaw::scale_colors()) 
+	при обработке в  LibRaw::dcraw_process()
+      </dd>
+      <dt><b>int no_interpolation;</b></dt>
+      <dd>
+        Запрещает вызов демозаики при обработке в LibRaw::dcraw_process()
+      </dd>
+      <dt><b>int sraw_ycc;</b></dt>
+      <dd>
+        Запрещает преобразование из YCbCr в  RGB для файлов  Canon sRAW/mRAW.
       </dd>
     </dl>
     <a name="libraw_decoder_info_t"></a>
