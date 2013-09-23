@@ -1,38 +1,86 @@
-﻿2013-07-03 Alex Tutubalin <lexa@lexa.ru>
-  * Импортирована dcraw 9.19/1.456
-    + Поддержка новых камер
-      Baumer TXG14
-      Canon EOS C500
-      Nikon D5200
-      OmniVision OV5647 (Raspberry Pi)
-      Panasonic DMC-GF6
-      Samsung NX300, NX1100, NX2000
-      Sony NEX-3N
-    + Новый код интерполяции для сенсоров Fuji X-Trans
-    + Для сенсоров Fuji X-Trans поле imgdata.iparams.filters имеет
-      значение 9 (было 2)
-  * Новое поле данных imgdata.iparams.xtrans[6][6] содержащее 
-    значения цветов для матриц Fuji X-Trans
-  * Временно удалено OpenMP-ускорение для ahd-демозаики.
-  * Удален быстрый декодер Lossless JPEG, перенесенный в свое время из
-    библиотеки RawSpeed. Для использования быстрых декодеров, используйте
-    LibRaw вместе с RawSpeed
-  * Для классов LibRaw*datastream удален метод make_byte_buffer() 
-    и сопутствующий код.
-  * Исправлена ошибка при декодировании некоторых файлов Canon sRAW.
+﻿2013-09-22 Alex Tutubalin <lexa@lexa.ru>
+  * Поддержка новых камер
+     Baumer TXG14
+     Blackmagic Cinema
+     Canon EOS 70D, C500
+     Fujifilm X-M1
+     Nikon D5200
+     Olympus E-P5,E-M1
+     OmniVision OV5647 (Raspberry Pi)
+     Panasonic LF1, GX7, GF6
+     Richon GR
+     Samsung NX300, NX1100, NX2000
+     Sony RX100II, RX1R, NEX-3N
 
-2013-05-27 Alex Tutubalin <lexa@lexa.ru>
-  * Новые алгоритмы демозаики:
-  	DHT Demosaic by Anton Petrusevich
-  	Modified AHD Demosaic by Anton Petrusevich
-    Включаются через params.user_qual (11 и 12, соответственно)
+  * Новый код для поддержки Foveon, основанный на библиотеке x3f 
+    (by Roland Karlsson)
+    BSD-лицензия, поэтому включен в основное дерево исходных текстов LibRaw
+    Отсутствует интерполяция цвета (необходимая для старых камер), поэтому
+    получить приемлемый цвет для старых камер (Sigma SD9 и SD14, Polaroid x530)
+    скорее всего не получится. Для современных Foveon-камер можно пытаться
+    обойтись ICC-профилем (пока его нет).
 
-  * Новый вызов C-API libraw_COLOR(libraw_data_t *t, int row,int col)
-    Это LibRaw::COLOR(row,col), но для пользователей C API
+    TODO: извлечение thumbnails, быстрое завершение декодера, переход на
+     LibRaw_memmgr для аллокаций.
 
-  * Новый параметр постобработкеи params.no_auto_scale
-    Если его поставить в не-0, то при постобработке в dcraw_process()
-    не будет вызываться scale_colors()
+    При сборке с LIBRAW_DEMOSAIC_PACK_GPL2 будет работать старый
+    Foveon-код (из dcraw)
+
+  * Изменения в API:
+
+    + Новые параметры процессинга (в imgdata.params)
+      - imgdata.params.no_interpolation - выключает этап интерполяции 
+        (дебайера) в вызове LibRaw::dcraw_process().
+      - imgdata.params.no_auto_scale - выключает этап масштабирования данных
+        (scale_colors() в вызове LibRaw::dcraw_process()
+      - imgdata.params.sraw_ycc - запрещает преобразование YCbCr-данных
+        файлов Canon sRAW/mRAW в RGB-формат при распаковке (LibRaw::unpack())
+
+    + Новый код обработки Fuji X-Trans привносит следующие изменения:
+      - Для файлов X-Trans значение поля imgdata.iparams.filters теперь
+        равно 9 (было 2).
+      - В массиве imgdata.iparams.xtrans[6][6] содержится цвет пикселя в 
+        блоке 6x6.
+
+    + Новый вызов: LibRaw::setCancelFlag() - быстрая остановка декодера
+      (LibRaw::unpack() если он работает. Для использования в многопоточных
+      программах.
+
+    + В интерфейсе абстрактного класса LibRaw_abstract_datastream 
+      заведующего чтением данных удален вызов make_byte_buffer(),
+      он более не нужен.
+
+    + Новый метод демозаики: DHT Demosaic by Anton Petrusevich
+      Использование: imgdata.params.user_qual=11 
+
+    + Новый метод демозаики: Modified AHD Demosaic by Anton Petrusevich
+      Использование: imgdata.params.user_qual=12 
+
+    + Новый вызов C-API: libraw_COLOR(libraw_data_t *t, int row,int col)
+      (это  LibRaw::COLOR(row,col) для пользователей C-API)
+
+  * Удален (более) быстрый декодер LJPEG, идея которого была позаимствованна
+    в свое время в библиотеке RawSpeed. Для быстрого декодирования 
+    используйте интеграцию RawSpeed и LibRaw
+
+  * Исправлена ошибка декодирования некоторых файлов Canon sRAW.
+
+  * Выключена обработка bad pixels встроенная в RawSpeed, при необходимости
+    используется обработка, встроенная в LibRaw.
+
+  * Имена камер Canon выдаются по таблице unique ID (т.е. 700D всегда будет
+    700D, даже если в EXIF написано Rebel T5i)
+
+  * Импортированы дополнительные проверки данных из LibRaw 0.15.4
+
+  * Поддержка сборки CMake
+
+  * Обновлен встроенный cameras.xml (RawSpeed)
+
+  * Много изменений в структурах данных, все приложения, использующие LibRaw,
+    должны быть перекомпилированы.
+
+  * LibRaw 0.16.0-Alpha1
 
 2013-05-23 Alex Tutubalin <lexa@lexa.ru>
 

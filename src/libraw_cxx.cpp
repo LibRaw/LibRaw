@@ -45,6 +45,7 @@ it under the terms of the one of three licenses as you choose:
 #include <RawSpeed/ColorFilterArray.h>
 #endif
 
+
 #ifdef __cplusplus
 extern "C" 
 {
@@ -2615,7 +2616,9 @@ int LibRaw::dcraw_process(void)
               if ((short) imgdata.image[0][i] < 0) imgdata.image[0][i] = 0;
           }
         else
-          foveon_interpolate();
+          {
+            foveon_interpolate();
+          }
         SET_PROC_FLAG(LIBRAW_PROGRESS_FOVEON_INTERPOLATE);
       }
 
@@ -3249,9 +3252,7 @@ static const char  *static_camera_list[] =
 "PhaseOne P 65",
 "PhaseOne P 65+",
 "Pixelink A782",
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
 "Polaroid x530",
-#endif
 "Ricoh GR Digital",
 "Ricoh GR Digital II",
 "Ricoh GR Digital III",
@@ -3289,7 +3290,6 @@ static const char  *static_camera_list[] =
 "Seitz Roundshot D3",
 "Seitz Roundshot D2X",
 "Seitz Roundshot D2xs",
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
 "Sigma SD9",
 "Sigma SD10",
 "Sigma SD14",
@@ -3304,7 +3304,6 @@ static const char  *static_camera_list[] =
 "Sigma DP2 Merill",
 "Sigma DP2S",
 "Sigma DP2X",
-#endif
 "Sinar 3072x2048",
 "Sinar 4080x4080",
 "Sinar 4080x5440",
@@ -3417,4 +3416,55 @@ const char * LibRaw::strprogress(enum LibRaw_progress p)
     default:
       return "Some strange things";
     }
+}
+
+#undef ID
+#include "../internal/libraw_x3f.cpp"
+
+void LibRaw::x3f_load_raw()
+{
+  int raise_error=0;
+  x3f_t *x3f = NULL;
+  x3f = x3f_new_from_file(libraw_internal_data.internal_data.input);
+  if(X3F_OK == x3f_load_data(x3f, x3f_get_raw(x3f)))
+    {
+      x3f_directory_entry_t *DE = x3f_get_raw(x3f);
+      x3f_directory_entry_header_t *DEH = &DE->header;
+      x3f_image_data_t *ID = &DEH->data_subsection.image_data;
+      x3f_huffman_t *HUF = ID->huffman;
+      x3f_true_t *TRU = ID->tru;
+      uint16_t *data = NULL;
+      if(ID->rows != S.height || ID->columns != S.width)
+        {
+          raise_error = 1;
+          goto cleanup;
+        }
+      if (HUF != NULL)
+        data = HUF->x3rgb16.element;
+      if (TRU != NULL)
+        data = TRU->x3rgb16.element;
+      if (data == NULL) 
+        {
+          raise_error = 1;
+          goto cleanup;
+        }
+      for (int row=0; row < ID->rows; row++) {
+          for (int col=0; col < ID->columns; col++) {
+              for (int color=0; color < 3; color++)
+                {
+                  imgdata.image[row*S.width+col][color] = data[3 * (ID->columns * row + col) + color];
+                  if((short)imgdata.image[row*S.width+col][color] < 0)
+                    imgdata.image[row*S.width+col][color] = 0;
+                }
+              imgdata.image[row*S.width+col][3]=0;
+          }
+        }
+
+    }
+  else
+    raise_error = 1;
+ cleanup:
+  x3f_delete(x3f);
+  if(raise_error)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
 }

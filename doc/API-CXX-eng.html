@@ -38,6 +38,8 @@
           <li><a href="#set_rawspeed_camerafile">int LibRaw::set_rawspeed_camerafile(char *path_to_cameras_xml)</a></li>
           <li><a href="#get_decoder_info">int LibRaw::get_decoder_info(libraw_decoder_info_t *)</a></li>
           <li><a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
+          <li><a href="#COLOR">int LibRaw::COLOR()</a>
+          <li><a href="#setCancelFlag">void LibRaw::setCancelFlag()</a>
           <li><a href="#subtract_black">int LibRaw::subtract_black()</a>
           <li><a  href="#recycle">void LibRaw::recycle_datastream(void)</a></li>
           <li><a href="#recycle">void LibRaw::recycle(void)</a></li>
@@ -303,6 +305,21 @@ LibRaw.
     <p>
       Returns function name of file unpacking function. Intended only for LibRaw test suite designers to use in test
       coverage evaluation.
+    </p>
+
+    <a name="setCancelFlag"></a>
+    <h4>void LibRaw::setCancelFlag()</h4>
+    <p>
+      This call sets internal fast cancel flags. If set, current Raw decoder will be terminated ASAP.
+      This call is useful if you need to cancel all LibRaw decoders in multithreaded program (e.g. for
+      fast program termination).
+    </p>
+
+    <a name="COLOR"></a>
+    <h4>int LibRaw::COLOR(int row, int col)</h4>
+    <p>
+      This call returns pixel color (color component number) in bayer patter at row,col. The returned value
+      is in 0..3 range  for 4-component Bayer (RGBG2, CMYG and so on) and in 0..2 range for 3-color data.
     </p>
 
     <a name="subtract_black"></a>
@@ -769,7 +786,7 @@ LibRaw.
         Returns name of opened file if datastream object knows it (for example,
         <b>LibRaw_file_datastream</b> used). Filename used in:
         <ul>
-          <li>error notofocation callbacks;</li>
+          <li>error notification callbacks;</li>
           <li>generation of filename of JPEG-file with metadata when needed (i.e. cameras with 'Diag RAW hack').
         </ul>
       </dd>
@@ -914,7 +931,7 @@ LibRaw.
     <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
 <!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
 <!-- hhmts start -->
-Last modified: Fri Aug 24 00:27:40 MSK 2012
+Last modified: Sun Sep 22 13:53:18 MSK 2013
 <!-- hhmts end -->
   </body>
 </html>

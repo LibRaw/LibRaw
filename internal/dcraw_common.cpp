@@ -7911,10 +7911,8 @@ void CLASS identify()
     parse_sinar_ia();
   else if (!memcmp (head,"\0MRM",4))
     parse_minolta(0);
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
   else if (!memcmp (head,"FOVb",4))
     parse_foveon();
-#endif
   else if (!memcmp (head,"CI",2))
     parse_cine();
   else

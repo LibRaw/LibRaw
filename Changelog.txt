@@ -1,74 +1,76 @@
-2013-09-15 Alex Tutubalin <lexa@lexa.ru>
-  * Olympus E-M1 support updated
-2013-09-12 Alex Tutubalin <lexa@lexa.ru>
-  * Olympus E-M1 support
-2013-09-10 Alex Tutubalin <lexa@lexa.ru>
-  * Imported CMake stuff
-2013-09-04 Alex Tutubalin <lexa@lexa.ru>
-  * Panasonic GX7 color data
-2013-09-03 Alex Tutubalin <lexa@lexa.ru>
-  * imgdata.params.no_interpolation - disables
-    interpolation step in dcraw_process()
-    use -disinterp switch to dcraw_sample to test
-
-2013-08-29 Alex Tutubalin <lexa@lexa.ru>
-  * Backported 0.15.4 input data checks
-    http://www.openwall.com/lists/oss-security/2013/08/29/3
-2013-08-23 Alex Tutubalin <lexa@lexa.ru>
-  * EOS M and EOS 70D added to unique ID table
-  * Canon EOS model name normalized by unique ID table
-
-2013-08-09 Alex Tutubalin <lexa@lexa.ru>
-  * Disabled RawSpeed's bad pixel processing
-
-2013-08-08 Alex Tutubalin <lexa@lexa.ru>
-  * OpenMP AHD code backported from 0.15 branch
-  * LibRaw::setCancelFlag() for fast decoder termination
-
-2013-08-07 Alex Tutubalin <lexa@lexa.ru>
-  * New camera/format support:
+2013-09-22 Alex Tutubalin <lexa@lexa.ru>
+  * Support for new cameras:
+     Baumer TXG14
      Blackmagic Cinema
-     Richon GR
-     Panasonic LF1
+     Canon EOS 70D, C500
      Fujifilm X-M1
-     Canon EOS 70D
-     Sony RX100II, RX1R
-     Olympus E-P5
+     Nikon D5200
+     Olympus E-P5,E-M1
+     OmniVision OV5647 (Raspberry Pi)
+     Panasonic LF1, GX7, GF6
+     Richon GR
+     Samsung NX300, NX1100, NX2000
+     Sony RX100II, RX1R, NEX-3N
 
-2013-07-08 Alex Tutubalin <lexa@lexa.ru>
-    * imgdata.params.sraw_ycc
+  * Support for Foveon sensor based on X3F code by Roland Karlsson
+    BSD-like license, so included in main LibRaw code.
+    No 'foveon intepolation', so no way to get good colors from
+    old Sigma cameras (SD9, SD14, Polaroid x530). For modern Foveon cameras
+    one may try to create ICC profile (not supplied).
 
-2013-07-03 Alex Tutubalin <lexa@lexa.ru>
-  * Imported dcraw 9.19/1.456
-    + Support for new cameras:
-      Baumer TXG14
-      Canon EOS C500
-      Nikon D5200
-      OmniVision OV5647 (Raspberry Pi)
-      Panasonic DMC-GF6
-      Samsung NX300, NX1100, NX2000
-      Sony NEX-3N
-    + New interpolation code for Fuji X-Trans sensor
-    + imgdata.iparams.filters value is now 9 for Fuji X-Trans (instead of 2)
-  * New imgdata.iparams.xtrans[6][6] matrix contains row/col to color mapping
-    for Fuji X-Trans sensor.
-  * Removed OpenMP speedup for AHD interpolation (to be returned later)
+    TODO: thumbnail extraction, fast cancelation    
+
+    Old foveon_*_load_raw (from dcraw) code is used if compiled with 
+    LIBRAW_DEMOSAIC_PACK_GPL2
+
+  * API Changes:
+
+    + New parameters in imgdata.params:
+      - imgdata.params.no_interpolation - disables interpolation step in 
+        LibRaw::dcraw_process() call.
+      - imgdata.params.no_auto_scale - disables call to scale_colors() in
+        LibRaw::dcraw_process() call.
+      - imgdata.params.sraw_ycc - disables Canon sRAW YCbCr to RGB conversion
+        in LibRaw::unpack() call (use for RAW analyzers 
+
+    + New Fuji X-Trans handling:
+      - imgdata.iparams.filters value is now 9 for Fuji X-Trans (instead of 2)
+      - imgdata.iparams.xtrans[6][6] matrix contains row/col to color mapping
+        for Fuji X-Trans sensor.
+
+    + LibRaw::setCancelFlag() - use for fast decoder termination
+
+    + LibRaw_abstract_datastream::make_byte_buffer() call is not needed more.
+
+    + New demosaic code: DHT Demosaic by Anton Petrusevich
+      Set params.user_qual=11 to use.
+
+    + New demosaic code: Modified AHD Demosaic by Anton Petrusevich
+      Set params.user_qual=12 to use.
+
+    + New C-API call libraw_COLOR(libraw_data_t *t, int row,int col)
+      (so LibRaw::COLOR(row,col) exposed to C-API users)
+
   * Removed faster lossless jpeg decoder ported from RawSpeed library
     some years ago. Build LibRaw with RawSpeed to get fast decoding.
-  * Removed make_byte_buffer() call from LibRaw*datastream interface.
+
   * Fixed decoding error for some Canon sRAW files.
+
+  * Disabled RawSpeed's bad pixel processing if RawSpeed used.
+
+  * EOS M and EOS 70D added to unique Canon ID table
+
+  * Canon EOS model name normalized by unique ID table
+
+  * Backported 0.15.4 input data checks
+
+  * Support for CMake builds
+
   * Updated RawSpeed supported camera list
 
-2013-05-27 Alex Tutubalin <lexa@lexa.ru>
-  * New demosaic code: DHT Demosaic by Anton Petrusevich
-    Set params.user_qual=11 to use.
-  * New demosaic code: Modified AHD Demosaic by Anton Petrusevich
-    Set params.user_qual=12 to use.
-  * New C-API call libraw_COLOR(libraw_data_t *t, int row,int col)
-    LibRaw::COLOR(row,col) exosed to C-API users.
+  * Internals changed, so all code using LibRaw should be recompiled.
 
-  * New output tuning parameter params.no_auto_scale
-    Set it to non-zero to disable call to scale_colors() in dcraw_process()
+  * LibRaw 0.16.0-Alpha1
 
 2013-05-23 Alex Tutubalin <lexa@lexa.ru>
 
