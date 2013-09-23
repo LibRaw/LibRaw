@@ -4272,7 +4272,6 @@ void CLASS ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(int top, int lef
   ushort (*pix)[4];
   ushort (*rix)[3];
   short (*lix)[3];
-  float xyz[3];
   const unsigned num_pix_per_row = 4*width;
   const unsigned rowlimit = MIN(top+TS-1, height-3);
   const unsigned collimit = MIN(left+TS-1, width-3);
