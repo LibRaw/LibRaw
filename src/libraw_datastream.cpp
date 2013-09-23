@@ -44,7 +44,7 @@
 int LibRaw_abstract_datastream::tempbuffer_open(void  *buf, size_t size)
 {
     if(substream) return EBUSY;
-    substream = new LibRaw_buffer_datastream(buf,size);
+    substream = new(std::nothrow) LibRaw_buffer_datastream(buf,size);
     return substream?0:EINVAL;
 }
 

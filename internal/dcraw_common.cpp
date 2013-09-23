@@ -713,7 +713,7 @@ void CLASS lossless_jpeg_load_raw()
       if (cr2_slice[0]) {
 	jidx = jrow*jwide + jcol;
 	i = jidx / (cr2_slice[1]*jh.high);
-	if ((j = i >= cr2_slice[0]))
+	if ((j = i) >= cr2_slice[0])
 		 i  = cr2_slice[0];
 	jidx -= i * (cr2_slice[1]*jh.high);
 	row = jidx / cr2_slice[1+j];
@@ -4272,7 +4272,6 @@ void CLASS ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(int top, int lef
   ushort (*pix)[4];
   ushort (*rix)[3];
   short (*lix)[3];
-  float xyz[3];
   const unsigned num_pix_per_row = 4*width;
   const unsigned rowlimit = MIN(top+TS-1, height-3);
   const unsigned collimit = MIN(left+TS-1, width-3);
