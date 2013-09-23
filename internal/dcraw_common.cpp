@@ -713,7 +713,7 @@ void CLASS lossless_jpeg_load_raw()
       if (cr2_slice[0]) {
 	jidx = jrow*jwide + jcol;
 	i = jidx / (cr2_slice[1]*jh.high);
-	if ((j = i >= cr2_slice[0]))
+	if ((j = i) >= cr2_slice[0])
 		 i  = cr2_slice[0];
 	jidx -= i * (cr2_slice[1]*jh.high);
 	row = jidx / cr2_slice[1+j];
