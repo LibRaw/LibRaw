@@ -2654,7 +2654,7 @@ int LibRaw::dcraw_process(void)
 
     if (P1.filters  && !O.no_interpolation) 
       {
-        if (noiserd>0 && P1.colors==3 && P1.filters) fbdd(noiserd);
+        if (noiserd>0 && P1.colors==3) fbdd(noiserd);
         if (quality == 0)
           lin_interpolate();
         else if (quality == 1 || P1.colors > 3)
