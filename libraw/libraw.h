@@ -114,6 +114,7 @@ class DllDef LibRaw
 
     int                         adjust_sizes_info_only(void);
     int                         subtract_black();
+    int                         subtract_black_internal();
     int                         raw2image();
     int                         raw2image_ex(int do_subtract_black);
     void                        raw2image_start();
