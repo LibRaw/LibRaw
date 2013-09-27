@@ -2354,8 +2354,13 @@ int LibRaw::adjust_sizes_info_only(void)
   return 0;
 }
 
-
 int LibRaw::subtract_black()
+{
+  adjust_bl();
+  return subtract_black_internal();
+}
+
+int LibRaw::subtract_black_internal()
 {
   CHECK_ORDER_LOW(LIBRAW_PROGRESS_RAW2_IMAGE);
 
@@ -2525,10 +2530,10 @@ void LibRaw::adjust_bl()
 {
 
    if (O.user_black >= 0) 
-		C.black = O.user_black;
+     C.black = O.user_black;
    for(int i=0; i<4; i++)
-		if(O.user_cblack[i]>-1000000)
-			C.cblack[i] = O.user_cblack[i];
+     if(O.user_cblack[i]>-1000000)
+       C.cblack[i] = O.user_cblack[i];
 
   // remove common part from C.cblack[]
   int i = C.cblack[3];
@@ -2602,7 +2607,7 @@ int LibRaw::dcraw_process(void)
     if(!subtract_inline || !C.data_maximum)
       {
         adjust_bl();
-        subtract_black();
+        subtract_black_internal();
       }
 
     adjust_maximum();
