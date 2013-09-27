@@ -2982,8 +2982,11 @@ void CLASS crop_masked_pixels()
   unsigned 
 #ifndef LIBRAW_LIBRARY_BUILD
     r, raw_pitch = raw_width*2,
-#endif
     c, m, mblack[8], zero, val;
+#else
+    c, m, zero, val;
+#define mblack imgdata.color.black_stat
+#endif
 
 #ifndef LIBRAW_LIBRARY_BUILD
   if (load_raw == &CLASS phase_one_load_raw ||
@@ -3051,6 +3054,9 @@ mask_set:
   } else if (zero < mblack[4] && mblack[5] && mblack[6] && mblack[7])
     FORC4 cblack[c] = mblack[c] / mblack[4+c];
 }
+#ifdef LIBRAW_LIBRARY_BUILD
+#undef mblack
+#endif
 
 void CLASS remove_zeroes()
 {

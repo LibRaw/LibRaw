@@ -203,6 +203,7 @@ typedef struct
   char        model2[64];
   void        *profile;
   unsigned    profile_length;
+  unsigned    black_stat[8];
 }libraw_colordata_t;
 
 typedef struct
