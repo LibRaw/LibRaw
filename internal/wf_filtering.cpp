@@ -682,7 +682,7 @@ int LibRaw::wf_remove_banding()
 	}
 
 	free(dummy_line);
-	
+        return WF_DEBANDING_OK;
 }
 
 double LibRaw::wf_filter_energy(int r1_greenmode, int r1, int r2_greenmode, int r2)
