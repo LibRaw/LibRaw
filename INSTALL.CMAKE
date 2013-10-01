@@ -82,13 +82,9 @@ II. ./cmake options
      b) If no folder is specified in -DENABLE_RAWSPEED switch:
 
           ./RawSpeed (in LibRaw folder)
-<<<<<<< HEAD
-          
-=======
 
   If CHECKOUT_RAWSPEED is enabled, code wil be checkout from remote repository
 
->>>>>>> 0eeff91... polish
 -DENABLE_DCRAW_DEBUG=ON/OFF
 
   Enables/disables support of additional debug traces from dcraw operations. Disabled by default

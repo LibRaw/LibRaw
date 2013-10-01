@@ -4217,9 +4217,18 @@ void CLASS cam_xyz_coeff (double cam_xyz[4][3])
   for (i=0; i < colors; i++) {		/* Normalize cam_rgb so that */
     for (num=j=0; j < 3; j++)		/* cam_rgb * (1,1,1) is (1,1,1,1) */
       num += cam_rgb[i][j];
-    for (j=0; j < 3; j++)
-      cam_rgb[i][j] /= num;
-    pre_mul[i] = 1 / num;
+    if(num > 0.00001)
+      {
+        for (j=0; j < 3; j++)
+          cam_rgb[i][j] /= num;
+        pre_mul[i] = 1 / num;
+      }
+    else
+      {
+        for (j=0; j < 3; j++)
+          cam_rgb[i][j] = 0.0;
+        pre_mul[i] = 1.0;
+      }
   }
   pseudoinverse (cam_rgb, inverse, colors);
   for (raw_color = i=0; i < 3; i++)
