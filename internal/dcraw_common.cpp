@@ -4501,7 +4501,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 5642 "dcraw/dcraw.c"
+#line 5651 "dcraw/dcraw.c"
 void CLASS parse_makernote (int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5016,7 +5016,7 @@ void CLASS parse_kodak_ifd (int base)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 6162 "dcraw/dcraw.c"
+#line 6171 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6281,7 +6281,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 7429 "dcraw/dcraw.c"
+#line 7438 "dcraw/dcraw.c"
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
   int i;
@@ -6382,7 +6382,7 @@ void CLASS parse_foveon()
   }
   is_foveon = 1;
 }
-#line 7532 "dcraw/dcraw.c"
+#line 7541 "dcraw/dcraw.c"
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -8382,6 +8382,16 @@ wb550:
   }  else
       identify2(fsize,flen,head); /* Avoid MS VS 2008/2010 bug */
 
+  /* Early reject for damaged images */
+  if (!load_raw || height < 22 || width < 22 ||
+	tiff_bps > 16 || tiff_samples > 4 || colors > 4 || colors < 1)
+    {
+      is_raw = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+      RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
+#endif
+      return;
+    }
   if (!model[0])
     sprintf (model, "%dx%d", width, height);
   if (filters == UINT_MAX) filters = 0x94949494;
@@ -9029,7 +9039,7 @@ c603:
 }
 
 
-#line 10270 "dcraw/dcraw.c"
+#line 10289 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -9260,7 +9270,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 10526 "dcraw/dcraw.c"
+#line 10545 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
