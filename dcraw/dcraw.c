@@ -9878,6 +9878,16 @@ konica_400z:
    order = 0x4949;
    maximum = 0x0fff;
   }
+  /* Early reject for damaged images */
+  if (!load_raw || height < 22 || width < 22 ||
+	tiff_bps > 16 || tiff_samples > 4 || colors > 4 || colors < 1)
+    {
+      is_raw = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+      RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
+#endif
+      return;
+    }
   if (!model[0])
     sprintf (model, "%dx%d", width, height);
   if (filters == UINT_MAX) filters = 0x94949494;
