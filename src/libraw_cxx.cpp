@@ -1318,8 +1318,6 @@ int LibRaw::raw2image(void)
           // legacy decoder, but no data?
           throw LIBRAW_EXCEPTION_DECODE_RAW;
         }
-    }
-    
     // Free PhaseOne separate copy allocated at function start
     if (is_phaseone_compressed())
       {
