@@ -46,6 +46,7 @@ II. ./cmake options
 
 -DENABLE_DEMOSAIC_PACK_GPL2=ON/OFF
 -DDEMOSAIC_PACK_GPL2_RPATH=FOLDERNAME
+-DCHECKOUT_DEMOSAIC_PACK_GPL2=ON/OFF
 
   Enables/disables support of additional demosaic methods licensed under GPL2
   You need to download and unpack LibRaw-demosaic-pack-GPL2 archive to use 
@@ -58,10 +59,12 @@ II. ./cmake options
      b) If no folder is specified in -DDENABLE_DEMOSAIC_PACK_GPL2 switch:
 
           ./LibRaw-demosaic-pack-GPL2 (in LibRaw folder)
- 
+
+  If DCHECKOUT_DEMOSAIC_PACK_GPL2 is enabled, code wil be checkout from remote repository
 
 -DENABLE_DEMOSAIC_PACK_GPL3=ON/OFF
 -DDEMOSAIC_PACK_GPL3_RPATH=FOLDERNAME
+-DCHECKOUT_DEMOSAIC_PACK_GPL3=ON/OFF
 
         Same as above, but for GPL3-licensed demosaic pack.
 
@@ -80,6 +83,8 @@ II. ./cmake options
      b) If no folder is specified in -DENABLE_RAWSPEED switch:
 
           ./RawSpeed (in LibRaw folder)
+
+  If CHECKOUT_RAWSPEED is enabled, code wil be checkout from remote repository
 
 -DENABLE_DCRAW_DEBUG=ON/OFF
 
