@@ -18,6 +18,7 @@ cd build
 cmake -G "Unix Makefiles" . \
       -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" \
+      -Wno-dev \
       -DENABLE_OPENMP=ON \
       -DENABLE_LCMS=ON \
       -DENABLE_EXAMPLES=ON \
