@@ -665,6 +665,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
       d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
       d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags |= LIBRAW_DECODER_ITSASONY;
     }
   else if (load_raw == &LibRaw::samsung_load_raw )
     {
