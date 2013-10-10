@@ -347,7 +347,11 @@ void DHT::hide_hots() {
 void DHT::restore_hots() {
 	int iwidth = libraw.imgdata.sizes.iwidth;
 #if defined(LIBRAW_USE_OPENMP)
+#ifdef WIN32
+#pragma omp parallel for firstprivate(iwidth)
+#else
 #pragma omp parallel for schedule(guided) firstprivate(iwidth) collapse(2)
+#endif
 #endif
 	for (int i = 0; i < libraw.imgdata.sizes.iheight; ++i) {
 		for (int j = 0; j < iwidth; ++j) {
