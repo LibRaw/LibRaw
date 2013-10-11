@@ -1,11 +1,15 @@
 ﻿2013-10-15 Alex Tutubalin <lexa@lexa.ru>
   * Поддержка новых камер
-     Canon Powershot S120 и G16 (предварительные цветовые данные)
+     Canon Powershot S120 (предварительные цветовые данные) и G16 
      Fujifilm X-A1 (предварительные цветовые данные)
+     Hasselblad Lunar, Stellar
      Nikon Coolpix P7800 (предварительные цветовые данные)
      Pentax K50, K500, Q7
      Samsung Galaxy NX (EK-GN120)
-     Sony NEX-5T    (предварительные цветовые данные)
+     Sony NEX-5T 
+  * Обновлены цветовые данные для камер:
+     Samsung NX300
+     Sony RX1R
 
 2013-09-22 Alex Tutubalin <lexa@lexa.ru>
   * Поддержка новых камер
