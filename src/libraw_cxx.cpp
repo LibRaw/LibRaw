@@ -878,6 +878,32 @@ void LibRaw::hasselblad_full_load_raw()
       }
 }
 
+struct foveon_data_t
+{
+    char *make;
+    char *model;
+    int  white;
+    int  left_margin,top_margin;
+    int  width,height;
+} foveon_data [] =
+{
+    {"Sigma","SD9",	3600,20,8,2266,1510},
+    {"Sigma","SD10",9340,20,8,2266,1510},
+    {"Sigma","SD14",7200,18,12,2651,1767},
+    {"Sigma","SD15",3590,18,12,2651,1767},
+    {"Sigma","DP1",2100,18,12,2651,1767},
+    {"Sigma","DP1S",2200,18,12,2651,1767},
+    {"Sigma","DP1X",3560,18,12,2651,1767},
+    {"Sigma","DP2",2326,13,16,2651,1767},
+    {"Sigma","DP2S",2300,18,12,2651,1767},
+    {"Sigma","DP2X",2300,18,12,2651,1767},
+    {"Sigma","SD1",3900,12,52,4807,3205},
+    {"Sigma","SD1 Merill",3900,12,52,4807,3205},
+    {"Sigma","DP1 Merrill",3900,12,0,4807,3205},
+    {"Sigma","DP2 Merrill",3900,12,0,4807,3205},
+    {"Sigma","DP3 Merrill",3900,12,0,4807,3205},
+};
+const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
 int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 {
@@ -896,6 +922,21 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       O.use_camera_matrix = O.use_camera_wb;
 
     identify();
+#ifndef LIBRAW_DEMOSAIC_PACK_GPL2
+    // Adjust sizes
+    if(imgdata.idata.is_foveon)
+    {
+        for(int i=0; i< foveon_count;i++)
+            if(!strcasecmp(imgdata.idata.make,foveon_data[i].make) && !strcasecmp(imgdata.idata.model,foveon_data[i].model))
+            {
+                imgdata.sizes.top_margin = foveon_data[i].top_margin;
+                imgdata.sizes.left_margin = foveon_data[i].left_margin;
+                imgdata.sizes.width = imgdata.sizes.iwidth = foveon_data[i].width;
+                imgdata.sizes.height = imgdata.sizes.iheight = foveon_data[i].height;
+                break;
+            }
+    }
+#endif
 #if 0
     size_t bytes = ID.input->size()-libraw_internal_data.unpacker_data.data_offset;
     float bpp = float(bytes)/float(S.raw_width)/float(S.raw_height);
@@ -1055,6 +1096,7 @@ int LibRaw::unpack(void)
     get_decoder_info(&decoder_info);
 
     int save_iwidth = S.iwidth, save_iheight = S.iheight, save_shrink = IO.shrink;
+    int save_width = S.width, save_height = S.height;
 
     int rwidth = S.raw_width, rheight = S.raw_height;
     if( !IO.fuji_width)
@@ -1165,8 +1207,8 @@ int LibRaw::unpack(void)
           {
             // sRAW and Foveon only, so extra buffer size is just 1/4
             // Legacy converters does not supports half mode!
-            S.iwidth = S.width;
-            S.iheight= S.height;
+            S.iwidth = S.width = S.raw_width;
+            S.iheight= S.height = S.raw_height;
             IO.shrink = 0;
             S.raw_pitch = S.width*8;
             // allocate image as temporary buffer, size 
@@ -1186,11 +1228,11 @@ int LibRaw::unpack(void)
             // successfully decoded legacy image, attach image to raw_alloc
             imgdata.rawdata.raw_alloc = imgdata.image;
             imgdata.image = 0; 
-            // Adjust sizes according to image buffer size
-            S.raw_width = S.width;
-            S.left_margin = 0;
-            S.raw_height = S.height;
-            S.top_margin = 0;
+            // Restore saved values. Note: Foveon have masked frame
+            S.width = save_width;
+            S.iwidth = save_iwidth;
+            S.height = save_height;
+            S.iheight = save_iheight;
           }
       }
 
@@ -2575,6 +2617,21 @@ int LibRaw::dcraw_process(void)
 
     raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
 
+    // Adjust foveon max
+#ifndef LIBRAW_DEMOSAIC_PACK_GPL2
+    // Adjust sizes
+    if(imgdata.idata.is_foveon)
+    {
+        for(int i=0; i< foveon_count;i++)
+            if(!strcasecmp(imgdata.idata.make,foveon_data[i].make) && !strcasecmp(imgdata.idata.model,foveon_data[i].model))
+            {
+                imgdata.color.maximum = foveon_data[i].white;
+                break;
+            }
+    }
+#endif
+
+
     int save_4color = O.four_color_rgb;
 
     if (IO.zero_is_bad) 
@@ -3462,11 +3519,11 @@ void LibRaw::x3f_load_raw()
           for (int col=0; col < ID->columns; col++) {
               for (int color=0; color < 3; color++)
                 {
-                  imgdata.image[row*S.width+col][color] = data[3 * (ID->columns * row + col) + color];
-                  if((short)imgdata.image[row*S.width+col][color] < 0)
-                    imgdata.image[row*S.width+col][color] = 0;
+                  imgdata.image[row*S.raw_width+col][color] = data[3 * (ID->columns * row + col) + color];
+                  if((short)imgdata.image[row*S.raw_width+col][color] < 0)
+                    imgdata.image[row*S.raw_width+col][color] = 0;
                 }
-              imgdata.image[row*S.width+col][3]=0;
+              imgdata.image[row*S.raw_width+col][3]=0;
           }
         }
 
