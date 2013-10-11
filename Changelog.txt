@@ -1,3 +1,26 @@
+2013-10-16 Alex Tutubalin <lexa@lexa.ru>
+  * Support for new cameras:
+    Canon S120 (preliminary color data), G16
+    Fujifilm X-A1 (preliminary color data)
+    Hasselblad Lunar, Stellar
+    Nikon P7800 (preliminary color data)
+    Pentax K50, K500, Q7
+    Samsung Galaxy NX (EK-GN120)
+    Sony NEX-5T
+
+  * Updated color data for:
+    Samsung NX300
+    Sony RX1R
+    Sigma SD1, SD1 Merrill, DPxx (only if non-GPL2 foveon decoder used)
+
+  * Image dimensions table for Foveon cameras (only if
+    non-GPL2 foveon decoder used)
+
+  * Fixed memory leak in x3f-tools code (new Foveon decoder)
+  * Fixed DHT-demosaic incompatibility with MS VisualStudio in OpenMP directives
+  * Additional image size checks.
+  * LibRaw 0.16-Alpha2
+
 2013-09-22 Alex Tutubalin <lexa@lexa.ru>
   * Support for new cameras:
      Baumer TXG14
