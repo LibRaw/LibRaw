@@ -8721,7 +8721,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 
   sprintf (name, "%s %s", t_make, t_model);
   for (i=0; i < sizeof table / sizeof *table; i++)
-    if (!strncmp (name, table[i].prefix, strlen(table[i].prefix))) {
+    if (!strncasecmp(name, table[i].prefix, strlen(table[i].prefix))) {
       if (table[i].t_black)   black   = (ushort) table[i].t_black;
       if (table[i].t_maximum) maximum = (ushort) table[i].t_maximum;
       if (table[i].trans[0]) {
