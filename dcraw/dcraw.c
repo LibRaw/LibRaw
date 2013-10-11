@@ -7862,11 +7862,10 @@ void CLASS parse_foveon()
   }
 #ifndef LIBRAW_DEMOSAIC_PACK_GPL2
   raw_color=1; // Force adobe coeff
+  maximum=0x3fff; // To be reset by color table
 #endif
 }
-//@end COMMON
 
-//@out COMMON
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -8599,10 +8598,29 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
     { "Samsung S85", 0, 0,		/* DJC */
 	{ 11885,-3968,-1473,-4214,12299,1916,-835,1655,5549 } },
 #ifndef LIBRAW_DEMOSAIC_PACK_GPL2
-    { "Sigma SD", 31, 0,			/* LibRaw */
-      { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
-    { "Sigma DP", 31, 0,			/* LibRaw */
-      { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+     // Old Foveons
+    { "Sigma SD9", 15, 4095,			/* LibRaw */
+    { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
+    { "Sigma SD10", 15, 16383,			/* LibRaw */
+    { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
+    { "Sigma SD14", 15, 16383,			/* LibRaw */
+    { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
+    { "Sigma SD15", 15, 4095,			/* LibRaw */
+    { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
+    // Merills + SD1
+    { "Sigma SD1 Merrill", 31, 4095,			/* LibRaw */
+    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+    { "Sigma SD1", 16, 4096,			/* LibRaw */
+    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+    { "Sigma DP1 Merrill", 31, 4095,			/* LibRaw */
+    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+    { "Sigma DP2 Merrill", 31, 4095,			/* LibRaw */
+    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+    { "Sigma DP3 Merrill", 31, 4095,			/* LibRaw */
+    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+    // Sigma DP (non-Merill Versions)
+    { "Sigma DP", 0, 4095,			/* LibRaw */
+    { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
 #endif
     { "Sinar", 0, 0,			/* DJC */
 	{ 16442,-2956,-2422,-2877,12128,750,-1136,6066,4559 } },
