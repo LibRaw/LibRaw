@@ -7860,6 +7860,9 @@ void CLASS parse_foveon()
     }
     fseek (ifp, save, SEEK_SET);
   }
+#ifndef LIBRAW_DEMOSAIC_PACK_GPL2
+  raw_color=1; // Force adobe coeff
+#endif
 }
 //@end COMMON
 
@@ -8595,6 +8598,12 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 10504,-2438,-1189,-8603,16207,2531,-1022,863,12242 } },
     { "Samsung S85", 0, 0,		/* DJC */
 	{ 11885,-3968,-1473,-4214,12299,1916,-835,1655,5549 } },
+#ifndef LIBRAW_DEMOSAIC_PACK_GPL2
+    { "Sigma SD", 31, 0,			/* LibRaw */
+      { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+    { "Sigma DP", 31, 0,			/* LibRaw */
+      { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+#endif
     { "Sinar", 0, 0,			/* DJC */
 	{ 16442,-2956,-2422,-2877,12128,750,-1136,6066,4559 } },
     { "Sony DSC-F828", 0, 0,
@@ -9258,7 +9267,9 @@ void CLASS identify()
     if (height*2 < width) pixel_aspect = 0.5;
     if (height   > width) pixel_aspect = 2;
     filters = 0;
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
     simple_coeff(0);
+#endif
   } else if (!strcmp(make,"Canon") && tiff_bps == 15) {
     switch (width) {
       case 3344: width -= 66;

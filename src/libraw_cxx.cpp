@@ -2633,7 +2633,11 @@ int LibRaw::dcraw_process(void)
         green_matching();
       }
 
-    if (!P1.is_foveon && !O.no_auto_scale)
+    if (
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+        !P1.is_foveon && 
+#endif
+        !O.no_auto_scale)
       {
         scale_colors();
         SET_PROC_FLAG(LIBRAW_PROGRESS_SCALE_COLORS);

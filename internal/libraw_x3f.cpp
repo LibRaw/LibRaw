@@ -630,7 +630,9 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
   infile->seek(0, SEEK_SET);
   GET4(H->identifier);
   if (H->identifier != X3F_FOVb) {
+#ifdef DCRAW_VERBOSE
     fprintf(stderr, "Faulty file type\n");
+#endif
     x3f_delete(x3f);
     return NULL;
   }
@@ -799,7 +801,7 @@ static uint32_t row_offsets_size(x3f_huffman_t *HUF)
       x3f_image_data_t *ID = &DEH->data_subsection.image_data;
 
       cleanup_huffman(&ID->huffman);
-
+      cleanup_true(&ID->tru);
       FREE(ID->data);
     }
 
@@ -816,7 +818,6 @@ static uint32_t row_offsets_size(x3f_huffman_t *HUF)
 
   FREE(DS->directory_entry);
   FREE(x3f);
-
   return X3F_OK;
 }
 
@@ -1053,7 +1054,9 @@ static int32_t get_true_diff(bit_state_t *BS, x3f_hufftree_t *HTP)
 
     node = new_node;
     if (node == NULL) {
+#ifdef DCRAW_VERBOSE
       fprintf(stderr, "Huffman coding got unexpected bit\n");
+#endif
       return 0;
     }
   }
@@ -1159,7 +1162,9 @@ static int32_t get_huffman_diff(bit_state_t *BS, x3f_hufftree_t *HTP)
 
     node = new_node;
     if (node == NULL) {
+#ifdef DCRAW_VERBOSE
       fprintf(stderr, "Huffman coding got unexpected bit\n");
+#endif
       return 0;
     }
   }
@@ -1203,7 +1208,10 @@ static void huffman_decode_row(x3f_info_t *I,
         HUF->rgb8.element[3*(row*ID->columns + col) + color] = c_fix[color]; 
         break;
       default:
+#ifdef DCRAW_VERBOSE
         fprintf(stderr, "Unknown huffman image type\n");
+#endif
+        ;
       }
     }
   }
@@ -1265,7 +1273,9 @@ static void simple_decode_row(x3f_info_t *I,
     mask = 0xfff;
     break;
   default:
+#ifdef DCRAW_VERBOSE
     fprintf(stderr, "Unknown number of bits: %d\n", bits);
+#endif
     mask = 0;
     break;
   }
@@ -1290,7 +1300,10 @@ static void simple_decode_row(x3f_info_t *I,
         HUF->rgb8.element[3*(row*ID->columns + col) + color] = c_fix[color]; 
         break;
       default:
+#ifdef DCRAW_VERBOSE
         fprintf(stderr, "Unknown huffman image type\n");
+#endif
+        ;
       }
     }
   }
@@ -1422,7 +1435,6 @@ static void x3f_load_true(x3f_info_t *I,
   TRU->x3rgb16.size = ID->columns * ID->rows * 3;
   TRU->x3rgb16.element =
     (uint16_t *)malloc(sizeof(uint16_t)*TRU->x3rgb16.size);
-
   true_decode(I, DE);
 }
 
@@ -1492,7 +1504,10 @@ static void x3f_load_huffman(x3f_info_t *I,
       (uint8_t *)malloc(sizeof(uint8_t)*HUF->rgb8.size);
     break;
   default:
+#ifdef DCRAW_VERBOSE
     fprintf(stderr, "Unknown huffman image type\n");
+#endif
+    ;
   }
 
   if (row_stride == 0)
@@ -1537,7 +1552,10 @@ static void x3f_load_image(x3f_info_t *I, x3f_directory_entry_t *DE)
     x3f_load_jpeg(I, DE);
     break;
   default:
+#ifdef DCRAW_VERBOSE
     fprintf(stderr, "Unknown image type\n");
+#endif
+    ;
   }
 }
 
@@ -1673,7 +1691,9 @@ static void x3f_setup_camf_entries(x3f_camf_t *CAMF)
     if ((*p4 & 0xffffff) != X3F_CMb) {
       /* TODO: whats this all about ? Is it OK to just terminate if
 	 you find an invalid entry ? */
+#ifdef DCRAW_VERBOSE
       fprintf(stderr, "Unknown CAMF entry %x\n", *p4);
+#endif
       break;
     }
 
@@ -1715,13 +1735,18 @@ static void x3f_load_camf(x3f_info_t *I, x3f_directory_entry_t *DE)
     x3f_load_camf_decode_type4(CAMF);
     break;
   default:
+#ifdef DCRAW_VERBOSE
     fprintf(stderr, "Unknown CAMF type\n");
+#endif
+    ;
   }
 
   if (CAMF->decoded_data != NULL)
     x3f_setup_camf_entries(CAMF);
+#ifdef DCRAW_VERBOSE
   else
     fprintf(stderr, "No decoded CAMF data\n");
+#endif
 }
 
 /* extern */ x3f_return_t x3f_load_data(x3f_t *x3f, x3f_directory_entry_t *DE)
@@ -1742,7 +1767,9 @@ static void x3f_load_camf(x3f_info_t *I, x3f_directory_entry_t *DE)
     x3f_load_camf(I, DE);
     break;
   default:
+#ifdef DCRAW_VERBOSE
     fprintf(stderr, "Unknown directory entry type\n");
+#endif
     return X3F_INTERNAL_ERROR;
   }
 
@@ -1762,7 +1789,9 @@ static void x3f_load_camf(x3f_info_t *I, x3f_directory_entry_t *DE)
     x3f_load_image_verbatim(I, DE);
     break;
   default:
+#ifdef DCRAW_VERBOSE
     fprintf(stderr, "Unknown image directory entry type\n");
+#endif
     return X3F_INTERNAL_ERROR;
   }
 
