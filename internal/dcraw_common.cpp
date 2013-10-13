@@ -6679,9 +6679,10 @@ void CLASS parse_foveon()
   }
 #ifndef LIBRAW_DEMOSAIC_PACK_GPL2
   raw_color=1; // Force adobe coeff
-  maximum=0xffff;
+  maximum=0x3fff; // To be reset by color table
 #endif
 }
+
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
@@ -7415,27 +7416,27 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 11885,-3968,-1473,-4214,12299,1916,-835,1655,5549 } },
 #ifndef LIBRAW_DEMOSAIC_PACK_GPL2
      // Old Foveons
-    { "Sigma SD9", 15, 0,			/* LibRaw */
+    { "Sigma SD9", 15, 4095,			/* LibRaw */
     { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
-    { "Sigma SD10", 15, 0,			/* LibRaw */
+    { "Sigma SD10", 15, 16383,			/* LibRaw */
     { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
-    { "Sigma SD14", 15, 0,			/* LibRaw */
+    { "Sigma SD14", 15, 16383,			/* LibRaw */
     { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
-    { "Sigma SD15", 15, 0,			/* LibRaw */
+    { "Sigma SD15", 15, 4095,			/* LibRaw */
     { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
     // Merills + SD1
-    { "Sigma SD1 Merrill", 31, 0,			/* LibRaw */
+    { "Sigma SD1 Merrill", 31, 4095,			/* LibRaw */
     { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
-    { "Sigma SD1", 16, 0,			/* LibRaw */
+    { "Sigma SD1", 16, 4096,			/* LibRaw */
     { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
-    { "Sigma DP1 Merrill", 31, 0,			/* LibRaw */
+    { "Sigma DP1 Merrill", 31, 4095,			/* LibRaw */
     { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
-    { "Sigma DP2 Merrill", 31, 0,			/* LibRaw */
+    { "Sigma DP2 Merrill", 31, 4095,			/* LibRaw */
     { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
-    { "Sigma DP3 Merrill", 31, 0,			/* LibRaw */
+    { "Sigma DP3 Merrill", 31, 4095,			/* LibRaw */
     { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
     // Sigma DP (non-Merill Versions)
-    { "Sigma DP", 0, 0,			/* LibRaw */
+    { "Sigma DP", 0, 4095,			/* LibRaw */
     { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
 #endif
     { "Sinar", 0, 0,			/* DJC */
