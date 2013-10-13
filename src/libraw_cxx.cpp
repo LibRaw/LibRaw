@@ -1207,11 +1207,6 @@ int LibRaw::unpack(void)
         else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
           {
             // sRAW and Foveon only, so extra buffer size is just 1/4
-<<<<<<< HEAD
-            // Legacy converters does not supports half mode!
-            S.iwidth = S.width = S.raw_width;
-            S.iheight= S.height = S.raw_height;
-=======
 #ifndef LIBRAW_DEMOSAIC_PACK_GPL2
             if(imgdata.idata.is_foveon) // new Foveon decoder
               {
@@ -1225,7 +1220,6 @@ int LibRaw::unpack(void)
                 S.iheight= S.height;        
 
               }
->>>>>>> e4407674371d889acc6cd0ecb1da25b01ae9785e
             IO.shrink = 0;
             S.raw_pitch = S.width*8;
             // allocate image as temporary buffer, size 
@@ -1246,12 +1240,6 @@ int LibRaw::unpack(void)
             imgdata.rawdata.raw_alloc = imgdata.image;
             imgdata.image = 0; 
             // Restore saved values. Note: Foveon have masked frame
-<<<<<<< HEAD
-            S.width = save_width;
-            S.iwidth = save_iwidth;
-            S.height = save_height;
-            S.iheight = save_iheight;
-=======
 #ifndef LIBRAW_DEMOSAIC_PACK_GPL2
             if(imgdata.idata.is_foveon)
               {
@@ -1269,7 +1257,6 @@ int LibRaw::unpack(void)
                 S.raw_height = S.height;
                 S.top_margin = 0; 
               }
->>>>>>> e4407674371d889acc6cd0ecb1da25b01ae9785e
           }
       }
 
