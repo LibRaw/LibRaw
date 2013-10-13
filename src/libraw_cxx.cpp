@@ -890,7 +890,7 @@ struct foveon_data_t
     {"Sigma","SD9",	3600,20,8,2266,1510},
     {"Sigma","SD10",9340,20,8,2266,1510},
     {"Sigma","SD14",7200,18,12,2651,1767},
-    {"Sigma","SD15",3590,18,12,2651,1767},
+    {"Sigma","SD15",2900,18,12,2651,1767},
     {"Sigma","DP1",2100,18,12,2651,1767},
     {"Sigma","DP1S",2200,18,12,2651,1767},
     {"Sigma","DP1X",3560,18,12,2651,1767},
@@ -902,6 +902,7 @@ struct foveon_data_t
     {"Sigma","DP1 Merrill",3900,12,0,4807,3205},
     {"Sigma","DP2 Merrill",3900,12,0,4807,3205},
     {"Sigma","DP3 Merrill",3900,12,0,4807,3205},
+    {"Polaroid","x530",2700,10,13,1419,1059},
 };
 const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
