@@ -1,4 +1,13 @@
-﻿2013-09-22 Alex Tutubalin <lexa@lexa.ru>
+﻿2013-10-15 Alex Tutubalin <lexa@lexa.ru>
+  * Поддержка новых камер
+     Canon Powershot S120 и G16 (предварительные цветовые данные)
+     Fujifilm X-A1 (предварительные цветовые данные)
+     Nikon Coolpix P7800 (предварительные цветовые данные)
+     Pentax K50, K500, Q7
+     Samsung Galaxy NX (EK-GN120)
+     Sony NEX-5T    (предварительные цветовые данные)
+
+2013-09-22 Alex Tutubalin <lexa@lexa.ru>
   * Поддержка новых камер
      Baumer TXG14
      Blackmagic Cinema

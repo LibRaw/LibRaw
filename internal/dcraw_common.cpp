@@ -3752,7 +3752,7 @@ void CLASS lin_interpolate()
       FORCC
 	if (c != f) {
 	  *ip++ = c;
-	  *ip++ = 256 / sum[c];
+	  *ip++ = sum[c]>0?256 / sum[c]:0;
 	}
     }
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -6790,6 +6790,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 13244,-5501,-1248,-1508,9858,1935,-270,1083,4366 } },
     { "Canon PowerShot G15", 0, 0,
 	{ 7474,-2301,-567,-4056,11456,2975,-222,716,4181 } },
+    { "Canon PowerShot G16", 0, 0,
+        { 7474,-2301,-567,-4056,11456,2975,-222,716,4181 } },
     { "Canon PowerShot G1 X", 0, 0,
 	{ 7378,-1255,-1043,-4088,12251,2048,-876,1946,5805 } },
     { "Canon PowerShot G1", 0, 0,
@@ -6826,12 +6828,12 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 12374,-5016,-1049,-1677,9902,2078,-83,852,4683 } },
     { "Canon PowerShot S95", 0, 0,
 	{ 13440,-5896,-1279,-1236,9598,1931,-180,1001,4651 } },
+    { "Canon PowerShot S120", 0, 0,
+        { 8039,-2643,-654,-3783,11230,2930,-206,690,4194 } },
     { "Canon PowerShot S110", 0, 0,
 	{ 8039,-2643,-654,-3783,11230,2930,-206,690,4194 } },
     { "Canon PowerShot S100", 0, 0,
 	{ 7968,-2565,-636,-2873,10697,2513,180,667,4211 } },
-    { "Canon PowerShot S110", 0, 0,
-	{ 8039,-2643,-654,-3783,11230,2930,-206,690,4194 } },
     { "Canon PowerShot SX1 IS", 0, 0,
 	{ 6578,-259,-502,-5974,13030,3309,-308,1058,4970 } },
     { "Canon PowerShot SX50 HS", 0, 0,
@@ -6946,6 +6948,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 11768,-4971,-1133,-4904,12927,2183,-480,1723,4605 } },
     { "Fujifilm X-Pro1", 0, 0,
 	{ 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
+    { "Fujifilm X-A1", 0, 0,
+        { 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
     { "Fujifilm X-E1", 0, 0,
 	{ 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
     { "Fujifilm XF1", 0, 0,
@@ -7145,6 +7149,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
     { "Nikon COOLPIX P7100", 0, 0,
 	{ 11053,-4269,-1024,-1976,10182,2088,-526,1263,4469 } },
     { "Nikon COOLPIX P7700", 200, 0,
+	{ 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
+    { "Nikon COOLPIX P7800", 200, 0,
 	{ 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
     { "Nikon 1 V2", 0, 0,
 	{ 6588,-1305,-693,-3277,10987,2634,-355,2016,5106 } },
@@ -7392,6 +7398,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 8035,435,-962,-6001,13872,2320,-1159,3065,5434 } },
     { "Red One", 704, 0xffff,		/* DJC */
 	{ 21014,-7891,-2613,-3056,12201,856,-2203,5125,8042 } },
+    { "Samsung EK-GN120", 0, 0, /* Adobe; Galaxy NX */
+        { 7557,-2522,-739,-4679,12949,1894,-840,1777,5311 } },
     { "Samsung EX1", 0, 0x3e00,
 	{ 8898,-2498,-994,-3144,11328,2066,-760,1381,4576 } },
     { "Samsung EX2F", 0, 0x7ff,
@@ -8154,6 +8162,25 @@ canon_a5:
     mask[0][0] = top_margin = 16;
     mask[0][2] = top_margin + height;
     mask[0][3] = left_margin = 92;
+  } else if (!strcmp(model,"PowerShot S120")) {
+        raw_width = 4192;
+        raw_height = 3062;
+        width = 4022;
+        height = 3017;
+        mask[0][0] = top_margin = 30;
+        mask[0][2] = top_margin + height;
+        left_margin = 120;
+        mask[0][1] = 23; 
+        mask[0][3] = 72;
+  } else if (!strcmp(model,"PowerShot G16")) {
+      mask[0][0] = 0;
+      mask[0][2] = 80;
+      mask[0][1] = 0;
+      mask[0][3] = 16;
+      top_margin = 18;
+      left_margin = 96;
+      width = raw_width-left_margin-24;
+      height = raw_height-top_margin;
   } else if (!strcmp(model,"PowerShot SX50 HS")) {
     mask[0][0] = top_margin = 17;
     mask[0][2] = raw_height;
