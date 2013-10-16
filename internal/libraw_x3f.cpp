@@ -435,7 +435,7 @@ unsigned x3f_get4(LibRaw_abstract_datastream *f)
 	int _cur = _file->_func(_buffer,1,_left);		\
 	if (_cur == 0) {					\
 	  fprintf(stderr, "Failure to access file\n");		\
-	  exit(1);						\
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;			\
 	}							\
 	_left -= _cur;						\
       }								\
