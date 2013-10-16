@@ -96,10 +96,4 @@ void CLASS cfa_impulse_gauss(float lclean, float cclean){}
 #endif
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
 #include <dcraw_foveon.c>
-#else
-void CLASS foveon_interpolate(){}
-void CLASS foveon_dp_load_raw(){ x3f_load_raw();}
-void CLASS foveon_sd_load_raw(){ x3f_load_raw();}
-void CLASS foveon_thumb_loader(){}
-void CLASS foveon_thumb(){}
 #endif
