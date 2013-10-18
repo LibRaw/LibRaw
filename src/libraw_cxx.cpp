@@ -882,27 +882,28 @@ struct foveon_data_t
 {
     const char *make;
     const char *model;
+    const int raw_width;
     const int  white;
     const int  left_margin,top_margin;
     const int  width,height;
 } foveon_data [] =
 {
-    {"Sigma","SD9",	3600,20,8,2266,1510},
-    {"Sigma","SD10",9340,20,8,2266,1510},
-    {"Sigma","SD14",7200,18,12,2651,1767},
-    {"Sigma","SD15",2900,18,12,2651,1767},
-    {"Sigma","DP1",2100,18,12,2651,1767},
-    {"Sigma","DP1S",2200,18,12,2651,1767},
-    {"Sigma","DP1X",3560,18,12,2651,1767},
-    {"Sigma","DP2",2326,13,16,2651,1767},
-    {"Sigma","DP2S",2300,18,12,2651,1767},
-    {"Sigma","DP2X",2300,18,12,2651,1767},
-    {"Sigma","SD1",3900,12,52,4807,3205},
-    {"Sigma","SD1 Merill",3900,12,52,4807,3205},
-    {"Sigma","DP1 Merrill",3900,12,0,4807,3205},
-    {"Sigma","DP2 Merrill",3900,12,0,4807,3205},
-    {"Sigma","DP3 Merrill",3900,12,0,4807,3205},
-    {"Polaroid","x530",2700,10,13,1419,1059},
+    {"Sigma","SD9",	2304,3600,20,8,2266,1510},
+    {"Sigma","SD10",2304,9340,20,8,2266,1510},
+    {"Sigma","SD14",2688,7200,18,12,2651,1767},
+    {"Sigma","SD15",2688,2900,18,12,2651,1767},
+    {"Sigma","DP1",2688,2100,18,12,2651,1767},
+    {"Sigma","DP1S",2688,2200,18,12,2651,1767},
+    {"Sigma","DP1X",2688,3560,18,12,2651,1767},
+    {"Sigma","DP2",2688,2326,13,16,2651,1767},
+    {"Sigma","DP2S",2688,2300,18,12,2651,1767},
+    {"Sigma","DP2X",2688,2300,18,12,2651,1767},
+    {"Sigma","SD1",4928,3900,12,52,4807,3205},
+    {"Sigma","SD1 Merill",4928,3900,12,52,4807,3205},
+    {"Sigma","DP1 Merrill",4928,3900,12,0,4807,3205},
+    {"Sigma","DP2 Merrill",4928,3900,12,0,4807,3205},
+    {"Sigma","DP3 Merrill",4928,3900,12,0,4807,3205},
+    {"Polaroid","x530",1440,2700,10,13,1419,1059},
 };
 const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
@@ -928,7 +929,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     if(imgdata.idata.is_foveon)
     {
         for(int i=0; i< foveon_count;i++)
-            if(!strcasecmp(imgdata.idata.make,foveon_data[i].make) && !strcasecmp(imgdata.idata.model,foveon_data[i].model))
+            if(!strcasecmp(imgdata.idata.make,foveon_data[i].make) && !strcasecmp(imgdata.idata.model,foveon_data[i].model)
+                && imgdata.sizes.raw_width == foveon_data[i].raw_width)
             {
                 imgdata.sizes.top_margin = foveon_data[i].top_margin;
                 imgdata.sizes.left_margin = foveon_data[i].left_margin;
