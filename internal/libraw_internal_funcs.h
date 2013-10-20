@@ -160,12 +160,11 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        parse_minolta (int base);
 
 // Foveon/Sigma
-
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
     void        foveon_sd_load_raw();
     void        foveon_dp_load_raw();
     void        foveon_huff (ushort *huff);
     void        foveon_load_camf();
-    void        x3f_load_raw();
 
     const char* foveon_camf_param (const char *block, const char *param);
     void *      foveon_camf_matrix (unsigned dim[3], const char *name);
@@ -177,6 +176,9 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        foveon_interpolate();
     char *      foveon_gets (int offset, char *str, int len);
     void        parse_foveon();
+#else
+    void        x3f_load_raw();
+#endif
 
 
 // CAM/RGB

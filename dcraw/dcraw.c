@@ -6189,6 +6189,10 @@ nf: order = 0x4949;
       FORC4 cam_mul[c ^ (c >> 1) ^ (i & 1)] =
 	sget2 (buf97 + (i & -2) + c*2);
     }
+    if(tag == 0xb001 && type == 3)
+      {
+        unique_id = get2();
+      }
     if (tag == 0x200 && len == 3)
       shot_order = (get4(),get4());
     if (tag == 0x200 && len == 4)
@@ -7760,7 +7764,6 @@ void CLASS parse_redcine()
 }
 //@end COMMON
 
-//@out COMMON
 char * CLASS foveon_gets (int offset, char *str, int len)
 {
   int i;
@@ -7865,6 +7868,8 @@ void CLASS parse_foveon()
   maximum=0x3fff; // To be reset by color table
 #endif
 }
+
+//@out COMMON
 
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
@@ -8680,6 +8685,10 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 5413,-1162,-365,-5665,13098,2866,-608,1179,8440 } },
     { "Sony DSLR-A900", 128, 0,
 	{ 5209,-1072,-397,-8845,16120,2919,-1618,1803,8654 } },
+    {"Sony ILCE-A7R",128, 0,
+     { 8592,-3219,-348,-3846,12042,1475,-1079,2166,5893 } },
+    {"Sony ILCE-A7",128, 0,
+     { 8592,-3219,-348,-3846,12042,1475,-1079,2166,5893 } },
     { "Sony NEX-5T", 128, 0,
         { 7623,-2693,-347,-4060,11875,1928,-1363,2329,5752 } },
     { "Sony NEX-5N", 128, 0,
@@ -8803,10 +8812,6 @@ float CLASS find_green (int bps, int bite, int off0, int off1)
 }
 
 
-#ifndef LIBRAW_LIBRARY_BUILD
-void CLASS identify2(unsigned fsize, unsigned flen, char *head);
-#endif
-
 /*
    Identify which camera created this file, and set global variables
    accordingly.
@@ -8899,6 +8904,59 @@ void CLASS identify()
     { 0x288, "EOS 1100D" },
     { 0x346, "EOS 100D" },
     { 0x331, "EOS M" },
+  };
+  static const struct {
+    ushort id;
+    char t_model[20];
+  } sony_unique[] = {
+    {2,"DSC-R1"},
+    {256,"DSLR-A100"},
+    {257,"DSLR-A900"},
+    {258,"DSLR-A700"},
+    {259,"DSLR-A200"},
+    {260,"DSLR-A350"},
+    {261,"DSLR-A300"},
+    {262,"DSLR-A900"},
+    {263,"DSLR-A380"},
+    {264,"DSLR-A330"},
+    {265,"DSLR-A230"},
+    {266,"DSLR-A290"},
+    {269,"DSLR-A850"},
+    {270,"DSLR-A850"},
+    {273,"DSLR-A550"},
+    {274,"DSLR-A500"},
+    {275,"DSLR-A450"},
+    {278,"NEX-5"},
+    {279,"NEX-3"},
+    {280,"SLT-A33"},
+    {281,"SLT-A55"},
+    {282,"DSLR-A560"},
+    {283,"DSLR-A580"},
+    {284,"NEX-C3"},
+    {285,"SLT-A35"},
+    {286,"SLT-A65"},
+    {287,"SLT-A77"},
+    {288,"NEX-5N"},
+    {289,"NEX-7"},
+    {290,"NEX-VG20E"},
+    {291,"SLT-A37"},
+    {292,"SLT-A57"},
+    {293,"NEX-F3"},
+    {294,"SLT-A99"},
+    {295,"NEX-6"},
+    {296,"NEX-5R"},
+    {297,"DSC-RX100"},
+    {298,"DSC-RX1"},
+    {299,"NEX-VG900"},
+    {300,"NEX-VG30E"},
+    {302,"ILCE-3000"},
+    {303,"SLT-A58"},
+    {305,"NEX-3N"},
+    {306,"ILCE-A7"},
+    {307,"NEX-5T"},
+    {308,"DSC-RX100M2"},
+    {310,"DSC-RX1R"},
+    {311,"ILCE-A7R"},
   };
   static const struct {
     unsigned fsize;
@@ -9155,8 +9213,10 @@ void CLASS identify()
     parse_sinar_ia();
   else if (!memcmp (head,"\0MRM",4))
     parse_minolta(0);
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
   else if (!memcmp (head,"FOVb",4))
     parse_foveon();
+#endif
   else if (!memcmp (head,"CI",2))
     parse_cine();
   else
@@ -9276,12 +9336,26 @@ void CLASS identify()
       top_margin = 16;
     }
   }
-  for (i=0; i < sizeof unique / sizeof *unique; i++)
-    if (unique_id == 0x80000000 + unique[i].id)
-      {
-        adobe_coeff ("Canon", unique[i].t_model);
-        strcpy(model,unique[i].t_model);
-      }
+  if (!strcmp(make,"Canon") && unique_id)
+    {
+      for (i=0; i < sizeof unique / sizeof *unique; i++)
+        if (unique_id == 0x80000000 + unique[i].id)
+          {
+            adobe_coeff ("Canon", unique[i].t_model);
+            strcpy(model,unique[i].t_model);
+          }
+    }
+
+  if (!strcasecmp(make,"Sony") && unique_id)
+    {
+      for (i=0; i < sizeof sony_unique / sizeof *sony_unique; i++)
+        if (unique_id == sony_unique[i].id)
+          {
+            adobe_coeff ("Sony", sony_unique[i].t_model);
+            strcpy(model,sony_unique[i].t_model);
+          }
+    }
+
   if (!strcmp(make,"Nikon")) {
     if (!load_raw)
       load_raw = &CLASS packed_load_raw;

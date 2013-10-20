@@ -691,6 +691,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; 
       d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
     }
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
   else if (load_raw == &LibRaw::foveon_sd_load_raw )
     {
       d_info->decoder_name = "foveon_sd_load_raw()";
@@ -701,6 +702,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_name = "foveon_dp_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
     }
+#endif
   else
     {
       d_info->decoder_name = "Unknown unpack function";
@@ -1619,7 +1621,11 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     // process cropping
     int do_crop = 0;
     unsigned save_width = S.width;
-    if (~O.cropbox[2] && ~O.cropbox[3] && load_raw != &LibRaw::foveon_sd_load_raw) // Foveon SD to be cropped later
+    if (~O.cropbox[2] && ~O.cropbox[3] 
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+        && load_raw != &LibRaw::foveon_sd_load_raw
+#endif
+        ) // Foveon SD to be cropped later
       {
         int crop[4],c,filt;
         for(int c=0;c<4;c++) 
@@ -2328,6 +2334,7 @@ int LibRaw::unpack_thumb(void)
             return 0;
 
           }
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
         else if (write_thumb == &LibRaw::foveon_thumb)
           {
             foveon_thumb_loader();
@@ -2337,6 +2344,7 @@ int LibRaw::unpack_thumb(void)
             return 0;
           }
         // else if -- all other write_thumb cases!
+#endif
         else
           {
             return LIBRAW_UNSUPPORTED_THUMBNAIL;
@@ -2699,6 +2707,7 @@ int LibRaw::dcraw_process(void)
 
     if (P1.is_foveon) 
       {
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
         if(load_raw == &LibRaw::foveon_dp_load_raw)
           {
             for (int i=0; i < S.height*S.width*4; i++)
@@ -2708,6 +2717,7 @@ int LibRaw::dcraw_process(void)
           {
             foveon_interpolate();
           }
+#endif
         SET_PROC_FLAG(LIBRAW_PROGRESS_FOVEON_INTERPOLATE);
       }
 
@@ -3523,6 +3533,7 @@ const char * LibRaw::strprogress(enum LibRaw_progress p)
 }
 
 #undef ID
+#ifndef LIBRAW_DEMOSAIC_PACK_GPL2
 #include "../internal/libraw_x3f.cpp"
 
 void LibRaw::x3f_load_raw()
@@ -3572,3 +3583,4 @@ void LibRaw::x3f_load_raw()
   if(raise_error)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
 }
+#endif

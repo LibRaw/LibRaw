@@ -220,11 +220,12 @@ protected:
 
     void        kodak_thumb_loader();
     void        write_thumb_ppm_tiff(FILE *); 
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
     void        foveon_thumb_loader (void);
+#endif
     
     int         own_filtering_supported(){ return 0;}
     void        identify();
-    void        identify2(unsigned, unsigned, char*);
     void        write_ppm_tiff ();
     void        convert_to_rgb();
     void        remove_zeroes();
@@ -272,7 +273,9 @@ protected:
 
     void        stretch();
 
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
     void        foveon_thumb ();
+#endif
     void        jpeg_thumb_writer (FILE *tfp,char *thumb,int thumb_length);
     void        jpeg_thumb ();
     void        ppm_thumb ();
@@ -281,7 +284,9 @@ protected:
     void        rollei_thumb ();
     void        kodak_thumb_load_raw();
 
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
     void        foveon_decoder (unsigned size, unsigned code);
+#endif
     unsigned    get4();
 
     int         flip_index (int row, int col);
