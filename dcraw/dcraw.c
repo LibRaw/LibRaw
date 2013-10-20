@@ -9314,6 +9314,7 @@ void CLASS identify()
     if (filters) is_raw = tiff_samples;
     else	 colors = tiff_samples;
     switch (tiff_compress) {
+    case 0:  /* Compression not set, assuming uncompressed */
       case 1:     load_raw = &CLASS   packed_dng_load_raw;  break;
       case 7:     load_raw = &CLASS lossless_dng_load_raw;  break;
       case 34892: load_raw = &CLASS    lossy_dng_load_raw;  break;
