@@ -226,7 +226,6 @@ protected:
     
     int         own_filtering_supported(){ return 0;}
     void        identify();
-    void        identify2(unsigned, unsigned, char*);
     void        write_ppm_tiff ();
     void        convert_to_rgb();
     void        remove_zeroes();
