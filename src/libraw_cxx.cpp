@@ -943,7 +943,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     identify();
 #ifndef LIBRAW_DEMOSAIC_PACK_GPL2
     // Adjust sizes
-    if(imgdata.idata.is_foveon)
+    if(0 && imgdata.idata.is_foveon)
     {
         for(int i=0; i< foveon_count;i++)
             if(!strcasecmp(imgdata.idata.make,foveon_data[i].make) && !strcasecmp(imgdata.idata.model,foveon_data[i].model)
@@ -1126,7 +1126,7 @@ int LibRaw::unpack(void)
         if(rheight < S.height + S.top_margin)
           rheight = S.height + S.top_margin;
       }
-    S.raw_pitch = S.raw_width*2;
+
     imgdata.rawdata.raw_image = 0;
     imgdata.rawdata.color4_image = 0;
     imgdata.rawdata.color3_image = 0;
@@ -1226,6 +1226,8 @@ int LibRaw::unpack(void)
           {
             imgdata.rawdata.raw_alloc = malloc(rwidth*(rheight+7)*sizeof(imgdata.rawdata.raw_image[0]));
             imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
+            if(!S.raw_pitch)
+                S.raw_pitch = S.raw_width*2; // Bayer case, not set before
           }
         else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
           {
@@ -3611,6 +3613,10 @@ void LibRaw::parse_x3f()
     imgdata.idata.raw_count=1;
     load_raw = &LibRaw::x3f_load_raw;
     imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*6;
+    imgdata.idata.is_foveon = 1;
+    libraw_internal_data.internal_output_params.raw_color=1; // Force adobe coeff
+    imgdata.color.maximum=0x3fff; // To be reset by color table
+    libraw_internal_data.unpacker_data.order = 0x4949;
   }
 }
 
@@ -3628,7 +3634,7 @@ void LibRaw::x3f_load_raw()
       x3f_huffman_t *HUF = ID->huffman;
       x3f_true_t *TRU = ID->tru;
       uint16_t *data = NULL;
-      if(ID->rows != S.height || ID->columns != S.width)
+      if(ID->rows != S.raw_height || ID->columns != S.raw_width)
         {
           raise_error = 1;
           goto end;
