@@ -176,10 +176,10 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        foveon_interpolate();
     char *      foveon_gets (int offset, char *str, int len);
     void        parse_foveon();
-#else
-    void        x3f_load_raw();
 #endif
-
+// We always have x3f code compiled in!
+    void        parse_x3f();
+    void        x3f_load_raw();
 
 // CAM/RGB
     void        pseudoinverse (double (*in)[3], double (*out)[3], int size);

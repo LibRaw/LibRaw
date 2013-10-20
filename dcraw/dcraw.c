@@ -9213,9 +9213,11 @@ void CLASS identify()
     parse_sinar_ia();
   else if (!memcmp (head,"\0MRM",4))
     parse_minolta(0);
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
   else if (!memcmp (head,"FOVb",4))
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
     parse_foveon();
+#else
+    parse_x3f();
 #endif
   else if (!memcmp (head,"CI",2))
     parse_cine();
@@ -9314,6 +9316,7 @@ void CLASS identify()
     if (filters) is_raw = tiff_samples;
     else	 colors = tiff_samples;
     switch (tiff_compress) {
+    case 0:  /* Compression not set, assuming uncompressed */
       case 1:     load_raw = &CLASS   packed_dng_load_raw;  break;
       case 7:     load_raw = &CLASS lossless_dng_load_raw;  break;
       case 34892: load_raw = &CLASS    lossy_dng_load_raw;  break;

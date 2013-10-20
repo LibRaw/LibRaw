@@ -27,7 +27,7 @@ it under the terms of the one of three licenses as you choose:
 
 #ifdef __cplusplus
 
-#define MSIZE 32
+#define LIBRAW_MSIZE 32
 
 class DllDef libraw_memmgr
 {
@@ -63,7 +63,7 @@ class DllDef libraw_memmgr
     }
     void cleanup(void)
     {
-        for(int i = 0; i< MSIZE; i++)
+        for(int i = 0; i< LIBRAW_MSIZE; i++)
             if(mems[i])
                 {
                     free(mems[i]);
@@ -72,12 +72,12 @@ class DllDef libraw_memmgr
     }
 
   private:
-    void *mems[MSIZE];
+    void *mems[LIBRAW_MSIZE];
     int calloc_cnt;
     void mem_ptr(void *ptr)
     {
         if(ptr)
-            for(int i=0;i < MSIZE; i++)
+            for(int i=0;i < LIBRAW_MSIZE; i++)
                 if(!mems[i])
                     {
                         mems[i] = ptr;
@@ -87,7 +87,7 @@ class DllDef libraw_memmgr
     void forget_ptr(void *ptr)
     {
         if(ptr)
-            for(int i=0;i < MSIZE; i++)
+            for(int i=0;i < LIBRAW_MSIZE; i++)
                 if(mems[i] == ptr)
                     mems[i] = NULL;
     }

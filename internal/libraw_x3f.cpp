@@ -307,7 +307,7 @@ typedef struct x3f_directory_entry_s {
   struct {
     uint32_t offset;
     uint32_t size;
-  } input;
+  } input,output;
 
   uint32_t type;
 

@@ -299,6 +299,8 @@ protected:
   /* Fast cancel flag */
   long          _exitflag;
 
+  /* X3F data */
+  void          *_x3f_data;
 
 #ifdef LIBRAW_LIBRARY_BUILD 
 #include "internal/libraw_internal_funcs.h"
