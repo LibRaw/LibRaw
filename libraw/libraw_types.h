@@ -306,26 +306,28 @@ typedef struct
     int no_interpolation;
   /* Disable sRAW YCC to RGB conversion */
   int sraw_ycc;
+  /* Force use x3f data decoding either if demosaic pack GPL2 enabled */
+  int force_foveon_x3f;
 }libraw_output_params_t;
 
 typedef struct
 {
     /* really allocated bitmap */
-    void        *raw_alloc;
-    /* alias to single_channel variant */
-    ushort      *raw_image;
-    /* alias to 4-channel variant */
-    ushort      (*color4_image)[4] ;
-	/* alias to 3-color variand decoded by RawSpeed */
-	ushort		(*color3_image)[3];
+  void          *raw_alloc;
+  /* alias to single_channel variant */
+  ushort        *raw_image;
+  /* alias to 4-channel variant */
+  ushort        (*color4_image)[4] ;
+  /* alias to 3-color variand decoded by RawSpeed */
+  ushort        (*color3_image)[3];
     
-    /* Phase One black level data; */
-    short  (*ph1_black)[2];
-    /* save color and sizes here, too.... */
-    libraw_iparams_t  iparams;
-    libraw_image_sizes_t sizes;
-    libraw_internal_output_params_t ioparams;
-    libraw_colordata_t color;
+  /* Phase One black level data; */
+  short  (*ph1_black)[2];
+  /* save color and sizes here, too.... */
+  libraw_iparams_t  iparams;
+  libraw_image_sizes_t sizes;
+  libraw_internal_output_params_t ioparams;
+  libraw_colordata_t color;
 } libraw_rawdata_t;
 
 

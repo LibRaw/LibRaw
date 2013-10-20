@@ -32,6 +32,14 @@ it under the terms of the one of three licenses as you choose:
 #define snprintf _snprintf
 #endif
 
+#define P1 MyCoolRawProcessor.imgdata.idata
+#define P2 MyCoolRawProcessor.imgdata.other
+
+#define S MyCoolRawProcessor.imgdata.sizes
+#define O MyCoolRawProcessor.imgdata.params
+#define C MyCoolRawProcessor.imgdata.color
+#define T MyCoolRawProcessor.imgdata.thumbnail
+
 
 int main(int ac, char *av[])
 {
@@ -44,24 +52,15 @@ int main(int ac, char *av[])
                 if(av[i][1]=='v' && av[i][2]==0) verbose++;
                 if(av[i][1]=='u' && av[i][2]==0) print_unpack++;
                 if(av[i][1]=='f' && av[i][2]==0) print_frame++;
+                if(av[i][1]=='x' && av[i][2]==0) O.force_foveon_x3f=1;
                 continue;
             }
         if( (ret = MyCoolRawProcessor.open_file(av[i])) != LIBRAW_SUCCESS)
-            {
-                printf("Cannot decode %s: %s\n",av[i],libraw_strerror(ret));
-                continue; // no recycle, open_file will recycle
-            }
+          {
+            printf("Cannot decode %s: %s\n",av[i],libraw_strerror(ret));
+            continue; // no recycle, open_file will recycle
+          }
         if(verbose) {
-
-#define P1 MyCoolRawProcessor.imgdata.idata
-#define P2 MyCoolRawProcessor.imgdata.other
-
-#define S MyCoolRawProcessor.imgdata.sizes
-#define O MyCoolRawProcessor.imgdata.params
-#define C MyCoolRawProcessor.imgdata.color
-#define T MyCoolRawProcessor.imgdata.thumbnail
-
-
             if( (ret =  MyCoolRawProcessor.adjust_sizes_info_only()))
             {
                 printf("Cannot decode %s: %s\n",av[i],libraw_strerror(ret));
@@ -122,12 +121,14 @@ int main(int ac, char *av[])
             {
                 if(print_unpack)
                     {
-                        char frame[32]="";
+                        char frame[48]="";
                         if(print_frame)
                             {
                                 ushort right_margin = S.raw_width - S.width - S.left_margin;
                                 ushort bottom_margin = S.raw_height - S.height - S.top_margin;
-                                snprintf(frame,32,"%dx%dx%dx%d",S.left_margin,S.top_margin,right_margin,bottom_margin);
+                                snprintf(frame,48,"F=%dx%dx%dx%d RS=%dx%d",
+                                         S.left_margin,S.top_margin,right_margin,bottom_margin,
+                                         S.raw_width,S.raw_height);
                                 printf ("%s\t%s\t%s\t%s/%s\n", 
                                 av[i],
                                 MyCoolRawProcessor.unpack_function_name(),

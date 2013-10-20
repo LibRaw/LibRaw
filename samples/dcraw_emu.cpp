@@ -123,6 +123,7 @@ void usage(const char *prog)
 "-disinterp Do not run interpolation step\n"
 "-dsrawrgb1 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation enabled)\n"
 "-dsrawrgb2 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation disabled)\n"
+"-disadcf  Do not use dcraw Foveon code either if compiled with demosaic-pack-GPL2\n"
 );
     exit(1);
 }
@@ -339,6 +340,8 @@ int main(int argc, char *argv[])
                     OUT.dcb_iterations = atoi(argv[arg++]);
                   else if(!strcmp(optstr,"-disars"))
                     OUT.use_rawspeed=0;
+                  else if(!strcmp(optstr,"-disadcf"))
+                    OUT.force_foveon_x3f=1;
                   else if(!strcmp(optstr,"-disinterp"))
                     OUT.no_interpolation=1;
                   else if(!strcmp(optstr,"-dcbe"))

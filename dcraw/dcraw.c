@@ -7863,10 +7863,6 @@ void CLASS parse_foveon()
     }
     fseek (ifp, save, SEEK_SET);
   }
-#ifndef LIBRAW_DEMOSAIC_PACK_GPL2
-  raw_color=1; // Force adobe coeff
-  maximum=0x3fff; // To be reset by color table
-#endif
 }
 
 //@out COMMON
@@ -8616,8 +8612,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 10504,-2438,-1189,-8603,16207,2531,-1022,863,12242 } },
     { "Samsung S85", 0, 0,		/* DJC */
 	{ 11885,-3968,-1473,-4214,12299,1916,-835,1655,5549 } },
-#ifndef LIBRAW_DEMOSAIC_PACK_GPL2
-     // Old Foveons
+     // Foveon: LibRaw color data
     { "Sigma SD9", 15, 4095,			/* LibRaw */
       { 14082,-2201,-1056,-5243,14788,167,-121,196,8881 } },
     { "Sigma SD10", 15, 16383,			/* LibRaw */
@@ -8640,7 +8635,6 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
     // Sigma DP (non-Merill Versions)
     { "Sigma DP", 0, 4095,			/* LibRaw */
     { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
-#endif
     { "Sinar", 0, 0,			/* DJC */
 	{ 16442,-2956,-2422,-2877,12128,750,-1136,6066,4559 } },
     { "Sony DSC-F828", 0, 0,
@@ -9214,11 +9208,14 @@ void CLASS identify()
   else if (!memcmp (head,"\0MRM",4))
     parse_minolta(0);
   else if (!memcmp (head,"FOVb",4))
+    {
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-    parse_foveon();
-#else
-    parse_x3f();
+      if(!imgdata.params.force_foveon_x3f)
+        parse_foveon();
+      else
 #endif
+        parse_x3f();
+    }
   else if (!memcmp (head,"CI",2))
     parse_cine();
   else
@@ -9379,7 +9376,8 @@ void CLASS identify()
     if (height   > width) pixel_aspect = 2;
     filters = 0;
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-    simple_coeff(0);
+    if(!imgdata.params.force_foveon_x3f)
+      simple_coeff(0);
 #endif
   } else if (!strcmp(make,"Canon") && tiff_bps == 15) {
     switch (width) {
