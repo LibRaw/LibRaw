@@ -8063,7 +8063,6 @@ void CLASS identify()
       for (i=0; i < sizeof sony_unique / sizeof *sony_unique; i++)
         if (unique_id == sony_unique[i].id)
           {
-            printf("Found %s\n",sony_unique[i].t_model);
             adobe_coeff ("Sony", sony_unique[i].t_model);
             strcpy(model,sony_unique[i].t_model);
           }
@@ -8553,6 +8552,8 @@ konica_400z:
     width -= 8;
   } else if (!strcmp(make,"Sony") && raw_width == 6048) {
     width -= 24;
+  } else if (!strcmp(make,"Sony") && raw_width == 7392) {
+    width -= 24; // 21 pix really
   } else if (!strcmp(model,"DSLR-A100")) {
     if (width == 3880) {
       height--;
