@@ -9840,6 +9840,8 @@ konica_400z:
     width -= 8;
   } else if (!strcmp(make,"Sony") && raw_width == 6048) {
     width -= 24;
+  } else if (!strcmp(make,"Sony") && raw_width == 7392) {
+    width -= 24; // 21 pix really
   } else if (!strcmp(model,"DSLR-A100")) {
     if (width == 3880) {
       height--;
