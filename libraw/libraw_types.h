@@ -333,17 +333,17 @@ typedef struct
 
 typedef struct
 {
-	ushort                      (*image)[4] ;
-	libraw_image_sizes_t        sizes;
-	libraw_iparams_t            idata;
-	libraw_output_params_t		params;
-    unsigned int                progress_flags;
-    unsigned int                process_warnings;
-    libraw_colordata_t          color;
-    libraw_imgother_t           other;
-    libraw_thumbnail_t          thumbnail;
-    libraw_rawdata_t            rawdata;
-    void                *parent_class;      
+  ushort                      (*image)[4] ;
+  libraw_image_sizes_t        sizes;
+  libraw_iparams_t            idata;
+  libraw_output_params_t		params;
+  unsigned int                progress_flags;
+  unsigned int                process_warnings;
+  libraw_colordata_t          color;
+  libraw_imgother_t           other;
+  libraw_thumbnail_t          thumbnail;
+  libraw_rawdata_t            rawdata;
+  void                *parent_class;      
 } libraw_data_t;
 
 

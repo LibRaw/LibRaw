@@ -220,6 +220,7 @@ protected:
 
     void        kodak_thumb_loader();
     void        write_thumb_ppm_tiff(FILE *); 
+    void        x3f_thumb_loader();
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
     void        foveon_thumb_loader (void);
 #endif

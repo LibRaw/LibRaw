@@ -103,7 +103,8 @@ int main(int ac, char *av[])
                     continue; // no recycle b/c open file will recycle itself
                 }
             
-            if( (ret = RawProcessor.unpack() ) != LIBRAW_SUCCESS)
+            if(!output_thumbs) // No unpack for thumb extraction
+              if( (ret = RawProcessor.unpack() ) != LIBRAW_SUCCESS)
                 {
                     fprintf(stderr,"Cannot unpack %s: %s\n",av[i],libraw_strerror(ret));
                     continue;
@@ -132,6 +133,7 @@ int main(int ac, char *av[])
                                         continue; 
                                 }
                         }
+                    continue;
                 }
             
             ret = RawProcessor.dcraw_process();
