@@ -12,6 +12,10 @@
   * Samsung: black level and color matrix extracted from EXIF; 
     Camera multipliers are now extracted correctly even if black is not 0
 
+  * Better source compatibility with Mac OS X compilation
+
+  * Better source compatibility with Win32 compilation
+
   * DNG without Compression tag assumed uncompressed
 
   * Better X3F-tools based Foveon support:
