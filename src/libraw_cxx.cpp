@@ -900,28 +900,38 @@ struct foveon_data_t
 {
     const char *make;
     const char *model;
-    const int raw_width;
+    const int raw_width,raw_height;
     const int  white;
     const int  left_margin,top_margin;
     const int  width,height;
 } foveon_data [] =
 {
-    {"Sigma","SD9",	2304,3600,20,8,2266,1510},
-    {"Sigma","SD10",2304,9340,20,8,2266,1510},
-    {"Sigma","SD14",2688,7200,18,12,2651,1767},
-    {"Sigma","SD15",2688,2900,18,12,2651,1767},
-    {"Sigma","DP1",2688,2100,18,12,2651,1767},
-    {"Sigma","DP1S",2688,2200,18,12,2651,1767},
-    {"Sigma","DP1X",2688,3560,18,12,2651,1767},
-    {"Sigma","DP2",2688,2326,13,16,2651,1767},
-    {"Sigma","DP2S",2688,2300,18,12,2651,1767},
-    {"Sigma","DP2X",2688,2300,18,12,2651,1767},
-    {"Sigma","SD1",4928,3900,12,52,4807,3205},
-    {"Sigma","SD1 Merill",4928,3900,12,52,4807,3205},
-    {"Sigma","DP1 Merrill",4928,3900,12,0,4807,3205},
-    {"Sigma","DP2 Merrill",4928,3900,12,0,4807,3205},
-    {"Sigma","DP3 Merrill",4928,3900,12,0,4807,3205},
-    {"Polaroid","x530",1440,2700,10,13,1419,1059},
+    {"Sigma","SD9",	2304,1531,3600,20,8,2266,1510},
+    {"Sigma","SD10",2304,1531,9340,20,8,2266,1510},
+    {"Sigma","SD14",2688,1792,7200,18,12,2651,1767},
+    {"Sigma","SD15",2688,1792,2900,18,12,2651,1767},
+    {"Sigma","DP1",2688,1792,2100,18,12,2651,1767},
+    {"Sigma","DP1S",2688,1792,2200,18,12,2651,1767},
+    {"Sigma","DP1X",2688,1792,3560,18,12,2651,1767},
+    {"Sigma","DP2",2688,1792,2326,13,16,2651,1767},
+    {"Sigma","DP2S",2688,1792,2300,18,12,2651,1767},
+    {"Sigma","DP2X",2688,1792,2300,18,12,2651,1767},
+    {"Sigma","SD1",4928,3264,3900,12,52,4807,3205}, // Full size
+    {"Sigma","SD1",4928,1632,3900,12,26,4807,1603}, // 2/3 size
+    {"Sigma","SD1",2464,1632,3900,6,26,2403,1603}, // 1/2 size
+    {"Sigma","SD1 Merill",4928,3264,3900,12,52,4807,3205}, // Full size
+    {"Sigma","SD1 Merill",4928,1632,3900,12,26,4807,1603}, // 2/3 size
+    {"Sigma","SD1 Merill",2464,1632,3900,6,26,2403,1603}, // 1/2 size
+    {"Sigma","DP1 Merrill",4928,3264,3900,12,0,4807,3205},
+    {"Sigma","DP1 Merrill",2464,1632,3900,12,0,2403,1603}, // 1/2 size
+    {"Sigma","DP1 Merrill",4928,1632,3900,12,0,4807,1603}, // 2/3 size
+    {"Sigma","DP2 Merrill",4928,3264,3900,12,0,4807,3205},
+    {"Sigma","DP2 Merrill",2464,1632,3900,12,0,2403,1603}, // 1/2 size
+    {"Sigma","DP2 Merrill",4928,1632,3900,12,0,4807,1603}, // 2/3 size
+    {"Sigma","DP3 Merrill",4928,3264,3900,12,0,4807,3205},
+    {"Sigma","DP3 Merrill",2464,1632,3900,12,0,2403,1603}, // 1/2 size
+    {"Sigma","DP3 Merrill",4928,1632,3900,12,0,4807,1603}, // 2/3 size
+    {"Polaroid","x530",1440,1088,2700,10,13,1419,1059},
 };
 const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
@@ -943,11 +953,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
     // Adjust sizes for X3F processing
-    if(0 && load_raw == &LibRaw::x3f_load_raw)
+    if(load_raw == &LibRaw::x3f_load_raw)
     {
         for(int i=0; i< foveon_count;i++)
             if(!strcasecmp(imgdata.idata.make,foveon_data[i].make) && !strcasecmp(imgdata.idata.model,foveon_data[i].model)
-                && imgdata.sizes.raw_width == foveon_data[i].raw_width)
+                && imgdata.sizes.raw_width == foveon_data[i].raw_width
+                && imgdata.sizes.raw_height == foveon_data[i].raw_height
+                )
             {
                 imgdata.sizes.top_margin = foveon_data[i].top_margin;
                 imgdata.sizes.left_margin = foveon_data[i].left_margin;
