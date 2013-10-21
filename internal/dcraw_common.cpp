@@ -4894,11 +4894,11 @@ nf: order = 0x4949;
       iso_speed = (get2(),get2());
     if (tag == 4 && len > 26 && len < 35) {
       if ((i=(get4(),get2())) != 0x7fff && !iso_speed)
-	iso_speed = 50 * pow (2, i/32.0 - 4);
+	iso_speed = 50 * pow (2.0, i/32.0 - 4);
       if ((i=(get2(),get2())) != 0x7fff && !aperture)
-	aperture = pow (2, i/64.0);
+	aperture = pow (2.0, i/64.0);
       if ((i=get2()) != 0xffff && !shutter)
-	shutter = pow (2, (short) i/-32.0);
+	shutter = pow (2.0, (short) i/-32.0);
       wbi = (get2(),get2());
       shot_order = (get2(),get2());
     }
@@ -5157,8 +5157,8 @@ void CLASS parse_exif (int base)
       case 36867:
       case 36868:  get_timestamp(0);			break;
       case 37377:  if ((expo = -getreal(type)) < 128)
-		     shutter = pow (2, expo);		break;
-      case 37378:  aperture = pow (2, getreal(type)/2);	break;
+		     shutter = pow (2.0, expo);		break;
+      case 37378:  aperture = pow (2.0, getreal(type)/2);	break;
       case 37386:  focal_len = getreal(type);		break;
       case 37500:  parse_makernote (base, 0);		break;
       case 40962:  if (kodak) raw_width  = get4();	break;
@@ -6048,7 +6048,7 @@ void CLASS parse_external_jpeg()
 #ifndef LIBRAW_LIBRARY_BUILD
   FILE *save=ifp;
 #else
-#if defined (WIN32) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
   if(ifp->wfname())
   {
 	  std::wstring rawfile(ifp->wfname());
@@ -6208,13 +6208,13 @@ void CLASS parse_ciff (int offset, int length, int depth)
       thumb_length = len;
     }
     if (type == 0x1818) {
-      shutter = pow (2, -int_to_float((get4(),get4())));
-      aperture = pow (2, int_to_float(get4())/2);
+      shutter = pow (2.0f, -int_to_float((get4(),get4())));
+      aperture = pow (2.0f, int_to_float(get4())/2);
     }
     if (type == 0x102a) {
-      iso_speed = pow (2, (get4(),get2())/32.0 - 4) * 50;
-      aperture  = pow (2, (get2(),(short)get2())/64.0);
-      shutter   = pow (2,-((short)get2())/32.0);
+      iso_speed = pow (2.0, (get4(),get2())/32.0 - 4) * 50;
+      aperture  = pow (2.0, (get2(),(short)get2())/64.0);
+      shutter   = pow (2.0,-((short)get2())/32.0);
       wbi = (get2(),get2());
       if (wbi > 17) wbi = 0;
       fseek (ifp, 32, SEEK_CUR);
