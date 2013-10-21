@@ -9872,6 +9872,8 @@ konica_400z:
     adobe_coeff ("Sony","DSC-R1");
     width = 3925;
     order = 0x4d4d;
+  } else if (!strcmp(make,"Sony") && !strcmp(model,"ILCE-3000")) {
+    width -= 24;
   } else if (!strcmp(make,"Sony") && raw_width == 5504) {
     width -= 8;
   } else if (!strcmp(make,"Sony") && raw_width == 6048) {
