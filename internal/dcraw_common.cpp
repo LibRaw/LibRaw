@@ -4830,6 +4830,7 @@ void CLASS parse_makernote (int base, int uptag)
   uchar buf97[324], ci, cj, ck;
   short morder, sorder=order;
   char buf[10];
+  unsigned SamsungKey[11];
 /*
    The MakerNote might have its own TIFF header (possibly with
    its own byte-order!), or it might just be a table.
@@ -5087,10 +5088,26 @@ get2_rggb:
       fseek (ifp, i, SEEK_CUR);
       FORC4 sraw_mul[c ^ (c >> 1)] = get2();
     }
-    if (tag == 0xa021)
-      FORC4 cam_mul[c ^ (c >> 1)] = get4();
-    if (tag == 0xa028)
-      FORC4 cam_mul[c ^ (c >> 1)] -= get4();
+    if(!strcasecmp(make,"Samsung"))
+      {
+        if (tag == 0xa020) // get the full Samsung encryption key
+            for (i=0; i<11; i++) SamsungKey[i] = get4();
+        if (tag == 0xa021) // get and decode Samsung cam_mul array
+            FORC4 cam_mul[c ^ (c >> 1)] = get4() - SamsungKey[c];
+        if (tag == 0xa030 && len == 9)	// get and decode Samsung color matrix
+            for (i=0; i < 3; i++)
+              FORC3 cmatrix[i][c] = (short)((get4() + SamsungKey[i*3+c]))/256.0;
+        if (tag == 0xa028)
+          FORC4 cblack[c ^ (c >> 1)] = get4() - SamsungKey[c];
+      }
+    else
+      {
+        // Somebody else use 0xa021 and 0xa028?
+        if (tag == 0xa021)
+          FORC4 cam_mul[c ^ (c >> 1)] = get4();
+        if (tag == 0xa028)
+          FORC4 cam_mul[c ^ (c >> 1)] -= get4();
+      }
 next:
     fseek (ifp, save, SEEK_SET);
   }
@@ -5506,6 +5523,23 @@ int CLASS parse_tiff_ifd (int base)
 	i = (cam_mul[1] == 1024 && cam_mul[2] == 1024) << 1;
 	SWAP (cam_mul[i],cam_mul[i+1])
 	break;
+    case 30720: // Sony matrix, Sony_SR2SubIFD_0x7800
+      for (i=0; i < 3; i++)
+        FORC3 cmatrix[i][c] = ((short) get2()) / 1024.0;
+#ifdef DCRAW_VERBOSE
+	if (verbose) fprintf (stderr, _(" Sony matrix:\n%f %f %f\n%f %f %f\n%f %f %f\n"), cmatrix[0][0],  cmatrix[0][1], cmatrix[0][2], cmatrix[1][0], cmatrix[1][1], cmatrix[1][2], cmatrix[2][0], cmatrix[2][1], cmatrix[2][2]);
+#endif
+	break;
+    case 29456: // Sony black level, Sony_SR2SubIFD_0x7310, needs to be divided by 4
+      FORC4 cblack[c ^ c >> 1] = get2()/4;
+      i = cblack[3];
+      FORC3 if(i>cblack[c]) i = cblack[c];
+      FORC4 cblack[c]-=i;
+      black = i;
+#ifdef DCRAW_VERBOSE
+      if (verbose) fprintf (stderr, _("...Sony black= %u cblack %u %u %u %u\n"), black, cblack[0],cblack[1],cblack[2], cblack[3]);
+#endif
+      break;
       case 33405:			/* Model2 */
 	fgets (model2, 64, ifp);
 	break;
@@ -7338,16 +7372,14 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
     { "Sigma SD15", 15, 4095,			/* LibRaw */
       { 14082,-2201,-1056,-5243,14788,167,-121,196,8881 } },
     // Merills + SD1
-    { "Sigma SD1 Merrill", 31, 4095,			/* LibRaw */
-    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
-    { "Sigma SD1", 16, 4096,			/* LibRaw */
-    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+    { "Sigma SD1", 31, 4095,			/* LibRaw */
+      { 5133,-1895,-353,4978,744,144,3837,3069,2777 } },
     { "Sigma DP1 Merrill", 31, 4095,			/* LibRaw */
-    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+      { 5133,-1895,-353,4978,744,144,3837,3069,2777 } },
     { "Sigma DP2 Merrill", 31, 4095,			/* LibRaw */
-    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+      { 5133,-1895,-353,4978,744,144,3837,3069,2777 } },
     { "Sigma DP3 Merrill", 31, 4095,			/* LibRaw */
-    { 4683,-1294,-312,3936,1802,487,2642,3706,3379 } },
+      { 5133,-1895,-353,4978,744,144,3837,3069,2777 } },
     // Sigma DP (non-Merill Versions)
     { "Sigma DP", 0, 4095,			/* LibRaw */
     { 13100,-3638,-847,6855,2369,580,2723,3218,3251 } },
@@ -7355,17 +7387,17 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 16442,-2956,-2422,-2877,12128,750,-1136,6066,4559 } },
     { "Sony DSC-F828", 0, 0,
 	{ 7924,-1910,-777,-8226,15459,2998,-1517,2199,6818,-7242,11401,3481 } },
-    { "Sony DSC-R1", 512, 0,
+    { "Sony DSC-R1", -512, 0,
 	{ 8512,-2641,-694,-8042,15670,2526,-1821,2117,7414 } },
     { "Sony DSC-V3", 0, 0,
 	{ 7511,-2571,-692,-7894,15088,3060,-948,1111,8128 } },
-    { "Sony DSC-RX100M2", 200, 0,
+    { "Sony DSC-RX100M2", -200, 0,
 	{ 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
-    { "Sony DSC-RX100", 200, 0,
+    { "Sony DSC-RX100", -200, 0,
 	{ 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
-    { "Sony DSC-RX1R", 128, 0,
+    { "Sony DSC-RX1R", -128, 0,
         { 8195,-2800,-422,-4261,12273,1709,-1505,2400,5624 } },
-    { "Sony DSC-RX1", 128, 0,
+    { "Sony DSC-RX1", -128, 0,
 	{ 6344,-1612,-462,-4863,12477,2681,-865,1786,6899 } },
     { "Sony DSLR-A100", 0, 0xfeb,
 	{ 9437,-2811,-774,-8405,16215,2290,-710,596,7181 } },
@@ -7383,57 +7415,57 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 6038,-1484,-579,-9145,16746,2512,-875,746,7218 } },
     { "Sony DSLR-A390", 0, 0,
 	{ 6038,-1484,-579,-9145,16746,2512,-875,746,7218 } },
-    { "Sony DSLR-A450", 128, 0xfeb,
+    { "Sony DSLR-A450", -128, 0xfeb,
 	{ 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
-    { "Sony DSLR-A580", 128, 0xfeb,
+    { "Sony DSLR-A580", -128, 0xfeb,
 	{ 5932,-1492,-411,-4813,12285,2856,-741,1524,6739 } },
-    { "Sony DSLR-A5", 128, 0xfeb,
+    { "Sony DSLR-A5", -128, 0xfeb,
 	{ 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
-    { "Sony DSLR-A700", 126, 0,
+    { "Sony DSLR-A700", -128, 0,
 	{ 5775,-805,-359,-8574,16295,2391,-1943,2341,7249 } },
-    { "Sony DSLR-A850", 128, 0,
+    { "Sony DSLR-A850", -128, 0,
 	{ 5413,-1162,-365,-5665,13098,2866,-608,1179,8440 } },
-    { "Sony DSLR-A900", 128, 0,
+    { "Sony DSLR-A900", -128, 0,
 	{ 5209,-1072,-397,-8845,16120,2919,-1618,1803,8654 } },
-    {"Sony ILCE-A7R",128, 0,
+    {"Sony ILCE-A7R",-128, 0,
      { 8592,-3219,-348,-3846,12042,1475,-1079,2166,5893 } },
-    {"Sony ILCE-A7",128, 0,
+    {"Sony ILCE-A7",-128, 0,
      { 8592,-3219,-348,-3846,12042,1475,-1079,2166,5893 } },
-    { "Sony NEX-5T", 128, 0,
+    { "Sony NEX-5T", -128, 0,
         { 7623,-2693,-347,-4060,11875,1928,-1363,2329,5752 } },
-    { "Sony NEX-5N", 128, 0,
+    { "Sony NEX-5N", -128, 0,
 	{ 5991,-1456,-455,-4764,12135,2980,-707,1425,6701 } },
-    { "Sony NEX-5R", 128, 0,
+    { "Sony NEX-5R", -128, 0,
 	{ 6129,-1545,-418,-4930,12490,2743,-977,1693,6615 } },
-    { "Sony NEX-3N", 128, 0,
+    { "Sony NEX-3N", -128, 0,
 	{ 6129,-1545,-418,-4930,12490,2743,-977,1693,6615 } },
-    { "Sony NEX-3", 128, 0,		/* Adobe */
+    { "Sony NEX-3", -128, 0,		/* Adobe */
 	{ 6549,-1550,-436,-4880,12435,2753,-854,1868,6976 } },
-    { "Sony NEX-5", 128, 0,		/* Adobe */
+    { "Sony NEX-5", -128, 0,		/* Adobe */
 	{ 6549,-1550,-436,-4880,12435,2753,-854,1868,6976 } },
-    { "Sony NEX-6", 128, 0,
+    { "Sony NEX-6", -128, 0,
 	{ 6129,-1545,-418,-4930,12490,2743,-977,1693,6615 } },
-    { "Sony NEX-7", 128, 0,
+    { "Sony NEX-7", -128, 0,
 	{ 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
-    { "Sony NEX", 128, 0,	/* NEX-C3, NEX-F3 */
+    { "Sony NEX", -128, 0,	/* NEX-C3, NEX-F3 */
 	{ 5991,-1456,-455,-4764,12135,2980,-707,1425,6701 } },
-    { "Sony SLT-A33", 128, 0,
+    { "Sony SLT-A33", -128, 0,
 	{ 6069,-1221,-366,-5221,12779,2734,-1024,2066,6834 } },
-    { "Sony SLT-A35", 128, 0,
+    { "Sony SLT-A35", -128, 0,
 	{ 5986,-1618,-415,-4557,11820,3120,-681,1404,6971 } },
-    { "Sony SLT-A37", 128, 0,
+    { "Sony SLT-A37", -128, 0,
 	{ 5991,-1456,-455,-4764,12135,2980,-707,1425,6701 } },
-    { "Sony SLT-A55", 128, 0,
+    { "Sony SLT-A55", -128, 0,
 	{ 5932,-1492,-411,-4813,12285,2856,-741,1524,6739 } },
-    { "Sony SLT-A57", 128, 0,
+    { "Sony SLT-A57", -128, 0,
 	{ 5991,-1456,-455,-4764,12135,2980,-707,1425,6701 } },
-    { "Sony SLT-A58", 128, 0,
+    { "Sony SLT-A58", -128, 0,
 	{ 5991,-1456,-455,-4764,12135,2980,-707,1425,6701 } },
-    { "Sony SLT-A65", 128, 0,
+    { "Sony SLT-A65", -128, 0,
 	{ 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
-    { "Sony SLT-A77", 128, 0,
+    { "Sony SLT-A77", -128, 0,
 	{ 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
-    { "Sony SLT-A99", 128, 0,
+    { "Sony SLT-A99", -128, 0,
 	{ 6344,-1612,-462,-4863,12477,2681,-865,1786,6899 } },
   };
   double cam_xyz[4][3];
@@ -7443,7 +7475,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
   sprintf (name, "%s %s", t_make, t_model);
   for (i=0; i < sizeof table / sizeof *table; i++)
     if (!strncasecmp(name, table[i].prefix, strlen(table[i].prefix))) {
-      if (table[i].t_black)   black   = (ushort) table[i].t_black;
+      if (table[i].t_black>0)   black   = (ushort) table[i].t_black;
+      else if(table[i].t_black <0 && black == 0 )  black   = (ushort) (-table[i].t_black);
       if (table[i].t_maximum) maximum = (ushort) table[i].t_maximum;
       if (table[i].trans[0]) {
 	for (j=0; j < 12; j++)

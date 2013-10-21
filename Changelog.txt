@@ -1,3 +1,40 @@
+2013-10-22 Alex Tutubalin <lexa@lexa.ru>
+  * Support for new cameras:
+    Sony A7, A7R
+    Panasonic GM1
+
+  * Sony RX1R and RX100M2 color data updated.
+
+  * Sony cameras model name is set by SonyModelID EXIF tag
+  
+  * Sony ARW2: black level and color matrix extracted from EXIF data
+
+  * Samsung: black level and color matrix extracted from EXIF; 
+    Camera multipliers are now extracted correctly even if black is not 0
+
+  * DNG without Compression tag assumed uncompressed
+
+  * Better X3F-tools based Foveon support:
+    - new Foveon metadata parser based on X3F-tools. So, if LibRaw compiled
+      without demosaic-pack-GPL2, then no dcraw Foveon code used.
+    - Support for Medium resolution RAWs from DPx Merrill and SD1 cameras.
+      RAW data extracted as is (4800x1600 pixels), aspect ratio is set to
+      0.5, so these RAWs are processed to full-size 4800x3200 RGB.
+    - Support for Foveon thumbnail extraction. Only JPEG and bitmap
+      thumbnails extracted, but 'foveon' (RAW) thumbnails are really not used
+      in production cameras.
+    - New imgdata.params.force_foveon_x3f flag
+      Forces use of x3f-tools based code for Foveon processing if LibRaw
+      compiled with demosaic-pack-GPL2 (and does nothing if LibRaw compiled
+      without this pack).
+      New flag -disadcf added to dcraw_emu sample to use this flag.
+    - LibRaw do not calls exit() on broken Foveon files.
+
+  * API/ABI changed, so all code using LibRaw should be recompiled.
+
+  * LibRaw 0.16.0-Alpha3
+    
+
 2013-10-16 Alex Tutubalin <lexa@lexa.ru>
   * Support for new cameras:
     Canon S120 (preliminary color data), G16

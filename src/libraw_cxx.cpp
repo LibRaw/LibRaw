@@ -1100,6 +1100,7 @@ int LibRaw::unpack(void)
     if(!load_raw)
       return LIBRAW_UNSPECIFIED_ERROR;
         
+
     if (O.use_camera_matrix && C.cmatrix[0][0] > 0.25) 
       {
         memcpy (C.rgb_cam, C.cmatrix, sizeof (C.cmatrix));
@@ -3672,7 +3673,6 @@ void LibRaw::x3f_thumb_loader()
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
   x3f_directory_entry_header_t *DEH = &DE->header;
   x3f_image_data_t *ID = &DEH->data_subsection.image_data;
-  printf("Thumb: %dx%d %d bytes stride=%d\n",ID->columns,ID->rows,ID->data_size,ID->row_stride);
   imgdata.thumbnail.twidth = ID->columns;
   imgdata.thumbnail.theight = ID->rows;
   imgdata.thumbnail.tcolors = 3;

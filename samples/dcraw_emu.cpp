@@ -328,7 +328,7 @@ int main(int argc, char *argv[])
                               fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
                   break;
               case 'w':  OUT.use_camera_wb     = 1;  break;
-              case 'M':  OUT.use_camera_matrix = (opm == '+');  break;
+              case 'M':  OUT.use_camera_matrix = (opm == '+'); break;
               case 'j':  OUT.use_fuji_rotate   = 0;  break;
               case 'W':  OUT.no_auto_bright    = 1;  break;
               case 'T':  OUT.output_tiff       = 1;  break;
