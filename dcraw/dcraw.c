@@ -9873,7 +9873,7 @@ konica_400z:
     width = 3925;
     order = 0x4d4d;
   } else if (!strcmp(make,"Sony") && !strcmp(model,"ILCE-3000")) {
-    width -= 24;
+    width -= 32;
   } else if (!strcmp(make,"Sony") && raw_width == 5504) {
     width -= 8;
   } else if (!strcmp(make,"Sony") && raw_width == 6048) {
