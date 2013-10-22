@@ -808,7 +808,7 @@ int LibRaw::open_file(const char *fname, INT64 max_buf_size)
   return ret;
 }
 
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
 int LibRaw::open_file(const wchar_t *fname, INT64 max_buf_size)
 {
   struct _stati64 st;

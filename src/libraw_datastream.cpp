@@ -88,7 +88,7 @@ LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
       }
     }
 }
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
 LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname) : filename(),wfilename(fname),jas_file(NULL),_fsize(0)
 {
   if (wfilename.size()>0) 
@@ -212,7 +212,7 @@ int LibRaw_file_datastream::subfile_open(const char *fn)
         return 0;
 }
 
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
 int LibRaw_file_datastream::subfile_open(const wchar_t *fn)
 {
 	LR_STREAM_CHK();
@@ -246,7 +246,7 @@ void * LibRaw_file_datastream::make_jas_stream()
 #ifdef NO_JASPER
     return NULL;
 #else
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
 	if(wfname())
 	{
 		jas_file = _wfopen(wfname(),L"rb");
@@ -266,7 +266,7 @@ int LibRaw_file_datastream::jpeg_src(void *jpegdata)
   return -1; // not supported
 #else
   if(jas_file) { fclose(jas_file); jas_file = NULL;}
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
   if(wfname())
     {
       jas_file = _wfopen(wfname(),L"rb");
@@ -476,7 +476,7 @@ LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname): filenam
     sav=0;
 }
 
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
 LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const wchar_t *fname) : filename(),wfilename(fname)
 { 
   if(wfilename.size()>0)
@@ -590,7 +590,7 @@ int LibRaw_bigfile_datastream::subfile_open(const char *fn)
     else
         return 0;
 }
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
 int LibRaw_bigfile_datastream::subfile_open(const wchar_t *fn)
 {
 	if(sav) return EBUSY;
