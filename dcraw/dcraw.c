@@ -6005,6 +6005,13 @@ void CLASS parse_makernote (int base, int uptag)
   short morder, sorder=order;
   char buf[10];
   unsigned SamsungKey[11];
+  static const double rgb_adobe[3][3] =		// inv(sRGB2XYZ_D65) * AdobeRGB2XYZ_D65
+    {{ 1.398283396477404,     -0.398283116703571, 4.427165001263944E-08},
+     {-1.233904514232401E-07,  0.999999995196570, 3.126724276714121e-08},
+     { 4.561487232726535E-08, -0.042938290466635, 1.042938250416105    }};
+  
+  float adobe_cam [3][3];
+
 /*
    The MakerNote might have its own TIFF header (possibly with
    its own byte-order!), or it might just be a table.
@@ -6229,8 +6236,21 @@ nf: order = 0x4949;
       goto get2_256;
     }
     if ((tag == 0x1011 && len == 9) || tag == 0x20400200)
-      for (i=0; i < 3; i++)
-	FORC3 cmatrix[i][c] = ((short) get2()) / 256.0;
+      {
+        if(!strcasecmp(make,"Olympus"))
+          {
+            int j,k;
+            for (i=0; i < 3; i++)
+              FORC3 adobe_cam[i][c] = ((short) get2()) / 256.0;
+            for (i=0; i < 3; i++)
+              for (j=0; j < 3; j++)
+                for (cmatrix[i][j] = k=0; k < 3; k++)
+                  cmatrix[i][j] += rgb_adobe[i][k] * adobe_cam[k][j];
+          }
+        else
+          for (i=0; i < 3; i++)
+            FORC3 cmatrix[i][c] = ((short) get2()) / 256.0;
+      }
     if ((tag == 0x1012 || tag == 0x20400600) && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x1017 || tag == 0x20400100)
