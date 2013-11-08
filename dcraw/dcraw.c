@@ -6211,6 +6211,8 @@ nf: order = 0x4949;
       meta_offset = ftell(ifp);
     if (tag == 0x401 && type == 4 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get4();
+    if (tag == 0x03d && strstr(make,"NIKON") && len == 4)
+      FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0xe01) {		/* Nikon Capture Note */
       order = 0x4949;
       fseek (ifp, 22, SEEK_CUR);
@@ -6732,12 +6734,8 @@ int CLASS parse_tiff_ifd (int base)
 	break;
     case 29456: // Sony black level, Sony_SR2SubIFD_0x7310, needs to be divided by 4
       FORC4 cblack[c ^ c >> 1] = get2()/4;
-      i = cblack[3];
-      FORC3 if(i>cblack[c]) i = cblack[c];
-      FORC4 cblack[c]-=i;
-      black = i;
 #ifdef DCRAW_VERBOSE
-      if (verbose) fprintf (stderr, _("...Sony black= %u cblack %u %u %u %u\n"), black, cblack[0],cblack[1],cblack[2], cblack[3]);
+      if (verbose) fprintf (stderr, _("...Sony cblack: %u %u %u %u\n"), cblack[0],cblack[1],cblack[2], cblack[3]);
 #endif
       break;
       case 33405:			/* Model2 */
