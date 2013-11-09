@@ -6734,8 +6734,12 @@ int CLASS parse_tiff_ifd (int base)
 	break;
     case 29456: // Sony black level, Sony_SR2SubIFD_0x7310, needs to be divided by 4
       FORC4 cblack[c ^ c >> 1] = get2()/4;
+      i = cblack[3];
+      FORC3 if(i>cblack[c]) i = cblack[c];
+      FORC4 cblack[c]-=i;
+      black = i;
 #ifdef DCRAW_VERBOSE
-      if (verbose) fprintf (stderr, _("...Sony cblack: %u %u %u %u\n"), cblack[0],cblack[1],cblack[2], cblack[3]);
+      if (verbose) fprintf (stderr, _("...Sony black: %u cblack: %u %u %u %u\n"),black, cblack[0],cblack[1],cblack[2], cblack[3]);
 #endif
       break;
       case 33405:			/* Model2 */
@@ -8557,6 +8561,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
     { "Leica DIGILUX 2", 0, 0,
 	{ 11340,-4069,-1275,-7555,15266,2448,-2960,3426,7685 } },
     { "Panasonic DMC-LF1", 143, 0,
+	{ 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
+    { "Leica C", 143, 0,
 	{ 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
     { "Panasonic DMC-LX1", 0, 0xf7f,
 	{ 10704,-4187,-1230,-8314,15952,2501,-920,945,8927 } },
