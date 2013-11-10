@@ -8595,6 +8595,7 @@ konica_400z:
       }
     } else if (!strcmp(model,"STYLUS1")) {
       width -= 14;
+      maximum = 0xfff;
     } else if (!strcmp(model,"E-330")) {
       width -= 30;
       if (load_raw == &CLASS unpacked_load_raw)
