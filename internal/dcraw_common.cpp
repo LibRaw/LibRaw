@@ -8593,6 +8593,8 @@ konica_400z:
 	maximum = 0xfc3;
 	memset (cblack, 0, sizeof cblack);
       }
+    } else if (!strcmp(model,"STYLUS1")) {
+      width -= 14;
     } else if (!strcmp(model,"E-330")) {
       width -= 30;
       if (load_raw == &CLASS unpacked_load_raw)
