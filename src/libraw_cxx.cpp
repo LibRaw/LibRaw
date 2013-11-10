@@ -3227,6 +3227,7 @@ static const char  *static_camera_list[] =
 "Nikon D50",
 "Nikon D60",
 "Nikon D600",
+"Nikon D610",
 "Nikon D70",
 "Nikon D70s",
 "Nikon D80",
