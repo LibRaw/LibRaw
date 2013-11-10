@@ -8233,10 +8233,10 @@ canon_a5:
       mask[0][2] = 80;
       mask[0][1] = 0;
       mask[0][3] = 16;
-      top_margin = 18;
-      left_margin = 96;
-      width = raw_width-left_margin-24;
-      height = raw_height-top_margin;
+      top_margin = 28;
+      left_margin = 120;
+      width = raw_width-left_margin-48;
+      height = raw_height-top_margin-14;
   } else if (!strcmp(model,"PowerShot SX50 HS")) {
     mask[0][0] = top_margin = 17;
     mask[0][2] = raw_height;
