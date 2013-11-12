@@ -3248,6 +3248,7 @@ static const char  *static_camera_list[] =
 "Nikon D7100",
 "Nikon D800",
 "Nikon D800E",
+"Nikon 1 AW1",
 "Nikon 1 J1",
 "Nikon 1 J2",
 "Nikon 1 J3",
