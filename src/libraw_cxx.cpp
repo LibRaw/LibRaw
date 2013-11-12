@@ -3329,6 +3329,7 @@ static const char  *static_camera_list[] =
 "Olympus SP550UZ",
 "Olympus SP560UZ",
 "Olympus SP570UZ",
+"Olympus STYLUS1",
 "Olympus XZ-1",
 "Olympus XZ-2",
 "Olympus XZ-10",

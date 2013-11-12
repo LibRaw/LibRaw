@@ -1,3 +1,28 @@
+2013-11-12 Alex Tutubalin <lexa@lexa.ru>
+  * New cameras supported
+     Leica C, X VARIO
+     Nikon D5300, D610, Df
+     Nokia Lumia 1020, 1520
+     Olympus STYLUS1
+     Pentax K-3
+     Sony RX10, A3000 (ILCE-3000), 
+  * Color data updated:
+     Canon S120
+     Nikon P7800
+     Olympus E-M1
+  * Corrected image visible area sizes
+    Canon G16
+    Sigma pre-Merrill cameras: small and medium-sized RAWs
+
+  * Better EXIF parsing:
+     - ISO values for new Nikon cameras (D4, D800)
+     - black level extraction for Nikon D5300
+     - correct Olympus color data conversion
+
+  * Better Visual Studio compatibility (esp. old versions)
+  * Cmake build: added ws2_32 library for MinGW builds
+  * LibRaw 0.16.0-Beta1
+
 2013-10-22 Alex Tutubalin <lexa@lexa.ru>
   * Support for new cameras:
     Sony A7, A7R
