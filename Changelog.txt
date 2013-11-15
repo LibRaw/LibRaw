@@ -8,7 +8,7 @@
      Sony RX10, A3000 (ILCE-3000), 
   * Color data updated:
      Canon S120
-     Nikon P7800
+     Nikon P7800, 1 J3
      Olympus E-M1
   * Corrected image visible area sizes
     Canon G16
