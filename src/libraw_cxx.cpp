@@ -3083,6 +3083,7 @@ static const char  *static_camera_list[] =
 "FujiFilm F800EXR",
 "FujiFilm X-Pro1",
 "FujiFilm X-S1",
+"FujiFilm XQ1",
 "FujiFilm X100",
 "FujiFilm X100S",
 "FujiFilm X10",

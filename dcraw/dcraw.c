@@ -8202,6 +8202,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
       { 13193,-6685,-425,-2229,10458,1534,-878,1763,5217 } },
     { "Fujifilm X-S1", 0, 0,
 	{ 13509,-6199,-1254,-4430,12733,1865,-331,1441,5022 } },
+    { "Fujifilm XQ1", 0, 0,
+      { 14305,-7365,-687,-3117,12383,432,-287,1660,4361 } },
     { "Hasselblad Lunar", 128, 0,
 	{ 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
     { "Hasselblad Stellar", 200, 0,
@@ -9590,6 +9592,9 @@ canon_a5:
     else width -= 8;
   } else if (!strncmp(model,"D300",4)) {
     width -= 32;
+  } else if (!strcmp(make,"Nikon") && !strcmp(model,"Df")) {
+    left_margin=4;
+    width-=64;
   } else if (!strcmp(make,"Nikon") && raw_width == 4032) {
     adobe_coeff ("Nikon","COOLPIX P7700");
   } else if (!strncmp(model,"COOLPIX P",9)) {
