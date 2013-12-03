@@ -88,6 +88,8 @@ SET(RAWSPEED_PATH           "${CMAKE_CURRENT_SOURCE_DIR}/${RAWSPEED_RPATH}")
 # ==================================================================================================
 # General definitions rules
 
+SET(LIB_SUFFIX "" CACHE STRING "Define suffix of lib directory name (32/64)" )
+
 # To prevent warnings from M$ compiler
 IF(WIN32 AND MSVC)
     ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
@@ -549,10 +551,10 @@ SET_TARGET_PROPERTIES(raw_r PROPERTIES OUTPUT_NAME "raw_r")
 # Configure and install data file for packaging.
 IF(NOT WIN32)
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/data/libraw.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw.pc @ONLY)
-    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libraw.pc DESTINATION lib/pkgconfig)
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libraw.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
 
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/data/libraw_r.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw_r.pc @ONLY)
-    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libraw_r.pc DESTINATION lib/pkgconfig)
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libraw_r.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
 
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/data/libraw.lsm.cmake ${CMAKE_CURRENT_BINARY_DIR}/libraw.lsm)
 ENDIF()
@@ -573,14 +575,14 @@ INSTALL(FILES       ${CMAKE_CURRENT_SOURCE_DIR}/libraw/libraw.h
 # Install Shared binary files.
 INSTALL(TARGETS raw
         RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib${LIB_SUFFIX}
+        ARCHIVE DESTINATION lib${LIB_SUFFIX}
        )
 
 INSTALL(TARGETS raw_r
         RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib${LIB_SUFFIX}
+        ARCHIVE DESTINATION lib${LIB_SUFFIX}
        )
 
 # Install find cmake script to the system for client applications.
@@ -634,8 +636,9 @@ MACRO(LIBRAW_BUILD_SAMPLES)
 
     INSTALL(TARGETS ${_target}
             RUNTIME DESTINATION bin
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib)
+            LIBRARY DESTINATION lib${LIB_SUFFIX}
+            ARCHIVE DESTINATION lib${LIB_SUFFIX}
+    )
 
 ENDMACRO(LIBRAW_BUILD_SAMPLES)
 
