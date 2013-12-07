@@ -41,7 +41,7 @@ it under the terms of the one of three licenses as you choose:
 #include "internal/var_defines.h"
 
 
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2_ttt
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
 /*AHD-Mod*/
 #include <ahd_interpolate_mod.c>
 /*LMMSE*/
