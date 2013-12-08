@@ -1182,7 +1182,6 @@ int LibRaw::unpack(void)
             CameraMetaDataLR *meta = static_cast<CameraMetaDataLR*>(_rawspeed_camerameta);
             d = t.getDecoder();
             if(!d) throw "Unable to find decoder";
-            d->failOnUnknown=true;
             try {
               d->checkSupport(meta);
             }
