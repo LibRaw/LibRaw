@@ -9,4 +9,4 @@ URL: http://www.libraw.org
 Requires:
 Version: @RAW_LIB_VERSION_STRING@
 Libs: -L${libdir} -lraw
-Cflags: -I${includedir}/libraw
+Cflags: -I${includedir}
