@@ -1,6 +1,6 @@
 prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=${prefix}
-libdir=${prefix}/lib
+libdir=${prefix}/lib@LIB_SUFFIX@
 includedir=${prefix}/include/libraw
 
 Name: @PROJECT_NAME@
