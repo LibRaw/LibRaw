@@ -2297,7 +2297,7 @@ void LibRaw::kodak_thumb_loader()
 #undef SWAP
 
 
-// Достает thumbnail из файла, ставит thumb_format в соответствии с форматом
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ thumbnail пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ thumb_format пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 int LibRaw::unpack_thumb(void)
 {
   CHECK_ORDER_LOW(LIBRAW_PROGRESS_IDENTIFY);
@@ -2352,7 +2352,7 @@ int LibRaw::unpack_thumb(void)
             T.tlength = T.twidth * T.theight*3;
             ushort *t_thumb = (ushort*)calloc(T.tlength,2);
             ID.input->read(t_thumb,2,T.tlength);
-            if ((libraw_internal_data.unpacker_data.order= 0x4949) == (ntohs(0x1234) == 0x1234))
+            if ((libraw_internal_data.unpacker_data.order == 0x4949) == (ntohs(0x1234) == 0x1234))
               swab ((char*)t_thumb, (char*)t_thumb, T.tlength*2);
 
             if(T.thumb) free(T.thumb);
