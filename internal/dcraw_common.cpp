@@ -68,8 +68,9 @@ char *my_memmem (char *haystack, size_t haystacklen,
 char *my_strcasestr (char *haystack, const char *needle)
 {
   char *c;
+  size_t len = strlen(needle);
   for (c = haystack; *c; c++)
-    if (!strncasecmp(c, needle, strlen(needle)))
+    if (!strncasecmp(c, needle, len))
       return c;
   return 0;
 }
