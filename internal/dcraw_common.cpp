@@ -8284,6 +8284,7 @@ canon_a5:
     width -= 44;
   } else if (!strcmp(model,"D3200") ||
 	     !strcmp(model,"D600")  ||
+	     !strcmp(model,"D610")  ||
 	    !strncmp(model,"D800",4)) {
     width -= 46;
   } else if (!strcmp(model,"D4")) {
