@@ -68,9 +68,8 @@ char *my_memmem (char *haystack, size_t haystacklen,
 char *my_strcasestr (char *haystack, const char *needle)
 {
   char *c;
-  size_t len = strlen(needle);
   for (c = haystack; *c; c++)
-    if (!strncasecmp(c, needle, len))
+    if (!strncasecmp(c, needle, strlen(needle)))
       return c;
   return 0;
 }
@@ -4901,7 +4900,11 @@ nf: order = 0x4949;
     if (tag == 2 && strstr(make,"NIKON") && !iso_speed)
       iso_speed = (get2(),get2());
     if (tag == 37 && strstr(make,"NIKON") && !iso_speed)
-      iso_speed = int(100.0 * pow(2.0,double(get2() >>8)/12.0-5.0));
+      {
+        unsigned char cc;
+        fread(&cc,1,1,ifp);
+        iso_speed = int(100.0 * pow(2.0,double(cc)/12.0-5.0));
+      }
     if (tag == 4 && len > 26 && len < 35) {
       if ((i=(get4(),get2())) != 0x7fff && !iso_speed)
 	iso_speed = 50 * pow (2.0, i/32.0 - 4);
