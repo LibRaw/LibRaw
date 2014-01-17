@@ -1,6 +1,6 @@
 prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=${prefix}
-libdir=${prefix}/lib
+libdir=${prefix}/lib@LIB_SUFFIX@
 includedir=${prefix}/include/libraw
 
 Name: @PROJECT_NAME@
@@ -9,4 +9,4 @@ URL: http://www.libraw.org
 Requires:
 Version: @RAW_LIB_VERSION_STRING@
 Libs: -L${libdir} -lraw_r
-Cflags: -I${includedir}/libraw
+Cflags: -I${includedir}
