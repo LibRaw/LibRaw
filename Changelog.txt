@@ -1,3 +1,17 @@
+2014-01-17 Alex Tutubalin <lexa@lexa.ru>
+  * Camera support:
+     Added: Fujifilm XE2, XQ1
+     Color data updated: Nikon D4 1 AW1/J3, Fuji X-M2
+     Fixes: Nikon D610 visible image area, Canon A3300 bayer 
+     pattern
+  * RawSpeed support: enabled processing for cameras,
+    unknown to RawSpeed
+  * Fixed error in LibRaw::unpack_thumb()
+  * little improve performance in my_strcasestr
+  * Fix compiler errors for VS2012/OpenMP
+  * Fixed typo which prevents to use Demosaic Pack GPL2
+  * LibRaw 0.16.0-Release
+
 2013-11-15 Alex Tutubalin <lexa@lexa.ru>
   * New cameras supported
      Leica C, X VARIO

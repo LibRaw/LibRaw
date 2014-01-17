@@ -8011,12 +8011,18 @@ void CLASS identify()
     parse_minolta(0);
   else if (!memcmp (head,"FOVb",4))
     {
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef  LIBRAW_DEMOSAIC_PACK_GPL2
       if(!imgdata.params.force_foveon_x3f)
         parse_foveon();
       else
 #endif
         parse_x3f();
+#else
+#ifdef  LIBRAW_DEMOSAIC_PACK_GPL2
+      parse_foveon();
+#endif
+#endif
     }
   else if (!memcmp (head,"CI",2))
     parse_cine();

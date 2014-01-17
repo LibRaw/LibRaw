@@ -1,4 +1,21 @@
-﻿2013-11-12 Alex Tutubalin <lexa@lexa.ru>
+﻿2014-01-17 Alex Tutubalin <lexa@lexa.ru>
+  * Поддержка камер
+    Добавлены: Fujifilm X-E2,XQ1
+    Обновлены цветовые данные: Nikon D4, 1 AW1/J3; Fuji X-M2
+    Исправления: видимая область у Nikon D610, паттерн
+     светофильтров у Canon A330
+  * Улучшен разбор High-ISO у камер Nikon
+  * Работа с RawSpeed: разрешен процессинг этой библиотекой
+    для камер, неизвестных RawSpeed (касается в первую очередь
+    DNG-формата)
+  * Исправлена ошибка в разборе thumbnail
+  * Увеличена скорость работы вызова my_strcasestr
+  * Исправлены ошибки компиляции при сборке VS2012 с включенным
+    OpenMP
+  * Исправлена опечатка, не дававшая использовать Demosaic Pack GPL2
+  * LibRaw 0.16.0-Beta1
+
+2013-11-12 Alex Tutubalin <lexa@lexa.ru>
   * Поддержка новых камер
      Leica C, X VARIO
      Nikon D5300, D610, Df, 1 AW1
