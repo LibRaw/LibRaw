@@ -5748,7 +5748,7 @@ guess_cfa_pc:
 	    cblack[4] = cblack[5] = 1;
 	break;
       case 61450:
-	cblack[4] = cblack[5] = MIN(sqrt(len),64);
+	cblack[4] = cblack[5] = MIN(sqrt((double)len),64);
       case 50714:			/* BlackLevel */
 	FORC (cblack[4] * cblack[5])
 	  cblack[6+c] = getreal(type);
