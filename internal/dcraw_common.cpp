@@ -8268,11 +8268,20 @@ canon_a5:
     top_margin=16;
     left_margin = 92;
   } else if (!strcmp(model,"PowerShot S120")) {
+        raw_width = 4192;
+        raw_height = 3062;
         width = 4022;
         height = 3016;
-        top_margin = 31;
+        mask[0][0] = top_margin = 31;
+        mask[0][2] = top_margin + height;
         left_margin = 120;
+        mask[0][1] = 23; 
+        mask[0][3] = 72;
   } else if (!strcmp(model,"PowerShot G16")) {
+      mask[0][0] = 0;
+      mask[0][2] = 80;
+      mask[0][1] = 0;
+      mask[0][3] = 16;
       top_margin = 29;
       left_margin = 120;
       width = raw_width-left_margin-48;
