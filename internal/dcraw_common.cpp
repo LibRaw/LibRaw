@@ -8265,6 +8265,25 @@ canon_a5:
     if (canon_s2is()) strcpy (model+10, "S2 IS");
   } else if (!strcmp(model,"PowerShot SX220 HS")) {
     mask[1][3] = -4;
+    top_margin=16;
+    left_margin = 92;
+  } else if (!strcmp(model,"PowerShot S120")) {
+        raw_width = 4192;
+        raw_height = 3062;
+        width = 4022;
+        height = 3017;
+        mask[0][0] = top_margin = 30;
+        mask[0][2] = top_margin + height;
+        left_margin = 120;
+        mask[0][1] = 23; 
+        mask[0][3] = 72;
+  } else if (!strcmp(model,"PowerShot G16")) {
+      top_margin = 28;
+      left_margin = 120;
+      width = raw_width-left_margin-48;
+      height = raw_height-top_margin-14;
+  } else if (!strcmp(model,"PowerShot SX50 HS")) {
+    top_margin = 17;
   } else if (!strcmp(model,"EOS D2000C")) {
     filters = 0x61616161;
     black = curve[200];
