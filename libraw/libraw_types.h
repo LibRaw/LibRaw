@@ -187,7 +187,7 @@ struct ph1_t
 typedef struct
 {
   ushort      curve[0x10000]; 
-  unsigned    cblack[4];
+  unsigned    cblack[4102];
   unsigned    black;
   unsigned    data_maximum;
   unsigned    maximum;

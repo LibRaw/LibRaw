@@ -1,3 +1,21 @@
+2014-01-20 Alex Tutubalin <lexa@lexa.ru>
+  * Imported dcraw 9.20:
+    - Support for DNG BlackLevelRepeatDim tags
+    - imgdata.color.cblack[] holds variable BlackLevel for DNG files (up to ~4k values)
+    - imgdata.params.use_camera_matrix is now ON by default. Set it to 3 if you want
+      to force use of DNG embedded matrix.
+    - Tone curve for Canon RMF format supported
+    - Color data for Canon C500
+  * Additional camera support:
+     Alcatel 5035D
+     DJI 4384x3288
+     Fujifilm F900EXR 
+     Kodak 12MP
+     Matrix 4608x3288
+     Nokia 1200x1600
+     Olympus E-PL6
+     Panasonic DMC-FZ7
+
 2014-01-17 Alex Tutubalin <lexa@lexa.ru>
   * Camera support:
      Added: Fujifilm XE2, XQ1

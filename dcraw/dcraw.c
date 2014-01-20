@@ -4308,7 +4308,7 @@ void CLASS pseudoinverse (double (*in)[3], double (*out)[3], int size)
 	out[i][j] += work[j][k+3] * in[i][k];
 }
 
-void CLASS cam_xyz_coeff (float rgb_cam[3][4], double cam_xyz[4][3])
+void CLASS cam_xyz_coeff (float _rgb_cam[3][4], double cam_xyz[4][3])
 {
   double cam_rgb[4][3], inverse[4][3], num;
   int i, j, k;
@@ -4337,7 +4337,7 @@ void CLASS cam_xyz_coeff (float rgb_cam[3][4], double cam_xyz[4][3])
   pseudoinverse (cam_rgb, inverse, colors);
   for (i=0; i < 3; i++)
     for (j=0; j < colors; j++)
-      rgb_cam[i][j] = inverse[j][i];
+      _rgb_cam[i][j] = inverse[j][i];
 }
 
 #ifdef COLORCHECK
@@ -6924,7 +6924,7 @@ guess_cfa_pc:
       case 50713:			/* BlackLevelRepeatDim */
 	cblack[4] = get2();
 	cblack[5] = get2();
-	if (cblack[4] * cblack[5] > sizeof cblack / sizeof *cblack - 6)
+	if (cblack[4] * cblack[5] > (sizeof(cblack) / sizeof (cblack[0]) - 6))
 	    cblack[4] = cblack[5] = 1;
 	break;
       case 61450:
@@ -8983,7 +8983,6 @@ void CLASS identify()
     { 0x190, "EOS 40D" },    { 0x169, "EOS-1D Mark III" },
     { 0x261, "EOS 50D" },    { 0x281, "EOS-1D Mark IV" },
     { 0x287, "EOS 60D" },    { 0x167, "EOS-1DS" },
-    { 0x325, "EOS 70D" },
     { 0x170, "EOS 300D" },   { 0x188, "EOS-1Ds Mark II" },
     { 0x176, "EOS 450D" },   { 0x215, "EOS-1Ds Mark III" },
     { 0x189, "EOS 350D" },   { 0x324, "EOS-1D C" },
@@ -9608,9 +9607,6 @@ canon_a5:
     else width -= 8;
   } else if (!strncmp(model,"D300",4)) {
     width -= 32;
-  } else if (!strcmp(make,"Nikon") && !strcmp(model,"Df")) {
-    left_margin=4;
-    width-=64;
   } else if (!strcmp(make,"Nikon") && raw_width == 4032) {
     adobe_coeff ("Nikon","COOLPIX P7700");
   } else if (!strncmp(model,"COOLPIX P",9)) {

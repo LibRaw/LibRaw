@@ -307,7 +307,7 @@ LibRaw:: LibRaw(unsigned int flags)
   memmove(&imgdata.params.cropbox,&cropbox,sizeof(cropbox));
   
   imgdata.params.bright=1;
-  imgdata.params.use_camera_matrix=-1;
+  imgdata.params.use_camera_matrix=1;
   imgdata.params.user_flip=-1;
   imgdata.params.user_black=-1;
   imgdata.params.user_cblack[0]=imgdata.params.user_cblack[1]=imgdata.params.user_cblack[2]=imgdata.params.user_cblack[3]=-1000001;
@@ -966,9 +966,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     ID.input = stream;
     SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
-    if (O.use_camera_matrix < 0)
-      O.use_camera_matrix = O.use_camera_wb;
-
     identify();
     // Adjust sizes for X3F processing
     if(load_raw == &LibRaw::x3f_load_raw)
@@ -1058,10 +1055,13 @@ void LibRaw::fix_after_rawspeed(int bl)
     C.maximum = 0xffff;
   else if (load_raw == &LibRaw::sony_load_raw)
     C.maximum = 0x3ff0;
-  else if (
-           (load_raw == &LibRaw::sony_arw2_load_raw || (load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")))
-           && bl >= (C.black+C.cblack[0])*2
-           )
+  else if 
+    (
+     (load_raw == &LibRaw::sony_arw2_load_raw 
+      || (load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony"))
+      )
+     && bl >= (C.black+C.cblack[0])*2
+     )
     {
       C.maximum *=4;
       C.black *=4;
@@ -1118,12 +1118,6 @@ int LibRaw::unpack(void)
     if(!load_raw)
       return LIBRAW_UNSPECIFIED_ERROR;
         
-
-    if (O.use_camera_matrix && C.cmatrix[0][0] > 0.25) 
-      {
-        memcpy (C.rgb_cam, C.cmatrix, sizeof (C.cmatrix));
-        IO.raw_color = 0;
-      }
     // already allocated ?
     if(imgdata.image)
       {
@@ -2618,7 +2612,21 @@ void LibRaw::scale_colors_loop(float scale_mul[4])
 {
   unsigned size = S.iheight*S.iwidth;
   
-  if(C.cblack[0]||C.cblack[1]||C.cblack[2]||C.cblack[3])
+
+  if (C.cblack[4] && C.cblack[5])
+    {
+      int val;
+      for (unsigned i=0; i < size*4; i++) 
+        {
+          if (!(val = imgdata.image[0][i])) continue;
+          val -= C.cblack[6 + i/4 / S.iwidth % C.cblack[4] * C.cblack[4] +
+			i/4 % S.iwidth % C.cblack[5]];
+          val -= C.cblack[i & 3];
+          val *= scale_mul[i & 3];
+          imgdata.image[0][i] = CLIP(val);
+        }
+    }
+  else if(C.cblack[0]||C.cblack[1]||C.cblack[2]||C.cblack[3])
     {
       for (unsigned i=0; i < size*4; i++) 
         {
@@ -2916,6 +2924,7 @@ static const char  *static_camera_list[] =
 {
 "Adobe Digital Negative (DNG)",
 "AgfaPhoto DC-833m",
+"Alcatel 5035D",
 "Apple QuickTake 100",
 "Apple QuickTake 150",
 "Apple QuickTake 200",
@@ -2943,6 +2952,7 @@ static const char  *static_camera_list[] =
 "Canon PowerShot A650 (CHDK hack)",
 "Canon PowerShot A710 IS (CHDK hack)",
 "Canon PowerShot A720 IS (CHDK hack)",
+"Canon PowerShot A3300 IS (CHDK hack)",
 "Canon PowerShot Pro70",
 "Canon PowerShot Pro90 IS",
 "Canon PowerShot Pro1",
@@ -3050,6 +3060,7 @@ static const char  *static_camera_list[] =
 "Casio Exlim Pro 700",
 "Contax N Digital",
 "Creative PC-CAM 600",
+"DJI 4384x3288",
 "Epson R-D1",
 "Foculus 531C",
 "FujiFilm E550",
@@ -3080,6 +3091,7 @@ static const char  *static_camera_list[] =
 "FujiFilm F600EXR",
 "FujiFilm F770EXR",
 "FujiFilm F800EXR",
+"FujiFilm F900EXR",
 "FujiFilm X-Pro1",
 "FujiFilm X-S1",
 "FujiFilm XQ1",
@@ -3185,9 +3197,11 @@ static const char  *static_camera_list[] =
 "Leica M8",
 "Leica M8.2",
 "Leica M9",
-"Leica M (Type 240)",
+"Leica M (Typ 240)",
+"Leica R8",
 "Leica S2",
 "Leica X1",
+"Leica X2",
 "Leica V-LUX1",
 "Leica V-LUX2",
 "Leica V-LUX3",
@@ -3195,6 +3209,7 @@ static const char  *static_camera_list[] =
 "Leica X VARIO (Typ 107)",
 "Logitech Fotoman Pixtura",
 "Mamiya ZD",
+"Matrix 4608x3288",
 "Micron 2010",
 "Minolta RD175",
 "Minolta DiMAGE 5",
@@ -3285,6 +3300,7 @@ static const char  *static_camera_list[] =
 "Nikon Coolpix S6 (\"DIAG RAW\" hack)",
 "Nokia N95",
 "Nokia X2",
+"Nokia 1200x1600",
 "Nokia Lumia 1020",
 "Nokia Lumia 1520",
 "Olympus C3030Z",
@@ -3322,6 +3338,7 @@ static const char  *static_camera_list[] =
 "Olympus E-PL5",
 "Olympus E-PM1",
 "Olympus E-PM2",
+"Olympus E-M1",
 "Olympus E-M5",
 "Olympus SP310",
 "Olympus SP320",
@@ -3343,6 +3360,7 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-FZ35/FZ38",
 "Panasonic DMC-FZ40",
 "Panasonic DMC-FZ50",
+"Panasonic DMC-FZ70",
 "Panasonic DMC-FZ100",
 "Panasonic DMC-FZ150",
 "Panasonic DMC-FZ200",
@@ -3424,7 +3442,8 @@ static const char  *static_camera_list[] =
 "Ricoh GR",
 "Ricoh GX100",
 "Ricoh GX200",
-"Ricoh GXR",
+"Ricoh GXR Mount A12",
+"Ricoh GXR A16",
 #ifndef NO_JASPER
 "Redcode R3D format",
 #endif
