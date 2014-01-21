@@ -324,6 +324,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.no_interpolation = 0;
   imgdata.params.sraw_ycc = 0;
   imgdata.params.force_foveon_x3f = 0;
+  imgdata.params.sony_arw2_options = 0;
   imgdata.params.green_matching = 0;
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
@@ -967,7 +968,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
     identify();
-    printf("Max=%d\n",C.maximum);
     // Adjust BL for Sony A900/A850
     if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")
        && (!strcasecmp(imgdata.idata.model,"DSLR-A900")))

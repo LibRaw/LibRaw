@@ -23,6 +23,14 @@ it under the terms of the one of three licenses as you choose:
 #define LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD 0.75
 #define LIBRAW_DEFAULT_AUTO_BRIGHTNESS_THRESHOLD 0.01
 
+enum LibRaw_sonyarw2_options
+{
+  LIBRAW_SONYARW2_NONE=0,
+  LIBRAW_SONYARW2_BASEONLY=1,  
+  LIBRAW_SONYARW2_DELTAONLY=2,  
+  LIBRAW_SONYARW2_DELTAZEROBASE=3
+};
+
 enum LibRaw_decoder_flags
 {
     LIBRAW_DECODER_LEGACY = 1,      

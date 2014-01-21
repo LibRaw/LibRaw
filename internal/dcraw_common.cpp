@@ -2670,6 +2670,49 @@ void CLASS sony_arw2_load_raw()
       imax = 0x0f & val >> 22;
       imin = 0x0f & val >> 26;
       for (sh=0; sh < 4 && 0x80 << sh <= max-min; sh++);
+#ifdef LIBRAW_LIBRARY_BUILD
+      /* flag checks if outside of loop */
+      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_NONE)
+        {
+          for (bit=30, i=0; i < 16; i++)
+            if      (i == imax) pix[i] = max;
+            else if (i == imin) pix[i] = min;
+            else {
+              pix[i] = ((sget2(dp+(bit >> 3)) >> (bit & 7) & 0x7f) << sh) + min;
+              if (pix[i] > 0x7ff) pix[i] = 0x7ff;
+              bit += 7;
+            }
+        }
+      else if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_BASEONLY)
+        {
+          for (bit=30, i=0; i < 16; i++)
+            if      (i == imax) pix[i] = max;
+            else if (i == imin) pix[i] = min;
+        }
+      else if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTAONLY)
+        {
+          for (bit=30, i=0; i < 16; i++)
+            if      (i == imax) pix[i] = 0;
+            else if (i == imin) pix[i] = 0;
+            else {
+              pix[i] = ((sget2(dp+(bit >> 3)) >> (bit & 7) & 0x7f) << sh) + min;
+              if (pix[i] > 0x7ff) pix[i] = 0x7ff;
+              bit += 7;
+            }
+        }
+      else if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTAZEROBASE)
+        {
+          for (bit=30, i=0; i < 16; i++)
+            if      (i == imax) pix[i] = 0;
+            else if (i == imin) pix[i] = 0;
+            else {
+              pix[i] = ((sget2(dp+(bit >> 3)) >> (bit & 7) & 0x7f) << sh);
+              if (pix[i] > 0x7ff) pix[i] = 0x7ff;
+              bit += 7;
+            }
+        }
+#else
+      /* unaltered dcraw processing */
       for (bit=30, i=0; i < 16; i++)
 	if      (i == imax) pix[i] = max;
 	else if (i == imin) pix[i] = min;
@@ -2678,6 +2721,8 @@ void CLASS sony_arw2_load_raw()
 	  if (pix[i] > 0x7ff) pix[i] = 0x7ff;
 	  bit += 7;
 	}
+#endif
+
 #ifdef LIBRAW_LIBRARY_BUILD
       for (i=0; i < 16; i++, col+=2)
         RAW(row,col) = curve[pix[i] << 1];

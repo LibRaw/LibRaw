@@ -1,6 +1,12 @@
 2014-01-21 Alex Tutubalin <lexa@lexa.ru>
    * imgdata.params.sony_arw2_hack removed.
      It always on for ARW2-files.
+   * New imgdata.params.sony_arw2_options processing flags
+     Values:
+       LIBRAW_SONYARW2_NONE - normal processing
+       LIBRAW_SONYARW2_BASEONLY - BASE pixels outputeed, delta pixels set to 0
+       LIBRAW_SONYARW2_DELTAONLY - Delta pixels written to raw data, base pixels zeroed
+       LIBRAW_SONYARW2_DELTAZEROBASE - Only deltas written without base offset
 
 2014-01-20 Alex Tutubalin <lexa@lexa.ru>
   * Imported dcraw 9.20:
