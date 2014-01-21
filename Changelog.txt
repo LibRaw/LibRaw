@@ -1,3 +1,7 @@
+2014-01-21 Alex Tutubalin <lexa@lexa.ru>
+   * imgdata.params.sony_arw2_hack removed.
+     It always on for ARW2-files.
+
 2014-01-20 Alex Tutubalin <lexa@lexa.ru>
   * Imported dcraw 9.20:
     - Support for DNG BlackLevelRepeatDim tags

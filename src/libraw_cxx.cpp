@@ -967,6 +967,17 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
     identify();
+    printf("Max=%d\n",C.maximum);
+    // Adjust BL for Sony A900/A850
+    if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")
+       && (!strcasecmp(imgdata.idata.model,"DSLR-A900")))
+      {
+        C.maximum = 4095;
+        C.black /=4;
+        for(int c=0; c< 4; c++)
+          C.cblack[c]/=4;
+      }
+
     // Adjust sizes for X3F processing
     if(load_raw == &LibRaw::x3f_load_raw)
     {
@@ -1056,10 +1067,7 @@ void LibRaw::fix_after_rawspeed(int bl)
   else if (load_raw == &LibRaw::sony_load_raw)
     C.maximum = 0x3ff0;
   else if 
-    (
-     (load_raw == &LibRaw::sony_arw2_load_raw 
-      || (load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony"))
-      )
+    ( (load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony"))
      && bl >= (C.black+C.cblack[0])*2
      )
     {
