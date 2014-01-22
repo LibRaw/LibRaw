@@ -970,7 +970,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     identify();
     // Adjust BL for Sony A900/A850
     if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")
-       && (!strcasecmp(imgdata.idata.model,"DSLR-A900")))
+       && C.maximum > 15000 )
       {
         C.maximum = 4095;
         C.black /=4;
