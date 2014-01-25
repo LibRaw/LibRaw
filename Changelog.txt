@@ -1,3 +1,5 @@
+2014-01-27 Alex Tutubalin <lexa@lexa.ru>
+   * dcraw 1.460:  Nikon D3300, Panasonic DMC-TZ61, Sony  ILCE-5000
 2014-01-25 Alex Tutubalin <lexa@lexa.ru>
    * PhaseOne IQ250 support (both compressed and uncompressed)
 2014-01-21 Alex Tutubalin <lexa@lexa.ru>
