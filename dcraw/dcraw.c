@@ -1702,6 +1702,15 @@ void CLASS phase_one_load_raw()
   akey = get2();
   bkey = get2();
   t_mask = ph1.format == 1 ? 0x5555:0x1354;
+#ifdef LIBRAW_LIBRARY_BUILD
+  if (ph1.black_off)
+      {
+        fseek (ifp, ph1.black_off, SEEK_SET);
+        imgdata.rawdata.ph1_black = (short (*)[2])calloc(raw_height*2,sizeof(short));
+        merror (imgdata.rawdata.ph1_black, "phase_one_load_raw_c()");
+        read_shorts ((ushort *) imgdata.rawdata.ph1_black, raw_height*2);
+      }
+#endif
   fseek (ifp, data_offset, SEEK_SET);
   read_shorts (raw_image, raw_width*raw_height);
   if (ph1.format)

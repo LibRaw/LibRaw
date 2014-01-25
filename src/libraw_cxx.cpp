@@ -1383,7 +1383,7 @@ void LibRaw::raw2image_start()
 
 int LibRaw::is_phaseone_compressed() 
 { 
-  return (load_raw == &LibRaw::phase_one_load_raw_c && imgdata.rawdata.ph1_black); 
+  return (load_raw == &LibRaw::phase_one_load_raw_c || load_raw == &LibRaw::phase_one_load_raw); 
 }
 
 int LibRaw::raw2image(void)
@@ -1521,14 +1521,18 @@ void LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
     {
       for(int row = 0; row < S.raw_height; row++)
         {
-          ushort bl = imgdata.color.phase_one_data.t_black - imgdata.rawdata.ph1_black[row][0];
+          ushort bl = imgdata.color.phase_one_data.t_black;
+          if(imgdata.rawdata.ph1_black)
+            bl -= imgdata.rawdata.ph1_black[row][0];
           for(int col=0; col < imgdata.color.phase_one_data.split_col && col < S.raw_width; col++)
             {
               int idx  = row*S.raw_width + col;
               ushort val = src[idx];
               dest[idx] = val>bl?val-bl:0;
             }
-          bl = imgdata.color.phase_one_data.t_black - imgdata.rawdata.ph1_black[row][1];
+          bl = imgdata.color.phase_one_data.t_black;
+          if(imgdata.rawdata.ph1_black)
+            bl -= imgdata.rawdata.ph1_black[row][1];
           for(int col=imgdata.color.phase_one_data.split_col; col < S.raw_width; col++)
             {
               int idx  = row*S.raw_width + col;

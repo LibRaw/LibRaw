@@ -1,3 +1,5 @@
+2014-01-25 Alex Tutubalin <lexa@lexa.ru>
+   * PhaseOne IQ250 support (both compressed and uncompressed)
 2014-01-21 Alex Tutubalin <lexa@lexa.ru>
    * imgdata.params.sony_arw2_hack removed.
      It always on for ARW2-files.
