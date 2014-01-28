@@ -1862,7 +1862,8 @@ int LibRaw::raw2image_ex(int do_subtract_black)
       {
         C.data_maximum = (int)dmax;
         C.maximum -= C.black;
-        ZERO(C.cblack);
+        //        ZERO(C.cblack);
+        C.cblack[0]=C.cblack[1]=C.cblack[2]=C.cblack[3]=0;
         C.black = 0;
       }
 
