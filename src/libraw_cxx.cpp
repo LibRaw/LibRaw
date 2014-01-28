@@ -3108,6 +3108,7 @@ static const char  *static_camera_list[] =
 "FujiFilm X-E2",
 "FujiFilm X-M1",
 "FujiFilm XF1",
+"FujiFilm X-T1",
 "FujiFilm IS-1",
 "Hasselblad CFV",
 "Hasselblad CFH",
