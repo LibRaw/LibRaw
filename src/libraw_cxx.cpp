@@ -908,7 +908,7 @@ struct foveon_data_t
 } foveon_data [] =
 {
   {"Sigma","SD9",2304,1531,3600,20,8,2266,1510},
-  {"Sigma","SD9",1152,763,3600,10,2,1132,755},
+  {"Sigma","SD9",1152,763,11500,10,2,1132,755},
   {"Sigma","SD10",2304,1531,9340,20,8,2266,1510},
   {"Sigma","SD10",1152,763,3600,10,2,1132,755},
   {"Sigma","SD14",2688,1792,7200,18,12,2651,1767},
@@ -991,6 +991,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
                 imgdata.sizes.left_margin = foveon_data[i].left_margin;
                 imgdata.sizes.width = imgdata.sizes.iwidth = foveon_data[i].width;
                 imgdata.sizes.height = imgdata.sizes.iheight = foveon_data[i].height;
+                C.maximum = foveon_data[i].white;
                 break;
             }
     }
@@ -2710,15 +2711,6 @@ int LibRaw::dcraw_process(void)
     raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
 
     // Adjust sizes
-    if(0 && load_raw == &LibRaw::x3f_load_raw)
-    {
-        for(int i=0; i< foveon_count;i++)
-            if(!strcasecmp(imgdata.idata.make,foveon_data[i].make) && !strcasecmp(imgdata.idata.model,foveon_data[i].model))
-            {
-                imgdata.color.maximum = foveon_data[i].white;
-                break;
-            }
-    }
 
     int save_4color = O.four_color_rgb;
 
