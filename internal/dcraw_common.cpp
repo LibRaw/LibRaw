@@ -2697,6 +2697,7 @@ void CLASS sony_arw2_load_raw()
           for (bit=30, i=0; i < 16; i++)
             if      (i == imax) pix[i] = max;
             else if (i == imin) pix[i] = min;
+            else pix[i]=0;
         }
       else if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTAONLY)
         {
