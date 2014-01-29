@@ -153,6 +153,7 @@ const char* LibRaw::version() { return LIBRAW_VERSION_STR;}
 int LibRaw::versionNumber() { return LIBRAW_VERSION; }
 const char* LibRaw::strerror(int p) { return libraw_strerror(p);}
 
+int LibRaw::isARW2(){return load_raw == &LibRaw::sony_arw2_load_raw;}
 
 void LibRaw::derror()
 {

@@ -161,14 +161,15 @@ class DllDef LibRaw
     const char *unpack_function_name();
     int get_decoder_info(libraw_decoder_info_t* d_info);
     libraw_internal_data_t * get_internal_data_pointer(){ return &libraw_internal_data; }
+  int isARW2();
 
     /* Debanding filter */
-    int                         wf_remove_banding();
+    int  wf_remove_banding();
 
   /* Phase one correction/subtractBL calls */
   void phase_one_subtract_black(ushort *src, ushort *dest);
-  void        phase_one_correct();
-  int set_rawspeed_camerafile(char *filename);
+  void phase_one_correct();
+  int  set_rawspeed_camerafile(char *filename);
   void setCancelFlag();
 
 protected:
