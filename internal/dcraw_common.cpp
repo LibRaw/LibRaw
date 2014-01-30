@@ -3614,7 +3614,7 @@ skip_block: ;
 #endif
   if (filters > 1000 && (cblack[4]+1)/2 == 1 && (cblack[5]+1)/2 == 1) {
     FORC4 cblack[FC(c/2,c%2)] +=
-	cblack[6 + c/2 % cblack[4] * cblack[4] + c%2 % cblack[5]];
+	cblack[6 + c/2 % cblack[4] * cblack[5] + c%2 % cblack[5]];
     cblack[4] = cblack[5] = 0;
   }
   size = iheight*iwidth;
@@ -3624,7 +3624,7 @@ skip_block: ;
   for (i=0; i < size*4; i++) {
     if (!(val = image[0][i])) continue;
     if (cblack[4] && cblack[5])
-      val -= cblack[6 + i/4 / iwidth % cblack[4] * cblack[4] +
+      val -= cblack[6 + i/4 / iwidth % cblack[4] * cblack[5] +
 			i/4 % iwidth % cblack[5]];
     val -= cblack[i & 3];
     val *= scale_mul[i & 3];

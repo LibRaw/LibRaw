@@ -2632,7 +2632,7 @@ void LibRaw::scale_colors_loop(float scale_mul[4])
       for (unsigned i=0; i < size*4; i++) 
         {
           if (!(val = imgdata.image[0][i])) continue;
-          val -= C.cblack[6 + i/4 / S.iwidth % C.cblack[4] * C.cblack[4] +
+          val -= C.cblack[6 + i/4 / S.iwidth % C.cblack[4] * C.cblack[5] +
 			i/4 % S.iwidth % C.cblack[5]];
           val -= C.cblack[i & 3];
           val *= scale_mul[i & 3];
