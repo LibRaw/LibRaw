@@ -153,8 +153,6 @@ const char* LibRaw::version() { return LIBRAW_VERSION_STR;}
 int LibRaw::versionNumber() { return LIBRAW_VERSION; }
 const char* LibRaw::strerror(int p) { return libraw_strerror(p);}
 
-int LibRaw::isARW2(){return load_raw == &LibRaw::sony_arw2_load_raw;}
-
 void LibRaw::derror()
 {
   if (!libraw_internal_data.unpacker_data.data_error && libraw_internal_data.internal_data.input) 
@@ -678,7 +676,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
       d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
       d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
-      d_info->decoder_flags |= LIBRAW_DECODER_ITSASONY;
+      d_info->decoder_flags |= LIBRAW_DECODER_SONYARW2;
     }
   else if (load_raw == &LibRaw::samsung_load_raw )
     {
