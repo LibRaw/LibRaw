@@ -975,6 +975,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         C.black /=4;
         for(int c=0; c< 4; c++)
           C.cblack[c]/=4;
+        for(int c=0; c< C.cblack[4]*C.cblack[5];c++)
+          C.cblack[6+c]/=4;
       }
 
     // Adjust sizes for X3F processing
@@ -1071,6 +1073,7 @@ void LibRaw::fix_after_rawspeed(int bl)
      && bl >= (C.black+C.cblack[0])*2
      )
     {
+      // Rlly?
       C.maximum *=4;
       C.black *=4;
       for(int c=0; c< 4; c++)
@@ -2486,7 +2489,7 @@ int LibRaw::subtract_black_internal()
   CHECK_ORDER_LOW(LIBRAW_PROGRESS_RAW2_IMAGE);
 
   try {
-    if(!is_phaseone_compressed() && (C.cblack[0] || C.cblack[1] || C.cblack[2] || C.cblack[3]))
+    if(!is_phaseone_compressed() && (C.cblack[0] || C.cblack[1] || C.cblack[2] || C.cblack[3] || (C.cblack[4] && C.cblack[5]) ))
       {
 #define BAYERC(row,col,c) imgdata.image[((row) >> IO.shrink)*S.iwidth + ((col) >> IO.shrink)][c] 
         int cblk[4],i;
@@ -2499,12 +2502,27 @@ int LibRaw::subtract_black_internal()
 #define LIM(x,min,max) MAX(min,MIN(x,max))
 #define CLIP(x) LIM(x,0,65535)
         int dmax = 0;
-        for(i=0; i< size*4; i++)
+        if(C.cblack[4] && C.cblack[5])
           {
-            int val = imgdata.image[0][i];
-            val -= cblk[i & 3];
-            imgdata.image[0][i] = CLIP(val);
-            if(dmax < val) dmax = val;
+            for(i=0; i< size*4; i++)
+              {
+                int val = imgdata.image[0][i];
+                val -= C.cblack[6 + i/4 / S.iwidth % C.cblack[4] * C.cblack[5] +
+			i/4 % S.iwidth % C.cblack[5]];
+                val -= cblk[i & 3];
+                imgdata.image[0][i] = CLIP(val);
+                if(dmax < val) dmax = val;
+              }
+          }
+        else
+          {
+            for(i=0; i< size*4; i++)
+              {
+                int val = imgdata.image[0][i];
+                val -= cblk[i & 3];
+                imgdata.image[0][i] = CLIP(val);
+                if(dmax < val) dmax = val;
+              }
           }
         C.data_maximum = dmax & 0xffff;
 #undef MIN
@@ -2512,7 +2530,7 @@ int LibRaw::subtract_black_internal()
 #undef LIM
 #undef CLIP
         C.maximum -= C.black;
-        ZERO(C.cblack);
+        ZERO(C.cblack); // Yeah, we used cblack[6+] values too!
         C.black = 0;
 #undef BAYERC
       }
@@ -2663,20 +2681,50 @@ void LibRaw::scale_colors_loop(float scale_mul[4])
 
 void LibRaw::adjust_bl()
 {
-
+  int clear_repeat=0;
    if (O.user_black >= 0) 
-     C.black = O.user_black;
+     {
+       C.black = O.user_black;
+       clear_repeat = 1;
+     }
    for(int i=0; i<4; i++)
      if(O.user_cblack[i]>-1000000)
-       C.cblack[i] = O.user_cblack[i];
+       {
+         C.cblack[i] = O.user_cblack[i];
+         clear_repeat  = 1;
+       }
+
+   if(clear_repeat)
+     C.cblack[4]=C.cblack[5]=0;
+
 
   // remove common part from C.cblack[]
   int i = C.cblack[3];
   int c;
   for(c=0;c<3;c++) if (i > C.cblack[c]) i = C.cblack[c];
-  for(c=0;c<4;c++) C.cblack[c] -= i;
+
+  for(c=0;c<4;c++) C.cblack[c] -= i; // remove common part
   C.black += i;
-  for(c=0;c<4;c++) C.cblack[c] += C.black;
+
+  // Now calculate common part for cblack[6+] part and move it to C.black
+
+  if(C.cblack[4] && C.cblack[5])
+    {
+      i = C.cblack[6];
+      for(c=1; c<C.cblack[4]*C.cblack[5]; c++)
+        if(i>C.cblack[6+c]) i = C.cblack[6+c];
+      // Remove i from cblack[6+]
+      int nonz=0;
+      for(c=0; c<C.cblack[4]*C.cblack[5]; c++)
+        {
+          C.cblack[6+c]-=i;
+          if(C.cblack[6+c])nonz++;
+        }
+      C.black +=i;
+      if(!nonz)
+        C.cblack[4] = C.cblack[5] = 0;
+    }
+  for(c=0;c<4;c++) C.cblack[c] += C.black; 
 }
 
 int LibRaw::dcraw_process(void)

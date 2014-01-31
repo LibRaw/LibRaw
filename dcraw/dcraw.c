@@ -20,8 +20,8 @@
    *If you have not modified dcraw.c in any way, a link to my
    homepage qualifies as "full source code".
 
-   $Revision: 1.460 $
-   $Date: 2014/01/26 23:56:04 $
+   $Revision: 1.461 $
+   $Date: 2014/01/31 04:05:31 $
  */
 /*@out DEFINES
 #ifndef USE_JPEG
