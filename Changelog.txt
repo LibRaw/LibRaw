@@ -1,3 +1,9 @@
+2014-01-31:
+   * imported dcraw 1.461: fixed error in BlackLevelDim handling
+   * Accurate work with pattern black-level (cblack[6+])
+   * Support for Olympus E-M10 and Fujifilm X-T1
+   * Adjusted possbile maximum value for Sigma SD9 small raws
+   
 2014-01-27 Alex Tutubalin <lexa@lexa.ru>
    * dcraw 1.460:  Nikon D3300, Panasonic DMC-TZ61, Sony  ILCE-5000
 2014-01-25 Alex Tutubalin <lexa@lexa.ru>
