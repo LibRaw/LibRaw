@@ -19,8 +19,8 @@
    *If you have not modified dcraw.c in any way, a link to my
    homepage qualifies as "full source code".
 
-   $Revision: 1.460 $
-   $Date: 2014/01/26 23:56:04 $
+   $Revision: 1.461 $
+   $Date: 2014/01/31 04:05:31 $
  */
 
 #define DCRAW_VERSION "9.20"
@@ -3901,14 +3901,14 @@ skip_block: ;
   }
   if (filters > 1000 && (cblack[4]+1)/2 == 1 && (cblack[5]+1)/2 == 1) {
     FORC4 cblack[FC(c/2,c%2)] +=
-	cblack[6 + c/2 % cblack[4] * cblack[4] + c%2 % cblack[5]];
+	cblack[6 + c/2 % cblack[4] * cblack[5] + c%2 % cblack[5]];
     cblack[4] = cblack[5] = 0;
   }
   size = iheight*iwidth;
   for (i=0; i < size*4; i++) {
     if (!(val = image[0][i])) continue;
     if (cblack[4] && cblack[5])
-      val -= cblack[6 + i/4 / iwidth % cblack[4] * cblack[4] +
+      val -= cblack[6 + i/4 / iwidth % cblack[4] * cblack[5] +
 			i/4 % iwidth % cblack[5]];
     val -= cblack[i & 3];
     val *= scale_mul[i & 3];
@@ -7386,7 +7386,7 @@ void CLASS adobe_coeff (const char *make, const char *model)
 	{ 5932,-1492,-411,-4813,12285,2856,-741,1524,6739 } },
     { "Sony DSLR-A5", 128, 0xfeb,
 	{ 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
-    { "Sony DSLR-A700", 126, 0,
+    { "Sony DSLR-A700", 128, 0,
 	{ 5775,-805,-359,-8574,16295,2391,-1943,2341,7249 } },
     { "Sony DSLR-A850", 128, 0,
 	{ 5413,-1162,-365,-5665,13098,2866,-608,1179,8440 } },
