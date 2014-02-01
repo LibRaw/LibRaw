@@ -1,4 +1,9 @@
-2014-01-31:
+2014-02-01  Alex Tutubalin <lexa@lexa.ru>
+   * Updated Oly E-M10 & Panasonic TZ60/61 color data
+   * Updated foveon SD9-14 white level
+   * Support for 1x1 BlackLevelRepeatDim
+   
+2014-01-31  Alex Tutubalin <lexa@lexa.ru>
    * imported dcraw 1.461: fixed error in BlackLevelDim handling
    * Accurate work with pattern black-level (cblack[6+])
    * Support for Olympus E-M10 and Fujifilm X-T1
