@@ -978,6 +978,17 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         for(int c=0; c< C.cblack[4]*C.cblack[5];c++)
           C.cblack[6+c]/=4;
       }
+    // Adjust BL for Nikon 14bit
+    if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Sony")
+       && libraw_internal_data.unpacker_data.tiff_bps == 12)
+      {
+        C.maximum = 4095;
+        C.black /=4;
+        for(int c=0; c< 4; c++)
+          C.cblack[c]/=4;
+        for(int c=0; c< C.cblack[4]*C.cblack[5];c++)
+          C.cblack[6+c]/=4;
+      }
 
     // Adjust sizes for X3F processing
     if(load_raw == &LibRaw::x3f_load_raw)
