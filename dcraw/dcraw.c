@@ -6261,7 +6261,13 @@ nf: order = 0x4949;
     if (tag == 0x401 && type == 4 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get4();
     if (tag == 0x03d && strstr(make,"NIKON") && len == 4)
-      FORC4 cblack[c ^ c >> 1] = get2();
+      {
+        FORC4 cblack[c ^ c >> 1] = get2();
+        i = cblack[3];
+        FORC3 if(i>cblack[c]) i = cblack[c];
+        FORC4 cblack[c]-=i;
+        black += i;
+      }
     if (tag == 0xe01) {		/* Nikon Capture Note */
       order = 0x4949;
       fseek (ifp, 22, SEEK_CUR);

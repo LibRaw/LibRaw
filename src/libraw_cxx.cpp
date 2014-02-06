@@ -979,7 +979,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           C.cblack[6+c]/=4;
       }
     // Adjust BL for Nikon 14bit
-    if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Sony")
+    if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
        && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
         C.maximum = 4095;
