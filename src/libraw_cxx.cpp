@@ -990,6 +990,21 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           C.cblack[6+c]/=4;
       }
 
+	// Adjust BL for Panasonic
+	if(load_raw == &LibRaw::panasonic_load_raw && !strcasecmp(imgdata.idata.make,"Panasonic")
+		&& !C.cblack[4] && !C.cblack[5] && C.cblack[6] && C.cblack[7] && C.cblack[8])
+	{
+		C.black=0;
+		C.cblack[0] = C.cblack[6]+C.cblack[9];
+		C.cblack[1] = C.cblack[3] = C.cblack[7]+C.cblack[9];
+		C.cblack[2] = C.cblack[8]+C.cblack[9];
+		C.cblack[6]=C.cblack[7]=C.cblack[8]=C.cblack[9]=0;
+		int i = C.cblack[3];
+		for(int c=0; c<3; c++) if(i>C.cblack[c]) i = C.cblack[c];
+		for(int c=0; c< 4; c++) C.cblack[c]-=i;
+		C.black = i;
+	}
+
     // Adjust sizes for X3F processing
     if(load_raw == &LibRaw::x3f_load_raw)
     {
