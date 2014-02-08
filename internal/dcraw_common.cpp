@@ -5431,12 +5431,12 @@ int CLASS parse_tiff_ifd (int base)
       case 6:   height = get2();  break;
       case 7:   width += get2();  break;
       case 9:   if ((i = get2())) filters = i;  
-        if(pana_raw && len == 2)
+        if(pana_raw && len == 1 && type ==3)
           cblack[9]+=i;
         break;
       case 8:
       case 10:
-        if(pana_raw && len == 2)
+        if(pana_raw && len == 1 && type ==3)
           cblack[9]+=get2();
         break;
       case 17: case 18:
@@ -5447,15 +5447,15 @@ int CLASS parse_tiff_ifd (int base)
 	if (type == 3) iso_speed = get2();
 	break;
       case 28:
-        if(pana_raw && len == 2)
+        if(pana_raw && len == 1 && type ==3)
           cblack[6] = get2();
         break;
       case 29:
-        if(pana_raw && len == 2)
+        if(pana_raw && len == 1 && type ==3)
           cblack[7] = get2();
         break;
       case 30:
-        if(pana_raw && len == 2)
+        if(pana_raw && len == 1 && type ==3)
           cblack[8] = get2();
         break;
       case 36: case 37: case 38:
