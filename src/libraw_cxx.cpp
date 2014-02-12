@@ -3513,7 +3513,6 @@ static const char  *static_camera_list[] =
 "PhaseOne IQ140",
 "PhaseOne IQ160",
 "PhaseOne IQ180",
-"PhaseOne IQ240",
 "PhaseOne IQ250",
 "PhaseOne IQ260",
 "PhaseOne IQ280",
