@@ -1815,7 +1815,7 @@ unsigned CLASS pana_bits (int nbits)
   }
   vbits = (vbits - nbits) & 0x1ffff;
   byte = vbits >> 3 ^ 0x3ff0;
-  return (buf[byte] | buf[byte+1] << 8) >> (vbits & 7) & ~(-1 << nbits);
+  return (buf[byte] | buf[byte+1] << 8) >> (vbits & 7) & ~((~0u) << nbits);
 #ifndef LIBRAW_NOTHREADS
 #undef buf
 #undef vbits
@@ -1839,7 +1839,7 @@ void CLASS panasonic_load_raw()
       if (nonz[i & 1]) {
 	if ((j = pana_bits(8))) {
 	  if ((pred[i & 1] -= 0x80 << sh) < 0 || sh == 4)
-	       pred[i & 1] &= ~(-1 << sh);
+            pred[i & 1] &= ~((~0u) << sh);
 	  pred[i & 1] += j << sh;
 	}
       } else if ((nonz[i & 1] = pana_bits(8)) || i > 11)
@@ -2073,7 +2073,7 @@ void CLASS kodak_radc_load_raw()
     FORC3 {
       val = ((0x1000000/last[c] + 0x7ff) >> 12) * mul[c];
       s = val > 65564 ? 10:12;
-      x = ~(-1 << (s-1));
+      x = ~((~0u) << (s-1));
       val <<= 12-s;
       for (i=0; i < sizeof(buf[0])/sizeof(short); i++)
 	buf[c][0][i] = (buf[c][0][i] * val + x) >> s;
@@ -2777,7 +2777,7 @@ void CLASS smal_decode_segment (unsigned seg[2][2], int holes)
 	if ((data >> nbits & 0xff) == 0xff) break;
       if (nbits > 0)
 	  data = ((data & ((1 << (nbits-1)) - 1)) << 1) |
-	((data + (((data & (1 << (nbits-1)))) << 1)) & (-1 << nbits));
+            ((data + (((data & (1 << (nbits-1)))) << 1)) & ((~0u) << nbits));
       if (nbits >= 0) {
 	data += getbits(1);
 	carry = nbits - 8;
@@ -6604,7 +6604,7 @@ void CLASS parse_cine()
   }
   cam_mul[0] = getreal(11);
   cam_mul[2] = getreal(11);
-  maximum = ~(-1 << get4());
+  maximum = ~((~0u) << get4());
   fseek (ifp, 668, SEEK_CUR);
   shutter = get4()/1000000000.0;
   fseek (ifp, off_image, SEEK_SET);
