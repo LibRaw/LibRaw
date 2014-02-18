@@ -196,7 +196,7 @@ void AAHD::hide_hots() {
 				int avg = 0;
 				for (int k = -2; k < 3; k += 2)
 					for (int m = -2; m < 3; m += 2)
-						if (m == 0 && m == 0)
+						if (m == 0 && k == 0)
 							continue;
 						else
 							avg += rgb[nr_offset(k, m)][kc];
