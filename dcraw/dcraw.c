@@ -2960,7 +2960,9 @@ void CLASS sony_arw2_load_raw()
       for (sh=0; sh < 4 && 0x80 << sh <= max-min; sh++);
 #ifdef LIBRAW_LIBRARY_BUILD
       /* flag checks if outside of loop */
-      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_NONE)
+      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_NONE 
+         || imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_POSTERIZATION
+         )
         {
           for (bit=30, i=0; i < 16; i++)
             if      (i == imax) pix[i] = max;
@@ -3013,8 +3015,20 @@ void CLASS sony_arw2_load_raw()
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
-      for (i=0; i < 16; i++, col+=2)
-        RAW(row,col) = curve[pix[i] << 1];
+      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_POSTERIZATION)
+        {
+          for (i=0; i < 16; i++, col+=2)
+            {
+              unsigned slope = pix[i] < 1001? 2 : curve[pix[i]<<1]-curve[(pix[i]<<1)-2];
+              unsigned step = 1 << sh;
+              RAW(row,col)=curve[pix[i]<<1]>black?LIM(((slope*step*100)/(curve[pix[i]<<1]-black)),0,10000):10000;
+            }
+        }
+      else
+        {
+          for (i=0; i < 16; i++, col+=2)
+            RAW(row,col) = curve[pix[i] << 1];
+        }
 #else
       for (i=0; i < 16; i++, col+=2)
 	RAW(row,col) = curve[pix[i] << 1] >> 2;
