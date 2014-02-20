@@ -2742,7 +2742,8 @@ void CLASS sony_arw2_load_raw()
             {
               unsigned slope = pix[i] < 1001? 2 : curve[pix[i]<<1]-curve[(pix[i]<<1)-2];
               unsigned step = 1 << sh;
-              RAW(row,col)=curve[pix[i]<<1]>black?LIM(((slope*step*100)/(curve[pix[i]<<1]-black)),0,10000):10000;
+              RAW(row,col)=curve[pix[i]<<1]>black+imgdata.params.sony_arw2_posterization_thr?
+                LIM(((slope*step*100)/(curve[pix[i]<<1]-black)),0,10000):(imgdata.params.sony_arw2_posterization_thr?0:10000);
             }
         }
       else

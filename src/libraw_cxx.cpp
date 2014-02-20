@@ -324,6 +324,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.sraw_ycc = 0;
   imgdata.params.force_foveon_x3f = 0;
   imgdata.params.sony_arw2_options = 0;
+  imgdata.params.sony_arw2_posterization_thr = 0;
   imgdata.params.green_matching = 0;
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
