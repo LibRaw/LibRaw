@@ -2661,10 +2661,20 @@ void CLASS sony_arw2_load_raw()
 {
   uchar *data, *dp;
   ushort pix[16];
+#ifdef LIBRAW_LIBRARY_BUILD
+  ushort *deltas=0;
+#endif
   int row, col, val, max, min, imax, imin, sh, bit, i;
 
   data = (uchar *) malloc (raw_width+1);
   merror (data, "sony_arw2_load_raw()");
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVARIANCE)
+  {
+	  deltas = (ushort*)malloc((raw_width+2)*sizeof(ushort));
+	  merror (deltas, "sony_arw2_load_raw()");
+  }
+#endif
 #ifdef LIBRAW_LIBRARY_BUILD
   try {
 #endif
@@ -2682,7 +2692,8 @@ void CLASS sony_arw2_load_raw()
 #ifdef LIBRAW_LIBRARY_BUILD
       /* flag checks if outside of loop */
       if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_NONE 
-         || imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_POSTERIZATION
+         || imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVALUE
+		 || imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVARIANCE
          )
         {
           for (bit=30, i=0; i < 16; i++)
@@ -2736,16 +2747,26 @@ void CLASS sony_arw2_load_raw()
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
-      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_POSTERIZATION)
+      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVALUE)
         {
           for (i=0; i < 16; i++, col+=2)
             {
               unsigned slope = pix[i] < 1001? 2 : curve[pix[i]<<1]-curve[(pix[i]<<1)-2];
               unsigned step = 1 << sh;
               RAW(row,col)=curve[pix[i]<<1]>black+imgdata.params.sony_arw2_posterization_thr?
-                LIM(((slope*step*100)/(curve[pix[i]<<1]-black)),0,10000):(imgdata.params.sony_arw2_posterization_thr?0:10000);
+                LIM(((slope*step*1000)/(curve[pix[i]<<1]-black)),0,10000):(imgdata.params.sony_arw2_posterization_thr?0:10000);
             }
         }
+	  else if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVARIANCE)
+	  {
+		  for (i=0; i < 16; i++, col+=2)
+		  {
+			  unsigned slope = pix[i] < 1001? 2 : curve[pix[i]<<1]-curve[(pix[i]<<1)-2];
+			  unsigned step = 1 << sh;
+			  RAW(row,col) = curve[pix[i] << 1];
+			  deltas[col] = slope*step;
+		  }
+	  }
       else
         {
           for (i=0; i < 16; i++, col+=2)
@@ -2757,14 +2778,90 @@ void CLASS sony_arw2_load_raw()
 #endif
       col -= col & 1 ? 1:31;
     }
-  }
+#ifdef LIBRAW_LIBRARY_BUILD
+	if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVARIANCE)
+	{
+#if 1
+		int win = imgdata.params.sony_arw2_posterization_halfwin;
+		for(int i = win; i<raw_width/2-win;i++)
+		{
+			float osum=0.f,osumsq=0.f,esum=0.f,esumsq=0.f;
+			for(int j=-win;j<win;j++)
+			{
+				osum += float(RAW(row,(i+j)*2));
+				osumsq += float(RAW(row,(i+j)*2))*float(RAW(row,(i+j)*2));
+				esum += float(RAW(row,(i+j)*2+1));
+				esumsq += float(RAW(row,(i+j)*2+1))*float(RAW(row,(i+j)*2+1));
+			}
+			float N = win*2+1;
+			//deltas[i*2] = (ushort)sqrtf(osumsq/N - (osum/N)*(osum/N));
+			//deltas[i*2+1] = (ushort)sqrtf(esumsq/N - (esum/N)*(esum/N));
+			ushort evenvar = (ushort)sqrtf(osumsq/N - (osum/N)*(osum/N));
+			ushort oddvar = (ushort)sqrtf(esumsq/N - (esum/N)*(esum/N));
+			deltas[i*2] = evenvar>0?LIM(deltas[i*2]*1000/evenvar,0,10000):10000;
+			deltas[i*2+1] = oddvar>0?LIM(deltas[i*2+1]*1000/oddvar,0,10000):10000;
+		}
+		for(int i=0; i< raw_width;i++)
+			RAW(row,i)=deltas[i];
+
+#else
+		// Calculate variance
+		unsigned odd_sum=0,odd_sumsq=0,even_sum=0,even_sumsq=0;
+		int win = imgdata.params.sony_arw2_posterization_halfwin;
+		// initialize sums
+		for(int i=0; i<win*2+1;i++)
+		{
+			int value = RAW(row,i*2);
+			even_sum+=value;
+			even_sumsq+=value*value;
+			value = RAW(row,i*2+1);
+			odd_sum+=value;
+			odd_sumsq+=value*value;
+		}
+		// zero left side
+		for(int i=0; i< win;i++)
+			deltas[i*2]=deltas[i*2+1]=0;
+		for(int i=win; i< raw_width/2-win;i++)
+		{
+			int evenvar = (int)sqrtf(float(even_sumsq)/(2*win+1)-float(even_sum/(2*win+1)*even_sum/(2*win+1)));
+			int oddvar = (int)sqrtf(float(odd_sumsq)/(2*win+1)-float(odd_sum/(2*win+1)*odd_sum/(2*win+1)));
+			deltas[i*2] = evenvar;//>0?LIM(deltas[i*2]*1000/evenvar,0,10000):10000;
+			deltas[i*2+1] = oddvar;//>0?LIM(deltas[i*2+1]*1000/oddvar,0,10000):10000;
+			// Пересчитаем вариации:
+			int val0 = RAW(row,(i-win)*2);
+			even_sum -= val0;
+			even_sumsq -= val0*val0;
+			val0 = RAW(row,(i-win)*2+1);
+			odd_sum -= val0;
+			odd_sumsq -= val0;
+			int val1 = RAW(row,(i+win)*2);
+			even_sum += val1;
+			even_sumsq += val1*val1;
+			val1 = RAW(row,(i+win)*2+1);
+			odd_sum += val1;
+			odd_sumsq += val1*val1;
+		}
+		for(int i=raw_width-win*2; i< raw_width;i++)
+			deltas[i]=0;
+#endif
+//		for(int i=0; i< raw_width;i++)
+			//RAW(row,i)=deltas[i];
+	}
+#endif
+  } /* End ROW loop */
 #ifdef LIBRAW_LIBRARY_BUILD
   } catch(...) {
     free (data);
+	if(deltas) {free(deltas); deltas=0;};
     throw;
   }
+  if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVALUE)
+	  maximum=10000;
 #endif
   free (data);
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(deltas) free(deltas);
+#endif
 }
 
 void CLASS samsung_load_raw()
