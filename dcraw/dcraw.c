@@ -2961,7 +2961,7 @@ void CLASS sony_arw2_load_raw()
 #ifdef LIBRAW_LIBRARY_BUILD
       /* flag checks if outside of loop */
       if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_NONE 
-         || imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_POSTERIZATION
+         || imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVALUE
          )
         {
           for (bit=30, i=0; i < 16; i++)
@@ -3015,14 +3015,14 @@ void CLASS sony_arw2_load_raw()
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
-      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_POSTERIZATION)
+      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVALUE)
         {
           for (i=0; i < 16; i++, col+=2)
             {
               unsigned slope = pix[i] < 1001? 2 : curve[pix[i]<<1]-curve[(pix[i]<<1)-2];
               unsigned step = 1 << sh;
               RAW(row,col)=curve[pix[i]<<1]>black+imgdata.params.sony_arw2_posterization_thr?
-                LIM(((slope*step*100)/(curve[pix[i]<<1]-black)),0,10000):(imgdata.params.sony_arw2_posterization_thr?0:10000);
+                LIM(((slope*step*1000)/(curve[pix[i]<<1]-black)),0,10000):0;
             }
         }
       else
@@ -3042,6 +3042,8 @@ void CLASS sony_arw2_load_raw()
     free (data);
     throw;
   }
+  if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVALUE)
+    maximum=10000;
 #endif
   free (data);
 }
@@ -8774,10 +8776,10 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 8898,-2498,-994,-3144,11328,2066,-760,1381,4576 } },
     { "Samsung EX2F", 0, 0x7ff,
 	{ 10648,-3897,-1055,-2022,10573,1668,-492,1611,4742 } },
-    { "Samsung EK-GN120", 0, 0,
-	{ 7557,-2522,-739,-4679,12949,1894,-840,1777,5311 } },
     { "Samsung NX300", 0, 0,
         { 8873,-3984,-372,-3759,12305,1013,-994,1981,4788 } },
+    { "Samsung NX30", 0, 0, /* Adobe beta, copied from Galaxy NX */
+        { 7557,-2522,-739,-4679,12949,1894,-840,1777,5311 } },
     { "Samsung NX2000", 0, 0,
 	{ 7557,-2522,-739,-4679,12949,1894,-840,1777,5311 } },
     { "Samsung NX2", 0, 0xfff,	/* NX20, NX200, NX210 */

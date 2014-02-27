@@ -325,7 +325,6 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.force_foveon_x3f = 0;
   imgdata.params.sony_arw2_options = 0;
   imgdata.params.sony_arw2_posterization_thr = 0;
-  imgdata.params.sony_arw2_posterization_halfwin = 4;
   imgdata.params.green_matching = 0;
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
@@ -3775,8 +3774,8 @@ void LibRaw::parse_x3f()
       if (!strcmp (name, "EXPTIME"))
         imgdata.other.shutter = atoi(value) / 1000000.0;
 #endif
-	  if (!strcmp (name, "SHUTTER"))
-		  imgdata.other.shutter = atof(value);
+      if (!strcmp (name, "SHUTTER"))
+        imgdata.other.shutter = atof(value);
       if (!strcmp (name, "APERTURE"))
         imgdata.other.aperture = atof(value);
       if (!strcmp (name, "FLENGTH"))

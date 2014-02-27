@@ -310,7 +310,6 @@ typedef struct
   /* Sony ARW2 digging mode */
   int sony_arw2_options;
   int sony_arw2_posterization_thr;
-  int sony_arw2_posterization_halfwin;
 }libraw_output_params_t;
 
 typedef struct
