@@ -7697,6 +7697,10 @@ void CLASS parse_riff()
   order = 0x4949;
   fread (tag, 4, 1, ifp);
   size = get4();
+#ifdef LIBRAW_LIBRARY_BUILD
+  if((int)size<0) 
+    throw LIBRAW_EXCEPTION_IO_EOF;
+#endif
   end = ftell(ifp) + size;
   if (!memcmp(tag,"RIFF",4) || !memcmp(tag,"LIST",4)) {
     get4();

@@ -2687,7 +2687,8 @@ int LibRaw::dcraw_process(void)
 
     int subtract_inline = !O.bad_pixels && !O.dark_frame && !O.wf_debanding && !(di.decoder_flags & LIBRAW_DECODER_LEGACY) && !IO.zero_is_bad;
 
-    raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
+    int ret = raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
+    if(ret) return ret;
 
     // Adjust sizes
     if(0 && load_raw == &LibRaw::x3f_load_raw)

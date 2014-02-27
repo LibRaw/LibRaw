@@ -151,7 +151,7 @@ class DllDef  LibRaw_buffer_datastream : public LibRaw_abstract_datastream
     { 
         if(substream) return substream->get_char();
         if(streampos>=streamsize)
-            return -1;
+          throw LIBRAW_EXCEPTION_IO_EOF;
         return buf[streampos++];
     }
 
