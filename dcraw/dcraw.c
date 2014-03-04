@@ -6841,15 +6841,25 @@ int CLASS parse_tiff_ifd (int base)
 	break;
       case 33422:			/* CFAPattern */
       case 64777:			/* Kodak P-series */
-	if ((plen=len) > 16) plen = 16;
-	fread (cfa_pat, 1, plen, ifp);
-	for (colors=cfa=i=0; i < plen && colors < 4; i++) {
-	  colors += !(cfa & (1 << cfa_pat[i]));
-	  cfa |= 1 << cfa_pat[i];
-	}
-	if (cfa == 070) memcpy (cfa_pc,"\003\004\005",3);	/* CMY */
-	if (cfa == 072) memcpy (cfa_pc,"\005\003\004\001",4);	/* GMCY */
-	goto guess_cfa_pc;
+        if(len == 36)
+          {
+            filters = 9;
+            colors = 3;
+            FORC(36) xtrans[0][c] = fgetc(ifp) & 3;
+          }
+        else
+          {
+            if ((plen=len) > 16) plen = 16;
+            fread (cfa_pat, 1, plen, ifp);
+            for (colors=cfa=i=0; i < plen && colors < 4; i++) {
+              colors += !(cfa & (1 << cfa_pat[i]));
+              cfa |= 1 << cfa_pat[i];
+            }
+            if (cfa == 070) memcpy (cfa_pc,"\003\004\005",3);	/* CMY */
+            if (cfa == 072) memcpy (cfa_pc,"\005\003\004\001",4);	/* GMCY */
+            goto guess_cfa_pc;
+          }
+        break;
       case 33424:
       case 65024:
 	fseek (ifp, get4()+base, SEEK_SET);
@@ -6986,15 +6996,18 @@ int CLASS parse_tiff_ifd (int base)
 	is_raw = 1;
 	break;
       case 50710:			/* CFAPlaneColor */
-	if (len > 4) len = 4;
-	colors = len;
-	fread (cfa_pc, 1, colors, ifp);
+        if(filters != 9 )
+          {
+            if (len > 4) len = 4;
+            colors = len;
+            fread (cfa_pc, 1, colors, ifp);
 guess_cfa_pc:
-	FORCC tab[cfa_pc[c]] = c;
-	cdesc[c] = 0;
-	for (i=16; i--; )
-	  filters = filters << 2 | tab[cfa_pat[i % plen]];
-	filters -= !filters;
+            FORCC tab[cfa_pc[c]] = c;
+            cdesc[c] = 0;
+            for (i=16; i--; )
+              filters = filters << 2 | tab[cfa_pat[i % plen]];
+            filters -= !filters;
+          }
 	break;
       case 50711:			/* CFALayout */
 	if (get2() == 2) {
