@@ -512,6 +512,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_name = "nikon_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_TRYRAWSPEED;
     }
+  else if (load_raw == &LibRaw::nikon_load_sraw )
+  {
+	  d_info->decoder_name = "nikon_load_sraw()";
+	  d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
+  }
   else if (load_raw == &LibRaw::rollei_load_raw )
     {
       // UNTESTED
@@ -979,8 +984,14 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         for(int c=0; c< C.cblack[4]*C.cblack[5];c++)
           C.cblack[6+c]/=4;
       }
-    // Adjust BL for Nikon 14bit
-    if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
+
+	if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon") && !strcasecmp(imgdata.idata.model,"D4s") && imgdata.sizes.raw_width==2464
+		&& imgdata.sizes.raw_height == 1640)
+	{
+		load_raw= &LibRaw::nikon_load_sraw;
+	}
+	// Adjust BL for Nikon 14bit
+	else if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
        && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
         C.maximum = 4095;
@@ -1369,6 +1380,31 @@ int LibRaw::unpack(void)
   catch (std::exception ee) {
     EXCEPTION_HANDLER(LIBRAW_EXCEPTION_IO_CORRUPT);
   }
+}
+
+
+void LibRaw::nikon_load_sraw()
+{
+	// We're already seeked to data!
+	unsigned char *row_data = (unsigned char *)malloc(3*(imgdata.sizes.raw_width+2));
+	if(!row_data) throw LIBRAW_EXCEPTION_ALLOC;
+	int row,col;
+	for(row = 0; row < imgdata.sizes.raw_height; row++)
+	{
+		libraw_internal_data.internal_data.input->read(row_data,3,imgdata.sizes.raw_width);
+		for(col = 0; col < imgdata.sizes.raw_width;col+=2)
+		{
+			unsigned short bits1 = (row_data[col*3] )<<4 | (row_data[col*3+1]>>4)	;
+			unsigned short bits2 = (row_data[col*3+1] & 0xf )<<8 | (row_data[col*3+2])	;
+			unsigned short bits3 = (row_data[col*3+3] )<<4 | (row_data[col*3+4]>>4)	;
+			unsigned short bits4 = (row_data[col*3+4] & 0xf )<<8 | (row_data[col*3+5])	;
+			imgdata.image[row*imgdata.sizes.raw_width+col][0]=bits1;
+			imgdata.image[row*imgdata.sizes.raw_width+col][1]=bits2;
+			imgdata.image[row*imgdata.sizes.raw_width+col][2]=bits3;
+			imgdata.image[row*imgdata.sizes.raw_width+col][3]=bits4;
+		}
+	}
+	free(row_data);
 }
 
 void LibRaw::free_image(void)
