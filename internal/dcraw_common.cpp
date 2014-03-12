@@ -3593,12 +3593,14 @@ skip_block: ;
 	  sum[c] += val;
 	sum[c+4]++;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
     if(load_raw == &LibRaw::nikon_load_sraw)
-	{
-		// Nikon sRAW: camera WB already applied:
-		pre_mul[0]=pre_mul[1]=pre_mul[2]=pre_mul[3]=1.0;
-	}
-	else
+      {
+        // Nikon sRAW: camera WB already applied:
+        pre_mul[0]=pre_mul[1]=pre_mul[2]=pre_mul[3]=1.0;
+      }
+    else
+#endif
     if (sum[0] && sum[1] && sum[2] && sum[3])
       FORC4 pre_mul[c] = (float) sum[c+4] / sum[c];
     else if (cam_mul[0] && cam_mul[2])
@@ -3613,13 +3615,16 @@ skip_block: ;
 #endif
       }
   }
+#ifdef LIBRAW_LIBRARY_BUILD
   // Nikon sRAW, daylight
-  if (load_raw == &LibRaw::nikon_load_sraw && !use_camera_wb && cam_mul[0] > 0.001f && cam_mul[1] > 0.001f && cam_mul[2] > 0.001f && !use_auto_wb)
-  {
-	  for(c=0;c<3;c++)
-		  pre_mul[c]/=cam_mul[c];
+  if (load_raw == &LibRaw::nikon_load_sraw 
+      && !use_camera_wb && !use_auto_wb 
+      && cam_mul[0] > 0.001f && cam_mul[1] > 0.001f && cam_mul[2] > 0.001f )
+    {
+      for(c=0;c<3;c++)
+        pre_mul[c]/=cam_mul[c];
   }
-
+#endif
   if (pre_mul[1] == 0) pre_mul[1] = 1;
   if (pre_mul[3] == 0) pre_mul[3] = colors < 4 ? pre_mul[1] : 1;
   dark = black;

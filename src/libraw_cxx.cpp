@@ -514,10 +514,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::nikon_load_sraw )
-  {
-	  d_info->decoder_name = "nikon_load_sraw()";
-	  d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
-  }
+    {
+      d_info->decoder_name = "nikon_load_sraw()";
+      d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
+    }
   else if (load_raw == &LibRaw::rollei_load_raw )
     {
       // UNTESTED
@@ -986,19 +986,22 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           C.cblack[6+c]/=4;
       }
 
-	if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon") && !strcasecmp(imgdata.idata.model,"D4s") && imgdata.sizes.raw_width==2464
-		&& imgdata.sizes.raw_height == 1640)
-	{
-		load_raw= &LibRaw::nikon_load_sraw;
-		C.black =0;
-		memset(C.cblack,0,sizeof(C.cblack));
-		imgdata.idata.filters = 0;
-		libraw_internal_data.unpacker_data.tiff_samples=3;
-		imgdata.idata.colors = 3;
-	}
+    if(load_raw == &LibRaw::nikon_load_raw 
+       && !strcasecmp(imgdata.idata.make,"Nikon") 
+       && !strcasecmp(imgdata.idata.model,"D4s") 
+       && imgdata.sizes.raw_width==2464
+       && imgdata.sizes.raw_height == 1640)
+      {
+        load_raw= &LibRaw::nikon_load_sraw;
+        C.black =0;
+        memset(C.cblack,0,sizeof(C.cblack));
+        imgdata.idata.filters = 0;
+        libraw_internal_data.unpacker_data.tiff_samples=3;
+        imgdata.idata.colors = 3;
+      }
 	// Adjust BL for Nikon 14bit
-	else if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
-       && libraw_internal_data.unpacker_data.tiff_bps == 12)
+    else if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
+            && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
         C.maximum = 4095;
         C.black /=4;
@@ -1009,19 +1012,19 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       }
 
 	// Adjust BL for Panasonic
-	if(load_raw == &LibRaw::panasonic_load_raw && !strcasecmp(imgdata.idata.make,"Panasonic")
-		&& !C.cblack[4] && !C.cblack[5] && C.cblack[6] && C.cblack[7] && C.cblack[8])
-	{
-		C.black=0;
-		C.cblack[0] = C.cblack[6]+C.cblack[9];
-		C.cblack[1] = C.cblack[3] = C.cblack[7]+C.cblack[9];
-		C.cblack[2] = C.cblack[8]+C.cblack[9];
-		C.cblack[6]=C.cblack[7]=C.cblack[8]=C.cblack[9]=0;
-		int i = C.cblack[3];
-		for(int c=0; c<3; c++) if(i>C.cblack[c]) i = C.cblack[c];
-		for(int c=0; c< 4; c++) C.cblack[c]-=i;
-		C.black = i;
-	}
+    if(load_raw == &LibRaw::panasonic_load_raw && !strcasecmp(imgdata.idata.make,"Panasonic")
+       && !C.cblack[4] && !C.cblack[5] && C.cblack[6] && C.cblack[7] && C.cblack[8])
+      {
+        C.black=0;
+        C.cblack[0] = C.cblack[6]+C.cblack[9];
+        C.cblack[1] = C.cblack[3] = C.cblack[7]+C.cblack[9];
+        C.cblack[2] = C.cblack[8]+C.cblack[9];
+        C.cblack[6]=C.cblack[7]=C.cblack[8]=C.cblack[9]=0;
+        int i = C.cblack[3];
+        for(int c=0; c<3; c++) if(i>C.cblack[c]) i = C.cblack[c];
+        for(int c=0; c< 4; c++) C.cblack[c]-=i;
+        C.black = i;
+      }
 
     // Adjust sizes for X3F processing
     if(load_raw == &LibRaw::x3f_load_raw)
@@ -1391,75 +1394,79 @@ int LibRaw::unpack(void)
 
 void LibRaw::nikon_load_sraw()
 {
-	// We're already seeked to data!
-	unsigned char *rd = (unsigned char *)malloc(3*(imgdata.sizes.raw_width+2));
-	if(!rd) throw LIBRAW_EXCEPTION_ALLOC;
-	try {
-		int row,col;
-		for(row = 0; row < imgdata.sizes.raw_height; row++)
-		{
-			checkCancel();
-			libraw_internal_data.internal_data.input->read(rd,3,imgdata.sizes.raw_width);
-			for(col = 0; col < imgdata.sizes.raw_width-1;col+=2)
-			{
-				int bi = col*3;	
-				ushort bits1 = (rd[bi+1] &0xf)<<8| rd[bi]; // 3,0,1
-				ushort bits2 = rd[bi+2] << 4 | ((rd[bi+1]>>4)& 0xf); //452
-				ushort bits3 =  ((rd[bi+4] & 0xf)<<8) | rd[bi+3]; // 967
-				ushort bits4 = rd[bi+5] << 4 | ((rd[bi+4]>>4)& 0xf); // ab8
-				imgdata.image[row*imgdata.sizes.raw_width+col][0]=bits1;
-				imgdata.image[row*imgdata.sizes.raw_width+col][1]=bits3;
-				imgdata.image[row*imgdata.sizes.raw_width+col][2]=bits4;
-				imgdata.image[row*imgdata.sizes.raw_width+col+1][0]=bits2;
-				imgdata.image[row*imgdata.sizes.raw_width+col+1][1]=2048;
-				imgdata.image[row*imgdata.sizes.raw_width+col+1][2]=2048;
-			}
-		}
-	}catch (...) {
-		free(rd);
-		throw ;
-	}
-	free(rd);
-	C.maximum = 0xfff; // 12 bit?
-	if(imgdata.params.sraw_ycc>=2)
-	{
-		return; // no CbCr interpolation
-	}
-	// Interpolate CC channels
-	int row,col;
-	for(row = 0; row < imgdata.sizes.raw_height; row++)
-	{
-		checkCancel(); // will throw out
-		for(col = 0; col < imgdata.sizes.raw_width;col+=2)
-		{
-			int col2 = col<imgdata.sizes.raw_width-2?col+2:col;
-			imgdata.image[row*imgdata.sizes.raw_width+col+1][1]=ushort(int(imgdata.image[row*imgdata.sizes.raw_width+col][1]+imgdata.image[row*imgdata.sizes.raw_width+col2][1])/2);
-			imgdata.image[row*imgdata.sizes.raw_width+col+1][2]=ushort(int(imgdata.image[row*imgdata.sizes.raw_width+col][2]+imgdata.image[row*imgdata.sizes.raw_width+col2][2])/2);
-		}
-	}
-	if(imgdata.params.sraw_ycc>0)
-		return;
-
-	for(row = 0; row < imgdata.sizes.raw_height; row++)
-	{
-		checkCancel(); // will throw out
-		for(col = 0; col < imgdata.sizes.raw_width;col++)
-		{
-			int Y = imgdata.image[row*imgdata.sizes.raw_width+col][0];
-			int Ch2 = imgdata.image[row*imgdata.sizes.raw_width+col][1];
-			int Ch3 = imgdata.image[row*imgdata.sizes.raw_width+col][2];
-			if(Y>2151) Y = 2151;
-			int R = Y + Ch3 - 2048;
-			if(R<0) R=0;
-			int G = Y - (Ch3 - 2048) - (Ch2-2048);
-			if(G<0) G=0;
-			int B = Y + (Ch2-2048);
-			if(B<0) B=0;
-			imgdata.image[row*imgdata.sizes.raw_width+col][0]=R;
-			imgdata.image[row*imgdata.sizes.raw_width+col][1]=G;
-			imgdata.image[row*imgdata.sizes.raw_width+col][2]=B;
-		}
-	}
+  // We're already seeked to data!
+  unsigned char *rd = (unsigned char *)malloc(3*(imgdata.sizes.raw_width+2));
+  if(!rd) throw LIBRAW_EXCEPTION_ALLOC;
+  try {
+    int row,col;
+    for(row = 0; row < imgdata.sizes.raw_height; row++)
+      {
+        checkCancel();
+        libraw_internal_data.internal_data.input->read(rd,3,imgdata.sizes.raw_width);
+        for(col = 0; col < imgdata.sizes.raw_width-1;col+=2)
+          {
+            int bi = col*3;	
+            ushort bits1 = (rd[bi+1] &0xf)<<8| rd[bi]; // 3,0,1
+            ushort bits2 = rd[bi+2] << 4 | ((rd[bi+1]>>4)& 0xf); //452
+            ushort bits3 =  ((rd[bi+4] & 0xf)<<8) | rd[bi+3]; // 967
+            ushort bits4 = rd[bi+5] << 4 | ((rd[bi+4]>>4)& 0xf); // ab8
+            imgdata.image[row*imgdata.sizes.raw_width+col][0]=bits1;
+            imgdata.image[row*imgdata.sizes.raw_width+col][1]=bits3;
+            imgdata.image[row*imgdata.sizes.raw_width+col][2]=bits4;
+            imgdata.image[row*imgdata.sizes.raw_width+col+1][0]=bits2;
+            imgdata.image[row*imgdata.sizes.raw_width+col+1][1]=2048;
+            imgdata.image[row*imgdata.sizes.raw_width+col+1][2]=2048;
+          }
+      }
+  }catch (...) {
+    free(rd);
+    throw ;
+  }
+  free(rd);
+  C.maximum = 0xfff; // 12 bit?
+  if(imgdata.params.sraw_ycc>=2)
+    {
+      return; // no CbCr interpolation
+    }
+  // Interpolate CC channels
+  int row,col;
+  for(row = 0; row < imgdata.sizes.raw_height; row++)
+    {
+      checkCancel(); // will throw out
+      for(col = 0; col < imgdata.sizes.raw_width;col+=2)
+        {
+          int col2 = col<imgdata.sizes.raw_width-2?col+2:col;
+          imgdata.image[row*imgdata.sizes.raw_width+col+1][1]
+            =(unsigned short)(int(imgdata.image[row*imgdata.sizes.raw_width+col][1]
+                                  +imgdata.image[row*imgdata.sizes.raw_width+col2][1])/2);
+          imgdata.image[row*imgdata.sizes.raw_width+col+1][2]
+            =(unsigned short)(int(imgdata.image[row*imgdata.sizes.raw_width+col][2]
+                                  +imgdata.image[row*imgdata.sizes.raw_width+col2][2])/2);
+        }
+    }
+  if(imgdata.params.sraw_ycc>0)
+    return;
+  
+  for(row = 0; row < imgdata.sizes.raw_height; row++)
+    {
+      checkCancel(); // will throw out
+      for(col = 0; col < imgdata.sizes.raw_width;col++)
+        {
+          int Y = imgdata.image[row*imgdata.sizes.raw_width+col][0];
+          int Ch2 = imgdata.image[row*imgdata.sizes.raw_width+col][1];
+          int Ch3 = imgdata.image[row*imgdata.sizes.raw_width+col][2];
+          if(Y>2151) Y = 2151;
+          int R = Y + Ch3 - 2048;
+          if(R<0) R=0;
+          int G = Y - (Ch3 - 2048) - (Ch2-2048);
+          if(G<0) G=0;
+          int B = Y + (Ch2-2048);
+          if(B<0) B=0;
+          imgdata.image[row*imgdata.sizes.raw_width+col][0]=R;
+          imgdata.image[row*imgdata.sizes.raw_width+col][1]=G;
+          imgdata.image[row*imgdata.sizes.raw_width+col][2]=B;
+        }
+    }
 }
 
 void LibRaw::free_image(void)
