@@ -179,7 +179,8 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t* p)
     if(p) ::free(p);
 }
 
-int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw; }
+int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
+int LibRaw::sraw_midpoint() {if (load_raw == &LibRaw::canon_sraw_load_raw) return 8192; else if (load_raw == &LibRaw::nikon_load_sraw) return 2048; else return 0;}
 
 #ifdef USE_RAWSPEED
 using namespace RawSpeed;
@@ -989,6 +990,11 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		&& imgdata.sizes.raw_height == 1640)
 	{
 		load_raw= &LibRaw::nikon_load_sraw;
+		C.black =0;
+		memset(C.cblack,0,sizeof(C.cblack));
+		imgdata.idata.filters = 0;
+		libraw_internal_data.unpacker_data.tiff_samples=3;
+		imgdata.idata.colors = 3;
 	}
 	// Adjust BL for Nikon 14bit
 	else if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
@@ -1386,25 +1392,74 @@ int LibRaw::unpack(void)
 void LibRaw::nikon_load_sraw()
 {
 	// We're already seeked to data!
-	unsigned char *row_data = (unsigned char *)malloc(3*(imgdata.sizes.raw_width+2));
-	if(!row_data) throw LIBRAW_EXCEPTION_ALLOC;
+	unsigned char *rd = (unsigned char *)malloc(3*(imgdata.sizes.raw_width+2));
+	if(!rd) throw LIBRAW_EXCEPTION_ALLOC;
+	try {
+		int row,col;
+		for(row = 0; row < imgdata.sizes.raw_height; row++)
+		{
+			checkCancel();
+			libraw_internal_data.internal_data.input->read(rd,3,imgdata.sizes.raw_width);
+			for(col = 0; col < imgdata.sizes.raw_width-1;col+=2)
+			{
+				int bi = col*3;	
+				ushort bits1 = (rd[bi+1] &0xf)<<8| rd[bi]; // 3,0,1
+				ushort bits2 = rd[bi+2] << 4 | ((rd[bi+1]>>4)& 0xf); //452
+				ushort bits3 =  ((rd[bi+4] & 0xf)<<8) | rd[bi+3]; // 967
+				ushort bits4 = rd[bi+5] << 4 | ((rd[bi+4]>>4)& 0xf); // ab8
+				imgdata.image[row*imgdata.sizes.raw_width+col][0]=bits1;
+				imgdata.image[row*imgdata.sizes.raw_width+col][1]=bits3;
+				imgdata.image[row*imgdata.sizes.raw_width+col][2]=bits4;
+				imgdata.image[row*imgdata.sizes.raw_width+col+1][0]=bits2;
+				imgdata.image[row*imgdata.sizes.raw_width+col+1][1]=2048;
+				imgdata.image[row*imgdata.sizes.raw_width+col+1][2]=2048;
+			}
+		}
+	}catch (...) {
+		free(rd);
+		throw ;
+	}
+	free(rd);
+	C.maximum = 0xfff; // 12 bit?
+	if(imgdata.params.sraw_ycc>=2)
+	{
+		return; // no CbCr interpolation
+	}
+	// Interpolate CC channels
 	int row,col;
 	for(row = 0; row < imgdata.sizes.raw_height; row++)
 	{
-		libraw_internal_data.internal_data.input->read(row_data,3,imgdata.sizes.raw_width);
+		checkCancel(); // will throw out
 		for(col = 0; col < imgdata.sizes.raw_width;col+=2)
 		{
-			unsigned short bits1 = (row_data[col*3] )<<4 | (row_data[col*3+1]>>4)	;
-			unsigned short bits2 = (row_data[col*3+1] & 0xf )<<8 | (row_data[col*3+2])	;
-			unsigned short bits3 = (row_data[col*3+3] )<<4 | (row_data[col*3+4]>>4)	;
-			unsigned short bits4 = (row_data[col*3+4] & 0xf )<<8 | (row_data[col*3+5])	;
-			imgdata.image[row*imgdata.sizes.raw_width+col][0]=bits1;
-			imgdata.image[row*imgdata.sizes.raw_width+col][1]=bits2;
-			imgdata.image[row*imgdata.sizes.raw_width+col][2]=bits3;
-			imgdata.image[row*imgdata.sizes.raw_width+col][3]=bits4;
+			int col2 = col<imgdata.sizes.raw_width-2?col+2:col;
+			imgdata.image[row*imgdata.sizes.raw_width+col+1][1]=ushort(int(imgdata.image[row*imgdata.sizes.raw_width+col][1]+imgdata.image[row*imgdata.sizes.raw_width+col2][1])/2);
+			imgdata.image[row*imgdata.sizes.raw_width+col+1][2]=ushort(int(imgdata.image[row*imgdata.sizes.raw_width+col][2]+imgdata.image[row*imgdata.sizes.raw_width+col2][2])/2);
 		}
 	}
-	free(row_data);
+	if(imgdata.params.sraw_ycc>0)
+		return;
+
+	for(row = 0; row < imgdata.sizes.raw_height; row++)
+	{
+		checkCancel(); // will throw out
+		for(col = 0; col < imgdata.sizes.raw_width;col++)
+		{
+			int Y = imgdata.image[row*imgdata.sizes.raw_width+col][0];
+			int Ch2 = imgdata.image[row*imgdata.sizes.raw_width+col][1];
+			int Ch3 = imgdata.image[row*imgdata.sizes.raw_width+col][2];
+			if(Y>2151) Y = 2151;
+			int R = Y + Ch3 - 2048;
+			if(R<0) R=0;
+			int G = Y - (Ch3 - 2048) - (Ch2-2048);
+			if(G<0) G=0;
+			int B = Y + (Ch2-2048);
+			if(B<0) B=0;
+			imgdata.image[row*imgdata.sizes.raw_width+col][0]=R;
+			imgdata.image[row*imgdata.sizes.raw_width+col][1]=G;
+			imgdata.image[row*imgdata.sizes.raw_width+col][2]=B;
+		}
+	}
 }
 
 void LibRaw::free_image(void)
