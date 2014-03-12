@@ -180,6 +180,7 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t* p)
 }
 
 int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
+int LibRaw::is_nikon_sraw(){ return load_raw == &LibRaw::nikon_load_sraw;}
 int LibRaw::sraw_midpoint() {if (load_raw == &LibRaw::canon_sraw_load_raw) return 8192; else if (load_raw == &LibRaw::nikon_load_sraw) return 2048; else return 0;}
 
 #ifdef USE_RAWSPEED
@@ -998,6 +999,11 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         imgdata.idata.filters = 0;
         libraw_internal_data.unpacker_data.tiff_samples=3;
         imgdata.idata.colors = 3;
+		for(int i=0; i<=3072;i++)
+		{
+			float q = (float(i)/3072.f);
+			imgdata.color.curve[i] = int(powf(q,2.2f)*16383.f);
+		}
       }
 	// Adjust BL for Nikon 14bit
     else if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
@@ -1455,18 +1461,19 @@ void LibRaw::nikon_load_sraw()
           int Y = imgdata.image[row*imgdata.sizes.raw_width+col][0];
           int Ch2 = imgdata.image[row*imgdata.sizes.raw_width+col][1];
           int Ch3 = imgdata.image[row*imgdata.sizes.raw_width+col][2];
-          if(Y>2151) Y = 2151;
+          //if(Y>2151) Y = 2151;
           int R = Y + Ch3 - 2048;
           if(R<0) R=0;
           int G = Y - (Ch3 - 2048) - (Ch2-2048);
           if(G<0) G=0;
           int B = Y + (Ch2-2048);
           if(B<0) B=0;
-          imgdata.image[row*imgdata.sizes.raw_width+col][0]=R;
-          imgdata.image[row*imgdata.sizes.raw_width+col][1]=G;
-          imgdata.image[row*imgdata.sizes.raw_width+col][2]=B;
+          imgdata.image[row*imgdata.sizes.raw_width+col][0]=imgdata.color.curve[R];
+          imgdata.image[row*imgdata.sizes.raw_width+col][1]=imgdata.color.curve[G];
+          imgdata.image[row*imgdata.sizes.raw_width+col][2]=imgdata.color.curve[B];
         }
     }
+  C.maximum=0x4000;
 }
 
 void LibRaw::free_image(void)
