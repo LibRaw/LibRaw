@@ -180,6 +180,7 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t* p)
 }
 
 int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
+int LibRaw::is_nikon_sraw(){ return load_raw == &LibRaw::nikon_load_sraw;}
 int LibRaw::sraw_midpoint() {if (load_raw == &LibRaw::canon_sraw_load_raw) return 8192; else if (load_raw == &LibRaw::nikon_load_sraw) return 2048; else return 0;}
 
 #ifdef USE_RAWSPEED
