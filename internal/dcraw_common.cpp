@@ -6089,6 +6089,12 @@ void CLASS apply_tiff()
 	  load_flags = 4;
 	  order = 0x4d4d;
 	} else
+		if(raw_width*raw_height*3 == tiff_ifd[raw].bytes*2)
+		{
+			load_raw = &CLASS packed_load_raw;
+			load_flags=80;
+		}
+		else
 	  load_raw = &CLASS nikon_load_raw;			break;
       case 65535:
 	load_raw = &CLASS pentax_load_raw;			break;

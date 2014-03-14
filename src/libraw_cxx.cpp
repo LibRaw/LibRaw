@@ -1006,7 +1006,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		}
       }
 	// Adjust BL for Nikon 14bit
-    else if(load_raw == &LibRaw::nikon_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
+    else if((load_raw == &LibRaw::nikon_load_raw || load_raw == &LibRaw::packed_load_raw)  && !strcasecmp(imgdata.idata.make,"Nikon")
             && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
         C.maximum = 4095;
@@ -1258,7 +1258,7 @@ int LibRaw::unpack(void)
               {
                 delete d;
                 _rawspeed_decoder = 0;
-                throw; 
+                throw 1; 
               }
             if (r->isCFA) {
               imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
