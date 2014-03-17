@@ -517,7 +517,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
   else if (load_raw == &LibRaw::nikon_load_sraw )
     {
       d_info->decoder_name = "nikon_load_sraw()";
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
+      d_info->decoder_flags = LIBRAW_DECODER_LEGACY | LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_FIXEDMAXC; 
     }
   else if (load_raw == &LibRaw::rollei_load_raw )
     {
@@ -1002,14 +1002,16 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		for(int i=0; i<=3072;i++)
 		{
 			float q = (float(i)/3072.f);
-			imgdata.color.curve[i] = int(powf(q,2.2f)*16383.f);
+			//float p = q*2.473247 - powf(q,2.0f)*1.516858f - 0.013689f;
+			//imgdata.color.curve[i] = int(p*16383.f);
+			imgdata.color.curve[i] = int(powf(q,2.f)*16383.f);
 		}
       }
 	// Adjust BL for Nikon 14bit
     else if((load_raw == &LibRaw::nikon_load_raw || load_raw == &LibRaw::packed_load_raw)  && !strcasecmp(imgdata.idata.make,"Nikon")
             && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
-        C.maximum = 4095;
+        C.maximum = 6500;
         C.black /=4;
         for(int c=0; c< 4; c++)
           C.cblack[c]/=4;
@@ -1458,22 +1460,25 @@ void LibRaw::nikon_load_sraw()
       checkCancel(); // will throw out
       for(col = 0; col < imgdata.sizes.raw_width;col++)
         {
-          int Y = imgdata.image[row*imgdata.sizes.raw_width+col][0];
-          int Ch2 = imgdata.image[row*imgdata.sizes.raw_width+col][1];
-          int Ch3 = imgdata.image[row*imgdata.sizes.raw_width+col][2];
-          //if(Y>2151) Y = 2151;
-          int R = Y + Ch3 - 2048;
-          if(R<0) R=0;
-          int G = Y - (Ch3 - 2048) - (Ch2-2048);
-          if(G<0) G=0;
-          int B = Y + (Ch2-2048);
-          if(B<0) B=0;
-          imgdata.image[row*imgdata.sizes.raw_width+col][0]=imgdata.color.curve[R];
-          imgdata.image[row*imgdata.sizes.raw_width+col][1]=imgdata.color.curve[G];
-          imgdata.image[row*imgdata.sizes.raw_width+col][2]=imgdata.color.curve[B];
+          float Y = float(imgdata.image[row*imgdata.sizes.raw_width+col][0])/2549.f;
+          float Ch2 = float(imgdata.image[row*imgdata.sizes.raw_width+col][1]-1280)/1536.f;
+          float Ch3 = float(imgdata.image[row*imgdata.sizes.raw_width+col][2]-1280)/1536.f;
+          if(Y>1.f) Y = 1.f;
+          float r = Y + (Ch3 - 0.5f);
+		  if(r<0.f) r=0.f;
+		  if(r>1.f) r=1.f;
+          float g = Y - (Ch3 - 0.5f) - (Ch2-0.5f);
+		  if(g>1.f) g = 1.f;
+		  if(g<0.f) g = 0.f;
+          float b = Y + (Ch2-0.5f);
+		  if(b>1.f) b = 1.f;
+		  if(b<0.f) b = 0.f;
+          imgdata.image[row*imgdata.sizes.raw_width+col][0]=imgdata.color.curve[int(r*3072.f)];
+          imgdata.image[row*imgdata.sizes.raw_width+col][1]=imgdata.color.curve[int(g*3072.f)];
+          imgdata.image[row*imgdata.sizes.raw_width+col][2]=imgdata.color.curve[int(b*3072.f)];
         }
     }
-  C.maximum=0x4000;
+  C.maximum=7500;
 }
 
 void LibRaw::free_image(void)
@@ -2934,7 +2939,8 @@ int LibRaw::dcraw_process(void)
         subtract_black_internal();
       }
 
-    adjust_maximum();
+	if(!(di.decoder_flags & LIBRAW_DECODER_FIXEDMAXC))
+		adjust_maximum();
 
     if (O.user_sat > 0) C.maximum = O.user_sat;
 
