@@ -1001,17 +1001,22 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         imgdata.idata.colors = 3;
 		for(int i=0; i<=3072;i++)
 		{
-			float q = (float(i)/3072.f);
+			//float q = (float(i)/3072.f);
 			//float p = q*2.473247 - powf(q,2.0f)*1.516858f - 0.013689f;
 			//imgdata.color.curve[i] = int(p*16383.f);
-			imgdata.color.curve[i] = int(powf(q,2.f)*16383.f);
+			//imgdata.color.curve[i] = int(powf(q,2.f)*16383.f);
+			float C1  = i;
+			imgdata.color.curve[i] = (171731.464565f+1722.601753f*C1+5.21022f*C1*C1)/(3645.806558f-0.532618f*C1+0.000041f*C1*C1)/2.f;
 		}
+		for(int i=0;i<3;i++)
+			for(int j=0;j<4;j++)
+				imgdata.color.rgb_cam[i][j]=float(i==j);
       }
 	// Adjust BL for Nikon 14bit
     else if((load_raw == &LibRaw::nikon_load_raw || load_raw == &LibRaw::packed_load_raw)  && !strcasecmp(imgdata.idata.make,"Nikon")
             && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
-        C.maximum = 6500;
+        C.maximum = 4095;
         C.black /=4;
         for(int c=0; c< 4; c++)
           C.cblack[c]/=4;
@@ -1464,13 +1469,14 @@ void LibRaw::nikon_load_sraw()
           float Ch2 = float(imgdata.image[row*imgdata.sizes.raw_width+col][1]-1280)/1536.f;
           float Ch3 = float(imgdata.image[row*imgdata.sizes.raw_width+col][2]-1280)/1536.f;
           if(Y>1.f) Y = 1.f;
-          float r = Y + (Ch3 - 0.5f);
+		  if(Y>0.803f) Ch2 = Ch3 = 0.5f;
+          float r = Y + 1.40200f*(Ch3 - 0.5f);
 		  if(r<0.f) r=0.f;
 		  if(r>1.f) r=1.f;
-          float g = Y - (Ch3 - 0.5f) - (Ch2-0.5f);
+          float g = Y - 0.34414f*(Ch2-0.5f) - 0.71414*(Ch3 - 0.5f) ;
 		  if(g>1.f) g = 1.f;
 		  if(g<0.f) g = 0.f;
-          float b = Y + (Ch2-0.5f);
+          float b = Y + 1.77200*(Ch2-0.5f);
 		  if(b>1.f) b = 1.f;
 		  if(b<0.f) b = 0.f;
           imgdata.image[row*imgdata.sizes.raw_width+col][0]=imgdata.color.curve[int(r*3072.f)];
@@ -1478,7 +1484,7 @@ void LibRaw::nikon_load_sraw()
           imgdata.image[row*imgdata.sizes.raw_width+col][2]=imgdata.color.curve[int(b*3072.f)];
         }
     }
-  C.maximum=7500;
+  C.maximum=4550;
 }
 
 void LibRaw::free_image(void)
