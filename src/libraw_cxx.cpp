@@ -999,14 +999,21 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         imgdata.idata.filters = 0;
         libraw_internal_data.unpacker_data.tiff_samples=3;
         imgdata.idata.colors = 3;
+		double beta_1 = -5.79342238397656E-02;
+		double beta_2 = 3.28163551282665;
+		double beta_3 = -8.43136004842678;
+		double beta_4 = 1.03533181861023E+01;
 		for(int i=0; i<=3072;i++)
 		{
-			//float q = (float(i)/3072.f);
+			double x = (double)i/3072.;
 			//float p = q*2.473247 - powf(q,2.0f)*1.516858f - 0.013689f;
 			//imgdata.color.curve[i] = int(p*16383.f);
 			//imgdata.color.curve[i] = int(powf(q,2.f)*16383.f);
-			float C1  = i;
-			imgdata.color.curve[i] = (171731.464565f+1722.601753f*C1+5.21022f*C1*C1)/(3645.806558f-0.532618f*C1+0.000041f*C1*C1)/2.f;
+//			float C1  = i;
+//			imgdata.color.curve[i] = (171731.464565f+1722.601753f*C1+5.21022f*C1*C1)/(3645.806558f-0.532618f*C1+0.000041f*C1*C1)/2.f;
+			double y = (1.-exp(-beta_1*x-beta_2*x*x-beta_3*x*x*x-beta_4*x*x*x*x));
+			if(y<0.)y=0.;
+			imgdata.color.curve[i] = (y*16383.);
 		}
 		for(int i=0;i<3;i++)
 			for(int j=0;j<4;j++)
@@ -1484,7 +1491,7 @@ void LibRaw::nikon_load_sraw()
           imgdata.image[row*imgdata.sizes.raw_width+col][2]=imgdata.color.curve[int(b*3072.f)];
         }
     }
-  C.maximum=4550;
+  C.maximum=16383;
 }
 
 void LibRaw::free_image(void)
