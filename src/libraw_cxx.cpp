@@ -2854,7 +2854,12 @@ void LibRaw::adjust_bl()
 		   C.cblack[c] += C.cblack[6 + c/2 % C.cblack[4] * C.cblack[5] + c%2 % C.cblack[5]];
 	   C.cblack[4]=C.cblack[5]=0;
    }
-
+   else if(imgdata.idata.filters <= 1000 && C.cblack[4]==1 && C.cblack[5]==1) // Fuji RAF dng
+   {
+	   for(int c=0; c<4; c++)
+		   C.cblack[c] += C.cblack[6];
+	   C.cblack[4]=C.cblack[5]=0;
+   }
   // remove common part from C.cblack[]
   int i = C.cblack[3];
   int c;
