@@ -1000,9 +1000,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           C.cblack[6+c]/=4;
       }
 
-    if(load_raw == &LibRaw::nikon_load_raw 
-       && !strcasecmp(imgdata.idata.make,"Nikon") 
-	   )
+    if(load_raw == &LibRaw::nikon_load_raw ) // Is it Nikon sRAW?
       {
 		for(int i=0; i<nikon_sraw_list_count; i++)
 		{
@@ -1038,12 +1036,10 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 					for(int j=0;j<4;j++)
 						imgdata.color.rgb_cam[i][j]=float(i==j);
 			}
-
+		 }
 		}
-
-		}
-	// Adjust BL for Nikon 14bit
-    else if((load_raw == &LibRaw::nikon_load_raw || load_raw == &LibRaw::packed_load_raw)  && !strcasecmp(imgdata.idata.make,"Nikon")
+	// Adjust BL for Nikon 12bit
+    if((load_raw == &LibRaw::nikon_load_raw || load_raw == &LibRaw::packed_load_raw)  && !strcasecmp(imgdata.idata.make,"Nikon")
             && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
         C.maximum = 4095;
