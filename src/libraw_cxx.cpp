@@ -1293,14 +1293,18 @@ int LibRaw::unpack(void)
                 _rawspeed_decoder = 0;
                 throw 1; 
               }
-            if (r->isCFA) {
+            if (r->isCFA) 
+			{
               imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
-            } else if(r->getCpp()==4) {
+            }
+			else if(r->getCpp()==4) 
+			{
               imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
-			  C.maximum = r->whitePoint;
-            } else if(r->getCpp() == 3)
+            }
+			else if(r->getCpp() == 3)
               {
                 imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
+				C.maximum = r->whitePoint;
               }
             else
               {
