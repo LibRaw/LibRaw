@@ -1300,11 +1300,11 @@ int LibRaw::unpack(void)
 			else if(r->getCpp()==4) 
 			{
               imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
-            }
-			else if(r->getCpp() == 3)
+              C.maximum = r->whitePoint;
+            } else if(r->getCpp() == 3)
               {
                 imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
-				C.maximum = r->whitePoint;
+              C.maximum = r->whitePoint;
               }
             else
               {
