@@ -6818,7 +6818,7 @@ int CLASS parse_tiff_ifd (int base)
 	break;
 #ifdef LIBRAW_LIBRARY_BUILD
       case 700:
-        if(type == 1 && len > 1 && len < 100000)
+        if((type == 1 || type == 2 || type == 6 || type == 7) && len > 1 && len < 5100000)
           {
             xmpdata = (char*)malloc(xmplen = len);
             fread(xmpdata,len,1,ifp);
