@@ -5636,13 +5636,15 @@ int CLASS parse_tiff_ifd (int base)
 	strcpy (make, "Sarnoff");
 	maximum = 0xfff;
 	break;
-	  case 700:
-		  if(type == 1 && len > 1 && len < 100000)
-		  {
-			  xmpdata = (char*)malloc(xmplen = len);
-			  fread(xmpdata,len,1,ifp);
-		  }  
-		  break;
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 700:
+        if(type == 1 && len > 1 && len < 100000)
+          {
+            xmpdata = (char*)malloc(xmplen = len);
+            fread(xmpdata,len,1,ifp);
+          }  
+        break;
+#endif
       case 28688:
 	FORC4 sony_curve[c+1] = get2() >> 2 & 0xfff;
 	for (i=0; i < 5; i++)
