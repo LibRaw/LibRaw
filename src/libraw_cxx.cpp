@@ -424,6 +424,7 @@ void LibRaw:: recycle()
   FREE(imgdata.color.profile);
   FREE(imgdata.rawdata.ph1_black);
   FREE(imgdata.rawdata.raw_alloc); 
+  FREE(imgdata.idata.xmpdata); 
 #undef FREE
   ZERO(imgdata.rawdata);
   ZERO(imgdata.sizes);

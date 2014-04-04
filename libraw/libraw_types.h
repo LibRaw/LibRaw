@@ -149,15 +149,15 @@ typedef struct
 {
     char        make[64];
     char        model[64];
-
     unsigned    raw_count;
     unsigned    dng_version;
     unsigned    is_foveon;
     int         colors;
-
     unsigned    filters;
     char        xtrans[6][6];
     char        cdesc[5];
+	unsigned		xmplen;
+	char			*xmpdata;
 
 }libraw_iparams_t;
 
