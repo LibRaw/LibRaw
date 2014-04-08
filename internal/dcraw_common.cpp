@@ -5642,7 +5642,7 @@ int CLASS parse_tiff_ifd (int base)
           {
             xmpdata = (char*)malloc(xmplen = len+1);
             fread(xmpdata,len,1,ifp);
-			xmpdata[len]=0;
+            xmpdata[len]=0;
           }  
         break;
 #endif
@@ -7870,7 +7870,7 @@ void CLASS identify()
     { 0x327, "EOS 1200D" },
     { 0x346, "EOS 100D" },
     { 0x331, "EOS M" },
-	{ 0x335, "EOS M2" },
+    { 0x335, "EOS M2" },
   };
   static const struct {
     ushort id;

@@ -6820,8 +6820,9 @@ int CLASS parse_tiff_ifd (int base)
       case 700:
         if((type == 1 || type == 2 || type == 6 || type == 7) && len > 1 && len < 5100000)
           {
-            xmpdata = (char*)malloc(xmplen = len);
+            xmpdata = (char*)malloc(xmplen = len+1);
             fread(xmpdata,len,1,ifp);
+            xmpdata[len]=0;
           }  
         break;
 #endif
@@ -9153,6 +9154,7 @@ void CLASS identify()
     { 0x327, "EOS 1200D" },
     { 0x346, "EOS 100D" },
     { 0x331, "EOS M" },
+    { 0x335, "EOS M2" },
   };
   static const struct {
     ushort id;
