@@ -7263,8 +7263,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181 } },
     { "Nikon COOLPIX P330", 0, 0,
 	{ 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
-	{ "Nikon COOLPIX P340", 200, 0,
-	{ 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
+    { "Nikon COOLPIX P340", 200, 0,
+        { 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
     { "Nikon COOLPIX P6000", 0, 0,
 	{ 9698,-3367,-914,-4706,12584,2368,-837,968,5801 } },
     { "Nikon COOLPIX P7000", 0, 0,
@@ -7515,8 +7515,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 7780,-2410,-806,-3913,11724,2484,-1018,2390,5298 } },
     { "Panasonic DMC-GH3", 144, 0,
 	{ 6559,-1752,-491,-3672,11407,2586,-962,1875,5130 } },
-	{"Panasonic DMC-GH4",-144, 0,
-	{ 7635,-2514,-436,-2063,10135,1406,-1084,2080,4375 } },
+    {"Panasonic DMC-GH4",-144, 0,
+        { 7635,-2514,-436,-2063,10135,1406,-1084,2080,4375 } },
     { "Panasonic DMC-GM1", 143, 0,
         { 8977,-3976,-425,-3050,11095,1117,-1217,2563,4750 } },
     { "Panasonic DMC-GX1", 143, 0,
@@ -7551,9 +7551,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 8898,-2498,-994,-3144,11328,2066,-760,1381,4576 } },
     { "Samsung EX2F", 0, 0x7ff,
 	{ 10648,-3897,-1055,-2022,10573,1668,-492,1611,4742 } },
-	{ "Samsung NX30", 0, 0, /* Adobe beta, copied from Galaxy NX */
+    { "Samsung NX30", 0, 0, /* LibRaw */
  	{ 8644,-3883,-361,-3664,11989,987,-967,1930,4664 } },
-	//{ 7557,-2522,-739,-4679,12949,1894,-840,1777,5311 } },
     { "Samsung NX300", 0, 0,
         { 8873,-3984,-372,-3759,12305,1013,-994,1981,4788 } },
     { "Samsung NX2000", 0, 0,
@@ -8512,11 +8511,11 @@ canon_a5:
     else width -= 8;
   } else if (!strncmp(model,"D300",4)) {
     width -= 32;
-  } else if (!strcmp(make,"Nikon") && raw_width == 4032)  {
-	  if(!strcmp(model,"COOLPIX P7700"))
-		adobe_coeff ("Nikon","COOLPIX P7700");
-	  else
-		  load_flags=0;
+  } else if (!strcmp(make,"Nikon") && raw_width == 4032) {
+    if(!strcmp(model,"COOLPIX P7700"))
+      adobe_coeff ("Nikon","COOLPIX P7700");
+    else
+      load_flags=0;
   } else if (!strncmp(model,"COOLPIX P",9)) {
     load_flags = 24;
     filters = 0x94949494;
