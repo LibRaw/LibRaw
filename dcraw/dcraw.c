@@ -8172,6 +8172,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
 	{ 7474,-2301,-567,-4056,11456,2975,-222,716,4181 } },
     { "Canon PowerShot G16", 0, 0,
         { 14130,-8071,127,2199,6528,1551,3402,-1721,4960 } },
+    { "Canon PowerShot G1 X Mark II", 0, 0,
+	{ 7378,-1255,-1043,-4088,12251,2048,-876,1946,5805 } },
     { "Canon PowerShot G1 X", 0, 0,
 	{ 7378,-1255,-1043,-4088,12251,2048,-876,1946,5805 } },
     { "Canon PowerShot G1", 0, 0,
