@@ -7870,6 +7870,7 @@ void CLASS identify()
     { 0x327, "EOS 1200D" },
     { 0x346, "EOS 100D" },
     { 0x331, "EOS M" },
+	{ 0x335, "EOS M2" },
   };
   static const struct {
     ushort id;
