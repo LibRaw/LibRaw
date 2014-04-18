@@ -1041,6 +1041,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		}
 	// Adjust BL for Nikon 12bit
     if((load_raw == &LibRaw::nikon_load_raw || load_raw == &LibRaw::packed_load_raw)  && !strcasecmp(imgdata.idata.make,"Nikon")
+			&& strncmp(imgdata.idata.model,"COOLPIX",7)
             && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
         C.maximum = 4095;
