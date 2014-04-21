@@ -1804,13 +1804,15 @@ void CLASS canon_rmf_load_raw()
 {
   int row, col, bits, orow, ocol, c;
 
+  int *words = (int*)malloc(sizeof(int)*(raw_width/3+1));
+  merror(words,"canon_rmf_load_raw");
   for (row=0; row < raw_height; row++)
   {
 #ifdef LIBRAW_LIBRARY_BUILD
     checkCancel();
-#endif
+	fread(words,sizeof(int),raw_width/3,ifp);
     for (col=0; col < raw_width-2; col+=3) {
-      bits = get4();
+      bits = words[col/3];
       FORC3 {
 	orow = row;
 	if ((ocol = col+c-4) < 0) {
@@ -1821,8 +1823,23 @@ void CLASS canon_rmf_load_raw()
 	RAW(orow,ocol) = curve[bits >> (10*c+2) & 0x3ff];
       }
     }
+#else
+	  for (col=0; col < raw_width-2; col+=3) {
+		  bits = get4();
+		  FORC3 {
+			  orow = row;
+			  if ((ocol = col+c-4) < 0) {
+				  ocol += raw_width;
+				  if ((orow -= 2) < 0)
+					  orow += raw_height;
+			  }
+			  RAW(orow,ocol) = curve[bits >> (10*c+2) & 0x3ff];
+		  }
+	  }
+#endif
   }  
   maximum = curve[0x3ff];
+  free(words);
 }
 
 unsigned CLASS pana_bits (int nbits)
