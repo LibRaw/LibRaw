@@ -7115,16 +7115,41 @@ guess_cfa_pc:
 	pixel_aspect  = getreal(type);
 	pixel_aspect /= getreal(type);
 	break;
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 50778:
+        imgdata.color.dng_color[0].illuminant = get2();
+        break;
+      case 50779:
+        imgdata.color.dng_color[0].illuminant = get2();
+        break;
+#endif        
       case 50721:			/* ColorMatrix1 */
       case 50722:			/* ColorMatrix2 */
+#ifdef LIBRAW_LIBRARY_BUILD
+        i = tag == 50721?0:1;
+#endif
 	FORCC for (j=0; j < 3; j++)
+          {
+#ifdef LIBRAW_LIBRARY_BUILD
+          imgdata.color.dng_color[i].colormatrix[c][j]=
+#endif
 	  cm[c][j] = getreal(type);
+          }
 	use_cm = 1;
 	break;
       case 50723:			/* CameraCalibration1 */
       case 50724:			/* CameraCalibration2 */
+#ifdef LIBRAW_LIBRARY_BUILD
+        j = tag == 50723?0:1;
+#endif
 	for (i=0; i < colors; i++)
-	  FORCC cc[i][c] = getreal(type);
+	  FORCC
+            {
+#ifdef LIBRAW_LIBRARY_BUILD
+              imgdata.color.dng_color[j].calibration[i][c]=
+#endif
+              cc[i][c] = getreal(type);
+            }
 	break;
       case 50727:			/* AnalogBalance */
 	FORCC ab[c] = getreal(type);

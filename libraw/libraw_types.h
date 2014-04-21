@@ -186,6 +186,13 @@ struct ph1_t
 
 typedef struct
 {
+  unsigned short illuminant;
+  float calibration[4][4];
+  float colormatrix[3][4];
+} dng_color_t;
+
+typedef struct
+{
   ushort      curve[0x10000]; 
   unsigned    cblack[4102];
   unsigned    black;
@@ -204,6 +211,7 @@ typedef struct
   void        *profile;
   unsigned    profile_length;
   unsigned    black_stat[8];
+  dng_color_t  dng_color[2];
 }libraw_colordata_t;
 
 typedef struct
