@@ -2557,7 +2557,7 @@ void CLASS kodak_ycbcr_load_raw()
   ushort *ip;
 
   if (!image) return;
-  unsigned int bits = load_flags?load_flags:10;
+  unsigned int bits = (load_flags && load_flags > 9 && load_flags < 17)?load_flags:10;
   for (row=0; row < height; row+=2)
   {
 #ifdef LIBRAW_LIBRARY_BUILD
