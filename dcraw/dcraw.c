@@ -7120,7 +7120,7 @@ guess_cfa_pc:
         imgdata.color.dng_color[0].illuminant = get2();
         break;
       case 50779:
-        imgdata.color.dng_color[0].illuminant = get2();
+        imgdata.color.dng_color[1].illuminant = get2();
         break;
 #endif        
       case 50721:			/* ColorMatrix1 */
@@ -8130,7 +8130,11 @@ void CLASS parse_foveon()
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
  */
-void CLASS adobe_coeff (const char *t_make, const char *t_model)
+void CLASS adobe_coeff (const char *t_make, const char *t_model
+#ifdef LIBRAW_LIBRARY_BUILD
+	,int internal_only
+#endif
+)
 {
   static const struct {
     const char *prefix;
@@ -8155,7 +8159,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
     { "Canon EOS 5D", 0, 0xe6c,
 	{ 6347,-479,-972,-8297,15954,2480,-1968,2131,7649 } },
     { "Canon EOS 6D", 0, 0x3c82,
-	{ 7034,-804,-1014,-4420,12564,2058,-851,1994,5758 } },
+	{ 8624,-2197,-788,-3150,11361,912,-1161,2401,4838 } },
     { "Canon EOS 7D", 0, 0x3510,
 	{ 6844,-996,-856,-3876,11761,2396,-593,1772,6198 } },
     { "Canon EOS 10D", 0, 0xfa0,
@@ -9056,10 +9060,16 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model)
       if (table[i].trans[0]) {
 	for (raw_color = j=0; j < 12; j++)
 #ifdef LIBRAW_LIBRARY_BUILD
-          imgdata.color.cam_xyz[0][j] = 
+		if(internal_only)
+			imgdata.color.cam_xyz[0][j] = table[i].trans[j] / 10000.0;
+		else
+                  imgdata.color.cam_xyz[0][j] = 
 #endif
-	  cam_xyz[0][j] = table[i].trans[j] / 10000.0;
-	cam_xyz_coeff (rgb_cam, cam_xyz);
+                    cam_xyz[0][j] = table[i].trans[j] / 10000.0;
+#ifdef LIBRAW_LIBRARY_BUILD
+	if(!internal_only)
+#endif
+          cam_xyz_coeff (rgb_cam, cam_xyz);
       }
       break;
     }
@@ -10430,7 +10440,13 @@ dng_skip:
     memcpy (rgb_cam, cmatrix, sizeof cmatrix);
     raw_color = 0;
   }
+
   if (raw_color) adobe_coeff (make, model);
+#ifdef LIBRAW_LIBRARY_BUILD
+  else if(imgdata.color.cam_xyz[0][0]<0.01)
+	  adobe_coeff (make, model,1);
+#endif
+
   if (load_raw == &CLASS kodak_radc_load_raw)
     if (raw_color) adobe_coeff ("Apple","Quicktake");
 

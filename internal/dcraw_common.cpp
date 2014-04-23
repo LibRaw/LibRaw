@@ -6850,7 +6850,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 #ifdef LIBRAW_LIBRARY_BUILD
 	,int internal_only
 #endif
-	)
+)
 {
   static const struct {
     const char *prefix;
@@ -7779,13 +7779,13 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 		if(internal_only)
 			imgdata.color.cam_xyz[0][j] = table[i].trans[j] / 10000.0;
 		else
-          imgdata.color.cam_xyz[0][j] = 
+                  imgdata.color.cam_xyz[0][j] = 
 #endif
-	  cam_xyz[0][j] = table[i].trans[j] / 10000.0;
+                    cam_xyz[0][j] = table[i].trans[j] / 10000.0;
 #ifdef LIBRAW_LIBRARY_BUILD
 	if(!internal_only)
 #endif
-		cam_xyz_coeff (rgb_cam, cam_xyz);
+          cam_xyz_coeff (rgb_cam, cam_xyz);
       }
       break;
     }
@@ -9156,11 +9156,13 @@ dng_skip:
     memcpy (rgb_cam, cmatrix, sizeof cmatrix);
     raw_color = 0;
   }
+
   if (raw_color) adobe_coeff (make, model);
 #ifdef LIBRAW_LIBRARY_BUILD
   else if(imgdata.color.cam_xyz[0][0]<0.01)
 	  adobe_coeff (make, model,1);
 #endif
+
   if (load_raw == &CLASS kodak_radc_load_raw)
     if (raw_color) adobe_coeff ("Apple","Quicktake");
 
