@@ -184,7 +184,6 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 // CAM/RGB
     void        pseudoinverse (double (*in)[3], double (*out)[3], int size);
     void        cam_xyz_coeff (float _rgb_cam[3][4],double cam_xyz[4][3]);
-    void        adobe_coeff (const char *, const char *);
     void        simple_coeff (int index);
 
 

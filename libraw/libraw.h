@@ -172,6 +172,7 @@ class DllDef LibRaw
   void phase_one_correct();
   int  set_rawspeed_camerafile(char *filename);
   void setCancelFlag();
+  void adobe_coeff (const char *, const char *, int internal_only=0);
 
 protected:
     void checkCancel();

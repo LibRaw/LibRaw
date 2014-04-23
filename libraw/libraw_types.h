@@ -188,7 +188,7 @@ typedef struct
 {
   unsigned short illuminant;
   float calibration[4][4];
-  float colormatrix[3][4];
+  float colormatrix[4][3];
 } dng_color_t;
 
 typedef struct
