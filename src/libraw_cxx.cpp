@@ -3183,6 +3183,7 @@ static const char  *static_camera_list[] =
 "Canon PowerShot A460 (CHDK hack)",
 "Canon PowerShot A470 (CHDK hack)",
 "Canon PowerShot A530 (CHDK hack)",
+"Canon PowerShot A550 (CHDK hack)",
 "Canon PowerShot A570 (CHDK hack)",
 "Canon PowerShot A590 (CHDK hack)",
 "Canon PowerShot A610 (CHDK hack)",
@@ -3214,6 +3215,7 @@ static const char  *static_camera_list[] =
 "Canon PowerShot S3 IS (CHDK hack)",
 "Canon PowerShot S5 IS (CHDK hack)",
 "Canon PowerShot SD300 (CHDK hack)",
+"Canon PowerShot SD950 (CHDK hack)",
 "Canon PowerShot S30",
 "Canon PowerShot S40",
 "Canon PowerShot S45",
@@ -3442,6 +3444,7 @@ static const char  *static_camera_list[] =
 "Leica M8.2",
 "Leica M9",
 "Leica M (Typ 240)",
+"Leica Monochrom (Typ 240)",
 "Leica R8",
 "Leica S2",
 "Leica X1",
@@ -3759,6 +3762,7 @@ static const char  *static_camera_list[] =
 "Sony A7",
 "Sony A7R",
 "Sony ILCE-5000",
+"Sony ILCE-6000",
 "Sony DSC-F828",
 "Sony DSC-R1",
 "Sony DSC-RX1",
@@ -3888,7 +3892,6 @@ static char *utf2char(utf16_t *str, char *buffer)
   *b = 0;
   return buffer;
 }
-
 
 
 void LibRaw::parse_x3f()
