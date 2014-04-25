@@ -3447,6 +3447,7 @@ static const char  *static_camera_list[] =
 "Leica Monochrom (Typ 240)",
 "Leica R8",
 "Leica S2",
+"Leica T (Typ 701)"
 "Leica X1",
 "Leica X2",
 "Leica V-LUX1",
