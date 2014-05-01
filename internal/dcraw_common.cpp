@@ -2557,6 +2557,7 @@ void CLASS kodak_ycbcr_load_raw()
   ushort *ip;
 
   if (!image) return;
+  unsigned int bits = load_flags?load_flags:10;
   for (row=0; row < height; row+=2)
   {
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -2574,7 +2575,7 @@ void CLASS kodak_ycbcr_load_raw()
 	rgb[0] = rgb[1] + cr;
 	for (j=0; j < 2; j++)
 	  for (k=0; k < 2; k++) {
-	    if ((y[j][k] = y[j][k^1] + *bp++) >> 10) derror();
+	    if ((y[j][k] = y[j][k^1] + *bp++) >> bits) derror();
 	    ip = image[(row+j)*width + col+i+k];
 	    FORC3 ip[c] = curve[LIM(y[j][k]+rgb[c], 0, 0xfff)];
 	  }

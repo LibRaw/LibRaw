@@ -2317,6 +2317,8 @@ void LibRaw::kodak_thumb_loader()
 {
   // some kodak cameras
   ushort s_height = S.height, s_width = S.width,s_iwidth = S.iwidth,s_iheight=S.iheight;
+  ushort s_flags = libraw_internal_data.unpacker_data.load_flags;
+  libraw_internal_data.unpacker_data.load_flags = 12;
   int s_colors = P1.colors;
   unsigned s_filters = P1.filters;
   ushort (*s_image)[4] = imgdata.image;
@@ -2337,7 +2339,30 @@ void LibRaw::kodak_thumb_loader()
 
   ID.input->seek(ID.toffset, SEEK_SET);
   // read kodak thumbnail into T.image[]
-  (this->*thumb_load_raw)();
+  try {
+	  (this->*thumb_load_raw)();
+  } catch (...)
+  {
+	  free(imgdata.image);
+	  imgdata.image  = s_image;
+
+	  T.twidth = 0;
+	  S.width = s_width;
+
+	  S.iwidth = s_iwidth;
+	  S.iheight = s_iheight;
+
+	  T.theight = 0;
+	  S.height = s_height;
+
+	  T.tcolors = 0;
+	  P1.colors = s_colors;
+
+	  P1.filters = s_filters;
+	  T.tlength=0;
+	  libraw_internal_data.unpacker_data.load_flags = s_flags;
+	  return;
+  }
 
   // copy-n-paste from image pipe
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -2474,6 +2499,7 @@ void LibRaw::kodak_thumb_loader()
   P1.colors = s_colors;
 
   P1.filters = s_filters;
+  libraw_internal_data.unpacker_data.load_flags = s_flags;
 }
 #undef MIN
 #undef MAX
