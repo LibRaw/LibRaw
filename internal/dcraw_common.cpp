@@ -2184,6 +2184,7 @@ void CLASS kodak_jpeg_load_raw() {}
 void CLASS lossy_dng_load_raw() {}
 #else
 
+
 #ifndef LIBRAW_LIBRARY_BUILD
 METHODDEF(boolean)
 fill_input_buffer (j_decompress_ptr cinfo)
@@ -2199,125 +2200,124 @@ fill_input_buffer (j_decompress_ptr cinfo)
 }
 void CLASS kodak_jpeg_load_raw()
 {
-	struct jpeg_decompress_struct cinfo;
-	struct jpeg_error_mgr jerr;
-	JSAMPARRAY buf;
-	JSAMPLE (*pixel)[3];
-	int row, col;
-
-	cinfo.err = jpeg_std_error (&jerr);
-	jpeg_create_decompress (&cinfo);
-	jpeg_stdio_src (&cinfo, ifp);
-	cinfo.src->fill_input_buffer = fill_input_buffer;
-	jpeg_read_header (&cinfo, TRUE);
-	jpeg_start_decompress (&cinfo);
-	if ((cinfo.output_width      != width  ) ||
-		(cinfo.output_height*2   != height ) ||
-		(cinfo.output_components != 3      )) {
-			fprintf (stderr,_("%s: incorrect JPEG dimensions\n"), ifname);
-			jpeg_destroy_decompress (&cinfo);
-			longjmp (failure, 3);
-	}
-	buf = (*cinfo.mem->alloc_sarray)
-		((j_common_ptr) &cinfo, JPOOL_IMAGE, width*3, 1);
-
-	while (cinfo.output_scanline < cinfo.output_height) {
-		row = cinfo.output_scanline * 2;
-		jpeg_read_scanlines (&cinfo, buf, 1);
-		pixel = (JSAMPLE (*)[3]) buf[0];
-		for (col=0; col < width; col+=2) {
-			RAW(row+0,col+0) = pixel[col+0][1] << 1;
-			RAW(row+1,col+1) = pixel[col+1][1] << 1;
-			RAW(row+0,col+1) = pixel[col][0] + pixel[col+1][0];
-			RAW(row+1,col+0) = pixel[col][2] + pixel[col+1][2];
-		}
-	}
-	jpeg_finish_decompress (&cinfo);
-	jpeg_destroy_decompress (&cinfo);
-	maximum = 0xff << 1;
+  struct jpeg_decompress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+  JSAMPARRAY buf;
+  JSAMPLE (*pixel)[3];
+  int row, col;
+  
+  cinfo.err = jpeg_std_error (&jerr);
+  jpeg_create_decompress (&cinfo);
+  jpeg_stdio_src (&cinfo, ifp);
+  cinfo.src->fill_input_buffer = fill_input_buffer;
+  jpeg_read_header (&cinfo, TRUE);
+  jpeg_start_decompress (&cinfo);
+  if ((cinfo.output_width      != width  ) ||
+      (cinfo.output_height*2   != height ) ||
+      (cinfo.output_components != 3      )) {
+    fprintf (stderr,_("%s: incorrect JPEG dimensions\n"), ifname);
+    jpeg_destroy_decompress (&cinfo);
+    longjmp (failure, 3);
+  }
+  buf = (*cinfo.mem->alloc_sarray)
+    ((j_common_ptr) &cinfo, JPOOL_IMAGE, width*3, 1);
+  
+  while (cinfo.output_scanline < cinfo.output_height) {
+    row = cinfo.output_scanline * 2;
+    jpeg_read_scanlines (&cinfo, buf, 1);
+    pixel = (JSAMPLE (*)[3]) buf[0];
+    for (col=0; col < width; col+=2) {
+      RAW(row+0,col+0) = pixel[col+0][1] << 1;
+      RAW(row+1,col+1) = pixel[col+1][1] << 1;
+      RAW(row+0,col+1) = pixel[col][0] + pixel[col+1][0];
+      RAW(row+1,col+0) = pixel[col][2] + pixel[col+1][2];
+    }
+  }
+  jpeg_finish_decompress (&cinfo);
+  jpeg_destroy_decompress (&cinfo);
+  maximum = 0xff << 1;
 }
 #else
 
 struct jpegErrorManager {
-	struct jpeg_error_mgr pub;
+  struct jpeg_error_mgr pub;
 };
 
 static void jpegErrorExit (j_common_ptr cinfo)
 {
-	jpegErrorManager* myerr = (jpegErrorManager*) cinfo->err;
-	throw LIBRAW_EXCEPTION_DECODE_JPEG;
+  jpegErrorManager* myerr = (jpegErrorManager*) cinfo->err;
+  throw LIBRAW_EXCEPTION_DECODE_JPEG;
 }
 
 
 // LibRaw's Kodak_jpeg_load_raw
 void CLASS kodak_jpeg_load_raw()
 {
-	if(data_size < 1)
-		throw LIBRAW_EXCEPTION_DECODE_JPEG;
-
-	int row, col;
-	jpegErrorManager jerr;
-	struct jpeg_decompress_struct cinfo;
-
-	cinfo.err = jpeg_std_error(&jerr.pub);
-	jerr.pub.error_exit = jpegErrorExit;
-
-	unsigned char *jpg_buf = (unsigned char *)malloc(data_size);
-	merror(jpg_buf,"kodak_jpeg_load_raw");
-	unsigned char *pixel_buf = (unsigned char*) malloc(width*3);
-	jpeg_create_decompress (&cinfo);
-	merror(pixel_buf,"kodak_jpeg_load_raw");
-
-	fread(jpg_buf,data_size,1,ifp);
-	swab ((char*)jpg_buf, (char*)jpg_buf, data_size);
-	try 
-	{
-		jpeg_mem_src(&cinfo, jpg_buf, data_size);
-		int rc = jpeg_read_header(&cinfo, TRUE);
-		if(rc!=1)
-			throw LIBRAW_EXCEPTION_DECODE_JPEG;
-
-		jpeg_start_decompress (&cinfo);
-		if ((cinfo.output_width      != width  ) ||
-			(cinfo.output_height*2   != height ) ||
-			(cinfo.output_components != 3      )) {
-				throw LIBRAW_EXCEPTION_DECODE_JPEG;
-		}
-
-		unsigned char *buf[1];
-		buf[0] = pixel_buf;
-
-		while (cinfo.output_scanline < cinfo.output_height) 
-		{
-			checkCancel();
-			row = cinfo.output_scanline * 2;
-			jpeg_read_scanlines (&cinfo, buf, 1);
-			unsigned char (*pixel)[3] = (unsigned char (*)[3]) buf[0];
-			for (col=0; col < width; col+=2) {
-				RAW(row+0,col+0) = pixel[col+0][1] << 1;
-				RAW(row+1,col+1) = pixel[col+1][1] << 1;
-				RAW(row+0,col+1) = pixel[col][0] + pixel[col+1][0];
-				RAW(row+1,col+0) = pixel[col][2] + pixel[col+1][2];
-			}
-		}
-	} catch (...) {
-		jpeg_finish_decompress (&cinfo);
-		jpeg_destroy_decompress (&cinfo);
-		free(jpg_buf);
-		free(pixel_buf);
-		throw;
-	}
-	jpeg_finish_decompress (&cinfo);
-	jpeg_destroy_decompress (&cinfo);
-	free(jpg_buf);
-	free(pixel_buf);
-	maximum = 0xff << 1;
+  if(data_size < 1)
+    throw LIBRAW_EXCEPTION_DECODE_JPEG;
+  
+  int row, col;
+  jpegErrorManager jerr;
+  struct jpeg_decompress_struct cinfo;
+  
+  cinfo.err = jpeg_std_error(&jerr.pub);
+  jerr.pub.error_exit = jpegErrorExit;
+  
+  unsigned char *jpg_buf = (unsigned char *)malloc(data_size);
+  merror(jpg_buf,"kodak_jpeg_load_raw");
+  unsigned char *pixel_buf = (unsigned char*) malloc(width*3);
+  jpeg_create_decompress (&cinfo);
+  merror(pixel_buf,"kodak_jpeg_load_raw");
+  
+  fread(jpg_buf,data_size,1,ifp);
+  swab ((char*)jpg_buf, (char*)jpg_buf, data_size);
+  try 
+    {
+      jpeg_mem_src(&cinfo, jpg_buf, data_size);
+      int rc = jpeg_read_header(&cinfo, TRUE);
+      if(rc!=1)
+        throw LIBRAW_EXCEPTION_DECODE_JPEG;
+      
+      jpeg_start_decompress (&cinfo);
+      if ((cinfo.output_width      != width  ) ||
+          (cinfo.output_height*2   != height ) ||
+          (cinfo.output_components != 3      )) 
+        {
+          throw LIBRAW_EXCEPTION_DECODE_JPEG;
+        }
+      
+      unsigned char *buf[1];
+      buf[0] = pixel_buf;
+      
+      while (cinfo.output_scanline < cinfo.output_height) 
+        {
+          checkCancel();
+          row = cinfo.output_scanline * 2;
+          jpeg_read_scanlines (&cinfo, buf, 1);
+          unsigned char (*pixel)[3] = (unsigned char (*)[3]) buf[0];
+          for (col=0; col < width; col+=2) {
+            RAW(row+0,col+0) = pixel[col+0][1] << 1;
+            RAW(row+1,col+1) = pixel[col+1][1] << 1;
+            RAW(row+0,col+1) = pixel[col][0] + pixel[col+1][0];
+            RAW(row+1,col+0) = pixel[col][2] + pixel[col+1][2];
+          }
+        }
+    } 
+  catch (...) 
+        {
+          jpeg_finish_decompress (&cinfo);
+          jpeg_destroy_decompress (&cinfo);
+          free(jpg_buf);
+          free(pixel_buf);
+          throw;
+        }
+  jpeg_finish_decompress (&cinfo);
+  jpeg_destroy_decompress (&cinfo);
+  free(jpg_buf);
+  free(pixel_buf);
+  maximum = 0xff << 1;
 }
-
-
-
 #endif 
-
 
 void CLASS lossy_dng_load_raw()
 {
@@ -2651,16 +2651,14 @@ void CLASS kodak_rgb_load_raw()
       kodak_65000_decode (buf, len*3);
       memset (rgb, 0, sizeof rgb);
       for (bp=buf, i=0; i < len; i++, ip+=4)
-	  {
 #ifdef LIBRAW_LIBRARY_BUILD
-		  if(load_flags == 12)
-		  {
-			  FORC3 ip[c] = (rgb[c] += *bp++) &0xfff;
-		  }
-			  else
+        if(load_flags == 12)
+          {
+            FORC3 ip[c] = (rgb[c] += *bp++) &0xfff;
+          }
+        else
 #endif
-				FORC3 if ((ip[c] = rgb[c] += *bp++) >> 12) derror();
-	  }
+          FORC3 if ((ip[c] = rgb[c] += *bp++) >> 12) derror();
     }
   }
 }
