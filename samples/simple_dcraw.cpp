@@ -60,6 +60,7 @@ int main(int ac, char *av[])
                 " %d cameras supported\n"
                 "Usage: %s [-D] [-T] [-v] [-e] raw-files....\n"
                 "\t-4 - 16-bit mode\n"
+                "\t-L - list supported cameras and exit\n"
                 "\t-v - verbose output\n"
                 "\t-T - output TIFF files instead of .pgm/ppm\n"
                 "\t-e - extract thumbnails (same as dcraw -e in separate run)\n",LibRaw::version(),
@@ -92,6 +93,18 @@ int main(int ac, char *av[])
                         OUT.output_bps=16;
                     if(av[i][1]=='C' && av[i][2]==0)
                         RawProcessor.set_progress_handler(my_progress_callback,NULL);
+                    if(av[i][1]=='L' && av[i][2]==0)
+                      {
+                        const char **clist = LibRaw::cameraList();
+                        const char **cc = clist;
+                        while(*cc)
+                          {
+                            printf("%s\n",*cc);
+                            cc++;
+                          }
+                        
+                        exit(0);
+                      }
                     continue;
                 }
 
