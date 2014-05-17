@@ -10312,12 +10312,7 @@ konica_400z:
   } else if (!strcmp(make,"Samsung") && raw_height == 3714) {
     height -= 18;
     width = 5536;
-    if(!strcmp(model,"NX30"))
-      {
-        filters = 0x49494949;
-      }
-    else
-      filters = 0x61616161;
+    filters = 0x61616161;
     colors = 3;
   } else if (!strcmp(make,"Samsung") && raw_width == 5632) {
     order = 0x4949;
