@@ -2513,7 +2513,7 @@ void CLASS lossy_dng_load_raw()
 	coeff[i] = getreal(12);
       for (i=0; i < 256; i++) {
 	for (tot=j=0; j <= deg; j++)
-	  tot += coeff[j] * pow(i/255.0, j);
+	  tot += coeff[j] * pow(i/255.0, (int)j);
 	cur[c][i] = tot*0xffff;
       }
     }
