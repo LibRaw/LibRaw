@@ -295,6 +295,7 @@ protected:
 
     int         flip_index (int row, int col);
     void        gamma_curve (double pwr, double ts, int mode, int imax);
+    void        cubic_spline (const int *x_, const int *y_, const int len);
 
   /* RawSpeed data */
   void		*_rawspeed_camerameta;

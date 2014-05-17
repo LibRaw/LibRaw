@@ -29,7 +29,7 @@ it under the terms of the one of three licenses as you choose:
 #define NO_JASPER
 #endif
 #line 38 "dcraw/dcraw.c"
-#define DCRAW_VERSION "9.20"
+#define DCRAW_VERSION "9.21"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -100,7 +100,7 @@ typedef unsigned long long UINT64;
 #ifndef LONG_BIT
 #define LONG_BIT (8 * sizeof (long))
 #endif
-#line 192 "dcraw/dcraw.c"
+#line 193 "dcraw/dcraw.c"
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
@@ -156,7 +156,7 @@ typedef unsigned long long UINT64;
 
 #define RAW(row,col) \
 	raw_image[(row)*raw_width+(col)]
-#line 253 "dcraw/dcraw.c"
+#line 254 "dcraw/dcraw.c"
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 

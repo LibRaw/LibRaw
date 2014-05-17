@@ -180,8 +180,9 @@ typedef struct
 
 struct ph1_t
 {
-    int format, key_off, t_black, black_off, split_col, tag_21a;
-    float tag_210;
+  int format, key_off, tag_21a;
+  int t_black, split_col, black_col, split_row, black_row;
+  float tag_210;
 };
 
 typedef struct
@@ -332,7 +333,8 @@ typedef struct
   ushort        (*color3_image)[3];
     
   /* Phase One black level data; */
-  short  (*ph1_black)[2];
+  short  (*ph1_cblack)[2];
+  short  (*ph1_rblack)[2];
   /* save color and sizes here, too.... */
   libraw_iparams_t  iparams;
   libraw_image_sizes_t sizes;

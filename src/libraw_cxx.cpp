@@ -422,7 +422,8 @@ void LibRaw:: recycle()
   FREE(libraw_internal_data.output_data.histogram);
   FREE(libraw_internal_data.output_data.oprof);
   FREE(imgdata.color.profile);
-  FREE(imgdata.rawdata.ph1_black);
+  FREE(imgdata.rawdata.ph1_cblack);
+  FREE(imgdata.rawdata.ph1_rblack);
   FREE(imgdata.rawdata.raw_alloc); 
   FREE(imgdata.idata.xmpdata); 
 #undef FREE
@@ -692,6 +693,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_name = "samsung_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
       d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+    }
+  else if (load_raw == &LibRaw::samsung2_load_raw )
+    {
+      d_info->decoder_name = "samsung2_load_raw()";
+      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::smal_v6_load_raw )
     {
@@ -1001,48 +1007,49 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           C.cblack[6+c]/=4;
       }
 
-    if(load_raw == &LibRaw::nikon_load_raw ) // Is it Nikon sRAW?
+    if(   (load_raw == &LibRaw::nikon_load_raw 
+        || load_raw == &LibRaw::packed_load_raw)  
+       && !strcasecmp(imgdata.idata.make,"Nikon")
+       ) // Is it Nikon sRAW?
       {
-		for(int i=0; i<nikon_sraw_list_count; i++)
-		{
-			if( !strcasecmp(imgdata.idata.model,nikon_sraw_list[i].model)
-				&& S.raw_width == nikon_sraw_list[i].raw_width
-				&& S.raw_height == nikon_sraw_list[i].raw_height
-				&& S.raw_width*S.raw_height*3 == libraw_internal_data.unpacker_data.data_size
-				)
-			{
-				load_raw= &LibRaw::nikon_load_sraw;
-				C.black =0;
-				memset(C.cblack,0,sizeof(C.cblack));
-				imgdata.idata.filters = 0;
-				libraw_internal_data.unpacker_data.tiff_samples=3;
-				imgdata.idata.colors = 3;
-				double beta_1 = -5.79342238397656E-02;
-				double beta_2 = 3.28163551282665;
-				double beta_3 = -8.43136004842678;
-				double beta_4 = 1.03533181861023E+01;
-				for(int i=0; i<=3072;i++)
-				{
-					double x = (double)i/3072.;
-					//float p = q*2.473247 - powf(q,2.0f)*1.516858f - 0.013689f;
-					//imgdata.color.curve[i] = int(p*16383.f);
-					//imgdata.color.curve[i] = int(powf(q,2.f)*16383.f);
-					//			float C1  = i;
-					//			imgdata.color.curve[i] = (171731.464565f+1722.601753f*C1+5.21022f*C1*C1)/(3645.806558f-0.532618f*C1+0.000041f*C1*C1)/2.f;
-					double y = (1.-exp(-beta_1*x-beta_2*x*x-beta_3*x*x*x-beta_4*x*x*x*x));
-					if(y<0.)y=0.;
-					imgdata.color.curve[i] = (y*16383.);
-				}
-				for(int i=0;i<3;i++)
-					for(int j=0;j<4;j++)
-						imgdata.color.rgb_cam[i][j]=float(i==j);
-			}
-		 }
-		}
+        for(int i=0; i<nikon_sraw_list_count; i++)
+          {
+            if( !strcasecmp(imgdata.idata.model,nikon_sraw_list[i].model)
+                && S.raw_width == nikon_sraw_list[i].raw_width
+                && S.raw_height == nikon_sraw_list[i].raw_height
+                && S.raw_width*S.raw_height*3 == libraw_internal_data.unpacker_data.data_size
+                )
+              {
+                load_raw= &LibRaw::nikon_load_sraw;
+                C.black =0;
+                memset(C.cblack,0,sizeof(C.cblack));
+                imgdata.idata.filters = 0;
+                libraw_internal_data.unpacker_data.tiff_samples=3;
+                imgdata.idata.colors = 3;
+                double beta_1 = -5.79342238397656E-02;
+                double beta_2 = 3.28163551282665;
+                double beta_3 = -8.43136004842678;
+                double beta_4 = 1.03533181861023E+01;
+                for(int i=0; i<=3072;i++)
+                  {
+                    double x = (double)i/3072.;
+                    double y = (1.-exp(-beta_1*x-beta_2*x*x-beta_3*x*x*x-beta_4*x*x*x*x));
+                    if(y<0.)y=0.;
+                    imgdata.color.curve[i] = (y*16383.);
+                  }
+                for(int i=0;i<3;i++)
+                  for(int j=0;j<4;j++)
+                    imgdata.color.rgb_cam[i][j]=float(i==j);
+              }
+          }
+      }
 	// Adjust BL for Nikon 12bit
-    if((load_raw == &LibRaw::nikon_load_raw || load_raw == &LibRaw::packed_load_raw)  && !strcasecmp(imgdata.idata.make,"Nikon")
-			&& strncmp(imgdata.idata.model,"COOLPIX",7)
-            && libraw_internal_data.unpacker_data.tiff_bps == 12)
+    if((
+        load_raw == &LibRaw::nikon_load_raw 
+        || load_raw == &LibRaw::packed_load_raw)  
+       && !strcasecmp(imgdata.idata.make,"Nikon")
+       && strncmp(imgdata.idata.model,"COOLPIX",7)
+       && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
         C.maximum = 4095;
         C.black /=4;
@@ -1697,26 +1704,30 @@ void LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
   //	ushort *src = (ushort*)imgdata.rawdata.raw_alloc;
   if(O.user_black<0 && O.user_cblack[0] <= -1000000 && O.user_cblack[1] <= -1000000 && O.user_cblack[2] <= -1000000 && O.user_cblack[3] <= -1000000)
     {
-      for(int row = 0; row < S.raw_height; row++)
+      if(imgdata.rawdata.ph1_cblack && imgdata.rawdata.ph1_rblack)
         {
-          ushort bl = imgdata.color.phase_one_data.t_black;
-          if(imgdata.rawdata.ph1_black)
-            bl -= imgdata.rawdata.ph1_black[row][0];
-          for(int col=0; col < imgdata.color.phase_one_data.split_col && col < S.raw_width; col++)
-            {
-              int idx  = row*S.raw_width + col;
-              ushort val = src[idx];
-              dest[idx] = val>bl?val-bl:0;
-            }
-          bl = imgdata.color.phase_one_data.t_black;
-          if(imgdata.rawdata.ph1_black)
-            bl -= imgdata.rawdata.ph1_black[row][1];
-          for(int col=imgdata.color.phase_one_data.split_col; col < S.raw_width; col++)
-            {
-              int idx  = row*S.raw_width + col;
-              ushort val = src[idx];
-              dest[idx] = val>bl?val-bl:0;
-            }
+          register int bl = imgdata.color.phase_one_data.t_black;
+          for(int row = 0; row < S.raw_height; row++)
+            for(int col=0; col < S.raw_width; col++)
+              {
+                int idx  = row*S.raw_width + col;
+                int val = int(src[idx]) - bl;
+                dest[idx] = val>0?val:0;
+              }
+        }
+      else
+        {
+          register int bl = imgdata.color.phase_one_data.t_black;
+          for(int row = 0; row < S.raw_height; row++)
+            for(int col=0; col < S.raw_width; col++)
+              {
+                int idx  = row*S.raw_width + col;
+                int val = int(src[idx]) - bl
+                  + imgdata.rawdata.ph1_cblack[row][col>=imgdata.rawdata.color.phase_one_data.split_col]
+                  + imgdata.rawdata.ph1_rblack[col][row>=imgdata.rawdata.color.phase_one_data.split_row];
+                dest[idx] = val>0?val:0;
+              }
+
         }
     }
   else // black set by user interaction
