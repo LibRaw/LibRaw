@@ -110,6 +110,7 @@ class DllDef LibRaw
 #endif
     int                         open_buffer(void *buffer, size_t size);
     int                         open_datastream(LibRaw_abstract_datastream *);
+	int							error_count(){return libraw_internal_data.unpacker_data.data_error;}
 	void							recycle_datastream();
     int                         unpack(void);
     int                         unpack_thumb(void);

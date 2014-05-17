@@ -1632,6 +1632,8 @@ void CLASS phase_one_load_raw_c()
   int *offset, len[2], pred[2], row, col, i, j;
   ushort *pixel;
   short (*c_black)[2], (*r_black)[2];
+  if(ph1.format == 6)
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
   pixel = (ushort *) calloc (raw_width*3 + raw_height*4, 2);
   merror (pixel, "phase_one_load_raw_c()");
