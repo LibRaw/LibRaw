@@ -3254,10 +3254,10 @@ void CLASS redcine_load_raw()
   if (!jimg) longjmp (failure, 3);
 #else
   if(!jimg)
-      {
-          jas_stream_close (in);
-          throw LIBRAW_EXCEPTION_DECODE_JPEG2000;
-      }
+    {
+      jas_stream_close (in);
+      throw LIBRAW_EXCEPTION_DECODE_JPEG2000;
+    }
 #endif
   jmat = jas_matrix_create (height/2, width/2);
   merror (jmat, "redcine_load_raw()");
