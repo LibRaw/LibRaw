@@ -965,6 +965,9 @@ struct foveon_data_t
   {"Sigma","DP3 Merrill",2464,1632,3900,12,0,2403,1603}, // 1/2 size
   {"Sigma","DP3 Merrill",4928,1632,3900,12,0,4807,1603}, // 2/3 size
   {"Polaroid","x530",1440,1088,2700,10,13,1419,1059},
+  // dp2 Q
+  {"Sigma","dp2 Quattro",5888,3672,40000,204,24,5446,3624}, // 1/2 size
+
 };
 const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
@@ -3958,10 +3961,12 @@ void LibRaw::parse_x3f()
   imgdata.sizes.raw_height = ID->rows;
   // Parse other params from property section
   DE = x3f_get_prop(x3f);
-  if(! (x3f_load_data(x3f,DE) == X3F_OK))
-    return;
-  DEH = &DE->header;
-  x3f_property_list_t *PL = &DEH->data_subsection.property_list;
+  if(DE)
+  {
+	  if(! (x3f_load_data(x3f,DE) == X3F_OK))
+		return;
+	  DEH = &DE->header;
+	x3f_property_list_t *PL = &DEH->data_subsection.property_list;
   if (PL->property_table.size != 0) {
     int i;
     x3f_property_t *P = PL->property_table.element;
@@ -3997,6 +4002,21 @@ void LibRaw::parse_x3f()
     libraw_internal_data.internal_output_params.raw_color=1; // Force adobe coeff
     imgdata.color.maximum=0x3fff; // To be reset by color table
     libraw_internal_data.unpacker_data.order = 0x4949;
+    }
+  }
+  else {
+	  // No DE
+	  imgdata.idata.raw_count=1;
+	  load_raw = &LibRaw::x3f_load_raw;
+	  imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*6;
+	  imgdata.idata.is_foveon = 1;
+	  libraw_internal_data.internal_output_params.raw_color=1; // Force adobe coeff
+	  imgdata.color.maximum=12000; // To be reset by color table
+	  imgdata.color.black=4900;
+	  imgdata.color.cblack[0] = imgdata.color.cblack[2]=1100;
+	  libraw_internal_data.unpacker_data.order = 0x4949;
+	  strcpy (imgdata.idata.make, "SIGMA");
+	  strcpy (imgdata.idata.model, "dp2 Quattro");
   }
   // Try to get thumbnail data
   LibRaw_thumbnail_formats format = LIBRAW_THUMBNAIL_UNKNOWN;

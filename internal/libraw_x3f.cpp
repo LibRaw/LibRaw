@@ -86,7 +86,7 @@ BSD-style License
 
 /* TODO: bad name */
 #define X3F_IMAGE_RAW_TRUE_SD1      (uint32_t)(0x0001001e)
-
+#define X3F_IMAGE_RAW_TRUE_DPQ      (uint32_t)(0x00010023)
 /* TODO: bad name */
 #define X3F_IMAGE_RAW_HUFFMAN_X530  (uint32_t)(0x00030005)
 
@@ -541,9 +541,12 @@ static void cleanup_true(x3f_true_t **TRUP)
 
   if (TRU == NULL) return;
 
-  FREE(TRU->table.element);
-  FREE(TRU->plane_size.element);
-  cleanup_huffman_tree(&TRU->tree);
+  if(TRU->table.element)
+	FREE(TRU->table.element);
+  if(TRU->plane_size.element)
+	FREE(TRU->plane_size.element);
+  if(TRU->tree.nodes)
+	cleanup_huffman_tree(&TRU->tree);
   FREE(TRU->x3rgb16.element);
 
   FREE(TRU);
@@ -890,6 +893,9 @@ static x3f_directory_entry_t *x3f_get(x3f_t *x3f,
   if ((DE = x3f_get(x3f, X3F_SECi, X3F_IMAGE_RAW_TRUE_SD1)) != NULL)
     return DE;
 
+  if ((DE = x3f_get(x3f, X3F_SECi, X3F_IMAGE_RAW_TRUE_DPQ)) != NULL)
+	  return DE;
+
   return NULL;
 }
 
@@ -1051,6 +1057,7 @@ static uint8_t get_bit(bit_state_t *BS)
 
   return BS->bits[BS->bit_offset++];
 }
+
 
 /* Decode use the TRUE algorithm */
 
@@ -1402,6 +1409,199 @@ static void x3f_load_property_list(x3f_info_t *I, x3f_directory_entry_t *DE)
   }
 }
 
+struct x3f_dpq
+{
+	int pred[3];
+	uchar8 code_table[256];
+	int32 big_table[1<<14];
+};
+
+void createSigmaTable(x3f_info_t *I, x3f_dpq *DPQ, int codes) 
+{
+	memset(DPQ->code_table, 0xff, sizeof(DPQ->code_table));
+
+	// Read codes and create 8 bit table with all valid values.
+	for (int i = 0; i < codes; i++) {
+		unsigned char blen,bcode;
+		GET1(blen);
+		GET1(bcode);
+		uint32 len = blen;
+		uint32 code = bcode;
+		if (len > 8)
+			fprintf(stderr,"X3fDecoder: bit length longer than 8");
+		uint32 rem_bits = 8-len;
+		for (int j = 0; j < (1<<rem_bits); j++)
+			DPQ->code_table[code|j] = (i << 4) | len; 
+	}
+	// Create a 14 bit table that contains code length
+	// AND value. This is enough to decode most images,
+	// and will make most codes be returned with a single
+	// lookup.
+	// If the table value is 0xf, it is not possible to get a
+	// value from 14 bits.
+	for (int i = 0; i < (1<<14); i++) {
+		uint32 top = i>>6;
+		uchar8 val = DPQ->code_table[top];
+		if (val != 0xff) {
+			uint32 code_bits = val&0xf;
+			uint32 val_bits = val>>4;
+			if (code_bits + val_bits < 14) {
+				uint32 low_pos = 14-code_bits-val_bits;
+				int v = (int)(i>>low_pos)&((1<<val_bits) - 1);
+				if ((v & (1 << (val_bits - 1))) == 0)
+					v -= (1 << val_bits) - 1;
+				DPQ->big_table[i] = (v<<8) | (code_bits+val_bits);
+			} else {
+				DPQ->big_table[i] = 0xf;
+			}
+		} else {
+			DPQ->big_table[i] = 0xf;
+		}
+	}
+	return;
+}
+
+int SigmaDecode(BitPumpMSB *bits,x3f_dpq *DPQ) {
+
+	bits->fill();
+	uint32 code = bits->peekBitsNoFill(14);
+	int32 bigv = DPQ->big_table[code];
+	if (bigv != 0xf) {
+		bits->skipBitsNoFill(bigv&0xff);
+		return bigv >> 8;
+	}
+	uchar8 val = DPQ->code_table[code>>6];
+	if (val == 0xff)
+		printf("X3fDecoder: Invalid Huffman code");
+
+	uint32 code_bits = val&0xf;
+	uint32 val_bits = val>>4;
+	bits->skipBitsNoFill(code_bits);
+	if (!val_bits)
+		return 0;
+	int v = bits->getBitsNoFill(val_bits);
+	if ((v & (1 << (val_bits - 1))) == 0)
+		v -= (1 << val_bits) - 1;
+	return v;
+}
+
+
+
+static void decodeSigmaDPQPlane(int color,x3f_image_data_t *ID,x3f_dpq *DPQ)
+{
+	bit_state_t BS;
+	x3f_true_t *TRU = ID->tru;
+
+	RawSpeed::BitPumpMSB *bits = new RawSpeed::BitPumpMSB(TRU->plane_address[color],TRU->plane_size.element[color]);
+
+	int pred_up;
+	int pred_left;
+
+	pred_up = DPQ->pred[color];
+
+	int w = ID->columns;
+	int h = ID->rows;
+	if (color < 2) {
+		w >>= 1;
+		h >>= 1;
+	} else {
+		// For some weird reason blue is 384 pixels wider than actual image??!
+		w+=384;
+	}
+
+    for (int y = 0; y < h; y++) {
+	  uint16_t* dst = &TRU->x3rgb16.element[ID->columns*3*y*(1+(color<2))+color];
+//	  uint16_t* dst = &TRU->x3rgb16.element[ID->columns*3*y+color];
+      int diff1= SigmaDecode(bits,DPQ);
+      dst[0] = pred_left = pred_up = pred_up + diff1;
+      dst+=3;
+      for (int x = 1; x < w; x++) {
+        int diff1= SigmaDecode(bits,DPQ);
+        pred_left = pred_left + diff1;
+        if (x < ID->columns) {
+          dst[0] = pred_left;
+/*          if ((y&3) == 0 && ((x&15) == 0 || (x&15) == 1) && color < 2) {
+            dst[0] = (((dst[0] - 4000) * 320) >> 8) + 4000; 
+          } */
+        }
+        dst += (color == 2) ? 3 : 6;
+      }
+    }
+
+}
+
+inline uint32 _clampbits(int x, uint32 n) { 
+	uint32 _y_temp; 
+	if( (_y_temp=x>>n) ) 
+		x = ~_y_temp >> (32-n); 
+	return x;
+}
+
+static void x3f_load_dpq(x3f_info_t *I,	x3f_directory_entry_t *DE)
+{
+	x3f_directory_entry_header_t *DEH = &DE->header;
+	x3f_image_data_t *ID = &DEH->data_subsection.image_data;
+	x3f_dpq DPQ;
+	x3f_true_t *TRU = new_true(&ID->tru);
+	unsigned char skip[32];
+
+	GET2(DPQ.pred[0]);
+	GET2(DPQ.pred[1]);
+	GET2(DPQ.pred[2]);
+	GETN(skip,14); // Skip 14 bytes padding
+	createSigmaTable(I, &DPQ, 15);
+	GETN(skip,6); // Skip padding
+	GET_TABLE(uint32_t,TRU->plane_size, GET4, TRUE_PLANES);
+
+	ID->data_size = read_data_block(&ID->data, I, DE, 0);
+
+	TRU->plane_address[0] = ID->data;
+	for (int i=1; i<3; i++)
+		TRU->plane_address[i] = 
+		TRU->plane_address[i-1] +
+		(((TRU->plane_size.element[i-1] + 15) / 16) * 16); 
+
+	TRU->x3rgb16.size = ID->columns * ID->rows * 3;
+	TRU->x3rgb16.element =
+		(uint16_t *)malloc(sizeof(uint16_t)*TRU->x3rgb16.size);
+
+	for(int color=0; color < 3; color++)
+		decodeSigmaDPQPlane(color,ID,&DPQ);
+
+	int w = ID->columns/2;
+	int h = ID->rows/2;
+	for (int color = 0; color < 2;  color++) {
+		for (int y = 2; y < (h-2); y++) {
+			uint16_t* dst = &TRU->x3rgb16.element[ID->columns*3*y*2+color];
+			uint16_t* blue = &TRU->x3rgb16.element[ID->columns*3*y*2+2];
+			for (int x = 2; x < (w-2); x++) {
+				// Interpolate 1 missing pixel
+				int blue_mid = ((int)blue[-3] + (int)blue[3] + 1)>>1;
+				int blue_off = (int)blue[0] - blue_mid;
+				int c_mid = ((int)dst[-3] + (int)dst[3] + 1)>>1;
+				dst[0] = _clampbits(c_mid + blue_off, 16);
+				dst += 6;
+				blue += 6;
+			}
+		}
+		for (int y = 0; y < (h-2); y++) {
+			uint16_t* dst = &TRU->x3rgb16.element[ID->columns*3*(y*2+1)+color];
+			uint16_t* blue = &TRU->x3rgb16.element[ID->columns*3*(y*2+1)+2];
+			int pitch = (ID->columns*3);
+			for (int x = 0; x < (w*2); x++) {
+				// Interpolate 1 missing pixel
+				int blue_mid = ((int)blue[-pitch] + (int)blue[pitch] + 1)>>1;
+				int blue_off = (int)blue[0] - blue_mid;
+				int c_mid = ((int)dst[-pitch] + (int)dst[pitch] + 1)>>1;
+				dst[0] = _clampbits(c_mid + blue_off, 16);
+				dst += 3;
+				blue += 3;
+			}
+		}
+	}
+}
+
+
 static void x3f_load_true(x3f_info_t *I,
 			  x3f_directory_entry_t *DE)
 {
@@ -1550,6 +1750,9 @@ static void x3f_load_image(x3f_info_t *I, x3f_directory_entry_t *DE)
   case X3F_IMAGE_RAW_TRUE_SD1:
     x3f_load_true(I, DE);
     break;
+  case X3F_IMAGE_RAW_TRUE_DPQ:
+	  x3f_load_dpq(I, DE);
+	  break;
   case X3F_IMAGE_RAW_HUFFMAN_X530:
   case X3F_IMAGE_RAW_HUFFMAN_10BIT:
     x3f_load_huffman(I, DE, 10, 1, ID->row_stride);
