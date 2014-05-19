@@ -155,6 +155,7 @@ typedef struct
   int         colors;
   unsigned    filters;
   char        xtrans[6][6];
+  char        xtrans_abs[6][6];
   char        cdesc[5];
   unsigned    xmplen;
   char	      *xmpdata;

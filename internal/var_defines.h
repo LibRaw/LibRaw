@@ -31,6 +31,7 @@ it under the terms of the one of three licenses as you choose:
 #define cdesc           (imgdata.idata.cdesc)
 #define filters         (imgdata.idata.filters)
 #define xtrans         (imgdata.idata.xtrans)
+#define xtrans_abs         (imgdata.idata.xtrans_abs)
 #define xmpdata			(imgdata.idata.xmpdata)
 #define xmplen			(imgdata.idata.xmplen)
 //imgdata image
