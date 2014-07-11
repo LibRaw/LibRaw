@@ -31,6 +31,13 @@ enum LibRaw_sonyarw2_options
   LIBRAW_SONYARW2_DELTAZEROBASE=3,
   LIBRAW_SONYARW2_DELTATOVALUE=4
 };
+enum LibRaw_dp2q_options
+{
+	LIBRAW_DP2QOPT_NONE=0,
+	LIBRAW_DP2Q_INTERPOLATERG=1,
+	LIBRAW_DP2Q_INTERPOLATEAF=2,
+};
+
 
 enum LibRaw_decoder_flags
 {

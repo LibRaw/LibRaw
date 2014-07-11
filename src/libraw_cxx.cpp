@@ -325,6 +325,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.no_interpolation = 0;
   imgdata.params.sraw_ycc = 0;
   imgdata.params.force_foveon_x3f = 0;
+  imgdata.params.x3f_flags = 0;
   imgdata.params.sony_arw2_options = 0;
   imgdata.params.sony_arw2_posterization_thr = 0;
   imgdata.params.green_matching = 0;
@@ -1052,6 +1053,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         || load_raw == &LibRaw::packed_load_raw)  
        && !strcasecmp(imgdata.idata.make,"Nikon")
        && strncmp(imgdata.idata.model,"COOLPIX",7)
+	   && strncmp(imgdata.idata.model,"1 ",2)
        && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
         C.maximum = 4095;
@@ -3559,6 +3561,7 @@ static const char  *static_camera_list[] =
 "Nikon 1 J1",
 "Nikon 1 J2",
 "Nikon 1 J3",
+"Nikon 1 J4",
 "Nikon 1 S1",
 "Nikon 1 V1",
 "Nikon 1 V2",
@@ -3661,6 +3664,7 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-FZ100",
 "Panasonic DMC-FZ150",
 "Panasonic DMC-FZ200",
+"Panasonic DMC-FZ1000",
 "Panasonic DMC-FX150",
 "Panasonic DMC-G1",
 "Panasonic DMC-G10",
@@ -3719,6 +3723,7 @@ static const char  *static_camera_list[] =
 "Pentax Optio 33WR",
 "Pentax Optio 750Z",
 "Pentax 645D",
+"Pentax 645Z",
 "PhaseOne IQ140",
 "PhaseOne IQ160",
 "PhaseOne IQ180",
@@ -3805,6 +3810,7 @@ static const char  *static_camera_list[] =
 "Sony A3000",
 "Sony A7",
 "Sony A7R",
+"Sony A7S",
 "Sony ILCA-77M2 (A77-II)",
 "Sony ILCE-3000",
 "Sony ILCE-5000",
@@ -4079,6 +4085,31 @@ void LibRaw::x3f_thumb_loader()
     }
 }
 
+static inline uint32 _clampbits(int x, uint32 n) { 
+	uint32 _y_temp; 
+	if( (_y_temp=x>>n) ) 
+		x = ~_y_temp >> (32-n); 
+	return x;
+}
+
+void LibRaw::x3f_dpq_interpolate_rg()
+{
+	int w = imgdata.sizes.raw_width/2;
+	int h = imgdata.sizes.raw_height/2;
+	unsigned short *image = (ushort*)imgdata.rawdata.color3_image;
+
+	for (int color = 0; color < 2;  color++) {
+	for (int y = 2; y < (h-2); y++) {
+		uint16_t* row0 = &image[imgdata.sizes.raw_width*3*(y*2)+3+color]; // dst[1]
+		uint16_t* row1 = &image[imgdata.sizes.raw_width*3*(y*2+1)+3+color]; //dst1[1]
+		for (int x = 2; x < (w-2); x++) {
+			row1[0]=row1[3]=row0[3]=row0[0];
+			row0 += 6;
+			row1 += 6;
+		}
+	}
+	}
+}
 void LibRaw::x3f_load_raw()
 {
   int raise_error=0;
@@ -4107,6 +4138,10 @@ void LibRaw::x3f_load_raw()
           goto end;
         }
       imgdata.rawdata.color3_image = (ushort (*)[3])data;
+	  if(!strcasecmp(imgdata.idata.make,"Sigma") 
+		  && !strcasecmp(imgdata.idata.model,"dp2 Quattro") 
+		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATERG))
+		  x3f_dpq_interpolate_rg();
     }
   else
     raise_error = 1;

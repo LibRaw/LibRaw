@@ -1530,12 +1530,6 @@ static void decodeSigmaDPQPlane(int color,x3f_image_data_t *ID,x3f_dpq *DPQ)
 
 }
 
-inline uint32 _clampbits(int x, uint32 n) { 
-	uint32 _y_temp; 
-	if( (_y_temp=x>>n) ) 
-		x = ~_y_temp >> (32-n); 
-	return x;
-}
 
 static void x3f_load_dpq(x3f_info_t *I,	x3f_directory_entry_t *DE)
 {
@@ -1568,37 +1562,6 @@ static void x3f_load_dpq(x3f_info_t *I,	x3f_directory_entry_t *DE)
 	for(int color=0; color < 3; color++)
 		decodeSigmaDPQPlane(color,ID,&DPQ);
 
-	int w = ID->columns/2;
-	int h = ID->rows/2;
-	for (int color = 0; color < 2;  color++) {
-		for (int y = 2; y < (h-2); y++) {
-			uint16_t* dst = &TRU->x3rgb16.element[ID->columns*3*y*2+color];
-			uint16_t* blue = &TRU->x3rgb16.element[ID->columns*3*y*2+2];
-			for (int x = 2; x < (w-2); x++) {
-				// Interpolate 1 missing pixel
-				int blue_mid = ((int)blue[-3] + (int)blue[3] + 1)>>1;
-				int blue_off = (int)blue[0] - blue_mid;
-				int c_mid = ((int)dst[-3] + (int)dst[3] + 1)>>1;
-				dst[0] = _clampbits(c_mid + blue_off, 16);
-				dst += 6;
-				blue += 6;
-			}
-		}
-		for (int y = 0; y < (h-2); y++) {
-			uint16_t* dst = &TRU->x3rgb16.element[ID->columns*3*(y*2+1)+color];
-			uint16_t* blue = &TRU->x3rgb16.element[ID->columns*3*(y*2+1)+2];
-			int pitch = (ID->columns*3);
-			for (int x = 0; x < (w*2); x++) {
-				// Interpolate 1 missing pixel
-				int blue_mid = ((int)blue[-pitch] + (int)blue[pitch] + 1)>>1;
-				int blue_off = (int)blue[0] - blue_mid;
-				int c_mid = ((int)dst[-pitch] + (int)dst[pitch] + 1)>>1;
-				dst[0] = _clampbits(c_mid + blue_off, 16);
-				dst += 3;
-				blue += 3;
-			}
-		}
-	}
 }
 
 

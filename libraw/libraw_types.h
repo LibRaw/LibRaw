@@ -317,6 +317,7 @@ typedef struct
   int sraw_ycc;
   /* Force use x3f data decoding either if demosaic pack GPL2 enabled */
   int force_foveon_x3f;
+  int x3f_flags;
   /* Sony ARW2 digging mode */
   int sony_arw2_options;
   int sony_arw2_posterization_thr;

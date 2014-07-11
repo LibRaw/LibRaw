@@ -181,6 +181,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 // We always have x3f code compiled in!
     void        parse_x3f();
     void        x3f_load_raw();
+    void        x3f_dpq_interpolate_rg();
 
 // CAM/RGB
     void        pseudoinverse (double (*in)[3], double (*out)[3], int size);
