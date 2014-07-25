@@ -1709,7 +1709,7 @@ void LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
   //	ushort *src = (ushort*)imgdata.rawdata.raw_alloc;
   if(O.user_black<0 && O.user_cblack[0] <= -1000000 && O.user_cblack[1] <= -1000000 && O.user_cblack[2] <= -1000000 && O.user_cblack[3] <= -1000000)
     {
-      if(imgdata.rawdata.ph1_cblack && imgdata.rawdata.ph1_rblack)
+      if(!imgdata.rawdata.ph1_cblack || !imgdata.rawdata.ph1_rblack)
         {
           register int bl = imgdata.color.phase_one_data.t_black;
           for(int row = 0; row < S.raw_height; row++)
