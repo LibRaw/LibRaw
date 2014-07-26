@@ -38,7 +38,6 @@ enum LibRaw_dp2q_options
 	LIBRAW_DP2Q_INTERPOLATEAF=2,
 };
 
-
 enum LibRaw_decoder_flags
 {
     LIBRAW_DECODER_LEGACY = 1,      

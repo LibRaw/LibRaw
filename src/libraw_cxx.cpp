@@ -325,7 +325,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.no_interpolation = 0;
   imgdata.params.sraw_ycc = 0;
   imgdata.params.force_foveon_x3f = 0;
-  imgdata.params.x3f_flags = 0;
+  imgdata.params.x3f_flags = LIBRAW_DP2Q_INTERPOLATERG|LIBRAW_DP2Q_INTERPOLATEAF;
   imgdata.params.sony_arw2_options = 0;
   imgdata.params.sony_arw2_posterization_thr = 0;
   imgdata.params.green_matching = 0;
@@ -3967,59 +3967,57 @@ void LibRaw::parse_x3f()
   imgdata.sizes.raw_height = ID->rows;
   // Parse other params from property section
   DE = x3f_get_prop(x3f);
-  if(DE)
+  if((x3f_load_data(x3f,DE) == X3F_OK))
   {
-	  if(! (x3f_load_data(x3f,DE) == X3F_OK))
-		return;
+	  // Parse property list
 	  DEH = &DE->header;
-	x3f_property_list_t *PL = &DEH->data_subsection.property_list;
-  if (PL->property_table.size != 0) {
-    int i;
-    x3f_property_t *P = PL->property_table.element;
-    for (i=0; i<PL->num_properties; i++) {
-      char name[100], value[100];
-      utf2char(P[i].name,name);
-      utf2char(P[i].value,value);
-      if (!strcmp (name, "ISO"))
-	imgdata.other.iso_speed = atoi(value);
-      if (!strcmp (name, "CAMMANUF"))
-        strcpy (imgdata.idata.make, value);
-      if (!strcmp (name, "CAMMODEL"))
-        strcpy (imgdata.idata.model, value);
-      if (!strcmp (name, "WB_DESC"))
-        strcpy (imgdata.color.model2, value);
-      if (!strcmp (name, "TIME"))
-	    imgdata.other.timestamp = atoi(value);
+	  x3f_property_list_t *PL = &DEH->data_subsection.property_list;
+	  if (PL->property_table.size != 0) {
+		  int i;
+		  x3f_property_t *P = PL->property_table.element;
+		  for (i=0; i<PL->num_properties; i++) {
+			  char name[100], value[100];
+			  utf2char(P[i].name,name);
+			  utf2char(P[i].value,value);
+			  if (!strcmp (name, "ISO"))
+				  imgdata.other.iso_speed = atoi(value);
+			  if (!strcmp (name, "CAMMANUF"))
+				  strcpy (imgdata.idata.make, value);
+			  if (!strcmp (name, "CAMMODEL"))
+				  strcpy (imgdata.idata.model, value);
+			  if (!strcmp (name, "WB_DESC"))
+				  strcpy (imgdata.color.model2, value);
+			  if (!strcmp (name, "TIME"))
+				  imgdata.other.timestamp = atoi(value);
 #if 0
-      if (!strcmp (name, "EXPTIME"))
-        imgdata.other.shutter = atoi(value) / 1000000.0;
+			  if (!strcmp (name, "EXPTIME"))
+				  imgdata.other.shutter = atoi(value) / 1000000.0;
 #endif
-      if (!strcmp (name, "SHUTTER"))
-        imgdata.other.shutter = atof(value);
-      if (!strcmp (name, "APERTURE"))
-        imgdata.other.aperture = atof(value);
-      if (!strcmp (name, "FLENGTH"))
-        imgdata.other.focal_len = atof(value);
-    }
-    imgdata.idata.raw_count=1;
-    load_raw = &LibRaw::x3f_load_raw;
-    imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*6;
-    imgdata.idata.is_foveon = 1;
-    libraw_internal_data.internal_output_params.raw_color=1; // Force adobe coeff
-    imgdata.color.maximum=0x3fff; // To be reset by color table
-    libraw_internal_data.unpacker_data.order = 0x4949;
-    }
+			  if (!strcmp (name, "SHUTTER"))
+				  imgdata.other.shutter = atof(value);
+			  if (!strcmp (name, "APERTURE"))
+				  imgdata.other.aperture = atof(value);
+			  if (!strcmp (name, "FLENGTH"))
+				  imgdata.other.focal_len = atof(value);
+		  }
+		  imgdata.idata.raw_count=1;
+		  load_raw = &LibRaw::x3f_load_raw;
+		  imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*6;
+		  imgdata.idata.is_foveon = 1;
+		  libraw_internal_data.internal_output_params.raw_color=1; // Force adobe coeff
+		  imgdata.color.maximum=0x3fff; // To be reset by color table
+		  libraw_internal_data.unpacker_data.order = 0x4949;
+	  }
   }
-  else {
-	  // No DE
+  else
+  {
+	  // No property list
 	  imgdata.idata.raw_count=1;
 	  load_raw = &LibRaw::x3f_load_raw;
 	  imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*6;
 	  imgdata.idata.is_foveon = 1;
 	  libraw_internal_data.internal_output_params.raw_color=1; // Force adobe coeff
-	  imgdata.color.maximum=12000; // To be reset by color table
-	  imgdata.color.black=4900;
-	  imgdata.color.cblack[0] = imgdata.color.cblack[2]=1100;
+	  imgdata.color.black=2047;
 	  libraw_internal_data.unpacker_data.order = 0x4949;
 	  strcpy (imgdata.idata.make, "SIGMA");
 	  strcpy (imgdata.idata.model, "dp2 Quattro");
@@ -4098,18 +4096,24 @@ void LibRaw::x3f_dpq_interpolate_rg()
 	int h = imgdata.sizes.raw_height/2;
 	unsigned short *image = (ushort*)imgdata.rawdata.color3_image;
 
-	for (int color = 0; color < 2;  color++) {
-	for (int y = 2; y < (h-2); y++) {
-		uint16_t* row0 = &image[imgdata.sizes.raw_width*3*(y*2)+3+color]; // dst[1]
-		uint16_t* row1 = &image[imgdata.sizes.raw_width*3*(y*2+1)+3+color]; //dst1[1]
-		for (int x = 2; x < (w-2); x++) {
-			row1[0]=row1[3]=row0[3]=row0[0];
-			row0 += 6;
-			row1 += 6;
+	for (int color = 0; color < 2;  color++) 
+	{
+		for (int y = 2; y < (h-2); y++) 
+		{
+			uint16_t* row0 = &image[imgdata.sizes.raw_width*3*(y*2)+3+color]; // dst[1]
+			uint16_t  row0_3 = row0[3];
+			uint16_t* row1 = &image[imgdata.sizes.raw_width*3*(y*2+1)+3+color]; //dst1[1]
+			uint16_t  row1_3 = row1[3];
+			for (int x = 2; x < (w-2); x++) 
+			{
+				row1[0]=row1[3]=row0[0]=row0[3];
+				row0 += 6;
+				row1 += 6;
+			}
 		}
 	}
-	}
 }
+
 void LibRaw::x3f_load_raw()
 {
   int raise_error=0;
@@ -4140,8 +4144,9 @@ void LibRaw::x3f_load_raw()
       imgdata.rawdata.color3_image = (ushort (*)[3])data;
 	  if(!strcasecmp(imgdata.idata.make,"Sigma") 
 		  && !strcasecmp(imgdata.idata.model,"dp2 Quattro") 
-		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATERG))
-		  x3f_dpq_interpolate_rg();
+		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATERG)
+		  )
+			x3f_dpq_interpolate_rg();
     }
   else
     raise_error = 1;
