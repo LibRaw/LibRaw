@@ -7952,7 +7952,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 8898,-2498,-994,-3144,11328,2066,-760,1381,4576 } },
     { "Samsung EX2F", 0, 0x7ff,
 	{ 10648,-3897,-1055,-2022,10573,1668,-492,1611,4742 } },
-	{ "Samsung NX3000", 0, 0, /* LibRaw */
+    { "Samsung NX3000", 0, 0, /* LibRaw */
 	{ 9618,-4205,-554,-3558,11937,1166,-1149,2169,4949 } },
     { "Samsung NX300", 0, 0, /* LibRaw */
         { 8873,-3984,-372,-3759,12305,1013,-994,1981,4788 } },
@@ -9091,12 +9091,12 @@ konica_400z:
     width -= 2 * (left_margin = 8);
     load_flags = 32;
   } else if (!strcmp(make,"Samsung") && !strcmp(model,"NX3000")) { 
-	  top_margin = 24;
-	  left_margin = 64;
-	  width = 5472;
-	  height = 3648;
-	  filters = 0x61616161;
-	  colors = 3;
+    top_margin = 24;
+    left_margin = 64;
+    width = 5472;
+    height = 3648;
+    filters = 0x61616161;
+    colors = 3;
   } else if (!strcmp(make,"Samsung") && raw_height == 3714) {
     height -= 18;
     width = 5536;
