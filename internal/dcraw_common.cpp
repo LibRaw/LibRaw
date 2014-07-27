@@ -9589,7 +9589,7 @@ dng_skip:
   if (!maximum)
     {
       maximum = (1 << tiff_bps) - 1;
-	  if(maximum < 0x10000 && curve[maximum]>0 &&    load_raw == &CLASS sony_arw2_load_raw)
+      if(maximum < 0x10000 && curve[maximum]>0 &&    load_raw == &CLASS sony_arw2_load_raw)
         maximum = curve[maximum];
     }
   if (!load_raw || height < 22 || width < 22 ||
