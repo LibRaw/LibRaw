@@ -8699,10 +8699,13 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 12066,-5927,-367,-1969,9878,1503,-721,2034,5453 } },
     { "Fujifilm XQ1", 0, 0,
       { 14305,-7365,-687,-3117,12383,432,-287,1660,4361 } },
-    { "Hasselblad Lunar", 128, 0,
+    { "Hasselblad Lunar", -512, 0,
 	{ 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
-    { "Hasselblad Stellar", 200, 0,
+    { "Hasselblad Stellar", -800, 0,
 	{ 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
+    { "Hasselblad H3D-50", 0, 0,
+	{3857,452, -46, -6008, 14477, 1596, -2627, 4481, 5718}}, /* LibRaw */
+    /*{5656,-659,-346,-3923,12306,1791,-1602,3509,5442}}, */ /* Adobe */
     { "Imacon Ixpress", 0, 0,		/* DJC */
 	{ 7025,-1415,-704,-5188,13765,1424,-1248,2742,6038 } },
     { "Kodak NC2000", 0, 0,
@@ -10408,19 +10411,32 @@ konica_400z:
       width -= (left_margin = 3) + 7;
       filters = 0x61616161;
     } else if (raw_width == 8282 && raw_height == 6240) {
-		/* H5D 50*/
-		left_margin = 54;
-		top_margin = 16;
-		width = 8176;
-		height = 6132;
-		black = 256;
+      if(!strcasecmp(model,"H5D"))
+        {
+          /* H5D 50*/
+          left_margin = 54;
+          top_margin = 16;
+          width = 8176;
+          height = 6132;
+          black = 256;
+        }
+      else if(!strcasecmp(model,"H3D"))
+        {
+          black=0;
+          left_margin = 54;
+          top_margin = 16;
+          width = 8176;
+          height = 6132;
+          memset(cblack,0,sizeof(cblack));
+          adobe_coeff("Hasselblad","H3D-50");
+        }
     } else if (raw_width == 8374 && raw_height == 6304) {
-		/* H5D 50c*/
-		left_margin = 52;
-		top_margin = 100;
-		width = 8272;
-		height = 6200;
-		black = 256;
+      /* H5D 50c*/
+      left_margin = 52;
+      top_margin = 100;
+      width = 8272;
+      height = 6200;
+      black = 256;
     }
   } else if (!strcmp(make,"Sinar")) {
     if (!load_raw) load_raw = &CLASS unpacked_load_raw;
