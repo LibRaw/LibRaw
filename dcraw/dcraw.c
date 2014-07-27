@@ -1741,8 +1741,8 @@ void CLASS phase_one_correct()
 	    cf[1+i] = ref[i];
 	  }
 	  cx[0] = cf[0] = 0;
-	  cx[17] = cf[17] = cf[18] = ((unsigned int)ref[15] * 65535) / lc[qr][qc][15];
-          cx[18] = 65535;
+	  cx[17] = cf[17] = ((unsigned int)ref[15] * 65535) / lc[qr][qc][15];
+          cf[18] = cx[18] = 65535;
 	  cubic_spline(cx, cf, 19);
 
 	  for (row = (qr ? ph1.split_row : 0);
@@ -6739,6 +6739,7 @@ void CLASS parse_exif (int base)
 
   kodak = !strncmp(make,"EASTMAN",7) && tiff_nifds < 3;
   entries = get2();
+  if(!strcmp(make,"Hasselblad") && (tiff_nifds > 3) && (entries > 512)) return;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
     switch (tag) {
