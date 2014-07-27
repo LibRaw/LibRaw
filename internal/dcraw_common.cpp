@@ -7436,11 +7436,11 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
     { "Hasselblad Stellar", -800, 0,
 	{ 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
-    { "Hasselblad H3D-39", 0, 0,
+    { "Hasselblad H3DII-39", 0, 0,
 	{3857,452, -46, -6008, 14477, 1596, -2627, 4481, 5718}}, /* Adobe */
     { "Hasselblad H3D-50", 0, 0,
 	{3857,452, -46, -6008, 14477, 1596, -2627, 4481, 5718}}, /* Adobe H3D-39 */
-    { "Hasselblad H3D-60", 0, 0,
+    { "Hasselblad H4D-60", 0, 0,
 	{9662, -684, -279, -4903, 12293, 2950, -344, 1669, 6024}},
     { "Hasselblad H4D-40", 0, 0,
 	{6159,-1402, -177, -5439, 12762, 3007, -955, 2200, 7104}},
@@ -9134,8 +9134,8 @@ konica_400z:
       filters = 0x61616161;
       if(!strcasecmp(model,"H3D"))
         {
-          adobe_coeff("Hasselblad","H3D-39");
-          strcpy(model,"H3D-39");
+          adobe_coeff("Hasselblad","H3DII-39");
+          strcpy(model,"H3DII-39");
         }
     } else if (raw_width == 7410) {
       height = 5502;
@@ -9146,15 +9146,15 @@ konica_400z:
       adobe_coeff("Hasselblad","H4D-40");
       strcpy(model,"H4D-40");
     } else if (raw_width == 9044) {
-      if(!strcasecmp(model,"H3D"))
+      if(black > 500)
         {
           top_margin = 12;
           left_margin = 44;
           width = 8956;
           height = 6708;
           memset(cblack,0,sizeof(cblack));
-          adobe_coeff("Hasselblad","H3D-60");
-          strcpy(model,"H3D-60");
+          adobe_coeff("Hasselblad","H4D-60");
+          strcpy(model,"H4D-60");
           black = 512;
         }
       else
@@ -9165,6 +9165,7 @@ konica_400z:
           left_margin = 40;
           black += load_flags = 256;
           maximum = 0x8101;
+          strcpy(model,"H3DII-60");
         }
     } else if (raw_width == 4090) {
       strcpy (model, "V96C");
