@@ -7935,7 +7935,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Samsung S85", 0, 0,		/* DJC */
 	{ 11885,-3968,-1473,-4214,12299,1916,-835,1655,5549 } },
      // Foveon: LibRaw color data
-    {"Sigma dp2 Quattro",0, 0,
+    {"Sigma dp2 Quattro",2047, 0,
       { 13793,-3389,-1014,5532,3801,877,1849,4243,3732 } },
     { "Sigma SD9", 15, 4095,			/* LibRaw */
       { 14082,-2201,-1056,-5243,14788,167,-121,196,8881 } },
@@ -9120,7 +9120,21 @@ konica_400z:
       height -= (top_margin = 6);
       width -= (left_margin = 3) + 7;
       filters = 0x61616161;
-    }
+    } else if (raw_width == 8282 && raw_height == 6240) {
+		/* H5D 50*/
+		left_margin = 54;
+		top_margin = 16;
+		width = 8176;
+		height = 6132;
+		black = 256;
+	} else if (raw_width == 8374 && raw_height == 6304) {
+		/* H5D 50c*/
+		left_margin = 52;
+		top_margin = 100;
+		width = 8272;
+		height = 6200;
+		black = 256;
+	}
   } else if (!strcmp(make,"Sinar")) {
     if (!load_raw) load_raw = &CLASS unpacked_load_raw;
     maximum = 0x3fff;

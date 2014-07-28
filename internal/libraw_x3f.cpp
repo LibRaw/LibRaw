@@ -1176,14 +1176,23 @@ static void true_decode_one_color(x3f_image_data_t *ID, int color)
   row_start_acc[1][0] = seed;
   row_start_acc[1][1] = seed;
 
+
+  int datastep = 1;
+
   if (ID->type_format == X3F_IMAGE_RAW_QUATTRO) {
+    if(ID->quattro->plane[color].rows < (rows/2)+16)
+	{ 
+		// Half sized layer
+		datastep = 2;
+	}
     rows = ID->quattro->plane[color].rows;
     cols = ID->quattro->plane[color].columns;
   }
 
+
   for (row = 0; row < rows; row++) 
   {
-	    uint16_t *dst = TRU->x3rgb16.element + row * out_cols * 3 * (1+(color<2))+ color;
+	    uint16_t *dst = TRU->x3rgb16.element + row * out_cols * 3 * datastep+ color;
 		int col;
 		bool_t odd_row = row&1;
 		int32_t acc[2];
@@ -1200,7 +1209,7 @@ static void true_decode_one_color(x3f_image_data_t *ID, int color)
 			{ 
 				/* For quattro the input may be larger   than the output */
 				*dst = value;
-				dst += 3*(1+(color<2));
+				dst += 3*datastep;
 			}
 		}
   }

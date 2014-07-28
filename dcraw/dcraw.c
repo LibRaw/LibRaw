@@ -10405,6 +10405,20 @@ konica_400z:
       height -= (top_margin = 6);
       width -= (left_margin = 3) + 7;
       filters = 0x61616161;
+    } else if (raw_width == 8282 && raw_height == 6240) {
+		/* H5D 50*/
+		left_margin = 54;
+		top_margin = 16;
+		width = 8176;
+		height = 6132;
+		black = 256;
+    } else if (raw_width == 8374 && raw_height == 6304) {
+		/* H5D 50c*/
+		left_margin = 52;
+		top_margin = 100;
+		width = 8272;
+		height = 6200;
+		black = 256;
     }
   } else if (!strcmp(make,"Sinar")) {
     if (!load_raw) load_raw = &CLASS unpacked_load_raw;
