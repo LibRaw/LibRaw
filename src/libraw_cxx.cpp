@@ -972,18 +972,6 @@ struct foveon_data_t
 };
 const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
-struct nikon_sraw_list_t
-{
-	const char *model;
-	const int raw_width,raw_height;
-} nikon_sraw_list [] =
-{
-	{"D4s",2464,1640},
-	{"D4s",2048,1360},
-	{"D4s",2048,1640},
-	{"D4s",1600,1064},
-};
-const int nikon_sraw_list_count = sizeof(nikon_sraw_list)/sizeof(nikon_sraw_list[0]);
 
 int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 {
@@ -1014,38 +1002,29 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     if(   (load_raw == &LibRaw::nikon_load_raw 
         || load_raw == &LibRaw::packed_load_raw)  
        && !strcasecmp(imgdata.idata.make,"Nikon")
+	   && S.raw_width*S.raw_height*3 == libraw_internal_data.unpacker_data.data_size
        ) // Is it Nikon sRAW?
       {
-        for(int i=0; i<nikon_sraw_list_count; i++)
-          {
-            if( !strcasecmp(imgdata.idata.model,nikon_sraw_list[i].model)
-                && S.raw_width == nikon_sraw_list[i].raw_width
-                && S.raw_height == nikon_sraw_list[i].raw_height
-                && S.raw_width*S.raw_height*3 == libraw_internal_data.unpacker_data.data_size
-                )
-              {
-                load_raw= &LibRaw::nikon_load_sraw;
-                C.black =0;
-                memset(C.cblack,0,sizeof(C.cblack));
-                imgdata.idata.filters = 0;
-                libraw_internal_data.unpacker_data.tiff_samples=3;
-                imgdata.idata.colors = 3;
-                double beta_1 = -5.79342238397656E-02;
-                double beta_2 = 3.28163551282665;
-                double beta_3 = -8.43136004842678;
-                double beta_4 = 1.03533181861023E+01;
-                for(int i=0; i<=3072;i++)
-                  {
-                    double x = (double)i/3072.;
-                    double y = (1.-exp(-beta_1*x-beta_2*x*x-beta_3*x*x*x-beta_4*x*x*x*x));
-                    if(y<0.)y=0.;
-                    imgdata.color.curve[i] = (y*16383.);
-                  }
-                for(int i=0;i<3;i++)
-                  for(int j=0;j<4;j++)
-                    imgdata.color.rgb_cam[i][j]=float(i==j);
-              }
-          }
+           load_raw= &LibRaw::nikon_load_sraw;
+           C.black =0;
+           memset(C.cblack,0,sizeof(C.cblack));
+           imgdata.idata.filters = 0;
+           libraw_internal_data.unpacker_data.tiff_samples=3;
+           imgdata.idata.colors = 3;
+           double beta_1 = -5.79342238397656E-02;
+           double beta_2 = 3.28163551282665;
+           double beta_3 = -8.43136004842678;
+           double beta_4 = 1.03533181861023E+01;
+           for(int i=0; i<=3072;i++)
+           {
+               double x = (double)i/3072.;
+               double y = (1.-exp(-beta_1*x-beta_2*x*x-beta_3*x*x*x-beta_4*x*x*x*x));
+               if(y<0.)y=0.;
+               imgdata.color.curve[i] = (y*16383.);
+           }
+           for(int i=0;i<3;i++)
+             for(int j=0;j<4;j++)
+               imgdata.color.rgb_cam[i][j]=float(i==j);
       }
 	// Adjust BL for Nikon 12bit
     if((
