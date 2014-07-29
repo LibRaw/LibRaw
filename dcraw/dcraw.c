@@ -9220,7 +9220,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Samsung S85", 0, 0,		/* DJC */
 	{ 11885,-3968,-1473,-4214,12299,1916,-835,1655,5549 } },
      // Foveon: LibRaw color data
-    {"Sigma dp2 Quattro",0, 0,
+    {"Sigma dp2 Quattro",2047, 0,
       { 13801,-3390,-1016,5535,3802,877,1848,4245,3730 } },
     { "Sigma SD9", 15, 4095,			/* LibRaw */
       { 14082,-2201,-1056,-5243,14788,167,-121,196,8881 } },
