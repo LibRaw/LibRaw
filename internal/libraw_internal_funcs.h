@@ -182,8 +182,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        parse_x3f();
     void        x3f_load_raw();
     void        x3f_dpq_interpolate_rg();
-	void        x3f_dpq_interpolate_af2x2(int xoff, int xstep, int ystep); // 2x2 af pixels
-	void        x3f_dpq_interpolate_af(int xoff, int xstep, int ystep); // 1x1 af pixels
+	void        x3f_dpq_interpolate_af2x2(int xstep, int ystep); // 2x2 af pixels
+	void        x3f_dpq_interpolate_af(int xstep, int ystep); // 1x1 af pixels
 
 // CAM/RGB
     void        pseudoinverse (double (*in)[3], double (*out)[3], int size);

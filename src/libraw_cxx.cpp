@@ -4084,13 +4084,13 @@ void LibRaw::x3f_dpq_interpolate_rg()
 	{
 		for (int y = 2; y < (h-2); y++) 
 		{
-			uint16_t* row0 = &image[imgdata.sizes.raw_width*3*(y*2)+3+color]; // dst[1]
+			uint16_t* row0 = &image[imgdata.sizes.raw_width*3*(y*2)+color]; // dst[1]
 			uint16_t  row0_3 = row0[3];
-			uint16_t* row1 = &image[imgdata.sizes.raw_width*3*(y*2+1)+3+color]; //dst1[1]
+			uint16_t* row1 = &image[imgdata.sizes.raw_width*3*(y*2+1)+color]; //dst1[1]
 			uint16_t  row1_3 = row1[3];
 			for (int x = 2; x < (w-2); x++) 
 			{
-				row1[0]=row1[3]=row0[0]=row0[3];
+				row1[0]=row1[3]=row0[3]=row0[0];
 				row0 += 6;
 				row1 += 6;
 			}
@@ -4098,59 +4098,79 @@ void LibRaw::x3f_dpq_interpolate_rg()
 	}
 }
 
-void LibRaw::x3f_dpq_interpolate_af2x2(int xoff,int xstep, int ystep)
+void LibRaw::x3f_dpq_interpolate_af2x2(int xstep, int ystep)
 {
 	unsigned short *image = (ushort*)imgdata.rawdata.color3_image;
 	unsigned int rowpitch = imgdata.rawdata.sizes.raw_pitch/2; // in 16-bit words
-	for(int y = 0;  y < imgdata.rawdata.sizes.height+imgdata.rawdata.sizes.top_margin; y+=ystep)
+	if(imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATERG)
 	{
-		if(y<imgdata.rawdata.sizes.top_margin) continue;
-		if(y<1) continue;
-		if(y>imgdata.rawdata.sizes.raw_height-3) break;
-		uint16_t* row_minus = &image[imgdata.sizes.raw_width*3*(y-1)];
-		uint16_t* row0 = &image[imgdata.sizes.raw_width*3*y];
-		uint16_t* row1 = &image[imgdata.sizes.raw_width*3*(y+1)];
-		uint16_t* row_plus = &image[imgdata.sizes.raw_width*3*(y+2)];
-		for(int x = xoff; x < imgdata.rawdata.sizes.width+imgdata.rawdata.sizes.left_margin; x+= xstep)
+		// Interpolate 4 pixels
+		for(int y = 0;  y < imgdata.rawdata.sizes.height+imgdata.rawdata.sizes.top_margin; y+=ystep)
 		{
-			if(x<imgdata.rawdata.sizes.left_margin) continue;
-			if(x<1) continue;
-			if(x>imgdata.rawdata.sizes.raw_width-3) continue;
-			// Interpolate pixel0-0
-			uint16_t* pixel_lt = &row_minus[(x-1)*3];
-			uint16_t* pixel_t = &row_minus[(x)*3];
-			uint16_t* pixel_l = &row0[(x-1)*3];
-			uint16_t* pixel0 = &row0[x*3];
-			pixel0[0] = _clampbits((pixel_lt[0]+pixel_l[0]+pixel_t[0]+(pixel0[0]-imgdata.color.black)*4+imgdata.color.black)/4,14);
-			pixel0[1] = _clampbits((pixel_lt[1]+pixel_l[1]+pixel_t[1]+(pixel0[1]-imgdata.color.black)*4+imgdata.color.black)/4,14);
+			if(y<imgdata.rawdata.sizes.top_margin) continue;
+			if(y<1) continue;
+			if(y>imgdata.rawdata.sizes.raw_height-3) break;
+			uint16_t* row_minus = &image[imgdata.sizes.raw_width*3*(y-1)];
+			uint16_t* row0 = &image[imgdata.sizes.raw_width*3*y];
+			uint16_t* row1 = &image[imgdata.sizes.raw_width*3*(y+1)];
+			uint16_t* row_plus = &image[imgdata.sizes.raw_width*3*(y+2)];
+			for(int x = 0; x < imgdata.rawdata.sizes.width+imgdata.rawdata.sizes.left_margin; x+= xstep)
+			{
+				if(x<imgdata.rawdata.sizes.left_margin) continue;
+				if(x<1) continue;
+				if(x>imgdata.rawdata.sizes.raw_width-3) continue;
+				// Interpolate pixel0-0
+				uint16_t* pixel_t = &row_minus[(x)*3];
+				uint16_t* pixel_l = &row0[(x-1)*3];
+				uint16_t* pixel0 = &row0[x*3];
+				pixel0[0] = _clampbits((pixel_l[0]+pixel_t[0]+(pixel0[0]-imgdata.color.black)*15+imgdata.color.black*4)/6,14);
+				pixel0[1] = _clampbits((pixel_l[1]+pixel_t[1]+(pixel0[1]-imgdata.color.black)*15+imgdata.color.black*4)/6,14);
 
-			uint16_t* pixel1 = &row0[(x+1)*3];
-					  pixel_t = &row_minus[(x+1)*3];
-			uint16_t* pixel_tr = &row_minus[(x+2)*3];
-			uint16_t* pixel_r = &row0[(x+2)*3];
-			pixel1[0] = _clampbits((pixel_t[0]+pixel_tr[0]+pixel_r[0]+(pixel1[0]-imgdata.color.black)*4+imgdata.color.black)/4,14);
-			pixel1[1] = _clampbits((pixel_t[1]+pixel_tr[1]+pixel_r[1]+(pixel1[1]-imgdata.color.black)*4+imgdata.color.black)/4,14);
+				uint16_t* pixel1 = &row0[(x+1)*3];
+				pixel_t = &row_minus[(x+1)*3];
+				uint16_t* pixel_r = &row0[(x+2)*3];
+				pixel1[0] = _clampbits((pixel_t[0]+pixel_r[0]+(pixel1[0]-imgdata.color.black)*15+imgdata.color.black*4)/6,14);
+				pixel1[1] = _clampbits((pixel_t[1]+pixel_r[1]+(pixel1[1]-imgdata.color.black)*15+imgdata.color.black*4)/6,14);
 
-			uint16_t* pixel2 = &row1[(x)*3];
-					  pixel_l = &row1[(x-1)*3];
-  		    uint16_t* pixel_bl = &row_plus[(x-1)*3];
-			uint16_t* pixel_b = &row_plus[(x)*3];
+				uint16_t* pixel2 = &row1[(x)*3];
+				pixel_l = &row1[(x-1)*3];
+				uint16_t* pixel_b = &row_plus[(x)*3];
 
-			pixel2[0] = _clampbits((pixel_l[0]+pixel_bl[0]+pixel_b[0]+(pixel2[0]-imgdata.color.black)*4+imgdata.color.black)/4,14);
-			pixel2[1] = _clampbits((pixel_l[1]+pixel_bl[1]+pixel_b[1]+(pixel2[1]-imgdata.color.black)*4+imgdata.color.black)/4,14);
+				pixel2[0] = _clampbits((pixel_l[0]+pixel_b[0]+(pixel2[0]-imgdata.color.black)*15+imgdata.color.black*4)/6,14);
+				pixel2[1] = _clampbits((pixel_l[1]+pixel_b[1]+(pixel2[1]-imgdata.color.black)*15+imgdata.color.black*4)/6,14);
 
-			uint16_t* pixel3 = &row1[(x+1)*3];
-					  pixel_r = &row1[(x+2)*3];
-					  pixel_b = &row_plus[(x+1)*3];
-			uint16_t* pixel_br = &row_plus[(x+2)*3];
-			pixel3[0] = _clampbits((pixel_r[0]+pixel_br[0]+pixel_b[0]+(pixel3[0]-imgdata.color.black)*4+imgdata.color.black)/4,14);
-			pixel3[1] = _clampbits((pixel_r[1]+pixel_br[1]+pixel_b[1]+(pixel3[1]-imgdata.color.black)*4+imgdata.color.black)/4,14);
+				uint16_t* pixel3 = &row1[(x+1)*3];
+				pixel_r = &row1[(x+2)*3];
+				pixel_b = &row_plus[(x+1)*3];
+				pixel3[0] = _clampbits((pixel_r[0]+pixel_b[0]+(pixel3[0]-imgdata.color.black)*15+imgdata.color.black*4)/6,14);
+				pixel3[1] = _clampbits((pixel_r[1]+pixel_b[1]+(pixel3[1]-imgdata.color.black)*15+imgdata.color.black*4)/6,14);
+			}
 		}
-		
+	} 
+	else
+	{
+		// Interpolate single pixel
+		for(int y = 0;  y < imgdata.rawdata.sizes.height+imgdata.rawdata.sizes.top_margin; y+=ystep)
+		{
+			if(y<imgdata.rawdata.sizes.top_margin) continue;
+			if(y<1) continue;
+			if(y>imgdata.rawdata.sizes.raw_height-3) break;
+			uint16_t* row0 = &image[imgdata.sizes.raw_width*3*y];
+			for(int x = 0; x < imgdata.rawdata.sizes.width+imgdata.rawdata.sizes.left_margin; x+= xstep)
+			{
+				if(x<imgdata.rawdata.sizes.left_margin) continue;
+				if(x<1) continue;
+				if(x>imgdata.rawdata.sizes.raw_width-3) continue;
+				uint16_t* pixel0 = &row0[x*3];
+				pixel0[0] = _clampbits((pixel0[0]-imgdata.color.black)*4+imgdata.color.black,14);
+				pixel0[1] = _clampbits((pixel0[1]-imgdata.color.black)*4+imgdata.color.black,14);
+			}
+		}
 	}
+
 }
 
-void LibRaw::x3f_dpq_interpolate_af(int xoff,int xstep, int ystep)
+void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep)
 {
 	unsigned short *image = (ushort*)imgdata.rawdata.color3_image;
 	unsigned int rowpitch = imgdata.rawdata.sizes.raw_pitch/2; // in 16-bit words
@@ -4162,7 +4182,7 @@ void LibRaw::x3f_dpq_interpolate_af(int xoff,int xstep, int ystep)
 		uint16_t* row_minus = &image[imgdata.sizes.raw_width*3*(y-1)];
 		uint16_t* row0 = &image[imgdata.sizes.raw_width*3*y];
 		uint16_t* row_plus = &image[imgdata.sizes.raw_width*3*(y+1)];
-		for(int x = xoff; x < imgdata.rawdata.sizes.width+imgdata.rawdata.sizes.left_margin; x+= xstep)
+		for(int x = 0; x < imgdata.rawdata.sizes.width+imgdata.rawdata.sizes.left_margin; x+= xstep)
 		{
 			if(x<imgdata.rawdata.sizes.left_margin) continue;
 			if(x<1) continue;
@@ -4226,11 +4246,11 @@ void LibRaw::x3f_load_raw()
 	  {
 		  if(imgdata.sizes.raw_width == 5888)
 		  {
-			  x3f_dpq_interpolate_af2x2(-1,32,8);
+			  x3f_dpq_interpolate_af2x2(32,8);
 		  }
 		  if(imgdata.sizes.raw_width == 2944)
 		  {
-			  x3f_dpq_interpolate_af(0,16,4);
+			  x3f_dpq_interpolate_af(16,4);
 		  }
 	  }
   
