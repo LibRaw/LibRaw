@@ -5929,7 +5929,15 @@ int CLASS parse_tiff_ifd (int base)
 	  data_offset = get4()+base;
 	  ifd++;  break;
 	}
-        if(len > 1000) len=1000; /* 1000 SubIFDs is enough */
+#ifdef LIBRAW_LIBRARY_BUILD
+	if (!strcmp(make,"Hasselblad") && libraw_internal_data.unpacker_data.hasselblad_parser_flag) {
+		fseek (ifp, ftell(ifp)+4, SEEK_SET);
+		fseek (ifp, get4()+base, SEEK_SET);
+		parse_tiff_ifd (base);
+		break;
+	}
+#endif
+    if(len > 1000) len=1000; /* 1000 SubIFDs is enough */
 	while (len--) {
 	  i = ftell(ifp);
 	  fseek (ifp, get4()+base, SEEK_SET);
@@ -6144,6 +6152,7 @@ int CLASS parse_tiff_ifd (int base)
 	if (!make[0]) strcpy (make, "Hasselblad");
 	break;
       case 50459:			/* Hasselblad tag */
+    libraw_internal_data.unpacker_data.hasselblad_parser_flag=1;
 	i = order;
 	j = ftell(ifp);
 	c = tiff_nifds;
