@@ -4144,8 +4144,9 @@ void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep, int scale)
 				else
 				{
 					float multip = float(bnear - imgdata.color.black)/float(blocal-imgdata.color.black);
-					pixel0[0] = float(pixf[0]-imgdata.color.black)*multip + imgdata.color.black;
-					pixel0[1] = float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black;
+					pixel0[0] = ((float(pixf[0]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[0]-imgdata.color.black)*3.75 + imgdata.color.black))/2;
+					pixel0[1] = ((float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[1]-imgdata.color.black)*3.75 + imgdata.color.black))/2;
+					//pixel0[1] = float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black;
 				}
 			}
 		}
