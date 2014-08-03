@@ -7436,16 +7436,45 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
     { "Hasselblad Stellar", -800, 0,
 	{ 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
-    { "Hasselblad H3DII-39", 0, 0,
-	{3857,452, -46, -6008, 14477, 1596, -2627, 4481, 5718}}, /* Adobe */
-    { "Hasselblad H3D-50", 0, 0,
-	{3857,452, -46, -6008, 14477, 1596, -2627, 4481, 5718}}, /* Adobe H3D-39 */
-    { "Hasselblad H4D-60", 0, 0,
-	{9662, -684, -279, -4903, 12293, 2950, -344, 1669, 6024}},
-    { "Hasselblad H4D-40", 0, 0,
-	{6159,-1402, -177, -5439, 12762, 3007, -955, 2200, 7104}},
-    { "Imacon Ixpress", 0, 0,		/* DJC */
+
+	{ "Hasselblad CFV", 0, 0, /* Adobe */
+	{ 8519, -3260, -280, -5081, 13459, 1738, -1449, 2960, 7809, } }, 
+
+	{ "Hasselblad H-16MP", 0, 0, /* LibRaw */
+	{ 17765,-5322,-1734,-6168,13354,2135,-264,2524,7440 } }, 
+
+	{ "Hasselblad H-22MP", 0, 0, /* LibRaw */
+	{ 17765,-5322,-1734,-6168,13354,2135,-264,2524,7440 } },
+	 
+	{"Hasselblad H-31MP",0, 0, /* LibRaw */
+	{ 14480,-5448,-1686,-3534,13123,2260,384,2952,7232 } },
+
+	{"Hasselblad H-39MP",0, 0, /* Adobe */
+	{3857,452, -46, -6008, 14477, 1596, -2627, 4481, 5718}}, 
+	//{ 13096,-4581,-1546,-2705,12219,2687,997,3035,6550 } },
+
+    { "Hasselblad H3D-50", 0, 0, /* Adobe  */
+	{3857,452, -46, -6008, 14477, 1596, -2627, 4481, 5718}}, 
+
+	{"Hasselblad H4D-40",0, 0, /* Adobe */
+	{6159, -1402, -177, -5439, 12762, 3007, -955, 2200, 7104 }},
+	//{ 15283,-6272,-465,-2030,16031,478,-2379,390,7965 } },
+
+	{"Hasselblad H4D-50",0, 0, /* LibRaw */
+	{ 15283,-6272,-465,-2030,16031,478,-2379,390,7965 } },
+
+	{"Hasselblad H4D-60",0, 0, /* Adobe */
+		{9662, -684, -279, -4903, 12293, 2950, -344, 1669, 6024}},
+
+	{"Hasselblad H5D-50c",0, 0, /* Adobe */
+	{4932, -835, 141, -4878, 11868, 3437, -1138, 1961, 7067}},
+
+	{"Hasselblad H5D-50",0, 0, /* Adobe */
+	{5656, -659, -346, -3923, 12306, 1791, -1602, 3509, 5442}},
+
+	{ "Imacon Ixpress", 0, 0,		/* DJC */
 	{ 7025,-1415,-704,-5188,13765,1424,-1248,2742,6038 } },
+	
     { "Kodak NC2000", 0, 0,
 	{ 13891,-6055,-803,-465,9919,642,2121,82,1291 } },
     { "Kodak DCS315C", 8, 0,
@@ -9126,7 +9155,9 @@ konica_400z:
   } else if (!strcmp(make,"Hasselblad")) {
     if (load_raw == &CLASS lossless_jpeg_load_raw)
       load_raw = &CLASS hasselblad_load_raw;
-    if (raw_width == 7262) {
+	if (raw_width == 6542) {
+		adobe_coeff("Hasselblad","H-31MP");
+	}else if (raw_width == 7262) {
       height = 5444;
       width  = 7248;
       top_margin  = 4;
@@ -9134,7 +9165,7 @@ konica_400z:
       filters = 0x61616161;
       if(!strcasecmp(model,"H3D"))
         {
-          adobe_coeff("Hasselblad","H3DII-39");
+          adobe_coeff("Hasselblad","H-39MP");
           strcpy(model,"H3DII-39");
         }
     } else if (raw_width == 7410) {
@@ -9192,7 +9223,7 @@ konica_400z:
           height = 6132;
           memset(cblack,0,sizeof(cblack));
           adobe_coeff("Hasselblad","H3D-50");
-          strcpy(model,"H3D-50");
+          strcpy(model,"H3DII-50");
         }
     } else if (raw_width == 8374 && raw_height == 6304) {
       /* H5D 50c*/
