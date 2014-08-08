@@ -988,17 +988,19 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
     // Adjust BL for Sony A900/A850
-    if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")
-       && C.maximum > 15000 )
+    if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")) // 12 bit sony, but metadata may be for 14-bit range
       {
-        C.maximum = 4095;
-        C.black /=4;
-        for(int c=0; c< 4; c++)
-          C.cblack[c]/=4;
-        for(int c=0; c< C.cblack[4]*C.cblack[5];c++)
-          C.cblack[6+c]/=4;
+		  if(C.maximum>4095)
+			C.maximum = 4095;
+		  if(C.black > 256 || C.cblack[0] > 256)
+		  {
+			C.black /=4;
+			for(int c=0; c< 4; c++)
+				C.cblack[c]/=4;
+			for(int c=0; c< C.cblack[4]*C.cblack[5];c++)
+			C.cblack[6+c]/=4;
+		  }
       }
-
     if(   (load_raw == &LibRaw::nikon_load_raw 
         || load_raw == &LibRaw::packed_load_raw)  
        && !strcasecmp(imgdata.idata.make,"Nikon")
