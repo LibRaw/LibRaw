@@ -3526,7 +3526,7 @@ static const char  *static_camera_list[] =
 "Leica R8",
 "Leica S",
 "Leica S2",
-"Leica S3",
+//"Leica S3",
 "Leica T (Typ 701)"
 "Leica X1",
 "Leica X2",
@@ -3717,7 +3717,7 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-GF1",
 "Panasonic DMC-GF2",
 "Panasonic DMC-GF3",
-"Panasonic DMC-GF3KK",
+//"Panasonic DMC-GF3KK",
 "Panasonic DMC-GF5",
 "Panasonic DMC-GF6",
 "Panasonic DMC-GH1",
