@@ -6228,20 +6228,6 @@ guess_cfa_pc:
 	pixel_aspect /= getreal(type);
 	break;
 #ifdef LIBRAW_LIBRARY_BUILD
-	  case 50719:
-		  if(dng_version && left_margin == 0 && top_margin == 0)
-		  {
-			  left_margin = getreal(type);
-			  top_margin = getreal(type);
-		  }
-		  break;
-	  case 50720:
-		  if(dng_version && width == 0 && height == 0)
-		  {
-			  width = getreal(type);
-			  height = getreal(type);
-		  }
-		  break;
       case 50778:
         imgdata.color.dng_color[0].illuminant = get2();
         break;
