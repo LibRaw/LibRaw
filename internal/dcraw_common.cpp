@@ -8382,7 +8382,8 @@ void CLASS identify()
     {311,"ILCE-7R"},
     {312,"ILCE-6000"},
     {313,"ILCE-5000"},
-    {319,"ILCA-77M2"}
+    {319,"ILCA-77M2"},
+	{339,"ILCE-5100"}
   };
   static const struct {
     unsigned fsize;
