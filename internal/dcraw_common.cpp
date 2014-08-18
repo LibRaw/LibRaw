@@ -5772,12 +5772,12 @@ int CLASS parse_tiff_ifd (int base)
       case 7:   width += get2();  break;
       case 9:   if ((i = get2())) filters = i;  
         if(pana_raw && len == 1 && type ==3)
-          cblack[9]+=i;
+          pana_black[3]+=i;
         break;
       case 8:
       case 10:
         if(pana_raw && len == 1 && type ==3)
-          cblack[9]+=get2();
+          pana_black[3]+=get2();
         break;
       case 17: case 18:
 	if (type == 3 && len == 1)
@@ -5789,7 +5789,7 @@ int CLASS parse_tiff_ifd (int base)
       case 28: case 29: case 30:
         if(pana_raw && len == 1 && type ==3)
           {
-            cblack[tag-22] = get2();
+            pana_black[tag-28] = get2();
           }
         else
           {
@@ -8124,12 +8124,12 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       if (table[i].t_black>0)
         {
           black   = (ushort) table[i].t_black;
-          memset(cblack,0,sizeof(cblack));
+  		  memset(cblack,0,sizeof(cblack));
         }
       else if(table[i].t_black <0 && rblack == 0 ) 
         {
           black   = (ushort) (-table[i].t_black);
-          memset(cblack,0,sizeof(cblack));
+		  memset(cblack,0,sizeof(cblack));
         }
       if (table[i].t_maximum) maximum = (ushort) table[i].t_maximum;
       if (table[i].trans[0]) {
