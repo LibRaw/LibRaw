@@ -6233,7 +6233,7 @@ guess_cfa_pc:
 	pixel_aspect  = getreal(type);
 	pixel_aspect /= getreal(type);
 	if(pixel_aspect > 0.995 && pixel_aspect < 1.005)
-		pixel_aspect = 1.0;
+          pixel_aspect = 1.0;
 	break;
 #ifdef LIBRAW_LIBRARY_BUILD
       case 50778:
@@ -7484,7 +7484,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 10592,-2206,-967,-1944,11685,230,2206,670,1273 } },
     { "Kodak EOSDCS3B", 0, 0,
 	{ 9898,-2700,-940,-2478,12219,206,1985,634,1031 } },
-    { "Kodak DCS520C", 178, 0,
+    { "Kodak DCS520C", -178, 0,
 	{ 24542,-10860,-3401,-1490,11370,-297,2858,-605,3225 } },
     { "Kodak DCS560C", -177, 0,
 	{ 20482,-7172,-3125,-1033,10410,-285,2542,226,3136 } },
@@ -8977,17 +8977,17 @@ canon_a5:
     width -= 32;
   } else if (!strcmp(make,"Nikon") && raw_width == 4032) {
     if(!strcmp(model,"COOLPIX P7700"))
-	{
-      adobe_coeff ("Nikon","COOLPIX P7700");
-	  maximum = 65504;
-	  load_flags = 0;
-	}
-	else if(!strcmp(model,"COOLPIX P7800"))
-	{
-		adobe_coeff ("Nikon","COOLPIX P7800");
-		maximum = 65504;
-		load_flags = 0;
-	}
+      {
+        adobe_coeff ("Nikon","COOLPIX P7700");
+        maximum = 65504;
+        load_flags = 0;
+      }
+    else if(!strcmp(model,"COOLPIX P7800"))
+      {
+        adobe_coeff ("Nikon","COOLPIX P7800");
+        maximum = 65504;
+        load_flags = 0;
+      }
     else  if(!strcmp(model,"COOLPIX P340"))
       load_flags=0;
   } else if (!strncmp(model,"COOLPIX P",9)) {
@@ -9604,7 +9604,6 @@ konica_400z:
   }
 
 dng_skip:
-
   if ((use_camera_matrix & (use_camera_wb || dng_version))
 	&& cmatrix[0][0] > 0.125) {
     memcpy (rgb_cam, cmatrix, sizeof cmatrix);

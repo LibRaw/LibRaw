@@ -7394,7 +7394,7 @@ guess_cfa_pc:
           {
             black = getreal(type);
           }
-        else if(cblack[4] * cblack[5] == len)
+        else if(cblack[4] * cblack[5] <= len)
           {
             FORC (cblack[4] * cblack[5])
               cblack[6+c] = getreal(type);
@@ -7413,6 +7413,8 @@ guess_cfa_pc:
       case 50718:			/* DefaultScale */
 	pixel_aspect  = getreal(type);
 	pixel_aspect /= getreal(type);
+	if(pixel_aspect > 0.995 && pixel_aspect < 1.005)
+          pixel_aspect = 1.0;
 	break;
 #ifdef LIBRAW_LIBRARY_BUILD
       case 50778:
@@ -8755,9 +8757,9 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 7025,-1415,-704,-5188,13765,1424,-1248,2742,6038 } },
     { "Kodak NC2000", 0, 0,
 	{ 13891,-6055,-803,-465,9919,642,2121,82,1291 } },
-    { "Kodak DCS315C", 8, 0,
+    { "Kodak DCS315C", -8, 0,
 	{ 17523,-4827,-2510,756,8546,-137,6113,1649,2250 } },
-    { "Kodak DCS330C", 8, 0,
+    { "Kodak DCS330C", -8, 0,
 	{ 20620,-7572,-2801,-103,10073,-396,3551,-233,2220 } },
     { "Kodak DCS420", 0, 0,
 	{ 10868,-1852,-644,-1537,11083,484,2343,628,2216 } },
@@ -8767,15 +8769,15 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 10592,-2206,-967,-1944,11685,230,2206,670,1273 } },
     { "Kodak EOSDCS3B", 0, 0,
 	{ 9898,-2700,-940,-2478,12219,206,1985,634,1031 } },
-    { "Kodak DCS520C", 178, 0,
+    { "Kodak DCS520C", -178, 0,
 	{ 24542,-10860,-3401,-1490,11370,-297,2858,-605,3225 } },
-    { "Kodak DCS560C", 177, 0,
+    { "Kodak DCS560C", -177, 0,
 	{ 20482,-7172,-3125,-1033,10410,-285,2542,226,3136 } },
-    { "Kodak DCS620C", 177, 0,
+    { "Kodak DCS620C", -177, 0,
 	{ 23617,-10175,-3149,-2054,11749,-272,2586,-489,3453 } },
-    { "Kodak DCS620X", 176, 0,
+    { "Kodak DCS620X", -176, 0,
 	{ 13095,-6231,154,12221,-21,-2137,895,4602,2258 } },
-    { "Kodak DCS660C", 173, 0,
+    { "Kodak DCS660C", -173, 0,
 	{ 18244,-6351,-2739,-791,11193,-521,3711,-129,2802 } },
     { "Kodak DCS720X", 0, 0,
 	{ 11775,-5884,950,9556,1846,-1286,-1019,6221,2728 } },
@@ -8955,9 +8957,9 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 11432,-3679,-1111,-3169,11239,2202,-791,1380,4455 } },
     { "Nikon COOLPIX P7100", 0, 0,
 	{ 11053,-4269,-1024,-1976,10182,2088,-526,1263,4469 } },
-    { "Nikon COOLPIX P7700", 200, 0,
+    { "Nikon COOLPIX P7700", -3200, 0,
 	{ 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
-    { "Nikon COOLPIX P7800", 200, 0, /* LibRaw */
+    { "Nikon COOLPIX P7800", -3200, 0, /* LibRaw */
       { 13443,-6418,-673,-1309,10025,1131,-462,1827,4782 } },
     { "Nikon 1 V3", 200, 0,
 	{ 5958,-1559,-571,-4021,11453,2939,-634,1548,5087 } },
@@ -10260,7 +10262,17 @@ canon_a5:
     width -= 32;
   } else if (!strcmp(make,"Nikon") && raw_width == 4032) {
     if(!strcmp(model,"COOLPIX P7700"))
-      adobe_coeff ("Nikon","COOLPIX P7700");
+      {
+        adobe_coeff ("Nikon","COOLPIX P7700");
+        maximum = 65504;
+        load_flags = 0;
+      }
+    else if(!strcmp(model,"COOLPIX P7800"))
+      {
+        adobe_coeff ("Nikon","COOLPIX P7800");
+        maximum = 65504;
+        load_flags = 0;
+      }
     else  if(!strcmp(model,"COOLPIX P340"))
       load_flags=0;
   } else if (!strncmp(model,"COOLPIX P",9)) {
