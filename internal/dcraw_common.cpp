@@ -8976,8 +8976,8 @@ canon_a5:
   } else if (!strcmp(make,"Nikon") && raw_width == 4032) {
     if(!strcmp(model,"COOLPIX P7700"))
       adobe_coeff ("Nikon","COOLPIX P7700");
-    else if(!strcmp(model,"COOLPIX P340"))
-      load_flags=0; 
+    else  if(!strcmp(model,"COOLPIX P340"))
+      load_flags=0;
   } else if (!strncmp(model,"COOLPIX P",9)) {
     load_flags = 24;
     filters = 0x94949494;
