@@ -10349,6 +10349,10 @@ canon_a5:
       left_margin = 0;
       filters = 0x16161616;
     }
+    if(!strcmp(model,"S5500"))
+      {
+        height -= (top_margin=6); 
+      }
     if (fuji_layout) raw_width *= is_raw;
     if (filters == 9)
       FORC(36) xtrans[0][c] =
