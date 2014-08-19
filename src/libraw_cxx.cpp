@@ -987,7 +987,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
     identify();
-    // Adjust BL for Sony A900/A850
+
+	// Adjust BL for Sony A900/A850
     if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")) // 12 bit sony, but metadata may be for 14-bit range
       {
         if(C.maximum>4095)

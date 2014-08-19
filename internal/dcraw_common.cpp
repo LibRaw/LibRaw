@@ -7654,9 +7654,9 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 7971,-2314,-913,-8451,15762,2894,-1442,1520,7610 } },
     { "Nikon COOLPIX A", 0, 0,
 	{ 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181 } },
-    { "Nikon COOLPIX P330", 0, 0,
+    { "Nikon COOLPIX P330", -200, 0,
 	{ 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
-    { "Nikon COOLPIX P340", 200, 0,
+    { "Nikon COOLPIX P340", -200, 0,
         { 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
     { "Nikon COOLPIX P6000", 0, 0,
 	{ 9698,-3367,-914,-4706,12584,2368,-837,968,5801 } },
@@ -8968,8 +8968,8 @@ canon_a5:
   } else if (!strcmp(make,"Nikon") && raw_width == 4032) {
     if(!strcmp(model,"COOLPIX P7700"))
       adobe_coeff ("Nikon","COOLPIX P7700");
-    else
-      load_flags=0;
+    else if(!strcmp(model,"COOLPIX P340"))
+      load_flags=0; 
   } else if (!strncmp(model,"COOLPIX P",9)) {
     load_flags = 24;
     filters = 0x94949494;
