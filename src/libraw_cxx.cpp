@@ -3878,6 +3878,7 @@ static const char  *static_camera_list[] =
 "Sony ILCA-77M2 (A77-II)",
 "Sony ILCE-3000",
 "Sony ILCE-5000",
+"Sony ILCE-5100",
 "Sony ILCE-6000",
 "Sony DSC-F828",
 "Sony DSC-R1",
