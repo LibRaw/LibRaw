@@ -988,6 +988,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
 
+	if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
+		 && !libraw_internal_data.unpacker_data.load_flags &&
+		 libraw_internal_data.unpacker_data.data_size*2 == imgdata.sizes.raw_height*imgdata.sizes.raw_width*3)
+	{
+		libraw_internal_data.unpacker_data.load_flags = 80;
+	}
+
 	// Adjust BL for Sony A900/A850
     if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")) // 12 bit sony, but metadata may be for 14-bit range
       {
@@ -1047,7 +1054,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       }
 
 	// Adjust BL for Panasonic
-    if(load_raw == &LibRaw::panasonic_load_raw && !strcasecmp(imgdata.idata.make,"Panasonic")
+    if(load_raw == &LibRaw::panasonic_load_raw && (!strcasecmp(imgdata.idata.make,"Panasonic") || !strcasecmp(imgdata.idata.make,"Leica"))
        &&  ID.pana_black[0] && ID.pana_black[1] && ID.pana_black[2])
       {
         C.black=0;
@@ -1149,17 +1156,6 @@ void LibRaw::fix_after_rawspeed(int bl)
     C.maximum = 0xffff;
   else if (load_raw == &LibRaw::sony_load_raw)
     C.maximum = 0x3ff0;
-  else if 
-    ( (load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony"))
-     && bl >= (C.black+C.cblack[0])*2
-     )
-    {
-      // Rlly?
-      C.maximum *=4;
-      C.black *=4;
-      for(int c=0; c< 4; c++)
-        C.cblack[c]*=4;
-    }
 }
 #else
 void LibRaw::fix_after_rawspeed(int)

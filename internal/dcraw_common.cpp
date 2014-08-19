@@ -7856,7 +7856,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 11340,-4069,-1275,-7555,15266,2448,-2960,3426,7685 } },
     { "Panasonic DMC-LF1", -15, 0,
 	{ 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
-    { "Leica C (Typ 112)", -15, 0,
+    { "Leica C", -15, 0,
 	{ 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
     { "Panasonic DMC-LX1", 0, 0xf7f,
 	{ 10704,-4187,-1230,-8314,15952,2501,-920,945,8927 } },
@@ -9064,6 +9064,10 @@ canon_a5:
       left_margin = 0;
       filters = 0x16161616;
     }
+	if(!strcmp(model,"S5500"))
+	{
+		height -= (top_margin=6); 
+	}
     if (fuji_layout) raw_width *= is_raw;
     if (filters == 9)
       FORC(36) xtrans[0][c] =
