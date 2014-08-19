@@ -148,6 +148,7 @@ it under the terms of the one of three licenses as you choose:
 #define ofp             libraw_internal_data.internal_data.output
 #define profile_offset  (libraw_internal_data.internal_data.profile_offset)
 #define thumb_offset    (libraw_internal_data.internal_data.toffset)
+#define pana_black		(libraw_internal_data.internal_data.pana_black)
 
 //libraw_internal_data.internal_output_params
 #define mix_green       (libraw_internal_data.internal_output_params.mix_green)

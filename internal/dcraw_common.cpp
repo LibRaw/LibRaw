@@ -5771,13 +5771,17 @@ int CLASS parse_tiff_ifd (int base)
       case 6:   height = get2();  break;
       case 7:   width += get2();  break;
       case 9:   if ((i = get2())) filters = i;  
+#ifdef LIBRAW_LIBRARY_BUILD
         if(pana_raw && len == 1 && type ==3)
-          cblack[9]+=i;
+          pana_black[3]+=i;
+#endif
         break;
       case 8:
       case 10:
+#ifdef LIBRAW_LIBRARY_BUILD
         if(pana_raw && len == 1 && type ==3)
-          cblack[9]+=get2();
+          pana_black[3]+=get2();
+#endif
         break;
       case 17: case 18:
 	if (type == 3 && len == 1)
@@ -5787,11 +5791,13 @@ int CLASS parse_tiff_ifd (int base)
 	if (type == 3) iso_speed = get2();
 	break;
       case 28: case 29: case 30:
+#ifdef LIBRAW_LIBRARY_BUILD
         if(pana_raw && len == 1 && type ==3)
           {
-            cblack[tag-22] = get2();
+            pana_black[tag-28] = get2();
           }
         else
+#endif
           {
             cblack[tag-28] = get2();
             cblack[3] = cblack[1];
@@ -8058,6 +8064,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{6655,-2434,-214,-2523,10565,1450,-863,1790,5024} },
     {"Sony ILCE-3000",-512, 0,  /* LibRaw */
         { 14009,-8208,729,3738,4752,2932,5743,-3800,6494 } },    
+    {"Sony ILCE-5100",-512, 0,  /* LibRaw */
+     { 6775,-2514,-213,-2837,10905,1593,-1103,2064,5149 } },
     {"Sony ILCE-5000",-512, 0,  /* LibRaw */
         {5991,-1456,-455,-4764,12135,2980,-707,1425,6701} },
     {"Sony ILCE-6000",-512, 0,  /* LibRaw */
@@ -8383,7 +8391,7 @@ void CLASS identify()
     {312,"ILCE-6000"},
     {313,"ILCE-5000"},
     {319,"ILCA-77M2"},
-	{339,"ILCE-5100"}
+    {339,"ILCE-5100"}
   };
   static const struct {
     unsigned fsize;

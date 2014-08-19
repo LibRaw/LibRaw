@@ -1048,13 +1048,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
 	// Adjust BL for Panasonic
     if(load_raw == &LibRaw::panasonic_load_raw && !strcasecmp(imgdata.idata.make,"Panasonic")
-       && !C.cblack[4] && !C.cblack[5] && C.cblack[6] && C.cblack[7] && C.cblack[8])
+       &&  ID.pana_black[0] && ID.pana_black[1] && ID.pana_black[2])
       {
         C.black=0;
-        C.cblack[0] = C.cblack[6]+C.cblack[9];
-        C.cblack[1] = C.cblack[3] = C.cblack[7]+C.cblack[9];
-        C.cblack[2] = C.cblack[8]+C.cblack[9];
-        C.cblack[6]=C.cblack[7]=C.cblack[8]=C.cblack[9]=0;
+        C.cblack[0] = ID.pana_black[0]+ID.pana_black[3];
+        C.cblack[1] = C.cblack[3] = ID.pana_black[1]+ID.pana_black[3];
+        C.cblack[2] = ID.pana_black[2]+ID.pana_black[3];
         int i = C.cblack[3];
         for(int c=0; c<3; c++) if(i>C.cblack[c]) i = C.cblack[c];
         for(int c=0; c< 4; c++) C.cblack[c]-=i;
@@ -3201,6 +3200,7 @@ static const char  *static_camera_list[] =
 "Baumer TXG14",
 "BlackMagic Cinema Camera",
 "Blackmagic Pocket Cinema Camera",
+"BlackMagic Production Camera 4k",
 "Canon PowerShot 600",
 "Canon PowerShot A5",
 "Canon PowerShot A5 Zoom",

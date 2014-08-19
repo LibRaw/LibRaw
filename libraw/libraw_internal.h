@@ -101,6 +101,7 @@ typedef struct
     char        *meta_data;
     INT64       profile_offset;
     INT64       toffset;
+	unsigned    pana_black[4];
 
 } internal_data_t;
 
