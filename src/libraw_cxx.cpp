@@ -988,6 +988,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
 
+	// S3Pro DNG patch
+	if(imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Fujifilm") && !strcmp(imgdata.idata.model,"S3Pro") && imgdata.sizes.raw_width == 4288 )
+	{
+		imgdata.idata.filters = 0x94949494;
+	}
+
 	if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
 		 && !libraw_internal_data.unpacker_data.load_flags &&
 		 libraw_internal_data.unpacker_data.data_size*2 == imgdata.sizes.raw_height*imgdata.sizes.raw_width*3)
@@ -1243,8 +1249,11 @@ int LibRaw::unpack(void)
     imgdata.rawdata.color4_image = 0;
     imgdata.rawdata.color3_image = 0;
 #ifdef USE_RAWSPEED
+	int rawspeed_enabled = 1;
+	if(!strcasecmp(imgdata.idata.make,"Fujifilm") && imgdata.idata.dng_version)
+		rawspeed_enabled = 0;
     // RawSpeed Supported, 
-    if(O.use_rawspeed 
+    if(O.use_rawspeed  && rawspeed_enabled
        && !(is_sraw() && O.sraw_ycc)
        && (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
       {
@@ -2657,8 +2666,8 @@ int LibRaw::adjust_sizes_info_only(void)
         } 
       else 
         {
-          if (S.pixel_aspect < 1) S.iheight = (ushort)( S.iheight / S.pixel_aspect + 0.5);
-          if (S.pixel_aspect > 1) S.iwidth  = (ushort) (S.iwidth  * S.pixel_aspect + 0.5);
+          if (S.pixel_aspect < 0.995) S.iheight = (ushort)( S.iheight / S.pixel_aspect + 0.5);
+          if (S.pixel_aspect > 1.005) S.iwidth  = (ushort) (S.iwidth  * S.pixel_aspect + 0.5);
         }
     }
   SET_PROC_FLAG(LIBRAW_PROGRESS_FUJI_ROTATE);
