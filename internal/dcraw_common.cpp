@@ -5573,7 +5573,7 @@ void CLASS parse_exif (int base)
       case 34855:  iso_speed = get2();			break;
       case 36867:
       case 36868:  get_timestamp(0);			break;
-      case 37377:  if ((expo = -getreal(type)) < 128)
+      case 37377:  if ((expo = -getreal(type)) < 128 && shutter == 0.)
 		     shutter = pow (2.0, expo);		break;
       case 37378:  aperture = pow (2.0, getreal(type)/2);	break;
       case 37386:  focal_len = getreal(type);		break;
