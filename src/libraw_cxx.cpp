@@ -3424,7 +3424,7 @@ static const char  *static_camera_list[] =
 "Hasselblad H3D-22",
 "Hasselblad H3D-31",
 "Hasselblad H3D-39",
-"Hasselblad H2D-22"
+"Hasselblad H2D-22",
 "Hasselblad H2D-39",
 "Hasselblad CFV",
 "Hasselblad CFH",
@@ -3533,7 +3533,7 @@ static const char  *static_camera_list[] =
 "Leica S",
 "Leica S2",
 //"Leica S3",
-"Leica T (Typ 701)"
+"Leica T (Typ 701)",
 "Leica X1",
 "Leica X2",
 "Leica V-LUX1",
