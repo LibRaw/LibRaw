@@ -6751,6 +6751,7 @@ void CLASS parse_exif (int base)
       case 37377:  if ((expo = -getreal(type)) < 128 && shutter == 0.)
 		     shutter = pow (2.0, expo);		break;
       case 37378:  aperture = pow (2.0, getreal(type)/2);	break;
+      case 37385:  flash_used = getreal(type);          break;
       case 37386:  focal_len = getreal(type);		break;
       case 37500:  parse_makernote (base, 0);		break;
       case 40962:  if (kodak) raw_width  = get4();	break;
