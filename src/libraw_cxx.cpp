@@ -1250,7 +1250,7 @@ int LibRaw::unpack(void)
     imgdata.rawdata.color3_image = 0;
 #ifdef USE_RAWSPEED
 	int rawspeed_enabled = 1;
-	if(!strcasecmp(imgdata.idata.make,"Fujifilm") && imgdata.idata.dng_version)
+	if(imgdata.idata.dng_version && libraw_internal_data.unpacker_data.tiff_samples == 2)
 		rawspeed_enabled = 0;
     // RawSpeed Supported, 
     if(O.use_rawspeed  && rawspeed_enabled
