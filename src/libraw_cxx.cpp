@@ -228,7 +228,7 @@ CameraMetaDataLR::CameraMetaDataLR(char *data, int sz) : CameraMetaData() {
       addCamera(camera);
       
       // Create cameras for aliases.
-      for (uint32 i = 0; i < camera->aliases.size(); i++) {
+      for (uint32_t i = 0; i < camera->aliases.size(); i++) {
         addCamera(new Camera(camera, i));
       }
     }
@@ -4160,8 +4160,8 @@ void LibRaw::x3f_thumb_loader()
     }
 }
 
-static inline uint32 _clampbits(int x, uint32 n) { 
-	uint32 _y_temp; 
+static inline uint32_t _clampbits(int x, uint32_t n) { 
+	uint32_t _y_temp; 
 	if( (_y_temp=x>>n) ) 
 		x = ~_y_temp >> (32-n); 
 	return x;
