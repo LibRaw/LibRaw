@@ -3897,7 +3897,6 @@ static const char  *static_camera_list[] =
 "SMaL Ultra-Pocket 3",
 "SMaL Ultra-Pocket 4",
 "SMaL Ultra-Pocket 5",
-"Sony A3000",
 "Sony A7",
 "Sony A7R",
 "Sony A7S",
