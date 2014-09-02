@@ -1321,11 +1321,13 @@ int LibRaw::unpack(void)
 			else if(r->getCpp()==4) 
 			{
               imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
-              C.maximum = r->whitePoint;
+			  if(r->whitePoint > 0 && r->whitePoint < 65536)
+					C.maximum = r->whitePoint;
             } else if(r->getCpp() == 3)
               {
                 imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
-              C.maximum = r->whitePoint;
+				if(r->whitePoint > 0 && r->whitePoint < 65536)
+					C.maximum = r->whitePoint;
               }
             else
               {
@@ -3873,7 +3875,7 @@ static const char  *static_camera_list[] =
 "Seitz 6x17",
 "Seitz Roundshot D3",
 "Seitz Roundshot D2X",
-"Seitz Roundshot D2xs",
+"Seitz Roundshot D2Xs",
 "Sigma SD9",
 "Sigma SD10",
 "Sigma SD14",
