@@ -1012,7 +1012,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	// S3Pro DNG patch
 	if(imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Fujifilm") && !strcmp(imgdata.idata.model,"S3Pro") && imgdata.sizes.raw_width == 4288 )
 	{
-		imgdata.idata.filters = 0x94949494;
+		imgdata.sizes.left_margin++;
+		imgdata.sizes.width--;
 	}
 
 	if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
