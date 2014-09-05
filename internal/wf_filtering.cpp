@@ -1166,7 +1166,7 @@ void LibRaw::wf_bayer4_igauss_filter(int radius, void* src_image, int src_imgmod
 
 	for (i=0; i<4; i++)
 	{
-		int padding = i<2 && (S.width & 1 == 1) ? 1 : 0;
+		int padding = i<2 && (S.width & 1) ? 1 : 0;
 		right_edge[i]=width_d2 + radius + padding;
 	}
 	
@@ -1329,7 +1329,7 @@ void LibRaw::wf_bayer4_igauss_filter(int radius, void* src_image, int src_imgmod
 
 	for (i=0; i<4; i++)
 	{
-		int padding = i<2 && (S.height & 1 == 1) ? 1 : 0;
+		int padding = i<2 && (S.height & 1 ) ? 1 : 0;
 		lower_edge[i]=height_d2 + radius + padding;
 	}
 
