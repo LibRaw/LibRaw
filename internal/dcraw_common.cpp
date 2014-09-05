@@ -5281,7 +5281,7 @@ nf: order = 0x4949;
     tag |= uptag << 16;
     if (tag == 2 && strstr(make,"NIKON") && !iso_speed)
       iso_speed = (get2(),get2());
-    if (tag == 37 && strstr(make,"NIKON") && !iso_speed)
+    if (tag == 37 && strstr(make,"NIKON") && (!iso_speed || iso_speed==65535))
       {
         unsigned char cc;
         fread(&cc,1,1,ifp);
@@ -6285,6 +6285,18 @@ guess_cfa_pc:
 	FORC3 xyz[c] /= d65_white[c];
 	break;
       case 50740:			/* DNGPrivateData */
+		  // IB start
+		  if (!strncmp(software, "Adobe DNG Converter ",20)) {
+			  char mbuf[8];
+			  fread (mbuf, 1, 6, ifp);
+			  if (!strcmp(mbuf, "Adobe")) {
+				  fseek (ifp, 14, SEEK_CUR);
+				  parse_makernote(base, 0);
+			  }
+			  else
+				  fseek(ifp, -6, SEEK_CUR);
+		  }
+		  //IB end
 	if (dng_version) break;
 	parse_minolta (j = get4()+base);
 	fseek (ifp, j, SEEK_SET);
