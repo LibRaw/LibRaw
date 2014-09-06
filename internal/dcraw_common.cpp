@@ -7034,8 +7034,9 @@ void CLASS parse_riff()
   size = get4();
   end = ftell(ifp) + size;
   if (!memcmp(tag,"RIFF",4) || !memcmp(tag,"LIST",4)) {
+    int maxloop = 1000;
     get4();
-    while (ftell(ifp)+7 < end)
+    while (ftell(ifp)+7 < end && maxloop--)
       parse_riff();
   } else if (!memcmp(tag,"nctg",4)) {
     while (ftell(ifp)+7 < end) {
