@@ -76,6 +76,7 @@ it under the terms of the one of three licenses as you choose:
 #define flash_used      (imgdata.color.flash_used)
 #define canon_ev        (imgdata.color.canon_ev)
 #define model2          (imgdata.color.model2)
+#define baseline_exposure  (imgdata.color.baseline_exposure)
 
 //imgdata.thumbnail
 

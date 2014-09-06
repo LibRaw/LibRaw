@@ -89,6 +89,8 @@ int main(int ac, char *av[])
             else
                 printf ("Embedded ICC profile: no\n");
                 
+	   if (C.baseline_exposure > -999.f) printf ("Baseline exposure: %04.3f\n", C.baseline_exposure);
+
             printf ("Number of raw images: %d\n", P1.raw_count);
             if (S.pixel_aspect != 1)
                 printf ("Pixel Aspect Ratio: %0.6f\n", S.pixel_aspect);
@@ -113,7 +115,7 @@ int main(int ac, char *av[])
                     printf ("\nCamera multipliers:");
                     for(int c=0;c<4;c++) printf (" %f", C.cam_mul[c]);
                 }
-            printf("Cam->XYZ matrix:\n");
+            printf("\nCam->XYZ matrix:\n");
             for(int i=0; i< 4; i++)
                 printf("%6.4f\t%6.4f\t%6.4f\n",C.cam_xyz[i][0],C.cam_xyz[i][1],C.cam_xyz[i][2]);
         }

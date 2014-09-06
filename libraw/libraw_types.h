@@ -214,6 +214,7 @@ typedef struct
   unsigned    profile_length;
   unsigned    black_stat[8];
   dng_color_t  dng_color[2];
+  float	      baseline_exposure;
 }libraw_colordata_t;
 
 typedef struct

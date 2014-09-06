@@ -352,6 +352,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.green_matching = 0;
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
+  imgdata.color.baseline_exposure = -999.f;
   _exitflag = 0;
   tls = new LibRaw_TLS;
   tls->init();
@@ -452,6 +453,7 @@ void LibRaw:: recycle()
   ZERO(imgdata.rawdata);
   ZERO(imgdata.sizes);
   ZERO(imgdata.color);
+  imgdata.color.baseline_exposure = -999.f;
   ZERO(libraw_internal_data);
   _exitflag = 0;
 #ifdef USE_RAWSPEED
