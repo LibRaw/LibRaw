@@ -6284,40 +6284,42 @@ guess_cfa_pc:
 	xyz[2] = 1 - xyz[0] - xyz[1];
 	FORC3 xyz[c] /= d65_white[c];
 	break;
-	case 50730:			/* DNG: Baseline Exposure */
-		baseline_exposure = getreal(type);
-		break;
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 50730:			/* DNG: Baseline Exposure */
+        baseline_exposure = getreal(type);
+        break;
+#endif
       case 50740:			/* DNGPrivateData */
-		{
- 			char mbuf[64];
- 			unsigned short makernote_found = 0;
- 			unsigned curr_pos, start_pos = ftell(ifp);
- 			unsigned MakN_order, m_sorder = order;
- 			unsigned MakN_length;
- 			unsigned pos_in_original_raw;
- 			order = 0x4d4d;											// Adobe header is always in "MM" / big endian
- 			if (!strncmp(software, "Adobe DNG Converter ",20)) {
- 				fread (mbuf, 1, 6, ifp);
- 				if (!strcmp(mbuf, "Adobe")) {
-					curr_pos = start_pos + 6;
-					while (curr_pos + 8 <= len) {
- 						fread (mbuf, 1, 4, ifp);
-						curr_pos += 8;
- 						if (!strncmp(mbuf, "MakN", 4)) {
-   							makernote_found = 1;
- 							MakN_length = get4();
- 							MakN_order = get2();
- 							pos_in_original_raw = get4();
- 							order = MakN_order;
- 							parse_makernote(curr_pos + 6 - pos_in_original_raw, 0);
- 							break;
- 						}
- 					}
-				}
- 			}
- 			if (!makernote_found) fseek(ifp, start_pos, SEEK_SET);
- 			order = m_sorder;
-		}
+        {
+          char mbuf[64];
+          unsigned short makernote_found = 0;
+          unsigned curr_pos, start_pos = ftell(ifp);
+          unsigned MakN_order, m_sorder = order;
+          unsigned MakN_length;
+          unsigned pos_in_original_raw;
+          order = 0x4d4d;											// Adobe header is always in "MM" / big endian
+          if (!strncmp(software, "Adobe DNG Converter ",20)) {
+            fread (mbuf, 1, 6, ifp);
+            if (!strcmp(mbuf, "Adobe")) {
+              curr_pos = start_pos + 6;
+              while (curr_pos + 8 <= len) {
+                fread (mbuf, 1, 4, ifp);
+                curr_pos += 8;
+                if (!strncmp(mbuf, "MakN", 4)) {
+                  makernote_found = 1;
+                  MakN_length = get4();
+                  MakN_order = get2();
+                  pos_in_original_raw = get4();
+                  order = MakN_order;
+                  parse_makernote(curr_pos + 6 - pos_in_original_raw, 0);
+                  break;
+                }
+              }
+            }
+          }
+          if (!makernote_found) fseek(ifp, start_pos, SEEK_SET);
+          order = m_sorder;
+        }
 	if (dng_version) break;
 	parse_minolta (j = get4()+base);
 	fseek (ifp, j, SEEK_SET);

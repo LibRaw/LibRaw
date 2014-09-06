@@ -6463,7 +6463,7 @@ nf: order = 0x4949;
         iso_speed = int(100.0 * pow(2.0,double(cc)/12.0-5.0));
       }
     if (tag == 4 && len > 26 && len < 35) {
-      if ((i=(get4(),get2())) != 0x7fff && !iso_speed)
+      if ((i=(get4(),get2())) != 0x7fff && (!iso_speed || iso_speed == 65535))
 	iso_speed = 50 * pow (2.0, i/32.0 - 4);
       if ((i=(get2(),get2())) != 0x7fff && !aperture)
 	aperture = pow (2.0, i/64.0);
@@ -7465,19 +7465,42 @@ guess_cfa_pc:
 	xyz[2] = 1 - xyz[0] - xyz[1];
 	FORC3 xyz[c] /= d65_white[c];
 	break;
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 50730:			/* DNG: Baseline Exposure */
+        baseline_exposure = getreal(type);
+        break;
+#endif
       case 50740:			/* DNGPrivateData */
-        if (!strncmp(software, "Adobe DNG Converter ",20)) 
-          {
-            char mbuf[8];
+        {
+          char mbuf[64];
+          unsigned short makernote_found = 0;
+          unsigned curr_pos, start_pos = ftell(ifp);
+          unsigned MakN_order, m_sorder = order;
+          unsigned MakN_length;
+          unsigned pos_in_original_raw;
+          order = 0x4d4d;											// Adobe header is always in "MM" / big endian
+          if (!strncmp(software, "Adobe DNG Converter ",20)) {
             fread (mbuf, 1, 6, ifp);
-            if (!strcmp(mbuf, "Adobe")) 
-              {
-                fseek (ifp, 14, SEEK_CUR);
-                parse_makernote(base, 0);
+            if (!strcmp(mbuf, "Adobe")) {
+              curr_pos = start_pos + 6;
+              while (curr_pos + 8 <= len) {
+                fread (mbuf, 1, 4, ifp);
+                curr_pos += 8;
+                if (!strncmp(mbuf, "MakN", 4)) {
+                  makernote_found = 1;
+                  MakN_length = get4();
+                  MakN_order = get2();
+                  pos_in_original_raw = get4();
+                  order = MakN_order;
+                  parse_makernote(curr_pos + 6 - pos_in_original_raw, 0);
+                  break;
+                }
               }
-            else
-              fseek(ifp, -6, SEEK_CUR);
+            }
           }
+          if (!makernote_found) fseek(ifp, start_pos, SEEK_SET);
+          order = m_sorder;
+        }
 	if (dng_version) break;
 	parse_minolta (j = get4()+base);
 	fseek (ifp, j, SEEK_SET);
