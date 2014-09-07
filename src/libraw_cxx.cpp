@@ -1019,8 +1019,9 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	}
 
 	if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
-		 && !libraw_internal_data.unpacker_data.load_flags &&
-		 libraw_internal_data.unpacker_data.data_size*2 == imgdata.sizes.raw_height*imgdata.sizes.raw_width*3)
+		 && !libraw_internal_data.unpacker_data.load_flags 
+		 && strcasecmp(imgdata.idata.model,"COOLPIX P340")
+		 && libraw_internal_data.unpacker_data.data_size*2 == imgdata.sizes.raw_height*imgdata.sizes.raw_width*3)
 	{
 		libraw_internal_data.unpacker_data.load_flags = 80;
 	}
