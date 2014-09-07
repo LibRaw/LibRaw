@@ -6377,6 +6377,7 @@ void CLASS parse_makernote_nikon_iso (int base, int uptag)
         iso_speed = int(100.0 * pow(2.0,double(cc)/12.0-5.0));
         break;
       }
+    fseek (ifp, save, SEEK_SET);
   }
  quit:
   order = sorder;
