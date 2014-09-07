@@ -194,6 +194,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        tiff_get (unsigned base,unsigned *tag, unsigned *type, unsigned *len, unsigned *save);
     void        parse_thumb_note (int base, unsigned toff, unsigned tlen);
     void        parse_makernote (int base, int uptag);
+	void        parse_makernote_nikon_iso (int base, int uptag);
     void        parse_exif (int base);
     void        linear_table (unsigned len);
     void        parse_kodak_ifd (int base);
