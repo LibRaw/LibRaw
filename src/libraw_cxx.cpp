@@ -3507,6 +3507,7 @@ static const char  *static_camera_list[] =
 "Kodak C603",
 "Kodak P850",
 "Kodak P880",
+"Kodak S-1",
 "Kodak Z980",
 "Kodak Z981",
 "Kodak Z990",
