@@ -1060,33 +1060,32 @@ void CLASS pentax_load_raw()
 
 void CLASS nikon_coolscan_load_raw()
 {
-	int size = width*height*3*tiff_bps/8;
-	int bufsize = width*3*tiff_bps/8;
-	fseek (ifp, data_offset, SEEK_SET);
-	unsigned char *buf = (unsigned char*)malloc(bufsize);
-	unsigned short *ubuf = (unsigned short *)buf;
-	for(int row = 0; row < raw_height; row++)
-	{
-		int red = fread (buf, 1, bufsize, ifp);
-		unsigned short (*ip)[4] = (unsigned short (*)[4]) image + row*width;
-		if(tiff_bps <= 8)
-			for(int col=0; col<width;col++)
-			{
-				ip[col][0] = buf[col*3];
-				ip[col][1] = buf[col*3+1];
-				ip[col][2] = buf[col*3+2];
-				ip[col][3]=0;
-			}
-		else
-			for(int col=0; col<width;col++)
-			{
-				ip[col][0] = ubuf[col*3];
-				ip[col][1] = ubuf[col*3+1];
-				ip[col][2] = ubuf[col*3+2];
-				ip[col][3]=0;
-			}
-	}
-	free(buf);
+  int bufsize = width*3*tiff_bps/8;
+  fseek (ifp, data_offset, SEEK_SET);
+  unsigned char *buf = (unsigned char*)malloc(bufsize);
+  unsigned short *ubuf = (unsigned short *)buf;
+  for(int row = 0; row < raw_height; row++)
+    {
+      int red = fread (buf, 1, bufsize, ifp);
+      unsigned short (*ip)[4] = (unsigned short (*)[4]) image + row*width;
+      if(tiff_bps <= 8)
+        for(int col=0; col<width;col++)
+          {
+            ip[col][0] = buf[col*3];
+            ip[col][1] = buf[col*3+1];
+            ip[col][2] = buf[col*3+2];
+            ip[col][3]=0;
+          }
+      else
+        for(int col=0; col<width;col++)
+          {
+            ip[col][0] = ubuf[col*3];
+            ip[col][1] = ubuf[col*3+1];
+            ip[col][2] = ubuf[col*3+2];
+            ip[col][3]=0;
+          }
+    }
+  free(buf);
 }
 
 void CLASS nikon_load_raw()
@@ -5972,7 +5971,6 @@ int CLASS parse_tiff_ifd (int base)
 	    !strncmp(software,"dcraw",5) ||
 	    !strncmp(software,"UFRaw",5) ||
 	    !strncmp(software,"Bibble",6) ||
-	    //!strncmp(software,"Nikon Scan",10) ||
 	    !strcmp (software,"Digital Photo Professional"))
 	  is_raw = 0;
 	break;
@@ -6545,13 +6543,13 @@ void CLASS apply_tiff()
       case 32770:
       case 32773: goto slr;
       case 0:  case 1:
-		 if(!strcasecmp(make,"Nikon") && !strncmp(software,"Nikon Scan",10))
-		  {
-			  load_raw = &CLASS nikon_coolscan_load_raw;
-			  raw_color = 1;
-			  filters = 0;
-			  break;
-		  }
+        if(!strcasecmp(make,"Nikon") && !strncmp(software,"Nikon Scan",10))
+          {
+            load_raw = &CLASS nikon_coolscan_load_raw;
+            raw_color = 1;
+            filters = 0;
+            break;
+          }
 	if (!strncmp(make,"OLYMPUS",7) &&
 		tiff_ifd[raw].bytes*2 == raw_width*raw_height*3)
 	  load_flags = 24;
@@ -6606,13 +6604,12 @@ void CLASS apply_tiff()
       case 32867: case 34892: break;
       default: is_raw = 0;
     }
-  int qq = strncmp(software,"Nikon Scan",10);
   if (!dng_version)
     if ( ((tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 &&
-	  (tiff_compress & -16) != 32768)  
+	  (tiff_compress & -16) != 32768)
       || (tiff_bps == 8 && !strcasestr(make,"Kodak") &&
 	  !strstr(model2,"DEBUG RAW")))
-	  && strncmp(software,"Nikon Scan",10))
+         && strncmp(software,"Nikon Scan",10))
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
     if (i != raw && tiff_ifd[i].samples == max_samp &&
