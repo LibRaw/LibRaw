@@ -540,6 +540,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_name = "nikon_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_TRYRAWSPEED;
     }
+  else if (load_raw == &LibRaw::nikon_coolscan_load_raw )
+  {
+	  d_info->decoder_name = "nikon_coolscan_load_raw()";
+	  d_info->decoder_flags = LIBRAW_DECODER_LEGACY | LIBRAW_DECODER_FIXEDMAXC; 
+  }
   else if (load_raw == &LibRaw::nikon_load_sraw )
     {
       d_info->decoder_name = "nikon_load_sraw()";

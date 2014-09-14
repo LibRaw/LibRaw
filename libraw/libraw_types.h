@@ -149,6 +149,7 @@ typedef struct
 {
   char        make[64];
   char        model[64];
+  char		  software[64];
   unsigned    raw_count;
   unsigned    dng_version;
   unsigned    is_foveon;
