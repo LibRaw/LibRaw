@@ -9733,6 +9733,7 @@ void CLASS identify()
     { 0x286, "EOS 600D" },
     { 0x287, "EOS 60D" },
     { 0x288, "EOS 1100D" },
+    { 0x289, "EOS 7D Mark II" },
     { 0x301, "EOS 650D" },
     { 0x302, "EOS 6D" },
     { 0x324, "EOS-1D C" },
