@@ -80,6 +80,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 // Nikon (and Minolta Z2)
     void        nikon_load_raw();
     void        nikon_load_sraw();
+    void	nikon_coolscan_load_raw();
     int         nikon_e995();
     int         nikon_e2100();
     void        nikon_3700();
@@ -156,7 +157,6 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        sony_load_raw();
     void        sony_arw_load_raw();
     void        sony_arw2_load_raw();
-	void			nikon_coolscan_load_raw();
     void        samsung_load_raw();
     void        samsung2_load_raw();
     void        parse_minolta (int base);

@@ -135,7 +135,7 @@ FILE *ifp, *ofp;
 short order;
 const char *ifname;
 char *meta_data, xtrans[6][6], xtrans_abs[6][6];
-char cdesc[5], desc[512], make[64], model[64], model2[64], artist[64];
+char cdesc[5], desc[512], make[64], model[64], model2[64], artist[64],software[64];
 float flash_used, canon_ev, iso_speed, shutter, aperture, focal_len;
 time_t timestamp;
 off_t strip_offset, data_offset;
@@ -1331,6 +1331,36 @@ void CLASS pentax_load_raw()
       if (hpred[col & 1] >> tiff_bps) derror();
     }
   }
+}
+
+void CLASS nikon_coolscan_load_raw()
+{
+  int bufsize = width*3*tiff_bps/8;
+  fseek (ifp, data_offset, SEEK_SET);
+  unsigned char *buf = (unsigned char*)malloc(bufsize);
+  unsigned short *ubuf = (unsigned short *)buf;
+  for(int row = 0; row < raw_height; row++)
+    {
+      int red = fread (buf, 1, bufsize, ifp);
+      unsigned short (*ip)[4] = (unsigned short (*)[4]) image + row*width;
+      if(tiff_bps <= 8)
+        for(int col=0; col<width;col++)
+          {
+            ip[col][0] = buf[col*3];
+            ip[col][1] = buf[col*3+1];
+            ip[col][2] = buf[col*3+2];
+            ip[col][3]=0;
+          }
+      else
+        for(int col=0; col<width;col++)
+          {
+            ip[col][0] = ubuf[col*3];
+            ip[col][1] = ubuf[col*3+1];
+            ip[col][2] = ubuf[col*3+2];
+            ip[col][3]=0;
+          }
+    }
+  free(buf);
 }
 
 void CLASS nikon_load_raw()
@@ -6969,7 +6999,7 @@ int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
   int ifd, use_cm=0, cfa, i, j, c, ima_len=0;
-  char software[64], *cbuf, *cp;
+  char *cbuf, *cp;
   uchar cfa_pat[16], cfa_pc[] = { 0,1,2,3 }, tab[256];
   double cc[4][4], cm[4][3], cam_xyz[4][3], num;
   double ab[]={ 1,1,1,1 }, asn[] = { 0,0,0,0 }, xyz[] = { 1,1,1 };
@@ -7122,7 +7152,6 @@ int CLASS parse_tiff_ifd (int base)
 	    !strncmp(software,"dcraw",5) ||
 	    !strncmp(software,"UFRaw",5) ||
 	    !strncmp(software,"Bibble",6) ||
-	    !strncmp(software,"Nikon Scan",10) ||
 	    !strcmp (software,"Digital Photo Professional"))
 	  is_raw = 0;
 	break;
@@ -7695,6 +7724,13 @@ void CLASS apply_tiff()
       case 32770:
       case 32773: goto slr;
       case 0:  case 1:
+        if(!strcasecmp(make,"Nikon") && !strncmp(software,"Nikon Scan",10))
+          {
+            load_raw = &CLASS nikon_coolscan_load_raw;
+            raw_color = 1;
+            filters = 0;
+            break;
+          }
 	if (!strncmp(make,"OLYMPUS",7) &&
 		tiff_ifd[raw].bytes*2 == raw_width*raw_height*3)
 	  load_flags = 24;
@@ -7750,10 +7786,11 @@ void CLASS apply_tiff()
       default: is_raw = 0;
     }
   if (!dng_version)
-    if ( (tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 &&
+    if ( ((tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 &&
 	  (tiff_compress & -16) != 32768)
       || (tiff_bps == 8 && !strcasestr(make,"Kodak") &&
 	  !strstr(model2,"DEBUG RAW")))
+         && strncmp(software,"Nikon Scan",10))
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
     if (i != raw && tiff_ifd[i].samples == max_samp &&
@@ -9696,6 +9733,7 @@ void CLASS identify()
     { 0x286, "EOS 600D" },
     { 0x287, "EOS 60D" },
     { 0x288, "EOS 1100D" },
+    { 0x289, "EOS 7D Mark II" },
     { 0x301, "EOS 650D" },
     { 0x302, "EOS 6D" },
     { 0x324, "EOS-1D C" },
