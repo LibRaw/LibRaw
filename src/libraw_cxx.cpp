@@ -323,6 +323,7 @@ LibRaw:: LibRaw(unsigned int flags)
 #endif
   callbacks.mem_cb = (flags & LIBRAW_OPIONS_NO_MEMERR_CALLBACK) ? NULL:  &default_memory_callback;
   callbacks.data_cb = (flags & LIBRAW_OPIONS_NO_DATAERR_CALLBACK)? NULL : &default_data_callback;
+  callbacks.exif_cb = NULL; // no default callback
   memmove(&imgdata.params.aber,&aber,sizeof(aber));
   memmove(&imgdata.params.gamm,&gamm,sizeof(gamm));
   memmove(&imgdata.params.greybox,&greybox,sizeof(greybox));

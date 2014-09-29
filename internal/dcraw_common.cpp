@@ -5637,6 +5637,14 @@ void CLASS parse_exif (int base)
   if(!strcmp(make,"Hasselblad") && (tiff_nifds > 3) && (entries > 512)) return;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
+#ifdef LIBRAW_LIBRARY_BUILD
+	if(callbacks.exif_cb)
+	{
+		int savepos = ftell(ifp);
+		callbacks.exif_cb(callbacks.exifparser_data,tag,type,len,order,ifp);
+		fseek(ifp,savepos,SEEK_SET);
+	}
+#endif
     switch (tag) {
       case 33434:  shutter = getreal(type);		break;
       case 33437:  aperture = getreal(type);		break;
@@ -5840,6 +5848,14 @@ int CLASS parse_tiff_ifd (int base)
   if (entries > 512) return 1;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
+#ifdef LIBRAW_LIBRARY_BUILD
+	if(callbacks.exif_cb)
+	{
+		int savepos = ftell(ifp);
+		callbacks.exif_cb(callbacks.exifparser_data,tag,type,len,order,ifp);
+		fseek(ifp,savepos,SEEK_SET);
+	}
+#endif
     switch (tag) {
       case 1:   if(len==4) pana_raw = get4(); break;
       case 5:   width  = get2();  break;
@@ -7735,7 +7751,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Nikon D7100", 0, 0,
 	{ 8322,-3112,-1047,-6367,14342,2179,-988,1638,6394 } },
     {"Nikon D750",-600, 0,
-       { 10645,-5086,-698,-4938,13608,761,-1107,1874,5312 } },
+	{ 10316,-4181,-518,-3565,11855,1344,-1349,2423,5856 } },	
     { "Nikon D700", 0, 0,
 	{ 8139,-2171,-663,-8747,16541,2295,-1925,2008,8093 } },
     { "Nikon D70", 0, 0,
@@ -8526,7 +8542,8 @@ void CLASS identify()
     {317,"DSC-RX100M3"},
     {318,"ILCE-7S"},
     {319,"ILCA-77M2"},
-    {339,"ILCE-5100"}
+    {339,"ILCE-5100"},
+	{346,"ILCE-QX1"}
   };
   static const struct {
     unsigned fsize;

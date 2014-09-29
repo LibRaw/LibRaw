@@ -111,6 +111,7 @@ typedef struct
 
 
 typedef void (* memory_callback)(void * data, const char *file, const char *where);
+typedef void (*exif_parser_callback) (void *context, int tag, int type, int len,unsigned int ord, void *ifp);
 
 DllDef void default_memory_callback(void *data,const char *file, const char *where);
 
@@ -130,6 +131,9 @@ typedef struct
 
     progress_callback progress_cb;
     void *progresscb_data;
+
+	exif_parser_callback exif_cb;
+	void *exifparser_data;
 } libraw_callbacks_t;
 
 

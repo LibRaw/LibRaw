@@ -25,7 +25,7 @@ it under the terms of the one of three licenses as you choose:
 #else
     /* WF */
     void        wf_bayer4_igauss_filter(int radius,void* src_image, int src_imgmode, void* dst_image, int dst_imgmode);
-    void	wf_bayer4_green_blur   (int mode,void* src_image, int src_imgmode, void* dst_image, int dst_imgmode);
+    void			wf_bayer4_green_blur   (int mode,void* src_image, int src_imgmode, void* dst_image, int dst_imgmode);
     void        wf_bayer4_block_filter (int* radius_list, void* src_image, int src_imgmode, void* dst_image, int dst_imgmode);
     double	wf_filter_energy       (int r1_greenmode, int r1, int r2_greenmode, int r2);
 

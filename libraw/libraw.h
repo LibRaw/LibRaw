@@ -75,6 +75,7 @@ DllDef    int                 libraw_cameraCount();
 
   /* helpers */
 DllDef    void                libraw_set_memerror_handler(libraw_data_t*, memory_callback cb, void *datap);
+DllDef    void                libraw_set_exifparser_handler(libraw_data_t*, exif_parser_callback cb, void *datap);
 DllDef    void                libraw_set_dataerror_handler(libraw_data_t*,data_callback func,void *datap);
 DllDef    void                libraw_set_progress_handler(libraw_data_t*,progress_callback cb,void *datap);
 DllDef    const char *        libraw_unpack_function_name(libraw_data_t* lr);
@@ -123,6 +124,7 @@ class DllDef LibRaw
     void                        raw2image_start();
     void                        free_image();
     int                         adjust_maximum();
+	void							set_exifparser_handler( exif_parser_callback cb,void *data) {callbacks.exifparser_data = data; callbacks.exif_cb = cb; }
     void                        set_memerror_handler( memory_callback cb,void *data) {callbacks.memcb_data = data; callbacks.mem_cb = cb; }
     void                        set_dataerror_handler(data_callback func, void *data) { callbacks.datacb_data = data; callbacks.data_cb = func;}
     void                        set_progress_handler(progress_callback pcb, void *data) { callbacks.progresscb_data = data; callbacks.progress_cb = pcb;}
