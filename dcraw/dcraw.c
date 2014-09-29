@@ -6812,6 +6812,14 @@ void CLASS parse_exif (int base)
   if(!strcmp(make,"Hasselblad") && (tiff_nifds > 3) && (entries > 512)) return;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
+#ifdef LIBRAW_LIBRARY_BUILD
+    if(callbacks.exif_cb)
+      {
+        int savepos = ftell(ifp);
+        callbacks.exif_cb(callbacks.exifparser_data,tag,type,len,order,ifp);
+        fseek(ifp,savepos,SEEK_SET);
+      }
+#endif
     switch (tag) {
       case 33434:  shutter = getreal(type);		break;
       case 33437:  aperture = getreal(type);		break;
@@ -7021,6 +7029,14 @@ int CLASS parse_tiff_ifd (int base)
   if (entries > 512) return 1;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
+#ifdef LIBRAW_LIBRARY_BUILD
+    if(callbacks.exif_cb)
+      {
+        int savepos = ftell(ifp);
+        callbacks.exif_cb(callbacks.exifparser_data,tag,type,len,order,ifp);
+        fseek(ifp,savepos,SEEK_SET);
+      }
+#endif
     switch (tag) {
       case 1:   if(len==4) pana_raw = get4(); break;
       case 5:   width  = get2();  break;
