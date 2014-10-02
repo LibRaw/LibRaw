@@ -1990,7 +1990,7 @@ int LibRaw::copy_mem_image(void* scan0, int stride, int bgr)
     if(libraw_internal_data.output_data.histogram)
       {
         int perc, val, total, t_white=0x2000,c;
-        perc = S.width * S.height * 0.01;        /* 99th percentile white level */
+        perc = S.width * S.height * O.auto_bright_thr;        /* 99th percentile white level */
         if (IO.fuji_width) perc /= 2;
         if (!((O.highlight & ~2) || O.no_auto_bright))
           for (t_white=c=0; c < P1.colors; c++) {
