@@ -119,6 +119,7 @@ it under the terms of the one of three licenses as you choose:
 #define output_tiff     (imgdata.params.output_tiff)
 #define med_passes      (imgdata.params.med_passes)
 #define no_auto_bright  (imgdata.params.no_auto_bright)
+#define auto_bright_thr  (imgdata.params.auto_bright_thr)
 #define use_fuji_rotate (imgdata.params.use_fuji_rotate)
 #define filtering_mode (imgdata.params.filtering_mode)
 
