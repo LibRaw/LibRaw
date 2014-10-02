@@ -1017,11 +1017,26 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
 
+	if(!imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Samsung") && !strcmp(imgdata.idata.model,"NX1"))
+	{
+		imgdata.idata.raw_count = 0; // Disabled for non-DNG
+	}
+
 	// S3Pro DNG patch
 	if(imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Fujifilm") && !strcmp(imgdata.idata.model,"S3Pro") && imgdata.sizes.raw_width == 4288 )
 	{
 		imgdata.sizes.left_margin++;
 		imgdata.sizes.width--;
+	}
+	if(imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Fujifilm") && !strcmp(imgdata.idata.model,"S5Pro") && imgdata.sizes.raw_width == 4288 )
+	{
+		imgdata.sizes.left_margin++;
+		imgdata.sizes.width--;
+	}
+	if(!imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Fujifilm") && !strcmp(imgdata.idata.model,"S20Pro"))
+	{
+		if(imgdata.idata.raw_count>1)
+			imgdata.idata.raw_count = 1;
 	}
 
 	if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
@@ -3293,6 +3308,7 @@ static const char  *static_camera_list[] =
 "Canon PowerShot S120",
 "Canon PowerShot SX1 IS",
 "Canon PowerShot SX50 HS",
+"Canon PowerShot SX60 HS",
 "Canon PowerShot SX110 IS (CHDK hack)",
 "Canon PowerShot SX120 IS (CHDK hack)",
 "Canon PowerShot SX220 HS (CHDK hack)",
@@ -3437,6 +3453,7 @@ static const char  *static_camera_list[] =
 "FujiFilm X100S",
 "FujiFilm X10",
 "FujiFilm X20",
+"FujiFilm X30",
 "FujiFilm X-A1",
 "FujiFilm X-E1",
 "FujiFilm X-E2",
@@ -3599,6 +3616,7 @@ static const char  *static_camera_list[] =
 "Minolta Alpha/Dynax/Maxxum 5D",
 "Minolta Alpha/Dynax/Maxxum 7D",
 "Motorola PIXL",
+"Nikon Coolscan NEF",
 "Nikon D1",
 "Nikon D1H",
 "Nikon D1X",
@@ -3925,6 +3943,7 @@ static const char  *static_camera_list[] =
 "Sony ILCE-5000",
 "Sony ILCE-5100",
 "Sony ILCE-6000",
+"Sony ILCE-QX1",
 "Sony DSC-F828",
 "Sony DSC-R1",
 "Sony DSC-RX1",
