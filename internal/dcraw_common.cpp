@@ -9305,7 +9305,11 @@ void CLASS write_ppm_tiff()
   int c, row, col, soff, rstep, cstep;
   int perc, val, total, t_white=0x2000;
 
+#ifdef LIBRAW_LIBRARY_BUILD
+  perc = width * height * auto_bright_thr;		/* 99th percentile white level */
+#else
   perc = width * height * 0.01;		/* 99th percentile white level */
+#endif
   if (fuji_width) perc /= 2;
   if (!((highlight & ~2) || no_auto_bright))
     for (t_white=c=0; c < colors; c++) {
