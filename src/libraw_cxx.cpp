@@ -200,6 +200,8 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t* p)
 }
 
 int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
+int LibRaw::is_coolscan_nef() { return load_raw == &LibRaw::nikon_coolscan_load_raw;}
+
 int LibRaw::is_nikon_sraw(){ return load_raw == &LibRaw::nikon_load_sraw;}
 int LibRaw::sraw_midpoint() {if (load_raw == &LibRaw::canon_sraw_load_raw) return 8192; else if (load_raw == &LibRaw::nikon_load_sraw) return 2048; else return 0;}
 
@@ -351,6 +353,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.sony_arw2_options = 0;
   imgdata.params.sony_arw2_posterization_thr = 0;
   imgdata.params.green_matching = 0;
+  imgdata.params.coolscan_nef_gamma = 1.0f;
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
   imgdata.color.baseline_exposure = -999.f;
