@@ -1058,14 +1058,15 @@ void CLASS pentax_load_raw()
   }
 }
 
+#ifdef LIBRAW_LIBRARY_BUILD
+
 void CLASS nikon_coolscan_load_raw()
 {
   int bufsize = width*3*tiff_bps/8;
-
   if(tiff_bps <= 8)
-	  gamma_curve(1.0/imgdata.params.coolscan_nef_gamma,0.,1,255);
+    gamma_curve(1.0/imgdata.params.coolscan_nef_gamma,0.,1,255);
   else
-	  gamma_curve(1.0/imgdata.params.coolscan_nef_gamma,0.,1,65535);
+    gamma_curve(1.0/imgdata.params.coolscan_nef_gamma,0.,1,65535);
   fseek (ifp, data_offset, SEEK_SET);
   unsigned char *buf = (unsigned char*)malloc(bufsize);
   unsigned short *ubuf = (unsigned short *)buf;
@@ -1092,6 +1093,7 @@ void CLASS nikon_coolscan_load_raw()
     }
   free(buf);
 }
+#endif
 
 void CLASS nikon_load_raw()
 {
@@ -6564,6 +6566,7 @@ void CLASS apply_tiff()
       case 32770:
       case 32773: goto slr;
       case 0:  case 1:
+#ifdef LIBRAW_LIBRARY_BUILD
         if(!strcasecmp(make,"Nikon") && !strncmp(software,"Nikon Scan",10))
           {
             load_raw = &CLASS nikon_coolscan_load_raw;
@@ -6571,6 +6574,7 @@ void CLASS apply_tiff()
             filters = 0;
             break;
           }
+#endif
 	if (!strncmp(make,"OLYMPUS",7) &&
 		tiff_ifd[raw].bytes*2 == raw_width*raw_height*3)
 	  load_flags = 24;

@@ -3700,6 +3700,7 @@ static const char  *static_camera_list[] =
 "Nikon Coolpix P7700",
 "Nikon Coolpix P7800",
 "Nikon Coolpix S6 (\"DIAG RAW\" hack)",
+"Nikon Coolscan NEF",
 "Nokia N95",
 "Nokia X2",
 "Nokia 1200x1600",
