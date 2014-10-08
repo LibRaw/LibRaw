@@ -1058,9 +1058,15 @@ void CLASS pentax_load_raw()
   }
 }
 
+#ifdef LIBRAW_LIBRARY_BUILD
+
 void CLASS nikon_coolscan_load_raw()
 {
   int bufsize = width*3*tiff_bps/8;
+  if(tiff_bps <= 8)
+    gamma_curve(1.0/imgdata.params.coolscan_nef_gamma,0.,1,255);
+  else
+    gamma_curve(1.0/imgdata.params.coolscan_nef_gamma,0.,1,65535);
   fseek (ifp, data_offset, SEEK_SET);
   unsigned char *buf = (unsigned char*)malloc(bufsize);
   unsigned short *ubuf = (unsigned short *)buf;
@@ -1071,22 +1077,23 @@ void CLASS nikon_coolscan_load_raw()
       if(tiff_bps <= 8)
         for(int col=0; col<width;col++)
           {
-            ip[col][0] = buf[col*3];
-            ip[col][1] = buf[col*3+1];
-            ip[col][2] = buf[col*3+2];
+            ip[col][0] = curve[buf[col*3]];
+            ip[col][1] = curve[buf[col*3+1]];
+            ip[col][2] = curve[buf[col*3+2]];
             ip[col][3]=0;
           }
       else
         for(int col=0; col<width;col++)
           {
-            ip[col][0] = ubuf[col*3];
-            ip[col][1] = ubuf[col*3+1];
-            ip[col][2] = ubuf[col*3+2];
+            ip[col][0] = curve[ubuf[col*3]];
+            ip[col][1] = curve[ubuf[col*3+1]];
+            ip[col][2] = curve[ubuf[col*3+2]];
             ip[col][3]=0;
           }
     }
   free(buf);
 }
+#endif
 
 void CLASS nikon_load_raw()
 {
@@ -6559,6 +6566,7 @@ void CLASS apply_tiff()
       case 32770:
       case 32773: goto slr;
       case 0:  case 1:
+#ifdef LIBRAW_LIBRARY_BUILD
         if(!strcasecmp(make,"Nikon") && !strncmp(software,"Nikon Scan",10))
           {
             load_raw = &CLASS nikon_coolscan_load_raw;
@@ -6566,6 +6574,7 @@ void CLASS apply_tiff()
             filters = 0;
             break;
           }
+#endif
 	if (!strncmp(make,"OLYMPUS",7) &&
 		tiff_ifd[raw].bytes*2 == raw_width*raw_height*3)
 	  load_flags = 24;
