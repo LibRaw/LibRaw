@@ -198,6 +198,14 @@ typedef struct
   float colormatrix[4][3];
 } dng_color_t;
 
+typedef struct 
+{
+	int CanonColorDataVer;
+	int CanonColorDataSubVer;
+	int SpecularWhiteLevel;
+	int AverageBlackLevel;
+} canon_makernotes_t;
+
 typedef struct
 {
   ushort      curve[0x10000]; 
@@ -219,7 +227,9 @@ typedef struct
   unsigned    profile_length;
   unsigned    black_stat[8];
   dng_color_t  dng_color[2];
+  canon_makernotes_t canon_makernotes;
   float	      baseline_exposure;
+  int		  OlympusSensorCalibration[2];
 }libraw_colordata_t;
 
 typedef struct

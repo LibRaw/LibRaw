@@ -1058,15 +1058,9 @@ void CLASS pentax_load_raw()
   }
 }
 
-#ifdef LIBRAW_LIBRARY_BUILD
-
 void CLASS nikon_coolscan_load_raw()
 {
   int bufsize = width*3*tiff_bps/8;
-  if(tiff_bps <= 8)
-    gamma_curve(1.0/imgdata.params.coolscan_nef_gamma,0.,1,255);
-  else
-    gamma_curve(1.0/imgdata.params.coolscan_nef_gamma,0.,1,65535);
   fseek (ifp, data_offset, SEEK_SET);
   unsigned char *buf = (unsigned char*)malloc(bufsize);
   unsigned short *ubuf = (unsigned short *)buf;
@@ -1077,23 +1071,22 @@ void CLASS nikon_coolscan_load_raw()
       if(tiff_bps <= 8)
         for(int col=0; col<width;col++)
           {
-            ip[col][0] = curve[buf[col*3]];
-            ip[col][1] = curve[buf[col*3+1]];
-            ip[col][2] = curve[buf[col*3+2]];
+            ip[col][0] = buf[col*3];
+            ip[col][1] = buf[col*3+1];
+            ip[col][2] = buf[col*3+2];
             ip[col][3]=0;
           }
       else
         for(int col=0; col<width;col++)
           {
-            ip[col][0] = curve[ubuf[col*3]];
-            ip[col][1] = curve[ubuf[col*3+1]];
-            ip[col][2] = curve[ubuf[col*3+2]];
+            ip[col][0] = ubuf[col*3];
+            ip[col][1] = ubuf[col*3+1];
+            ip[col][2] = ubuf[col*3+2];
             ip[col][3]=0;
           }
     }
   free(buf);
 }
-#endif
 
 void CLASS nikon_load_raw()
 {
@@ -5492,6 +5485,96 @@ nf: order = 0x4949;
       {
         unique_id = get2();
       }
+	if(tag == 0x20400805 && len == 2 && !strncasecmp(make,"Olympus",7))
+	{
+		imgdata.color.OlympusSensorCalibration[0]=getreal(type);
+		imgdata.color.OlympusSensorCalibration[1]=getreal(type);
+	}
+	if (tag == 0x4001 && len > 500 && !strcasecmp(make,"Canon")) 
+	{
+		long int save1 = ftell(ifp);
+		switch (len) {
+		case 582: 
+			imgdata.color.canon_makernotes.CanonColorDataVer = 1;	// 20D / 350D
+			break;
+		case 653: 
+			imgdata.color.canon_makernotes.CanonColorDataVer = 2;	// 1Dmk2 / 1DsMK2
+			break;
+		case 796: 
+			imgdata.color.canon_makernotes.CanonColorDataVer = 3;	// 1DmkIIN / 5D / 30D / 400D
+
+			// 1DmkIII / 1DSmkIII / 1DmkIV / 5DmkII
+			// 7D / 40D / 50D / 60D / 450D / 500D
+			// 550D / 1000D / 1100D
+		case 674: case 692: case 702: case 1227: case 1250:
+		case 1251: case 1337: case 1338: case 1346: 
+			imgdata.color.canon_makernotes.CanonColorDataVer = 4;
+			imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+			{
+				fseek (ifp, save1+(0x0e7<<1), SEEK_SET);			// offset 231 short
+				int bls=0;
+				FORC4 bls+=get2();
+				imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+			}
+			if ((imgdata.color.canon_makernotes.CanonColorDataSubVer == 4) || (imgdata.color.canon_makernotes.CanonColorDataSubVer == 5)) 
+			{
+				fseek (ifp, save1+(0x2b9<<1), SEEK_SET);		// offset 697 shorts
+				imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+			}
+			else if ((imgdata.color.canon_makernotes.CanonColorDataSubVer == 6) || (imgdata.color.canon_makernotes.CanonColorDataSubVer == 7)) 
+			{
+				fseek (ifp, save1+(0x2d0<<1), SEEK_SET);		// offset 720 shorts
+				imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+			}
+			else if (imgdata.color.canon_makernotes.CanonColorDataSubVer == 9)
+			{
+				fseek (ifp, save1+(0x2d4<<1), SEEK_SET);		// offset 724 shorts
+				imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+			}
+			break;
+
+		case 5120: 
+			imgdata.color.canon_makernotes.CanonColorDataVer = 5;	// PowerSot G10
+			break;
+
+		case 1273: case 1275: 
+			imgdata.color.canon_makernotes.CanonColorDataVer = 6;	// 600D / 1200D
+			imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+			{
+				fseek (ifp, save1+(0x0fb<<1), SEEK_SET);			// offset 251 short
+				int bls=0;
+				FORC4 bls+=get2();
+				imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+			}
+			fseek (ifp, save1+(0x1e4<<1), SEEK_SET);			// offset 484 shorts
+			imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+			break;
+
+			// 1DX / 5DmkIII / 6D / 100D / 650D / 700D / M / 7DmkII
+		case 1312: case 1313: case 1316: case 1506: 
+			imgdata.color.canon_makernotes.CanonColorDataVer = 7;
+			imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+			{
+				fseek (ifp, save1+(0x114<<1), SEEK_SET);			// offset 276 shorts
+				int bls=0;
+				FORC4 bls+=get2();
+				imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+			}
+			if (imgdata.color.canon_makernotes.CanonColorDataSubVer == 10) 
+			{
+				fseek (ifp, save1+(0x1fd<<1), SEEK_SET);		// offset 509 shorts
+				imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+			} else if (imgdata.color.canon_makernotes.CanonColorDataSubVer == 11) 
+			{
+				fseek (ifp, save1+(0x2dd<<1), SEEK_SET);		// offset 733 shorts
+				imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+			}
+			break;
+		default: 
+			break;
+		}
+		fseek (ifp, save1, SEEK_SET);
+	}
     if (tag == 0x200 && len == 3)
       shot_order = (get4(),get4());
     if (tag == 0x200 && len == 4)
@@ -5793,6 +5876,42 @@ void CLASS linear_table (unsigned len)
   maximum = curve[len<0x1000?0xfff:len-1];
 }
 
+#ifdef LIBRAW_LIBRARY_BUILD 
+/* Thanks Alexey Danilchenko for wb as-shot parsing code */
+void CLASS parse_kodak_ifd (int base)
+{
+	unsigned entries, tag, type, len, save;
+	int i, c, wbi=-2;
+	float mul[3]={1,1,1}, num;
+	static const int wbtag[] = { 64037,64040,64039,64041,-1,-1,64042 };
+
+	entries = get2();
+	if (entries > 1024) return;
+	while (entries--) {
+		tiff_get (base, &tag, &type, &len, &save);
+		if (tag == 1020) wbi = getint(type);
+		if (tag == 1021 && len == 72) {		/* WB set in software */
+			fseek (ifp, 40, SEEK_CUR);
+			FORC3 cam_mul[c] = 2048.0 / get2();
+			wbi = -2;
+		}
+		if (tag == 2120 + wbi ||
+			(wbi<0 && tag == 2125))  /* use Auto WB if illuminant index is not set */
+		{
+			FORC3 mul[c] = (num=getreal(type))==0 ? 1 : num;
+			FORC3 cam_mul[c] = mul[1] / mul[c]; /* normalise against green */
+		}
+		if (tag == 2317) linear_table (len);
+		if (tag == 6020) iso_speed = getint(type);
+		if (tag == 64013) wbi = fgetc(ifp);
+		if ((unsigned) wbi < 7 && tag == wbtag[wbi])
+			FORC3 cam_mul[c] = get4();
+		if (tag == 64019) width = getint(type);
+		if (tag == 64020) height = (getint(type)+1) & -2;
+		fseek (ifp, save, SEEK_SET);
+	}
+}
+#else
 void CLASS parse_kodak_ifd (int base)
 {
   unsigned entries, tag, type, len, save;
@@ -5829,6 +5948,7 @@ void CLASS parse_kodak_ifd (int base)
     fseek (ifp, save, SEEK_SET);
   }
 }
+#endif
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -6566,7 +6686,6 @@ void CLASS apply_tiff()
       case 32770:
       case 32773: goto slr;
       case 0:  case 1:
-#ifdef LIBRAW_LIBRARY_BUILD
         if(!strcasecmp(make,"Nikon") && !strncmp(software,"Nikon Scan",10))
           {
             load_raw = &CLASS nikon_coolscan_load_raw;
@@ -6574,7 +6693,6 @@ void CLASS apply_tiff()
             filters = 0;
             break;
           }
-#endif
 	if (!strncmp(make,"OLYMPUS",7) &&
 		tiff_ifd[raw].bytes*2 == raw_width*raw_height*3)
 	  load_flags = 24;
