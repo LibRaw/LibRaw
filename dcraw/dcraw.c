@@ -7075,6 +7075,14 @@ void CLASS parse_kodak_ifd (int base)
   if (entries > 1024) return;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
+#ifdef LIBRAW_LIBRARY_BUILD
+    if(callbacks.exif_cb)
+      {
+        int savepos = ftell(ifp);
+        callbacks.exif_cb(callbacks.exifparser_data,tag | 0x20000,type,len,order,ifp);
+        fseek(ifp,savepos,SEEK_SET);
+      }
+#endif
     if (tag == 1020) wbi = getint(type);
     if (tag == 1021 && len == 72) {		/* WB set in software */
       fseek (ifp, 40, SEEK_CUR);
