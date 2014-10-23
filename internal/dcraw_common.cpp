@@ -5998,7 +5998,7 @@ int CLASS parse_tiff_ifd (int base)
     if(callbacks.exif_cb)
       {
         int savepos = ftell(ifp);
-        callbacks.exif_cb(callbacks.exifparser_data,tag| (pana_raw?0x30000:0),type,len,order,ifp);
+        callbacks.exif_cb(callbacks.exifparser_data,tag|(pana_raw?0x30000:0),type,len,order,ifp);
         fseek(ifp,savepos,SEEK_SET);
       }
 #endif
