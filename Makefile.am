@@ -25,6 +25,10 @@ doc_DATA =	COPYRIGHT \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libraw.pc libraw_r.pc
 
+# Cmake config files
+cmakeconfigdir = $(libdir)/cmake/LibRaw/
+cmakeconfig_DATA = cmake/modules/FindLibRaw.cmake
+
 # Libraries
 lib_LTLIBRARIES = lib/libraw.la lib/libraw_r.la
 
