@@ -7096,7 +7096,8 @@ void CLASS parse_kodak_ifd (int base)
         FORC3 cam_mul[c] = mul[1] / mul[c]; /* normalise against green */
       }
     if (tag == 2317) linear_table (len);
-    if (tag == 6020) iso_speed = getint(type);
+    if (tag == 0x903) iso_speed = getreal(type);
+    //if (tag == 6020) iso_speed = getint(type);
     if (tag == 64013) wbi = fgetc(ifp);
     if ((unsigned) wbi < 7 && tag == wbtag[wbi])
       FORC3 cam_mul[c] = get4();
@@ -11063,6 +11064,10 @@ konica_400z:
     }
     if (!strncmp(model,"DC2",3)) {
       raw_height = 2 + (height = 242);
+      if (!strncmp(model, "DC290", 5))
+        iso_speed = 100;
+      if (!strncmp(model, "DC280", 5))
+        iso_speed = 70;
       if (flen < 100000) {
 	raw_width = 256; width = 249;
 	pixel_aspect = (4.0*height) / (3.0*width);
@@ -11088,12 +11093,14 @@ konica_400z:
       strcpy (model, "DC50");
       height = 512;
       width  = 768;
+      iso_speed=84;
       data_offset = 19712;
       load_raw = &CLASS kodak_radc_load_raw;
     } else if (strstr(model,"DC120")) {
       strcpy (model, "DC120");
       height = 976;
       width  = 848;
+      iso_speed=160;
       pixel_aspect = height/0.75/width;
       load_raw = tiff_compress == 7 ?
 	&CLASS kodak_jpeg_load_raw : &CLASS kodak_dc120_load_raw;
@@ -11102,6 +11109,7 @@ konica_400z:
       thumb_width  = 192;
       thumb_offset = 6144;
       thumb_misc   = 360;
+      iso_speed=140;
       write_thumb = &CLASS layer_thumb;
       black = 17;
     }
