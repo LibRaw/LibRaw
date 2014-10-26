@@ -202,7 +202,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     int         parse_tiff (int base);
     void        apply_tiff(void);
     void        parse_gps (int base);
-    void        romm_coeff (float romm_cam[3][3]);
+	void        parse_gps_libraw(int base);
+	void        romm_coeff(float romm_cam[3][3]);
     void        parse_mos (int offset);
     void        get_timestamp (int reversed);
 
