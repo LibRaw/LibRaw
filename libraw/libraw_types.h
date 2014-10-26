@@ -249,7 +249,8 @@ typedef struct
 	float longtitude[3]; // Deg,min,sec
 	float gpstimestamp[3]; // Deg,min,sec
 	float altitude;
-	char  altref, latref, longref, status;
+	char  altref, latref, longref, gpsstatus;
+	char  gpsparsed;
 
 } libraw_gps_info_t;
 

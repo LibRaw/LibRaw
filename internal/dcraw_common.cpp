@@ -5778,6 +5778,8 @@ void CLASS parse_gps_libraw(int base)
 	unsigned entries, tag, type, len, save, c;
 
 	entries = get2();
+	if (entries > 0)
+		imgdata.other.parsed_gps.gpsparsed = 1;
 	while (entries--) {
 		tiff_get(base, &tag, &type, &len, &save);
 		switch (tag) {
@@ -5799,7 +5801,7 @@ void CLASS parse_gps_libraw(int base)
 		case 6:
 			imgdata.other.parsed_gps.altitude = getreal(type);
 			break;
-		case 9: imgdata.other.parsed_gps.status = getc(ifp); break;
+		case 9: imgdata.other.parsed_gps.gpsstatus = getc(ifp); break;
 		}
 		fseek(ifp, save, SEEK_SET);
 	}
