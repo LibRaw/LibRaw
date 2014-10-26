@@ -5773,40 +5773,42 @@ void CLASS parse_exif (int base)
   }
 }
 
+#ifdef LIBRAW_LIBRARY_BUILD
+
 void CLASS parse_gps_libraw(int base)
 {
-	unsigned entries, tag, type, len, save, c;
-
-	entries = get2();
-	if (entries > 0)
-		imgdata.other.parsed_gps.gpsparsed = 1;
-	while (entries--) {
-		tiff_get(base, &tag, &type, &len, &save);
-		switch (tag) {
-		case 1:  imgdata.other.parsed_gps.latref = getc(ifp); break;
-		case 3:  imgdata.other.parsed_gps.longref = getc(ifp); break;
-		case 5:  imgdata.other.parsed_gps.altref = getc(ifp); break;
-		case 2:
-			if (len == 3)
-				FORC(3) imgdata.other.parsed_gps.latitude[c] = getreal(type); 
-			break;
-		case 4:
-			if (len == 3)
-				FORC(3) imgdata.other.parsed_gps.longtitude[c] = getreal(type);
-			break;
-		case 7:
-			if (len == 3)
-				FORC(3) imgdata.other.parsed_gps.gpstimestamp[c] = getreal(type);
-			break;
-		case 6:
-			imgdata.other.parsed_gps.altitude = getreal(type);
-			break;
-		case 9: imgdata.other.parsed_gps.gpsstatus = getc(ifp); break;
-		}
-		fseek(ifp, save, SEEK_SET);
-	}
+  unsigned entries, tag, type, len, save, c;
+  
+  entries = get2();
+  if (entries > 0)
+    imgdata.other.parsed_gps.gpsparsed = 1;
+  while (entries--) {
+    tiff_get(base, &tag, &type, &len, &save);
+    switch (tag) {
+    case 1:  imgdata.other.parsed_gps.latref = getc(ifp); break;
+    case 3:  imgdata.other.parsed_gps.longref = getc(ifp); break;
+    case 5:  imgdata.other.parsed_gps.altref = getc(ifp); break;
+    case 2:
+      if (len == 3)
+        FORC(3) imgdata.other.parsed_gps.latitude[c] = getreal(type); 
+      break;
+    case 4:
+      if (len == 3)
+        FORC(3) imgdata.other.parsed_gps.longtitude[c] = getreal(type);
+      break;
+    case 7:
+      if (len == 3)
+        FORC(3) imgdata.other.parsed_gps.gpstimestamp[c] = getreal(type);
+      break;
+    case 6:
+      imgdata.other.parsed_gps.altitude = getreal(type);
+      break;
+    case 9: imgdata.other.parsed_gps.gpsstatus = getc(ifp); break;
+    }
+    fseek(ifp, save, SEEK_SET);
+  }
 }
-
+#endif
 
 void CLASS parse_gps (int base)
 {
@@ -6344,16 +6346,16 @@ int CLASS parse_tiff_ifd (int base)
 	fseek (ifp, get4()+base, SEEK_SET);
 	parse_exif (base);
 	break;
-	  case 34853:			/* GPSInfo tag */
-	  {
-		  unsigned pos;
-		  fseek(ifp, pos = (get4() + base), SEEK_SET);
-		  parse_gps(base);
+      case 34853:			/* GPSInfo tag */
+        {
+          unsigned pos;
+          fseek(ifp, pos = (get4() + base), SEEK_SET);
+          parse_gps(base);
 #ifdef LIBRAW_LIBRARY_BUILD
-		  fseek(ifp, pos, SEEK_SET);
-		  parse_gps_libraw(base);
+          fseek(ifp, pos, SEEK_SET);
+          parse_gps_libraw(base);
 #endif
-	  }
+        }
 	break;
       case 34675:			/* InterColorProfile */
       case 50831:			/* AsShotICCProfile */
