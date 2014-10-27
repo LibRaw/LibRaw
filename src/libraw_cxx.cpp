@@ -457,6 +457,7 @@ void LibRaw:: recycle()
   ZERO(imgdata.rawdata);
   ZERO(imgdata.sizes);
   ZERO(imgdata.color);
+  ZERO(imgdata.other);
   imgdata.color.baseline_exposure = -999.f;
   ZERO(libraw_internal_data);
   _exitflag = 0;
