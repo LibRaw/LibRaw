@@ -300,6 +300,13 @@ static CameraMetaDataLR* make_camera_metadata()
 
 #define ZERO(a) memset(&a,0,sizeof(a))
 
+static void cleargps(libraw_gps_info_t*q)
+{
+	for (int i = 0; i < 3; i++)
+		q->latitude[i] = q->longtitude[i] = q->gpstimestamp[i] = 0.f;
+	q->altitude = 0.f;
+	q->altref = q->latref = q->longref = q->gpsstatus = q->gpsparsed = 0;
+}
 
 LibRaw:: LibRaw(unsigned int flags)
 {
@@ -313,6 +320,7 @@ LibRaw:: LibRaw(unsigned int flags)
   verbose = 0;
 #endif
   ZERO(imgdata);
+  cleargps(&imgdata.other.parsed_gps);
   ZERO(libraw_internal_data);
   ZERO(callbacks);
   
@@ -438,6 +446,7 @@ void LibRaw:: recycle_datastream()
 
 void x3f_clear(void*);
 
+
 void LibRaw:: recycle() 
 {
   recycle_datastream();
@@ -457,6 +466,7 @@ void LibRaw:: recycle()
   ZERO(imgdata.rawdata);
   ZERO(imgdata.sizes);
   ZERO(imgdata.color);
+  cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
   ZERO(libraw_internal_data);
   _exitflag = 0;

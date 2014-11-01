@@ -243,6 +243,17 @@ typedef struct
     char       *thumb;
 }libraw_thumbnail_t;
 
+typedef struct 
+{
+	float latitude[3]; // Deg,min,sec
+	float longtitude[3]; // Deg,min,sec
+	float gpstimestamp[3]; // Deg,min,sec
+	float altitude;
+	char  altref, latref, longref, gpsstatus;
+	char  gpsparsed;
+
+} libraw_gps_info_t;
+
 typedef struct
 {
     float       iso_speed; 
@@ -252,6 +263,7 @@ typedef struct
     time_t      timestamp; 
     unsigned    shot_order;
     unsigned    gpsdata[32];
+	libraw_gps_info_t parsed_gps;
     char        desc[512],
                 artist[64];
 } libraw_imgother_t;

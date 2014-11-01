@@ -187,7 +187,6 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 
 // CAM/RGB
     void        pseudoinverse (double (*in)[3], double (*out)[3], int size);
-    void        cam_xyz_coeff (float _rgb_cam[3][4],double cam_xyz[4][3]);
     void        simple_coeff (int index);
 
 
@@ -203,7 +202,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     int         parse_tiff (int base);
     void        apply_tiff(void);
     void        parse_gps (int base);
-    void        romm_coeff (float romm_cam[3][3]);
+	void        parse_gps_libraw(int base);
+	void        romm_coeff(float romm_cam[3][3]);
     void        parse_mos (int offset);
     void        get_timestamp (int reversed);
 

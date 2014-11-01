@@ -120,18 +120,22 @@ float CLASS int_to_float (int i)
 
 double CLASS getreal (int type)
 {
-  union { char c[8]; double d; } u;
+  union { char c[8]; double d; } u,v;
   int i, rev;
 
   switch (type) {
     case 3: return (unsigned short) get2();
     case 4: return (unsigned int) get4();
-    case 5:  u.d = (unsigned int) get4();
-      return u.d / (unsigned int) get4();
+    case 5:  
+      u.d = (unsigned int) get4();
+      v.d = (unsigned int)get4();
+      return u.d / (v.d ? v.d : 1);
     case 8: return (signed short) get2();
     case 9: return (signed int) get4();
-    case 10: u.d = (signed int) get4();
-      return u.d / (signed int) get4();
+    case 10: 
+      u.d = (signed int) get4();
+      v.d = (signed int)get4();
+      return u.d / (v.d?v.d:1);
     case 11: return int_to_float (get4());
     case 12:
       rev = 7 * ((order == 0x4949) == (ntohs(0x1234) == 0x1234));
@@ -5773,6 +5777,43 @@ void CLASS parse_exif (int base)
   }
 }
 
+#ifdef LIBRAW_LIBRARY_BUILD
+
+void CLASS parse_gps_libraw(int base)
+{
+  unsigned entries, tag, type, len, save, c;
+  
+  entries = get2();
+  if (entries > 0)
+    imgdata.other.parsed_gps.gpsparsed = 1;
+  while (entries--) {
+    tiff_get(base, &tag, &type, &len, &save);
+    switch (tag) {
+    case 1:  imgdata.other.parsed_gps.latref = getc(ifp); break;
+    case 3:  imgdata.other.parsed_gps.longref = getc(ifp); break;
+    case 5:  imgdata.other.parsed_gps.altref = getc(ifp); break;
+    case 2:
+      if (len == 3)
+        FORC(3) imgdata.other.parsed_gps.latitude[c] = getreal(type); 
+      break;
+    case 4:
+      if (len == 3)
+        FORC(3) imgdata.other.parsed_gps.longtitude[c] = getreal(type);
+      break;
+    case 7:
+      if (len == 3)
+        FORC(3) imgdata.other.parsed_gps.gpstimestamp[c] = getreal(type);
+      break;
+    case 6:
+      imgdata.other.parsed_gps.altitude = getreal(type);
+      break;
+    case 9: imgdata.other.parsed_gps.gpsstatus = getc(ifp); break;
+    }
+    fseek(ifp, save, SEEK_SET);
+  }
+}
+#endif
+
 void CLASS parse_gps (int base)
 {
   unsigned entries, tag, type, len, save, c;
@@ -5921,7 +5962,8 @@ void CLASS parse_kodak_ifd (int base)
         FORC3 cam_mul[c] = mul[1] / mul[c]; /* normalise against green */
       }
     if (tag == 2317) linear_table (len);
-    if (tag == 6020) iso_speed = getint(type);
+    if (tag == 0x903) iso_speed = getreal(type);
+    //if (tag == 6020) iso_speed = getint(type);
     if (tag == 64013) wbi = fgetc(ifp);
     if ((unsigned) wbi < 7 && tag == wbtag[wbi])
       FORC3 cam_mul[c] = get4();
@@ -5998,7 +6040,7 @@ int CLASS parse_tiff_ifd (int base)
     if(callbacks.exif_cb)
       {
         int savepos = ftell(ifp);
-        callbacks.exif_cb(callbacks.exifparser_data,tag,type,len,order,ifp);
+        callbacks.exif_cb(callbacks.exifparser_data,tag|(pana_raw?0x30000:0),type,len,order,ifp);
         fseek(ifp,savepos,SEEK_SET);
       }
 #endif
@@ -6309,8 +6351,15 @@ int CLASS parse_tiff_ifd (int base)
 	parse_exif (base);
 	break;
       case 34853:			/* GPSInfo tag */
-	fseek (ifp, get4()+base, SEEK_SET);
-	parse_gps (base);
+        {
+          unsigned pos;
+          fseek(ifp, pos = (get4() + base), SEEK_SET);
+          parse_gps(base);
+#ifdef LIBRAW_LIBRARY_BUILD
+          fseek(ifp, pos, SEEK_SET);
+          parse_gps_libraw(base);
+#endif
+        }
 	break;
       case 34675:			/* InterColorProfile */
       case 50831:			/* AsShotICCProfile */
@@ -8104,7 +8153,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 11057,-3604,-1155,-5152,13046,2329,-282,375,8104 } },
     { "Pentax K-x", 0, 0,
 	{ 8843,-2837,-625,-5025,12644,2668,-411,1234,7410 } },
-    { "Pentax K-r", 0, 0,
+   { "Pentax K-r", 0, 0,
 	{ 9895,-3077,-850,-5304,13035,2521,-883,1768,6936 } },
     { "Pentax K-3", 0, 0,
 	{ 7415,-2052,-721,-5186,12788,2682,-1446,2157,6773 } },
@@ -8124,7 +8173,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 8986,-2755,-802,-6341,13575,3077,-1476,2144,6379 } },
     { "Panasonic DMC-FZ18", 0, 0,
 	{ 9932,-3060,-935,-5809,13331,2753,-1267,2155,5575 } },
-    { "Panasonic DMC-FZ28", 15, 0xf96,
+    { "Panasonic DMC-FZ28", -15, 0xf96,
 	{ 10109,-3488,-993,-5412,12812,2916,-1305,2140,5543 } },
     { "Panasonic DMC-FZ30", 0, 0xf94,
 	{ 10976,-4029,-1141,-7918,15491,2600,-1670,2071,8246 } },
@@ -8138,7 +8187,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 11532,-4324,-1066,-2375,10847,1749,-564,1699,4351 } },
     { "Leica V-LUX1", 0, 0,
 	{ 7906,-2709,-594,-6231,13351,3220,-1922,2631,6537 } },
-    { "Panasonic DMC-L10", 15, 0xf96,
+    { "Panasonic DMC-L10", -15, 0xf96,
 	{ 8025,-1942,-1050,-7920,15904,2100,-2456,3005,7039 } },
     { "Panasonic DMC-L1", 0, 0xf7f,
 	{ 8054,-1885,-1025,-8349,16367,2040,-2805,3542,7629 } },
@@ -8166,9 +8215,9 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 8048,-2810,-623,-6450,13519,3272,-1700,2146,7049 } },
     { "Leica D-LUX3", 0, 0,
 	{ 8048,-2810,-623,-6450,13519,3272,-1700,2146,7049 } },
-    { "Panasonic DMC-LX3", 15, 0,
+    { "Panasonic DMC-LX3", -15, 0,
 	{ 8128,-2668,-655,-6134,13307,3161,-1782,2568,6083 } },
-    { "Leica D-LUX 4", 15, 0,
+    { "Leica D-LUX 4", -15, 0,
 	{ 8128,-2668,-655,-6134,13307,3161,-1782,2568,6083 } },
     { "Panasonic DMC-LX5", -15, 0,
 	{ 10909,-4295,-948,-1333,9306,2399,22,1738,4582 } },
@@ -8194,13 +8243,13 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 8112,-2563,-740,-3730,11784,2197,-941,2075,4933 } },
     { "Leica V-LUX 4", -15, 0xfff,
 	{ 8112,-2563,-740,-3730,11784,2197,-941,2075,4933 } },
-    { "Panasonic DMC-FX150", 15, 0xfff,
+    { "Panasonic DMC-FX150", -15, 0xfff,
 	{ 9082,-2907,-925,-6119,13377,3058,-1797,2641,5609 } },
     { "Panasonic DMC-G10", 0, 0,
 	{ 10113,-3400,-1114,-4765,12683,2317,-377,1437,6710 } },
-    { "Panasonic DMC-G1", 15, 0xf94,
+    { "Panasonic DMC-G1", -15, 0xf94,
 	{ 8199,-2065,-1056,-8124,16156,2033,-2458,3022,7220 } },
-    { "Panasonic DMC-G2", 15, 0xf3c,
+    { "Panasonic DMC-G2", -15, 0xf3c,
 	{ 10113,-3400,-1114,-4765,12683,2317,-377,1437,6710 } },
     { "Panasonic DMC-G3", -15, 0xfff,
 	{ 6763,-1919,-863,-3868,11515,2684,-1216,2387,5879 } },
@@ -9778,6 +9827,10 @@ konica_400z:
     }
     if (!strncmp(model,"DC2",3)) {
       raw_height = 2 + (height = 242);
+      if (!strncmp(model, "DC290", 5))
+        iso_speed = 100;
+      if (!strncmp(model, "DC280", 5))
+        iso_speed = 70;
       if (flen < 100000) {
 	raw_width = 256; width = 249;
 	pixel_aspect = (4.0*height) / (3.0*width);
@@ -9803,12 +9856,14 @@ konica_400z:
       strcpy (model, "DC50");
       height = 512;
       width  = 768;
+      iso_speed=84;
       data_offset = 19712;
       load_raw = &CLASS kodak_radc_load_raw;
     } else if (strstr(model,"DC120")) {
       strcpy (model, "DC120");
       height = 976;
       width  = 848;
+      iso_speed=160;
       pixel_aspect = height/0.75/width;
       load_raw = tiff_compress == 7 ?
 	&CLASS kodak_jpeg_load_raw : &CLASS kodak_dc120_load_raw;
@@ -9817,6 +9872,7 @@ konica_400z:
       thumb_width  = 192;
       thumb_offset = 6144;
       thumb_misc   = 360;
+      iso_speed=140;
       write_thumb = &CLASS layer_thumb;
       black = 17;
     }
