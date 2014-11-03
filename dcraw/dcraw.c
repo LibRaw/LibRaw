@@ -7022,6 +7022,9 @@ void CLASS romm_coeff (float romm_cam[3][3])
     for (j=0; j < 3; j++)
       for (cmatrix[i][j] = k=0; k < 3; k++)
 	cmatrix[i][j] += rgb_romm[i][k] * romm_cam[k][j];
+#ifdef LIBRAW_LIBRARY_BUILD
+   imgdata.color.digitalBack_color=1;
+#endif
 }
 
 void CLASS parse_mos (int offset)

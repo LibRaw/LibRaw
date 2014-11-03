@@ -230,6 +230,7 @@ typedef struct
   canon_makernotes_t canon_makernotes;
   float	      baseline_exposure;
   int		  OlympusSensorCalibration[2];
+  int		digitalBack_color;
 }libraw_colordata_t;
 
 typedef struct

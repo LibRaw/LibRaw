@@ -173,6 +173,15 @@ const char* LibRaw::version() { return LIBRAW_VERSION_STR;}
 int LibRaw::versionNumber() { return LIBRAW_VERSION; }
 const char* LibRaw::strerror(int p) { return libraw_strerror(p);}
 
+LibRaw_colormatrix_type LibRaw::camera_color_type()
+{
+  if(C.cmatrix[0][0] <= 0.125) return LIBRAW_CMATRIX_NONE;
+  if(P1.dng_version) return LIBRAW_CMATRIX_DNG;
+  if(C.digitalBack_color) return LIBRAW_CMATRIX_DIGBACK;
+  return LIBRAW_CMATRIX_OTHER;
+
+}
+
 void LibRaw::derror()
 {
   if (!libraw_internal_data.unpacker_data.data_error && libraw_internal_data.internal_data.input) 
