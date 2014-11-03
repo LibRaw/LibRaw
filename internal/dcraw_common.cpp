@@ -5219,15 +5219,43 @@ void CLASS parse_makernote_nikon_iso (int base, int uptag)
   char buf[10];
 
   fread (buf, 1, 10, ifp);
-  if (!strcmp (buf,"Nikon")) {
-    base = ftell(ifp);
-    order = get2();
-    if (get2() != 42) goto quit;
-    offset = get4();
-    fseek (ifp, offset-8, SEEK_CUR);
+
+  if (!strcmp(buf, "Nikon")) {
+	  base = ftell(ifp);
+	  order = get2();
+	  if (get2() != 42) goto quit;
+	  offset = get4();
+	  fseek(ifp, offset - 8, SEEK_CUR);
   }
-  else
-    return;
+  else if (!strcmp(buf, "OLYMPUS") ||
+	  !strcmp(buf, "PENTAX ")) {
+	  base = ftell(ifp) - 10;
+	  fseek(ifp, -2, SEEK_CUR);
+	  order = get2();
+	  if (buf[0] == 'O') get2();
+  }
+  else if (!strncmp(buf, "SONY", 4) ||
+	  !strcmp(buf, "Panasonic")) {
+	  goto nf;
+  }
+  else if (!strncmp(buf, "FUJIFILM", 8)) {
+	  base = ftell(ifp) - 10;
+  nf: order = 0x4949;
+	  fseek(ifp, 2, SEEK_CUR);
+  }
+  else if (!strcmp(buf, "OLYMP") ||
+	  !strcmp(buf, "LEICA") ||
+	  !strcmp(buf, "Ricoh") ||
+	  !strcmp(buf, "EPSON"))
+	  fseek(ifp, -2, SEEK_CUR);
+  else if (!strcmp(buf, "AOC") ||
+	  !strcmp(buf, "QVC"))
+	  fseek(ifp, -4, SEEK_CUR);
+  else {
+	  fseek(ifp, -10, SEEK_CUR);
+	  if (!strncmp(make, "SAMSUNG", 7))
+		  base = ftell(ifp);
+  }
 
   entries = get2();
   if (entries > 1000) return;
@@ -5243,7 +5271,11 @@ void CLASS parse_makernote_nikon_iso (int base, int uptag)
         iso_speed = int(100.0 * pow(2.0,double(cc)/12.0-5.0));
         break;
       }
-    fseek (ifp, save, SEEK_SET);
+    if (tag == 0x10 && type == 4)
+      unique_id = get4();
+    if (tag == 0xb001 && type == 3)
+      unique_id = get2();
+    fseek(ifp, save, SEEK_SET);
   }
  quit:
   order = sorder;
@@ -9141,6 +9173,24 @@ void CLASS identify()
       case 34892: load_raw = &CLASS    lossy_dng_load_raw;  break;
       default:    load_raw = 0;
     }
+    if (!strcmp(make, "Canon") && unique_id)
+      {
+        for (i = 0; i < sizeof unique / sizeof *unique; i++)
+          if (unique_id == 0x80000000 + unique[i].id)
+            {
+              strcpy(model, unique[i].t_model);
+              break;
+            }
+      }
+    if (!strcasecmp(make, "Sony") && unique_id)
+      {
+        for (i = 0; i < sizeof sony_unique / sizeof *sony_unique; i++)
+          if (unique_id == sony_unique[i].id)
+            {
+              strcpy(model, sony_unique[i].t_model);
+              break;
+            }
+      }
     goto dng_skip;
   }
   if (!strcmp(make,"Canon") && !fsize && tiff_bps != 15) {
