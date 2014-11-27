@@ -6942,7 +6942,7 @@ void CLASS get_timestamp (int reversed)
 void CLASS parse_exif (int base)
 {
   unsigned kodak, entries, tag, type, len, save, c;
-  double expo;
+  double expo,ape;
 
   kodak = !strncmp(make,"EASTMAN",7) && tiff_nifds < 3;
   entries = get2();
@@ -6969,7 +6969,10 @@ void CLASS parse_exif (int base)
       case 36868:  get_timestamp(0);			break;
       case 37377:  if ((expo = -getreal(type)) < 128 && shutter == 0.)
 		     shutter = pow (2.0, expo);		break;
-      case 37378:  aperture = pow (2.0, getreal(type)/2);	break;
+      case 37378: 
+		  if (fabs(ape = getreal(type))<256.0)
+			aperture = pow (2.0, ape/2);
+		  break;
       case 37385:  flash_used = getreal(type);          break;
       case 37386:  focal_len = getreal(type);		break;
       case 37500:  parse_makernote (base, 0);		break;
