@@ -8,9 +8,9 @@ patch=`grep LIBRAW_PATCH_VERSION $vfile | head -1 | awk '{print $3}'`
 tail=`grep LIBRAW_VERSION_TAIL $vfile | head -1 | awk '{print $3}'`
 
 if [ x$tail = xRelease ] ; then
- echo -n "$major.$minor.$patch"
+ echo "$major.$minor.$patch" | awk '{printf $1}'
 else
- echo -n "$major.$minor.$patch-$tail"
+ echo "$major.$minor.$patch-$tail" | awk '{printf $1}'
 fi
 
 
