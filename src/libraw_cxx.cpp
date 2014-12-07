@@ -1043,6 +1043,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	{
 		imgdata.idata.raw_count = 0; // Disabled for non-DNG
 	}
+	if (!imgdata.idata.dng_version && !strcmp(imgdata.idata.make, "Leaf") && !strcmp(imgdata.idata.model, "Credo 50"))
+	{
+		imgdata.color.pre_mul[0] = 1.f / 0.3984f;
+		imgdata.color.pre_mul[2] = 1.f / 0.7666f;
+		imgdata.color.pre_mul[1] = imgdata.color.pre_mul[3] = 1.0;
+	}
 
 	// S3Pro DNG patch
 	if(imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Fujifilm") && !strcmp(imgdata.idata.model,"S3Pro") && imgdata.sizes.raw_width == 4288 )
@@ -3473,6 +3479,7 @@ static const char  *static_camera_list[] =
 "FujiFilm XQ1",
 "FujiFilm X100",
 "FujiFilm X100S",
+"FujiFilm X100T",
 "FujiFilm X10",
 "FujiFilm X20",
 "FujiFilm X30",
@@ -3581,6 +3588,7 @@ static const char  *static_camera_list[] =
 "Leaf CatchLight",
 "Leaf CMost",
 "Leaf Credo 40",
+"Leaf Credo 50",
 "Leaf Credo 60",
 "Leaf Credo 80",
 "Leaf DCB2",
@@ -3605,12 +3613,14 @@ static const char  *static_camera_list[] =
 "Leica M (Typ 240)",
 "Leica Monochrom (Typ 240)",
 "Leica M-E",
+"Leica M-P",
 "Leica R8",
 "Leica S",
 "Leica S2",
 //"Leica S3",
 "Leica T (Typ 701)",
 "Leica X1",
+"Leica X (Typ 113)",
 "Leica X2",
 "Leica V-LUX1",
 "Leica V-LUX2",
@@ -3777,6 +3787,7 @@ static const char  *static_camera_list[] =
 "Olympus SP565UZ",
 "Olympus SP570UZ",
 "Olympus STYLUS1",
+"Olympus STYLUS1s",
 "Olympus XZ-1",
 "Olympus XZ-2",
 "Olympus XZ-10",
@@ -3813,6 +3824,8 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-GH4",
 "Panasonic AG-GH4",
 "Panasonic DMC-GM1",
+"Panasonic DMC-GM1s",
+"Panasonic DMC-GM5",
 "Panasonic DMC-GX1",
 "Panasonic DMC-GX7",
 "Panasonic DMC-L1",
@@ -3849,10 +3862,12 @@ static const char  *static_camera_list[] =
 "Pentax K-50",
 "Pentax K-500",
 "Pentax K-7",
+"Pentax K-S1",
 "Pentax MX-1",
 "Pentax Q",
 "Pentax Q7",
 "Pentax Q10",
+"Pentax QS-1",
 "Pentax Optio S",
 "Pentax Optio S4",
 "Pentax Optio 33WR",

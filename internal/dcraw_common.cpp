@@ -5767,7 +5767,7 @@ void CLASS get_timestamp (int reversed)
 void CLASS parse_exif (int base)
 {
   unsigned kodak, entries, tag, type, len, save, c;
-  double expo;
+  double expo,ape;
 
   kodak = !strncmp(make,"EASTMAN",7) && tiff_nifds < 3;
   entries = get2();
@@ -5794,7 +5794,10 @@ void CLASS parse_exif (int base)
       case 36868:  get_timestamp(0);			break;
       case 37377:  if ((expo = -getreal(type)) < 128 && shutter == 0.)
 		     shutter = pow (2.0, expo);		break;
-      case 37378:  aperture = pow (2.0, getreal(type)/2);	break;
+      case 37378: 
+		  if (fabs(ape = getreal(type))<256.0)
+			aperture = pow (2.0, ape/2);
+		  break;
       case 37385:  flash_used = getreal(type);          break;
       case 37386:  focal_len = getreal(type);		break;
       case 37500:  parse_makernote (base, 0);		break;
@@ -7524,7 +7527,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 {
   static const struct {
     const char *prefix;
-    short t_black, t_maximum, trans[12];
+    int t_black, t_maximum, trans[12];
   } table[] = {
     { "AgfaPhoto DC-833m", 0, 0,	/* DJC */
 	{ 11438,-3762,-1115,-2409,9914,2497,-1227,2295,5300 } },
@@ -7788,14 +7791,16 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 12085,-4727,-953,-3257,11489,2002,-511,2046,4592 } },
     { "Fujifilm X100S", 0, 0,
 	{ 10592,-4262,-1008,-3514,11355,2465,-870,2025,6386 } },
+    { "Fujifilm X100T", 0, 0, /* Adobe */
+        { 10592, -4262, -1008, -3514, 11355, 2465, -870, 2025, 6386 } },
     { "Fujifilm X100", 0, 0,
 	{ 12161,-4457,-1069,-5034,12874,2400,-795,1724,6904 } },
     { "Fujifilm X10", 0, 0,
 	{ 13509,-6199,-1254,-4430,12733,1865,-331,1441,5022 } },
     { "Fujifilm X20", 0, 0,
 	{ 11768,-4971,-1133,-4904,12927,2183,-480,1723,4605 } },
-    { "Fujifilm X30", 0, 0, /* temp */
-	{ 14305,-7365,-687,-3117,12383,432,-287,1660,4361 } },
+    { "Fujifilm X30", 0, 0, /* Adobe */
+	{ 12328, -5256, -1144, -4469, 12927, 1675, -87, 1291, 4351 } },
     { "Fujifilm X-Pro1", 0, 0,
 	{ 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
     { "Fujifilm X-A1", 0, 0,
@@ -7904,6 +7909,14 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 7914,1414,-1190,-8777,16582,2280,-2811,4605,5562 } },
     { "Leaf Aptus 75", 0, 0,
 	{ 7914,1414,-1190,-8777,16582,2280,-2811,4605,5562 } },
+    { "Leaf Credo 40", 0, 0,
+	{ 8035, 435, -962, -6001, 13872, 2320, -1159, 3065, 5434 } },
+    { "Leaf Credo 50", 0, 0,
+	{ 3984, 0, 0, 0, 10000, 0, 0, 0, 7666 } },
+    { "Leaf Credo 60", 0, 0,
+	{ 8035, 435, -962, -6001, 13872,2320,-1159,3065,5434} },
+    { "Leaf Credo 80", 0, 0,
+	{ 6294, 686, -712, -5435, 13417, 2211, -1006, 2435, 5042} },
     { "Leaf", 0, 0,
 	{ 8236,1746,-1314,-8251,15953,2428,-3673,5786,5771 } },
     { "Mamiya ZD", 0, 0,
@@ -8312,6 +8325,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
         { 7635,-2514,-436,-2063,10135,1406,-1084,2080,4375 } },
     {"Panasonic AG-GH4",-15, 0, /* LibRaw */
         { 7635,-2514,-436,-2063,10135,1406,-1084,2080,4375 } },
+    { "Panasonic DMC-GM5", -15, 0, /* Adobe */
+	{ 8238, -3244, -679, -3921, 11814, 2384, -836, 2022, 5852} },
     { "Panasonic DMC-GM1", -15, 0, /* LibRaw */
         { 8977,-3976,-425,-3050,11095,1117,-1217,2563,4750 } },
     { "Panasonic DMC-GX1", -15, 0, 
@@ -10415,7 +10430,7 @@ void CLASS tiff_head (struct tiff_hdr *th, int full)
   strncpy (th->t_desc, desc, 512);
   strncpy (th->t_make, make, 64);
   strncpy (th->t_model, model, 64);
-  strcpy (th->soft, "dcraw v"DCRAW_VERSION);
+  strcpy (th->soft, "dcraw v" DCRAW_VERSION);
   t = localtime (&timestamp);
   sprintf (th->date, "%04d:%02d:%02d %02d:%02d:%02d",
       t->tm_year+1900,t->tm_mon+1,t->tm_mday,t->tm_hour,t->tm_min,t->tm_sec);
