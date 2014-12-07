@@ -110,7 +110,7 @@ class DllDef LibRaw
 	int                         open_file(const wchar_t *fname, INT64 max_buffered_sz=LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE);
 #endif
     int                         open_buffer(void *buffer, size_t size);
-    int                         open_datastream(LibRaw_abstract_datastream *);
+    virtual int                 open_datastream(LibRaw_abstract_datastream *);
 	int							error_count(){return libraw_internal_data.unpacker_data.data_error;}
 	void							recycle_datastream();
     int                         unpack(void);
@@ -166,7 +166,7 @@ class DllDef LibRaw
     int         fcol (int row, int col);
     
     const char *unpack_function_name();
-    int get_decoder_info(libraw_decoder_info_t* d_info);
+    virtual int get_decoder_info(libraw_decoder_info_t* d_info);
     libraw_internal_data_t * get_internal_data_pointer(){ return &libraw_internal_data; }
 
     /* Debanding filter */
