@@ -4334,6 +4334,8 @@ void LibRaw::x3f_dpq_interpolate_rg()
 
 #define _ABS(a) ((a)<0?-(a):(a))
 
+#define CLIP(value,high) ((value)>(high)?(high):(value))
+
 void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep, int scale)
 {
 	unsigned short *image = (ushort*)imgdata.rawdata.color3_image;
@@ -4367,14 +4369,14 @@ void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep, int scale)
 				int blocal = pixel0[2],bnear = pixf[2];
 				if(blocal < imgdata.color.black+16 || bnear < imgdata.color.black+16	)
 				{
-					pixel0[0] = (pixel0[0] - imgdata.color.black)*4 + imgdata.color.black;
-					pixel0[1] = (pixel0[1] - imgdata.color.black)*4 + imgdata.color.black;
+					pixel0[0] = CLIP((pixel0[0] - imgdata.color.black)*4 + imgdata.color.black,16383);
+					pixel0[1] = CLIP((pixel0[1] - imgdata.color.black)*4 + imgdata.color.black,16383);
 				}
 				else
 				{
 					float multip = float(bnear - imgdata.color.black)/float(blocal-imgdata.color.black);
-					pixel0[0] = ((float(pixf[0]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[0]-imgdata.color.black)*3.75 + imgdata.color.black))/2;
-					pixel0[1] = ((float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[1]-imgdata.color.black)*3.75 + imgdata.color.black))/2;
+					pixel0[0] = CLIP(((float(pixf[0]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[0]-imgdata.color.black)*3.75 + imgdata.color.black))/2,16383);
+					pixel0[1] = CLIP(((float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[1]-imgdata.color.black)*3.75 + imgdata.color.black))/2,16383);
 					//pixel0[1] = float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black;
 				}
 			}
