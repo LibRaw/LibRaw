@@ -4335,6 +4335,7 @@ void LibRaw::x3f_dpq_interpolate_rg()
 
 #define _ABS(a) ((a)<0?-(a):(a))
 
+#undef CLIP
 #define CLIP(value,high) ((value)>(high)?(high):(value))
 
 void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep, int scale)
