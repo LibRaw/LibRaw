@@ -3517,6 +3517,7 @@ static const char  *static_camera_list[] =
 "Hasselblad V96C",
 "Hasselblad Lunar",
 "Hasselblad Stellar",
+"Hasselblad Stellar II",
 "Hasselblad HV",
 "Imacon Ixpress 96, 96C",
 "Imacon Ixpress 384, 384C (single shot only)",
