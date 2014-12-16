@@ -1019,7 +1019,9 @@ struct foveon_data_t
   {"Polaroid","x530",1440,1088,2700,10,13,1419,1059},
   // dp2 Q
   {"Sigma","dp2 Quattro",5888,3672,16383,204,24,5446,3624}, // full size
-  {"Sigma","dp2 Quattro",2944,1836,16383,102,12,2723,1812}, // full size
+  {"Sigma","dp2 Quattro",2944,1836,16383,102,12,2723,1812}, // half size
+  {"Sigma","dp1 Quattro",5888,3672,16383,204,24,5446,3624}, // full size
+  {"Sigma","dp1 Quattro",2944,1836,16383,102,12,2723,1812}, // half size
 };
 const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
@@ -1424,7 +1426,7 @@ int LibRaw::unpack(void)
           }
         else if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
           {
-            imgdata.rawdata.raw_alloc = malloc(rwidth*(rheight+7)*sizeof(imgdata.rawdata.raw_image[0]));
+            imgdata.rawdata.raw_alloc = malloc(rwidth*(rheight+8)*sizeof(imgdata.rawdata.raw_image[0]));
             imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
             if(!S.raw_pitch)
                 S.raw_pitch = S.raw_width*2; // Bayer case, not set before
@@ -3516,6 +3518,7 @@ static const char  *static_camera_list[] =
 "Hasselblad V96C",
 "Hasselblad Lunar",
 "Hasselblad Stellar",
+"Hasselblad Stellar II",
 "Hasselblad HV",
 "Imacon Ixpress 96, 96C",
 "Imacon Ixpress 384, 384C (single shot only)",
@@ -3964,6 +3967,7 @@ static const char  *static_camera_list[] =
 "Sigma DP2 Merill",
 "Sigma DP2S",
 "Sigma DP2X",
+"Sigma dp1 Quattro",
 "Sigma dp2 Quattro",
 "Sinar eMotion 22",
 "Sinar eMotion 54",
@@ -4118,6 +4122,32 @@ static char *utf2char(utf16_t *str, char *buffer)
   return buffer;
 }
 
+static void *lr_memmem(const void *l, size_t l_len, const void *s, size_t s_len)
+{
+	register char *cur, *last;
+	const char *cl = (const char *)l;
+	const char *cs = (const char *)s;
+
+	/* we need something to compare */
+	if (l_len == 0 || s_len == 0)
+		return NULL;
+
+	/* "s" must be smaller or equal to "l" */
+	if (l_len < s_len)
+		return NULL;
+
+	/* special case where s_len == 1 */
+	if (s_len == 1)
+		return (void*)memchr(l, (int)*cs, l_len);
+
+	/* the last position where its possible to find "s" in "l" */
+	last = (char *)cl + l_len - s_len;
+
+	for (cur = (char *)cl; cur <= last; cur++)
+		if (cur[0] == cs[0] && memcmp(cur, cs, s_len) == 0)
+			return cur;
+	return NULL;
+}
 
 void LibRaw::parse_x3f()
 {
@@ -4194,7 +4224,22 @@ void LibRaw::parse_x3f()
 		  libraw_internal_data.internal_output_params.raw_color=1; // Force adobe coeff
 		  libraw_internal_data.unpacker_data.order = 0x4949;
 		  strcpy (imgdata.idata.make, "SIGMA");
-		  strcpy (imgdata.idata.model, "dp2 Quattro");
+#if 1
+		  // Try to find model number in first 2048 bytes;
+		  int pos = libraw_internal_data.internal_data.input->tell();
+		  libraw_internal_data.internal_data.input->seek(0,SEEK_SET);
+		  unsigned char buf[2048];
+		  libraw_internal_data.internal_data.input->read(buf,2048,1);
+		  libraw_internal_data.internal_data.input->seek(pos,SEEK_SET);
+		  unsigned char *fnd=(unsigned char*)lr_memmem(buf,2048,"SIGMA dp",8);
+		  if(fnd)
+		  {
+			  unsigned char *nm = fnd+8;
+			  snprintf(imgdata.idata.model,64,"dp%c Quattro",*nm<='9' && *nm >='0' ? *nm: '2');
+		  }
+		  else
+#endif
+			strcpy (imgdata.idata.model, "dp2 Quattro");
 	  }
   }
   // Try to get thumbnail data
@@ -4291,6 +4336,9 @@ void LibRaw::x3f_dpq_interpolate_rg()
 
 #define _ABS(a) ((a)<0?-(a):(a))
 
+#undef CLIP
+#define CLIP(value,high) ((value)>(high)?(high):(value))
+
 void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep, int scale)
 {
 	unsigned short *image = (ushort*)imgdata.rawdata.color3_image;
@@ -4324,14 +4372,14 @@ void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep, int scale)
 				int blocal = pixel0[2],bnear = pixf[2];
 				if(blocal < imgdata.color.black+16 || bnear < imgdata.color.black+16	)
 				{
-					pixel0[0] = (pixel0[0] - imgdata.color.black)*4 + imgdata.color.black;
-					pixel0[1] = (pixel0[1] - imgdata.color.black)*4 + imgdata.color.black;
+					pixel0[0] = CLIP((pixel0[0] - imgdata.color.black)*4 + imgdata.color.black,16383);
+					pixel0[1] = CLIP((pixel0[1] - imgdata.color.black)*4 + imgdata.color.black,16383);
 				}
 				else
 				{
 					float multip = float(bnear - imgdata.color.black)/float(blocal-imgdata.color.black);
-					pixel0[0] = ((float(pixf[0]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[0]-imgdata.color.black)*3.75 + imgdata.color.black))/2;
-					pixel0[1] = ((float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[1]-imgdata.color.black)*3.75 + imgdata.color.black))/2;
+					pixel0[0] = CLIP(((float(pixf[0]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[0]-imgdata.color.black)*3.75 + imgdata.color.black))/2,16383);
+					pixel0[1] = CLIP(((float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[1]-imgdata.color.black)*3.75 + imgdata.color.black))/2,16383);
 					//pixel0[1] = float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black;
 				}
 			}
@@ -4369,7 +4417,7 @@ void LibRaw::x3f_load_raw()
       imgdata.rawdata.color3_image = (ushort (*)[3])data;
 
 	  if(!strcasecmp(imgdata.idata.make,"Sigma") 
-		  && !strcasecmp(imgdata.idata.model,"dp2 Quattro") 
+		  && (!strcasecmp(imgdata.idata.model,"dp2 Quattro")  || !strcasecmp(imgdata.idata.model,"dp1 Quattro"))
 		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATEAF)
 		  )
 	  {
@@ -4384,8 +4432,8 @@ void LibRaw::x3f_load_raw()
 	  }
 
 	  if(!strcasecmp(imgdata.idata.make,"Sigma") 
-		  && !strcasecmp(imgdata.idata.model,"dp2 Quattro") 
-		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATERG)
+		  && (!strcasecmp(imgdata.idata.model,"dp2 Quattro") || !strcasecmp(imgdata.idata.model,"dp1 Quattro"))
+		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATERG) 
 		  && (imgdata.sizes.raw_width== 5888)
 		  )
 			x3f_dpq_interpolate_rg();

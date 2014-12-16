@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use Data::Dumper;
 
-@makes=( "AgfaPhoto", "Canon", "Casio", "Epson", "Fujifilm", "Imacon",
+@makes=( "AgfaPhoto", "Canon", "Casio", "Digital Bolex", "Epson", "Fujifilm", "Imacon",
       "Mamiya", "Minolta", "Motorola", "Kodak", "Konica", "Leica", "Hasselblad",
       "Nikon", "Nokia", "Olympus", "Pentax", "Phase One", "Ricoh",
       "Samsung", "Sigma", "Sinar", "Sony" );
@@ -12,7 +12,7 @@ while(<>)
   chomp;  
   $cname = $_;
   $cname=~s/^\s+//g;
-  $cname=~s/s+$//g;
+  $cname=~s/\s+$//g;
   for my $camera (@makes)
   {
      if  ($cname=~/\Q$camera\E\s+(.*)/)
@@ -32,6 +32,7 @@ while(<>)
    push @{$cameralist->{$make}},"NO MODEL";
    
 }
+my $havenx1=0;
 print "<ul>\n";
 for my $make (sort keys %$cameralist)
 {
@@ -45,6 +46,11 @@ for my $make (sort keys %$cameralist)
 	   print "<li>$make\n<ul>\n";
 	   for my $model (@{$cameralist->{$make}})
 	    {
+	       if($make=~/Samsung/ && $model=~/^NX1/ && !$havenx1)
+		{
+	          print "  <li>NX1</li>\n";
+		  $havenx1=1;
+		}
 	       print "  <li>$model</li>\n";
 	     }
 	   print "</ul>\n</li>\n";

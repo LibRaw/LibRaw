@@ -8388,6 +8388,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Samsung S85", 0, 0,		/* DJC */
 	{ 11885,-3968,-1473,-4214,12299,1916,-835,1655,5549 } },
      // Foveon: LibRaw color data
+    {"Sigma dp1 Quattro",2047, 0,
+      { 13801,-3390,-1016,5535,3802,877,1848,4245,3730 } },
     {"Sigma dp2 Quattro",2047, 0,
       { 13801,-3390,-1016,5535,3802,877,1848,4245,3730 } },
     { "Sigma SD9", 15, 4095,			/* LibRaw */
@@ -8472,6 +8474,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     {"Sony ILCE-6000",-512, 0,  /* LibRaw */
         {6655,-2434,-214,-2523,10565,1450,-863,1790,5024} },
     {"Sony ILCE-7R",-512, 0,  /* LibRaw */
+        { 8592,-3219,-348,-3846,12042,1475,-1079,2166,5893 } },
+    {"Sony ILCE-7M2",-512, 0,  /* LibRaw */
         { 8592,-3219,-348,-3846,12042,1475,-1079,2166,5893 } },
     {"Sony ILCE-7",-512, 0,  /* LibRaw */
         { 8592,-3219,-348,-3846,12042,1475,-1079,2166,5893 } },
@@ -8798,7 +8802,8 @@ void CLASS identify()
     {317,"DSC-RX100M3"},
     {318,"ILCE-7S"},
     {319,"ILCA-77M2"},
-    {339,"ILCE-5100"}
+    {339,"ILCE-5100"},
+    {340,"ILCE-&M2"}
   };
   static const struct {
     unsigned fsize;
