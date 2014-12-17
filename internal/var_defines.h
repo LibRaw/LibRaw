@@ -21,6 +21,7 @@ it under the terms of the one of three licenses as you choose:
 #ifndef VAR_DEFINES_H
 #define VAR_DEFINES_H
 
+
 // imgdata.idata
 #define make            (imgdata.idata.make)
 #define model           (imgdata.idata.model)

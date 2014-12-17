@@ -32,6 +32,8 @@ it under the terms of the one of three licenses as you choose:
 
 // inline functions
     ushort      sget2 (uchar *s);
+    ushort      sget2Rev(uchar *s);
+    void 	parseSonyLensFeatures (ushort features);
     ushort      get2();
     unsigned    sget4 (uchar *s);
     unsigned    getint (int type);

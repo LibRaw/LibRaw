@@ -375,12 +375,66 @@ typedef struct
   libraw_colordata_t color;
 } libraw_rawdata_t;
 
+typedef struct  
+{
+	ushort SonyModelID;
+//	unsigned SonyMinoltaLensID, SonyLensID, SonyLensCrop, SonyLensMount, SonyMinFocalLength, SonyMaxFoclaLength, SonyFocalLength;
+	unsigned SonyMinoltaLensID, SonyLensID, SonyLensMount, SonyLensFormat, SonyMinFocalLength, SonyMaxFoclaLength, SonyFocalLength;
+	char SonyTeleconverterName[128], SonyMinoltaLensName[128], SonyLensName[128];
+	ushort SonyTeleconverterID, SonyLensSpecs_minFocal, SonyLensSpecs_maxFocal;
+	float SonyLensSpecs_maxAp4minFocal, SonyLensSpecs_maxAp4maxFocal, SonyMaxAperture, SonyMinAperture;
+	char SonyLensFeatures_pre[16], SonyLensFeatures_suf[16];
+}libraw_sonylens_t;
+
+typedef struct 
+{
+	short CanonLensID;
+	char CanonLensName[128];
+	ushort CanonMaxFocalLength, CanonMinFocalLength, CanonFocalLength;
+	// CanonFocalType: -1 is unknown; 1 is fixed focal; 2 is zoom
+	short CanonFocalType, CanonFocalUnits, CanonMaxAperture, CanonMinAperture;
+} libraw_canonlens_t;
+
+typedef struct
+{
+	ushort SamsungLensID;
+	char SamsungLensName[128];
+} libraw_samsunglens_t;
+
+typedef struct 
+{
+	float NikonLens_0x0084_MaxAperture4MaxFocal, NikonLens_0x0084_MaxAperture4MinFocal, NikonLens_0x0084_MaxFocal, NikonLens_0x0084_MinFocal;
+	float NikonEffectiveMaxAperture_0x0098;
+	uchar NikonLensIDNumber, NikonLensFStops, NikonMinFocalLength, NikonMaxFocalLength, NikonMaxApertureAtMinFocal, NikonMaxApertureAtMaxFocal, NikonMCUVersion, NikonLensType;
+	char NikonLensName[128];
+	unsigned long long NikonLensID;
+} libraw_nikonlens_t;
+
+typedef struct 
+{
+	float OlympusLens_MaxAperture4MinFocal, OlympusLens_MaxAperture4MaxFocal, OlympusLens_MinFocal, OlympusLens_MaxFocal;
+	float OlympusLens_MaxAperture;
+	uchar OlympusLensType_Make, OlympusLensType_Model, OlympusLensType_SubModel;
+} libraw_olympuslens_t;
+
+typedef struct 
+{
+	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal;
+	char LensMake[128], LensModel[128];
+	libraw_sonylens_t sony;
+	libraw_canonlens_t canon;
+	libraw_samsunglens_t samsung;
+	libraw_nikonlens_t nikon;
+	libraw_olympuslens_t olympus;
+} libraw_lensinfo_t;
+
 
 typedef struct
 {
   ushort                      (*image)[4] ;
   libraw_image_sizes_t        sizes;
   libraw_iparams_t            idata;
+  libraw_lensinfo_t			  lens;
   libraw_output_params_t		params;
   unsigned int                progress_flags;
   unsigned int                process_warnings;
