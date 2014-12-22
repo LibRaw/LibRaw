@@ -420,12 +420,20 @@ typedef struct
 typedef struct 
 {
 	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal;
+} libraw_dnglens_t;
+
+typedef struct 
+{
+	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal;
 	char LensMake[128], LensModel[128];
+	ushort FocalLengthIn35mmFormat;
 	libraw_sonylens_t sony;
 	libraw_canonlens_t canon;
 	libraw_samsunglens_t samsung;
 	libraw_nikonlens_t nikon;
 	libraw_olympuslens_t olympus;
+	libraw_dnglens_t dng;
+	short PentaxLensID;
 } libraw_lensinfo_t;
 
 
