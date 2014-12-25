@@ -5283,6 +5283,20 @@ void CLASS parseSonyLensFeatures(ushort features) {
 }
 
 
+static float my_roundf(float x) {
+  float t;
+  if (x >= 0.0) {
+    t = ceilf(x);
+    if (t - x > 0.5) t -= 1.0;
+    return t;
+  } else {
+    t = ceilf(-x);
+    if (t + x > 0.5) t -= 1.0;
+    return -t;
+  }
+}
+
+
 void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
 {
   static const uchar xlat[2][256] = {
@@ -5485,7 +5499,7 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
             //				order = 0x4949;						// little endian
             Sony_0x9050 = (uchar*)malloc(len);
             fread(Sony_0x9050, len, 1, ifp);
-            imgdata.lens.sony.SonyMaxAperture = roundf(pow(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
+            imgdata.lens.sony.SonyMaxAperture = my_roundf(powf(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
             //printf("\n====>>>> SonyMaxAperture= %d %d, %f", Sony_0x9050[0], SonySubstitution[Sony_0x9050[0]], SonyMaxAperture);
             if (!imgdata.lens.sony.SonyLensID) 
               imgdata.lens.sony.SonyLensID = SonySubstitution[Sony_0x9050[0x0108]] << 8 | SonySubstitution[Sony_0x9050[0x0107]]; // LensType2 - Sony lens ids
@@ -5568,11 +5582,11 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
           }
 			
         if (tag == 0x20100205)
-          imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = pow(sqrt(2.0f), get2() / 256.0f);
+          imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = powf(sqrt(2.0f), get2() / 256.0f);
 			
         if (tag == 0x20100206) 
           {
-            imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal = pow(sqrt(2.0f), get2() / 256.0f);
+            imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal = powf(sqrt(2.0f), get2() / 256.0f);
             if (!imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal)
               imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal;
           }
@@ -5588,7 +5602,7 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
           }
 			
         if (tag == 0x2010020a)
-          imgdata.lens.olympus.OlympusLens_MaxAperture = pow(sqrt(2.0f), get2() / 256.0f);
+          imgdata.lens.olympus.OlympusLens_MaxAperture = powf(sqrt(2.0f), get2() / 256.0f);
       }
 
     if (strcasecmp(make, "NIKON")) {
@@ -5637,11 +5651,11 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
           case 15:
           case -15:
             i = 7;
-            imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = pow(2.0f, NikonLensData[14] / 24.0f);
+            imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf(2.0f, NikonLensData[14] / 24.0f);
             break;
           case 16:
             i = 8;
-            imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = pow(2.0f, NikonLensData[15] / 24.0f);
+            imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf(2.0f, NikonLensData[15] / 24.0f);
             break;
           }
           imgdata.lens.nikon.NikonLensIDNumber = NikonLensData[i];
@@ -5662,7 +5676,7 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
         {
           unsigned char cc;
           fread(&cc, 1, 1, ifp);
-          iso_speed = (int)(100.0 * pow(2.0, (double)(cc) / 12.0 - 5.0));
+          iso_speed = (int)(100.0 * powf(2.0, (double)(cc) / 12.0 - 5.0));
           break;
         }
     }
@@ -6180,10 +6194,10 @@ nf: order = 0x4949;
             imgdata.lens.olympus.OlympusLensType_SubModel = fgetc(ifp);
           }
         if (tag == 0x20100205)
-          imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = pow(sqrt(2.0f), get2() / 256.0f);
+          imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = powf(sqrt(2.0f), get2() / 256.0f);
         if (tag == 0x20100206) 
           {
-            imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal = pow(sqrt(2.0f), get2() / 256.0f);
+            imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal = powf(sqrt(2.0f), get2() / 256.0f);
             if (!imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal)
               imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal;
           }
@@ -6196,7 +6210,7 @@ nf: order = 0x4949;
               imgdata.lens.olympus.OlympusLens_MaxFocal = imgdata.lens.olympus.OlympusLens_MinFocal;
           }
         if (tag == 0x2010020a)
-          imgdata.lens.olympus.OlympusLens_MaxAperture = pow(sqrt(2.0f), get2() / 256.0f);
+          imgdata.lens.olympus.OlympusLens_MaxAperture = powf(sqrt(2.0f), get2() / 256.0f);
       }
 
     if (strcasestr(make, "SONY") || strcasestr(make, "Konica") || strcasestr(make, "Minolta"))
@@ -6264,7 +6278,7 @@ nf: order = 0x4949;
           //				order = 0x4949;						// little endian
           Sony_0x9050 = (uchar*)malloc(len);
           fread(Sony_0x9050, len, 1, ifp);
-          imgdata.lens.sony.SonyMaxAperture = roundf(pow(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
+          imgdata.lens.sony.SonyMaxAperture = my_roundf(powf(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
           //printf("\n====>>>> SonyMaxAperture= %d %d, %f", Sony_0x9050[0], SonySubstitution[Sony_0x9050[0]], SonyMaxAperture);
           if (!imgdata.lens.sony.SonyLensID) 
             imgdata.lens.sony.SonyLensID = SonySubstitution[Sony_0x9050[0x0108]] << 8 | SonySubstitution[Sony_0x9050[0x0107]]; // LensType2 - Sony lens ids
@@ -6331,7 +6345,7 @@ nf: order = 0x4949;
       {
         unsigned char cc;
         fread(&cc,1,1,ifp);
-        iso_speed = int(100.0 * pow(2.0,double(cc)/12.0-5.0));
+        iso_speed = int(100.0 * powf(2.0f,float(cc)/12.0-5.0));
       }
     if (tag == 4 && len > 26 && len < 35) {
       if ((i=(get4(),get2())) != 0x7fff && (!iso_speed || iso_speed == 65535))
@@ -6756,11 +6770,11 @@ nf: order = 0x4949;
         case 15:
         case -15:
           i = 7;
-          imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = pow(2.0f, NikonLensData[14] / 24.0f);
+          imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf(2.0f, NikonLensData[14] / 24.0f);
           break;
         case 16:
           i = 8;
-          imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = pow(2.0f, NikonLensData[15] / 24.0f);
+          imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf(2.0f, NikonLensData[15] / 24.0f);
           break;
         }
         imgdata.lens.nikon.NikonLensIDNumber = NikonLensData[i];
