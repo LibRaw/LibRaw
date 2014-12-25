@@ -5432,8 +5432,8 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
         uchar SonyLensSpecs_suffix;
         if (tag == 0xb001 && type == 3)			// Sony ModelID
           unique_id = get2();
-        	if (tag == 0x0010 && strncasecmp(model, "DSLR-A100", 9) && !strncasecmp(make, "Sony", 4)) 
-		{		// CameraInfo: Not A100, not Konica, not Minolta
+        if (tag == 0x0010 && strncasecmp(model, "DSLR-A100", 9) && !strncasecmp(make, "Sony", 4)) 
+          {		// CameraInfo
             SonyCameraInfo = (uchar*)malloc(len);
             fread(SonyCameraInfo, len, 1, ifp);
             if (!memcmp(SonyCameraInfo, "\xff\xff\xff\xff\xff\xff\xff\xff", 8)) 
@@ -5522,7 +5522,7 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
             free(SonyCameraSettings);
           }
 
-		if (tag == 0xb027 || tag == 0x010c) 
+        if (tag == 0xb027 || tag == 0x010c) 
           {	// LensType
             imgdata.lens.sony.SonyMinoltaLensID = get4();
             //printf("\n====>>>> SonyMinoltaLensID: %d", SonyMinoltaLensID);
@@ -6222,7 +6222,7 @@ nf: order = 0x4949;
         if (tag == 0xb001 && type == 3)			// Sony ModelID
           unique_id = get2();
 
-		if (tag == 0x0010 && strncasecmp(model, "DSLR-A100", 9) && !strncasecmp(make, "Sony", 4))
+        if (tag == 0x0010 && strncasecmp(model, "DSLR-A100", 9) && !strncasecmp(make, "Sony", 4))
           {					// CameraInfo
             SonyCameraInfo = (uchar*)malloc(len);
             fread(SonyCameraInfo, len, 1, ifp);
@@ -6305,11 +6305,11 @@ nf: order = 0x4949;
           imgdata.lens.sony.SonyModelID = get2();
         }
 #endif
-		if (tag == 0xb027 || tag == 0x010c) 
-		{	// LensType
-          imgdata.lens.sony.SonyMinoltaLensID = get4();
-          //printf("\n====>> SonyMinoltaLensID: %d", SonyMinoltaLensID);
-        }
+        if (tag == 0xb027 || tag == 0x010c) 
+          {
+            imgdata.lens.sony.SonyMinoltaLensID = get4();
+            //printf("\n====>> SonyMinoltaLensID: %d", SonyMinoltaLensID);
+          }
 
         if (tag == 0xb02a) {	// Sony LensSpec			
           fread(SonyLensSpecs_bytes, 8, 1, ifp);
@@ -7000,10 +7000,9 @@ void CLASS parse_exif (int base)
       fread(imgdata.lens.LensModel, MIN(len, sizeof(imgdata.lens.LensMake)), 1, ifp);
       //		printf("\n======>>>>>EXIF LensModel: %s", LensModel);
       break;
-	case 0x9205:
-	  imgdata.lens.EXIF_MaxAperture = powf(2.0f, (getreal(type) / 2.0f));
-	  break;
-		  // IB end
+    case 0x9205:
+      imgdata.lens.EXIF_MaxAperture = powf(2.0f, (getreal(type) / 2.0f));
+      break;
 #endif
       case 33434:  shutter = getreal(type);		break;
       case 33437:  aperture = getreal(type);		break;
@@ -7588,34 +7587,33 @@ int CLASS parse_tiff_ifd (int base)
 	break;
 #ifdef LIBRAW_LIBRARY_BUILD
 // IB start
-		case 0xa405:		// FocalLengthIn35mmFormat
-			imgdata.lens.FocalLengthIn35mmFormat = get2();
-			break;
-	  case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
-		  imgdata.lens.MinFocal = getreal(type);
-		  imgdata.lens.MaxFocal = getreal(type);
-		  imgdata.lens.MaxAp4MinFocal = getreal(type);
-		  imgdata.lens.MaxAp4MaxFocal = getreal(type);
-		  //printf("\n======>>>>>EXIF: %f %f %f %f", MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal);
-		  break;
-	  case 0xc630:		// DNG LensInfo, Lens Specification per EXIF standard
-		  imgdata.lens.MinFocal = getreal(type);
-		  imgdata.lens.MaxFocal = getreal(type);
-		  imgdata.lens.MaxAp4MinFocal = getreal(type);
-		  imgdata.lens.MaxAp4MaxFocal = getreal(type);
-		  break;
-	  case 0xa433:		// LensMake
-		  fread(imgdata.lens.LensMake, MIN(len, sizeof(imgdata.lens.LensMake)), 1, ifp);
-		  //printf("\n======>>>>>EXIF: %s", LensMake);
-		  break;
-	  case 0xa434:		// LensModel
-		  fread(imgdata.lens.LensModel, MIN(len, sizeof(imgdata.lens.LensModel)), 1, ifp);
-		  //printf("\n======>>>>>EXIF: %s", LensModel);
-		  break;
-		case 0x9205:
-			imgdata.lens.EXIF_MaxAperture = powf(2.0f, (getreal(type) / 2.0f));
-			break;
-
+    case 0xa405:		// FocalLengthIn35mmFormat
+      imgdata.lens.FocalLengthIn35mmFormat = get2();
+      break;
+    case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
+      imgdata.lens.MinFocal = getreal(type);
+      imgdata.lens.MaxFocal = getreal(type);
+      imgdata.lens.MaxAp4MinFocal = getreal(type);
+      imgdata.lens.MaxAp4MaxFocal = getreal(type);
+      //printf("\n======>>>>>EXIF: %f %f %f %f", MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal);
+      break;
+    case 0xc630:		// DNG LensInfo, Lens Specification per EXIF standard
+      imgdata.lens.MinFocal = getreal(type);
+      imgdata.lens.MaxFocal = getreal(type);
+      imgdata.lens.MaxAp4MinFocal = getreal(type);
+      imgdata.lens.MaxAp4MaxFocal = getreal(type);
+      break;
+    case 0xa433:		// LensMake
+      fread(imgdata.lens.LensMake, MIN(len, sizeof(imgdata.lens.LensMake)), 1, ifp);
+      //printf("\n======>>>>>EXIF: %s", LensMake);
+      break;
+    case 0xa434:		// LensModel
+      fread(imgdata.lens.LensModel, MIN(len, sizeof(imgdata.lens.LensModel)), 1, ifp);
+      //printf("\n======>>>>>EXIF: %s", LensModel);
+      break;
+    case 0x9205:
+      imgdata.lens.EXIF_MaxAperture = powf(2.0f, (getreal(type) / 2.0f));
+      break;
 // IB end
 #endif
       case 34306:			/* Leaf white balance */
@@ -7867,8 +7865,7 @@ guess_cfa_pc:
 #endif
 		  // IB start
     case 50740:			/* DNGPrivateData tag 0xc634 */
-#if 1
-	{
+      {
         char mbuf[64];
         unsigned short makernote_found = 0;
         unsigned curr_pos, start_pos = ftell(ifp);
@@ -7908,7 +7905,6 @@ guess_cfa_pc:
         order = m_sorder;
       }
       // IB end
-#endif
 	if (dng_version) break;
 	parse_minolta (j = get4()+base);
 	fseek (ifp, j, SEEK_SET);
