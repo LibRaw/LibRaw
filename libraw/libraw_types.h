@@ -424,7 +424,7 @@ typedef struct
 
 typedef struct 
 {
-	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal;
+	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAperture;
 	char LensMake[128], LensModel[128];
 	ushort FocalLengthIn35mmFormat;
 	libraw_sonylens_t sony;
