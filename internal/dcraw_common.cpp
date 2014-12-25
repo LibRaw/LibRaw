@@ -82,7 +82,6 @@ ushort CLASS sget2 (uchar *s)
   else				/* "MM" means big-endian */
     return s[0] << 8 | s[1];
 }
-
 #ifdef LIBRAW_LIBRARY_BUILD
 static ushort bcd2dec(uchar data){
 	return (data >> 4) * 10 + (data & 0x0f);
@@ -102,7 +101,6 @@ ushort CLASS sget2Rev(uchar *s)	// specific to some Canon Makernotes fields, whe
 		return s[0] << 8 | s[1];
 }
 #endif
-
 
 ushort CLASS get2()
 {
@@ -2892,11 +2890,11 @@ void CLASS kodak_rgb_load_raw()
 #ifdef LIBRAW_LIBRARY_BUILD
         if(load_flags == 12)
           {
-			  FORC3 ip[c] = ret ? (*bp++) : (rgb[c] += *bp++);
+            FORC3 ip[c] = ret ? (*bp++) : (rgb[c] += *bp++);
           }
         else
 #endif
-		FORC3 if ((ip[c] = ret ? (*bp++) : (rgb[c] += *bp++)) >> 12) derror();
+          FORC3 if ((ip[c] = ret ? (*bp++) : (rgb[c] += *bp++)) >> 12) derror();
     }
   }
 }
@@ -5233,8 +5231,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
-// IB start
-
+#ifdef LIBRAW_LIBRARY_BUILD
 void CLASS parseSonyLensFeatures(ushort features) {
 	imgdata.lens.sony.SonyLensFeatures_pre[0] = 0;
 	imgdata.lens.sony.SonyLensFeatures_suf[0] = 32;
@@ -5284,6 +5281,7 @@ void CLASS parseSonyLensFeatures(ushort features) {
 
 	return;
 }
+
 
 void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
 {
@@ -5928,6 +5926,12 @@ quit:
 	order = sorder;
 }
 // IB end
+#else
+void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
+{
+  /*placeholder */
+}
+#endif
 
 
 void CLASS parse_makernote (int base, int uptag)
@@ -6320,8 +6324,8 @@ nf: order = 0x4949;
 	}
 	// IB end
 #endif
-	
-	if (tag == 2 && strstr(make,"NIKON") && !iso_speed)
+
+    if (tag == 2 && strstr(make,"NIKON") && !iso_speed)
       iso_speed = (get2(),get2());
     if (tag == 37 && strstr(make,"NIKON") && (!iso_speed || iso_speed == 65535))
       {
@@ -7592,7 +7596,6 @@ int CLASS parse_tiff_ifd (int base)
 		  break;
 // IB end
 #endif
-
       case 34306:			/* Leaf white balance */
 	FORC4 cam_mul[c ^ 1] = 4096.0 / get2();
 	break;
