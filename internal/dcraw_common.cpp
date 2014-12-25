@@ -5282,6 +5282,18 @@ void CLASS parseSonyLensFeatures(ushort features) {
 	return;
 }
 
+static float my_roundf(float x) {
+	float t;
+	if (x >= 0.0) {
+		t = ceilf(x);
+		if (t - x > 0.5) t -= 1.0;
+			return t;
+	} else {
+		t = ceilf(-x);
+		if (t + x > 0.5) t -= 1.0;
+			return -t;
+	}
+}
 
 void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
 {
@@ -5485,7 +5497,7 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
 				//				order = 0x4949;						// little endian
 				Sony_0x9050 = (uchar*)malloc(len);
 				fread(Sony_0x9050, len, 1, ifp);
-				imgdata.lens.sony.SonyMaxAperture = roundf(pow(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
+				imgdata.lens.sony.SonyMaxAperture = my_roundf(powf(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
 				//printf("\n====>>>> SonyMaxAperture= %d %d, %f", Sony_0x9050[0], SonySubstitution[Sony_0x9050[0]], SonyMaxAperture);
 				if (!imgdata.lens.sony.SonyLensID) 
 					imgdata.lens.sony.SonyLensID = SonySubstitution[Sony_0x9050[0x0108]] << 8 | SonySubstitution[Sony_0x9050[0x0107]]; // LensType2 - Sony lens ids
@@ -6264,7 +6276,7 @@ nf: order = 0x4949;
 			//				order = 0x4949;						// little endian
 			Sony_0x9050 = (uchar*)malloc(len);
 			fread(Sony_0x9050, len, 1, ifp);
-			imgdata.lens.sony.SonyMaxAperture = roundf(pow(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
+			imgdata.lens.sony.SonyMaxAperture = my_roundf(powf(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
 			//printf("\n====>>>> SonyMaxAperture= %d %d, %f", Sony_0x9050[0], SonySubstitution[Sony_0x9050[0]], SonyMaxAperture);
 			if (!imgdata.lens.sony.SonyLensID) 
 				imgdata.lens.sony.SonyLensID = SonySubstitution[Sony_0x9050[0x0108]] << 8 | SonySubstitution[Sony_0x9050[0x0107]]; // LensType2 - Sony lens ids
