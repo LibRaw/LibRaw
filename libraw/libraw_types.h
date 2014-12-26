@@ -379,7 +379,8 @@ typedef struct
 {
 	ushort SonyModelID;
 //	unsigned SonyMinoltaLensID, SonyLensID, SonyLensCrop, SonyLensMount, SonyMinFocalLength, SonyMaxFoclaLength, SonyFocalLength;
-	unsigned SonyMinoltaLensID, SonyLensID, SonyLensMount, SonyLensFormat, SonyMinFocalLength, SonyMaxFoclaLength, SonyFocalLength;
+	unsigned long long SonyMinoltaLensID;
+	unsigned SonyLensID, SonyLensMount, SonyLensFormat, SonyMinFocalLength, SonyMaxFoclaLength, SonyFocalLength;
 	char SonyTeleconverterName[128], SonyMinoltaLensName[128], SonyLensName[128];
 	ushort SonyTeleconverterID, SonyLensSpecs_minFocal, SonyLensSpecs_maxFocal;
 	float SonyLensSpecs_maxAp4minFocal, SonyLensSpecs_maxAp4maxFocal, SonyMaxAperture, SonyMinAperture;

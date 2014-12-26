@@ -5489,6 +5489,8 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
             Sony_0x940c = (uchar*)malloc(len);
             fread(Sony_0x940c, len, 1, ifp);
             imgdata.lens.sony.SonyLensID = SonySubstitution[Sony_0x940c[0x000a]] << 8 | SonySubstitution[Sony_0x940c[0x0009]]; // LensType2 - Sony lens ids
+			if (imgdata.lens.sony.SonyLensID >= 32784) 
+				imgdata.lens.sony.SonyLensID = 0;
             //printf("\n====>>>>  0x940c SonyLensID: %x", SonyLensID);
             free(Sony_0x940c);
           }
@@ -5504,8 +5506,8 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
             if (!imgdata.lens.sony.SonyLensID) 
               imgdata.lens.sony.SonyLensID = SonySubstitution[Sony_0x9050[0x0108]] << 8 | SonySubstitution[Sony_0x9050[0x0107]]; // LensType2 - Sony lens ids
             //printf("\n====>>>> SonyLensID 0x9050: %d", SonyLensID);
-            if (!imgdata.lens.sony.SonyMinoltaLensID)
-              imgdata.lens.sony.SonyMinoltaLensID = SonySubstitution[Sony_0x9050[0x0110]] << 8 | SonySubstitution[Sony_0x9050[0x0109]]; // LensType - Minolta/Sony lens ids
+			if (!imgdata.lens.sony.SonyMinoltaLensID) 
+				imgdata.lens.sony.SonyMinoltaLensID = SonySubstitution[Sony_0x9050[0x010a]] << 8 | SonySubstitution[Sony_0x9050[0x0109]]; // LensType - Minolta/Sony lens ids
             //printf("\n====>>>> SonyMinoltaLensID 0x9050: %d", SonySubstitution[Sony_0x9050[0x0110]] << 8 | SonySubstitution[Sony_0x9050[0x0109]]);
             imgdata.lens.sony.SonyLensMount = SonySubstitution[Sony_0x9050[0x105]];
             imgdata.lens.sony.SonyLensFormat = SonySubstitution[Sony_0x9050[0x106]];
@@ -6269,6 +6271,8 @@ nf: order = 0x4949;
           Sony_0x940c = (uchar*)malloc(len);
           fread(Sony_0x940c, len, 1, ifp);
           imgdata.lens.sony.SonyLensID = SonySubstitution[Sony_0x940c[0x000a]] << 8 | SonySubstitution[Sony_0x940c[0x0009]]; // LensType2 - Sony lens ids
+		  if (imgdata.lens.sony.SonyLensID >= 32784) 
+			  imgdata.lens.sony.SonyLensID = 0;
           //printf("\n========>>>>>> 0x940c SonyLensID: %x", SonyLensID);
           free(Sony_0x940c);
         }
@@ -6283,9 +6287,9 @@ nf: order = 0x4949;
           if (!imgdata.lens.sony.SonyLensID) 
             imgdata.lens.sony.SonyLensID = SonySubstitution[Sony_0x9050[0x0108]] << 8 | SonySubstitution[Sony_0x9050[0x0107]]; // LensType2 - Sony lens ids
           //printf("\nSonyLensID 0x9050: %d", SonyLensID);
-          if (!imgdata.lens.sony.SonyMinoltaLensID) 
-            imgdata.lens.sony.SonyMinoltaLensID = SonySubstitution[Sony_0x9050[0x0110]] << 8 | SonySubstitution[Sony_0x9050[0x0109]]; // LensType - Minolta/Sony lens ids
-          imgdata.lens.sony.SonyLensMount = SonySubstitution[Sony_0x9050[0x105]];
+		  if (!imgdata.lens.sony.SonyMinoltaLensID) 
+			  imgdata.lens.sony.SonyMinoltaLensID = SonySubstitution[Sony_0x9050[0x010a]] << 8 | SonySubstitution[Sony_0x9050[0x0109]]; // LensType - Minolta/Sony lens ids
+		  imgdata.lens.sony.SonyLensMount = SonySubstitution[Sony_0x9050[0x105]];
           imgdata.lens.sony.SonyLensFormat = SonySubstitution[Sony_0x9050[0x106]];
           //printf("\nSonyMinoltaLensID 0x9050: %d", SonyMinoltaLensID);
           //				order = save_order4Sony;
@@ -10202,10 +10206,6 @@ void CLASS identify()
   pixel_aspect = is_raw = raw_color = 1;
   tile_width = tile_length = 0;
 
-#ifdef LIBRAW_LIBRARY_BUILD
-  memset(&imgdata.lens, 0, sizeof(imgdata.lens));
-  imgdata.lens.PentaxLensID = -1;
-#endif
 
   for (i=0; i < 4; i++) {
     cam_mul[i] = i == 1;

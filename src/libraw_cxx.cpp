@@ -329,6 +329,9 @@ LibRaw:: LibRaw(unsigned int flags)
   verbose = 0;
 #endif
   ZERO(imgdata);
+  imgdata.lens.PentaxLensID = -1;
+  imgdata.lens.sony.SonyMinoltaLensID = 0xffffffffffffffff;
+
   cleargps(&imgdata.other.parsed_gps);
   ZERO(libraw_internal_data);
   ZERO(callbacks);
@@ -478,6 +481,10 @@ void LibRaw:: recycle()
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
   ZERO(libraw_internal_data);
+  ZERO(imgdata.lens);
+  imgdata.lens.PentaxLensID = -1;
+  imgdata.lens.sony.SonyMinoltaLensID = 0xffffffffffffffff;
+
   _exitflag = 0;
 #ifdef USE_RAWSPEED
   if(_rawspeed_decoder)
