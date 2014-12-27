@@ -329,6 +329,8 @@ LibRaw:: LibRaw(unsigned int flags)
   verbose = 0;
 #endif
   ZERO(imgdata);
+  imgdata.lens.canon.CanonFocalType = -1;
+  imgdata.lens.canon.CanonFocalUnits = 1;
   imgdata.lens.PentaxLensID = -1;
   imgdata.lens.sony.SonyMinoltaLensID = 0xffffffffffffffff;
 
@@ -482,6 +484,8 @@ void LibRaw:: recycle()
   imgdata.color.baseline_exposure = -999.f;
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);
+  imgdata.lens.canon.CanonFocalType = -1;
+  imgdata.lens.canon.CanonFocalUnits = 1;
   imgdata.lens.PentaxLensID = -1;
   imgdata.lens.sony.SonyMinoltaLensID = 0xffffffffffffffff;
 
