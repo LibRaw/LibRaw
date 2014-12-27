@@ -8385,8 +8385,21 @@ void CLASS parse_ciff (int offset, int length, int depth)
       raw_height = get2();
     }
     if (type == 0x5029) {
+#ifdef LIBRAW_LIBRARY_BUILD
+		imgdata.lens.canon.CanonFocalLength = len >> 16;
+		imgdata.lens.canon.CanonFocalType = len & 0xffff;
+		if (imgdata.lens.canon.CanonFocalType == 2) 
+		{
+			imgdata.lens.canon.CanonFocalUnits = 32;
+			focal_len = imgdata.lens.canon.CanonFocalLength / 32.0;
+		}
+		else 
+			focal_len = imgdata.lens.canon.CanonFocalLength;
+		// IB end
+#else
       focal_len = len >> 16;
       if ((len & 0xffff) == 2) focal_len /= 32;
+#endif
     }
     if (type == 0x5813) flash_used = int_to_float(len);
     if (type == 0x5814) canon_ev   = int_to_float(len);
