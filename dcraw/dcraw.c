@@ -9447,6 +9447,22 @@ void CLASS ciff_block_1030()
 /*
    Parse a CIFF file, better known as Canon CRW format.
  */
+
+#ifdef LIBRAW_LIBRARY_BUILD
+static float _CanonConvert2EV(short in) 
+{
+	float frac1;
+	short val = in, sign = 1, frac;
+	if (val < 0) { val = -val; sign = -1; }
+	frac = (val & 0x1f);
+	val -= frac;
+	if (frac == 0x0c) frac1 = 32.0f / 3.0f;
+	else if (frac == 0x14) frac1 = 64.0f / 3.0f;
+	else frac1 = (float)frac;
+	return (float)sign * ((float)val + frac1) / 32.0f;
+}
+#endif
+
 void CLASS parse_ciff (int offset, int length, int depth)
 {
   int tboff, nrecs, c, type, len, save, wbi=-1;
@@ -9505,6 +9521,21 @@ void CLASS parse_ciff (int offset, int length, int depth)
 	FORC4 cam_mul[c ^ (c >> 1) ^ 1] = get2();
       }
     }
+#ifdef LIBRAW_LIBRARY_BUILD
+    if (type == 0x102d) 
+      {
+        fseek(ifp, 44, SEEK_CUR);
+        imgdata.lens.canon.CanonLensID = get2();
+        imgdata.lens.canon.CanonMaxFocalLength = get2();
+        imgdata.lens.canon.CanonMinFocalLength = get2();
+        imgdata.lens.canon.CanonFocalUnits = get2();
+        imgdata.lens.MaxFocal = imgdata.lens.canon.CanonMaxFocalLength / MIN(imgdata.lens.canon.CanonFocalUnits,1);
+        imgdata.lens.MinFocal = imgdata.lens.canon.CanonMinFocalLength / MIN(imgdata.lens.canon.CanonFocalUnits,1);
+        imgdata.lens.canon.CanonMaxAperture = get2();
+        imgdata.lens.canon.CanonMinAperture = get2();
+        imgdata.lens.EXIF_MaxAperture = pow(2.0f, _CanonConvert2EV(imgdata.lens.canon.CanonMaxAperture) / 2.0f);
+      }
+#endif
     if (type == 0x0032) {
       if (len == 768) {			/* EOS D30 */
 	fseek (ifp, 72, SEEK_CUR);
@@ -9535,8 +9566,21 @@ void CLASS parse_ciff (int offset, int length, int depth)
       raw_height = get2();
     }
     if (type == 0x5029) {
+#ifdef LIBRAW_LIBRARY_BUILD
+      imgdata.lens.canon.CanonFocalLength = len >> 16;
+      imgdata.lens.canon.CanonFocalType = len & 0xffff;
+      if (imgdata.lens.canon.CanonFocalType == 2) 
+        {
+          imgdata.lens.canon.CanonFocalUnits = 32;
+          focal_len = imgdata.lens.canon.CanonFocalLength / 32.0;
+        }
+      else 
+        focal_len = imgdata.lens.canon.CanonFocalLength;
+      // IB end
+#else
       focal_len = len >> 16;
       if ((len & 0xffff) == 2) focal_len /= 32;
+#endif
     }
     if (type == 0x5813) flash_used = int_to_float(len);
     if (type == 0x5814) canon_ev   = int_to_float(len);
@@ -10701,6 +10745,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 12995,-5593,-1107,-1879,10139,2027,-64,1233,4919 } },
     { "Pentax 645D", 0, 0x3e00,
 	{ 10646,-3593,-1158,-3329,11699,1831,-667,2874,6287 } },
+    { "Panasonic DMC-CM1", -15, 0,
+        { 8770, -3194,-820,-2871,11281,1803,-513,1552,4434} },
     { "Panasonic DMC-FZ8", 0, 0xf7f,
 	{ 8986,-2755,-802,-6341,13575,3077,-1476,2144,6379 } },
     { "Panasonic DMC-FZ18", 0, 0,
@@ -10739,8 +10785,6 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 10704,-4187,-1230,-8314,15952,2501,-920,945,8927 } },
     { "Leica D-Lux (Typ 109)", 0, 0xf7f, /* LibRaw */
 	{ 10031,-4555,-456,-3024,11520,1091,-1342,2611,4752 } },
-    { "Panasonic DMC-LX100", 0, 0xf7f, /* Temp copy from LX1 */
-	{ 10704,-4187,-1230,-8314,15952,2501,-920,945,8927 } },
     { "Leica D-LUX2", 0, 0xf7f,
 	{ 10704,-4187,-1230,-8314,15952,2501,-920,945,8927 } },
     { "Panasonic DMC-LX2", 0, 0,

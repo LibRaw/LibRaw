@@ -8279,7 +8279,7 @@ static float _CanonConvert2EV(short in)
 	else if (frac == 0x14) frac1 = 64.0f / 3.0f;
 	else frac1 = (float)frac;
 	return (float)sign * ((float)val + frac1) / 32.0f;
-};
+}
 #endif
 
 void CLASS parse_ciff (int offset, int length, int depth)
@@ -8341,19 +8341,19 @@ void CLASS parse_ciff (int offset, int length, int depth)
       }
     }
 #ifdef LIBRAW_LIBRARY_BUILD
-	if (type == 0x102d) 
-	{
-		fseek(ifp, 44, SEEK_CUR);
-		imgdata.lens.canon.CanonLensID = get2();
-		imgdata.lens.canon.CanonMaxFocalLength = get2();
-		imgdata.lens.canon.CanonMinFocalLength = get2();
-		imgdata.lens.canon.CanonFocalUnits = get2();
-		imgdata.lens.MaxFocal = imgdata.lens.canon.CanonMaxFocalLength / MIN(imgdata.lens.canon.CanonFocalUnits,1);
-		imgdata.lens.MinFocal = imgdata.lens.canon.CanonMinFocalLength / MIN(imgdata.lens.canon.CanonFocalUnits,1);
-		imgdata.lens.canon.CanonMaxAperture = get2();
-		imgdata.lens.canon.CanonMinAperture = get2();
-		imgdata.lens.EXIF_MaxAperture = pow(2.0f, _CanonConvert2EV(imgdata.lens.canon.CanonMaxAperture) / 2.0f);
-	}
+    if (type == 0x102d) 
+      {
+        fseek(ifp, 44, SEEK_CUR);
+        imgdata.lens.canon.CanonLensID = get2();
+        imgdata.lens.canon.CanonMaxFocalLength = get2();
+        imgdata.lens.canon.CanonMinFocalLength = get2();
+        imgdata.lens.canon.CanonFocalUnits = get2();
+        imgdata.lens.MaxFocal = imgdata.lens.canon.CanonMaxFocalLength / MIN(imgdata.lens.canon.CanonFocalUnits,1);
+        imgdata.lens.MinFocal = imgdata.lens.canon.CanonMinFocalLength / MIN(imgdata.lens.canon.CanonFocalUnits,1);
+        imgdata.lens.canon.CanonMaxAperture = get2();
+        imgdata.lens.canon.CanonMinAperture = get2();
+        imgdata.lens.EXIF_MaxAperture = pow(2.0f, _CanonConvert2EV(imgdata.lens.canon.CanonMaxAperture) / 2.0f);
+      }
 #endif
     if (type == 0x0032) {
       if (len == 768) {			/* EOS D30 */
@@ -8386,16 +8386,16 @@ void CLASS parse_ciff (int offset, int length, int depth)
     }
     if (type == 0x5029) {
 #ifdef LIBRAW_LIBRARY_BUILD
-		imgdata.lens.canon.CanonFocalLength = len >> 16;
-		imgdata.lens.canon.CanonFocalType = len & 0xffff;
-		if (imgdata.lens.canon.CanonFocalType == 2) 
-		{
-			imgdata.lens.canon.CanonFocalUnits = 32;
-			focal_len = imgdata.lens.canon.CanonFocalLength / 32.0;
-		}
-		else 
-			focal_len = imgdata.lens.canon.CanonFocalLength;
-		// IB end
+      imgdata.lens.canon.CanonFocalLength = len >> 16;
+      imgdata.lens.canon.CanonFocalType = len & 0xffff;
+      if (imgdata.lens.canon.CanonFocalType == 2) 
+        {
+          imgdata.lens.canon.CanonFocalUnits = 32;
+          focal_len = imgdata.lens.canon.CanonFocalLength / 32.0;
+        }
+      else 
+        focal_len = imgdata.lens.canon.CanonFocalLength;
+      // IB end
 #else
       focal_len = len >> 16;
       if ((len & 0xffff) == 2) focal_len /= 32;
@@ -9460,9 +9460,9 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 12995,-5593,-1107,-1879,10139,2027,-64,1233,4919 } },
     { "Pentax 645D", 0, 0x3e00,
 	{ 10646,-3593,-1158,-3329,11699,1831,-667,2874,6287 } },
-	{ "Panasonic DMC-CM1", -15, 0,
-	{ 8770, -3194,-820,-2871,11281,1803,-513,1552,4434} },
-	{ "Panasonic DMC-FZ8", 0, 0xf7f,
+    { "Panasonic DMC-CM1", -15, 0,
+        { 8770, -3194,-820,-2871,11281,1803,-513,1552,4434} },
+    { "Panasonic DMC-FZ8", 0, 0xf7f,
 	{ 8986,-2755,-802,-6341,13575,3077,-1476,2144,6379 } },
     { "Panasonic DMC-FZ18", 0, 0,
 	{ 9932,-3060,-935,-5809,13331,2753,-1267,2155,5575 } },
@@ -9496,9 +9496,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
     {"Panasonic DMC-LX100",0, 0, /* LibRaw */
 	{ 10031,-4555,-456,-3024,11520,1091,-1342,2611,4752 } },
-	{ "Panasonic DMC-LX100", 0, 0xf7f, /* Temp copy from LX1 */
-	{ 10704, -4187, -1230, -8314, 15952, 2501, -920, 945, 8927 } },
-	{ "Panasonic DMC-LX1", 0, 0xf7f,
+    { "Panasonic DMC-LX1", 0, 0xf7f,
 	{ 10704,-4187,-1230,-8314,15952,2501,-920,945,8927 } },
     { "Leica D-Lux (Typ 109)", 0, 0xf7f, /* LibRaw */
 	{ 10031,-4555,-456,-3024,11520,1091,-1342,2611,4752 } },
@@ -9524,6 +9522,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
         { 9653,-4154,-509,-2262,10985,936,-1120,2255,4061 } },
     { "Panasonic DMC-FZ1000", -15, 0,	/* LibRaw */
         { 9653,-4154,-509,-2262,10985,936,-1120,2255,4061 } },
+    { "Panasonic DMC-FZ100", -15, 0xfff,
+	{ 16197,-6146,-1761,-2393,10765,1869,366,2238,5248 } },
     { "Leica V-LUX 2", -15, 0xfff,
 	{ 16197,-6146,-1761,-2393,10765,1869,366,2238,5248 } },
     { "Panasonic DMC-FZ150", -15, 0xfff,
