@@ -3803,6 +3803,7 @@ static const char  *static_camera_list[] =
 "Olympus XZ-2",
 "Olympus XZ-10",
 "OmniVision OV5647 (Raspberry Pi)",
+"Panasonic DMC-CM1",
 "Panasonic DMC-FZ8",
 "Panasonic DMC-FZ18",
 "Panasonic DMC-FZ28",
