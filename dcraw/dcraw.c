@@ -6772,19 +6772,44 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
         imgdata.lens.nikon.NikonLens_0x0084_MaxAperture4MinFocal = getreal(type);
         imgdata.lens.nikon.NikonLens_0x0084_MaxAperture4MaxFocal = getreal(type);
       }
-      if (tag == 0x0098) {
-        for (i = 0; i < 4; i++)
-          NikonLensDataVersion = NikonLensDataVersion * 10 + fgetc(ifp) - '0';
-        if (NikonLensDataVersion == 100)		// lensdata00
-          NikonLensDataLen = -9;
-        else if (NikonLensDataVersion == 101)	// lensdata01
-          NikonLensDataLen = -15;
-        else if (NikonLensDataVersion == 201 || NikonLensDataVersion == 202 || NikonLensDataVersion == 203)	// lensdata01
-          NikonLensDataLen = 15;
-        else if (NikonLensDataVersion == 204)	// lensdata204
-          NikonLensDataLen = 16;
-        else if (NikonLensDataVersion == 400)	// Nikon 1, lensdata400
-          NikonLensDataLen = 459;
+      if (tag == 0x0098) 
+        {
+          for (i = 0; i < 4; i++) 
+            {
+              NikonLensDataVersion = NikonLensDataVersion * 10 + fgetc(ifp) - '0';
+            }
+          if (NikonLensDataVersion == 100) 
+            {		// lensdata00
+              NikonLensDataLen = -9;
+            }
+          else if (NikonLensDataVersion == 101) 
+            {	// lensdata01
+              NikonLensDataLen = -15;
+            }
+          else if (NikonLensDataVersion == 201 || NikonLensDataVersion == 202 || NikonLensDataVersion == 203) 
+            {	// lensdata01
+              NikonLensDataLen = 15;
+            }
+          else if (NikonLensDataVersion == 204) 
+            {	// lensdata204
+              NikonLensDataLen = 16;
+            }
+          else if (NikonLensDataVersion == 400) 
+            {	// Nikon 1, lensdata400
+              NikonLensDataLen = 459;
+            }
+          else if (NikonLensDataVersion == 401) 
+            {	// Nikon series 1, lensdata401, encrypted
+              NikonLensDataLen = 590;
+            }
+          else if (NikonLensDataVersion == 402) 
+            {	// Nikon series 1, lensdata402, encrypted
+              NikonLensDataLen = 509;
+            }
+          else if (NikonLensDataVersion == 403) 
+            {	// Nikon series 1, lensdata403, encrypted
+              NikonLensDataLen = 879;
+            }
         fread(NikonLensData, abs(NikonLensDataLen), 1, ifp);
       }
 
@@ -6820,12 +6845,22 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
           imgdata.lens.nikon.NikonMaxApertureAtMaxFocal = NikonLensData[i + 5];
           imgdata.lens.nikon.NikonMCUVersion = NikonLensData[i + 6];
         }
-        if (NikonLensDataLen == 459) {
-          memcpy(imgdata.lens.nikon.NikonLensName, NikonLensData + 390, 64);
-          imgdata.lens.nikon.NikonLensName[64] = 0;
-        }
+        else if ((NikonLensDataLen == 459) || (NikonLensDataLen == 590)) 
+          {
+            memcpy(imgdata.lens.makernotes.LensModel, NikonLensData + 390, 64);
+            imgdata.lens.makernotes.LensModel[64] = 0;
+          }
+        else if (NikonLensDataLen == 509) 
+          {
+            memcpy(imgdata.lens.makernotes.LensModel, NikonLensData + 391, 64);
+            imgdata.lens.makernotes.LensModel[64] = 0;
+          }
+        else if (NikonLensDataLen == 879) 
+          {
+            memcpy(imgdata.lens.makernotes.LensModel, NikonLensData + 680, 64);
+            imgdata.lens.makernotes.LensModel[64] = 0;
+          }
       }
-
       if (tag == 37 && (!iso_speed || iso_speed == 65535))
         {
           unsigned char cc;
@@ -7315,19 +7350,44 @@ nf: order = 0x4949;
         imgdata.lens.nikon.NikonLens_0x0084_MaxAperture4MinFocal = getreal(type);
         imgdata.lens.nikon.NikonLens_0x0084_MaxAperture4MaxFocal = getreal(type);
       }
-      if (tag == 0x0098) {
-        for (i = 0; i < 4; i++)
-          NikonLensDataVersion = NikonLensDataVersion * 10 + fgetc(ifp) - '0';
-        if (NikonLensDataVersion == 100)		// lensdata00
-          NikonLensDataLen = -9;
-        else if (NikonLensDataVersion == 101)	// lensdata01
-          NikonLensDataLen = -15;
-        else if (NikonLensDataVersion == 201 || NikonLensDataVersion == 202 || NikonLensDataVersion == 203)	// lensdata01
-          NikonLensDataLen = 15;
-        else if (NikonLensDataVersion == 204)	// lensdata204
-          NikonLensDataLen = 16;
-        else if (NikonLensDataVersion == 400)	// Nikon 1, lensdata400
-          NikonLensDataLen = 459;
+      if (tag == 0x0098) 
+        {
+          for (i = 0; i < 4; i++) 
+            {
+              NikonLensDataVersion = NikonLensDataVersion * 10 + fgetc(ifp) - '0';
+            }
+          if (NikonLensDataVersion == 100) 
+            {		// lensdata00
+              NikonLensDataLen = -9;
+            }
+          else if (NikonLensDataVersion == 101) 
+            {	// lensdata01
+              NikonLensDataLen = -15;
+            }
+          else if (NikonLensDataVersion == 201 || NikonLensDataVersion == 202 || NikonLensDataVersion == 203) 
+            {	// lensdata01
+              NikonLensDataLen = 15;
+            }
+          else if (NikonLensDataVersion == 204) 
+            {	// lensdata204
+              NikonLensDataLen = 16;
+            }
+          else if (NikonLensDataVersion == 400) 
+            {	// Nikon 1, lensdata400
+              NikonLensDataLen = 459;
+            }
+          else if (NikonLensDataVersion == 401) 
+            {	// Nikon series 1, lensdata401, encrypted
+              NikonLensDataLen = 590;
+            }
+          else if (NikonLensDataVersion == 402) 
+            {	// Nikon series 1, lensdata402, encrypted
+              NikonLensDataLen = 509;
+            }
+          else if (NikonLensDataVersion == 403) 
+            {	// Nikon series 1, lensdata403, encrypted
+              NikonLensDataLen = 879;
+            }
         fread(NikonLensData, MIN(abs(NikonLensDataLen),sizeof(NikonLensData)), 1, ifp);
       }
     }
@@ -7903,10 +7963,21 @@ nf: order = 0x4949;
         imgdata.lens.nikon.NikonMaxApertureAtMaxFocal = NikonLensData[i + 5];
         imgdata.lens.nikon.NikonMCUVersion = NikonLensData[i + 6];
       }
-      if (NikonLensDataLen == 459) {
-        memcpy(imgdata.lens.nikon.NikonLensName, NikonLensData + 390, 64);
-        imgdata.lens.nikon.NikonLensName[64] = 0;
-      }
+      else if ((NikonLensDataLen == 459) || (NikonLensDataLen == 590)) 
+        {
+          memcpy(imgdata.lens.makernotes.LensModel, NikonLensData + 390, 64);
+          imgdata.lens.makernotes.LensModel[64] = 0;
+        }
+      else if (NikonLensDataLen == 509) 
+        {
+          memcpy(imgdata.lens.makernotes.LensModel, NikonLensData + 391, 64);
+          imgdata.lens.makernotes.LensModel[64] = 0;
+        }
+      else if (NikonLensDataLen == 879) 
+        {
+          memcpy(imgdata.lens.makernotes.LensModel, NikonLensData + 680, 64);
+          imgdata.lens.makernotes.LensModel[64] = 0;
+        }
     }
 #else
     if (tag == 0xa7 && (unsigned) (ver97-200) < 17) {
@@ -9687,6 +9758,19 @@ void CLASS parse_phase_one (int base)
     save = ftell(ifp);
     fseek (ifp, base+data, SEEK_SET);
     switch (tag) {
+#ifdef LIBRAW_LIBRARY_BUILD
+      // IB start
+    case 0x0412:
+      fread(imgdata.lens.makernotes.LensModel, 1, len, ifp);
+      break;
+    case 0x0414:
+      imgdata.lens.makernotes.MaxAp4CurFocal = pow(2.0f, (getreal(type) / 2.0f));
+      break;
+    case 0x0415:
+      imgdata.lens.makernotes.MinAp4CurFocal = pow(2.0f, (getreal(type) / 2.0f));
+      break;
+      // IB end
+#endif
       case 0x100:  flip = "0653"[data & 3]-'0';  break;
       case 0x106:
 	for (i=0; i < 9; i++)
@@ -10865,6 +10949,10 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
         { 15964,-8332,-389,1756,7198,383,862,784,1995 } },
     {"Panasonic DMC-ZS4",-15, 0,
         { 15964,-8332,-389,1756,7198,383,862,784,1995 } },
+    { "Panasonic DMC-TZ7",-15, 0,
+	{ 7901,-2472,-600,-3298,10720,2210,-864,2205,5064 } },
+    { "Panasonic DMC-ZS5",-15, 0,	/* same ID as Panasonic DMC-TZ70 */
+	{ 7901,-2472,-600,-3298,10720,2210,-864,2205,5064 } },
     { "Phase One H 20", 0, 0,		/* DJC */
 	{ 1313,1855,-109,-6715,15908,808,-327,1840,6020 } },
     { "Phase One H 25", 0, 0,
