@@ -380,7 +380,7 @@ typedef struct
 	ushort SonyModelID;
 //	unsigned SonyMinoltaLensID, SonyLensID, SonyLensCrop, SonyLensMount, SonyMinFocalLength, SonyMaxFoclaLength, SonyFocalLength;
 	unsigned long long SonyMinoltaLensID;
-	unsigned SonyLensID, SonyLensMount, SonyLensFormat, SonyMinFocalLength, SonyMaxFoclaLength, SonyFocalLength;
+	unsigned SonyLensID, SonyLensMount, SonyLensFormat, SonyMinFocalLength, SonyMaxFocalLength, SonyFocalLength;
 	char SonyTeleconverterName[128], SonyMinoltaLensName[128], SonyLensName[128];
 	ushort SonyTeleconverterID, SonyLensSpecs_minFocal, SonyLensSpecs_maxFocal;
 	float SonyLensSpecs_maxAp4minFocal, SonyLensSpecs_maxAp4maxFocal, SonyMaxAperture, SonyMinAperture;
@@ -401,6 +401,14 @@ typedef struct
 	ushort SamsungLensID;
 	char SamsungLensName[128];
 } libraw_samsunglens_t;
+
+typedef struct
+{
+	float MaxAp4CurFocal, MinAp4CurFocal;
+	char LensModel[128];
+	short LensFormat;	// 0 - unknown, 1 - crop, 2 - full-frame
+	short LensMount;		// 0 - unknown, 1 - A-mount, 2 - E-mount
+} libraw_makernotes_lens_t;
 
 typedef struct 
 {
@@ -434,6 +442,7 @@ typedef struct
 	libraw_nikonlens_t nikon;
 	libraw_olympuslens_t olympus;
 	libraw_dnglens_t dng;
+	libraw_makernotes_lens_t makernotes;
 	short PentaxLensID;
 } libraw_lensinfo_t;
 

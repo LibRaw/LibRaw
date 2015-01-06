@@ -125,6 +125,7 @@ class DllDef LibRaw
     void                        raw2image_start();
     void                        free_image();
     int                         adjust_maximum();
+	int							camera_unique_id(){ return libraw_internal_data.identify_data.unique_id; }
 	void							set_exifparser_handler( exif_parser_callback cb,void *data) {callbacks.exifparser_data = data; callbacks.exif_cb = cb; }
     void                        set_memerror_handler( memory_callback cb,void *data) {callbacks.memcb_data = data; callbacks.mem_cb = cb; }
     void                        set_dataerror_handler(data_callback func, void *data) { callbacks.datacb_data = data; callbacks.data_cb = func;}
