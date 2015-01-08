@@ -9764,10 +9764,10 @@ void CLASS parse_phase_one (int base)
       fread(imgdata.lens.makernotes.LensModel, 1, len, ifp);
       break;
     case 0x0414:
-      imgdata.lens.makernotes.MaxAp4CurFocal = pow(2.0f, (getreal(type) / 2.0f));
+      imgdata.lens.makernotes.MaxAp4CurFocal = powf(2.0f, (getreal(type) / 2.0f));
       break;
     case 0x0415:
-      imgdata.lens.makernotes.MinAp4CurFocal = pow(2.0f, (getreal(type) / 2.0f));
+      imgdata.lens.makernotes.MinAp4CurFocal = powf(2.0f, (getreal(type) / 2.0f));
       break;
       // IB end
 #endif
