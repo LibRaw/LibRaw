@@ -1653,6 +1653,9 @@ void CLASS phase_one_flat_field (int is_float, int nc)
   mrow = (float *) calloc (nc*wide, sizeof *mrow);
   merror (mrow, "phase_one_flat_field()");
   for (y=0; y < high; y++) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     for (x=0; x < wide; x++)
       for (c=0; c < nc; c+=2) {
 	num = is_float ? getreal(11) : get2()/32768.0;
@@ -1690,7 +1693,7 @@ void CLASS phase_one_flat_field (int is_float, int nc)
   free (mrow);
 }
 
-void CLASS phase_one_correct()
+int CLASS phase_one_correct()
 {
   unsigned entries, tag, data, save, col, row, type;
   int len, i, j, k, cip, val[4], dev[4], sum, max;
@@ -1702,7 +1705,7 @@ void CLASS phase_one_correct()
   ushort *xval[2];
   int qmult_applied = 0, qlin_applied = 0;
 
-  if (half_size || !meta_length) return;
+  if (half_size || !meta_length) return 0;
 #ifdef DCRAW_VERBOSE
   if (verbose) fprintf (stderr,_("Phase One correction...\n"));
 #endif
@@ -1711,7 +1714,14 @@ void CLASS phase_one_correct()
   fseek (ifp, 6, SEEK_CUR);
   fseek (ifp, meta_offset+get4(), SEEK_SET);
   entries = get4();  get4();
+
+#ifdef LIBRAW_LIBRARY_BUILD
+  try {
+#endif
   while (entries--) {
+#ifdef LIBRAW_LIBRARY_BUILD
+    checkCancel();
+#endif
     tag  = get4();
     len  = get4();
     data = get4();
@@ -1734,8 +1744,13 @@ void CLASS phase_one_correct()
 	curve[i] = LIM(num+i,0,65535);
       } apply:					/* apply to whole image */
       for (row=0; row < raw_height; row++)
+      {
+#ifdef LIBRAW_LIBRARY_BUILD
+        checkCancel();
+#endif
 	for (col = (tag & 1)*ph1.split_col; col < raw_width; col++)
 	  RAW(row,col) = curve[RAW(row,col)];
+      }
     } else if (tag == 0x400) {			/* Sensor defects */
       while ((len -= 8) >= 0) {
 	col  = get2();
@@ -1807,9 +1822,14 @@ void CLASS phase_one_correct()
 
 	  for (row = (qr ? ph1.split_row : 0);
 	       row < (qr ? raw_height : ph1.split_row); row++)
+          {
+#ifdef LIBRAW_LIBRARY_BUILD
+            checkCancel();
+#endif
 	    for (col = (qc ? ph1.split_col : 0);
 		 col < (qc ? raw_width : ph1.split_col); col++)
 	      RAW(row,col) = curve[RAW(row,col)];
+          }
 	}
       }
       qlin_applied = 1;
@@ -1824,10 +1844,15 @@ void CLASS phase_one_correct()
       get4(); get4(); get4();
       qmult[1][1] = 1.0 + getreal(11);
       for (row=0; row < raw_height; row++)
+      {
+#ifdef LIBRAW_LIBRARY_BUILD
+        checkCancel();
+#endif
 	for (col=0; col < raw_width; col++) {
 	  i = qmult[row >= ph1.split_row][col >= ph1.split_col] * RAW(row,col);
 	  RAW(row,col) = LIM(i,0,65535);
 	}
+      }
       qmult_applied = 1;
     } else if (tag == 0x431 && !qmult_applied) { /* Quadrant combined */
       ushort lc[2][2][7], ref[7];
@@ -1850,9 +1875,14 @@ void CLASS phase_one_correct()
 	  cubic_spline(cx, cf, 9);
 	  for (row = (qr ? ph1.split_row : 0);
 	       row < (qr ? raw_height : ph1.split_row); row++)
+          {
+#ifdef LIBRAW_LIBRARY_BUILD
+            checkCancel();
+#endif
 	    for (col = (qc ? ph1.split_col : 0);
 		 col < (qc ? raw_width : ph1.split_col); col++)
 	      RAW(row,col) = curve[RAW(row,col)];
+          }
         }
       }
       qmult_applied = 1;
@@ -1876,6 +1906,10 @@ void CLASS phase_one_correct()
       for (j=0; j < head[i+1]*head[i+3]; j++)
 	xval[i][j] = get2();
     for (row=0; row < raw_height; row++)
+    {
+#ifdef LIBRAW_LIBRARY_BUILD
+      checkCancel();
+#endif
       for (col=0; col < raw_width; col++) {
 	cfrac = (float) col * head[3] / raw_width;
 	cfrac -= cip = cfrac;
@@ -1890,8 +1924,16 @@ void CLASS phase_one_correct()
 	i = ((mult[0] * (1-cfrac) + mult[1] * cfrac) * row + num) * 2;
 	RAW(row,col) = LIM(i,0,65535);
       }
+    }
     free (yval[0]);
   }
+#ifdef LIBRAW_LIBRARY_BUILD
+  }
+  catch (...)
+  {
+	  return LIBRAW_CANCELLED_BY_CALLBACK;
+  }
+#endif
 }
 
 void CLASS phase_one_load_raw()
