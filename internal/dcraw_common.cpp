@@ -5308,6 +5308,16 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   }
 }
 
+static float powf_lim(float a, float b, float limup)
+{
+  return (b>limup || b < -limup)?0.f:powf(a,b);
+}
+static float powf64(float a, float b)
+{
+  return powf_lim(a,b,64.f);
+}
+
+
 #ifdef LIBRAW_LIBRARY_BUILD
 void CLASS parseSonyLensFeatures(ushort features) {
 	imgdata.lens.sony.SonyLensFeatures_pre[0] = 0;
@@ -5566,7 +5576,7 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
             //				order = 0x4949;						// little endian
             Sony_0x9050 = (uchar*)malloc(len);
             fread(Sony_0x9050, len, 1, ifp);
-            imgdata.lens.sony.SonyMaxAperture = my_roundf(powf(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
+            imgdata.lens.sony.SonyMaxAperture = my_roundf(powf64(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
             if (!imgdata.lens.sony.SonyLensID)
               imgdata.lens.sony.SonyLensID =
                 SonySubstitution[Sony_0x9050[0x0108]] << 8
@@ -5638,11 +5648,11 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
           }
 
         if (tag == 0x20100205)
-          imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = powf(sqrt(2.0f), get2() / 256.0f);
+          imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
 
         if (tag == 0x20100206)
           {
-            imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal = powf(sqrt(2.0f), get2() / 256.0f);
+            imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal = powf64(sqrt(2.0f), get2() / 256.0f);
             if (!imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal)
               imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal;
           }
@@ -5658,7 +5668,7 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
           }
 
         if (tag == 0x2010020a)
-          imgdata.lens.olympus.OlympusLens_MaxAperture = powf(sqrt(2.0f), get2() / 256.0f);
+          imgdata.lens.olympus.OlympusLens_MaxAperture = powf64(sqrt(2.0f), get2() / 256.0f);
       }
 
     if (strcasecmp(make, "NIKON")) {
@@ -5732,11 +5742,11 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
           case 15:
           case -15:
             i = 7;
-            imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf(2.0f, NikonLensData[14] / 24.0f);
+            imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf64(2.0f, NikonLensData[14] / 24.0f);
             break;
           case 16:
             i = 8;
-            imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf(2.0f, NikonLensData[15] / 24.0f);
+            imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf64(2.0f, NikonLensData[15] / 24.0f);
             break;
           }
           imgdata.lens.nikon.NikonLensIDNumber = NikonLensData[i];
@@ -5767,7 +5777,7 @@ void CLASS parse_makernote_inAdobeDNG(int base, int uptag)
         {
           unsigned char cc;
           fread(&cc, 1, 1, ifp);
-          iso_speed = (int)(100.0 * powf(2.0, (double)(cc) / 12.0 - 5.0));
+          iso_speed = (int)(100.0 * powf64(2.0, (double)(cc) / 12.0 - 5.0));
           break;
         }
     }
@@ -6303,10 +6313,10 @@ nf: order = 0x4949;
             imgdata.lens.olympus.OlympusLensType_SubModel = fgetc(ifp);
           }
         if (tag == 0x20100205)
-          imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = powf(sqrt(2.0f), get2() / 256.0f);
+          imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
         if (tag == 0x20100206)
           {
-            imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal = powf(sqrt(2.0f), get2() / 256.0f);
+            imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal = powf64(sqrt(2.0f), get2() / 256.0f);
             if (!imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal)
               imgdata.lens.olympus.OlympusLens_MaxAperture4MinFocal = imgdata.lens.olympus.OlympusLens_MaxAperture4MaxFocal;
           }
@@ -6319,7 +6329,7 @@ nf: order = 0x4949;
               imgdata.lens.olympus.OlympusLens_MaxFocal = imgdata.lens.olympus.OlympusLens_MinFocal;
           }
         if (tag == 0x2010020a)
-          imgdata.lens.olympus.OlympusLens_MaxAperture = powf(sqrt(2.0f), get2() / 256.0f);
+          imgdata.lens.olympus.OlympusLens_MaxAperture = powf64(sqrt(2.0f), get2() / 256.0f);
       }
 
     if (strcasestr(make, "SONY") || strcasestr(make, "Konica") || strcasestr(make, "Minolta"))
@@ -6378,7 +6388,7 @@ nf: order = 0x4949;
           //				order = 0x4949;						// little endian
           Sony_0x9050 = (uchar*)malloc(len);
           fread(Sony_0x9050, len, 1, ifp);
-          imgdata.lens.sony.SonyMaxAperture = my_roundf(powf(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
+          imgdata.lens.sony.SonyMaxAperture = my_roundf(powf64(2.0f, ((float)SonySubstitution[Sony_0x9050[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
           if (!imgdata.lens.sony.SonyLensID)
             imgdata.lens.sony.SonyLensID =
               SonySubstitution[Sony_0x9050[0x0108]] << 8
@@ -6427,15 +6437,15 @@ nf: order = 0x4949;
       {
         unsigned char cc;
         fread(&cc,1,1,ifp);
-        iso_speed = int(100.0 * powf(2.0f,float(cc)/12.0-5.0));
+        iso_speed = int(100.0 * powf64(2.0f,float(cc)/12.0-5.0));
       }
     if (tag == 4 && len > 26 && len < 35) {
       if ((i=(get4(),get2())) != 0x7fff && (!iso_speed || iso_speed == 65535))
-	iso_speed = 50 * pow (2.0, i/32.0 - 4);
+	iso_speed = 50 * powf64(2.0, i/32.0 - 4);
       if ((i=(get2(),get2())) != 0x7fff && !aperture)
-	aperture = pow (2.0, i/64.0);
+	aperture = powf64(2.0, i/64.0);
       if ((i=get2()) != 0xffff && !shutter)
-	shutter = pow (2.0, (short) i/-32.0);
+	shutter = powf64(2.0, (short) i/-32.0);
       wbi = (get2(),get2());
       shot_order = (get2(),get2());
     }
@@ -6850,11 +6860,11 @@ nf: order = 0x4949;
         case 15:
         case -15:
           i = 7;
-          imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf(2.0f, NikonLensData[14] / 24.0f);
+          imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf64(2.0f, NikonLensData[14] / 24.0f);
           break;
         case 16:
           i = 8;
-          imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf(2.0f, NikonLensData[15] / 24.0f);
+          imgdata.lens.nikon.NikonEffectiveMaxAperture_0x0098 = powf64(2.0f, NikonLensData[15] / 24.0f);
           break;
         }
         imgdata.lens.nikon.NikonLensIDNumber = NikonLensData[i];
@@ -7088,7 +7098,7 @@ void CLASS parse_exif (int base)
       fread(imgdata.lens.LensModel, MIN(len, sizeof(imgdata.lens.LensMake)), 1, ifp);
       break;
     case 0x9205:
-      imgdata.lens.EXIF_MaxAperture = powf(2.0f, (getreal(type) / 2.0f));
+      imgdata.lens.EXIF_MaxAperture = powf64(2.0f, (getreal(type) / 2.0f));
       break;
 #endif
       case 33434:  shutter = getreal(type);		break;
@@ -7101,11 +7111,11 @@ void CLASS parse_exif (int base)
       case 36867:
       case 36868:  get_timestamp(0);			break;
       case 37377:  if ((expo = -getreal(type)) < 128 && shutter == 0.)
-		     shutter = pow (2.0, expo);		break;
+          shutter = powf64(2.0, expo);		break;
       case 37378:
-		  if (fabs(ape = getreal(type))<256.0)
-			aperture = pow (2.0, ape/2);
-		  break;
+        if (fabs(ape = getreal(type))<256.0)
+          aperture = powf64(2.0, ape/2);
+        break;
       case 37385:  flash_used = getreal(type);          break;
       case 37386:  focal_len = getreal(type);		break;
       case 37500:  parse_makernote (base, 0);		break;
@@ -7214,6 +7224,15 @@ void CLASS parse_mos (int offset)
     fread (data, 1, 40, ifp);
     skip = get4();
     from = ftell(ifp);
+
+// IB start
+#ifdef LIBRAW_LIBRARY_BUILD
+    if (!strcmp(data,"CameraObj_camera_type")) {
+	  fread(body, skip, 1, ifp);
+//	  printf("\n*** --->>> Leaf CameraBodyName: %s", body);
+	}
+#endif
+// IB end
     if (!strcmp(data,"JPEG_preview_data")) {
       thumb_offset = from;
       thumb_length = skip;
@@ -7588,6 +7607,7 @@ int CLASS parse_tiff_ifd (int base)
             xmpdata = (char*)malloc(xmplen = len+1);
             fread(xmpdata,len,1,ifp);
             xmpdata[len]=0;
+//            printf ("\n*** --->>> %s", xmpdata);
           }
         break;
 #endif
@@ -7696,7 +7716,7 @@ int CLASS parse_tiff_ifd (int base)
       fread(imgdata.lens.LensModel, MIN(len, sizeof(imgdata.lens.LensModel)), 1, ifp);
       break;
     case 0x9205:
-      imgdata.lens.EXIF_MaxAperture = powf(2.0f, (getreal(type) / 2.0f));
+      imgdata.lens.EXIF_MaxAperture = powf64(2.0f, (getreal(type) / 2.0f));
       break;
 // IB end
 #endif
@@ -8467,13 +8487,13 @@ void CLASS parse_ciff (int offset, int length, int depth)
       thumb_length = len;
     }
     if (type == 0x1818) {
-      shutter = pow (2.0f, -int_to_float((get4(),get4())));
-      aperture = pow (2.0f, int_to_float(get4())/2);
+      shutter = powf64(2.0f, -int_to_float((get4(),get4())));
+      aperture = powf64(2.0f, int_to_float(get4())/2);
     }
     if (type == 0x102a) {
-      iso_speed = pow (2.0, (get4(),get2())/32.0 - 4) * 50;
-      aperture  = pow (2.0, (get2(),(short)get2())/64.0);
-      shutter   = pow (2.0,-((short)get2())/32.0);
+      iso_speed = powf64(2.0, (get4(),get2())/32.0 - 4) * 50;
+      aperture  = powf64(2.0, (get2(),(short)get2())/64.0);
+      shutter   = powf64(2.0,-((short)get2())/32.0);
       wbi = (get2(),get2());
       if (wbi > 17) wbi = 0;
       fseek (ifp, 32, SEEK_CUR);
@@ -8500,7 +8520,7 @@ void CLASS parse_ciff (int offset, int length, int depth)
         imgdata.lens.MinFocal = imgdata.lens.canon.CanonMinFocalLength / MIN(imgdata.lens.canon.CanonFocalUnits,1);
         imgdata.lens.canon.CanonMaxAperture = get2();
         imgdata.lens.canon.CanonMinAperture = get2();
-        imgdata.lens.EXIF_MaxAperture = pow(2.0f, _CanonConvert2EV(imgdata.lens.canon.CanonMaxAperture) / 2.0f);
+        imgdata.lens.EXIF_MaxAperture = powf64(2.0f, _CanonConvert2EV(imgdata.lens.canon.CanonMaxAperture) / 2.0f);
       }
 #endif
     if (type == 0x0032) {
@@ -8639,6 +8659,13 @@ void CLASS parse_phase_one (int base)
   float romm_cam[3][3];
   char *cp;
 
+// IB start
+#ifdef LIBRAW_LIBRARY_BUILD
+	char body_id[3];
+	body_id[0] = 0;
+#endif
+// IB end
+
   memset (&ph1, 0, sizeof ph1);
   fseek (ifp, base, SEEK_SET);
   order = get4() & 0xffff;
@@ -8655,18 +8682,54 @@ void CLASS parse_phase_one (int base)
     fseek (ifp, base+data, SEEK_SET);
     switch (tag) {
 #ifdef LIBRAW_LIBRARY_BUILD
-      // IB start
+
+// IB start
+	case 0x0102:
+		fread(body_id, 1, 3, ifp);
+		if ((body_id[0] == 0x4c) && (body_id[1] == 0x49)) {
+			body_id[1] = body_id[2];
+		}
+		unique_id = (((body_id[0] & 0x3f) << 5) | (body_id[1] & 0x3f)) - 0x41;
+//		printf("\n*** 0x0102 PhaseOne camera body id: %d", unique_id);
+		break;
+	case 0x0410:
+		fread(body, 1, len, ifp);
+//		printf("\n*** 0x0410 PhaseOne camera body name: %s", body);
+		break;
     case 0x0412:
       fread(imgdata.lens.makernotes.LensModel, 1, len, ifp);
       break;
     case 0x0414:
-      imgdata.lens.makernotes.MaxAp4CurFocal = powf(2.0f, (getreal(type) / 2.0f));
+      if (type == 4) {
+      	imgdata.lens.makernotes.MaxAp4CurFocal = powf64(2.0f, (int_to_float(data)/2.0f));
+	  } else {
+      imgdata.lens.makernotes.MaxAp4CurFocal = powf64(2.0f, (getreal(type) / 2.0f));
+      }
       break;
     case 0x0415:
-      imgdata.lens.makernotes.MinAp4CurFocal = powf(2.0f, (getreal(type) / 2.0f));
+      if (type == 4) {
+      	imgdata.lens.makernotes.MinAp4CurFocal = powf64(2.0f, (int_to_float(data)/2.0f));
+	  } else {
+      imgdata.lens.makernotes.MinAp4CurFocal = powf64(2.0f, (getreal(type) / 2.0f));
+      }
       break;
-      // IB end
+	case 0x0416:
+	  if (type == 4) {
+	  	imgdata.lens.makernotes.MinFocal =  int_to_float(data);
+	  } else {
+	  	imgdata.lens.makernotes.MinFocal = getreal(type);
+	  }
+	break;
+	case 0x0417:
+	  if (type == 4) {
+	  	imgdata.lens.makernotes.MaxFocal =  int_to_float(data);
+	  } else {
+	  	imgdata.lens.makernotes.MaxFocal = getreal(type);
+	  }
+	  break;
+// IB end
 #endif
+
       case 0x100:  flip = "0653"[data & 3]-'0';  break;
       case 0x106:
 	for (i=0; i < 9; i++)
@@ -8702,6 +8765,36 @@ void CLASS parse_phase_one (int base)
     }
     fseek (ifp, save, SEEK_SET);
   }
+
+// IB start
+#ifdef LIBRAW_LIBRARY_BUILD
+	if (!body && !body_id[0]) {
+		fseek (ifp, meta_offset, SEEK_SET);
+		order = get2();
+		fseek (ifp, 6, SEEK_CUR);
+		fseek (ifp, meta_offset+get4(), SEEK_SET);
+		entries = get4();  get4();
+		while (entries--) {
+			tag  = get4();
+			len  = get4();
+			data = get4();
+			save = ftell(ifp);
+//		printf("\n*** PhaseOne SensorCalibration tag: 0x%04x", tag);
+			fseek (ifp, meta_offset+data, SEEK_SET);
+			if (tag == 0x0407) {
+				fread(body_id, 1, 3, ifp);
+				if ((body_id[0] == 0x4c) && (body_id[1] == 0x49)) {
+					body_id[1] = body_id[2];
+				}
+				unique_id = (((body_id[0] & 0x3f) << 5) | (body_id[1] & 0x3f)) - 0x41;
+//				printf("\n*** 0x0407 PhaseOne camera body id: %d", unique_id);
+			}
+			fseek (ifp, save, SEEK_SET);
+		}
+	}
+#endif
+// IB end
+
   load_raw = ph1.format < 3 ?
 	&CLASS phase_one_load_raw : &CLASS phase_one_load_raw_c;
   maximum = 0xffff;
@@ -10211,8 +10304,157 @@ void CLASS identify()
     {318,"ILCE-7S"},
     {319,"ILCA-77M2"},
     {339,"ILCE-5100"},
-    {340,"ILCE-&M2"}
+    {340,"ILCE-7M2"},
+	{346,"ILCE-QX1"}
   };
+
+// IB start
+	static const struct {
+		ushort id;
+		char t_model[32];
+	} p1_unique[] = {
+// Phase One section:
+		{1, "Hasselblad V"},
+		{10, "PhaseOne/Mamiya"},
+		{12, "Contax 645"},
+		{16, "Hasselblad V"},
+		{17, "Hasselblad V"},
+		{18, "Contax 645"},
+		{19, "PhaseOne/Mamiya"},
+		{20, "Hasselblad V"},
+		{21, "Contax 645"},
+		{22, "PhaseOne/Mamiya"},
+		{23, "Hasselblad V"},
+		{24, "Hasselblad H"},
+		{25, "PhaseOne/Mamiya"},
+		{32, "Contax 645"},
+		{34, "Hasselblad V"},
+		{35, "Hasselblad V"},
+		{36, "Hasselblad H"},
+		{37, "Contax 645"},
+		{38, "PhaseOne/Mamiya"},
+		{39, "Hasselblad V"},
+		{40, "Hasselblad H"},
+		{41, "Contax 645"},
+		{42, "PhaseOne/Mamiya"},
+		{44, "Hasselblad V"},
+		{45, "Hasselblad H"},
+		{46, "Contax 645"},
+		{47, "PhaseOne/Mamiya"},
+		{48, "Hasselblad V"},
+		{49, "Hasselblad H"},
+		{50, "Contax 645"},
+		{51, "PhaseOne/Mamiya"},
+		{52, "Hasselblad V"},
+		{53, "Hasselblad H"},
+		{54, "Contax 645"},
+		{55, "PhaseOne/Mamiya"},
+		{67, "Hasselblad V"},
+		{68, "Hasselblad H"},
+		{69, "Contax 645"},
+		{70, "PhaseOne/Mamiya"},
+		{71, "Hasselblad V"},
+		{72, "Hasselblad H"},
+		{73, "Contax 645"},
+		{74, "PhaseOne/Mamiya"},
+		{76, "Hasselblad V"},
+		{77, "Hasselblad H"},
+		{78, "Contax 645"},
+		{79, "PhaseOne/Mamiya"},
+		{80, "Hasselblad V"},
+		{81, "Hasselblad H"},
+		{82, "Contax 645"},
+		{83, "PhaseOne/Mamiya"},
+		{84, "Hasselblad V"},
+		{85, "Hasselblad H"},
+		{86, "Contax 645"},
+		{87, "PhaseOne/Mamiya"},
+		{99, "Hasselblad V"},
+		{100, "Hasselblad H"},
+		{101, "Contax 645"},
+		{102, "PhaseOne/Mamiya"},
+		{103, "Hasselblad V"},
+		{104, "Hasselblad H"},
+		{105, "PhaseOne/Mamiya"},
+		{106, "Contax 645"},
+		{112, "Hasselblad V"},
+		{113, "Hasselblad H"},
+		{114, "Contax 645"},
+		{115, "PhaseOne/Mamiya"},
+		{131, "Hasselblad V"},
+		{132, "Hasselblad H"},
+		{133, "Contax 645"},
+		{134, "PhaseOne/Mamiya"},
+		{135, "Hasselblad V"},
+		{136, "Hasselblad H"},
+		{137, "Contax 645"},
+		{138, "PhaseOne/Mamiya"},
+		{140, "Hasselblad V"},
+		{141, "Hasselblad H"},
+		{142, "Contax 645"},
+		{143, "PhaseOne/Mamiya"},
+		{148, "Hasselblad V"},
+		{149, "Hasselblad H"},
+		{150, "Contax 645"},
+		{151, "PhaseOne/Mamiya"},
+		{160, "A-250"},
+		{161, "A-260"},
+		{162, "A-280"},
+		{167, "Hasselblad V"},
+		{168, "Hasselblad H"},
+		{169, "Contax 645"},
+		{170, "PhaseOne/Mamiya"},
+		{172, "Hasselblad V"},
+		{173, "Hasselblad H"},
+		{174, "Contax 645"},
+		{175, "PhaseOne/Mamiya"},
+		{176, "Hasselblad V"},
+		{177, "Hasselblad H"},
+		{178, "Contax 645"},
+		{179, "PhaseOne/Mamiya"},
+		{180, "Hasselblad V"},
+		{181, "Hasselblad H"},
+		{182, "Contax 645"},
+		{183, "PhaseOne/Mamiya"},
+		{208, "Hasselblad V"},
+		{211, "PhaseOne/Mamiya"},
+		{448, "Phase One 645AF"},
+		{457, "Phase One 645DF"},
+		{471, "Phase One 645DF+"},
+		{704, "Phase One iXA"},
+		{705, "Phase One iXA - R"},
+		{706, "Phase One iXU 150"},
+		{707, "Phase One iXU 150 - NIR"},
+		{708, "Phase One iXU 180"},
+		{721, "Phase One iXR"},
+// Leaf section:
+		{333,"Mamiya"},
+		{329,"Universal"},
+		{330,"Hasselblad H1/H2"},
+		{332,"Contax"},
+		{336,"AFi"},
+		{327,"Mamiya"},
+		{324,"Universal"},
+		{325,"Hasselblad H1/H2"},
+		{326,"Contax"},
+		{335,"AFi"},
+		{340,"Mamiya"},
+		{337,"Universal"},
+		{338,"Hasselblad H1/H2"},
+		{339,"Contax"},
+		{323,"Mamiya"},
+		{320,"Universal"},
+		{322,"Hasselblad H1/H2"},
+		{321,"Contax"},
+		{334,"AFi"},
+		{369,"Universal"},
+		{370,"Mamiya"},
+		{371,"Hasselblad H1/H2"},
+		{372,"Contax"},
+		{373,"Afi"},
+	};
+// IB end
+
   static const struct {
     unsigned fsize;
     ushort rw, rh;
@@ -10679,6 +10921,22 @@ void CLASS identify()
             strcpy(model,sony_unique[i].t_model);
           }
     }
+
+// IB start
+	if (!strcasecmp(make,"Phase One")) {
+//		for (i=0; i < sizeof p1_unique / sizeof *p1_unique; i++)
+//			printf("\n*** %d %s", p1_unique[i].id, p1_unique[i].t_model);
+		if (unique_id && !body[0]) {
+			for (i=0; i < sizeof p1_unique / sizeof *p1_unique; i++)
+				if (unique_id == p1_unique[i].id) {
+					strcpy(body,p1_unique[i].t_model);
+				}
+		}
+//		if (body[0]) {
+//			printf("\n*** PhaseOne camera body: %s", body);
+//		}
+	}
+// IB end
 
   if (!strcmp(make,"Nikon")) {
     if (!load_raw)
