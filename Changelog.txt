@@ -2,6 +2,7 @@
    * Updated Oly E-M10 & Panasonic TZ60/61 color data
    * Updated foveon SD9-14 white level
    * Support for 1x1 BlackLevelRepeatDim
+   * test message
    
 2014-01-31  Alex Tutubalin <lexa@lexa.ru>
    * imported dcraw 1.461: fixed error in BlackLevelDim handling
