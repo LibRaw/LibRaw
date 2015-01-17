@@ -52,6 +52,7 @@ it under the terms of the one of three licenses as you choose:
 void        parse_ciff (int offset, int length, int);
     void        ciff_block_1030();
 
+
 // LJPEG decoder
     unsigned    getbithuff (int nbits, ushort *huff);
     ushort*     make_decoder_ref (const uchar **source);

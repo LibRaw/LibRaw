@@ -5,11 +5,11 @@ PP=./internal/preprocess.pl
 CC=gcc
 CXX=g++
 
-CFLAGS=
+#CFLAGS=
 
 # RawSpeed Support
 # CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/opt/local/include/libxml2
-# LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/opt/local/lib -ljpeg -lxml2
+# LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/opt/local/include -ljpeg -lxml2
 # RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
 
@@ -17,14 +17,19 @@ CC=gcc
 CXX=g++
 # CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4 -fopenmp
 CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4
+
+
+#CC=gcc
+#CXX=g++
+CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O2
 # Haswell:
 #CFLAGS+=-march=core-avx2 -mtune=core-avx2 -mavx2
 
 
 # LCMS support
 # For lcms2 set -DUSE_LCMS2
-# CFLAGS+=-DUSE_LCMS -I/opt/local/include
-# LDADD+=-L/opt/local/lib -llcms
+CFLAGS+=-DUSE_LCMS2 -I/opt/local/include
+LDADD+=-L/opt/local/lib -llcms
 
 # Jasper support for RedCine
 CFLAGS+=-DUSE_JASPER -I/opt/local/include
@@ -33,6 +38,7 @@ LDADD+=-L/opt/local/lib -ljasper
 # JPEG support for DNG
 CFLAGS+=-DUSE_JPEG -I/opt/local/include
 LDADD+=-L/opt/local/lib -ljpeg
+
 # LIBJPEG8:
 CFLAGS+=-DUSE_JPEG8
 
@@ -62,7 +68,7 @@ RawSpeed/rawspeed_xmldata.cpp: ${RAWSPEED_DATA}
 
 ## Demosaic Pack(s)
 
-object/demosaic_packs.o: internal/demosaic_packs.cpp ${LR_INCLUDES} 
+object/demosaic_packs.o: internal/demosaic_packs.cpp ${LR_INCLUDES}
 	$(CXX) -w -c -DLIBRAW_NOTHREADS ${CFLAGS} ${DPCFLAGS} -o object/demosaic_packs.o internal/demosaic_packs.cpp
 
 object/demosaic_packs_mt.o: internal/demosaic_packs.cpp ${LR_INCLUDES}
@@ -149,7 +155,7 @@ object/dcraw_common_mt.o: internal/dcraw_common.cpp ${LR_INCLUDES}
 object/dcraw_fileio_mt.o: internal/dcraw_fileio.cpp ${LR_INCLUDES}
 	$(CXX)  -c -pthread ${LCMS_DEF} ${CFLAGS} -o object/dcraw_fileio_mt.o internal/dcraw_fileio.cpp
 
-object/libraw_cxx_mt.o: src/libraw_cxx.cpp ${LR_INCLUDES} 
+object/libraw_cxx_mt.o: src/libraw_cxx.cpp ${LR_INCLUDES}
 	$(CXX) -c ${LCMS_DEF} -pthread ${CFLAGS} -o object/libraw_cxx_mt.o src/libraw_cxx.cpp
 
 object/libraw_datastream_mt.o: src/libraw_datastream.cpp ${LR_INCLUDES}
