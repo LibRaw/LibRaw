@@ -51,6 +51,9 @@ it under the terms of the one of three licenses as you choose:
     int         canon_s2is();
 void        parse_ciff (int offset, int length, int);
     void        ciff_block_1030();
+    void android_tight_load_raw();
+    void android_loose_load_raw();
+
 
 // LJPEG decoder
     unsigned    getbithuff (int nbits, ushort *huff);
