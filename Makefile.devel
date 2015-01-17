@@ -5,17 +5,17 @@ PP=./internal/preprocess.pl
 CC=gcc
 CXX=g++
 
-CFLAGS=
+#CFLAGS=
 
 # RawSpeed Support
-CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
-LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/usr/local/include -ljpeg -lxml2
-RAWSPEED_DATA=../RawSpeed/data/cameras.xml
+#CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
+#LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/usr/local/include -ljpeg -lxml2
+#RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
 
-CC=gcc46
-CXX=g++46
-CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4 -fopenmp
+#CC=gcc46
+#CXX=g++46
+CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O2
 # Haswell:
 #CFLAGS+=-march=core-avx2 -mtune=core-avx2 -mavx2
 
@@ -26,18 +26,18 @@ CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4 -fopenmp
 #LDADD+=-L/usr/local/lib -llcms
 
 # Jasper support for RedCine
-CFLAGS+=-DUSE_JASPER -I/usr/local/include
-LDADD+=-L/usr/local/lib -ljasper
+#CFLAGS+=-DUSE_JASPER -I/usr/local/include
+#LDADD+=-L/usr/local/lib -ljasper
 
 # JPEG support for DNG
-CFLAGS+=-DUSE_JPEG -I/usr/local/include
-LDADD+=-L/usr/local/lib -ljpeg
+#CFLAGS+=-DUSE_JPEG -I/usr/local/include
+#LDADD+=-L/usr/local/lib -ljpeg
 # LIBJPEG8:
-CFLAGS+=-DUSE_JPEG8
+#CFLAGS+=-DUSE_JPEG8
 
 # Demosaic Pack GPL2:
-DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
-CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
+#DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
+#CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
 
 # Demosaic Pack GPL3:
 #DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL3
