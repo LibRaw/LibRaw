@@ -8,36 +8,37 @@ CXX=g++
 CFLAGS=
 
 # RawSpeed Support
-CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/usr/local/include/libxml2
-LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/usr/local/include -ljpeg -lxml2
-RAWSPEED_DATA=../RawSpeed/data/cameras.xml
+# CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/opt/local/include/libxml2
+# LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/opt/local/lib -ljpeg -lxml2
+# RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
 
-CC=gcc46
-CXX=g++46
-CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4 -fopenmp
+CC=gcc
+CXX=g++
+# CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4 -fopenmp
+CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4
 # Haswell:
 #CFLAGS+=-march=core-avx2 -mtune=core-avx2 -mavx2
 
 
 # LCMS support
 # For lcms2 set -DUSE_LCMS2
-#CFLAGS+=-DUSE_LCMS -I/usr/local/include
-#LDADD+=-L/usr/local/lib -llcms
+# CFLAGS+=-DUSE_LCMS -I/opt/local/include
+# LDADD+=-L/opt/local/lib -llcms
 
 # Jasper support for RedCine
-CFLAGS+=-DUSE_JASPER -I/usr/local/include
-LDADD+=-L/usr/local/lib -ljasper
+CFLAGS+=-DUSE_JASPER -I/opt/local/include
+LDADD+=-L/opt/local/lib -ljasper
 
 # JPEG support for DNG
-CFLAGS+=-DUSE_JPEG -I/usr/local/include
-LDADD+=-L/usr/local/lib -ljpeg
+CFLAGS+=-DUSE_JPEG -I/opt/local/include
+LDADD+=-L/opt/local/lib -ljpeg
 # LIBJPEG8:
 CFLAGS+=-DUSE_JPEG8
 
 # Demosaic Pack GPL2:
-DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
-CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
+# DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL2
+# CFLAGS+=-DLIBRAW_DEMOSAIC_PACK_GPL2
 
 # Demosaic Pack GPL3:
 #DPCFLAGS+=-I../LibRaw-demosaic-pack-GPL3
@@ -101,7 +102,7 @@ bin/dcraw_emu: lib/libraw.a samples/dcraw_emu.cpp
 dcraw_binaries: bin/dcraw_dist
 
 bin/dcraw_dist: dcraw/dcraw.c Makefile.devel
-	$(CXX) -w -O4 -DLIBRAW_NOTHREADS -DNO_LCMS -DNO_JASPER -I/usr/local/include -o bin/dcraw_dist dcraw/dcraw.c -lm -L/usr/local/lib -ljpeg
+	$(CXX) -w -O4 -DLIBRAW_NOTHREADS -DNO_LCMS -DNO_JASPER -I/opt/local/include -o bin/dcraw_dist dcraw/dcraw.c -lm -L/opt/local/lib -ljpeg
 
 regenerate:
 	${PP} -N -DDEFINES dcraw/dcraw.c  >internal/defines.h

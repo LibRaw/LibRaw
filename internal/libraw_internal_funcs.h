@@ -58,7 +58,7 @@ void        parse_ciff (int offset, int length, int);
     ushort*     make_decoder (const uchar *source);
     int         ljpeg_start (struct jhead *jh, int info_only);
     void        ljpeg_end(struct jhead *jh);
-    int         ljpeg_diff (ushort *huff); 
+    int         ljpeg_diff (ushort *huff);
     ushort *    ljpeg_row (int jrow, struct jhead *jh);
     unsigned    ph1_bithuff (int nbits, ushort *huff);
 
@@ -121,6 +121,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 
 // Misc P&S cameras
     void        nokia_load_raw();
+    void        android_loose_load_raw();
+    void        android_tight_load_raw();
     void        canon_rmf_load_raw();
     unsigned    pana_bits (int nbits);
     void        panasonic_load_raw();
