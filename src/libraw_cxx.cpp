@@ -529,12 +529,12 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
   if (load_raw == &LibRaw::android_tight_load_raw)
   {
 	  d_info->decoder_name = "android_tight_load_raw()";
-	  d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; // WB set within decoder, no need to load raw
+	  d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; 
   }
   else if (load_raw == &LibRaw::android_loose_load_raw)
   {
 	  d_info->decoder_name = "android_loose_load_raw()";
-	  d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; // WB set within decoder, no need to load raw
+	  d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; 
   }
   else if (load_raw == &LibRaw::canon_600_load_raw)
     {
