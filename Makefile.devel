@@ -16,7 +16,7 @@ CXX=g++
 CC=gcc
 CXX=g++
 # CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4 -fopenmp
-CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4
+CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O3
 
 
 #CC=gcc
@@ -108,7 +108,7 @@ bin/dcraw_emu: lib/libraw.a samples/dcraw_emu.cpp
 dcraw_binaries: bin/dcraw_dist
 
 bin/dcraw_dist: dcraw/dcraw.c Makefile.devel
-	$(CXX) -w -O4 -DLIBRAW_NOTHREADS -DNO_LCMS -DNO_JASPER -I/opt/local/include -o bin/dcraw_dist dcraw/dcraw.c -lm -L/opt/local/lib -ljpeg
+	$(CXX) -w -O3 -DLIBRAW_NOTHREADS -DNO_LCMS -DNO_JASPER -I/opt/local/include -o bin/dcraw_dist dcraw/dcraw.c -lm -L/opt/local/lib -ljpeg
 
 regenerate:
 	${PP} -N -DDEFINES dcraw/dcraw.c  >internal/defines.h

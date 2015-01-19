@@ -51,7 +51,7 @@ public:
          unsigned bitbuf;
          int vbits, reset;
     }getbits;
-    struct 
+    struct
     {
          UINT64 bitbuf;
          int vbits;
@@ -67,12 +67,12 @@ public:
         int vbits, padding;
     }pana_bits;
     uchar jpeg_buffer[4096];
-    struct 
+    struct
     {
       float cbrt[0x10000], xyz_cam[3][4];
     }ahd_data;
-    void init() 
-        { 
+    void init()
+        {
             getbits.bitbuf = 0; getbits.vbits = getbits.reset = 0;
             ph1_bits.bitbuf = 0; ph1_bits.vbits = 0;
             pana_bits.vbits = 0;
@@ -123,7 +123,7 @@ typedef struct
 
 typedef struct
 {
-    short       order; 
+    short       order;
     ushort      sraw_mul[4],cr2_slice[3];
     unsigned    kodak_cbpp;
     INT64       strip_offset, data_offset;
@@ -146,20 +146,20 @@ typedef struct
 typedef struct
 {
     internal_data_t internal_data;
-    libraw_internal_output_params_t internal_output_params;    
+    libraw_internal_output_params_t internal_output_params;
     output_data_t output_data;
     identify_data_t identify_data;
     unpacker_data_t unpacker_data;
 } libraw_internal_data_t;
 
 
-struct decode 
+struct decode
 {
     struct decode *branch[2];
     int leaf;
 };
 
-struct tiff_ifd_t 
+struct tiff_ifd_t
 {
     int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes,tile_maxbytes;
     int t_tile_width, t_tile_length;
@@ -189,7 +189,7 @@ struct tiff_hdr {
   short bps[4];
   int rat[10];
   unsigned gps[26];
-  char t_desc[512], t_make[64], t_model[64], soft[32], date[20], t_artist[64];
+  char t_desc[512], t_make[64], t_model[64], soft[32], date[20], t_artist[64], t_body[64];
 };
 
 

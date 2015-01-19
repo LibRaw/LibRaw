@@ -29,10 +29,10 @@ it under the terms of the one of three licenses as you choose:
 #endif
 #include <stdio.h>
 
-#if defined (_OPENMP) 
+#if defined (_OPENMP)
 
-#if defined(WIN32) 
-# if defined (_MSC_VER) && (_MSC_VER >= 1600 || (_MSC_VER == 1500 && _MSC_FULL_VER >= 150030729) ) 
+#if defined(WIN32)
+# if defined (_MSC_VER) && (_MSC_VER >= 1600 || (_MSC_VER == 1500 && _MSC_FULL_VER >= 150030729) )
 /* VS2010+ : OpenMP works OK, VS2008: have tested by cgilles */
 #   define LIBRAW_USE_OPENMP
 #elif defined (__INTEL_COMPILER) && (__INTEL_COMPILER >=910)
@@ -44,7 +44,7 @@ it under the terms of the one of three licenses as you choose:
 /* Not Win32 */
 # elif (defined(__APPLE__) || defined(__MACOSX__)) && defined(_REENTRANT)
 #   undef LIBRAW_USE_OPENMP
-# else 
+# else
 #   define LIBRAW_USE_OPENMP
 # endif
 #endif
@@ -139,13 +139,13 @@ typedef struct
 
 typedef struct
 {
-    enum LibRaw_image_formats type; 
+    enum LibRaw_image_formats type;
     ushort      height,
                 width,
                 colors,
                 bits;
-    unsigned int  data_size; 
-    unsigned char data[1]; 
+    unsigned int  data_size;
+    unsigned char data[1];
 }libraw_processed_image_t;
 
 
@@ -153,6 +153,7 @@ typedef struct
 {
   char        make[64];
   char        model[64];
+  char		  body[64];
   char		  software[64];
   unsigned    raw_count;
   unsigned    dng_version;
@@ -169,11 +170,11 @@ typedef struct
 
 typedef struct
 {
-    ushort      raw_height, 
+    ushort      raw_height,
                 raw_width,
-                height, 
-                width, 
-                top_margin, 
+                height,
+                width,
+                top_margin,
                 left_margin;
     ushort      iheight,
                 iwidth;
@@ -198,7 +199,7 @@ typedef struct
   float colormatrix[4][3];
 } dng_color_t;
 
-typedef struct 
+typedef struct
 {
 	int CanonColorDataVer;
 	int CanonColorDataSubVer;
@@ -208,20 +209,20 @@ typedef struct
 
 typedef struct
 {
-  ushort      curve[0x10000]; 
+  ushort      curve[0x10000];
   unsigned    cblack[4102];
   unsigned    black;
   unsigned    data_maximum;
   unsigned    maximum;
-  ushort      white[8][8];  
-  float       cam_mul[4]; 
-  float       pre_mul[4]; 
-  float       cmatrix[3][4]; 
-  float       rgb_cam[3][4]; 
-  float       cam_xyz[4][3]; 
+  ushort      white[8][8];
+  float       cam_mul[4];
+  float       pre_mul[4];
+  float       cmatrix[3][4];
+  float       rgb_cam[3][4];
+  float       cam_xyz[4][3];
   struct ph1_t       phase_one_data;
-  float       flash_used; 
-  float       canon_ev; 
+  float       flash_used;
+  float       canon_ev;
   char        model2[64];
   void        *profile;
   unsigned    profile_length;
@@ -236,15 +237,15 @@ typedef struct
 typedef struct
 {
     enum LibRaw_thumbnail_formats tformat;
-    ushort      twidth, 
+    ushort      twidth,
                 theight;
     unsigned    tlength;
     int         tcolors;
-    
+
     char       *thumb;
 }libraw_thumbnail_t;
 
-typedef struct 
+typedef struct
 {
 	float latitude[3]; // Deg,min,sec
 	float longtitude[3]; // Deg,min,sec
@@ -257,11 +258,11 @@ typedef struct
 
 typedef struct
 {
-    float       iso_speed; 
+    float       iso_speed;
     float       shutter;
     float       aperture;
     float       focal_len;
-    time_t      timestamp; 
+    time_t      timestamp;
     unsigned    shot_order;
     unsigned    gpsdata[32];
 	libraw_gps_info_t parsed_gps;
@@ -299,7 +300,7 @@ typedef struct
     int         user_sat;       /* -S */
 
     int         med_passes;     /* -m */
-    float       auto_bright_thr; 
+    float       auto_bright_thr;
     float       adjust_maximum_thr;
     int         no_auto_bright; /* -W */
     int         use_fuji_rotate;/* -j */
@@ -310,7 +311,7 @@ typedef struct
     int         afd_noise_thres;
     int         afd_luminance_passes;
     int         afd_chrominance_method;
-    int         afd_luminance_only; 
+    int         afd_luminance_only;
 #endif
     /* DCB parameters */
     int         dcb_iterations;
@@ -364,7 +365,7 @@ typedef struct
   ushort        (*color4_image)[4] ;
   /* alias to 3-color variand decoded by RawSpeed */
   ushort        (*color3_image)[3];
-    
+
   /* Phase One black level data; */
   short  (*ph1_cblack)[2];
   short  (*ph1_rblack)[2];
@@ -375,7 +376,7 @@ typedef struct
   libraw_colordata_t color;
 } libraw_rawdata_t;
 
-typedef struct  
+typedef struct
 {
 	ushort SonyModelID;
 //	unsigned SonyMinoltaLensID, SonyLensID, SonyLensCrop, SonyLensMount, SonyMinFocalLength, SonyMaxFoclaLength, SonyFocalLength;
@@ -387,7 +388,7 @@ typedef struct
 	char SonyLensFeatures_pre[16], SonyLensFeatures_suf[16];
 }libraw_sonylens_t;
 
-typedef struct 
+typedef struct
 {
 	short CanonLensID;
 	char CanonLensName[128];
@@ -410,7 +411,7 @@ typedef struct
 	short LensMount;		// 0 - unknown, 1 - A-mount, 2 - E-mount
 } libraw_makernotes_lens_t;
 
-typedef struct 
+typedef struct
 {
 	float NikonLens_0x0084_MaxAperture4MaxFocal, NikonLens_0x0084_MaxAperture4MinFocal, NikonLens_0x0084_MaxFocal, NikonLens_0x0084_MinFocal;
 	float NikonEffectiveMaxAperture_0x0098;
@@ -419,19 +420,19 @@ typedef struct
 	unsigned long long NikonLensID;
 } libraw_nikonlens_t;
 
-typedef struct 
+typedef struct
 {
 	float OlympusLens_MaxAperture4MinFocal, OlympusLens_MaxAperture4MaxFocal, OlympusLens_MinFocal, OlympusLens_MaxFocal;
 	float OlympusLens_MaxAperture;
 	uchar OlympusLensType_Make, OlympusLensType_Model, OlympusLensType_SubModel;
 } libraw_olympuslens_t;
 
-typedef struct 
+typedef struct
 {
 	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal;
 } libraw_dnglens_t;
 
-typedef struct 
+typedef struct
 {
 	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAperture;
 	char LensMake[128], LensModel[128];
@@ -460,7 +461,7 @@ typedef struct
   libraw_imgother_t           other;
   libraw_thumbnail_t          thumbnail;
   libraw_rawdata_t            rawdata;
-  void                *parent_class;      
+  void                *parent_class;
 } libraw_data_t;
 
 

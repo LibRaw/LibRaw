@@ -135,7 +135,7 @@ FILE *ifp, *ofp;
 short order;
 const char *ifname;
 char *meta_data, xtrans[6][6], xtrans_abs[6][6];
-char cdesc[5], desc[512], make[64], model[64], model2[64], artist[64],software[64];
+char cdesc[5], desc[512], make[64], model[64], model2[64], artist[64],software[64], body[64];
 float flash_used, canon_ev, iso_speed, shutter, aperture, focal_len;
 time_t timestamp;
 off_t strip_offset, data_offset;
@@ -9795,6 +9795,13 @@ void CLASS parse_phase_one (int base)
     switch (tag) {
 #ifdef LIBRAW_LIBRARY_BUILD
       // IB start
+      case 0x0102:
+		fread(body, 1, 2, ifp);
+		body[2] = 0;
+		break;
+	  case 0x0410:
+		fread(body, 1, len, ifp);
+		break;
     case 0x0412:
       fread(imgdata.lens.makernotes.LensModel, 1, len, ifp);
       break;
@@ -9841,6 +9848,168 @@ void CLASS parse_phase_one (int base)
     }
     fseek (ifp, save, SEEK_SET);
   }
+
+// IB start
+	if (!body[0]) {
+		fseek (ifp, meta_offset, SEEK_SET);
+		order = get2();
+		fseek (ifp, 6, SEEK_CUR);
+		fseek (ifp, meta_offset+get4(), SEEK_SET);
+		entries = get4();  get4();
+		while (entries--) {
+			tag  = get4();
+			len  = get4();
+			data = get4();
+			save = ftell(ifp);
+//		printf("\n*** PhaseOne SensorCalibration tag: 0x%04x", tag);
+			fseek (ifp, meta_offset+data, SEEK_SET);
+			if (tag == 0x0407) {
+				fread(body, 1, 2, ifp);
+				body[2] = 0;
+//				printf("\n*** 0x0407 PhaseOne camera body: %s", body);
+			}
+			fseek (ifp, save, SEEK_SET);
+		}
+	}
+	if (!body[2] && body[0]) {
+		if (memcmp(body, "FP", 2)) {
+			strcpy(body, "PhaseOne/Mamiya");
+		} else if (memcmp(body, "PA", 2)) {
+			strcpy(body, "Phase One 645AF");
+		} else if (memcmp(body, "PJ", 2)) {
+			strcpy(body, "Phase One 645DF");
+		} else if (memcmp(body, "PX", 2)) {
+			strcpy(body, "Phase One 645DF+");
+		} else if (memcmp(body, "XR", 2)) {
+			strcpy(body, "Phase One iXR");
+		} else if (memcmp(body, "XA", 2)) {
+			strcpy(body, "Phase One iXA");
+		} else if (memcmp(body, "XB", 2)) {
+			strcpy(body, "Phase One iXA - R");
+		}else if (memcmp(body, "XC", 2)) {
+			strcpy(body, "Phase One iXU 150");
+		} else if (memcmp(body, "XD", 2)) {
+			strcpy(body, "Phase One iXU 150 NIR");
+		} else if (memcmp(body, "XE", 2)) {
+			strcpy(body, "Phase One iXU 180");
+		} else if (memcmp(body, "GC", 2)) {
+			strcpy(body, "A-280");
+		} else if (memcmp(body, "GB", 2)) {
+			strcpy(body, "A-260");
+		} else if (memcmp(body, "GA", 2)) {
+			strcpy(body, "A-250");
+		} else if (memcmp(body, "GP", 2) ||
+				   memcmp(body, "GK", 2) ||
+				   memcmp(body, "GX", 2) ||
+				   memcmp(body, "GT", 2) ||
+				   memcmp(body, "FP", 2) ||
+				   memcmp(body, "FK", 2) ||
+				   memcmp(body, "FX", 2) ||
+				   memcmp(body, "HT", 2) ||
+				   memcmp(body, "FG", 2) ||
+				   memcmp(body, "EJ", 2) ||
+				   memcmp(body, "ET", 2) ||
+				   memcmp(body, "DT", 2) ||
+				   memcmp(body, "EG", 2) ||
+				   memcmp(body, "DP", 2) ||
+				   memcmp(body, "DK", 2) ||
+				   memcmp(body, "DX", 2) ||
+				   memcmp(body, "DG", 2) ||
+				   memcmp(body, "CT", 2) ||
+				   memcmp(body, "CP", 2) ||
+				   memcmp(body, "CK", 2) ||
+				   memcmp(body, "CX", 2) ||
+				   memcmp(body, "CG", 2) ||
+				   memcmp(body, "BZ", 2) ||
+				   memcmp(body, "BW", 2) ||
+				   memcmp(body, "BT", 2) ||
+				   memcmp(body, "BK", 2)) {
+			strcpy(body, "PhaseOne/Mamiya");
+		} else if (memcmp(body, "GM", 2) ||
+				   memcmp(body, "GH", 2) ||
+				   memcmp(body, "GU", 2) ||
+				   memcmp(body, "GQ", 2) ||
+				   memcmp(body, "FM", 2) ||
+				   memcmp(body, "FH", 2) ||
+				   memcmp(body, "FU", 2) ||
+				   memcmp(body, "HQ", 2) ||
+				   memcmp(body, "FD", 2) ||
+				   memcmp(body, "EH", 2) ||
+				   memcmp(body, "EQ", 2) ||
+				   memcmp(body, "DQ", 2) ||
+				   memcmp(body, "ED", 2) ||
+				   memcmp(body, "DM", 2) ||
+				   memcmp(body, "DH", 2) ||
+				   memcmp(body, "DU", 2) ||
+				   memcmp(body, "DD", 2) ||
+				   memcmp(body, "CQ", 2) ||
+				   memcmp(body, "CM", 2) ||
+				   memcmp(body, "CH", 2) ||
+				   memcmp(body, "CU", 2) ||
+				   memcmp(body, "CD", 2) ||
+				   memcmp(body, "CC", 2) ||
+				   memcmp(body, "BQ", 2) ||
+				   memcmp(body, "BX", 2) ||
+				   memcmp(body, "BU", 2) ||
+				   memcmp(body, "BR", 2) ||
+				   memcmp(body, "BB", 2)) {
+			strcpy(body, "Hasselblad V");
+		} else if (memcmp(body, "GN", 2) ||
+				   memcmp(body, "GI", 2) ||
+				   memcmp(body, "GV", 2) ||
+				   memcmp(body, "GR", 2) ||
+				   memcmp(body, "FN", 2) ||
+				   memcmp(body, "FI", 2) ||
+				   memcmp(body, "FV", 2) ||
+				   memcmp(body, "FE", 2) ||
+				   memcmp(body, "EI", 2) ||
+				   memcmp(body, "ER", 2) ||
+				   memcmp(body, "DR", 2) ||
+				   memcmp(body, "EE", 2) ||
+				   memcmp(body, "DN", 2) ||
+				   memcmp(body, "DI", 2) ||
+				   memcmp(body, "DV", 2) ||
+				   memcmp(body, "DE", 2) ||
+				   memcmp(body, "CR", 2) ||
+				   memcmp(body, "CN", 2) ||
+				   memcmp(body, "CI", 2) ||
+				   memcmp(body, "CV", 2) ||
+				   memcmp(body, "CE", 2) ||
+				   memcmp(body, "BY", 2)) {
+			strcpy(body, "Hasselblad H");
+		} else if (memcmp(body, "GO", 2) ||
+				   memcmp(body, "GJ", 2) ||
+				   memcmp(body, "GW", 2) ||
+				   memcmp(body, "GS", 2) ||
+				   memcmp(body, "FO", 2) ||
+				   memcmp(body, "FJ", 2) ||
+				   memcmp(body, "FW", 2) ||
+				   memcmp(body, "FF", 2) ||
+				   memcmp(body, "EK", 2) ||
+				   memcmp(body, "ES", 2) ||
+				   memcmp(body, "DS", 2) ||
+				   memcmp(body, "EF", 2) ||
+				   memcmp(body, "DO", 2) ||
+				   memcmp(body, "DJ", 2) ||
+				   memcmp(body, "DW", 2) ||
+				   memcmp(body, "DF", 2) ||
+				   memcmp(body, "CS", 2) ||
+				   memcmp(body, "CO", 2) ||
+				   memcmp(body, "CJ", 2) ||
+				   memcmp(body, "CW", 2) ||
+				   memcmp(body, "CF", 2) ||
+				   memcmp(body, "CA", 2) ||
+				   memcmp(body, "BV", 2) ||
+				   memcmp(body, "BS", 2) ||
+				   memcmp(body, "BM", 2)) {
+			strcpy(body, "Contax 645");
+		}
+	}
+//	if (body[0]) {
+//		printf("\n*** PhaseOne body: %s", body);
+//	}
+// IB end
+
   load_raw = ph1.format < 3 ?
 	&CLASS phase_one_load_raw : &CLASS phase_one_load_raw_c;
   maximum = 0xffff;
@@ -11579,6 +11748,10 @@ void CLASS identify()
   char head[32], *cp;
   int hlen, flen, fsize, zero_fsize=1, i, c;
   struct jhead jh;
+
+// IB start
+body[0] = body[2] = 0;
+// IB end
 
   tiff_flip = flip = filters = UINT_MAX;	/* unknown */
   raw_height = raw_width = fuji_width = fuji_layout = cr2_slice[0] = 0;
