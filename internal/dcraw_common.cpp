@@ -7172,6 +7172,15 @@ void CLASS parse_mos (int offset)
     fread (data, 1, 40, ifp);
     skip = get4();
     from = ftell(ifp);
+
+// IB start
+#ifdef LIBRAW_LIBRARY_BUILD
+    if (!strcmp(data,"CameraObj_camera_type")) {
+	  fread(body, skip, 1, ifp);
+//	  printf("\n*** --->>> Leaf CameraBodyName: %s", body);
+	}
+#endif
+// IB end
     if (!strcmp(data,"JPEG_preview_data")) {
       thumb_offset = from;
       thumb_length = skip;
@@ -7546,6 +7555,7 @@ int CLASS parse_tiff_ifd (int base)
             xmpdata = (char*)malloc(xmplen = len+1);
             fread(xmpdata,len,1,ifp);
             xmpdata[len]=0;
+//            printf ("\n*** --->>> %s", xmpdata);
           }
         break;
 #endif
