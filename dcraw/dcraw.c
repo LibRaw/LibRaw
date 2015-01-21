@@ -9779,8 +9779,10 @@ void CLASS parse_phase_one (int base)
   char *cp;
 
 // IB start
-	char body_id[2];
+#ifdef LIBRAW_LIBRARY_BUILD
+	char body_id[3];
 	body_id[0] = 0;
+#endif
 // IB end
 
   memset (&ph1, 0, sizeof ph1);
@@ -9802,7 +9804,10 @@ void CLASS parse_phase_one (int base)
 
 // IB start
 	case 0x0102:
-		fread(body_id, 1, 2, ifp);
+		fread(body_id, 1, 3, ifp);
+		if ((body_id[0] == 0x4c) && (body_id[1] == 0x49)) {
+			body_id[1] = body_id[2];
+		}
 		unique_id = (((body_id[0] & 0x3f) << 5) | (body_id[1] & 0x3f)) - 0x41;
 //		printf("\n*** 0x0102 PhaseOne camera body id: %d", unique_id);
 		break;
@@ -9874,7 +9879,10 @@ void CLASS parse_phase_one (int base)
 //		printf("\n*** PhaseOne SensorCalibration tag: 0x%04x", tag);
 			fseek (ifp, meta_offset+data, SEEK_SET);
 			if (tag == 0x0407) {
-				fread(body_id, 1, 2, ifp);
+				fread(body_id, 1, 3, ifp);
+				if ((body_id[0] == 0x4c) && (body_id[1] == 0x49)) {
+					body_id[1] = body_id[2];
+				}
 				unique_id = (((body_id[0] & 0x3f) << 5) | (body_id[1] & 0x3f)) - 0x41;
 //				printf("\n*** 0x0407 PhaseOne camera body id: %d", unique_id);
 			}
@@ -11506,6 +11514,7 @@ void CLASS identify()
 		ushort id;
 		char t_model[32];
 	} p1_unique[] = {
+// Phase One section:
 		{1, "Hasselblad V"},
 		{10, "PhaseOne/Mamiya"},
 		{12, "Contax 645"},
@@ -11619,6 +11628,31 @@ void CLASS identify()
 		{707, "Phase One iXU 150 - NIR"},
 		{708, "Phase One iXU 180"},
 		{721, "Phase One iXR"},
+// Leaf section:
+		{333,"Mamiya"},
+		{329,"Universal"},
+		{330,"Hasselblad H1/H2"},
+		{332,"Contax"},
+		{336,"AFi"},
+		{327,"Mamiya"},
+		{324,"Universal"},
+		{325,"Hasselblad H1/H2"},
+		{326,"Contax"},
+		{335,"AFi"},
+		{340,"Mamiya"},
+		{337,"Universal"},
+		{338,"Hasselblad H1/H2"},
+		{339,"Contax"},
+		{323,"Mamiya"},
+		{320,"Universal"},
+		{322,"Hasselblad H1/H2"},
+		{321,"Contax"},
+		{334,"AFi"},
+		{369,"Universal"},
+		{370,"Mamiya"},
+		{371,"Hasselblad H1/H2"},
+		{372,"Contax"},
+		{373,"Afi"},
 	};
 // IB end
 
