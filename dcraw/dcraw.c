@@ -9829,11 +9829,33 @@ void CLASS parse_phase_one (int base)
       fread(imgdata.lens.makernotes.LensModel, 1, len, ifp);
       break;
     case 0x0414:
+      if (type == 4) {
+      	imgdata.lens.makernotes.MaxAp4CurFocal = powf(2.0f, (int_to_float(data)/2.0f));
+	  } else {
       imgdata.lens.makernotes.MaxAp4CurFocal = powf(2.0f, (getreal(type) / 2.0f));
+      }
       break;
     case 0x0415:
+      if (type == 4) {
+      	imgdata.lens.makernotes.MinAp4CurFocal = powf(2.0f, (int_to_float(data)/2.0f));
+	  } else {
       imgdata.lens.makernotes.MinAp4CurFocal = powf(2.0f, (getreal(type) / 2.0f));
+      }
       break;
+	case 0x0416:
+	  if (type == 4) {
+	  	imgdata.lens.makernotes.MinFocal =  int_to_float(data);
+	  } else {
+	  	imgdata.lens.makernotes.MinFocal = getreal(type);
+	  }
+	break;
+	case 0x0417:
+	  if (type == 4) {
+	  	imgdata.lens.makernotes.MaxFocal =  int_to_float(data);
+	  } else {
+	  	imgdata.lens.makernotes.MaxFocal = getreal(type);
+	  }
+	  break;
 // IB end
 #endif
 

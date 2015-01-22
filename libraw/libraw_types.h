@@ -406,6 +406,7 @@ typedef struct
 typedef struct
 {
 	float MaxAp4CurFocal, MinAp4CurFocal;
+	float MinFocal, MaxFocal;
 	char LensModel[128];
 	short LensFormat;	// 0 - unknown, 1 - crop, 2 - full-frame
 	short LensMount;		// 0 - unknown, 1 - A-mount, 2 - E-mount
