@@ -1261,7 +1261,7 @@ void LibRaw::clearCancelFlag()
 #ifdef WIN32
 	InterlockedExchange(&_exitflag, 0);
 #else
-	__sync_fetch_and_set(&_exitflag, 0);
+	__sync_fetch_and_and(&_exitflag, 0);
 #endif
 #ifdef RAWSPEED_FASTEXIT
 	if (_rawspeed_decoder)
@@ -1278,7 +1278,7 @@ void LibRaw::setCancelFlag()
 #ifdef WIN32
   InterlockedExchange(&_exitflag,1);
 #else
-  __sync_fetch_and_set(&_exitflag,1);
+  __sync_fetch_and_add(&_exitflag,1);
 #endif
 #ifdef RAWSPEED_FASTEXIT
   if(_rawspeed_decoder)
@@ -1295,7 +1295,7 @@ void LibRaw::checkCancel()
   if(InterlockedExchange(&_exitflag,0))
     throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
 #else
-  if( __sync_add_and_set(&_exitflag,0))
+  if( __sync_fetch_and_and(&_exitflag,0))
     throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
 #endif
 }
