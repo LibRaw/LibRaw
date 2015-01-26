@@ -174,10 +174,14 @@ class DllDef LibRaw
     int  wf_remove_banding();
 
   /* Phase one correction/subtractBL calls */
-  void phase_one_subtract_black(ushort *src, ushort *dest);
-  void phase_one_correct();
+	/* Returns libraw error code */
+  
+  int phase_one_subtract_black(ushort *src, ushort *dest);
+  int phase_one_correct();
+
   int  set_rawspeed_camerafile(char *filename);
   void setCancelFlag();
+  void clearCancelFlag();
   virtual void adobe_coeff (const char *, const char *, int internal_only=0);
 
 

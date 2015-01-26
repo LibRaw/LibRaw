@@ -1256,12 +1256,29 @@ void LibRaw::fix_after_rawspeed(int)
 }
 #endif
 
+void LibRaw::clearCancelFlag()
+{
+#ifdef WIN32
+	InterlockedExchange(&_exitflag, 0);
+#else
+	__sync_fetch_and_set(&_exitflag, 0);
+#endif
+#ifdef RAWSPEED_FASTEXIT
+	if (_rawspeed_decoder)
+	{
+		RawDecoder *d = static_cast<RawDecoder*>(_rawspeed_decoder);
+		d->resumeProcessing();
+	}
+#endif
+
+}
+
 void LibRaw::setCancelFlag()
 {
 #ifdef WIN32
-  InterlockedExchangeAdd(&_exitflag,1);
+  InterlockedExchange(&_exitflag,1);
 #else
-  __sync_fetch_and_add(&_exitflag,1);
+  __sync_fetch_and_set(&_exitflag,1);
 #endif
 #ifdef RAWSPEED_FASTEXIT
   if(_rawspeed_decoder)
@@ -1275,10 +1292,10 @@ void LibRaw::setCancelFlag()
 void LibRaw::checkCancel()
 {
 #ifdef WIN32
-  if(InterlockedExchangeAdd(&_exitflag,0))
+  if(InterlockedExchange(&_exitflag,0))
     throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
 #else
-  if( __sync_add_and_fetch(&_exitflag,0))
+  if( __sync_add_and_set(&_exitflag,0))
     throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
 #endif
 }
@@ -1413,7 +1430,19 @@ int LibRaw::unpack(void)
             free(_rawspeed_buffer);
             _rawspeed_buffer = 0;
             imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROCESSED;
-          } 
+          }
+		catch (const RawDecoderException& RDE)
+		{
+			imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
+			if (_rawspeed_buffer)
+			{
+				free(_rawspeed_buffer);
+				_rawspeed_buffer = 0;
+			}
+			const char *p = RDE.what();
+			if (!strncmp(RDE.what(), "Decoder canceled", strlen("Decoder canceled")))
+				throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
+		}
         catch (...) 
           {
             // We may get here due to cancellation flag
@@ -1779,54 +1808,61 @@ void LibRaw::phase_one_free_tempbuffer()
 	imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
 }
 
-void LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
+int LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
 {
-  //	ushort *src = (ushort*)imgdata.rawdata.raw_alloc;
-  if(O.user_black<0 && O.user_cblack[0] <= -1000000 && O.user_cblack[1] <= -1000000 && O.user_cblack[2] <= -1000000 && O.user_cblack[3] <= -1000000)
-    {
-      if(!imgdata.rawdata.ph1_cblack || !imgdata.rawdata.ph1_rblack)
-        {
-          register int bl = imgdata.color.phase_one_data.t_black;
-          for(int row = 0; row < S.raw_height; row++)
-            for(int col=0; col < S.raw_width; col++)
-              {
-                int idx  = row*S.raw_width + col;
-                int val = int(src[idx]) - bl;
-                dest[idx] = val>0?val:0;
-              }
-        }
-      else
-        {
-          register int bl = imgdata.color.phase_one_data.t_black;
-          for(int row = 0; row < S.raw_height; row++)
-            for(int col=0; col < S.raw_width; col++)
-              {
-                int idx  = row*S.raw_width + col;
-                int val = int(src[idx]) - bl
-                  + imgdata.rawdata.ph1_cblack[row][col>=imgdata.rawdata.color.phase_one_data.split_col]
-                  + imgdata.rawdata.ph1_rblack[col][row>=imgdata.rawdata.color.phase_one_data.split_row];
-                dest[idx] = val>0?val:0;
-              }
 
-        }
-    }
-  else // black set by user interaction
-    {
-      // Black level in cblack!
-      for(int row = 0; row < S.raw_height; row++)
-        {
-          unsigned short cblk[16];
-          for(int cc=0; cc<16;cc++)
-            cblk[cc]=C.cblack[fcol(row,cc)];
-          for(int col = 0; col < S.raw_width; col++)
-            {
-              int idx  = row*S.raw_width + col;
-              ushort val = src[idx];
-              ushort bl = cblk[col&0xf];
-              dest[idx] = val>bl?val-bl:0;
-            }
-        }
-    }
+	try
+	{
+		if (O.user_black < 0 && O.user_cblack[0] <= -1000000 && O.user_cblack[1] <= -1000000 && O.user_cblack[2] <= -1000000 && O.user_cblack[3] <= -1000000)
+		{
+			if (!imgdata.rawdata.ph1_cblack || !imgdata.rawdata.ph1_rblack)
+			{
+				register int bl = imgdata.color.phase_one_data.t_black;
+				for (int row = 0; row < S.raw_height; row++)
+					for (int col = 0; col < S.raw_width; col++)
+					{
+						int idx = row*S.raw_width + col;
+						int val = int(src[idx]) - bl;
+						dest[idx] = val>0 ? val : 0;
+					}
+			}
+			else
+			{
+				register int bl = imgdata.color.phase_one_data.t_black;
+				for (int row = 0; row < S.raw_height; row++)
+					for (int col = 0; col < S.raw_width; col++)
+					{
+						int idx = row*S.raw_width + col;
+						int val = int(src[idx]) - bl
+							+ imgdata.rawdata.ph1_cblack[row][col >= imgdata.rawdata.color.phase_one_data.split_col]
+							+ imgdata.rawdata.ph1_rblack[col][row >= imgdata.rawdata.color.phase_one_data.split_row];
+						dest[idx] = val>0 ? val : 0;
+					}
+
+			}
+		}
+		else // black set by user interaction
+		{
+			// Black level in cblack!
+			for (int row = 0; row < S.raw_height; row++)
+			{
+				unsigned short cblk[16];
+				for (int cc = 0; cc < 16; cc++)
+					cblk[cc] = C.cblack[fcol(row, cc)];
+				for (int col = 0; col < S.raw_width; col++)
+				{
+					int idx = row*S.raw_width + col;
+					ushort val = src[idx];
+					ushort bl = cblk[col & 0xf];
+					dest[idx] = val>bl ? val - bl : 0;
+				}
+			}
+		}
+		return 0;
+	}
+	catch (LibRaw_exceptions err) {
+		return LIBRAW_CANCELLED_BY_CALLBACK;
+	}
 }
 
 void LibRaw::copy_fuji_uncropped(unsigned short cblack[4],unsigned short *dmaxp)
@@ -3663,7 +3699,6 @@ static const char  *static_camera_list[] =
 "Minolta Alpha/Dynax/Maxxum 5D",
 "Minolta Alpha/Dynax/Maxxum 7D",
 "Motorola PIXL",
-"Nikon Coolscan NEF",
 "Nikon D1",
 "Nikon D1H",
 "Nikon D1X",
@@ -3834,6 +3869,7 @@ static const char  *static_camera_list[] =
 //"Panasonic DMC-GF3KK",
 "Panasonic DMC-GF5",
 "Panasonic DMC-GF6",
+"Panasonic DMC-GF7",
 "Panasonic DMC-GH1",
 "Panasonic DMC-GH2",
 "Panasonic DMC-GH3",
@@ -3992,6 +4028,7 @@ static const char  *static_camera_list[] =
 "SMaL Ultra-Pocket 4",
 "SMaL Ultra-Pocket 5",
 "Sony A7",
+"Sony A7 II",
 "Sony A7R",
 "Sony A7S",
 "Sony ILCA-77M2 (A77-II)",
