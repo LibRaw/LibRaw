@@ -1366,6 +1366,9 @@ int LibRaw::unpack(void)
 	int rawspeed_enabled = 1;
 	if(imgdata.idata.dng_version && libraw_internal_data.unpacker_data.tiff_samples == 2)
 		rawspeed_enabled = 0;
+	// Disable rawspeed for double-sized Oly files
+	if(!strncasecmp(imgdata.idata.make,"Olympus",7) && !strncasecmp(imgdata.idata.model,"E-M5MarkII",10) && imgdata.sizes.raw_width == 9280)
+		rawspeed_enabled = 0;
     // RawSpeed Supported, 
     if(O.use_rawspeed  && rawspeed_enabled
        && !(is_sraw() && O.sraw_ycc)
@@ -3846,6 +3849,7 @@ static const char  *static_camera_list[] =
 "Olympus E-M1",
 "Olympus E-M10",
 "Olympus E-M5",
+"Olympus E-M5 Mark II",
 "Olympus SP310",
 "Olympus SP320",
 "Olympus SP350",
