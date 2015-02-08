@@ -1369,6 +1369,7 @@ int LibRaw::unpack(void)
 	// Disable rawspeed for double-sized Oly files
 	if(!strncasecmp(imgdata.idata.make,"Olympus",7) && !strncasecmp(imgdata.idata.model,"E-M5MarkII",10) && imgdata.sizes.raw_width == 9280)
 		rawspeed_enabled = 0;
+
     // RawSpeed Supported, 
     if(O.use_rawspeed  && rawspeed_enabled
        && !(is_sraw() && O.sraw_ycc)
