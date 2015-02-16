@@ -329,10 +329,8 @@ LibRaw:: LibRaw(unsigned int flags)
   verbose = 0;
 #endif
   ZERO(imgdata);
-  imgdata.lens.canon.CanonFocalType = -1;
   imgdata.lens.canon.CanonFocalUnits = 1;
-  imgdata.lens.PentaxLensID = -1;
-  imgdata.lens.sony.SonyMinoltaLensID = 0xffffffffffffffff;
+  imgdata.lens.makernotes.LensID = 0xffffffffffffffffULL;
 
   cleargps(&imgdata.other.parsed_gps);
   ZERO(libraw_internal_data);
@@ -484,10 +482,8 @@ void LibRaw:: recycle()
   imgdata.color.baseline_exposure = -999.f;
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);
-  imgdata.lens.canon.CanonFocalType = -1;
   imgdata.lens.canon.CanonFocalUnits = 1;
-  imgdata.lens.PentaxLensID = -1;
-  imgdata.lens.sony.SonyMinoltaLensID = 0xffffffffffffffff;
+  imgdata.lens.makernotes.LensID = 0xffffffffffffffffULL;
 
   _exitflag = 0;
 #ifdef USE_RAWSPEED
@@ -523,288 +519,261 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
   if(!d_info)   return LIBRAW_UNSPECIFIED_ERROR;
   if(!load_raw) return LIBRAW_OUT_OF_ORDER_CALL;
   
-  d_info->decoder_flags = LIBRAW_DECODER_NOTSET;
+  d_info->decoder_flags = 0;
   int rawdata = (imgdata.idata.filters || P1.colors == 1);
   // dcraw.c names order
   if (load_raw == &LibRaw::android_tight_load_raw)
   {
 	  d_info->decoder_name = "android_tight_load_raw()";
-	  d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; 
   }
   else if (load_raw == &LibRaw::android_loose_load_raw)
   {
 	  d_info->decoder_name = "android_loose_load_raw()";
-	  d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; 
   }
   else if (load_raw == &LibRaw::canon_600_load_raw)
     {
       d_info->decoder_name = "canon_600_load_raw()";   
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; // WB set within decoder, no need to load raw
     }
   else if (load_raw == &LibRaw::canon_load_raw)
     {
       d_info->decoder_name = "canon_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::lossless_jpeg_load_raw)
     {
       // Check rbayer
       d_info->decoder_name = "lossless_jpeg_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::canon_sraw_load_raw) 
     {
       d_info->decoder_name = "canon_sraw_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY | LIBRAW_DECODER_TRYRAWSPEED; 
+      d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED; 
     }
   else if (load_raw == &LibRaw::lossless_dng_load_raw) 
     {
       // Check rbayer
       d_info->decoder_name = "lossless_dng_load_raw()"; 
-      d_info->decoder_flags = rawdata? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY ;
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
-      d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::packed_dng_load_raw)
     {
       // Check rbayer
       d_info->decoder_name = "packed_dng_load_raw()"; 
-      d_info->decoder_flags = rawdata ? LIBRAW_DECODER_FLATFIELD : LIBRAW_DECODER_LEGACY;
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
-      d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::pentax_load_raw )
     {
       d_info->decoder_name = "pentax_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD  | LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::nikon_load_raw)
     {
       // Check rbayer
       d_info->decoder_name = "nikon_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::nikon_coolscan_load_raw )
   {
 	  d_info->decoder_name = "nikon_coolscan_load_raw()";
-	  d_info->decoder_flags = LIBRAW_DECODER_LEGACY | LIBRAW_DECODER_FIXEDMAXC; 
+	  d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC; 
   }
   else if (load_raw == &LibRaw::nikon_load_sraw )
     {
       d_info->decoder_name = "nikon_load_sraw()";
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY | LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_FIXEDMAXC; 
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_FIXEDMAXC; 
     }
   else if (load_raw == &LibRaw::rollei_load_raw )
     {
       // UNTESTED
       d_info->decoder_name = "rollei_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::phase_one_load_raw )
     {
       d_info->decoder_name = "phase_one_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::phase_one_load_raw_c )
     {
       d_info->decoder_name = "phase_one_load_raw_c()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::hasselblad_load_raw )
     {
       d_info->decoder_name = "hasselblad_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::leaf_hdr_load_raw )
     {
       d_info->decoder_name = "leaf_hdr_load_raw()"; 
-      d_info->decoder_flags = imgdata.idata.filters? LIBRAW_DECODER_FLATFIELD:LIBRAW_DECODER_LEGACY;
     }
   else if (load_raw == &LibRaw::unpacked_load_raw )
     {
       d_info->decoder_name = "unpacked_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_USEBAYER2;
     }
   else if (load_raw == &LibRaw::sinar_4shot_load_raw )
     {
       // UNTESTED
       d_info->decoder_name = "sinar_4shot_load_raw()";
-      d_info->decoder_flags = (O.shot_select|| O.half_size)?LIBRAW_DECODER_FLATFIELD:LIBRAW_DECODER_LEGACY;
     }
   else if (load_raw == &LibRaw::imacon_full_load_raw )
     {
       d_info->decoder_name = "imacon_full_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
     }
   else if (load_raw == &LibRaw::hasselblad_full_load_raw )
     {
       d_info->decoder_name = "hasselblad_full_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
     }
   else if (load_raw == &LibRaw::packed_load_raw )
     {
       d_info->decoder_name = "packed_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
-      d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::nokia_load_raw )
     {
       // UNTESTED
       d_info->decoder_name = "nokia_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::canon_rmf_load_raw )
     {
       // UNTESTED
       d_info->decoder_name = "canon_rmf_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::panasonic_load_raw )
     {
       d_info->decoder_name = "panasonic_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD  | LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::olympus_load_raw )
     {
       d_info->decoder_name = "olympus_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD | LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::minolta_rd175_load_raw ) 
     {  
       // UNTESTED
       d_info->decoder_name = "minolta_rd175_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::quicktake_100_load_raw )
     {
       // UNTESTED
       d_info->decoder_name = "quicktake_100_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::kodak_radc_load_raw )
     {
       d_info->decoder_name = "kodak_radc_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::kodak_jpeg_load_raw )
     {
       // UNTESTED + RBAYER
       d_info->decoder_name = "kodak_jpeg_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::lossy_dng_load_raw)
     {
       // Check rbayer
       d_info->decoder_name = "lossy_dng_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY | LIBRAW_DECODER_TRYRAWSPEED;
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
+      d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_HASCURVE;
     }
   else if (load_raw == &LibRaw::kodak_dc120_load_raw )
     {
       d_info->decoder_name = "kodak_dc120_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::eight_bit_load_raw )
     {
       d_info->decoder_name = "eight_bit_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
     }
+#if 0 // OLD kodak decoder
   else if (load_raw == &LibRaw::kodak_yrgb_load_raw )    
     {
       d_info->decoder_name = "kodak_yrgb_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
     }
+#else
+  else if (load_raw == &LibRaw::kodak_c330_load_raw )    
+    {
+      d_info->decoder_name = "kodak_yrgb_load_raw()"; 
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
+    }
+  else if (load_raw == &LibRaw::kodak_c603_load_raw )    
+    {
+      d_info->decoder_name = "kodak_yrgb_load_raw()"; 
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
+    }
+#endif
   else if (load_raw == &LibRaw::kodak_262_load_raw )
     {
       d_info->decoder_name = "kodak_262_load_raw()"; // UNTESTED!
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
     }
   else if (load_raw == &LibRaw::kodak_65000_load_raw )
     {
       d_info->decoder_name = "kodak_65000_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
     }
   else if (load_raw == &LibRaw::kodak_ycbcr_load_raw )
     {
       // UNTESTED
       d_info->decoder_name = "kodak_ycbcr_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
     }
   else if (load_raw == &LibRaw::kodak_rgb_load_raw ) 
     {
       // UNTESTED
       d_info->decoder_name = "kodak_rgb_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY;
     }
   else if (load_raw == &LibRaw::sony_load_raw )
     {
       d_info->decoder_name = "sony_load_raw()"; 
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::sony_arw_load_raw )
     {
       d_info->decoder_name = "sony_arw_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
-      d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
 
     }
   else if (load_raw == &LibRaw::sony_arw2_load_raw )
     {
       d_info->decoder_name = "sony_arw2_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
-      d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
-      d_info->decoder_flags |= LIBRAW_DECODER_SONYARW2;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_SONYARW2;
     }
   else if (load_raw == &LibRaw::samsung_load_raw )
     {
       d_info->decoder_name = "samsung_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
-      d_info->decoder_flags |= LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
     }
   else if (load_raw == &LibRaw::samsung2_load_raw )
     {
       d_info->decoder_name = "samsung2_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
+    }
+  else if (load_raw == &LibRaw::samsung3_load_raw )
+    {
+      d_info->decoder_name = "samsung3_load_raw()";
     }
   else if (load_raw == &LibRaw::smal_v6_load_raw )
     {
       // UNTESTED
       d_info->decoder_name = "smal_v6_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else if (load_raw == &LibRaw::smal_v9_load_raw )
     {
       // UNTESTED
       d_info->decoder_name = "smal_v9_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD;
     }
   else  if (load_raw == &LibRaw::redcine_load_raw)
     {
       d_info->decoder_name = "redcine_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_FLATFIELD; 
-      d_info->decoder_flags |= LIBRAW_DECODER_HASCURVE;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
     }
   else if (load_raw == &LibRaw::x3f_load_raw )
     {
       d_info->decoder_name = "x3f_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY | LIBRAW_DECODER_OWNALLOC; 
+      d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC; 
     }
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
   else if (load_raw == &LibRaw::foveon_sd_load_raw )
     {
       d_info->decoder_name = "foveon_sd_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
     }
   else if (load_raw == &LibRaw::foveon_dp_load_raw )
     {
       d_info->decoder_name = "foveon_dp_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_LEGACY; 
     }
 #endif
   else
@@ -1062,10 +1031,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
 
-	if(!imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Samsung") && !strcmp(imgdata.idata.model,"NX1"))
-	{
-		imgdata.idata.raw_count = 0; // Disabled for non-DNG
-	}
 	if (!imgdata.idata.dng_version && !strcmp(imgdata.idata.make, "Leaf") && !strcmp(imgdata.idata.model, "Credo 50"))
 	{
 		imgdata.color.pre_mul[0] = 1.f / 0.3984f;
@@ -1478,14 +1443,14 @@ int LibRaw::unpack(void)
             // x3f foveon decoder
             // Do nothing! Decoder will allocate data internally
           }
-        else if(decoder_info.decoder_flags &  LIBRAW_DECODER_FLATFIELD)
+        else if(imgdata.idata.filters || P1.colors == 1) // Bayer image or single color -> decode to raw_image
           {
             imgdata.rawdata.raw_alloc = malloc(rwidth*(rheight+8)*sizeof(imgdata.rawdata.raw_image[0]));
             imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
             if(!S.raw_pitch)
                 S.raw_pitch = S.raw_width*2; // Bayer case, not set before
           }
-        else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+        else // NO LEGACY FLAG if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
           {
             // sRAW and old Foveon decoders only, so extra buffer size is just 1/4
             S.iwidth = S.width;
@@ -1509,7 +1474,7 @@ int LibRaw::unpack(void)
             // x3f foveon decoder only: do nothing
 
           }
-        else if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+        else if (!(imgdata.idata.filters || P1.colors == 1))
           {
             // successfully decoded legacy image, attach image to raw_alloc
             imgdata.rawdata.raw_alloc = imgdata.image;
@@ -1527,7 +1492,7 @@ int LibRaw::unpack(void)
       crop_masked_pixels(); // calculate black levels
 
     // recover saved
-    if( (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY) && !imgdata.rawdata.color4_image)
+    if( !(imgdata.idata.filters || P1.colors == 1) && !imgdata.rawdata.color4_image)
       {
         imgdata.image = 0; 
         imgdata.rawdata.color4_image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
@@ -1724,7 +1689,7 @@ int LibRaw::raw2image(void)
     get_decoder_info(&decoder_info);
         
     // Move saved bitmap to imgdata.image
-    if(decoder_info.decoder_flags & LIBRAW_DECODER_FLATFIELD)
+    if( imgdata.idata.filters || P1.colors == 1)
       {
         if (IO.fuji_width) {
           unsigned r,c;
@@ -1752,7 +1717,7 @@ int LibRaw::raw2image(void)
                 = imgdata.rawdata.raw_image[(row+S.top_margin)*S.raw_pitch/2+(col+S.left_margin)];
         }
       }
-    else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+    else // if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
       {
         if(imgdata.rawdata.color4_image)
           {
@@ -2080,7 +2045,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
       }
         
     // Move saved bitmap to imgdata.image
-    if(decoder_info.decoder_flags & LIBRAW_DECODER_FLATFIELD)
+    if(imgdata.idata.filters || P1.colors == 1)
       {
         if (IO.fuji_width) 
           {
@@ -2133,7 +2098,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
             copy_bayer(cblack,&dmax);
           }
       }
-    else if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
+    else //if(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
       {
         if(imgdata.rawdata.color4_image)
           {
@@ -3114,7 +3079,8 @@ int LibRaw::dcraw_process(void)
     libraw_decoder_info_t di;
     get_decoder_info(&di);
 
-    int subtract_inline = !O.bad_pixels && !O.dark_frame && !O.wf_debanding && !(di.decoder_flags & LIBRAW_DECODER_LEGACY) && !IO.zero_is_bad;
+    bool is_bayer = (imgdata.idata.filters || P1.colors == 1);
+    int subtract_inline = !O.bad_pixels && !O.dark_frame && !O.wf_debanding && is_bayer && !IO.zero_is_bad;
 
     raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
 
@@ -3349,7 +3315,7 @@ static const char  *static_camera_list[] =
 "AVT F-810C",
 "Baumer TXG14",
 "BlackMagic Cinema Camera",
-"Blackmagic Pocket Cinema Camera",
+"BlackMagic Pocket Cinema Camera",
 "BlackMagic Production Camera 4k",
 "Canon PowerShot 600",
 "Canon PowerShot A5",
@@ -3588,6 +3554,7 @@ static const char  *static_camera_list[] =
 "Hasselblad Stellar",
 "Hasselblad Stellar II",
 "Hasselblad HV",
+"HTC UltraPixel",
 "Imacon Ixpress 96, 96C",
 "Imacon Ixpress 384, 384C (single shot only)",
 "Imacon Ixpress 132C",
@@ -3670,6 +3637,7 @@ static const char  *static_camera_list[] =
 "Leaf Valeo 17",
 "Leaf Valeo 22",
 "Leaf Volare",
+"Lenovo a820",
 "Leica C (Typ 112)",
 "Leica Digilux 2",
 "Leica Digilux 3",
@@ -4003,7 +3971,7 @@ static const char  *static_camera_list[] =
 "Samsung GX10",
 "Samsung GX20",
 "Samsung Galaxy NX (EK-GN120)",
-//"Samsung NX1",
+"Samsung NX1",
 "Samsung NX5",
 "Samsung NX10",
 "Samsung NX11",
@@ -4024,6 +3992,8 @@ static const char  *static_camera_list[] =
 "Samsung WB2000",
 "Samsung S85 (hacked)",
 "Samsung S850 (hacked)",
+"Samsung Galaxy S3",
+"Samsung Galaxy Nexus",
 "Sarnoff 4096x5440",
 "Seitz 6x17",
 "Seitz Roundshot D3",
@@ -4117,6 +4087,9 @@ static const char  *static_camera_list[] =
 "Sony SLT-A77V",
 "Sony SLT-A99V",
 "Sony XCD-SX910CR",
+"Sony IMX135-mipi 13mp",
+"Sony IMX135-QCOM",
+"Sony IMX072-mipi",
 "STV680 VGA",
 "ptGrey GRAS-50S5C",
 "JaiPulnix BB-500CL",

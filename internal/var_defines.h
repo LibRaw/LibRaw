@@ -25,7 +25,6 @@ it under the terms of the one of three licenses as you choose:
 // imgdata.idata
 #define make            (imgdata.idata.make)
 #define model           (imgdata.idata.model)
-#define body            (imgdata.idata.body)
 #define software        (imgdata.idata.software)
 #define is_raw          (imgdata.idata.raw_count)
 #define dng_version     (imgdata.idata.dng_version)
@@ -203,6 +202,7 @@ it under the terms of the one of three licenses as you choose:
 #define fseeko(stream,o,w)	 stream->seek(o,w)
 #define ftell(stream)		 stream->tell()
 #define ftello(stream)		 stream->tell()
+#define feof(stream)		 stream->eof()
 #ifdef getc
 #undef getc
 #endif

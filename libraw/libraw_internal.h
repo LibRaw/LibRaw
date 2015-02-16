@@ -189,7 +189,7 @@ struct tiff_hdr {
   short bps[4];
   int rat[10];
   unsigned gps[26];
-  char t_desc[512], t_make[64], t_model[64], soft[32], date[20], t_artist[64], t_body[64];
+  char t_desc[512], t_make[64], t_model[64], soft[32], date[20], t_artist[64];
 };
 
 

@@ -46,13 +46,8 @@ for my $make (sort keys %$cameralist)
 	   print "<li>$make\n<ul>\n";
 	   for my $model (@{$cameralist->{$make}})
 	    {
-	       if($make=~/Samsung/ && $model=~/^NX1/ && !$havenx1)
-		{
-	          print "  <li>NX1</li>\n";
-		  $havenx1=1;
-		}
 	       print "  <li>$model</li>\n";
-	     }
+	    }
 	   print "</ul>\n</li>\n";
      }
 }

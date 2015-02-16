@@ -153,8 +153,7 @@ typedef struct
 {
   char        make[64];
   char        model[64];
-  char		  body[64];
-  char		  software[64];
+  char		  	software[64];
   unsigned    raw_count;
   unsigned    dng_version;
   unsigned    is_foveon;
@@ -232,6 +231,8 @@ typedef struct
   float	      baseline_exposure;
   int		  OlympusSensorCalibration[2];
   int		digitalBack_color;
+  int		wb_applied;
+  int		gamma_applied;
 }libraw_colordata_t;
 
 typedef struct
@@ -378,55 +379,45 @@ typedef struct
 
 typedef struct
 {
-	ushort SonyModelID;
-//	unsigned SonyMinoltaLensID, SonyLensID, SonyLensCrop, SonyLensMount, SonyMinFocalLength, SonyMaxFoclaLength, SonyFocalLength;
-	unsigned long long SonyMinoltaLensID;
-	unsigned SonyLensID, SonyLensMount, SonyLensFormat, SonyMinFocalLength, SonyMaxFocalLength, SonyFocalLength;
-	char SonyTeleconverterName[128], SonyMinoltaLensName[128], SonyLensName[128];
-	ushort SonyTeleconverterID, SonyLensSpecs_minFocal, SonyLensSpecs_maxFocal;
-	float SonyLensSpecs_maxAp4minFocal, SonyLensSpecs_maxAp4maxFocal, SonyMaxAperture, SonyMinAperture;
-	char SonyLensFeatures_pre[16], SonyLensFeatures_suf[16];
-}libraw_sonylens_t;
-
-typedef struct
-{
-	short CanonLensID;
-	char CanonLensName[128];
-	ushort CanonMaxFocalLength, CanonMinFocalLength, CanonFocalLength;
-	// CanonFocalType: -1 is unknown; 1 is fixed focal; 2 is zoom
-	short CanonFocalType, CanonFocalUnits, CanonMaxAperture, CanonMinAperture;
+	short CanonFocalUnits;
 } libraw_canonlens_t;
 
 typedef struct
 {
-	ushort SamsungLensID;
-	char SamsungLensName[128];
+	float	FocalLengthIn35mmFormat;
 } libraw_samsunglens_t;
 
 typedef struct
 {
-	float MaxAp4CurFocal, MinAp4CurFocal;
-	float MinFocal, MaxFocal;
-	char LensModel[128];
-	short LensFormat;	// 0 - unknown, 1 - crop, 2 - full-frame
-	short LensMount;		// 0 - unknown, 1 - A-mount, 2 - E-mount
+	unsigned long long LensID;
+	char	Lens[128];
+	ushort	LensFormat;		// to characterize the image circle the lens covers
+	ushort	LensMount;		// 'male', lens itself
+	unsigned CamID;
+	ushort	CameraFormat;	// some of the sensor formats
+	ushort	CameraMount;	// 'female', body throat
+	char	body[64];
+	short	FocalType;		// -1/0 is unknown; 1 is fixed focal; 2 is zoom
+	char	LensFeatures_pre[16], LensFeatures_suf[16];
+	float	MinFocal, MaxFocal;
+	float	MaxAp4MinFocal, MaxAp4MaxFocal, MinAp4MinFocal, MinAp4MaxFocal;
+	float	MaxAp, MinAp;
+	float	CurFocal, CurAp;
+	float	MaxAp4CurFocal, MinAp4CurFocal;
+	float	LensFStops;
+	unsigned long long TeleconverterID;
+	char	Teleconverter[128];
+	unsigned long long AdapterID;
+	char	Adapter[128];
+	unsigned long long AttachmentID;
+	char	Attachment[128];
 } libraw_makernotes_lens_t;
 
 typedef struct
 {
-	float NikonLens_0x0084_MaxAperture4MaxFocal, NikonLens_0x0084_MaxAperture4MinFocal, NikonLens_0x0084_MaxFocal, NikonLens_0x0084_MinFocal;
-	float NikonEffectiveMaxAperture_0x0098;
-	uchar NikonLensIDNumber, NikonLensFStops, NikonMinFocalLength, NikonMaxFocalLength, NikonMaxApertureAtMinFocal, NikonMaxApertureAtMaxFocal, NikonMCUVersion, NikonLensType;
-	char NikonLensName[128];
-	unsigned long long NikonLensID;
+	float NikonEffectiveMaxAp;
+	uchar NikonLensIDNumber, NikonLensFStops, NikonMCUVersion, NikonLensType;
 } libraw_nikonlens_t;
-
-typedef struct
-{
-	float OlympusLens_MaxAperture4MinFocal, OlympusLens_MaxAperture4MaxFocal, OlympusLens_MinFocal, OlympusLens_MaxFocal;
-	float OlympusLens_MaxAperture;
-	uchar OlympusLensType_Make, OlympusLensType_Model, OlympusLensType_SubModel;
-} libraw_olympuslens_t;
 
 typedef struct
 {
@@ -435,17 +426,14 @@ typedef struct
 
 typedef struct
 {
-	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAperture;
-	char LensMake[128], LensModel[128];
+	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAp;
+	char LensMake[128], Lens[128];
 	ushort FocalLengthIn35mmFormat;
-	libraw_sonylens_t sony;
 	libraw_canonlens_t canon;
 	libraw_samsunglens_t samsung;
 	libraw_nikonlens_t nikon;
-	libraw_olympuslens_t olympus;
 	libraw_dnglens_t dng;
 	libraw_makernotes_lens_t makernotes;
-	short PentaxLensID;
 } libraw_lensinfo_t;
 
 

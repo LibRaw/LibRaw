@@ -33,7 +33,18 @@ it under the terms of the one of three licenses as you choose:
 // inline functions
     ushort      sget2 (uchar *s);
     ushort      sget2Rev(uchar *s);
-    void 	parseSonyLensFeatures (ushort features);
+    void	setCanonBodyFeatures (unsigned id);
+    void 	processCanonCameraInfo (unsigned id, uchar *CameraInfo);
+    void	processNikonLensData (uchar *LensData, unsigned len);
+    void	setOlympusBodyFeatures (unsigned long id);
+    void	setPhaseOneFeatures (unsigned id);
+    void	setPentaxBodyFeatures (unsigned id);
+    void	setSonyBodyFeatures (unsigned id);
+    void	parseSonyLensType2 (uchar a, uchar b);
+    void 	parseSonyLensFeatures (uchar a, uchar b);
+    void	process_Sony_0x9050 (uchar * buf, unsigned id);
+    void	process_Sony_0x940c (uchar * buf);
+
     ushort      get2();
     unsigned    sget4 (uchar *s);
     unsigned    getint (int type);
@@ -152,8 +163,10 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     int         kodak_65000_decode (short *out, int bsize);
     void        kodak_65000_load_raw();
     void        kodak_rgb_load_raw();
-    void        kodak_yrgb_load_raw();
     void        kodak_ycbcr_load_raw();
+//    void        kodak_yrgb_load_raw();
+    void        kodak_c330_load_raw();
+    void        kodak_c603_load_raw();
     void        kodak_rgb_load_thumb();
     void        kodak_ycbcr_load_thumb();
 
@@ -164,6 +177,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        sony_arw2_load_raw();
     void        samsung_load_raw();
     void        samsung2_load_raw();
+    void        samsung3_load_raw();
     void        parse_minolta (int base);
 
 // Foveon/Sigma
@@ -199,7 +213,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        tiff_get (unsigned base,unsigned *tag, unsigned *type, unsigned *len, unsigned *save);
     void        parse_thumb_note (int base, unsigned toff, unsigned tlen);
     void        parse_makernote (int base, int uptag);
-	void        parse_makernote_inAdobeDNG(int base, int uptag);
+		void        parse_makernote_0xc634(int base, int uptag, unsigned dng_writer);
     void        parse_exif (int base);
     void        linear_table (unsigned len);
     void        parse_kodak_ifd (int base);
@@ -207,9 +221,10 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     int         parse_tiff (int base);
     void        apply_tiff(void);
     void        parse_gps (int base);
-	void        parse_gps_libraw(int base);
-	void        romm_coeff(float romm_cam[3][3]);
+		void        parse_gps_libraw(int base);
+		void        romm_coeff(float romm_cam[3][3]);
     void        parse_mos (int offset);
+    void        parse_qt (int end);
     void        get_timestamp (int reversed);
 
 // External JPEGs, what cameras uses it ?
