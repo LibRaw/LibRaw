@@ -2074,9 +2074,6 @@ void CLASS packed_load_raw()
 {
   int vbits=0, bwide, rbits, bite, half, irow, row, col, val, i;
   UINT64 bitbuf=0;
-  int save_load_flags = load_flags;
-  int ignore_derror = load_flags & 1024;
-  load_flags &= 1023;
 
   bwide = raw_width * tiff_bps / 8;
   bwide += bwide & load_flags >> 7;
@@ -2107,12 +2104,11 @@ void CLASS packed_load_raw()
       }
       val = bitbuf << (64-tiff_bps-vbits) >> (64-tiff_bps);
       RAW(row,col ^ (load_flags >> 6 & 1)) = val;
-      if (load_flags & 1 && (col % 10) == 9 &&
-	fgetc(ifp) && col < width+left_margin &&!ignore_derror) derror();
+      if (load_flags & 1 && (col % 10) == 9 && fgetc(ifp) &&
+	row < height+top_margin && col < width+left_margin) derror();
     }
     vbits -= rbits;
   }
-  load_flags = save_load_flags;
 }
 
 void CLASS nokia_load_raw()
@@ -12689,16 +12685,9 @@ konica_400z:
   } else if (!strcmp(make,"Olympus")) {
     height += height & 1;
     if (exif_cfa) filters = exif_cfa;
-    if( width == 9280)
-      {
-        left_margin = 12;
-        top_margin = 12;
-        width -= 64;
-        height -= 24;
-        load_flags |= 1024;
-      }
     if (width == 4100) width -= 4;
     if (width == 4080) width -= 24;
+    if (width == 9280) { width -= 6; height -= 6; }
     if (load_raw == &CLASS unpacked_load_raw)
       load_flags = 4;
     tiff_bps = 12;
