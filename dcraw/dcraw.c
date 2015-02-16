@@ -24,7 +24,7 @@
    $Date: 2015/02/10 23:02:37 $
 
  make -f Makefile.devel
- git commit -a -m "v.095"
+ git commit -a -m "v.096"
  git push
 
  */
@@ -8815,7 +8815,7 @@ void CLASS parse_makernote (int base, int uptag)
             fseek(ifp, 6, SEEK_CUR);
             fseek(ifp, get4()+34, SEEK_SET);
             imgdata.lens.makernotes.LensID = getc(ifp) - '0';
-            switch(imgdata.lens.makernotes.LensID) 
+            switch(imgdata.lens.makernotes.LensID)
               {
             	case 1:
             	case 2:
@@ -9041,7 +9041,7 @@ void CLASS parse_makernote (int base, int uptag)
             if (memcmp(table_buf, "\xff\xff\xff\xff\xff\xff\xff\xff", 8) &&
                 memcmp(table_buf, "\x00\x00\x00\x00\x00\x00\x00\x00", 8))
               {
-                switch (len) 
+                switch (len)
                   {
                   case 368:
                   case 5478:
@@ -9235,7 +9235,7 @@ void CLASS parse_makernote (int base, int uptag)
     if (tag == 0x4001 && len > 500 && !strcasecmp(make,"Canon"))
       {
         long int save1 = ftell(ifp);
-        switch (len) 
+        switch (len)
           {
           case 582:
             imgdata.color.canon_makernotes.CanonColorDataVer = 1;	// 20D / 350D

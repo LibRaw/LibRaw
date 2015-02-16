@@ -157,7 +157,7 @@ fixed_lens_t *lookupFixedLens(const char *make, const char *model)
   return 0;
 }
 
-lens_t *lookup_lens_tUniqueID(unsigned long long id, lens_t *table, ushort nEntries) 
+lens_t *lookup_lens_tUniqueID(unsigned long long id, lens_t *table, ushort nEntries)
 {
   for (int k = 0; k < nEntries; k++)
     if (id == table[k].id)
@@ -165,11 +165,11 @@ lens_t *lookup_lens_tUniqueID(unsigned long long id, lens_t *table, ushort nEntr
   return 0;
 }
 
-lens_t *lookup_lens_tLeicaM(unsigned long long id, lens_t *table, ushort nEntries) 
+lens_t *lookup_lens_tLeicaM(unsigned long long id, lens_t *table, ushort nEntries)
 {
-  
+
   unsigned long long id1;
-  
+
   for (int k = 0; k < nEntries; k++)
     {
       if(!table[k].variant)
@@ -186,7 +186,7 @@ lens_t *lookup_lens_tLeicaM(unsigned long long id, lens_t *table, ushort nEntrie
   return 0;
 }
 
-lens_t* lookup_lens_tPentax(unsigned long long id, lens_t *table, ushort nEntries, float _cur_focal) 
+lens_t* lookup_lens_tPentax(unsigned long long id, lens_t *table, ushort nEntries, float _cur_focal)
 {
   int k;
   for (k = 0; k < nEntries-1; k++)
@@ -338,7 +338,7 @@ int main(int ac, char *av[])
   int verbose = 0, ret,print_unpack=0,print_frame=0;
   LibRaw MyCoolRawProcessor;
 
-  for (int i=1;i<ac;i++) 
+  for (int i=1;i<ac;i++)
     {
       if(av[i][0]=='-')
         {
@@ -355,7 +355,7 @@ int main(int ac, char *av[])
           continue; // no recycle, open_file will recycle
         }
 
-      if(verbose) 
+      if(verbose)
         {
           printf ("\nFilename: %s\n", av[i]);
           printf ("Timestamp: %s", ctime(&(P2.timestamp)));
@@ -707,6 +707,14 @@ int main(int ac, char *av[])
                   }
               }
           }
+
+        if (!strncmp(exifLens.Lens, "NX-M 9-27", 9))
+        {
+          MinFocal = 9.0f;
+          MaxFocal = 27.0f;
+          MaxAp4MinFocal = 3.5f;
+          MaxAp4MaxFocal = 5.6f;
+        }
 
         if (exifLens.MinFocal > 0.5f)
           MinFocal = exifLens.MinFocal;
