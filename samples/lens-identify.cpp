@@ -48,6 +48,7 @@
 #define Leica_S			16
 #define Samsung_NX	17
 #define RicohModule	18
+#define Samsung_NX_M	19
 #define FixedLens		99
 
 // lens & camera formats, to differentiate Sony F/FE A/DT, etc.
@@ -415,6 +416,7 @@ int main(int ac, char *av[])
             case 15: printf("Leica R\n"); break;
             case 16: printf("Leica S\n"); break;
             case 17: printf("Samsung NX\n"); break;
+            case 19: printf("Samsung NX-M\n"); break;
             case 99: printf("Fixed Lens\n"); break;
             default: printf("Unknown\n"); break;
             }
@@ -486,8 +488,8 @@ int main(int ac, char *av[])
           printf("\tMaxAp @CurFocal: f/%0.1f\n", mnLens.MaxAp4CurFocal);
           printf("\tMinAp @CurFocal: f/%0.1f\n", mnLens.MinAp4CurFocal);
 
-          if (exifLens.samsung.FocalLengthIn35mmFormat > 1.0f)
-            printf("\tFocalLengthIn35mmFormat: %0.1f mm\n", exifLens.samsung.FocalLengthIn35mmFormat);
+          if (exifLens.makernotes.SamsungFocalLengthIn35mmFormat > 1.0f)
+            printf("\tFocalLengthIn35mmFormat: %0.1f mm\n", exifLens.makernotes.SamsungFocalLengthIn35mmFormat);
 
           if (exifLens.nikon.NikonEffectiveMaxAp > 0.1f)
             printf("\tNikonEffectiveMaxAp: f/%0.1f\n", exifLens.nikon.NikonEffectiveMaxAp);
@@ -533,9 +535,9 @@ int main(int ac, char *av[])
         else
           EXIF_MaxAp = exifLens.EXIF_MaxAp;
 
-        if ((exifLens.samsung.FocalLengthIn35mmFormat > 1.0f) &&
+        if ((exifLens.makernotes.SamsungFocalLengthIn35mmFormat > 1.0f) &&
             (exifLens.FocalLengthIn35mmFormat < 1.0f))
-          FocalLengthIn35mmFormat = exifLens.samsung.FocalLengthIn35mmFormat;
+          FocalLengthIn35mmFormat = exifLens.makernotes.SamsungFocalLengthIn35mmFormat;
         else
           FocalLengthIn35mmFormat = exifLens.FocalLengthIn35mmFormat;
 
@@ -690,6 +692,7 @@ int main(int ac, char *av[])
                     goto got_lens;
                   }
               }
+
             else if ((mnLens.LensMount == Pentax_K) ||
                      (mnLens.LensMount == Pentax_Q) ||
                      (mnLens.LensMount == Pentax_645))
@@ -708,13 +711,15 @@ int main(int ac, char *av[])
               }
           }
 
-        if (!strncmp(exifLens.Lens, "NX-M 9-27", 9))
-        {
-          MinFocal = 9.0f;
-          MaxFocal = 27.0f;
-          MaxAp4MinFocal = 3.5f;
-          MaxAp4MaxFocal = 5.6f;
-        }
+				if ((mnLens.CameraMount == Samsung_NX_M) &&
+								 !strncmp(exifLens.Lens, "NX-M 9-27", 9))
+						{
+							MinFocal = 9.0f;
+							MaxFocal = 27.0f;
+							MaxAp4MinFocal = 3.5f;
+							MaxAp4MaxFocal = 5.6f;
+							goto got_lens;
+						}
 
         if (exifLens.MinFocal > 0.5f)
           MinFocal = exifLens.MinFocal;

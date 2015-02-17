@@ -109,6 +109,7 @@ ushort CLASS sget2 (uchar *s)
 #define Leica_S			16
 #define Samsung_NX	17
 #define RicohModule	18
+#define Samsung_NX_M	19
 #define FixedLens		99
 
 // lens & camera formats, to differentiate Sony F/FE A/DT, etc.
@@ -5560,6 +5561,7 @@ static float _CanonConvert2EV(short in)
 
 void CLASS setCanonBodyFeatures (unsigned id)
       {
+      imgdata.lens.makernotes.CamID = id;
 	if (
             (id == 0x80000001) ||	// 1D
             (id == 0x80000174) ||	// 1D2
@@ -5874,6 +5876,7 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
 
 void CLASS setOlympusBodyFeatures (unsigned long id)
 {
+  imgdata.lens.makernotes.CamID = id;
   if ((id == 0x4434303430) ||
       (id == 0x4434303431) ||
       ((id >= 0x5330303030) && (id <= 0x5330303939)))
@@ -5906,6 +5909,8 @@ void CLASS setOlympusBodyFeatures (unsigned long id)
 
 void CLASS setPentaxBodyFeatures (unsigned id)
 {
+  imgdata.lens.makernotes.CamID = id;
+
   switch (id) {
   case 0x12994:
   case 0x12aa2:
@@ -6107,6 +6112,7 @@ void CLASS setPhaseOneFeatures (unsigned id) {
     {372,"Contax"},
     {373,"Afi"},
   };
+  imgdata.lens.makernotes.CamID = id;
   if (id && !imgdata.lens.makernotes.body[0]) {
     for (i=0; i < sizeof p1_unique / sizeof *p1_unique; i++)
       if (id == p1_unique[i].id) {
@@ -6118,6 +6124,7 @@ void CLASS setPhaseOneFeatures (unsigned id) {
 
 void CLASS setSonyBodyFeatures (unsigned id) {
 
+  imgdata.lens.makernotes.CamID = id;
   if (	// FF cameras
       (id == 257) ||		// a900
       (id == 269) ||		// a850
@@ -6411,8 +6418,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
 
-  unsigned uidPentax = 0;
-
   uchar *table_buf;
   uchar *table_buf_0x9050;
   ushort table_buf_0x9050_present = 0;
@@ -6490,11 +6495,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             imgdata.lens.makernotes.LensID = get2();
             imgdata.lens.makernotes.MaxFocal = get2();
             imgdata.lens.makernotes.MinFocal = get2();
-            imgdata.lens.canon.CanonFocalUnits = get2();
-            if (imgdata.lens.canon.CanonFocalUnits != 1)
+            imgdata.lens.makernotes.CanonFocalUnits = get2();
+            if (imgdata.lens.makernotes.CanonFocalUnits != 1)
               {
-                imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.canon.CanonFocalUnits;
-                imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.canon.CanonFocalUnits;
+                imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
+                imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
               }
             imgdata.lens.makernotes.MaxAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
             imgdata.lens.makernotes.MinAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
@@ -6504,10 +6509,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           {
             imgdata.lens.makernotes.FocalType = get2();
             imgdata.lens.makernotes.CurFocal = get2();
-            if ((imgdata.lens.canon.CanonFocalUnits != 1) &&
-                imgdata.lens.canon.CanonFocalUnits)
+            if ((imgdata.lens.makernotes.CanonFocalUnits != 1) &&
+                imgdata.lens.makernotes.CanonFocalUnits)
               {
-                imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.canon.CanonFocalUnits;
+                imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
               }
           }
 
@@ -6524,7 +6529,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             lenCanonCameraInfo = len;
           }
 
-        else if (tag == 0x10 && type == 4)	// Canon ModelID
+        else if (tag == 0x10)	// Canon ModelID
           {
             unique_id = get4();
             setCanonBodyFeatures(unique_id);
@@ -6792,14 +6797,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       {
         if (tag == 0x0005)
           {
-            uidPentax = unique_id = get4();
+            unique_id = get4();
             setPentaxBodyFeatures(unique_id);
             if (
                 (dng_writer == CameraDNG) &&
                 (
-                 (uidPentax == 0x12f66) ||		// Q10
-                 (uidPentax == 0x12f7a) ||		// Q7
-                 (uidPentax == 0x12ee4)			// Q
+                 (unique_id == 0x12f66) ||		// Q10
+                 (unique_id == 0x12f7a) ||		// Q7
+                 (unique_id == 0x12ee4)			  // Q
                  )
                 )
               base += 10;
@@ -6821,10 +6826,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             ushort iLensData = 0;
             table_buf = (uchar*)malloc(len);
             fread(table_buf, len, 1, ifp);
-            if ((uidPentax < 0x12b9c) ||
-                ((uidPentax == 0x12b9c) ||	// K100D
-                 (uidPentax == 0x12b9d) ||	// K110D
-                 (uidPentax == 0x12ba2)	&&	// K100D Super
+            if ((imgdata.lens.makernotes.CamID < 0x12b9c) ||
+                ((imgdata.lens.makernotes.CamID == 0x12b9c) ||	// K100D
+                 (imgdata.lens.makernotes.CamID == 0x12b9d) ||	// K110D
+                 (imgdata.lens.makernotes.CamID == 0x12ba2)	&&	// K100D Super
                  (!table_buf[20] || (table_buf[20] == 0xff))))
               {
                 iLensData = 3;
@@ -6854,7 +6859,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                     ((unsigned)((table_buf[1] & 0x0f) + table_buf[4]) <<8) + table_buf[5];
                 break;
               default:
-                if (uidPentax >= 0x12b9c)		// LensInfo2
+                if (imgdata.lens.makernotes.CamID >= 0x12b9c)		// LensInfo2
                   {
                     iLensData = 4;
                     if (imgdata.lens.makernotes.LensID == -1)
@@ -6875,10 +6880,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                   imgdata.lens.makernotes.MinAp4CurFocal =
                     powf64(2.0f, (float)((table_buf[iLensData+10] & 0x0f) + 10)/4.0f);
                 if (
-                    (uidPentax != 0x12e6c) &&	// K-r
-                    (uidPentax != 0x12e76) &&	// K-5
-                    (uidPentax != 0x12f70)		// K-5 II
-                    //        	  		(uidPentax != 0x12f71)		// K-5 II s
+                    (imgdata.lens.makernotes.CamID != 0x12e6c) &&	// K-r
+                    (imgdata.lens.makernotes.CamID != 0x12e76) &&	// K-5
+                    (imgdata.lens.makernotes.CamID != 0x12f70)		// K-5 II
+                    //        	  		(imgdata.lens.makernotes.CamID != 0x12f71)		// K-5 II s
                     )
                   {
                     switch (table_buf[iLensData] & 0x06)
@@ -6896,7 +6901,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                       imgdata.lens.makernotes.MaxAp4CurFocal =
                         powf64(2.0f, (float)((table_buf[iLensData+14] & 0x7f) -1)/32.0f);
                   }
-                else if ((uidPentax != 0x12e76) &&	// K-5
+                else if ((imgdata.lens.makernotes.CamID != 0x12e76) &&	// K-5
                          (table_buf[iLensData+15] > 1) &&
                          (fabs(imgdata.lens.makernotes.MaxAp4CurFocal) < 0.7f))
                   {
@@ -6922,9 +6927,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       {
         if (tag == 0x0002)
           {
-            if(get4() == 0x2000)
+            if (get4() == 0x2000)
               {
                 imgdata.lens.makernotes.CameraMount = Samsung_NX;
+              }
+            else if (!strncmp(model, "NX mini", 7))
+              {
+                imgdata.lens.makernotes.CameraMount = Samsung_NX_M;
               }
             else
               {
@@ -6934,7 +6943,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           }
         else if (tag == 0x0003)
           {
-            unique_id = get4();
+            imgdata.lens.makernotes.CamID = unique_id = get4();
           }
         else if (tag == 0xa003)
           {
@@ -6948,9 +6957,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           }
         else if (tag == 0xa01a)
           {
-            imgdata.lens.samsung.FocalLengthIn35mmFormat = get4() / 10.0f;
-            if (imgdata.lens.samsung.FocalLengthIn35mmFormat < 10.0f)
-              imgdata.lens.samsung.FocalLengthIn35mmFormat *= 10.0f;
+            imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat = get4() / 10.0f;
+            if (imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat < 10.0f)
+              imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat *= 10.0f;
           }
       }
 
@@ -6962,7 +6971,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
         if (tag == 0xb001)			// Sony ModelID
           {
-            unique_id = imgdata.lens.makernotes.CamID = get2();
+            unique_id = get2();
             setSonyBodyFeatures(unique_id);
             if (table_buf_0x9050_present)
               {
@@ -7177,9 +7186,6 @@ void CLASS parse_makernote (int base, int uptag)
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
 
-  unsigned uidPentax = 0;
-  unsigned long long tLensID;
-
   uchar *table_buf;
   uchar *table_buf_0x9050;
   ushort table_buf_0x9050_present = 0;
@@ -7289,11 +7295,11 @@ void CLASS parse_makernote (int base, int uptag)
             imgdata.lens.makernotes.LensID = get2();
             imgdata.lens.makernotes.MaxFocal = get2();
             imgdata.lens.makernotes.MinFocal = get2();
-            imgdata.lens.canon.CanonFocalUnits = get2();
-            if (imgdata.lens.canon.CanonFocalUnits != 1)
+            imgdata.lens.makernotes.CanonFocalUnits = get2();
+            if (imgdata.lens.makernotes.CanonFocalUnits != 1)
               {
-                imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.canon.CanonFocalUnits;
-                imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.canon.CanonFocalUnits;
+                imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
+                imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
               }
             imgdata.lens.makernotes.MaxAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
             imgdata.lens.makernotes.MinAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
@@ -7303,10 +7309,10 @@ void CLASS parse_makernote (int base, int uptag)
           {
             imgdata.lens.makernotes.FocalType = get2();
             imgdata.lens.makernotes.CurFocal = get2();
-            if ((imgdata.lens.canon.CanonFocalUnits != 1) &&
-                imgdata.lens.canon.CanonFocalUnits)
+            if ((imgdata.lens.makernotes.CanonFocalUnits != 1) &&
+                imgdata.lens.makernotes.CanonFocalUnits)
               {
-                imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.canon.CanonFocalUnits;
+                imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
               }
           }
 
@@ -7662,7 +7668,7 @@ void CLASS parse_makernote (int base, int uptag)
       {
         if (tag == 0x0005)
           {
-            uidPentax = unique_id = get4();
+            unique_id = get4();
             setPentaxBodyFeatures(unique_id);
           }
         else if (tag == 0x0013)
@@ -7682,10 +7688,10 @@ void CLASS parse_makernote (int base, int uptag)
             ushort iLensData = 0;
             table_buf = (uchar*)malloc(len);
             fread(table_buf, len, 1, ifp);
-            if ((uidPentax < 0x12b9c) ||
-                ((uidPentax == 0x12b9c) ||	// K100D
-                 (uidPentax == 0x12b9d) ||	// K110D
-                 (uidPentax == 0x12ba2)	&&	// K100D Super
+            if ((imgdata.lens.makernotes.CamID < 0x12b9c) ||
+                ((imgdata.lens.makernotes.CamID == 0x12b9c) ||	// K100D
+                 (imgdata.lens.makernotes.CamID == 0x12b9d) ||	// K110D
+                 (imgdata.lens.makernotes.CamID == 0x12ba2)	&&	// K100D Super
                  (!table_buf[20] || (table_buf[20] == 0xff))))
               {
                 iLensData = 3;
@@ -7715,7 +7721,7 @@ void CLASS parse_makernote (int base, int uptag)
                     ((unsigned)((table_buf[1] & 0x0f) + table_buf[4]) <<8) + table_buf[5];
                 break;
               default:
-                if (uidPentax >= 0x12b9c)		// LensInfo2
+                if (imgdata.lens.makernotes.CamID >= 0x12b9c)		// LensInfo2
                   {
                     iLensData = 4;
                     if (imgdata.lens.makernotes.LensID == -1)
@@ -7735,10 +7741,10 @@ void CLASS parse_makernote (int base, int uptag)
                   imgdata.lens.makernotes.MinAp4CurFocal =
                     powf64(2.0f, (float)((table_buf[iLensData+10] & 0x0f) + 10)/4.0f);
                 if (
-                    (uidPentax != 0x12e6c) &&	// K-r
-                    (uidPentax != 0x12e76) &&	// K-5
-                    (uidPentax != 0x12f70)		// K-5 II
-                    //        	  		(uidPentax != 0x12f71)		// K-5 II s
+                    (imgdata.lens.makernotes.CamID != 0x12e6c) &&	// K-r
+                    (imgdata.lens.makernotes.CamID != 0x12e76) &&	// K-5
+                    (imgdata.lens.makernotes.CamID != 0x12f70)		// K-5 II
+                    //        	  		(imgdata.lens.makernotes.CamID != 0x12f71)		// K-5 II s
                     )
                   {
                     switch (table_buf[iLensData] & 0x06)
@@ -7756,7 +7762,7 @@ void CLASS parse_makernote (int base, int uptag)
                       imgdata.lens.makernotes.MaxAp4CurFocal =
                         powf64(2.0f, (float)((table_buf[iLensData+14] & 0x7f) -1)/32.0f);
                   }
-                else if ((uidPentax != 0x12e76) &&	// K-5
+                else if ((imgdata.lens.makernotes.CamID != 0x12e76) &&	// K-5
                          (table_buf[iLensData+15] > 1) &&
                          (fabs(imgdata.lens.makernotes.MaxAp4CurFocal) < 0.7f))
                   {
@@ -7785,6 +7791,10 @@ void CLASS parse_makernote (int base, int uptag)
               {
                 imgdata.lens.makernotes.CameraMount = Samsung_NX;
               }
+            else if (!strncmp(model, "NX mini", 7))
+              {
+                imgdata.lens.makernotes.CameraMount = Samsung_NX_M;
+              }
             else
               {
                 imgdata.lens.makernotes.CameraMount = FixedLens;
@@ -7793,7 +7803,7 @@ void CLASS parse_makernote (int base, int uptag)
           }
         else if (tag == 0x0003)
           {
-            unique_id = get4();
+            unique_id = imgdata.lens.makernotes.CamID = get4();
           }
         else if (tag == 0xa003)
           {
@@ -7807,9 +7817,9 @@ void CLASS parse_makernote (int base, int uptag)
           }
         else if (tag == 0xa01a)
           {
-            imgdata.lens.samsung.FocalLengthIn35mmFormat = get4() / 10.0f;
-            if (imgdata.lens.samsung.FocalLengthIn35mmFormat < 10.0f)
-              imgdata.lens.samsung.FocalLengthIn35mmFormat *= 10.0f;
+            imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat = get4() / 10.0f;
+            if (imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat < 10.0f)
+              imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat *= 10.0f;
           }
       }
 
@@ -7821,7 +7831,7 @@ void CLASS parse_makernote (int base, int uptag)
 
         if (tag == 0xb001)			// Sony ModelID
         {
-          unique_id = imgdata.lens.makernotes.CamID = get2();
+          unique_id = get2();
           setSonyBodyFeatures(unique_id);
           if (table_buf_0x9050_present)
             {
@@ -9867,11 +9877,11 @@ void CLASS parse_ciff (int offset, int length, int depth)
         imgdata.lens.makernotes.LensID = get2();
         imgdata.lens.makernotes.MaxFocal = get2();
         imgdata.lens.makernotes.MinFocal = get2();
-        imgdata.lens.canon.CanonFocalUnits = get2();
-        if (imgdata.lens.canon.CanonFocalUnits != 1)
+        imgdata.lens.makernotes.CanonFocalUnits = get2();
+        if (imgdata.lens.makernotes.CanonFocalUnits != 1)
           {
-            imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.canon.CanonFocalUnits;
-            imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.canon.CanonFocalUnits;
+            imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
+            imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
           }
         imgdata.lens.makernotes.MaxAp = powf64(2.0f, _CanonConvert2EV((float)get2()) / 2.0f);
         imgdata.lens.makernotes.MinAp = powf64(2.0f, _CanonConvert2EV((float)get2()) / 2.0f);
@@ -9914,8 +9924,8 @@ void CLASS parse_ciff (int offset, int length, int depth)
       imgdata.lens.makernotes.CurFocal  = len >> 16;
       imgdata.lens.makernotes.FocalType = len & 0xffff;
       if (imgdata.lens.makernotes.FocalType == 2) {
-        imgdata.lens.canon.CanonFocalUnits = 32;
-        imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.canon.CanonFocalUnits;
+        imgdata.lens.makernotes.CanonFocalUnits = 32;
+        imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
       }
       focal_len = imgdata.lens.makernotes.CurFocal;
 #else
