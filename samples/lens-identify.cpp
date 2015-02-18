@@ -721,6 +721,11 @@ int main(int ac, char *av[])
 							goto got_lens;
 						}
 
+				if (!strncmp(mnLens.Lens, "Schneider LS 75-150mm f/4.0-5.6", 31))
+						{
+							MaxAp4MaxFocal = 5.6f;
+						}
+
         if (exifLens.MinFocal > 0.5f)
           MinFocal = exifLens.MinFocal;
         else if (dngLens.MinFocal > 0.5f)

@@ -128,6 +128,7 @@ int main(int ac, char *av[])
 					case 15: printf("Leica R\n"); break;
 					case 16: printf("Leica S\n"); break;
 					case 17: printf("Samsung NX\n"); break;
+					case 19: printf("Samsung NX-M\n"); break;
 					case 99: printf("Fixed Lens\n"); break;
 					default: printf("Unknown\n"); break;
 				}
@@ -172,6 +173,7 @@ int main(int ac, char *av[])
 					case 15: printf("Leica R\n"); break;
 					case 16: printf("Leica S\n"); break;
 					case 17: printf("Samsung NX\n"); break;
+					case 18: printf("Ricoh module\n"); break;
 					case 99: printf("Fixed Lens\n"); break;
 					default: printf("Unknown\n"); break;
 				}

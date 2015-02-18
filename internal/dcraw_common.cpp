@@ -6135,14 +6135,19 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 298) ||		// DSC-RX1
       (id == 299) ||		// NEX-VG900
       (id == 310) ||		// DSC-RX1R
-      (id == 294)				// SLT-99
+      (id == 294)				// SLT-99, Hasselblad HV
       )
     {
       imgdata.lens.makernotes.CameraFormat = FF;
     }
   else
     {
-      imgdata.lens.makernotes.CameraFormat = APSC;
+      if ((id != 002) &&  // DSC-R1
+          (id != 297) &&  // DSC-RX100
+          (id != 308) &&  // DSC-RX100M2
+          (id != 309) &&  // DSC-RX10
+          (id != 317))    // DSC-RX100M3
+        imgdata.lens.makernotes.CameraFormat = APSC;
     }
 
   if (	// E-mount cameras
@@ -6213,13 +6218,13 @@ void CLASS setSonyBodyFeatures (unsigned id) {
     }
 
   else if (	// DSC
-           (id == 002) ||
-           (id == 297) ||
-           (id == 298) ||
-           (id == 308) ||
-           (id == 309) ||
-           (id == 310) ||
-           (id == 317)
+           (id == 002) ||  // DSC-R1
+           (id == 297) ||  // DSC-RX100
+           (id == 298) ||  // DSC-RX1
+           (id == 308) ||  // DSC-RX100M2
+           (id == 309) ||  // DSC-RX10
+           (id == 310) ||  // DSC-RX1R
+           (id == 317)     // DSC-RX100M3
            )
     {
       imgdata.lens.makernotes.CameraMount = FixedLens;
@@ -6965,7 +6970,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncasecmp(make, "SONY", 4) ||
              !strncasecmp(make, "Konica", 6) ||
-             !strncasecmp(make, "Minolta", 7))
+             !strncasecmp(make, "Minolta", 7) ||
+             (!strncasecmp(make, "Hasselblad", 10) &&
+              (!strncasecmp(model, "Stellar", 7) ||
+               !strncasecmp(model, "Lunar", 5) ||
+               !strncasecmp(model, "HV",2))))
       {
         ushort lid;
 
@@ -7825,7 +7834,11 @@ void CLASS parse_makernote (int base, int uptag)
 
     else if (!strncasecmp(make, "SONY", 4) ||
              !strncasecmp(make, "Konica", 6) ||
-             !strncasecmp(make, "Minolta", 7))
+             !strncasecmp(make, "Minolta", 7) ||
+             (!strncasecmp(make, "Hasselblad", 10) &&
+              (!strncasecmp(model, "Stellar", 7) ||
+               !strncasecmp(model, "Lunar", 5) ||
+               !strncasecmp(model, "HV",2))))
       {
         ushort lid;
 
