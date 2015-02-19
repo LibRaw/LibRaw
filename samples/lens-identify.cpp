@@ -111,7 +111,7 @@ last 2 bits:
 3 - 50/75mm frame lines
 */
 static lens_t LeicaMLensList [] = {
-  { 0*256+2, 1,  35,  35, 2.0f, 2.0f, "Summicron-M 1:2/35 ASPH."},
+//  { 0*256+2, 1,  35,  35, 2.0f, 2.0f, "Summicron-M 1:2/35 ASPH."},
   { 6*256+0, 1,  35,  35, 1.4f, 1.4f, "Summilux-M 1:1.4/35"},
   { 9*256+0, 1, 135, 135, 3.4f, 3.4f, "Apo-Telyt-M 1:3.4/135"},
   {16*256+1, 1,  16,  16, 4.0f, 4.0f, "Tri-Elmar-M 1:4/16-18-21 ASPH. @16mm"},
@@ -183,6 +183,14 @@ static name2lens_t LeicaSLensList [] = {	// Leica S-System lenses
 };
 #define LeicaSLensList_nEntries (sizeof(LeicaSLensList) / sizeof(name2lens_t))
 
+static name2lens_t LeicaTLensList [] = {
+  {"55-", 55, 135, 3.5f, 4.5f, "APO-Vario-Elmar-T 1:3.5-4.5/55–135 ASPH."},
+  {"11-", 11,  23, 3.5f, 4.5f, "Super-Vario-Elmar-T 1:3.5-4.5/11–23 ASPH."},
+  {"23",  23,  23, 2.0f, 2.0f, "Summicron-T 1:2/23 ASPH."},
+  {"18-", 18,  56, 3.5f, 5.6f, "Vario-Elmar-T 1:3.5-5.6/18-56 ASPH."},
+};
+#define LeicaTLensList_nEntries (sizeof(LeicaTLensList) / sizeof(name2lens_t))
+
 #ifdef WIN32
 #define snprintf _snprintf
 #endif
@@ -212,6 +220,22 @@ name2lens_t *lookupLensByShortName(const char *sName, name2lens_t *table, ushort
   for (int i = 0; i < nEntries; i++)
     if (!strncasecmp(table[i].shortName, sName, strlen(table[i].shortName)))
       return &table[i];
+  return 0;
+}
+
+name2lens_t *lookupLensBySubName(const char *sName, name2lens_t *table, ushort nEntries)
+{
+  for (int i = 0; i < nEntries; i++)
+    if (strstr(sName, table[i].shortName))
+      return &table[i];
+  return 0;
+}
+
+lens_t *lookupLensByName(const char *Name, lens_t *table, ushort nEntries)
+{
+  for (int k = nEntries-1; k = 0; k--)
+    if (strstr(Name, table[k].name))
+      return &table[k];
   return 0;
 }
 
@@ -626,43 +650,61 @@ int main(int ac, char *av[])
             goto got_lens;
           }
 
-        if (!strcasecmp(P1.make, "Hasselblad") && exifLens.Lens[0])
-        {
-          lens1 =
-            lookupLensByShortName (exifLens.Lens, HSystemLensList, HSystemLensList_nEntries);
-          if (lens1)
-          {
-            MinFocal = lens1->MinFocal;
-            MaxFocal = lens1->MaxFocal;
-            MaxAp4MinFocal = lens1->MaxAp4MinFocal;
-            MaxAp4MaxFocal = lens1->MaxAp4MaxFocal;
-            strcpy (LensModel, lens1->name);
-            goto got_lens;
-          }
+        else if (!strcasecmp(P1.make, "Hasselblad") && exifLens.Lens[0])
+					{
+						lens1 =
+							lookupLensByShortName (exifLens.Lens, HSystemLensList, HSystemLensList_nEntries);
+						if (lens1)
+						{
+							MinFocal = lens1->MinFocal;
+							MaxFocal = lens1->MaxFocal;
+							MaxAp4MinFocal = lens1->MaxAp4MinFocal;
+							MaxAp4MaxFocal = lens1->MaxAp4MaxFocal;
+							strcpy (LensModel, lens1->name);
+							goto got_lens;
+						}
+					}
+
+        else if ((mnLens.LensMount == Leica_S) &&
+                 !strcmp(P1.make, "Leica"))
+					{
+						if (mnLens.Lens[0])
+							lens1 =
+								lookupLensByShortName (mnLens.Lens, LeicaSLensList, LeicaSLensList_nEntries);
+						else if (exifLens.Lens[0])
+							lens1 =
+								lookupLensByShortName (exifLens.Lens, LeicaSLensList, LeicaSLensList_nEntries);
+						if (lens1)
+						{
+							MinFocal = lens1->MinFocal;
+							MaxFocal = lens1->MaxFocal;
+							MaxAp4MinFocal = lens1->MaxAp4MinFocal;
+							MaxAp4MaxFocal = lens1->MaxAp4MaxFocal;
+							strcpy (LensModel, lens1->name);
+							goto got_lens;
+						}
+					}
+
+        else if (mnLens.CameraMount == Leica_T)
+         {
+           if (mnLens.Lens[0])
+             lens1 =
+               lookupLensBySubName (mnLens.Lens, LeicaTLensList, LeicaTLensList_nEntries);
+           else if (exifLens.Lens[0])
+          	 lens1 =
+               lookupLensBySubName (exifLens.Lens, LeicaTLensList, LeicaTLensList_nEntries);
+					 if (lens1)
+						 {
+								MinFocal = lens1->MinFocal;
+								MaxFocal = lens1->MaxFocal;
+								MaxAp4MinFocal = lens1->MaxAp4MinFocal;
+								MaxAp4MaxFocal = lens1->MaxAp4MaxFocal;
+								strcpy (LensModel, lens1->name);
+								goto got_lens;
+						 }
         }
 
-        if ((mnLens.LensMount == Leica_S) &&
-            (!strcmp(P1.make, "Leica")) &&
-        			(mnLens.Lens[0] || exifLens.Lens[0]))
-        {
-          if (mnLens.Lens[0])
-            lens1 =
-              lookupLensByShortName (mnLens.Lens, LeicaSLensList, LeicaSLensList_nEntries);
-          else
-          	lens1 =
-              lookupLensByShortName (exifLens.Lens, LeicaSLensList, LeicaSLensList_nEntries);
-          if (lens1)
-          {
-            MinFocal = lens1->MinFocal;
-            MaxFocal = lens1->MaxFocal;
-            MaxAp4MinFocal = lens1->MaxAp4MinFocal;
-            MaxAp4MaxFocal = lens1->MaxAp4MaxFocal;
-            strcpy (LensModel, lens1->name);
-            goto got_lens;
-          }
-        }
-
-        if (LensID != -1)
+        else if (LensID != -1)
           {
 
             if ((mnLens.LensMount == Canon_EF) ||
@@ -688,19 +730,27 @@ int main(int ac, char *av[])
             else if ((mnLens.LensMount == Leica_M) &&
                      (!strcmp(P1.make, "Leica")))
               {
-                if ((LensID == 2) && (fabsf(exifLens.EXIF_MaxAp - 1.4f) < 0.17f))
-                  LensID = 0x2900;
-                lens =
-                  lookup_lens_tLeicaM(LensID, LeicaMLensList, LeicaMLensList_nEntries);
-                if (lens)
-                  {
-                    MinFocal = lens->MinFocal;
-                    MaxFocal = lens->MaxFocal;
-                    MaxAp4MinFocal = lens->MaxAp4MinFocal;
-                    MaxAp4MaxFocal = lens->MaxAp4MaxFocal;
-                    strcpy (LensModel, lens->name);
-                    goto got_lens;
+                if (LensID == 2)
+        			    {
+										if (mnLens.Lens[0])
+											lens =
+												lookupLensByName(mnLens.Lens, LeicaMLensList, LeicaMLensList_nEntries);
+										else if (exifLens.Lens[0])
+											lens =
+												lookupLensByName(exifLens.Lens, LeicaMLensList, LeicaMLensList_nEntries);
                   }
+                else
+                  lens =
+                    lookup_lens_tLeicaM(LensID, LeicaMLensList, LeicaMLensList_nEntries);
+								if (lens)
+									{
+										MinFocal = lens->MinFocal;
+										MaxFocal = lens->MaxFocal;
+										MaxAp4MinFocal = lens->MaxAp4MinFocal;
+										MaxAp4MaxFocal = lens->MaxAp4MaxFocal;
+										strcpy (LensModel, lens->name);
+										goto got_lens;
+									}
               }
 
             else if (mnLens.LensMount == Nikon_F)

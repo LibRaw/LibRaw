@@ -12083,11 +12083,11 @@ void CLASS identify()
       if (fsize == table[i].fsize) {
 	strcpy (make,  table[i].t_make );
 #ifdef LIBRAW_LIBRARY_BUILD
-				if (!strcmp(make, "Canon"))
-				{
-					imgdata.lens.makernotes.CameraMount = FixedLens;
-					imgdata.lens.makernotes.LensMount = FixedLens;
-				}
+  if (!strcmp(make, "Canon"))
+   {
+     imgdata.lens.makernotes.CameraMount = FixedLens;
+     imgdata.lens.makernotes.LensMount = FixedLens;
+   }
 #endif
 	strcpy (model, table[i].t_model);
 	flip = table[i].flags >> 2;
