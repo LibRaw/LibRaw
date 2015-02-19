@@ -49,6 +49,7 @@
 #define Samsung_NX	17
 #define RicohModule	18
 #define Samsung_NX_M	19
+#define Leica_T     20
 #define FixedLens		99
 
 // lens & camera formats, to differentiate Sony F/FE A/DT, etc.
@@ -76,6 +77,34 @@ static lens_t RicohModuleLensList [] = {
 };
 #define RicohModuleLensList_nEntries (sizeof(RicohModuleLensList) / sizeof(lens_t))
 
+typedef struct {
+	char const * shortName;
+	float MinFocal;
+	float MaxFocal;
+	float MaxAp4MinFocal;
+	float MaxAp4MaxFocal;
+	char const * name;
+} name2lens_t;
+
+static name2lens_t HSystemLensList [] = {	// Hasselblad H-System lenses
+  {"HCD 24",     24,   24,  4.8f,  4.8f, "HCD 4,8/24mm"},
+  {"HCD 28",     28,   28,  4.0f,  4.0f, "HCD 4/28mm"},
+  {"HC 35",      35,   35,  3.5f,  3.5f, "HC 3,5/35mm"},
+  {"HC 50",      50,   50,  3.5f,  3.5f, "HC 3,5/50mm"},
+  {"HC 50 II",   50,   50,  3.5f,  3.5f, "HC 3,5/50mm II"},
+  {"HC 80",      80,   80,  2.8f,  2.8f, "HC 2,8/80mm"},
+  {"HC 100",    100,  100,  2.2f,  2.2f, "HC 2,2/100mm"},
+  {"HC 120",    120,  120,  4.0f,  4.0f, "HC MACRO 4/120mm"},
+  {"HC 120 II", 120,  120,  4.0f,  4.0f, "HC MACRO 4/120mm II"},
+  {"HC 150",    150,  150,  3.2f,  3.2f, "HC 3,2/150mm"},
+  {"HC 150N",   150,  150,  3.2f,  3.2f, "HC 3,2/150mm N"},
+  {"HC 210",    210,  210,  4.0f,  4.0f, "HC 4/210mm"},
+  {"HC 300",    300,  300,  4.5f,  4.5f, "HC 4,5/300mm"},
+  {"HC 50-110",  50,  110,  3.5f,  4.5f, "HC 3,5-4,5/50-110mm"},
+  {"HCD 35-90",  35,   90,  4.0f,  5.6f, "HCD 4,0-5,6/35-90mm"},
+};
+#define HSystemLensList_nEntries (sizeof(HSystemLensList) / sizeof(name2lens_t))
+
 static lens_t LeicaMLensList [] = {
   {0*256+2,	1,	35,	35,	2.0f,	2.0f,	"Summicron-M 1:2/35 ASPH."},
   {6*256+0,	1,	35,	35,	1.4f,	1.4f,	"Summilux-M 1:1.4/35"},
@@ -83,7 +112,7 @@ static lens_t LeicaMLensList [] = {
   {16*256+1,	1,	16,	16,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/16-18-21 ASPH. @16mm"},
   {16*256+2,	1,	18,	18,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/16-18-21 ASPH. @18mm"},
   {16*256+3,	1,	21,	21,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/16-18-21 ASPH. @at 21mm"},
-  {29*256+0,	1,	35,	35,	1.4f,	1.4f,	"Summilux-M 1:1.4/35 ASPHERICAL"},
+  {29*256+0,	1,	35,	35,	1.4f,	1.4f,	"Summilux-M 1:1.4/35 ASPH."},
   {31*256+0,	1,	50,	50,	1.2f,	1.2f,	"Noctilux-M 1:1.2/50"},
   {39*256+0,	1,	135,	135,	4.0f,	4.0f,	"Tele-Elmar-M 1:4/135 (II)"},
   {41*256+3,	1,	50,	50,	2.0f,	2.0f,	"Apo-Summicron-M 1:2/50 ASPH."},
@@ -134,6 +163,20 @@ static lens_t LeicaMLensList [] = {
 };
 #define LeicaMLensList_nEntries (sizeof(LeicaMLensList) / sizeof(lens_t))
 
+static name2lens_t LeicaSLensList [] = {	// Leica S-System lenses
+{"Super-Elmar-S 24",       24,   24,  3.5f,  3.5f,  "Super-Elmar-S 1:3.5/24 ASPH."},
+{"Elmarit-S 30",           30,   30,  2.8f,  2.8f,  "Elmarit-S 1:2.8/30 ASPH."},
+{"Vario-Elmar-S",          30,   90,  3.5f,  5.6f,  "Vario-Elmar-S 1:3.5-5.6/30–90 ASPH."},
+{"Summarit-S 35",          35,   35,  2.5f,  2.5f,  "Summarit-S 1:2.5/35 ASPH."},
+{"Elmarit-S 45",           45,   45,  2.8f,  2.8f,  "Elmarit-S 1:2.8/45 ASPH."},
+{"Summarit-S 70",          70,   70,  2.5f,  2.5f,  "Summarit-S 1:2.5/70 ASPH."},
+{"Summicron-S 100",       100,  100,  2.0f,  2.0f,  "Summicron-S 1:2/100 ASPH."},
+{"APO-Macro-Summarit-S",  120,  120,  2.5f,  2.5f,  "APO-Macro-Summarit-S 1:2.5/120 ASPH."},
+{"TS-APO-Elmar-S",        120,  120,  5.6f,  5.6f,  "TS-APO-Elmar-S 1:5.6/120 ASPH."},
+{"APO-Elmar-S",           180,  180,  3.5f,  3.5f,  "APO-Elmar-S 1:3.5/180 ASPH."},
+};
+#define LeicaSLensList_nEntries (sizeof(LeicaSLensList) / sizeof(name2lens_t))
+
 #ifdef WIN32
 #define snprintf _snprintf
 #endif
@@ -155,6 +198,14 @@ fixed_lens_t *lookupFixedLens(const char *make, const char *model)
   for (int i = 0; i < FixedLensesList_nEntries; i++)
     if (!strcasecmp(FixedLensesList[i].make, make) && !strncasecmp(model, FixedLensesList[i].model, strlen(FixedLensesList[i].model)))
       return &FixedLensesList[i];
+  return 0;
+}
+
+name2lens_t *lookupLensByShortName(const char *sName, name2lens_t *table, ushort nEntries)
+{
+  for (int i = 0; i < nEntries; i++)
+    if (!strncasecmp(table[i].shortName, sName, strlen(table[i].shortName)))
+      return &table[i];
   return 0;
 }
 
@@ -344,6 +395,7 @@ int main(int ac, char *av[])
       if(av[i][0]=='-')
         {
           if(av[i][1]=='v' && av[i][2]==0) verbose++;
+          continue;
         }
       if( (ret = MyCoolRawProcessor.open_file(av[i])) != LIBRAW_SUCCESS)
         {
@@ -416,7 +468,9 @@ int main(int ac, char *av[])
             case 15: printf("Leica R\n"); break;
             case 16: printf("Leica S\n"); break;
             case 17: printf("Samsung NX\n"); break;
+            case 18: printf("Ricoh module\n"); break;
             case 19: printf("Samsung NX-M\n"); break;
+            case 20: printf("Leica T\n"); break;
             case 99: printf("Fixed Lens\n"); break;
             default: printf("Unknown\n"); break;
             }
@@ -462,6 +516,8 @@ int main(int ac, char *av[])
             case 16: printf("Leica S\n"); break;
             case 17: printf("Samsung NX\n"); break;
             case 18: printf("Ricoh module\n"); break;
+            case 19: printf("Samsung NX-M\n"); break;
+            case 20: printf("Leica T\n"); break;
             case 99: printf("Fixed Lens\n"); break;
             default: printf("Unknown\n"); break;
             }
@@ -513,6 +569,7 @@ int main(int ac, char *av[])
         float CropFactor, TCx = 1.0f, EXIF_MaxAp, FocalLengthIn35mmFormat;
         fixed_lens_t *fixed_lens;
         lens_t *lens;
+        name2lens_t *lens1;
         char LensModel[128];
         uchar is_fixed = 0;
         unsigned long long LensID = mnLens.LensID;
@@ -563,6 +620,41 @@ int main(int ac, char *av[])
             goto got_lens;
           }
 
+        if (!strcasecmp(P1.make, "Hasselblad") && exifLens.Lens[0])
+        {
+          lens1 =
+            lookupLensByShortName (exifLens.Lens, HSystemLensList, HSystemLensList_nEntries);
+          if (lens1)
+          {
+            MinFocal = lens1->MinFocal;
+            MaxFocal = lens1->MaxFocal;
+            MaxAp4MinFocal = lens1->MaxAp4MinFocal;
+            MaxAp4MaxFocal = lens1->MaxAp4MaxFocal;
+            strcpy (LensModel, lens1->name);
+            goto got_lens;
+          }
+        }
+
+        if ((mnLens.LensMount == Leica_S) &&
+        			(mnLens.Lens[0] || exifLens.Lens[0]))
+        {
+          if (mnLens.Lens[0])
+            lens1 =
+              lookupLensByShortName (mnLens.Lens, LeicaSLensList, LeicaSLensList_nEntries);
+          else
+          	lens1 =
+              lookupLensByShortName (exifLens.Lens, LeicaSLensList, LeicaSLensList_nEntries);
+          if (lens1)
+          {
+            MinFocal = lens1->MinFocal;
+            MaxFocal = lens1->MaxFocal;
+            MaxAp4MinFocal = lens1->MaxAp4MinFocal;
+            MaxAp4MaxFocal = lens1->MaxAp4MaxFocal;
+            strcpy (LensModel, lens1->name);
+            goto got_lens;
+          }
+        }
+
         if (LensID != -1)
           {
 
@@ -588,6 +680,8 @@ int main(int ac, char *av[])
 
             else if (mnLens.LensMount == Leica_M)
               {
+                if ((LensID == 2) && (fabsf(exifLens.EXIF_MaxAp - 1.4f) < 0.17f))
+                  LensID = 0x2900;
                 lens =
                   lookup_lens_tLeicaM(LensID, LeicaMLensList, LeicaMLensList_nEntries);
                 if (lens)
@@ -792,9 +886,6 @@ int main(int ac, char *av[])
           MaxAp4MaxFocal = dngLens.MaxAp4MaxFocal;
         else if (mnLens.MaxAp4MaxFocal > 0.7f)
           MaxAp4MaxFocal = mnLens.MaxAp4MaxFocal;
-
-        if (CurAp < (MaxAp4MaxFocal - 0.17f))
-          MaxAp4MaxFocal = 0.0f;
 
         if ((MaxAp4MaxFocal < 0.7f) && (MaxAp4MinFocal > 0.7f))
           MaxAp4MaxFocal = MaxAp4MinFocal;

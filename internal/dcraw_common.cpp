@@ -110,6 +110,7 @@ ushort CLASS sget2 (uchar *s)
 #define Samsung_NX	17
 #define RicohModule	18
 #define Samsung_NX_M	19
+#define Leica_T     20
 #define FixedLens		99
 
 // lens & camera formats, to differentiate Sony F/FE A/DT, etc.
@@ -6474,13 +6475,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
   entries = get2();
 
-// if (dng_writer == AdobeDNG)
-//   printf("\n*** parse_makernote_0xc634: AdobeDNG");
-// else if (dng_writer == CameraDNG)
-//   printf("\n*** parse_makernote_0xc634: CameraDNG");
+ if (dng_writer == AdobeDNG)
+   printf("\n*** parse_makernote_0xc634: AdobeDNG");
+ else if (dng_writer == CameraDNG)
+   printf("\n*** parse_makernote_0xc634: CameraDNG");
 
-//   printf ("\n\tbuf  =%s=\n\tmake  =%s=\n\tmodel =%s=\n\tbase: 0x%x\n\tentries: %d\n",
-//   		buf, make, model, base, entries);
+  printf ("\n\tbuf  =%s=\n\tmake  =%s=\n\tmodel =%s=\n\tbase: 0x%x\n\tentries: %d\n",
+    buf, make, model, base, entries);
 
   if (entries > 1000) return;
   morder = order;
@@ -6489,8 +6490,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     tiff_get(base, &tag, &type, &len, &save);
     tag |= uptag << 16;
 
-// 	printf ("\n\tbase: 0x%x tag: 0x%04x type: 0x%x len: 0x%x pos: 0x%llx",
-// 			base, tag, type, len, ftell(ifp));
+  	printf ("\n\tbase: 0x%x tag: 0x%04x type: 0x%x len: 0x%x pos: 0x%llx",
+  			base, tag, type, len, ftell(ifp));
 
     if (!strcmp(make, "Canon"))
       {
@@ -6595,6 +6596,52 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
       case 0x1407: imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type); break;
+      }
+
+    else if (!strncasecmp(make, "LEICA", 5))
+      {
+        if ((tag == 0x0303) && (type != 4))
+          {
+            fread(imgdata.lens.makernotes.Lens, len, 1, ifp);
+          }
+
+        if ((tag == 0x3405) ||
+            (tag == 0x0310) ||
+            (tag == 0x34003405))
+          {
+            imgdata.lens.makernotes.LensID = get4();
+            imgdata.lens.makernotes.LensID =
+              ((imgdata.lens.makernotes.LensID>>2)<<8) |
+              (imgdata.lens.makernotes.LensID & 0x3);
+            if (imgdata.lens.makernotes.LensID != -1)
+              {
+                if ((model[0] == 'M') ||
+                    !strncasecmp (model, "LEICA M", 7))
+                  {
+                    imgdata.lens.makernotes.LensMount = Leica_M;
+                  }
+                else if ((model[0] == 'S') ||
+                         !strncasecmp (model, "LEICA S", 7))
+                  {
+                    imgdata.lens.makernotes.LensMount = Leica_S;
+                  }
+              }
+          }
+
+        else if (
+                 ((tag == 0x0313) || (tag == 0x34003406)) &&
+                 (fabs(imgdata.lens.makernotes.CurAp) < 0.5f)
+                 )
+          {
+            imgdata.lens.makernotes.CurAp = getreal(5);
+            if (imgdata.lens.makernotes.CurAp > 126.3)
+              imgdata.lens.makernotes.CurAp = 0.0f;
+          }
+
+        else if (tag == 0x3400)
+          {
+            parse_makernote (base, 0x3400);
+          }
       }
 
     else if (!strncmp(make, "NIKON", 5))
@@ -7259,12 +7306,20 @@ void CLASS parse_makernote (int base, int uptag)
   // adjust pos & base for Leica M8/M9/M Mono tags and dir in tag 0x3400
   if (!strncasecmp(make, "LEICA", 5))
     {
-      if (!strncmp(model, "M8", 2))
+      if (!strncmp(model, "M8", 2) ||
+          !strncasecmp(model, "Leica M8", 2) ||
+          !strncasecmp(model, "LEICA X", 8))
         {
           base = ftell(ifp)-8;
         }
+      if (!strncasecmp(model, "LEICA M (Typ 240)", 17))
+        {
+          base = 0;
+        }
       else if (!strncmp(model, "M9", 2) ||
-               !strncmp(model, "M Monochrom", 11))
+               !strncasecmp(model, "Leica M9", 2) ||
+               !strncasecmp(model, "M Monochrom", 11) ||
+               !strncasecmp(model, "Leica M Monochrom", 11))
         {
           if (!uptag)
             {
@@ -7277,12 +7332,19 @@ void CLASS parse_makernote (int base, int uptag)
               base += 10;
             }
         }
+      else if (!strncasecmp(model, "LEICA T", 7))
+      	{
+      	  base = ftell(ifp)-8;
+#ifdef LIBRAW_LIBRARY_BUILD
+      	  imgdata.lens.makernotes.LensMount = Leica_T;
+#endif
+      	}
     }
 
   entries = get2();
 
-//   printf("\n*** parse_makernote\n\tmake  =%s=\n\tmodel =%s= \n\tentries: %d\n",
-// 		make, model, entries);
+  printf("\n*** parse_makernote\n\tmake  =%s=\n\tmodel =%s= \n\tentries: %d\n\tpos: 0x%llx\n",
+    make, model, entries, ftell(ifp));
 
   if (entries > 1000) return;
   morder = order;
@@ -7291,8 +7353,8 @@ void CLASS parse_makernote (int base, int uptag)
     tiff_get (base, &tag, &type, &len, &save);
     tag |= uptag << 16;
 
-// 	printf ("\n\tbase: 0x%x tag: 0x%04x type: 0x%x len: 0x%x pos: 0x%llx",
-// 		base, tag, type, len, ftell(ifp));
+    printf ("\n\tbase: 0x%x tag: 0x%04x type: 0x%x len: 0x%x pos: 0x%llx",
+      base, tag, type, len, ftell(ifp));
 
 #ifdef LIBRAW_LIBRARY_BUILD
 
@@ -7430,6 +7492,8 @@ void CLASS parse_makernote (int base, int uptag)
                  )
           {
             imgdata.lens.makernotes.CurAp = getreal(5);
+            if (imgdata.lens.makernotes.CurAp > 126.3)
+              imgdata.lens.makernotes.CurAp = 0.0f;
           }
 
         else if (tag == 0x3400)
