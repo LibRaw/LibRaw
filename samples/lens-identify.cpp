@@ -104,76 +104,82 @@ static name2lens_t HSystemLensList [] = {	// Hasselblad H-System lenses
   {"HCD 35-90",  35,   90,  4.0f,  5.6f, "HCD 4,0-5,6/35-90mm"},
 };
 #define HSystemLensList_nEntries (sizeof(HSystemLensList) / sizeof(name2lens_t))
-
+/*
+last 2 bits:
+1 - 28/90mm frame lines
+2 - 24/35mm or 35/135mm frame lines
+3 - 50/75mm frame lines
+*/
 static lens_t LeicaMLensList [] = {
-  {0*256+2,	1,	35,	35,	2.0f,	2.0f,	"Summicron-M 1:2/35 ASPH."},
-  {6*256+0,	1,	35,	35,	1.4f,	1.4f,	"Summilux-M 1:1.4/35"},
-  {9*256+0,	1,	135,	135,	3.4f,	3.4f,	"Apo-Telyt-M 1:3.4/135"},
-  {16*256+1,	1,	16,	16,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/16-18-21 ASPH. @16mm"},
-  {16*256+2,	1,	18,	18,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/16-18-21 ASPH. @18mm"},
-  {16*256+3,	1,	21,	21,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/16-18-21 ASPH. @at 21mm"},
-  {29*256+0,	1,	35,	35,	1.4f,	1.4f,	"Summilux-M 1:1.4/35 ASPH."},
-  {31*256+0,	1,	50,	50,	1.2f,	1.2f,	"Noctilux-M 1:1.2/50"},
-  {39*256+0,	1,	135,	135,	4.0f,	4.0f,	"Tele-Elmar-M 1:4/135 (II)"},
-  {41*256+3,	1,	50,	50,	2.0f,	2.0f,	"Apo-Summicron-M 1:2/50 ASPH."},
-  {42*256+1,	1,	28,	28,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/28-35-50 ASPH. @28mm"},
-  {42*256+2,	1,	35,	35,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/28-35-50 ASPH. @35mm"},
-  {42*256+3,	1,	50,	50,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/28-35-50 ASPH. @50mm"},
-  {51*256+2,	1,	14,	14,	3.8f,	3.8f,	"Super-Elmar-M 1:3.8/14 ASPH."},
-  {53*256+2,	1,	135,	135,	3.4f,	3.4f,	"Apo-Telyt-M 1:3.4/135"},
+  { 0*256+2, 1,  35,  35, 2.0f, 2.0f, "Summicron-M 1:2/35 ASPH."},
+  { 6*256+0, 1,  35,  35, 1.4f, 1.4f, "Summilux-M 1:1.4/35"},
+  { 9*256+0, 1, 135, 135, 3.4f, 3.4f, "Apo-Telyt-M 1:3.4/135"},
+  {16*256+1, 1,  16,  16, 4.0f, 4.0f, "Tri-Elmar-M 1:4/16-18-21 ASPH. @16mm"},
+  {16*256+2, 1,  18,  18, 4.0f, 4.0f, "Tri-Elmar-M 1:4/16-18-21 ASPH. @18mm"},
+  {16*256+3, 1,  21,  21, 4.0f, 4.0f, "Tri-Elmar-M 1:4/16-18-21 ASPH. @21mm"},
+  {29*256+0, 1,  35,  35, 1.4f, 1.4f, "Summilux-M 1:1.4/35 ASPH."},
+  {31*256+0, 1,  50,  50, 1.2f, 1.2f, "Noctilux-M 1:1.2/50"},
+  {39*256+0, 1, 135, 135, 4.0f, 4.0f, "Tele-Elmar-M 1:4/135 (II)"},
+  {41*256+3, 1,  50,  50, 2.0f, 2.0f, "Apo-Summicron-M 1:2/50 ASPH."},
+  {42*256+1, 1,  28,  28, 4.0f, 4.0f, "Tri-Elmar-M 1:4/28-35-50 ASPH. @28mm"},
+  {42*256+2, 1,  35,  35, 4.0f, 4.0f, "Tri-Elmar-M 1:4/28-35-50 ASPH. @35mm"},
+  {42*256+3, 1,  50,  50, 4.0f, 4.0f, "Tri-Elmar-M 1:4/28-35-50 ASPH. @50mm"},
+  {51*256+2, 1,  14,  14, 3.8f, 3.8f, "Super-Elmar-M 1:3.8/14 ASPH."},
+  {53*256+2, 1, 135, 135, 3.4f, 3.4f, "Apo-Telyt-M 1:3.4/135"},
+  {53*256+3, 2,  50,  50, 2.0f, 2.0f, "APO-Summicron-M 1:2/50 (VI)"},
 
-  {1*256,	0,	21,	21,	2.8f,	2.8f,	"Elmarit-M 1:2.8/21"},
-  {3*256,	0,	28,	28,	2.8f,	2.8f,	"Elmarit-M 1:2.8/28 (III)"},
-  {4*256,	0,	90,	90,	2.8f,	2.8f,	"Tele-Elmarit-M 1:2.8/90 (II)"},
-  {5*256,	0,	50,	50,	1.4f,	1.4f,	"Summilux-M 1:1.4/50 (II)"},
-  {6*256,	0,	35,	35,	2.0f,	2.0f,	"Summicron-M 1:2/35 (IV)"},
-  {7*256,	0,	90,	90,	2.0f,	2.0f,	"Summicron-M 1:2/90 (II)"},
-  {9*256,	0,	135,	135,	2.8f,	2.8f,	"Elmarit-M 1:2.8/135 (I/II)"},
-  {16*256,	0,	16,	21,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/16-18-21 ASPH."},
-  {23*256,	0,	50,	50,	2.0f,	2.0f,	"Summicron-M 1:2/50 (III)"},
-  {24*256,	0,	21,	21,	2.8f,	2.8f,	"Elmarit-M 1:2.8/21 ASPH."},
-  {25*256,	0,	24,	24,	2.8f,	2.8f,	"Elmarit-M 1:2.8/24 ASPH."},
-  {26*256,	0,	28,	28,	2.0f,	2.0f,	"Summicron-M 1:2/28 ASPH."},
-  {27*256,	0,	28,	28,	2.8f,	2.8f,	"Elmarit-M 1:2.8/28 (IV)"},
-  {28*256,	0,	28,	28,	2.8f,	2.8f,	"Elmarit-M 1:2.8/28 ASPH."},
-  {29*256,	0,	35,	35,	1.4f,	1.4f,	"Summilux-M 1:1.4/35 ASPH."},
-  {30*256,	0,	35,	35,	2.0f,	2.0f,	"Summicron-M 1:2/35 ASPH."},
-  {31*256,	0,	50,	50,	1.0f,	1.0f,	"Noctilux-M 1:1/50"},
-  {32*256,	0,	50,	50,	1.4f,	1.4f,	"Summilux-M 1:1.4/50 ASPH."},
-  {33*256,	0,	50,	50,	2.0f,	2.0f,	"Summicron-M 1:2/50 (IV, V)"},
-  {34*256,	0,	50,	50,	2.8f,	2.8f,	"Elmar-M 1:2.8/50"},
-  {35*256,	0,	75,	75,	1.4f,	1.4f,	"Summilux-M 1:1.4/75"},
-  {36*256,	0,	75,	75,	2.0f,	2.0f,	"Apo-Summicron-M 1:2/75 ASPH."},
-  {37*256,	0,	90,	90,	2.0f,	2.0f,	"Apo-Summicron-M 1:2/90 ASPH."},
-  {38*256,	0,	90,	90,	2.8f,	2.8f,	"Elmarit-M 1:2.8/90"},
-  {39*256,	0,	90,	90,	4.0f,	4.0f,	"Macro-Elmar-M 1:4/90"},
-  {40*256,	0,	0,	0,	0.0f,	0.0f,	"Macro-Adapter M"},
-  {42*256,	0,	28,	50,	4.0f,	4.0f,	"Tri-Elmar-M 1:4/28-35-50 ASPH."},
-  {43*256,	0,	35,	35,	2.5f,	2.5f,	"Summarit-M 1:2.5/35"},
-  {44*256,	0,	50,	50,	2.5f,	2.5f,	"Summarit-M 1:2.5/50"},
-  {45*256,	0,	75,	75,	2.5f,	2.5f,	"Summarit-M 1:2.5/75"},
-  {46*256,	0,	90,	90,	2.5f,	2.5f,	"Summarit-M 1:2.5/90"},
-  {47*256,	0,	21,21,	1.4f,	1.4f,	"Summilux-M 1:1.4/21 ASPH."},
-  {48*256,	0,	24,	24,	1.4f,	1.4f,	"Summilux-M 1:1.4/24 ASPH."},
-  {49*256,	0,	50,	50,	0.95f,	0.95f,	"Noctilux-M 1:0.95/50 ASPH."},
-  {50*256,	0,	24,	24,	3.8f,	3.8f,	"Elmar-M 1:3.8/24 ASPH."},
-  {51*256,	0,	21,	21,	3.4f,	3.4f,	"Super-Elmar-M 1:3.4/21 ASPH."},
-  {52*256,	0,	18,	18,	3.8f,	3.8f,	"Super-Elmar-M 1:3.8/18 ASPH."},
-  {0xFFFFFFFFFFFFFFFF,	0,	0,	0,	0.0f,	0.0f,	"Unknown"},
+  { 1*256, 0,  21,  21, 2.8f, 2.8f, "Elmarit-M 1:2.8/21"},
+  { 3*256, 0,  28,  28, 2.8f, 2.8f, "Elmarit-M 1:2.8/28 (III)"},
+  { 4*256, 0,  90,  90, 2.8f, 2.8f, "Tele-Elmarit-M 1:2.8/90 (II)"},
+  { 5*256, 0,  50,  50, 1.4f, 1.4f, "Summilux-M 1:1.4/50 (II)"},
+  { 6*256, 0,  35,  35, 2.0f, 2.0f, "Summicron-M 1:2/35 (IV)"},
+  { 7*256, 0,  90,  90, 2.0f, 2.0f, "Summicron-M 1:2/90 (II)"},
+  { 9*256, 0, 135, 135, 2.8f, 2.8f, "Elmarit-M 1:2.8/135 (I/II)"},
+  {16*256, 0,  16,  21, 4.0f, 4.0f, "Tri-Elmar-M 1:4/16-18-21 ASPH."},
+  {23*256, 0,  50,  50, 2.0f, 2.0f, "Summicron-M 1:2/50 (III)"},
+  {24*256, 0,  21,  21, 2.8f, 2.8f, "Elmarit-M 1:2.8/21 ASPH."},
+  {25*256, 0,  24,  24, 2.8f, 2.8f, "Elmarit-M 1:2.8/24 ASPH."},
+  {26*256, 0,  28,  28, 2.0f, 2.0f, "Summicron-M 1:2/28 ASPH."},
+  {27*256, 0,  28,  28, 2.8f, 2.8f, "Elmarit-M 1:2.8/28 (IV)"},
+  {28*256, 0,  28,  28, 2.8f, 2.8f, "Elmarit-M 1:2.8/28 ASPH."},
+  {29*256, 0,  35,  35, 1.4f, 1.4f, "Summilux-M 1:1.4/35 ASPH."},
+  {30*256, 0,  35,  35, 2.0f, 2.0f, "Summicron-M 1:2/35 ASPH."},
+  {31*256, 0,  50,  50, 1.0f, 1.0f, "Noctilux-M 1:1/50"},
+  {32*256, 0,  50,  50, 1.4f, 1.4f, "Summilux-M 1:1.4/50 ASPH."},
+  {33*256, 0,  50,  50, 2.0f, 2.0f, "Summicron-M 1:2/50 (IV/V)"},
+  {34*256, 0,  50,  50, 2.8f, 2.8f, "Elmar-M 1:2.8/50"},
+  {35*256, 0,  75,  75, 1.4f, 1.4f, "Summilux-M 1:1.4/75"},
+  {36*256, 0,  75,  75, 2.0f, 2.0f, "Apo-Summicron-M 1:2/75 ASPH."},
+  {37*256, 0,  90,  90, 2.0f, 2.0f, "Apo-Summicron-M 1:2/90 ASPH."},
+  {38*256, 0,  90,  90, 2.8f, 2.8f, "Elmarit-M 1:2.8/90"},
+  {39*256, 0,  90,  90, 4.0f, 4.0f, "Macro-Elmar-M 1:4/90"},
+  {40*256, 0,   0,   0, 0.0f, 0.0f, "Macro-Adapter M"},
+  {42*256, 0,  28,  50, 4.0f, 4.0f, "Tri-Elmar-M 1:4/28-35-50 ASPH."},
+  {43*256, 0,  35,  35, 2.5f, 2.5f, "Summarit-M 1:2.5/35"},
+  {44*256, 0,  50,  50, 2.5f, 2.5f, "Summarit-M 1:2.5/50"},
+  {45*256, 0,  75,  75, 2.5f, 2.5f, "Summarit-M 1:2.5/75"},
+  {46*256, 0,  90,  90, 2.5f, 2.5f, "Summarit-M 1:2.5/90"},
+  {47*256, 0,  21,  21, 1.4f, 1.4f, "Summilux-M 1:1.4/21 ASPH."},
+  {48*256, 0,  24,  24, 1.4f, 1.4f, "Summilux-M 1:1.4/24 ASPH."},
+  {49*256, 0,  50,  50, 0.95f, 0.95f, "Noctilux-M 1:0.95/50 ASPH."},
+  {50*256, 0,  24,  24, 3.8f, 3.8f, "Elmar-M 1:3.8/24 ASPH."},
+  {51*256, 0,  21,  21, 3.4f, 3.4f, "Super-Elmar-M 1:3.4/21 ASPH."},
+  {52*256, 0,  18,  18, 3.8f, 3.8f, "Super-Elmar-M 1:3.8/18 ASPH."},
+  {0xFFFFFFFFFFFFFFFF, 0, 0, 0, 0.0f, 0.0f, "Unknown"},
 };
 #define LeicaMLensList_nEntries (sizeof(LeicaMLensList) / sizeof(lens_t))
 
 static name2lens_t LeicaSLensList [] = {	// Leica S-System lenses
-{"Super-Elmar-S 24",       24,   24,  3.5f,  3.5f,  "Super-Elmar-S 1:3.5/24 ASPH."},
-{"Elmarit-S 30",           30,   30,  2.8f,  2.8f,  "Elmarit-S 1:2.8/30 ASPH."},
-{"Vario-Elmar-S",          30,   90,  3.5f,  5.6f,  "Vario-Elmar-S 1:3.5-5.6/30–90 ASPH."},
-{"Summarit-S 35",          35,   35,  2.5f,  2.5f,  "Summarit-S 1:2.5/35 ASPH."},
-{"Elmarit-S 45",           45,   45,  2.8f,  2.8f,  "Elmarit-S 1:2.8/45 ASPH."},
-{"Summarit-S 70",          70,   70,  2.5f,  2.5f,  "Summarit-S 1:2.5/70 ASPH."},
-{"Summicron-S 100",       100,  100,  2.0f,  2.0f,  "Summicron-S 1:2/100 ASPH."},
-{"APO-Macro-Summarit-S",  120,  120,  2.5f,  2.5f,  "APO-Macro-Summarit-S 1:2.5/120 ASPH."},
-{"TS-APO-Elmar-S",        120,  120,  5.6f,  5.6f,  "TS-APO-Elmar-S 1:5.6/120 ASPH."},
-{"APO-Elmar-S",           180,  180,  3.5f,  3.5f,  "APO-Elmar-S 1:3.5/180 ASPH."},
+  {"Super-Elmar-S 24",       24,   24,  3.5f,  3.5f,  "Super-Elmar-S 1:3.5/24 ASPH."},
+  {"Elmarit-S 30",           30,   30,  2.8f,  2.8f,  "Elmarit-S 1:2.8/30 ASPH."},
+  {"Vario-Elmar-S",          30,   90,  3.5f,  5.6f,  "Vario-Elmar-S 1:3.5-5.6/30–90 ASPH."},
+  {"Summarit-S 35",          35,   35,  2.5f,  2.5f,  "Summarit-S 1:2.5/35 ASPH."},
+  {"Elmarit-S 45",           45,   45,  2.8f,  2.8f,  "Elmarit-S 1:2.8/45 ASPH."},
+  {"Summarit-S 70",          70,   70,  2.5f,  2.5f,  "Summarit-S 1:2.5/70 ASPH."},
+  {"Summicron-S 100",       100,  100,  2.0f,  2.0f,  "Summicron-S 1:2/100 ASPH."},
+  {"APO-Macro-Summarit-S",  120,  120,  2.5f,  2.5f,  "APO-Macro-Summarit-S 1:2.5/120 ASPH."},
+  {"TS-APO-Elmar-S",        120,  120,  5.6f,  5.6f,  "TS-APO-Elmar-S 1:5.6/120 ASPH."},
+  {"APO-Elmar-S",           180,  180,  3.5f,  3.5f,  "APO-Elmar-S 1:3.5/180 ASPH."},
 };
 #define LeicaSLensList_nEntries (sizeof(LeicaSLensList) / sizeof(name2lens_t))
 
@@ -412,7 +418,7 @@ int main(int ac, char *av[])
         {
           printf ("\nFilename: %s\n", av[i]);
           printf ("Timestamp: %s", ctime(&(P2.timestamp)));
-          printf ("Camera: %s %s\n", P1.make, P1.model);
+          printf ("Camera: =%s= =%s=\n", P1.make, P1.model);
           if (P2.artist[0])
             printf ("Owner: %s\n", P2.artist);
           if (P1.dng_version) {
@@ -636,6 +642,7 @@ int main(int ac, char *av[])
         }
 
         if ((mnLens.LensMount == Leica_S) &&
+            (!strcmp(P1.make, "Leica")) &&
         			(mnLens.Lens[0] || exifLens.Lens[0]))
         {
           if (mnLens.Lens[0])
@@ -678,7 +685,8 @@ int main(int ac, char *av[])
                   }
               }
 
-            else if (mnLens.LensMount == Leica_M)
+            else if ((mnLens.LensMount == Leica_M) &&
+                     (!strcmp(P1.make, "Leica")))
               {
                 if ((LensID == 2) && (fabsf(exifLens.EXIF_MaxAp - 1.4f) < 0.17f))
                   LensID = 0x2900;
