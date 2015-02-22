@@ -111,6 +111,7 @@ ushort CLASS sget2 (uchar *s)
 #define RicohModule	18
 #define Samsung_NX_M	19
 #define Leica_T     20
+#define Contax_N    21
 #define FixedLens		99
 
 // lens & camera formats, to differentiate Sony F/FE A/DT, etc.
@@ -707,31 +708,47 @@ int CLASS ljpeg_start (struct jhead *jh, int info_only)
     fread (data, 2, 2, ifp);
     tag =  data[0] << 8 | data[1];
     len = (data[2] << 8 | data[3]) - 2;
+
+// printf ("\n*** ljpeg_start pos= %llx tag= %x, len= %d", ftell(ifp)-4, tag, len);
+
     if (tag <= 0xff00) return 0;
     fread (data, 1, len, ifp);
     switch (tag) {
-      case 0xffc3:
+      case 0xffc3:        // start of frame; lossless, Huffman
 	jh->sraw = ((data[7] >> 4) * (data[7] & 15) - 1) & 3;
-      case 0xffc0:
+//	printf ("\n*** %x: startraw= %d", tag, jh->sraw);
+      case 0xffc0:        // start of frame; baseline jpeg
 	jh->bits = data[0];
 	jh->high = data[1] << 8 | data[2];
 	jh->wide = data[3] << 8 | data[4];
 	jh->clrs = data[5] + jh->sraw;
+
+if (!strcmp(model, "EOS 5DS"))
+{
+  jh->wide = data[1] << 8 | data[2];
+	jh->high = data[3] << 8 | data[4];
+}
+//	printf ("\n*** %x: bits= %d; high= %d; wide= %d; clrs= %d",
+//	  tag, jh->bits, jh->high, jh->wide, jh->clrs);
+
 	if (len == 9 && !dng_version) getc(ifp);
 	break;
-      case 0xffc4:
+      case 0xffc4:          // define Huffman tables
 	if (info_only) break;
 	for (dp = data; dp < data+len && (c = *dp++) < 4; )
 	  jh->free[c] = jh->huff[c] = make_decoder_ref (&dp);
 	break;
-      case 0xffda:
+      case 0xffda:          // start of scan
 	jh->psv = data[1+data[0]*2];
 	jh->bits -= data[3+data[0]*2] & 15;
 	break;
-      case 0xffdd:
+      case 0xffdd:          // define restart interval
 	jh->restart = data[0] << 8 | data[1];
     }
   } while (tag != 0xffda);
+
+// printf ("\n");
+
   if (info_only) return 1;
   if (jh->clrs > 6 || !jh->huff[0]) return 0;
   FORC(5) if (!jh->huff[c+1]) jh->huff[c+1] = jh->huff[c];
@@ -815,6 +832,8 @@ void CLASS lossless_jpeg_load_raw()
   int jwide, jrow, jcol, val, jidx, i, j, row=0, col=0;
   struct jhead jh;
   ushort *rp;
+
+// printf ("\n*** lossless_jpeg_load_raw\n");
 
   if (!ljpeg_start (&jh, 0)) return;
 
@@ -7443,6 +7462,27 @@ void CLASS parse_makernote (int base, int uptag)
               }
           }
 
+        else if (tag == 0x00e0)			// sensor info
+          {
+            unsigned SensorWidth, SensorHeight, SensorLeftBorder, SensorTopBorder,
+                     SensorRightBorder, SensorBottomBorder, BlackMaskLeftBorder,
+                     BlackMaskTopBorder, BlackMaskRightBorder, BlackMaskBottomBorder;
+            SensorWidth = (get2(),get2());  // raw_width
+            SensorHeight = get2();          // raw_height
+            SensorLeftBorder = (get4(),get2());
+            SensorTopBorder = get2();
+            SensorRightBorder = get2();
+            SensorBottomBorder = get2();
+            BlackMaskLeftBorder = get2();
+            BlackMaskTopBorder = get2();
+            BlackMaskRightBorder = get2();
+            BlackMaskBottomBorder = get2();
+//             printf ("\n*** Canon:\n\tSensorWidth= %d SensorHeight= %d\n\tSensorLeftBorder= %d SensorTopBorder= %d\n\tSensorRightBorder= %d SensorBottomBorder= %d\n\tBlackMaskLeftBorder= %d BlackMaskTopBorder= %d\n\tBlackMaskRightBorder= %d BlackMaskBottomBorder= %d\n",
+//               SensorWidth, SensorHeight, SensorLeftBorder, SensorTopBorder,
+//               SensorRightBorder, SensorBottomBorder, BlackMaskLeftBorder,
+//               BlackMaskTopBorder, BlackMaskRightBorder, BlackMaskBottomBorder);
+          }
+
         else if (tag == 0x4021)			// multi-exposure tag
           {
             get4();
@@ -11962,8 +12002,37 @@ void CLASS identify()
     strcpy (model,"N Digital");
     fseek (ifp, 33, SEEK_SET);
     get_timestamp(1);
-    fseek (ifp, 60, SEEK_SET);
+    fseek (ifp, 52, SEEK_SET);
+    switch (get4()) {
+      case  7: iso_speed = 25;  break;
+      case  8: iso_speed = 32;  break;
+      case  9: iso_speed = 40;  break;
+      case 10: iso_speed = 50;  break;
+      case 11: iso_speed = 64;  break;
+      case 12: iso_speed = 80;  break;
+      case 13: iso_speed = 100; break;
+      case 14: iso_speed = 125; break;
+      case 15: iso_speed = 160; break;
+      case 16: iso_speed = 200; break;
+      case 17: iso_speed = 250; break;
+      case 18: iso_speed = 320; break;
+      case 19: iso_speed = 400; break;
+    }
+    shutter = powf64(2.0f, (((float)get4())/8.0f)) / 16000.0f;
     FORC4 cam_mul[c ^ (c >> 1)] = get4();
+    fseek (ifp, 88, SEEK_SET);
+    aperture = powf64(2.0f, ((float)get4())/16.0f);
+    fseek (ifp, 112, SEEK_SET);
+    focal_len = get4();
+#ifdef LIBRAW_LIBRARY_BUILD
+    fseek (ifp, 104, SEEK_SET);
+    imgdata.lens.makernotes.MaxAp4CurFocal = powf64(2.0f, ((float)get4())/16.0f);
+    fseek (ifp, 124, SEEK_SET);
+    fread(imgdata.lens.makernotes.Lens, 32, 1, ifp);
+    imgdata.lens.makernotes.CameraMount = Contax_N;
+    if (imgdata.lens.makernotes.Lens[0])
+      imgdata.lens.makernotes.LensMount = Contax_N;
+#endif
   } else if (!strcmp (head, "PXN")) {
     strcpy (make, "Logitech");
     strcpy (model,"Fotoman Pixtura");

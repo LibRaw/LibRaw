@@ -4256,6 +4256,35 @@ void LibRaw::parse_x3f()
 				  imgdata.other.aperture = atof(value);
 			  if (!strcmp (name, "FLENGTH"))
 				  imgdata.other.focal_len = atof(value);
+				if (!strcmp (name, "FLEQ35MM"))
+				  imgdata.lens.FocalLengthIn35mmFormat = atof(value);
+				if (!strcmp (name, "LENSARANGE"))
+				{
+				  char *sp;
+				  imgdata.lens.makernotes.MaxAp = imgdata.lens.makernotes.MinAp = atof(value);
+				  sp = strrchr (value, ' ');
+				  if (sp)
+				    {
+				      imgdata.lens.makernotes.MinAp = atof(sp);
+				      if (imgdata.lens.makernotes.MaxAp > imgdata.lens.makernotes.MinAp)
+				        swap (float, imgdata.lens.makernotes.MaxAp, imgdata.lens.makernotes.MinAp);
+				    }
+				  imgdata.lens.MaxAp4MinFocal = imgdata.lens.makernotes.MaxAp;
+				}
+				if (!strcmp (name, "LENSFRANGE"))
+				{
+				  char *sp;
+				  imgdata.lens.MinFocal = imgdata.lens.MaxFocal = atof(value);
+				  sp = strrchr (value, ' ');
+				  if (sp)
+				    {
+				      imgdata.lens.MaxFocal = atof(sp);
+				      if ((imgdata.lens.MaxFocal + 0.17f) < imgdata.lens.MinFocal)
+				        swap (float, imgdata.lens.MaxFocal, imgdata.lens.MinFocal);
+				    }
+				}
+				if (!strcmp (name, "LENSMODEL"))
+				  imgdata.lens.makernotes.LensID = atoi(value);
 		  }
 		  imgdata.idata.raw_count=1;
 		  load_raw = &LibRaw::x3f_load_raw;

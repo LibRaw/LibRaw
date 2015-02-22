@@ -377,16 +377,6 @@ typedef struct
   libraw_colordata_t color;
 } libraw_rawdata_t;
 
-// typedef struct
-// {
-// 	short CanonFocalUnits;
-// } libraw_canonlens_t;
-//
-// typedef struct
-// {
-// 	float	FocalLengthIn35mmFormat;
-// } libraw_samsunglens_t;
-
 typedef struct
 {
 	unsigned long long LensID;
@@ -431,8 +421,6 @@ typedef struct
 	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAp;
 	char LensMake[128], Lens[128];
 	ushort FocalLengthIn35mmFormat;
-//	libraw_canonlens_t canon;
-//	libraw_samsunglens_t samsung;
 	libraw_nikonlens_t nikon;
 	libraw_dnglens_t dng;
 	libraw_makernotes_lens_t makernotes;

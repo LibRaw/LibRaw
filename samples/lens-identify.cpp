@@ -50,6 +50,7 @@
 #define RicohModule	18
 #define Samsung_NX_M	19
 #define Leica_T     20
+#define Contax_N    21
 #define FixedLens		99
 
 // lens & camera formats, to differentiate Sony F/FE A/DT, etc.
@@ -190,6 +191,19 @@ static name2lens_t LeicaTLensList [] = {
   {"18-", 18,  56, 3.5f, 5.6f, "Vario-Elmar-T 1:3.5-5.6/18-56 ASPH."},
 };
 #define LeicaTLensList_nEntries (sizeof(LeicaTLensList) / sizeof(name2lens_t))
+
+static name2lens_t ContaxNLensList [] = {
+  {"100/2.8",   100, 100, 2.8f, 2.8f, "Makro-Sonnar T* 2.8/100"},
+  {"50/1.4",     50,  50, 1.4f, 1.4f, "Planar T* 1.4/50"},
+  {"85/1.4",     85,  85, 1.4f, 1.4f, "Planar T* 1.4/85"},
+  {"400/4",     400, 400, 4.0f, 4.0f, "Tele-Apotessar T* 4/400"},
+  {"17-35/2.8",  17,  35, 2.8f, 2.8f, "Vario-Sonnar T* 2.8/17-35"},
+  {"24-85/3.5",  24,  85, 3.5f, 4.5f, "Vario-Sonnar T* 3.5-4.5/24-85"},
+  {"70-200/3.5", 70, 200, 3.5f, 4.5f, "Vario-Sonnar T* 3.5-4.5/70-200"},
+  {"28-80/3.5",  28,  80, 3.5f, 5.6f, "Vario-Sonnar T* 3.5-5.6/28-80"},
+  {"70-300/4",   70, 300, 4.0f, 5.6f, "Vario-Sonnar T* 4.0-5.6/70-300"},
+};
+#define ContaxNLensList_nEntries (sizeof(ContaxNLensList) / sizeof(name2lens_t))
 
 #ifdef WIN32
 #define snprintf _snprintf
@@ -501,6 +515,7 @@ int main(int ac, char *av[])
             case 18: printf("Ricoh module\n"); break;
             case 19: printf("Samsung NX-M\n"); break;
             case 20: printf("Leica T\n"); break;
+            case 21: printf("Contax N\n"); break;
             case 99: printf("Fixed Lens\n"); break;
             default: printf("Unknown\n"); break;
             }
@@ -548,6 +563,7 @@ int main(int ac, char *av[])
             case 18: printf("Ricoh module\n"); break;
             case 19: printf("Samsung NX-M\n"); break;
             case 20: printf("Leica T\n"); break;
+            case 21: printf("Contax N\n"); break;
             case 99: printf("Fixed Lens\n"); break;
             default: printf("Unknown\n"); break;
             }
@@ -693,6 +709,21 @@ int main(int ac, char *av[])
            else if (exifLens.Lens[0])
           	 lens1 =
                lookupLensBySubName (exifLens.Lens, LeicaTLensList, LeicaTLensList_nEntries);
+					 if (lens1)
+						 {
+								MinFocal = lens1->MinFocal;
+								MaxFocal = lens1->MaxFocal;
+								MaxAp4MinFocal = lens1->MaxAp4MinFocal;
+								MaxAp4MaxFocal = lens1->MaxAp4MaxFocal;
+								strcpy (LensModel, lens1->name);
+								goto got_lens;
+						 }
+        }
+
+        else if (mnLens.LensMount == Contax_N)
+         {
+           lens1 =
+             lookupLensBySubName (mnLens.Lens, ContaxNLensList, ContaxNLensList_nEntries);
 					 if (lens1)
 						 {
 								MinFocal = lens1->MinFocal;
