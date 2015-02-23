@@ -122,6 +122,7 @@ extern "C"
 }
 #endif
 
+#define Sigma_X3F   22
 
 const double LibRaw_constants::xyz_rgb[3][3] =
 {
@@ -4261,30 +4262,33 @@ void LibRaw::parse_x3f()
 				if (!strcmp (name, "LENSARANGE"))
 				{
 				  char *sp;
-				  imgdata.lens.makernotes.MaxAp = imgdata.lens.makernotes.MinAp = atof(value);
+				  imgdata.lens.makernotes.MaxAp4CurFocal = imgdata.lens.makernotes.MinAp4CurFocal = atof(value);
 				  sp = strrchr (value, ' ');
 				  if (sp)
 				    {
-				      imgdata.lens.makernotes.MinAp = atof(sp);
-				      if (imgdata.lens.makernotes.MaxAp > imgdata.lens.makernotes.MinAp)
-				        swap (float, imgdata.lens.makernotes.MaxAp, imgdata.lens.makernotes.MinAp);
+				      imgdata.lens.makernotes.MinAp4CurFocal = atof(sp);
+				      if (imgdata.lens.makernotes.MaxAp4CurFocal > imgdata.lens.makernotes.MinAp4CurFocal)
+				        swap (float, imgdata.lens.makernotes.MaxAp4CurFocal, imgdata.lens.makernotes.MinAp4CurFocal);
 				    }
-				  imgdata.lens.MaxAp4MinFocal = imgdata.lens.makernotes.MaxAp;
 				}
 				if (!strcmp (name, "LENSFRANGE"))
 				{
-				  char *sp;
-				  imgdata.lens.MinFocal = imgdata.lens.MaxFocal = atof(value);
-				  sp = strrchr (value, ' ');
-				  if (sp)
-				    {
-				      imgdata.lens.MaxFocal = atof(sp);
-				      if ((imgdata.lens.MaxFocal + 0.17f) < imgdata.lens.MinFocal)
-				        swap (float, imgdata.lens.MaxFocal, imgdata.lens.MinFocal);
-				    }
+					char *sp;
+					imgdata.lens.makernotes.MinFocal = imgdata.lens.makernotes.MaxFocal = atof(value);
+					sp = strrchr (value, ' ');
+					if (sp)
+						{
+							imgdata.lens.makernotes.MaxFocal = atof(sp);
+							if ((imgdata.lens.makernotes.MaxFocal + 0.17f) < imgdata.lens.makernotes.MinFocal)
+								swap (float, imgdata.lens.makernotes.MaxFocal, imgdata.lens.makernotes.MinFocal);
+						}
 				}
 				if (!strcmp (name, "LENSMODEL"))
-				  imgdata.lens.makernotes.LensID = atoi(value);
+				{
+					imgdata.lens.makernotes.LensID = atoi(value);
+					if (imgdata.lens.makernotes.LensID)
+					 imgdata.lens.makernotes.LensMount = Sigma_X3F;
+				}
 		  }
 		  imgdata.idata.raw_count=1;
 		  load_raw = &LibRaw::x3f_load_raw;

@@ -112,6 +112,7 @@ ushort CLASS sget2 (uchar *s)
 #define Samsung_NX_M	19
 #define Leica_T     20
 #define Contax_N    21
+#define Sigma_X3F   22
 #define FixedLens		99
 
 // lens & camera formats, to differentiate Sony F/FE A/DT, etc.

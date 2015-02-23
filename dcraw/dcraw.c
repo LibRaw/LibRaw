@@ -24,7 +24,7 @@
    $Date: 2015/02/10 23:02:37 $
 
  make -f Makefile.devel
- git commit -a -m "v.099d"
+ git commit -a -m "v.099e"
  git push
 
  */
@@ -383,6 +383,7 @@ ushort CLASS sget2 (uchar *s)
 #define Samsung_NX_M	19
 #define Leica_T     20
 #define Contax_N    21
+#define Sigma_X3F   22
 #define FixedLens		99
 
 // lens & camera formats, to differentiate Sony F/FE A/DT, etc.
@@ -11824,33 +11825,36 @@ void CLASS parse_foveon()
 #ifdef LIBRAW_LIBRARY_BUILD
 	  if (!strcmp (name, "FLEQ35MM"))
 				imgdata.lens.FocalLengthIn35mmFormat = atof(value);
-			if (!strcmp (name, "LENSARANGE"))
+		if (!strcmp (name, "LENSARANGE"))
 			{
 				char *sp;
-				imgdata.lens.makernotes.MaxAp = imgdata.lens.makernotes.MinAp = atof(value);
+				imgdata.lens.makernotes.MaxAp4CurFocal = imgdata.lens.makernotes.MinAp4CurFocal = atof(value);
 				sp = strrchr (value, ' ');
 				if (sp)
 					{
-						imgdata.lens.makernotes.MinAp = atof(sp);
-						if (imgdata.lens.makernotes.MaxAp > imgdata.lens.makernotes.MinAp)
-							swap (float, imgdata.lens.makernotes.MaxAp, imgdata.lens.makernotes.MinAp);
+						imgdata.lens.makernotes.MinAp4CurFocal = atof(sp);
+						if (imgdata.lens.makernotes.MaxAp4CurFocal > imgdata.lens.makernotes.MinAp4CurFocal)
+							swap (float, imgdata.lens.makernotes.MaxAp4CurFocal, imgdata.lens.makernotes.MinAp4CurFocal);
 					}
-				imgdata.lens.MaxAp4MinFocal = imgdata.lens.makernotes.MaxAp;
 			}
 			if (!strcmp (name, "LENSFRANGE"))
 			{
 				char *sp;
-				imgdata.lens.MinFocal = imgdata.lens.MaxFocal = atof(value);
+				imgdata.lens.makernotes.MinFocal = imgdata.lens.makernotes.MaxFocal = atof(value);
 				sp = strrchr (value, ' ');
 				if (sp)
 					{
-						imgdata.lens.MaxFocal = atof(sp);
-						if ((imgdata.lens.MaxFocal + 0.17f) < imgdata.lens.MinFocal)
-							swap (float, imgdata.lens.MaxFocal, imgdata.lens.MinFocal);
+						imgdata.lens.makernotes.MaxFocal = atof(sp);
+						if ((imgdata.lens.makernotes.MaxFocal + 0.17f) < imgdata.lens.makernotes.MinFocal)
+							swap (float, imgdata.lens.makernotes.MaxFocal, imgdata.lens.makernotes.MinFocal);
 					}
 			}
 			if (!strcmp (name, "LENSMODEL"))
+			{
 				imgdata.lens.makernotes.LensID = atoi(value);
+				if (imgdata.lens.makernotes.LensID)
+				 imgdata.lens.makernotes.LensMount = Sigma_X3F;
+			}
 		}
 #endif
 	}
