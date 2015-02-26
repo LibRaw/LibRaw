@@ -128,6 +128,7 @@ int main(int ac, char *av[])
 					case 15: printf("Leica R\n"); break;
 					case 16: printf("Leica S\n"); break;
 					case 17: printf("Samsung NX\n"); break;
+					case 19: printf("Samsung NX-M\n"); break;
 					case 99: printf("Fixed Lens\n"); break;
 					default: printf("Unknown\n"); break;
 				}
@@ -172,6 +173,7 @@ int main(int ac, char *av[])
 					case 15: printf("Leica R\n"); break;
 					case 16: printf("Leica S\n"); break;
 					case 17: printf("Samsung NX\n"); break;
+					case 18: printf("Ricoh module\n"); break;
 					case 99: printf("Fixed Lens\n"); break;
 					default: printf("Unknown\n"); break;
 				}
@@ -198,8 +200,8 @@ int main(int ac, char *av[])
 			printf("\tMaxAp @CurFocal: f/%0.1f\n", mnLens.MaxAp4CurFocal);
 			printf("\tMinAp @CurFocal: f/%0.1f\n", mnLens.MinAp4CurFocal);
 
-			if (exifLens.samsung.FocalLengthIn35mmFormat > 1.0f)
-				printf("\tFocalLengthIn35mmFormat: %0.1f mm\n", exifLens.samsung.FocalLengthIn35mmFormat);
+			if (exifLens.makernotes.SamsungFocalLengthIn35mmFormat > 1.0f)
+				printf("\tFocalLengthIn35mmFormat: %0.1f mm\n", exifLens.makernotes.SamsungFocalLengthIn35mmFormat);
 
 			if (exifLens.nikon.NikonEffectiveMaxAp > 0.1f)
 				printf("\tNikonEffectiveMaxAp: f/%0.1f\n", exifLens.nikon.NikonEffectiveMaxAp);

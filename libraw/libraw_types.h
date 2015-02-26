@@ -379,15 +379,15 @@ typedef struct
   libraw_colordata_t color;
 } libraw_rawdata_t;
 
-typedef struct
-{
-	short CanonFocalUnits;
-} libraw_canonlens_t;
-
-typedef struct
-{
-	float	FocalLengthIn35mmFormat;
-} libraw_samsunglens_t;
+// typedef struct
+// {
+// 	short CanonFocalUnits;
+// } libraw_canonlens_t;
+//
+// typedef struct
+// {
+// 	float	FocalLengthIn35mmFormat;
+// } libraw_samsunglens_t;
 
 typedef struct
 {
@@ -395,7 +395,7 @@ typedef struct
 	char	Lens[128];
 	ushort	LensFormat;		// to characterize the image circle the lens covers
 	ushort	LensMount;		// 'male', lens itself
-	unsigned CamID;
+	unsigned long CamID;
 	ushort	CameraFormat;	// some of the sensor formats
 	ushort	CameraMount;	// 'female', body throat
 	char	body[64];
@@ -413,6 +413,8 @@ typedef struct
 	char	Adapter[128];
 	unsigned long long AttachmentID;
 	char	Attachment[128];
+	short CanonFocalUnits;
+	float	SamsungFocalLengthIn35mmFormat;
 } libraw_makernotes_lens_t;
 
 typedef struct
@@ -431,8 +433,8 @@ typedef struct
 	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAp;
 	char LensMake[128], Lens[128];
 	ushort FocalLengthIn35mmFormat;
-	libraw_canonlens_t canon;
-	libraw_samsunglens_t samsung;
+//	libraw_canonlens_t canon;
+//	libraw_samsunglens_t samsung;
 	libraw_nikonlens_t nikon;
 	libraw_dnglens_t dng;
 	libraw_makernotes_lens_t makernotes;

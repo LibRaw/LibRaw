@@ -345,7 +345,7 @@ LibRaw:: LibRaw(unsigned int flags)
   verbose = 0;
 #endif
   ZERO(imgdata);
-  imgdata.lens.canon.CanonFocalUnits = 1;
+  imgdata.lens.makernotes.CanonFocalUnits = 1;
   imgdata.lens.makernotes.LensID = 0xffffffffffffffffULL;
 
   cleargps(&imgdata.other.parsed_gps);
@@ -498,7 +498,7 @@ void LibRaw:: recycle()
   imgdata.color.baseline_exposure = -999.f;
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);
-  imgdata.lens.canon.CanonFocalUnits = 1;
+  imgdata.lens.makernotes.CanonFocalUnits = 1;
   imgdata.lens.makernotes.LensID = 0xffffffffffffffffULL;
 
   _exitflag = 0;
