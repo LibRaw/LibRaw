@@ -115,6 +115,8 @@ typedef unsigned long long UINT64;
 #define CLIP(x) LIM(x,0,65535)
 #define SWAP(a,b) { a=a+b; b=a-b; a=a-b; }
 
+#define swap(type, i, j) {type t = i; i = j; j = t;}
+
 /*
    In order to inline this calculation, I make the risky
    assumption that all filter patterns can be described
@@ -156,7 +158,7 @@ typedef unsigned long long UINT64;
 
 #define RAW(row,col) \
 	raw_image[(row)*raw_width+(col)]
-#line 255 "dcraw/dcraw.c"
+#line 257 "dcraw/dcraw.c"
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 

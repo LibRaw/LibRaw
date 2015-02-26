@@ -122,6 +122,7 @@ extern "C"
 }
 #endif
 
+#define Sigma_X3F   22
 
 const double LibRaw_constants::xyz_rgb[3][3] = 
 {
@@ -3247,7 +3248,11 @@ int LibRaw::dcraw_process(void)
           aahd_interpolate();
         // fallback to AHD
         else
-          ahd_interpolate();
+          {
+            ahd_interpolate();
+            imgdata.process_warnings |= LIBRAW_WARN_FALLBACK_TO_AHD;
+          }
+
 
         SET_PROC_FLAG(LIBRAW_PROGRESS_INTERPOLATE);
       }
@@ -4282,6 +4287,38 @@ void LibRaw::parse_x3f()
 				  imgdata.other.aperture = atof(value);
 			  if (!strcmp (name, "FLENGTH"))
 				  imgdata.other.focal_len = atof(value);
+				if (!strcmp (name, "FLEQ35MM"))
+				  imgdata.lens.FocalLengthIn35mmFormat = atof(value);
+				if (!strcmp (name, "LENSARANGE"))
+				{
+				  char *sp;
+				  imgdata.lens.makernotes.MaxAp4CurFocal = imgdata.lens.makernotes.MinAp4CurFocal = atof(value);
+				  sp = strrchr (value, ' ');
+				  if (sp)
+				    {
+				      imgdata.lens.makernotes.MinAp4CurFocal = atof(sp);
+				      if (imgdata.lens.makernotes.MaxAp4CurFocal > imgdata.lens.makernotes.MinAp4CurFocal)
+				        swap (float, imgdata.lens.makernotes.MaxAp4CurFocal, imgdata.lens.makernotes.MinAp4CurFocal);
+				    }
+				}
+				if (!strcmp (name, "LENSFRANGE"))
+				{
+					char *sp;
+					imgdata.lens.makernotes.MinFocal = imgdata.lens.makernotes.MaxFocal = atof(value);
+					sp = strrchr (value, ' ');
+					if (sp)
+						{
+							imgdata.lens.makernotes.MaxFocal = atof(sp);
+							if ((imgdata.lens.makernotes.MaxFocal + 0.17f) < imgdata.lens.makernotes.MinFocal)
+								swap (float, imgdata.lens.makernotes.MaxFocal, imgdata.lens.makernotes.MinFocal);
+						}
+				}
+				if (!strcmp (name, "LENSMODEL"))
+				{
+					imgdata.lens.makernotes.LensID = atoi(value);
+					if (imgdata.lens.makernotes.LensID)
+					 imgdata.lens.makernotes.LensMount = Sigma_X3F;
+				}
 		  }
 		  imgdata.idata.raw_count=1;
 		  load_raw = &LibRaw::x3f_load_raw;
