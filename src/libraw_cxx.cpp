@@ -208,11 +208,27 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t* p)
     if(p) ::free(p);
 }
 
-int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
+int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw 
+#ifdef LIBRAW_SMALL_NEF_CODE
+|| load_raw == &LibRaw::nikon_load_sraw
+#endif
+; }
 int LibRaw::is_coolscan_nef() { return load_raw == &LibRaw::nikon_coolscan_load_raw;}
 
-int LibRaw::is_nikon_sraw(){ return load_raw == &LibRaw::nikon_load_sraw;}
-int LibRaw::sraw_midpoint() {if (load_raw == &LibRaw::canon_sraw_load_raw) return 8192; else if (load_raw == &LibRaw::nikon_load_sraw) return 2048; else return 0;}
+int LibRaw::is_nikon_sraw(){ 
+#ifdef LIBRAW_SMALL_NEF_CODE
+  return load_raw == &LibRaw::nikon_load_sraw;
+#else
+  return 0;
+#endif
+}
+int LibRaw::sraw_midpoint() {
+  if (load_raw == &LibRaw::canon_sraw_load_raw) return 8192; 
+#ifdef LIBRAW_SMALL_NEF_CODE
+  else if (load_raw == &LibRaw::nikon_load_sraw) return 2048; 
+#endif
+  else return 0;
+}
 
 
 #ifdef USE_RAWSPEED
@@ -577,10 +593,17 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
 	  d_info->decoder_name = "nikon_coolscan_load_raw()";
 	  d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC; 
   }
+#ifdef LIBRAW_SMALL_NEF_CODE
   else if (load_raw == &LibRaw::nikon_load_sraw )
     {
       d_info->decoder_name = "nikon_load_sraw()";
       d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_FIXEDMAXC; 
+    }
+#endif
+  else if (load_raw == &LibRaw::nikon_yuv_load_raw )
+    {
+      d_info->decoder_name = "nikon_load_sraw()";
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
     }
   else if (load_raw == &LibRaw::rollei_load_raw )
     {
@@ -1077,6 +1100,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
               C.cblack[6+c]/=4;
           }
       }
+#ifdef LIBRAW_SMALL_NEF_CODE
     if(   (load_raw == &LibRaw::nikon_load_raw 
         || load_raw == &LibRaw::packed_load_raw)  
        && !strcasecmp(imgdata.idata.make,"Nikon")
@@ -1104,7 +1128,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
              for(int j=0;j<4;j++)
                imgdata.color.rgb_cam[i][j]=float(i==j);
       }
-	// Adjust BL for Nikon 12bit
+#endif
+    // Adjust BL for Nikon 12bit
     if((
         load_raw == &LibRaw::nikon_load_raw 
         || load_raw == &LibRaw::packed_load_raw)  
@@ -1531,7 +1556,7 @@ int LibRaw::unpack(void)
   }
 }
 
-
+#ifdef LIBRAW_SMALL_NEF_CODE
 void LibRaw::nikon_load_sraw()
 {
   // We're already seeked to data!
@@ -1613,6 +1638,7 @@ void LibRaw::nikon_load_sraw()
     }
   C.maximum=16383;
 }
+#endif
 
 void LibRaw::free_image(void)
 {

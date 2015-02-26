@@ -231,8 +231,10 @@ typedef struct
   float	      baseline_exposure;
   int		  OlympusSensorCalibration[2];
   int		digitalBack_color;
+#if 0
   int		wb_applied;
   int		gamma_applied;
+#endif
 }libraw_colordata_t;
 
 typedef struct
