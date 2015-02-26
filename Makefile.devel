@@ -58,7 +58,7 @@ LR_INCLUDES=libraw/libraw.h libraw/libraw_alloc.h libraw/libraw_const.h libraw/l
 sources: ${DCRAW_GEN} Makefile.devel ${PP}
 library: lib/libraw.a lib/libraw_r.a
 
-all_samples: bin/raw-identify bin/lens-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin/half_mt bin/mem_image \
+all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin/half_mt bin/mem_image \
         bin/unprocessed_raw bin/4channels bin/multirender_test bin/postprocessing_benchmark
 
 ## RawSpeed xml file
@@ -77,9 +77,6 @@ object/demosaic_packs_mt.o: internal/demosaic_packs.cpp ${LR_INCLUDES}
 ## Samples ##
 bin/raw-identify: lib/libraw.a samples/raw-identify.cpp
 	$(CXX) ${CFLAGS} -o bin/raw-identify samples/raw-identify.cpp -L./lib -lraw  -lm  ${LDADD}
-
-bin/lens-identify: lib/libraw.a samples/lens-identify.cpp
-	$(CXX) ${CFLAGS} -o bin/lens-identify samples/lens-identify.cpp -L./lib -lraw  -lm  ${LDADD}
 
 bin/simple_dcraw: lib/libraw.a samples/simple_dcraw.cpp
 	$(CXX) -DLIBRAW_NOTHREADS ${CFLAGS} -o bin/simple_dcraw samples/simple_dcraw.cpp -L./lib -lraw  -lm  ${LDADD}
