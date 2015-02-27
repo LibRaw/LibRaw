@@ -4298,7 +4298,7 @@ void LibRaw::parse_x3f()
 				    {
 				      imgdata.lens.makernotes.MinAp4CurFocal = atof(sp);
 				      if (imgdata.lens.makernotes.MaxAp4CurFocal > imgdata.lens.makernotes.MinAp4CurFocal)
-				        swap (float, imgdata.lens.makernotes.MaxAp4CurFocal, imgdata.lens.makernotes.MinAp4CurFocal);
+				        my_swap (float, imgdata.lens.makernotes.MaxAp4CurFocal, imgdata.lens.makernotes.MinAp4CurFocal);
 				    }
 				}
 				if (!strcmp (name, "LENSFRANGE"))
@@ -4310,7 +4310,7 @@ void LibRaw::parse_x3f()
 						{
 							imgdata.lens.makernotes.MaxFocal = atof(sp);
 							if ((imgdata.lens.makernotes.MaxFocal + 0.17f) < imgdata.lens.makernotes.MinFocal)
-								swap (float, imgdata.lens.makernotes.MaxFocal, imgdata.lens.makernotes.MinFocal);
+								my_swap (float, imgdata.lens.makernotes.MaxFocal, imgdata.lens.makernotes.MinFocal);
 						}
 				}
 				if (!strcmp (name, "LENSMODEL"))
