@@ -93,9 +93,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 
 // Nikon (and Minolta Z2)
     void        nikon_load_raw();
-#ifdef LIBRAW_SMALL_NEF_CODE
     void        nikon_load_sraw();
-#endif
     void        nikon_yuv_load_raw();
     void	nikon_coolscan_load_raw();
     int         nikon_e995();
