@@ -1087,15 +1087,11 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
               C.cblack[6+c]/=4;
           }
       }
-    if(   (load_raw == &LibRaw::nikon_load_raw
-        || load_raw == &LibRaw::packed_load_raw)
-       && !strcasecmp(imgdata.idata.make,"Nikon")
-	   && S.raw_width*S.raw_height*3 == libraw_internal_data.unpacker_data.data_size
-       ) // Is it Nikon sRAW?
+    if(  load_raw == &LibRaw::nikon_yuv_load_raw  ) // Is it Nikon sRAW?
       {
            load_raw= &LibRaw::nikon_load_sraw;
            C.black =0;
-           memset(C.cblack,0,sizeof(C.cblack));
+		   memset(C.cblack,0,sizeof(C.cblack));
            imgdata.idata.filters = 0;
            libraw_internal_data.unpacker_data.tiff_samples=3;
            imgdata.idata.colors = 3;
