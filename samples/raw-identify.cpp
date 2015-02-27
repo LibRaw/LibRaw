@@ -200,8 +200,8 @@ int main(int ac, char *av[])
 			printf("\tMaxAp @CurFocal: f/%0.1f\n", mnLens.MaxAp4CurFocal);
 			printf("\tMinAp @CurFocal: f/%0.1f\n", mnLens.MinAp4CurFocal);
 
-			if (exifLens.makernotes.SamsungFocalLengthIn35mmFormat > 1.0f)
-				printf("\tFocalLengthIn35mmFormat: %0.1f mm\n", exifLens.makernotes.SamsungFocalLengthIn35mmFormat);
+			if (exifLens.makernotes.FocalLengthIn35mmFormat > 1.0f)
+				printf("\tFocalLengthIn35mmFormat: %0.1f mm\n", exifLens.makernotes.FocalLengthIn35mmFormat);
 
 			if (exifLens.nikon.NikonEffectiveMaxAp > 0.1f)
 				printf("\tNikonEffectiveMaxAp: f/%0.1f\n", exifLens.nikon.NikonEffectiveMaxAp);

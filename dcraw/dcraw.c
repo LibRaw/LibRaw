@@ -8217,9 +8217,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           }
         else if (tag == 0xa01a)
           {
-            imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat = get4() / 10.0f;
-            if (imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat < 10.0f)
-              imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat *= 10.0f;
+            imgdata.lens.makernotes.FocalLengthIn35mmFormat = get4() / 10.0f;
+            if (imgdata.lens.makernotes.FocalLengthIn35mmFormat < 10.0f)
+              imgdata.lens.makernotes.FocalLengthIn35mmFormat *= 10.0f;
           }
       }
 
@@ -8947,7 +8947,7 @@ void CLASS parse_makernote (int base, int uptag)
             fseek(ifp, 6, SEEK_CUR);
             fseek(ifp, get4()+34, SEEK_SET);
             imgdata.lens.makernotes.LensID = getc(ifp) - '0';
-            switch(imgdata.lens.makernotes.LensID) 
+            switch(imgdata.lens.makernotes.LensID)
               {
             	case 1:
             	case 2:
@@ -9124,9 +9124,9 @@ void CLASS parse_makernote (int base, int uptag)
           }
         else if (tag == 0xa01a)
           {
-            imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat = get4() / 10.0f;
-            if (imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat < 10.0f)
-              imgdata.lens.makernotes.SamsungFocalLengthIn35mmFormat *= 10.0f;
+            imgdata.lens.makernotes.FocalLengthIn35mmFormat = get4() / 10.0f;
+            if (imgdata.lens.makernotes.FocalLengthIn35mmFormat < 10.0f)
+              imgdata.lens.makernotes.FocalLengthIn35mmFormat *= 10.0f;
           }
       }
 
@@ -9181,7 +9181,7 @@ void CLASS parse_makernote (int base, int uptag)
             if (memcmp(table_buf, "\xff\xff\xff\xff\xff\xff\xff\xff", 8) &&
                 memcmp(table_buf, "\x00\x00\x00\x00\x00\x00\x00\x00", 8))
               {
-                switch (len) 
+                switch (len)
                   {
                   case 368:
                   case 5478:
@@ -9375,7 +9375,7 @@ void CLASS parse_makernote (int base, int uptag)
     if (tag == 0x4001 && len > 500 && !strcasecmp(make,"Canon"))
       {
         long int save1 = ftell(ifp);
-        switch (len) 
+        switch (len)
           {
           case 582:
             imgdata.color.canon_makernotes.CanonColorDataVer = 1;	// 20D / 350D
@@ -11834,7 +11834,7 @@ void CLASS parse_foveon()
 	    focal_len = atof(value);
 #ifdef LIBRAW_LIBRARY_BUILD
 	  if (!strcmp (name, "FLEQ35MM"))
-				imgdata.lens.FocalLengthIn35mmFormat = atof(value);
+				imgdata.lens.makernotes.FocalLengthIn35mmFormat = atof(value);
 		if (!strcmp (name, "LENSARANGE"))
 			{
 				char *sp;

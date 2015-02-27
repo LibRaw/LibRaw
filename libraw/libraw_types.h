@@ -404,7 +404,7 @@ typedef struct
 	unsigned long long AttachmentID;
 	char	Attachment[128];
 	short CanonFocalUnits;
-	float	SamsungFocalLengthIn35mmFormat;
+	float	FocalLengthIn35mmFormat;
 } libraw_makernotes_lens_t;
 
 typedef struct
