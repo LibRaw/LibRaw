@@ -205,7 +205,7 @@ struct ph1 {
 #define CLIP(x) LIM(x,0,65535)
 #define SWAP(a,b) { a=a+b; b=a-b; a=a-b; }
 
-#define swap(type, i, j) {type t = i; i = j; j = t;}
+#define my_swap(type, i, j) {type t = i; i = j; j = t;}
 
 /*
    In order to inline this calculation, I make the risky
@@ -11844,7 +11844,7 @@ void CLASS parse_foveon()
 					{
 						imgdata.lens.makernotes.MinAp4CurFocal = atof(sp);
 						if (imgdata.lens.makernotes.MaxAp4CurFocal > imgdata.lens.makernotes.MinAp4CurFocal)
-							swap (float, imgdata.lens.makernotes.MaxAp4CurFocal, imgdata.lens.makernotes.MinAp4CurFocal);
+							my_swap (float, imgdata.lens.makernotes.MaxAp4CurFocal, imgdata.lens.makernotes.MinAp4CurFocal);
 					}
 			}
 			if (!strcmp (name, "LENSFRANGE"))
@@ -11856,7 +11856,7 @@ void CLASS parse_foveon()
 					{
 						imgdata.lens.makernotes.MaxFocal = atof(sp);
 						if ((imgdata.lens.makernotes.MaxFocal + 0.17f) < imgdata.lens.makernotes.MinFocal)
-							swap (float, imgdata.lens.makernotes.MaxFocal, imgdata.lens.makernotes.MinFocal);
+							my_swap (float, imgdata.lens.makernotes.MaxFocal, imgdata.lens.makernotes.MinFocal);
 					}
 			}
 			if (!strcmp (name, "LENSMODEL"))

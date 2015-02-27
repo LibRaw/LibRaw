@@ -115,7 +115,7 @@ typedef unsigned long long UINT64;
 #define CLIP(x) LIM(x,0,65535)
 #define SWAP(a,b) { a=a+b; b=a-b; a=a-b; }
 
-#define swap(type, i, j) {type t = i; i = j; j = t;}
+#define my_swap(type, i, j) {type t = i; i = j; j = t;}
 
 /*
    In order to inline this calculation, I make the risky
