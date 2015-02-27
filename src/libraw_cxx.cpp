@@ -1078,7 +1078,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		if(imgdata.idata.raw_count>1)
 			imgdata.idata.raw_count = 1;
 	}
-
+#if 0
 	if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
 		 && !libraw_internal_data.unpacker_data.load_flags
 		 && (!strcasecmp(imgdata.idata.model,"D810") || !strcasecmp(imgdata.idata.model,"D4S"))
@@ -1086,7 +1086,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	{
 		libraw_internal_data.unpacker_data.load_flags = 80;
 	}
-
+#endif
 	// Adjust BL for Sony A900/A850
     if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Sony")) // 12 bit sony, but metadata may be for 14-bit range
       {

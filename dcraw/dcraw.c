@@ -9581,6 +9581,7 @@ void CLASS parse_makernote (int base, int uptag)
       meta_offset = ftell(ifp);
     if (tag == 0x401 && type == 4 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get4();
+#if 0
     if (tag == 0x03d && strstr(make,"NIKON") && len == 4)
       {
         FORC4 cblack[c ^ c >> 1] = get2();
@@ -9589,6 +9590,7 @@ void CLASS parse_makernote (int base, int uptag)
         FORC4 cblack[c]-=i;
         black += i;
       }
+#endif
     if (tag == 0xe01) {		/* Nikon Capture Note */
       order = 0x4949;
       fseek (ifp, 22, SEEK_CUR);
