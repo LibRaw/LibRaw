@@ -9490,8 +9490,11 @@ void CLASS parse_makernote (int base, int uptag)
       fseek (ifp, 8 + c*32, SEEK_CUR);
       FORC4 cam_mul[c ^ (c >> 1) ^ 1] = get4();
     }
+#ifndef LIBRAW_LIBRARY_BUILD
+	// works for some files, but not all
     if (tag == 0x3d && type == 3 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2() >> (14-tiff_ifd[2].bps);
+#endif
     if (tag == 0x81 && type == 4) {
       data_offset = get4();
       fseek (ifp, data_offset + 41, SEEK_SET);
@@ -9581,7 +9584,8 @@ void CLASS parse_makernote (int base, int uptag)
       meta_offset = ftell(ifp);
     if (tag == 0x401 && type == 4 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get4();
-#if 0
+#ifdef LIBRAW_LIBRARY_BUILD
+    // not corrected for file bitcount, to be patched in open_datastream
     if (tag == 0x03d && strstr(make,"NIKON") && len == 4)
       {
         FORC4 cblack[c ^ c >> 1] = get2();
