@@ -5577,6 +5577,12 @@ static float _CanonConvert2EV(short in)
 	return (float)sign * ((float)val + frac1) / 32.0f;
     }
 
+static float _CanonConvertAperture(short in)
+{
+  if (in == (short)0xffe0) return 0.0f;
+  else return powf64(2.0f, _CanonConvert2EV(in) / 2.0f);
+}
+
 void CLASS setCanonBodyFeatures (unsigned id)
       {
       imgdata.lens.makernotes.CamID = id;
@@ -5627,6 +5633,7 @@ void CLASS setCanonBodyFeatures (unsigned id)
                 {
                   imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
                   imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF;
+                  imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Unknown;
                 }
               else
                 {
@@ -6524,8 +6531,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                 imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
                 imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
               }
-            imgdata.lens.makernotes.MaxAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
-            imgdata.lens.makernotes.MinAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
+            imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
+            imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
           }
 
         else if (tag == 0x0002)			// focal length
@@ -6542,7 +6549,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         else if (tag == 0x0004)			// shot info
           {
             fseek(ifp, 42, SEEK_CUR);
-            imgdata.lens.makernotes.CurAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
+            imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
           }
 
         else if (tag == 0x000d)			// camera info
@@ -7397,8 +7404,8 @@ void CLASS parse_makernote (int base, int uptag)
                 imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
                 imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
               }
-            imgdata.lens.makernotes.MaxAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
-            imgdata.lens.makernotes.MinAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
+            imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
+            imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
           }
 
         else if (tag == 0x0002)			// focal length
@@ -7415,7 +7422,7 @@ void CLASS parse_makernote (int base, int uptag)
         else if (tag == 0x0004)			// shot info
           {
             fseek(ifp, 42, SEEK_CUR);
-            imgdata.lens.makernotes.CurAp = powf64(2.0f, _CanonConvert2EV(get2()) / 2.0f);
+            imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
           }
 
         else if (tag == 0x000d)			// camera info
@@ -8302,7 +8309,7 @@ void CLASS parse_makernote (int base, int uptag)
     if (tag == 0x1d)
       while ((c = fgetc(ifp)) && c != EOF)
 	serial = serial*10 + (isdigit(c) ? c - '0' : c % 10);
-    if (tag == 0x29 && type == 1) {
+    if (tag == 0x29 && type == 1) {  // Canon PowerShot G9
       c = wbi < 18 ? "012347800000005896"[wbi]-'0' : 0;
       fseek (ifp, 8 + c*32, SEEK_CUR);
       FORC4 cam_mul[c ^ (c >> 1) ^ 1] = get4();
@@ -9960,6 +9967,9 @@ void CLASS parse_ciff (int offset, int length, int depth)
   while (nrecs--) {
     type = get2();
     len  = get4();
+
+//    printf ("\n*** type: 0x%04x len: 0x%04x", type, len);
+
     save = ftell(ifp) + 4;
     fseek (ifp, offset+get4(), SEEK_SET);
     if ((((type >> 8) + 8) | 8) == 0x38) {
@@ -9995,7 +10005,7 @@ void CLASS parse_ciff (int offset, int length, int depth)
 			//      iso_speed = pow (2.0, (get4(),get2())/32.0 - 4) * 50;
       iso_speed = powf64(2.0f, ((get2(),get2()) + get2())/32.0f - 5.0f) * 100.0f;
 #ifdef LIBRAW_LIBRARY_BUILD
-      aperture  = powf64(2.0f, _CanonConvert2EV((get2(),(float)get2())) / 2.0f);
+      aperture  = _CanonConvertAperture((get2(),get2()));
       imgdata.lens.makernotes.CurAp = aperture;
 #else
       aperture  = powf64(2.0, (get2(),(short)get2())/64.0);
@@ -10027,8 +10037,8 @@ void CLASS parse_ciff (int offset, int length, int depth)
             imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
             imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
           }
-        imgdata.lens.makernotes.MaxAp = powf64(2.0f, _CanonConvert2EV((float)get2()) / 2.0f);
-        imgdata.lens.makernotes.MinAp = powf64(2.0f, _CanonConvert2EV((float)get2()) / 2.0f);
+        imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
+        imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
     }
 #endif
     if (type == 0x0032) {
