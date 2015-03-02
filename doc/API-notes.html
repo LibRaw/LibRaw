@@ -5,7 +5,7 @@
   </head>
 
   <body>
-    <a href=index-eng.html>[back to Index]</a>
+    <a href=index.html>[back to Index]</a>
     <h1>LibRaw: General Notes on API</h1>
     <h2>Contents</h2>
 
@@ -64,8 +64,8 @@
           <dt><b>Non-fatal errors</b></dt>
           <dd>
          Non-fatal errors do not forbid execution of other functions in the processing succession
-     (e.g., <a href="API-CXX-eng.html#unpack_thumb">unpack_thumb()</a> can easily return the code corresponding to &quot;preview is absent&quot;
-     but this does not prevent further call of <a href="API-CXX-eng.html#unpack">unpack()</a>.
+     (e.g., <a href="API-CXX.html#unpack_thumb">unpack_thumb()</a> can easily return the code corresponding to &quot;preview is absent&quot;
+     but this does not prevent further call of <a href="API-CXX.html#unpack">unpack()</a>.
           </dd>
           <dt><b>Fatal errors</b></dt>
           <dd>
@@ -73,34 +73,34 @@
             is terminated and all allocated resouces are freed.<br/>
             If an attempt to continue processing is made, all subsequent API calls will return the LIBRAW_OUT_OF_ORDER_CALL error.<br/>
             At the same time, the LibRaw instance in which a fatal error has occurred can process the next RAW
-            files in the usual way (by calling <a href="API-CXX-eng.html#open_file">open_file()</a> (or other input methods),  then <a href="API-CXX-eng.html#unpack">unpack()</a>,
+            files in the usual way (by calling <a href="API-CXX.html#open_file">open_file()</a> (or other input methods),  then <a href="API-CXX.html#unpack">unpack()</a>,
             etc.). 
             </dd>
         </dl>
       <li>The macro LIBRAW_FATAL_ERROR(error code) checks if an error is fatal or not.</li> 
-      <li>The error codes are <a href="API-datastruct-eng.html#errors">listed and deciphered here</a>.</li>
+      <li>The error codes are <a href="API-datastruct.html#errors">listed and deciphered here</a>.</li>
     </ol>
 
     <a name=warnings></a>
     <h2>Nonstandard Situations That Are Not Errors</h2>
     <p>If the program has encountered a nonstandard situation that does not prevent retrieval of some data
-     from a file, it sends a signal by setting the corresponding bit in <a href="API-datastruct-eng.html#libraw_data_t">imgdata.process_warnings</a>. 
-     The possible types of warnings are <a href="API-datastruct-eng.html#warnings">listed and deciphered here</a>.
+     from a file, it sends a signal by setting the corresponding bit in <a href="API-datastruct.html#libraw_data_t">imgdata.process_warnings</a>. 
+     The possible types of warnings are <a href="API-datastruct.html#warnings">listed and deciphered here</a>.
       </p>
 
     <a name="io"></a>
     <h2>Input Layer Abstraction</h2>
     <p>
       LibRaw uses objects derived from 
-      <a href="API-CXX-eng.html#datastream">LibRaw_abstract_datastream</a> for data input.
+      <a href="API-CXX.html#datastream">LibRaw_abstract_datastream</a> for data input.
       Semantics of these objects is similar to 'file with arbitrary seek' object: both read and seek
       operations are used. 
     </p>
     <p>
       Some RAW formats requires temporary switch to another data stream created on top on memory buffer for metadata
       read. Methods for doing so are implemented in base class 
-      <a href="API-CXX-eng.html#datastream">LibRaw_abstract_datastream</a> by internal data field <b>substream</b>.
-      Look into source code of  <a href="API-CXX-eng.html#file_datastream">LibRaw_file_datastream</a> class 
+      <a href="API-CXX.html#datastream">LibRaw_abstract_datastream</a> by internal data field <b>substream</b>.
+      Look into source code of  <a href="API-CXX.html#file_datastream">LibRaw_file_datastream</a> class 
       in  <b>libraw/libraw_datastream.h</b> file for more details.
       <br/>
       When implementing own datastream classes, you need to take <b>substream</b> into account and pass control to
@@ -108,7 +108,7 @@
     </p>
     <p>
       If datastream implementaton knows name of input file, it should provide fname() call. This name will be used
-      in <a href="API-CXX-eng.html#callbacks">error callbacks</a> and in guessing name of JPEG file with metadata
+      in <a href="API-CXX.html#callbacks">error callbacks</a> and in guessing name of JPEG file with metadata
       (for RAW files with external metadata).
     </p>
     <p>
@@ -117,7 +117,7 @@
       ‚ÓÁ‚‡¯‡˛Ú ÍÓ‰ Ó¯Ë·ÍË.
       <br/>
       Sample of these methods implementation may be found in 
-      <a href="API-CXX-eng.html#file_datastream">LibRaw_file_datastream</a> class (look into 
+      <a href="API-CXX.html#file_datastream">LibRaw_file_datastream</a> class (look into 
       <b>libraw/libraw_datastream.h</b> file for details).
     </p>
 
@@ -163,7 +163,7 @@
     <a name="imgdata_params"></a>
     <h2>Parameters of the LibRaw::imgdata.params Structure Affecting the Behavior of open_file/unpack/unpack_thumb</h2>
     <p>
-      Most data fields of structure LibRaw::imgdata.params affect only  <a href="API-CXX-eng.html#dcrawemu">data
+      Most data fields of structure LibRaw::imgdata.params affect only  <a href="API-CXX.html#dcrawemu">data
         postprocessing</a>,  but there are some exceptions, which have been inherited by the current version of LibRaw
       from/ dcraw source texts (these dependences will be gradually removed).
        <dl>
@@ -176,7 +176,7 @@
       <dt><b>imgdata.params.user_flip</b></dt>
       <dd>
         If this parameter is greater than or equal to zero, assignment <code>imgdata.sizes.flip = imgdata.params.user_flip</code> is
-     performed at the <a href="API-CXX-eng.html#open_file">open_file()</a> stage.
+     performed at the <a href="API-CXX.html#open_file">open_file()</a> stage.
        </dd>
       <dt><b>imgdata.params.shot_select</b></dt>
       <dd>
@@ -217,7 +217,7 @@
       allocate a sufficient amount of memory for the thread stack. 
     </p>
     <p>In the case of dynamic allocation (<code>LibRaw *iProcessor = new LibRaw;</code>), the requirements to stack
-      memory will decrease by 100 Kb, which is the size of a class instance). If <a href="API-C-eng.html">C API</a> is
+      memory will decrease by 100 Kb, which is the size of a class instance). If <a href="API-C.html">C API</a> is
       used, the LibRaw instance is allocated dynamically.
     </p>
 
@@ -253,8 +253,8 @@
       </li>
     </ul>
     <p>The buffer for RAW data is allocated by 
-        href="API-CXX-eng.html#unpack">unpack()</a> call and freeed upon calling
-      œ”◊œ¬œ÷ƒ¡≈‘”— –“… <a href="API-CXX-eng.html#recycle">recycle()</a>. 
+        href="API-CXX.html#unpack">unpack()</a> call and freeed upon calling
+      œ”◊œ¬œ÷ƒ¡≈‘”— –“… <a href="API-CXX.html#recycle">recycle()</a>. 
     </p> 
 
     <a name="memimage"></a>
@@ -263,33 +263,33 @@
       On postprocessing stage each pixel contains four 16-bit values, one for each possible color channel (some
       sensors are actually 4-color).
     <p>The buffer for the decoded image is allocated upon calling 
-      <a href="API-CXX-eng.html#raw2image">raw2image()</a>,
-      <a href="API-CXX-eng.html#dcraw_process">dcraw_process()</a> or
+      <a href="API-CXX.html#raw2image">raw2image()</a>,
+      <a href="API-CXX.html#dcraw_process">dcraw_process()</a> or
     </p>
-    <p>The buffer freed upon calling <a href="API-CXX-eng.html#recycle">recycle()</a> 
+    <p>The buffer freed upon calling <a href="API-CXX.html#recycle">recycle()</a> 
       or 
-      <a href="API-CXX-eng.html#free_image">free_image()</a> calls.
+      <a href="API-CXX.html#free_image">free_image()</a> calls.
     </p> 
     <a name="memthumb"></a>
     <h4>Memory for the Decoded Thumbnail</h4>
     <p>
-      Memory for the thumbmail is allocated upon calling <a href="API-CXX-eng.html#unpack_thumb">unpack_thumb()</a> and freed upon
-      calling <a href="API-CXX-eng.html#recycle">recycle()</a>. The size of the allocated buffer is precisely adjusted to the thumbnail size,
+      Memory for the thumbmail is allocated upon calling <a href="API-CXX.html#unpack_thumb">unpack_thumb()</a> and freed upon
+      calling <a href="API-CXX.html#recycle">recycle()</a>. The size of the allocated buffer is precisely adjusted to the thumbnail size,
      i.e., up to several Mb. 
     </p>
 
     <a name="memprofile"></a>
     <h4>Memory for the Decoded ICC Profile</h4>
     <p>
-      Memory for the ICC profile is allocated upon calling  <a href="API-CXX-eng.html#unpack_profile">unpack_profile()</a> and freed upon
-      calling <a href="API-CXX-eng.html#recycle">recycle()</a>. The size of the allocated buffer is precisely adjusted to the ICC profile size,
+      Memory for the ICC profile is allocated upon calling  <a href="API-CXX.html#unpack_profile">unpack_profile()</a> and freed upon
+      calling <a href="API-CXX.html#recycle">recycle()</a>. The size of the allocated buffer is precisely adjusted to the ICC profile size,
      i.e., up to several hundred Kb. 
     </p>
     <a name="memraw"></a>
     <h4>Memory for RAW Unpacking</h4>
     <p>
       Memory for temporary buffer needed during RAW data unpacking may be allocated during the work of <a
-        href="API-CXX-eng.html#unpack">unpack()</a> and freed before completion of this function. The sizes of the allocated
+        href="API-CXX.html#unpack">unpack()</a> and freed before completion of this function. The sizes of the allocated
     buffers are small, up to tens of Kb. 
     </p>
 
@@ -297,11 +297,11 @@
     <h4>Memory for Postprocessing</h4>
     <p>During image postprocessing (inherited from dcraw), memory for the histogram (128 Kb) is allocated.
       This memory is allocated upon calling 
-      <a href="API-CXX-eng.html#dcraw_process">dcraw_process()</a> and freed upon calling
-      <a href="API-CXX-eng.html#recycle">recycle()</a>.
+      <a href="API-CXX.html#dcraw_process">dcraw_process()</a> and freed upon calling
+      <a href="API-CXX.html#recycle">recycle()</a>.
     </p>
     <p>
-      In addition, during the work of <a href="API-CXX-eng.html#dcraw_process">dcraw_process()</a> and during the
+      In addition, during the work of <a href="API-CXX.html#dcraw_process">dcraw_process()</a> and during the
    usage of some available possibilities, like
      </p>
       <ul>
@@ -320,14 +320,14 @@
     <a name="memwrite"></a>
     <h4>Memory for File Writing</h4>
     <p>
-      Upon calling <a href="API-CXX-eng.html#dcraw_ppm_tiff_writer">dcraw_ppm_tiff_writer()</a>, memory for a single row of the
+      Upon calling <a href="API-CXX.html#dcraw_ppm_tiff_writer">dcraw_ppm_tiff_writer()</a>, memory for a single row of the
    output image is allocated. The allocated memory is freed before the end of this call. 
     </p>
     <a name="memunpack"></a>
     <h4>Unpacking into memory buffer</h4>
     <p>
-      Functons <a href="API-CXX-eng.html#dcraw_make_mem_image">dcraw_make_mem_image()</a> Ë 
-      <a href="API-CXX-eng.html#dcraw_make_mem_thumb">dcraw_make_mem_thumb()</a> (and complementary calls in C-API)
+      Functons <a href="API-CXX.html#dcraw_make_mem_image">dcraw_make_mem_image()</a> Ë 
+      <a href="API-CXX.html#dcraw_make_mem_thumb">dcraw_make_mem_thumb()</a> (and complementary calls in C-API)
       allocates memory for entire output datasets  (full RGB bitmap and thumbnail, respectively).
       <b>Calling function should free() this memory themself.</b>
     </p>
@@ -348,12 +348,6 @@
       For all other cameras, thumbnails are extracted &quot;as is,&quot; without any color conversions, both in dcraw and in LibRaw.
     </p>
 
-    <a href=index-eng.html>[back to Index]</a>
-    <hr>
-    <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
-<!-- Created: Sun Mar 16 10:05:08 MSK 2008 -->
-<!-- hhmts start -->
-Last modified: Fri Aug 24 00:31:09 MSK 2012
-<!-- hhmts end -->
+    <a href=index.html>[back to Index]</a>
   </body>
 </html>

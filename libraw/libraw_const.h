@@ -142,7 +142,7 @@ enum LibRaw_exceptions
     LIBRAW_EXCEPTION_DECODE_JPEG2000=9
 };
 
-
+#if 0
 enum LibRaw_colorstate
 {
     LIBRAW_COLORSTATE_UNKNOWN   =0,
@@ -154,6 +154,7 @@ enum LibRaw_colorstate
     LIBRAW_COLORSTATE_RESERVED2 =6,
     LIBRAW_COLORSTATE_RESERVED3 =7
 };
+#endif
 
 enum LibRaw_progress
 {

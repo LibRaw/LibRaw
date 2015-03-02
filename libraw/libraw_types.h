@@ -196,7 +196,7 @@ typedef struct
   unsigned short illuminant;
   float calibration[4][4];
   float colormatrix[4][3];
-} dng_color_t;
+} libraw_dng_color_t;
 
 typedef struct
 {
@@ -226,15 +226,11 @@ typedef struct
   void        *profile;
   unsigned    profile_length;
   unsigned    black_stat[8];
-  dng_color_t  dng_color[2];
+  libraw_dng_color_t  dng_color[2];
   canon_makernotes_t canon_makernotes;
   float	      baseline_exposure;
   int		  OlympusSensorCalibration[2];
   int		digitalBack_color;
-#if 0
-  int		wb_applied;
-  int		gamma_applied;
-#endif
 }libraw_colordata_t;
 
 typedef struct
@@ -308,14 +304,6 @@ typedef struct
     int         no_auto_bright; /* -W */
     int         use_fuji_rotate;/* -j */
     int         green_matching;
-#if 0
-    /* AFD noise suppression parameters, disabled for now */
-    int         afd_noise_att;
-    int         afd_noise_thres;
-    int         afd_luminance_passes;
-    int         afd_chrominance_method;
-    int         afd_luminance_only;
-#endif
     /* DCB parameters */
     int         dcb_iterations;
     int         dcb_enhance_fl;

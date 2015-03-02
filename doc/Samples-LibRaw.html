@@ -5,14 +5,14 @@
   </head>
 
   <body>
-    <a href=index-eng.html>[back to Index]</a>
+    <a href=index.html>[back to Index]</a>
     <h1>LibRaw: Usage Examples</h1>
     
     <h2>Overview of Examples in the Distribution Package (samples/*)</h2>
     <p>The LibRaw package contains several examples illustrating the use of this library.
 Their source codes are located in the samples/ folder, and after library build they will be in the bin/ folder:</p>
     <ul>
-      <li><b>raw-identify</b> The only LibRaw call it uses is <a href="API-CXX-eng.html#open_file">open_file()</a>; 
+      <li><b>raw-identify</b> The only LibRaw call it uses is <a href="API-CXX.html#open_file">open_file()</a>; 
         further code prints the values of the fields of the imgdata structure. The output of 
         <b>raw-identify</b>/<b>raw-identify -v</b> is virtually identical to the output of 
         <b>dcraw -i</b>/<b>dcraw -i -v </b> (in the output of this example, the sources of color data in the numeric
@@ -23,10 +23,10 @@ Their source codes are located in the samples/ folder, and after library build t
         <b>dcraw [-D] [-e] [-v] [-T]</b>. The result of its work must be binary identical to the result produced by a
         dcraw run with relevant keys. A simplified version of this example is <a href="#code">considered below</a>.
         <br/>
-        <b>-B</b> command-line switch turns on use of <a href="API-CXX-eng.html#open_buffer">open_buffer() API call</a>
+        <b>-B</b> command-line switch turns on use of <a href="API-CXX.html#open_buffer">open_buffer() API call</a>
         used via mmap() of input file (Unix only).     
       </li>
-      <li><b>dcraw_half</b> Demonstrates the use of <a href="API-C-eng.html">C API</a>. The example emulates the 
+      <li><b>dcraw_half</b> Demonstrates the use of <a href="API-C.html">C API</a>. The example emulates the 
         behavior of <b>dcraw -h</b> (no other control parameters can be specified in this example). The result of its
         work must be binary identical to the results produced by <b>dcraw -h</b>. 
       </li>
@@ -40,12 +40,12 @@ Their source codes are located in the samples/ folder, and after library build t
         <dl>
           <dt><b>-mmap</b></dt>
           <dd>
-            Use <a href="API-CXX-eng.html#open_buffer">open_buffer()</a> interface. Buffer prepared by mmap()
+            Use <a href="API-CXX.html#open_buffer">open_buffer()</a> interface. Buffer prepared by mmap()
             call. This option not supported under Win32.
           </dd>
           <dt><b>-meme</b></dt>
           <dd>
-            Use <a href="API-CXX-eng.html#open_buffer">open_buffer()</a> interface. Buffer prepared by 
+            Use <a href="API-CXX.html#open_buffer">open_buffer()</a> interface. Buffer prepared by 
             malloc()+read() calls.
           </dd>
           <dt><b>-c float-value</b></dt>
@@ -121,8 +121,8 @@ Their source codes are located in the samples/ folder, and after library build t
         than write one complex code. 
       </li>
       <li><b>mem_image</b> This sample uses 
-        <a  href="API-CXX-eng.html#dcraw_make_mem_image">dcraw_make_mem_image</a> and
-        <a  href="API-CXX-eng.html#dcraw_make_mem_thumb">dcraw_make_mem_thumb</a> calls, than writes data in PPM
+        <a  href="API-CXX.html#dcraw_make_mem_image">dcraw_make_mem_image</a> and
+        <a  href="API-CXX.html#dcraw_make_mem_thumb">dcraw_make_mem_thumb</a> calls, than writes data in PPM
         format.  Results should be identical with dcraw with same command-line options (options supported: 
         <b>-4, -1, -e, -h</b>). 
       </li>
@@ -244,12 +244,6 @@ end:
 </pre>
 
 
-    <a href=index-eng.html>[back to Index]</a>
-    <hr>
-    <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
-<!-- Created: Sun Mar 16 12:19:36 MSK 2008 -->
-<!-- hhmts start -->
-Last modified: Fri Aug 24 00:31:06 MSK 2012
-<!-- hhmts end -->
+    <a href=index.html>[back to Index]</a>
   </body>
 </html>

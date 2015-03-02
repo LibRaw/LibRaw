@@ -691,13 +691,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_name = "eight_bit_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
     }
-#if 0 // OLD kodak decoder
-  else if (load_raw == &LibRaw::kodak_yrgb_load_raw )
-    {
-      d_info->decoder_name = "kodak_yrgb_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
-    }
-#else
   else if (load_raw == &LibRaw::kodak_c330_load_raw )
     {
       d_info->decoder_name = "kodak_yrgb_load_raw()";
@@ -708,7 +701,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_name = "kodak_yrgb_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
     }
-#endif
   else if (load_raw == &LibRaw::kodak_262_load_raw )
     {
       d_info->decoder_name = "kodak_262_load_raw()"; // UNTESTED!
@@ -4256,10 +4248,6 @@ void LibRaw::parse_x3f()
 				  strcpy (imgdata.color.model2, value);
 			  if (!strcmp (name, "TIME"))
 				  imgdata.other.timestamp = atoi(value);
-#if 0
-			  if (!strcmp (name, "EXPTIME"))
-				  imgdata.other.shutter = atoi(value) / 1000000.0;
-#endif
 			  if (!strcmp (name, "SHUTTER"))
 				  imgdata.other.shutter = atof(value);
 			  if (!strcmp (name, "APERTURE"))

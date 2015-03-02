@@ -5,7 +5,7 @@
   </head>
 
   <body>
-    <a href=index-eng.html>[back to Index]</a>
+    <a href=index.html>[back to Index]</a>
     <h1>LibRaw C++ API</h1>
     <p>Contents</p>
     <ol>
@@ -149,15 +149,15 @@
     </ul>
     <p>
       The results of processing are placed in the imgdata field of type <a
-        href=API-datastruct-eng.html>libraw_data_t</a>; the same data set contains fields that control the postprocessing
+        href=API-datastruct.html>libraw_data_t</a>; the same data set contains fields that control the postprocessing
 and output.
     </p>
     <a name="return"></a>
     <h2>Returned Values</h2>
     <p>
       All LibRaw API functions return an integer number in accordance with the
-<a href=API-notes-eng.html#errors>return code convention</a>. Please read the descriptions of 
-<a href=API-notes-eng.html#errors>this convention</a> and <a href="#callbacks">LibRaw behavior
+<a href=API-notes.html#errors>return code convention</a>. Please read the descriptions of 
+<a href=API-notes.html#errors>this convention</a> and <a href="#callbacks">LibRaw behavior
 in cases of fatal errors</a>.
     </p>
 
@@ -168,15 +168,15 @@ in cases of fatal errors</a>.
     <p>Opens a datastream with RAW data, reads metadata (EXIF) from it, and fills the following structures:
     </p>
     <ul>
-      <li>imgdata.idata (<a href="API-datastruct-eng.html#libraw_iparams_t">libraw_iparams_t</a>),</li>
-      <li>imgdata.sizes (<a href="API-datastruct-eng.html#libraw_image_sizes_t">libraw_image_sizes_t</a>),</li>
-      <li>imgdata.color (<a href="API-datastruct-eng.html#libraw_colordata_t">libraw_colordata_t</a>),</li>
-      <li>imgdata.other (<a href="API-datastruct-eng.html#libraw_imgother_t">libraw_imgother_t</a>), and </li>
-      <li>imgdata.thumbnail (<a href="API-datastruct-eng.html#libraw_thumbnail_t">libraw_thumbnail_t</a>).</li>
+      <li>imgdata.idata (<a href="API-datastruct.html#libraw_iparams_t">libraw_iparams_t</a>),</li>
+      <li>imgdata.sizes (<a href="API-datastruct.html#libraw_image_sizes_t">libraw_image_sizes_t</a>),</li>
+      <li>imgdata.color (<a href="API-datastruct.html#libraw_colordata_t">libraw_colordata_t</a>),</li>
+      <li>imgdata.other (<a href="API-datastruct.html#libraw_imgother_t">libraw_imgother_t</a>), and </li>
+      <li>imgdata.thumbnail (<a href="API-datastruct.html#libraw_thumbnail_t">libraw_thumbnail_t</a>).</li>
     </ul>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return
 code convention</a>: positive if any system call has returned an error, negative
-  (from the  <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
+  (from the  <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
 situation within LibRaw.
     </p>
     <p>Before file opening, <a href="#recycle">recycle()</a> is always called; hence, if several images
@@ -199,8 +199,8 @@ are processed in the batch mode, there is no need to call recycle() at the end o
       Second optional parameter <b>bigfile_size</b> controls background I/O interface used for file operations. For
       files smaller than bigfile_size the <a href="#file_datastream">LibRaw_file_datastream</a> will be used and the <a href="#bigfile_datastream">LibRaw_bigfile_datastream</a> otherwise.
     <p>The function returns an integer number in accordance with the 
-      <a href=API-notes-eng.html#errors>return code convention</a>: positive if any system call has returned an error, negative
-      (from the  <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
+      <a href=API-notes.html#errors>return code convention</a>: positive if any system call has returned an error, negative
+      (from the  <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
       situation within LibRaw.
     </p>
 
@@ -213,8 +213,8 @@ are processed in the batch mode, there is no need to call recycle() at the end o
       just created file_datastream destroyed immediately.
     </p>
     <p>The function returns an integer number in accordance with the 
-      <a href=API-notes-eng.html#errors>return code convention</a>: positive if any system call has returned an error, negative
-      (from the  <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
+      <a href=API-notes.html#errors>return code convention</a>: positive if any system call has returned an error, negative
+      (from the  <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
       situation within LibRaw.
     </p>
 
@@ -225,12 +225,12 @@ are processed in the batch mode, there is no need to call recycle() at the end o
     </p>
     <p>
  Data reading is sometimes (not frequently) affected by settings made in imgdata.params (<a
-        href="API-datastruct-eng.html#libraw_output_params_t">libraw_output_params_t</a>); see <a
-        href=API-notes-eng.html>API notes</a> for details.
+        href="API-datastruct.html#libraw_output_params_t">libraw_output_params_t</a>); see <a
+        href=API-notes.html>API notes</a> for details.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
 convention</a>: positive if any system call has returned an error, negative (from the
-      <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
+      <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
 situation within LibRaw.
     </p>
     
@@ -241,12 +241,12 @@ situation within LibRaw.
  JPEG previews are placed into this buffer without any changes (with the header etc.). Other preview
 formats are placed into the buffer in the form of the unpacked bitmap image (three components, 8 bits per component).<br/>
  The thumbnail format is written to the imgdata.thumbnail.tformat field; for the possible values, see
-<a href="API-datastruct-eng.html#LibRaw_thumbnail_formats">description of constants and data structures</a>.
+<a href="API-datastruct.html#LibRaw_thumbnail_formats">description of constants and data structures</a>.
 
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
 convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="utility"></a>
@@ -292,12 +292,12 @@ LibRaw.
     <a name="get_decoder_info"></a>
     <h4>int LibRaw::get_decoder_info(libraw_decoder_info_t *)</h4>
     <p>
-      The function fills <a href=API-datastruct-eng.html#libraw_decoder_info_t>libraw_decoder_info_t</a>
+      The function fills <a href=API-datastruct.html#libraw_decoder_info_t>libraw_decoder_info_t</a>
       structure by passed pointer with current raw decoder data.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
         convention</a>: positive if any system call has returned an error, negative (from the
-      <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+      <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
       LibRaw. 
     </p>
     <a name="unpack_function_name"></a>
@@ -326,18 +326,18 @@ LibRaw.
     <h4>void LibRaw::subtract_black()</h4>
     <p>
       This call will subtract black level values from RAW data (for suitable RAW data).
-      <a href="API-datastruct-eng.html#libraw_colordata_t">colordata.data_maximum</a> and
+      <a href="API-datastruct.html#libraw_colordata_t">colordata.data_maximum</a> and
       <b>colordata.maximum</b> and black level data (<a
-        href="API-datastruct-eng.html#libraw_colordata_t">colordata.black</a> and colordata.cblack) will be adjusted
+        href="API-datastruct.html#libraw_colordata_t">colordata.black</a> and colordata.cblack) will be adjusted
       too.  
     </p>
     <p>
       This call should be used if you postprocess RAW data by your own code. LibRaw 
       <a href="#dcrawemu">postprocessing functions</a> will call <b>subtract_black()</b> by oneself.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
         convention</a>: positive if any system call has returned an error, negative (from the
-      <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+      <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
       LibRaw. 
     </p>
 
@@ -514,7 +514,7 @@ Processing of a new file may be started in the usual way, by calling LibRaw::ope
       Virtually all parameters that can be set through the dcraw command line are specified by assigning values to 
       fields of the <b>LibRaw::imgdata.params</b> structure. The type of this structure is 
       <b>libraw_output_params_t</b>; all fields are listed and described in sufficient detail in the <a
-        href="API-datastruct-eng.html#libraw_output_params_t">description of data structures</a>.
+        href="API-datastruct.html#libraw_output_params_t">description of data structures</a>.
     </p>
     <a name="raw2image"></a>
     <h3>int LibRaw::raw2image</h3>
@@ -526,9 +526,9 @@ Processing of a new file may be started in the usual way, by calling LibRaw::ope
       This function should be called only if your code do postprocessing stage. If you use LibRaw's postprocessing
       calls (see below) you don't need to call raw2image().
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
         convention</a>: positive if any system call has returned an error, negative (from the
-      <a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+      <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
       LibRaw. 
     </p>
 
@@ -566,7 +566,7 @@ this change cannot be repeated again.
       Called after calling LibRaw::unpack();
     </p>
     <p>The entire functionality of dcraw (set via the field values in <a
-        href="API-datastruct-eng.html#libraw_output_params_t">imgdata.params</a>) is supported, except for
+        href="API-datastruct.html#libraw_output_params_t">imgdata.params</a>) is supported, except for
       </p>
     <ul>
       <li>Dark frame subtraction</li>
@@ -575,9 +575,9 @@ this change cannot be repeated again.
     <p>The function is intended solely for demonstration and testing purposes; it is assumed that its source code
 will be used in most real applications as the reference material concerning the order of RAW data processing. 
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>error
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>error
 code convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="dcrawrite"></a>
@@ -593,9 +593,9 @@ files must be binary identical.
      The function outputs the postprocessing results to a file in the PPM/PGM or TIFF format (the format is set via 
       imgdata.params.output_tiff). The results are binary identical to those provided by dcraw.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>error
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>error
 code convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="dcraw_thumb_writer"></a>
@@ -603,9 +603,9 @@ LibRaw.
     <p>Writes the thumbnail to a file in the PPM format for bitmap thumbnails and in the JPEG format for JPEG thumbnails, i.e.,
 in the format completely identical to the results provided by dcraw.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>error
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>error
 code convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="memwrite"></a>
@@ -650,9 +650,9 @@ LibRaw.
       or 16 or 32 bytes to make CPU more happy.</li>
       <li>int bgr - pixel copy order. RGB if bgr==0 and BGR overwise.</li>
     </ul>
-    <p>The function returns an integer number in accordance with the <a href=API-notes-eng.html#errors>error
+    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>error
 code convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct-eng.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="dcraw_make_mem_image"></a>
@@ -660,7 +660,7 @@ LibRaw.
       memory buffer as RGB-bitmap</h3>
     <p>
       This function allocates memory buffer and stores unpacked-preprocessed image into this buffer. Function returns
-      allocated structure <a href="API-datastruct-eng.html#libraw_processed_image_t">libraw_processed_image_t</a> with
+      allocated structure <a href="API-datastruct.html#libraw_processed_image_t">libraw_processed_image_t</a> with
       filled fields. Always returns data as RGB bitmap  (i.e. <b>type</b> field is equal to LIBRAW_IMAGE_BITMAP).
     </p>
     <p>
@@ -669,7 +669,7 @@ LibRaw.
     </p>
     <p>
       Returns NULL in case of an error. If caller has passed not-NULL value as errorcode parameter, than *errorcode
-      will be set to error code according to <a href="API-notes-eng.html#errors">error code convention</a>.
+      will be set to error code according to <a href="API-notes.html#errors">error code convention</a>.
     </p>
     <p><b>NOTE!</b> Memory, allocated for return value will not be fried at destructor or <b>LibRaw::recycle</b>
       calls. Caller of dcraw_make_mem_image should free this memory by call to <a
@@ -680,7 +680,7 @@ LibRaw.
     <h3>libraw_processed_image_t *dcraw_make_mem_thumb(int *errorcode=NULL) - store unpacked thumbnail into memory buffer</h3>
     <p>
       This function allocates memory buffer and stores thumbnail data in it. Function returns allocated
-      structure <a href="API-datastruct-eng.html#libraw_processed_image_t">libraw_processed_image_t</a> with
+      structure <a href="API-datastruct.html#libraw_processed_image_t">libraw_processed_image_t</a> with
       filled fields. For most RAW images allocated structure will contains JPEG image (i.e. <b>type</b>
       field is equal to  LIBRAW_IMAGE_JPEG). For some cameras with RGB-bitmap thumbnail (Kodak SLRs) 
       returned structure contains RGB bitmap (<b>type</b> field is equal to  LIBRAW_IMAGE_JPEG, see structure
@@ -691,7 +691,7 @@ LibRaw.
     </p>
     <p>
       Returns NULL in case of an error. If caller has passed not-NULL value as errorcode parameter, than *errorcode
-      will be set to error code according to ñ <a href=API-notes-eng.html#errors>error code convention</a>.
+      will be set to error code according to ñ <a href=API-notes.html#errors>error code convention</a>.
     </p>
     <p><b>NOTE!</b> Memory, allocated for return value will not be fried at destructor or <b>LibRaw::recycle</b>
       calls. Caller of dcraw_make_mem_image should free this memory by call to <a
@@ -926,12 +926,6 @@ LibRaw.
 
 
 
-    <a href=index-eng.html>[back to Index]</a>
-    <hr>
-    <address><a href="mailto:info@libraw.org">LibRaw Team</a></address>
-<!-- Created: Sun Mar 16 10:08:29 MSK 2008 -->
-<!-- hhmts start -->
-Last modified: Sun Sep 22 13:53:18 MSK 2013
-<!-- hhmts end -->
+    <a href=index.html>[back to Index]</a>
   </body>
 </html>
