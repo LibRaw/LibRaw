@@ -7792,16 +7792,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                 fread(imgdata.lens.makernotes.Lens + 5, 58, 1, ifp);
               }
           }
-#if 0 // handled different by Dave
-        else if (tag == 0x4021)			// multi-exposure tag
-          {
-            get4();
-            if (get4() == 2)
-              {
-                imgdata.color.wb_applied = 1;
-              }
-          }
-#endif
       }
 
     else if (!strncmp(make, "FUJI", 4))
@@ -7925,15 +7915,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                   (float)imgdata.lens.nikon.NikonLensFStops /12.0f;
               }
           }
-        else if ((tag == 0x0093) &&		// compression
-                 (get2() == 8))				// sRAW
-          {
-#if 0
-            imgdata.color.wb_applied = 1;
-            imgdata.color.gamma_applied = 1;
-#endif
-          }
-
         else if (tag == 0x0098)				// contains lens data
           {
             for (i = 0; i < 4; i++)
@@ -8658,34 +8639,6 @@ void CLASS parse_makernote (int base, int uptag)
                 fread(imgdata.lens.makernotes.Lens + 5, 58, 1, ifp);
               }
           }
-        else if (tag == 0x00e0)			// sensor info
-          {
-#if 0
-            unsigned SensorWidth, SensorHeight, SensorLeftBorder, SensorTopBorder,
-                     SensorRightBorder, SensorBottomBorder, BlackMaskLeftBorder,
-                     BlackMaskTopBorder, BlackMaskRightBorder, BlackMaskBottomBorder;
-            SensorWidth = (get2(),get2());  // raw_width
-            SensorHeight = get2();          // raw_height
-            SensorLeftBorder = (get4(),get2());
-            SensorTopBorder = get2();
-            SensorRightBorder = get2();
-            SensorBottomBorder = get2();
-            BlackMaskLeftBorder = get2();
-            BlackMaskTopBorder = get2();
-            BlackMaskRightBorder = get2();
-            BlackMaskBottomBorder = get2();
-#endif
-          }
-        else if (tag == 0x4021)			// multi-exposure tag
-          {
-#if 0
-            get4();
-            if (get4() == 2)
-              {
-                imgdata.color.wb_applied = 1;
-              }
-#endif
-          }
       }
 
     else if (!strncmp(make, "FUJI", 4))
@@ -8803,14 +8756,6 @@ void CLASS parse_makernote (int base, int uptag)
                 imgdata.lens.makernotes.LensFStops =
                   (float)imgdata.lens.nikon.NikonLensFStops /12.0f;
               }
-          }
-        else if ((tag == 0x0093) &&		// compression
-                 (get2() == 8))				// sRAW
-          {
-#if 0
-            imgdata.color.wb_applied = 1;
-            imgdata.color.gamma_applied = 1;
-#endif
           }
         else if (tag == 0x0098)				// contains lens data
           {
@@ -13791,11 +13736,6 @@ canon_a5:
   } else if (!strcmp(model,"D1")) {
     cam_mul[0] *= 256/527.0;
     cam_mul[2] *= 256/317.0;
-#ifdef LIBRAW_LIBRARY_BUILD
-#if 0
-    imgdata.color.wb_applied = 1;
-#endif
-#endif
   } else if (!strcmp(model,"D1X")) {
     width -= 4;
     pixel_aspect = 0.5;
