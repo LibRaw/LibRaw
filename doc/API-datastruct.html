@@ -561,7 +561,10 @@ changes the output size.
       <dt><b>int         use_camera_matrix;</b></dt>
       <dd>
         <b>dcraw keys:</b>  +M/-M <br/>
-        Use (1)/don't use camera color matrix.
+        <ul>
+	<li>0: do not use embedded color profile
+	<li>1 (default): use embedded color profile (if present) for DNG files (always); for other files only if use_camera_wb is set;
+	<li>3: use embedded color data (if present) regardless of white balance setting.
       </dd>
       <dt><b>int         output_color;</b></dt>
       <dd>

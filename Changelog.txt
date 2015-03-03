@@ -10,8 +10,6 @@
 
  * Exif/Makernotes parser callback (called for each processed tag)
 
- * Provided color data source
-
  * Sony ARW2.3 decoder:
    - params.sony_arw2_hack removed, decoded data are always in 0...17k range (note the difference with dcraw!)
    - Additional processing options for Sony lossy compression techincal analysis.
@@ -23,7 +21,7 @@
 
  * 196 camera models added to supported camera list.
    Some of them are new (released since LibRaw 0.16 come out), some was supported before, but missed from the list.
-   The list is :
+   Added cameras are:
 
   Alcatel 5035D
   BlackMagic Pocket Cinema Camera, Production Camera 4k
