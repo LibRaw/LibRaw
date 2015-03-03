@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: dcraw_half.c
- * Copyright 2008-2013 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2015 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  *
  * LibRaw  C API sample:  emulates "dcraw  -h"
