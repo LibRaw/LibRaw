@@ -27,6 +27,7 @@
 make -f Makefile.devel
 git commit -a -m "v.102"
 git push
+git log --pretty=format:"%h - %an, %ar : %s"
 
  */
 /*@out DEFINES
@@ -7046,15 +7047,19 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
     imgdata.lens.nikon.NikonLensIDNumber = LensData[i];
     imgdata.lens.nikon.NikonLensFStops = LensData[i + 1];
     imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops /12.0f;
-    imgdata.lens.makernotes.MinFocal = 5.0f * powf64(2.0f, (float)LensData[i + 2] / 24.0f);
-    imgdata.lens.makernotes.MaxFocal = 5.0f * powf64(2.0f, (float)LensData[i + 3] / 24.0f);
-    imgdata.lens.makernotes.MaxAp4MinFocal = powf64(2.0f, (float)LensData[i + 4] / 24.0f);
-    imgdata.lens.makernotes.MaxAp4MaxFocal = powf64(2.0f, (float)LensData[i + 5] / 24.0f);
+    if ((imgdata.lens.nikon.NikonLensType != 1) || LensData[i + 2])
+      imgdata.lens.makernotes.MinFocal = 5.0f * powf64(2.0f, (float)LensData[i + 2] / 24.0f);
+    if ((imgdata.lens.nikon.NikonLensType != 1) || LensData[i + 3])
+      imgdata.lens.makernotes.MaxFocal = 5.0f * powf64(2.0f, (float)LensData[i + 3] / 24.0f);
+    if ((imgdata.lens.nikon.NikonLensType != 1) || LensData[i + 4])
+      imgdata.lens.makernotes.MaxAp4MinFocal = powf64(2.0f, (float)LensData[i + 4] / 24.0f);
+    if ((imgdata.lens.nikon.NikonLensType != 1) || LensData[i + 5])
+      imgdata.lens.makernotes.MaxAp4MaxFocal = powf64(2.0f, (float)LensData[i + 5] / 24.0f);
     imgdata.lens.nikon.NikonMCUVersion = LensData[i + 6];
     if (i != 2)
       {
-        imgdata.lens.makernotes.CurFocal = 5.0f * powf64(2.0f, (float)LensData[i - 1] / 24.0f);
-        imgdata.lens.nikon.NikonEffectiveMaxAp = powf64(2.0f, (float)LensData[i + 7] / 24.0f);
+        if (LensData[i - 1]) imgdata.lens.makernotes.CurFocal = 5.0f * powf64(2.0f, (float)LensData[i - 1] / 24.0f);
+        if (LensData[i + 7]) imgdata.lens.nikon.NikonEffectiveMaxAp = powf64(2.0f, (float)LensData[i + 7] / 24.0f);
       }
     imgdata.lens.makernotes.LensID =
       (unsigned long long) LensData[i] << 56 |
