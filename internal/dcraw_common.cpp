@@ -5879,7 +5879,10 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F;
 
   if (imgdata.lens.nikon.NikonLensType & 0x20)
+  {
     strcpy(imgdata.lens.makernotes.Adapter, "FT-1");
+    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F;
+  }
 
   imgdata.lens.nikon.NikonLensType = imgdata.lens.nikon.NikonLensType & 0xdf;
 
@@ -6477,7 +6480,7 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
 
 void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 {
-  unsigned offset = 0, entries, tag, type, len, save, c;
+  unsigned ver97 = 0, offset = 0, entries, tag, type, len, save, c;
   unsigned i;
 
   uchar NikonKey, ci, cj, ck;
@@ -6709,7 +6712,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         if (tag == 0x1d)							// serial number
           while ((c = fgetc(ifp)) && c != EOF)
             serial = serial * 10 + (isdigit(c) ? c - '0' : c % 10);
-
+        else if (tag == 0x000a)
+          {
+            imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+            imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+          }
         else if (tag == 0x0082)				// lens attachment
           {
             fread(imgdata.lens.makernotes.Attachment, len, 1, ifp);
@@ -6738,6 +6745,25 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                   (float)imgdata.lens.nikon.NikonLensFStops /12.0f;
               }
           }
+        else if (tag == 0x0093)
+          {
+            i = get2();
+            if ((i == 7) || (i == 9))
+            {
+              imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+              imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+            }
+          }
+        else if (tag == 0x0097)
+          {
+            for (i=0; i < 4; i++)
+	            ver97 = ver97 * 10 + fgetc(ifp)-'0';
+	          if (ver97 == 601)  // Coolpix A
+	          {
+	            imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+              imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+	          }
+	        }
         else if (tag == 0x0098)				// contains lens data
           {
             for (i = 0; i < 4; i++)
@@ -7525,7 +7551,12 @@ void CLASS parse_makernote (int base, int uptag)
 
     else if (!strncmp(make, "NIKON",5))
       {
-        if (tag == 0x0082)						// lens attachment
+        if (tag == 0x000a)
+          {
+            imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+            imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+          }
+        else if (tag == 0x0082)				// lens attachment
           {
             fread(imgdata.lens.makernotes.Attachment, len, 1, ifp);
           }
@@ -7552,6 +7583,15 @@ void CLASS parse_makernote (int base, int uptag)
                 imgdata.lens.makernotes.LensFStops =
                   (float)imgdata.lens.nikon.NikonLensFStops /12.0f;
               }
+          }
+        else if (tag == 0x0093)
+          {
+            i = get2();
+            if ((i == 7) || (i == 9))
+            {
+              imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+              imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+            }
           }
         else if (tag == 0x0098)				// contains lens data
           {
@@ -8320,6 +8360,11 @@ void CLASS parse_makernote (int base, int uptag)
           table_buf[i] ^= (cj += ci * ck++);
         processNikonLensData(table_buf, lenNikonLensData);
         lenNikonLensData = 0;
+    	}
+    	if (ver97 == 601)  // Coolpix A
+    	{
+        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+        imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
     	}
 #endif
     }
