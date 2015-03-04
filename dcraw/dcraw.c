@@ -25,7 +25,7 @@
    $Date: 2015/02/25 18:18:18 $
 
 make -f Makefile.devel
-git commit -a -m "v.102"
+git commit -a -m "v.106"
 git push
 git log --pretty=format:"%h - %an, %ar : %s"
 
@@ -7032,6 +7032,42 @@ void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo)
 void CLASS processNikonLensData (uchar *LensData, unsigned len)
 {
   ushort i;
+  if (!(imgdata.lens.nikon.NikonLensType & 0x01))
+    {
+      imgdata.lens.makernotes.LensFeatures_pre[0] = 'A';
+      imgdata.lens.makernotes.LensFeatures_pre[1] = 'F';
+    }
+  else
+    {
+      imgdata.lens.makernotes.LensFeatures_pre[0] = 'M';
+      imgdata.lens.makernotes.LensFeatures_pre[1] = 'F';
+    }
+
+  if (imgdata.lens.nikon.NikonLensType & 0x02)
+    {
+      if (imgdata.lens.nikon.NikonLensType & 0x04)
+        imgdata.lens.makernotes.LensFeatures_suf[0] = 'G';
+      else
+        imgdata.lens.makernotes.LensFeatures_suf[0] = 'D';
+      imgdata.lens.makernotes.LensFeatures_suf[1] = ' ';
+    }
+
+  if (imgdata.lens.nikon.NikonLensType & 0x08)
+    {
+      imgdata.lens.makernotes.LensFeatures_suf[2] = 'V';
+      imgdata.lens.makernotes.LensFeatures_suf[3] = 'R';
+    }
+
+  if (imgdata.lens.nikon.NikonLensType & 0x10)
+    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_CX;
+  else
+    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F;
+
+  if (imgdata.lens.nikon.NikonLensType & 0x20)
+    strcpy(imgdata.lens.makernotes.Adapter, "FT-1");
+
+  imgdata.lens.nikon.NikonLensType = imgdata.lens.nikon.NikonLensType & 0xdf;
+
   if (len < 20) {
     switch (len) {
     case 9:
@@ -7047,13 +7083,13 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
     imgdata.lens.nikon.NikonLensIDNumber = LensData[i];
     imgdata.lens.nikon.NikonLensFStops = LensData[i + 1];
     imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops /12.0f;
-    if ((imgdata.lens.nikon.NikonLensType != 1) || LensData[i + 2])
+    if ((imgdata.lens.nikon.NikonLensType ^ (uchar)0x01) || LensData[i + 2])
       imgdata.lens.makernotes.MinFocal = 5.0f * powf64(2.0f, (float)LensData[i + 2] / 24.0f);
-    if ((imgdata.lens.nikon.NikonLensType != 1) || LensData[i + 3])
+    if ((imgdata.lens.nikon.NikonLensType ^ (uchar)0x01) || LensData[i + 3])
       imgdata.lens.makernotes.MaxFocal = 5.0f * powf64(2.0f, (float)LensData[i + 3] / 24.0f);
-    if ((imgdata.lens.nikon.NikonLensType != 1) || LensData[i + 4])
+    if ((imgdata.lens.nikon.NikonLensType ^ (uchar)0x01) || LensData[i + 4])
       imgdata.lens.makernotes.MaxAp4MinFocal = powf64(2.0f, (float)LensData[i + 4] / 24.0f);
-    if ((imgdata.lens.nikon.NikonLensType != 1) || LensData[i + 5])
+    if ((imgdata.lens.nikon.NikonLensType ^ (uchar)0x01) || LensData[i + 5])
       imgdata.lens.makernotes.MaxAp4MaxFocal = powf64(2.0f, (float)LensData[i + 5] / 24.0f);
     imgdata.lens.nikon.NikonMCUVersion = LensData[i + 6];
     if (i != 2)
@@ -7866,34 +7902,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         else if (tag == 0x0083)				// lens type
           {
             imgdata.lens.nikon.NikonLensType = fgetc(ifp);
-            if (!(imgdata.lens.nikon.NikonLensType & 0x01))
-              {
-                imgdata.lens.makernotes.LensFeatures_pre[0] = 'A';
-                imgdata.lens.makernotes.LensFeatures_pre[1] = 'F';
-              }
-            if (imgdata.lens.nikon.NikonLensType & 0x02)
-              {
-                if (imgdata.lens.nikon.NikonLensType & 0x04)
-                  imgdata.lens.makernotes.LensFeatures_suf[0] = 'G';
-                else
-                  imgdata.lens.makernotes.LensFeatures_suf[0] = 'D';
-                imgdata.lens.makernotes.LensFeatures_suf[1] = ' ';
-              }
-            if (imgdata.lens.nikon.NikonLensType & 0x08)
-              {
-                imgdata.lens.makernotes.LensFeatures_suf[2] = 'V';
-                imgdata.lens.makernotes.LensFeatures_suf[3] = 'R';
-              }
-            if (imgdata.lens.nikon.NikonLensType & 0x10)
-              {
-                imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_CX;
-              }
-
-            if (imgdata.lens.nikon.NikonLensType & 0x20)
-              {
-                strcpy(imgdata.lens.makernotes.Adapter, "FT-1");
-              }
-            imgdata.lens.nikon.NikonLensType = imgdata.lens.nikon.NikonLensType & 0xdf;
           }
         else if (tag == 0x0084)				// lens
           {
@@ -7923,12 +7931,12 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               }
             switch (NikonLensDataVersion)
               {
-              case 100: lenNikonLensData = 9; imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F; break;
+              case 100: lenNikonLensData = 9; break;
               case 101:
               case 201:	// encrypted, starting from v.201
               case 202:
-              case 203: lenNikonLensData = 15; imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F; break;
-              case 204: lenNikonLensData = 16; imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F; break;
+              case 203: lenNikonLensData = 15; break;
+              case 204: lenNikonLensData = 16; break;
               case 400: lenNikonLensData = 459; break;
               case 401: lenNikonLensData = 590; break;
               case 402: lenNikonLensData = 509; break;
@@ -8709,33 +8717,6 @@ void CLASS parse_makernote (int base, int uptag)
         else if (tag == 0x0083)				// lens type
           {
             imgdata.lens.nikon.NikonLensType = fgetc(ifp);
-            if (!(imgdata.lens.nikon.NikonLensType & 0x01))
-              {
-                imgdata.lens.makernotes.LensFeatures_pre[0] = 'A';
-                imgdata.lens.makernotes.LensFeatures_pre[1] = 'F';
-              }
-            if (imgdata.lens.nikon.NikonLensType & 0x02)
-              {
-                if (imgdata.lens.nikon.NikonLensType & 0x04)
-                  imgdata.lens.makernotes.LensFeatures_suf[0] = 'G';
-                else
-                  imgdata.lens.makernotes.LensFeatures_suf[0] = 'D';
-                imgdata.lens.makernotes.LensFeatures_suf[1] = ' ';
-              }
-            if (imgdata.lens.nikon.NikonLensType & 0x08)
-              {
-                imgdata.lens.makernotes.LensFeatures_suf[2] = 'V';
-                imgdata.lens.makernotes.LensFeatures_suf[3] = 'R';
-              }
-            if (imgdata.lens.nikon.NikonLensType & 0x10)
-              {
-                imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_CX;
-              }
-            if (imgdata.lens.nikon.NikonLensType & 0x20)
-              {
-                strcpy(imgdata.lens.makernotes.Adapter, "FT-1");
-              }
-            imgdata.lens.nikon.NikonLensType = imgdata.lens.nikon.NikonLensType & 0xdf;
           }
         else if (tag == 0x0084)				// lens
           {
@@ -8765,12 +8746,12 @@ void CLASS parse_makernote (int base, int uptag)
               }
             switch (NikonLensDataVersion)
               {
-              case 100: lenNikonLensData = 9; imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F; break;
+              case 100: lenNikonLensData = 9; break;
               case 101:
               case 201:	// encrypted, starting from v.201
               case 202:
-              case 203: lenNikonLensData = 15; imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F; break;
-              case 204: lenNikonLensData = 16; imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F; break;
+              case 203: lenNikonLensData = 15; break;
+              case 204: lenNikonLensData = 16; break;
               case 400: lenNikonLensData = 459; break;
               case 401: lenNikonLensData = 590; break;
               case 402: lenNikonLensData = 509; break;
