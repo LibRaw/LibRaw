@@ -7398,9 +7398,6 @@ void CLASS parse_makernote (int base, int uptag)
 
   entries = get2();
 
-//  printf("\n*** parse_makernote\n\tmake  =%s=\n\tmodel =%s= \n\tentries: %d\n\tpos: 0x%llx\n",
-//    make, model, entries, ftell(ifp));
-
   if (entries > 1000) return;
   morder = order;
   while (entries--) {
@@ -8867,7 +8864,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 #endif
-#line 10053 "dcraw/dcraw.c"
+#line 10050 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -9466,81 +9463,85 @@ guess_cfa_pc:
         break;
 #endif
 		  // IB start
-			case 50740:			/* tag 0xc634 : DNG Adobe, DNG Pentax, Sony SR2, DNG Private */
+    case 50740:			/* tag 0xc634 : DNG Adobe, DNG Pentax, Sony SR2, DNG Private */
+#ifdef LIBRAW_LIBRARY_BUILD
       {
         char mbuf[64];
         unsigned short makernote_found = 0;
-        unsigned curr_pos, start_pos = ftell(ifp);
+        INT64 curr_pos, start_pos = ftell(ifp);
         unsigned MakN_order, m_sorder = order;
         unsigned MakN_length;
         unsigned pos_in_original_raw;
         fread(mbuf, 1, 6, ifp);
 
-        if (!strcmp(mbuf, "Adobe")) {
-          order = 0x4d4d;				// Adobe header is always in "MM" / big endian
-          curr_pos = start_pos + 6;
-          while (curr_pos + 8 - start_pos <= len)
-            {
-              fread(mbuf, 1, 4, ifp);
-              curr_pos += 8;
-              if (!strncmp(mbuf, "MakN", 4)) {
-                makernote_found = 1;
+        if (!strcmp(mbuf, "Adobe")) 
+          {
+            order = 0x4d4d;				// Adobe header is always in "MM" / big endian
+            curr_pos = start_pos + 6;
+            while (curr_pos + 8 - start_pos <= len)
+              {
+                fread(mbuf, 1, 4, ifp);
+                curr_pos += 8;
+                if (!strncmp(mbuf, "MakN", 4)) {
+                  makernote_found = 1;
                 MakN_length = get4();
                 MakN_order = get2();
                 pos_in_original_raw = get4();
                 order = MakN_order;
                 parse_makernote_0xc634(curr_pos + 6 - pos_in_original_raw, 0, AdobeDNG);
                 break;
+                }
               }
-            }
-        }
-        else {
-          fread(mbuf + 6, 1, 2, ifp);
-          if (!strcmp(mbuf, "PENTAX ") ||
-              !strcmp(mbuf, "SAMSUNG"))
-            {
-              makernote_found = 1;
-              fseek(ifp, start_pos, SEEK_SET);
-              parse_makernote_0xc634(base, 0, CameraDNG);
-            }
-        }
-
-        if (!makernote_found) fseek(ifp, start_pos, SEEK_SET);
+          }
+        else 
+          {
+            fread(mbuf + 6, 1, 2, ifp);
+            if (!strcmp(mbuf, "PENTAX ") ||
+                !strcmp(mbuf, "SAMSUNG"))
+              {
+                makernote_found = 1;
+                fseek(ifp, start_pos, SEEK_SET);
+                parse_makernote_0xc634(base, 0, CameraDNG);
+              }
+          }
+        
+        fseek(ifp, start_pos, SEEK_SET);
         order = m_sorder;
       }
       // IB end
-	if (dng_version) break;
-	parse_minolta (j = get4()+base);
-	fseek (ifp, j, SEEK_SET);
-	parse_tiff_ifd (base);
-	break;
-      case 50752:
-	read_shorts (cr2_slice, 3);
-	break;
-      case 50829:			/* ActiveArea */
-	top_margin = getint(type);
-	left_margin = getint(type);
-	height = getint(type) - top_margin;
-	width = getint(type) - left_margin;
-	break;
-      case 50830:			/* MaskedAreas */
-        for (i=0; i < len && i < 32; i++)
-	  mask[0][i] = getint(type);
-	black = 0;
-	break;
-      case 51009:			/* OpcodeList2 */
-	meta_offset = ftell(ifp);
-	break;
-      case 64772:			/* Kodak P-series */
-	if (len < 13) break;
-	fseek (ifp, 16, SEEK_CUR);
-	data_offset = get4();
-	fseek (ifp, 28, SEEK_CUR);
-	data_offset += get4();
-	load_raw = &CLASS packed_load_raw;
-	break;
-      case 65026:
-	if (type == 2) fgets (model2, 64, ifp);
+#endif
+      if (dng_version) break;
+      parse_minolta (j = get4()+base);
+      fseek (ifp, j, SEEK_SET);
+      parse_tiff_ifd (base);
+      break;
+    case 50752:
+      read_shorts (cr2_slice, 3);
+      break;
+    case 50829:			/* ActiveArea */
+      top_margin = getint(type);
+      left_margin = getint(type);
+      height = getint(type) - top_margin;
+      width = getint(type) - left_margin;
+      break;
+    case 50830:			/* MaskedAreas */
+      for (i=0; i < len && i < 32; i++)
+        mask[0][i] = getint(type);
+      black = 0;
+      break;
+    case 51009:			/* OpcodeList2 */
+      meta_offset = ftell(ifp);
+      break;
+    case 64772:			/* Kodak P-series */
+      if (len < 13) break;
+      fseek (ifp, 16, SEEK_CUR);
+      data_offset = get4();
+      fseek (ifp, 28, SEEK_CUR);
+      data_offset += get4();
+      load_raw = &CLASS packed_load_raw;
+      break;
+    case 65026:
+      if (type == 2) fgets (model2, 64, ifp);
     }
     fseek (ifp, save, SEEK_SET);
   }
@@ -10553,7 +10554,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 11876 "dcraw/dcraw.c"
+#line 11877 "dcraw/dcraw.c"
 
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
@@ -13207,7 +13208,7 @@ notraw:
 }
 
 
-#line 14618 "dcraw/dcraw.c"
+#line 14619 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -13438,7 +13439,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 14874 "dcraw/dcraw.c"
+#line 14875 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
