@@ -7732,13 +7732,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
   entries = get2();
 
-// if (dng_writer == AdobeDNG)
-//   printf("\n*** parse_makernote_0xc634: AdobeDNG");
-// else if (dng_writer == CameraDNG)
-//   printf("\n*** parse_makernote_0xc634: CameraDNG");
-
-//   printf ("\n\tbuf  =%s=\n\tmake  =%s=\n\tmodel =%s=\n\tbase: 0x%x\n\tentries: %d\n",
-//   		buf, make, model, base, entries);
 
   if (entries > 1000) return;
   morder = order;
@@ -7747,8 +7740,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     tiff_get(base, &tag, &type, &len, &save);
     tag |= uptag << 16;
 
-// 	printf ("\n\tbase: 0x%x tag: 0x%04x type: 0x%x len: 0x%x pos: 0x%llx",
-// 			base, tag, type, len, ftell(ifp));
 
     if (!strcmp(make, "Canon"))
       {
@@ -8594,11 +8585,9 @@ void CLASS parse_makernote (int base, int uptag)
     tiff_get (base, &tag, &type, &len, &save);
     tag |= uptag << 16;
 
-// 	printf ("\n\tbase: 0x%x tag: 0x%04x type: 0x%x len: 0x%x pos: 0x%llx",
-// 		base, tag, type, len, ftell(ifp));
 
 #ifdef LIBRAW_LIBRARY_BUILD
-
+    INT64 _pos = ftell(ifp);
     if (!strcmp(make, "Canon"))
       {
         if (tag == 0x0001)				// camera settings
@@ -9296,6 +9285,8 @@ void CLASS parse_makernote (int base, int uptag)
             free(table_buf);
           }
       }
+
+    fseek(ifp,_pos,SEEK_SET);
 #endif
 
     if (tag == 2 && strstr(make,"NIKON") && !iso_speed)
@@ -9351,6 +9342,8 @@ void CLASS parse_makernote (int base, int uptag)
       }
 
 #ifdef LIBRAW_LIBRARY_BUILD
+    INT64 _pos2 = ftell(ifp);
+
     if(tag == 0x20400805 && len == 2 && !strncasecmp(make,"Olympus",7))
       {
         imgdata.color.OlympusSensorCalibration[0]=getreal(type);
@@ -9442,6 +9435,9 @@ void CLASS parse_makernote (int base, int uptag)
           }
         fseek (ifp, save1, SEEK_SET);
       }
+
+    fseek(ifp,_pos2,SEEK_SET);
+
 #endif
     if (tag == 0x11 && is_raw && !strncmp(make,"NIKON",5)) {
       fseek (ifp, get4()+base, SEEK_SET);
@@ -9550,11 +9546,11 @@ void CLASS parse_makernote (int base, int uptag)
           table_buf[i] ^= (cj += ci * ck++);
         processNikonLensData(table_buf, lenNikonLensData);
         lenNikonLensData = 0;
-    	}
-    	if (ver97 == 601)  // Coolpix A
+      }
+      if (ver97 == 601)  // Coolpix A
     	{
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-        imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+          imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
     	}
 #endif
     }
@@ -9643,11 +9639,13 @@ get2_256:
     if (tag == 0x2040)
       parse_makernote (base, 0x2040);
 #ifdef LIBRAW_LIBRARY_BUILD
-	// IB start
-	if (tag == 0x2010)
-	  {
-		parse_makernote(base, 0x2010);
-	  }
+    // IB start
+    if (tag == 0x2010)
+      {
+        INT64 _pos3 = ftell(ifp);
+        parse_makernote(base, 0x2010);
+        fseek(ifp,_pos3,SEEK_SET);
+      }
 	// IB end
 #endif
     if (tag == 0xb028) {
