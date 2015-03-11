@@ -7770,7 +7770,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               }
           }
 
-        else if (tag == 0x0004)			// shot info
+        else if ((tag == 0x0004) && (len > 43))  // shot info
           {
             fseek(ifp, 42, SEEK_CUR);
             imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
@@ -8614,7 +8614,7 @@ void CLASS parse_makernote (int base, int uptag)
               }
           }
 
-        else if (tag == 0x0004)			// shot info
+        else if ((tag == 0x0004) && (len > 43))			// shot info
           {
             fseek(ifp, 42, SEEK_CUR);
             imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
@@ -10656,7 +10656,7 @@ guess_cfa_pc:
         unsigned pos_in_original_raw;
         fread(mbuf, 1, 6, ifp);
 
-        if (!strcmp(mbuf, "Adobe")) 
+        if (!strcmp(mbuf, "Adobe"))
           {
             order = 0x4d4d;				// Adobe header is always in "MM" / big endian
             curr_pos = start_pos + 6;
@@ -10675,7 +10675,7 @@ guess_cfa_pc:
                 }
               }
           }
-        else 
+        else
           {
             fread(mbuf + 6, 1, 2, ifp);
             if (!strcmp(mbuf, "PENTAX ") ||
@@ -10686,7 +10686,7 @@ guess_cfa_pc:
                 parse_makernote_0xc634(base, 0, CameraDNG);
               }
           }
-        
+
         fseek(ifp, start_pos, SEEK_SET);
         order = m_sorder;
       }
