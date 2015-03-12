@@ -6764,7 +6764,7 @@ static float _CanonConvert2EV(short in)
 
 static float _CanonConvertAperture(short in)
 {
-  if (in == (short)0xffe0) return 0.0f;
+  if ((in == (short)0xffe0) || (in == (short)0x7fff)) return 0.0f;
   else return powf64(2.0f, _CanonConvert2EV(in) / 2.0f);
 }
 
@@ -7770,10 +7770,17 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               }
           }
 
-        else if ((tag == 0x0004) && (len > 20))  // shot info
+        else if (tag == 0x0004)			// shot info
           {
-            fseek(ifp, 42, SEEK_CUR);
-            imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
+            short tempAp;
+            fseek(ifp, 8, SEEK_CUR);
+            if ((tempAp = get2()) != 0x7fff)
+              aperture = imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
+            if (aperture < 0.7f)
+            {
+              fseek(ifp, 32, SEEK_CUR);
+              aperture = imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
+            }
           }
 
         else if (tag == 0x000d)			// camera info
@@ -8619,10 +8626,17 @@ void CLASS parse_makernote (int base, int uptag)
               }
           }
 
-        else if ((tag == 0x0004) && (len > 20))			// shot info
+        else if (tag == 0x0004)			// shot info
           {
-            fseek(ifp, 42, SEEK_CUR);
-            imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
+            short tempAp;
+            fseek(ifp, 8, SEEK_CUR);
+            if ((tempAp = get2()) != 0x7fff)
+              aperture = imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
+            if (aperture < 0.7f)
+            {
+              fseek(ifp, 32, SEEK_CUR);
+              aperture = imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
+            }
           }
 
         else if (tag == 0x000d)			// camera info
@@ -9302,8 +9316,12 @@ void CLASS parse_makernote (int base, int uptag)
     if (tag == 4 && len > 26 && len < 35) {
       if ((i=(get4(),get2())) != 0x7fff && (!iso_speed || iso_speed == 65535))
 	iso_speed = 50 * powf64(2.0, i/32.0 - 4);
+#ifdef LIBRAW_LIBRARY_BUILD
+      get4();
+#else
       if ((i=(get2(),get2())) != 0x7fff && !aperture)
 	aperture = powf64(2.0, i/64.0);
+#endif
       if ((i=get2()) != 0xffff && !shutter)
 	shutter = powf64(2.0, (short) i/-32.0);
       wbi = (get2(),get2());
