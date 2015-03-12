@@ -8575,8 +8575,8 @@ void CLASS parse_makernote (int base, int uptag)
 
   entries = get2();
 
-  printf("\n*** parse_makernote\n\tmake  =%s=\n\tmodel =%s= \n\tentries: %d\n\tpos: 0x%llx\n",
-    make, model, entries, ftell(ifp));
+//  printf("\n*** parse_makernote\n\tmake  =%s=\n\tmodel =%s= \n\tentries: %d\n\tpos: 0x%llx\n",
+//    make, model, entries, ftell(ifp));
 
   if (entries > 1000) return;
   morder = order;
@@ -8585,9 +8585,8 @@ void CLASS parse_makernote (int base, int uptag)
     tiff_get (base, &tag, &type, &len, &save);
     tag |= uptag << 16;
 
- 	if (tag == 0x0004)
- 	  printf ("\n\tbase: 0x%x tag: 0x%04x type: 0x%x len: 0x%x pos: 0x%llx",
- 		  base, tag, type, len, ftell(ifp));
+// 	  printf ("\n\tbase: 0x%x tag: 0x%04x type: 0x%x len: 0x%x pos: 0x%llx",
+// 		  base, tag, type, len, ftell(ifp));
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
