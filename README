@@ -11,11 +11,11 @@ RAW conversion.
 The library is intended for embedding in RAW converters, data analyzers, and 
 other programs using RAW files as the initial data.
 
-LibRaw library, Copyright (C) 2008-2009 LibRaw LLC (info@libraw.org)
+LibRaw library, Copyright (C) 2008-2015 LibRaw LLC (info@libraw.org)
 The library includes source code from
       
      dcraw.c, Dave Coffin's raw photo decoder
-     Copyright 1997-2010 by Dave Coffin, dcoffin a cybercom o net
+     Copyright 1997-2015 by Dave Coffin, dcoffin a cybercom o net
       
 LibRaw is distributed for free under three different licenses:
  *  GNU Lesser General Public License, version 2.1
