@@ -6749,23 +6749,10 @@ static float my_roundf(float x) {
   }
 }
 
-static float _CanonConvert2EV(short in)
-        {
-	float frac1;
-	short val = in, sign = 1, frac;
-	if (val < 0) { val = -val; sign = -1; }
-	frac = (val & 0x1f);
-	val -= frac;
-	if (frac == 0x0c) frac1 = 32.0f / 3.0f;
-	else if (frac == 0x14) frac1 = 64.0f / 3.0f;
-	else frac1 = (float)frac;
-	return (float)sign * ((float)val + frac1) / 32.0f;
-    }
-
-static float _CanonConvertAperture(short in)
+static float _CanonConvertAperture(ushort in)
 {
-  if ((in == (short)0xffe0) || (in == (short)0x7fff)) return 0.0f;
-  else return powf64(2.0f, _CanonConvert2EV(in) / 2.0f);
+  if ((in == (ushort)0xffe0) || (in == (ushort)0x7fff)) return 0.0f;
+  return powf64(2.0, in/64.0);
 }
 
 void CLASS setCanonBodyFeatures (unsigned id)
@@ -7775,12 +7762,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             short tempAp;
             fseek(ifp, 8, SEEK_CUR);
             if ((tempAp = get2()) != 0x7fff)
-              aperture = imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
-            if (aperture < 0.7f)
+              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
+            if (imgdata.lens.makernotes.CurAp < 0.7f)
             {
               fseek(ifp, 32, SEEK_CUR);
-              aperture = imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
+              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
             }
+            if (!aperture) aperture = imgdata.lens.makernotes.CurAp;
           }
 
         else if (tag == 0x000d)			// camera info
@@ -8631,12 +8619,13 @@ void CLASS parse_makernote (int base, int uptag)
             short tempAp;
             fseek(ifp, 8, SEEK_CUR);
             if ((tempAp = get2()) != 0x7fff)
-              aperture = imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
-            if (aperture < 0.7f)
+              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
+            if (imgdata.lens.makernotes.CurAp < 0.7f)
             {
               fseek(ifp, 32, SEEK_CUR);
-              aperture = imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
+              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
             }
+            if (!aperture) aperture = imgdata.lens.makernotes.CurAp;
           }
 
         else if (tag == 0x000d)			// camera info
@@ -9790,7 +9779,7 @@ void CLASS parse_exif (int base)
       break;
 #endif
       case 33434:  shutter = getreal(type);		break;
-      case 33437:  aperture = getreal(type);		break;
+      case 33437:  aperture = getreal(type);		break;  // 0x829d FNumber
       case 34855:  iso_speed = get2();			break;
       case 34866:
         if (iso_speed == 0xffff && (!strcasecmp(make, "SONY") || !strcasecmp(make, "CANON")))
@@ -9800,8 +9789,8 @@ void CLASS parse_exif (int base)
       case 36868:  get_timestamp(0);			break;
       case 37377:  if ((expo = -getreal(type)) < 128 && shutter == 0.)
           shutter = powf64(2.0, expo);		break;
-      case 37378:
-        if (fabs(ape = getreal(type))<256.0)
+      case 37378:                                       // 0x9202 ApertureValue
+        if ((fabs(ape = getreal(type))<256.0) && (!aperture))
           aperture = powf64(2.0, ape/2);
         break;
       case 37385:  flash_used = getreal(type);          break;
