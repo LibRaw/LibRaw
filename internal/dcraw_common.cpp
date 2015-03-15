@@ -5531,12 +5531,21 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   unsigned entries, tag, type, len, save;
 
   entries = get2();
+
+//  printf("\n*** parse_thumb_note\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
+//    make, model, entries, base, ftell(ifp));
+
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
+
+// 	  printf ("  thumb tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
+// 		  tag, type, len, ftell(ifp), save);
+
     if (tag == toff) thumb_offset = get4()+base;
     if (tag == tlen) thumb_length = get4();
     fseek (ifp, save, SEEK_SET);
   }
+//  print ("\n");
 }
 
 static float powf_lim(float a, float b, float limup)
@@ -6534,14 +6543,19 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
   entries = get2();
 
+//  printf("\n*** parse_makernote_0xc634\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
+//    make, model, entries, base, ftell(ifp));
 
   if (entries > 1000) return;
   morder = order;
+
   while (entries--) {
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
     tag |= uptag << 16;
 
+//  	  printf ("  mn0xc634 tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
+//  		  tag, type, len, ftell(ifp), save);
 
     if (!strcmp(make, "Canon"))
       {
@@ -7385,8 +7399,8 @@ void CLASS parse_makernote (int base, int uptag)
 
   entries = get2();
 
-//  printf("\n*** parse_makernote\n\tmake  =%s=\n\tmodel =%s= \n\tentries: %d\n\tpos: 0x%llx\n",
-//    make, model, entries, ftell(ifp));
+//  printf("\n*** parse_makernote\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
+//    make, model, entries, base, ftell(ifp));
 
   if (entries > 1000) return;
   morder = order;
@@ -7395,8 +7409,8 @@ void CLASS parse_makernote (int base, int uptag)
     tiff_get (base, &tag, &type, &len, &save);
     tag |= uptag << 16;
 
-// 	  printf ("\n\tbase: 0x%x tag: 0x%04x type: 0x%x len: 0x%x pos: 0x%llx",
-// 		  base, tag, type, len, ftell(ifp));
+// 	  printf (" mnote tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
+// 		  tag, type, len, ftell(ifp), save);
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
@@ -8458,19 +8472,19 @@ get2_256:
     }
     if ((tag | 0x70) == 0x2070 && (type == 4 || type == 13))
       fseek (ifp, get4()+base, SEEK_SET);
-    if (tag == 0x2020)
+    if ((tag == 0x2020) && ((type == 7) || (type == 13)))
       parse_thumb_note (base, 257, 258);
     if (tag == 0x2040)
       parse_makernote (base, 0x2040);
 #ifdef LIBRAW_LIBRARY_BUILD
-    // IB start
+// IB start
     if (tag == 0x2010)
       {
         INT64 _pos3 = ftell(ifp);
         parse_makernote(base, 0x2010);
         fseek(ifp,_pos3,SEEK_SET);
       }
-	// IB end
+// IB end
 #endif
     if (tag == 0xb028) {
       fseek (ifp, get4()+base, SEEK_SET);
@@ -8512,6 +8526,9 @@ next:
   }
 quit:
   order = sorder;
+
+//  printf ("\n");
+
 }
 
 /*
@@ -8549,12 +8566,14 @@ void CLASS parse_exif (int base)
   entries = get2();
   if(!strcmp(make,"Hasselblad") && (tiff_nifds > 3) && (entries > 512)) return;
 
-//  printf("\n*** in parse_exif, make: =%s= model: =%s=", make, model);
+//  printf("\n*** parse_exif\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
+//    make, model, entries, base, ftell(ifp));
 
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
 
-		//    printf("\n\ttag: %x", tag);
+// 	  printf ("  exif tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
+// 		  tag, type, len, ftell(ifp), save);
 
 #ifdef LIBRAW_LIBRARY_BUILD
     if(callbacks.exif_cb)
@@ -8620,6 +8639,9 @@ void CLASS parse_exif (int base)
     }
     fseek (ifp, save, SEEK_SET);
   }
+
+//  printf ("\n");
+
 }
 
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -8891,11 +8913,16 @@ int CLASS parse_tiff_ifd (int base)
     for (i=0; i < 4; i++)
       cc[j][i] = i == j;
   entries = get2();
+
+//  printf("\n*** parse_tiff_ifd\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
+//    make, model, entries, base, ftell(ifp));
+
   if (entries > 512) return 1;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
 
-//    printf ("\n*** parse_tiff_ifd tag: 0x%04x", tag);
+// 	  printf (" tiff ifd tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
+// 		  tag, type, len, ftell(ifp), save);
 
 #ifdef LIBRAW_LIBRARY_BUILD
     if(callbacks.exif_cb)
@@ -10333,11 +10360,19 @@ void CLASS parse_fuji (int offset)
 
   fseek (ifp, offset, SEEK_SET);
   entries = get4();
+
+//  printf("\n*** parse_fuji\n  make  =%s= model =%s= entries: %d offset: 0x%x 1st tag @ 0x%llx\n",
+//    make, model, entries, offset, ftell(ifp));
+
   if (entries > 255) return;
   while (entries--) {
     tag = get2();
     len = get2();
     save = ftell(ifp);
+
+// 	  printf ("  fuji tag: 0x%04x len: 0x%x data @ 0x%x\n",
+// 		  tag, len, save);
+
     if (tag == 0x100) {
       raw_height = get2();
       raw_width  = get2();
@@ -10352,6 +10387,14 @@ void CLASS parse_fuji (int offset)
       FORC(36) xtrans_abs[0][35-c] = fgetc(ifp) & 3;
     } else if (tag == 0x2ff0) {
       FORC4 cam_mul[c ^ 1] = get2();
+
+// IB start
+#ifdef LIBRAW_LIBRARY_BUILD
+    } else if (tag == 0x9650) {
+      imgdata.color.FujiExpoMidPointShift = ((short)get2()) / ((float)get2());
+#endif
+// IB end
+
     } else if (tag == 0xc000) {
       c = order;
       order = 0x4949;
@@ -10369,7 +10412,6 @@ void CLASS parse_fuji (int offset)
 int CLASS parse_jpeg (int offset)
 {
   int len, save, hlen, mark;
-
   fseek (ifp, offset, SEEK_SET);
   if (fgetc(ifp) != 0xff || fgetc(ifp) != 0xd8) return 0;
 
