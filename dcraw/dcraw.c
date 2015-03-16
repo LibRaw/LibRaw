@@ -963,15 +963,11 @@ int CLASS ljpeg_start (struct jhead *jh, int info_only)
     fread (data, 2, 2, ifp);
     tag =  data[0] << 8 | data[1];
     len = (data[2] << 8 | data[3]) - 2;
-
-// printf ("\n*** ljpeg_start pos= %llx tag= %x, len= %d", ftell(ifp)-4, tag, len);
-
     if (tag <= 0xff00) return 0;
     fread (data, 1, len, ifp);
     switch (tag) {
       case 0xffc3:        // start of frame; lossless, Huffman
 	jh->sraw = ((data[7] >> 4) * (data[7] & 15) - 1) & 3;
-//	printf ("\n*** %x: startraw= %d", tag, jh->sraw);
       case 0xffc0:        // start of frame; baseline jpeg
 	jh->bits = data[0];
 	jh->high = data[1] << 8 | data[2];
@@ -983,9 +979,6 @@ if (!strcmp(model, "EOS 5DS"))
   jh->wide = data[1] << 8 | data[2];
 	jh->high = data[3] << 8 | data[4];
 }
-//	printf ("\n*** %x: bits= %d; high= %d; wide= %d; clrs= %d",
-//	  tag, jh->bits, jh->high, jh->wide, jh->clrs);
-
 	if (len == 9 && !dng_version) getc(ifp);
 	break;
       case 0xffc4:          // define Huffman tables
@@ -1001,9 +994,6 @@ if (!strcmp(model, "EOS 5DS"))
 	jh->restart = data[0] << 8 | data[1];
     }
   } while (tag != 0xffda);
-
-// printf ("\n");
-
   if (info_only) return 1;
   if (jh->clrs > 6 || !jh->huff[0]) return 0;
   FORC(5) if (!jh->huff[c+1]) jh->huff[c+1] = jh->huff[c];
@@ -1087,8 +1077,6 @@ void CLASS lossless_jpeg_load_raw()
   int jwide, jrow, jcol, val, jidx, i, j, row=0, col=0;
   struct jhead jh;
   ushort *rp;
-
-// printf ("\n*** lossless_jpeg_load_raw\n");
 
   if (!ljpeg_start (&jh, 0)) return;
 
@@ -6711,21 +6699,12 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
   unsigned entries, tag, type, len, save;
 
   entries = get2();
-
-//  printf("\n*** parse_thumb_note\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
-//    make, model, entries, base, ftell(ifp));
-
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
-
-// 	  printf ("  thumb tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
-// 		  tag, type, len, ftell(ifp), save);
-
     if (tag == toff) thumb_offset = get4()+base;
     if (tag == tlen) thumb_length = get4();
     fseek (ifp, save, SEEK_SET);
   }
-//  print ("\n");
 }
 //@end COMMON
 
@@ -7727,10 +7706,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   }
 
   entries = get2();
-
-//  printf("\n*** parse_makernote_0xc634\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
-//    make, model, entries, base, ftell(ifp));
-
   if (entries > 1000) return;
   morder = order;
 
@@ -7738,9 +7713,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
     tag |= uptag << 16;
-
-//  	  printf ("  mn0xc634 tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
-//  		  tag, type, len, ftell(ifp), save);
 
     if (!strcmp(make, "Canon"))
       {
@@ -8583,19 +8555,12 @@ void CLASS parse_makernote (int base, int uptag)
     }
 
   entries = get2();
-
-//  printf("\n*** parse_makernote\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
-//    make, model, entries, base, ftell(ifp));
-
   if (entries > 1000) return;
   morder = order;
   while (entries--) {
     order = morder;
     tiff_get (base, &tag, &type, &len, &save);
     tag |= uptag << 16;
-
-// 	  printf (" mnote tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
-// 		  tag, type, len, ftell(ifp), save);
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
@@ -9711,9 +9676,6 @@ next:
   }
 quit:
   order = sorder;
-
-//  printf ("\n");
-
 }
 
 /*
@@ -9750,15 +9712,8 @@ void CLASS parse_exif (int base)
   kodak = !strncmp(make,"EASTMAN",7) && tiff_nifds < 3;
   entries = get2();
   if(!strcmp(make,"Hasselblad") && (tiff_nifds > 3) && (entries > 512)) return;
-
-//  printf("\n*** parse_exif\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
-//    make, model, entries, base, ftell(ifp));
-
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
-
-// 	  printf ("  exif tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
-// 		  tag, type, len, ftell(ifp), save);
 
 #ifdef LIBRAW_LIBRARY_BUILD
     if(callbacks.exif_cb)
@@ -9824,9 +9779,6 @@ void CLASS parse_exif (int base)
     }
     fseek (ifp, save, SEEK_SET);
   }
-
-//  printf ("\n");
-
 }
 
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -10104,16 +10056,9 @@ int CLASS parse_tiff_ifd (int base)
     for (i=0; i < 4; i++)
       cc[j][i] = i == j;
   entries = get2();
-
-//  printf("\n*** parse_tiff_ifd\n  make  =%s= model =%s= entries: %d base: 0x%x 1st tag @ 0x%llx\n",
-//    make, model, entries, base, ftell(ifp));
-
   if (entries > 512) return 1;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
-
-// 	  printf (" tiff ifd tag: 0x%04x type: 0x%x len: 0x%x data @ 0x%llx next tag @ 0x%x\n",
-// 		  tag, type, len, ftell(ifp), save);
 
 #ifdef LIBRAW_LIBRARY_BUILD
     if(callbacks.exif_cb)
@@ -11176,9 +11121,6 @@ void CLASS parse_ciff (int offset, int length, int depth)
   while (nrecs--) {
     type = get2();
     len  = get4();
-
-//    printf ("\n*** type: 0x%04x len: 0x%04x", type, len);
-
     save = ftell(ifp) + 4;
     fseek (ifp, offset+get4(), SEEK_SET);
     if ((((type >> 8) + 8) | 8) == 0x38) {
@@ -11551,19 +11493,11 @@ void CLASS parse_fuji (int offset)
 
   fseek (ifp, offset, SEEK_SET);
   entries = get4();
-
-//  printf("\n*** parse_fuji\n  make  =%s= model =%s= entries: %d offset: 0x%x 1st tag @ 0x%llx\n",
-//    make, model, entries, offset, ftell(ifp));
-
   if (entries > 255) return;
   while (entries--) {
     tag = get2();
     len = get2();
     save = ftell(ifp);
-
-// 	  printf ("  fuji tag: 0x%04x len: 0x%x data @ 0x%x\n",
-// 		  tag, len, save);
-
     if (tag == 0x100) {
       raw_height = get2();
       raw_width  = get2();
@@ -12806,6 +12740,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 10332,-3234,-1168,-6111,14639,1520,-1352,2647,8331 } },
     { "Samsung NX10", 0, 0,	/* also NX100 */
 	{ 10332,-3234,-1168,-6111,14639,1520,-1352,2647,8331 } },
+    { "Samsung NX500", -128, 0,
+	{ 10686,-4042,-1052,-3595,13238,276,-464,1259,5931 } },
     { "Samsung NX5", 0, 0,
 	{ 10332,-3234,-1168,-6111,14639,1520,-1352,2647,8331 } },
     { "Samsung NX1", -128, 0,

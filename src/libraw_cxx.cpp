@@ -3978,6 +3978,7 @@ static const char  *static_camera_list[] =
 "Samsung NX10",
 "Samsung NX11",
 "Samsung NX100",
+"Samsung NX500",
 "Samsung NX1000",
 "Samsung NX1100",
 "Samsung NX20",
