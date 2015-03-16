@@ -1108,7 +1108,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         || load_raw == &LibRaw::packed_load_raw)
        && !strcasecmp(imgdata.idata.make,"Nikon")
        && strncmp(imgdata.idata.model,"COOLPIX",7)
-	   && strncmp(imgdata.idata.model,"1 ",2)
+//	   && strncmp(imgdata.idata.model,"1 ",2)
        && libraw_internal_data.unpacker_data.tiff_bps == 12)
       {
         C.maximum = 4095;
