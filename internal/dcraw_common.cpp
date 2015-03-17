@@ -10307,6 +10307,7 @@ void CLASS parse_fuji (int offset)
     tag = get2();
     len = get2();
     save = ftell(ifp);
+
     if (tag == 0x100) {
       raw_height = get2();
       raw_width  = get2();
