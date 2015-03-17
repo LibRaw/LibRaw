@@ -2647,6 +2647,8 @@ int LibRaw::unpack_thumb(void)
             T.thumb = (char *) malloc (T.tlength);
             merror (T.thumb, "jpeg_thumb()");
             ID.input->read (T.thumb, 1, T.tlength);
+			T.thumb[0] = 0xff;
+			T.thumb[1] = 0xd8;
             T.tcolors = 3;
             T.tformat = LIBRAW_THUMBNAIL_JPEG;
             SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
