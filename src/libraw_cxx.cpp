@@ -3913,6 +3913,7 @@ static const char  *static_camera_list[] =
 "Pentax K-500",
 "Pentax K-7",
 "Pentax K-S1",
+"Pentax K-S2",
 "Pentax MX-1",
 "Pentax Q",
 "Pentax Q7",

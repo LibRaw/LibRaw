@@ -7173,6 +7173,7 @@ void CLASS setPentaxBodyFeatures (unsigned id)
   case 0x12fc0:
   case 0x12fca:
   case 0x1301a:
+  case 0x13024:
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Pentax_K;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Pentax_K;
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -12567,6 +12568,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 9142,-2947,-678,-8648,16967,1663,-2224,2898,8615 } },
     { "Pentax K-S1", 0, 0,
 	{ 8512,-3211,-787,-4167,11966,2487,-638,1288,6054 } },
+    { "Pentax K-S2", 0, 0,
+	{ 8130,-2556,-1157,-3882,12350,1689,-843,1491,6305 } },
     { "Pentax MX-1", 0, 0,
 	{ 8804,-2523,-1238,-2423,11627,860,-682,1774,4753 } },
     { "Pentax Q10", 0, 0,
