@@ -35,7 +35,7 @@
       </li>
       <li><a href="#const">Constants</a>
         <ol>
-          <li><a href="#LibRaw_errors">enum LibRaw_errors: Error Codes</a></li>       
+          <li><a href="#LibRaw_errors">enum LibRaw_errors: Error Codes</a></li>
           <li><a href="#decoder_flags">enum LibRaw_decoder_flags - RAW data format description</a></li>
           <li><a href="#progress">enum LibRaw_progress: Current State of LibRaw Object</a></li>
           <li><a href="#LibRaw_thumbnail_formats">enum LibRaw_thumbnail_formats: Thumbnail Data Formats</a></li>
@@ -67,7 +67,7 @@ the preview information (filled by calling unpack_thumb()).<br/>
       </dd>
       <dt><b>libraw_iparams_t            idata;</b></dt>
       <dd>
-        The structure describes the main image parameters retrieved from the RAW file. Fields of this structure 
+        The structure describes the main image parameters retrieved from the RAW file. Fields of this structure
 are described in detail <a href="#libraw_iparams_t">below</a>.
       </dd>
       <dt><b>libraw_image_sizes_t        sizes;</b></dt>
@@ -99,7 +99,7 @@ not needed in further file processing. Fields of this structure are described in
       </dd>
       <dt><b>ushort                      (*image)[4];</b></dt>
       <dd>
-        The memory area that contains the image pixels per se. It is filled when raw2image() or dcraw_process() is called. 
+        The memory area that contains the image pixels per se. It is filled when raw2image() or dcraw_process() is called.
       </dd>
 
       <dt><b>libraw_output_params_t     params;</b></dt>
@@ -136,7 +136,7 @@ Fields of this structure are described in detail <a href="#libraw_iparams_t">bel
       </dd>
       <dd>
         1 for Foveon matrices, 0 for others. Foveon is supported in LibRaw-demosaic-pack-GPL2.
-        </p>      
+        </p>
       </dd>
       <dt><b>int         colors;</b></dt>
       <dd>
@@ -165,7 +165,7 @@ which returns the number of the active color for a given pixel.
       </dd>
       <dt><b>char        cdesc[5];</b></dt>
       <dd>
-        Description of colors numbered from 0 to 3 (RGBG,RGBE,GMCY, or GBTG). 
+        Description of colors numbered from 0 to 3 (RGBG,RGBE,GMCY, or GBTG).
       </dd>
       <dt><b>unsigned xmplen; char *xmpdata;</b></dt>
       <dd>
@@ -175,7 +175,7 @@ which returns the number of the active color for a given pixel.
     <a name="libraw_image_sizes_t"></a>
     <h3>Structure libraw_image_sizes_t: Image Dimensions</h3>
     <p>Structure libraw_image_sizes_t is a collection of all file data that describe the size of the image.<br/>
-      Data fields: 
+      Data fields:
       </p>
     <dl>
       <dt><b>ushort    raw_height, raw_width;</b></dt>
@@ -184,7 +184,7 @@ which returns the number of the active color for a given pixel.
       </dd>
       <dt><b>ushort    height, width;</b></dt>
       <dd>
-       Size of visible (&quot;meaningful&quot;) part of the image (without the frame). 
+       Size of visible (&quot;meaningful&quot;) part of the image (without the frame).
       </dd>
       <dt><b>ushort    top_margin, left_margin;</b></dt>
       <dd>
@@ -192,7 +192,7 @@ which returns the number of the active color for a given pixel.
       </dd>
       <dt><b>ushort      iheight, iwidth;</b></dt>
       <dd>
-        Size of the output image (may differ from height/width for cameras that require image rotation or have non-square pixels). 
+        Size of the output image (may differ from height/width for cameras that require image rotation or have non-square pixels).
       </dd>
        <dt><b>unsigned raw_pitch;</b></dt>
 	<dd>
@@ -200,17 +200,17 @@ which returns the number of the active color for a given pixel.
 	</dd>
       <dt><b>double      pixel_aspect;</b></dt>
       <dd>
-      Pixel width/height ratio. If it is not unity, scaling of the image along one of the axes is required during output. 
+      Pixel width/height ratio. If it is not unity, scaling of the image along one of the axes is required during output.
        </dd>
       <dt><b>int         flip;</b></dt>
       <dd>
-        Image orientation (0 if does not require rotation; 3 if requires 180-deg rotation; 5 if 90 deg counterclockwise, 6 if 90 deg clockwise). 
+        Image orientation (0 if does not require rotation; 3 if requires 180-deg rotation; 5 if 90 deg counterclockwise, 6 if 90 deg clockwise).
       </dd>
     </dl>
     <a name="libraw_colordata_t"></a>
     <h3>Structure libraw_colordata_t: Color Information</h3>
     <p>Structure libraw_colordata_t unites all color data, both retrieved from the RAW file and calculated on the basis of the
-image itself. For different cameras, there are different ways of color handling. <br/>    
+image itself. For different cameras, there are different ways of color handling. <br/>
      Data fields:
     </p>
     <dl>
@@ -220,8 +220,8 @@ image itself. For different cameras, there are different ways of color handling.
       </dd>
       <dt><b>unsigned    black;</b></dt>
       <dd>
-      Black level. Depending on the camera, it may be zero (this means that black has been subtracted at the unpacking stage 
-or by the camera itself), calculated at the unpacking stage, read from the RAW file, or hardcoded. 
+      Black level. Depending on the camera, it may be zero (this means that black has been subtracted at the unpacking stage
+or by the camera itself), calculated at the unpacking stage, read from the RAW file, or hardcoded.
       </dd>
       <dt><b>unsigned    cblack[4102];</b></dt>
       <dd>
@@ -230,8 +230,8 @@ or by the camera itself), calculated at the unpacking stage, read from the RAW f
       </dd>
       <dt><b>unsigned    maximum;</b></dt>
       <dd>
-       Maximum pixel value. Calculated from the data for most cameras, hardcoded for others. 
-        This value may be changed on postprocessing stage (when black subtraction performed) and by 
+       Maximum pixel value. Calculated from the data for most cameras, hardcoded for others.
+        This value may be changed on postprocessing stage (when black subtraction performed) and by
         automated maximum adjustment (this adjustment performed if <b>params.adjust_maximum_thr</b>
         is set to nonzero).
       </dd>
@@ -256,7 +256,7 @@ balance coefficients.
       </dd>
       <dt><b>float       pre_mul[4]; </b></dt>
       <dd>
-        White balance coefficients for daylight (daylight balance). Either read from file, or calculated on the basis of file data, 
+        White balance coefficients for daylight (daylight balance). Either read from file, or calculated on the basis of file data,
 or taken from hardcoded constants.
       </dd>
       <dt><b>float       cmatrix[3][4];</b></dt>
@@ -308,6 +308,10 @@ or taken from hardcoded constants.
       <dt><b>int		  OlympusSensorCalibration[2]</b></dt>
       <dd>
 	Olympus file: sensor calibration values (midtone and max).
+      </dd>
+      <dt><b>float		  FujiExpoMidPointShift</b></dt>
+      <dd>
+	Fujifilm file: indicates the shift of metering point relative to SOS calibration standard, can be used as an instruction to raw converter to compensate raw image brightness. If the raw file contains 2 frames, each one may have its own value for FujiExpoMidPointShift.
       </dd>
       <dt><b>int		digitalBack_color</b></dt>
       <dd>
@@ -387,10 +391,10 @@ or taken from hardcoded constants.
       <dt>    unsigned short                      (*color4_image)[4] ;</dt>
       <dd>Pointer to buffer with 4-component pixel data data</dd>
     </dl>
-    After call to <a href="API-CXX.html#unpack">unpack()</a> only one of these fields is non-NULL. 
+    After call to <a href="API-CXX.html#unpack">unpack()</a> only one of these fields is non-NULL.
 <p>
     All other fields of this structure are for internal use and should not be touched by user code.
-    
+
     <a name="libraw_thumbnail_t"></a>
     <h3>Structure libraw_thumbnail_t: Description of Thumbnail</h3>
     <p>Structure libraw_thumbnail_t describes all parameters associated with the preview saved in the RAW file.<br/>
@@ -400,7 +404,7 @@ or taken from hardcoded constants.
       <dt><b>LibRaw_thumbnail_formats tformat;</b></dt>
       <dd>
         Thumbnail data format. One of the values among enum <a
-          href="#LibRaw_thumbnail_formats">LibRaw_thumbnail_formats</a>. 
+          href="#LibRaw_thumbnail_formats">LibRaw_thumbnail_formats</a>.
       </dd>
       <dt><b>ushort      twidth, theight;</b></dt>
       <dd>
@@ -423,13 +427,13 @@ or taken from hardcoded constants.
     <a name="libraw_lensinfo_t"></a>
     <h3>Structure libraw_lensinfo_t: parsed lens data</h3>
     <p>
-      The following parameters are extracted from Makernotes and EXIF, to help identify which lens 
-      was mounted on the camera. If  the value is missing in Makernotes or EXIF, the parameter is set 
-      to zero with some exceptions noted below. In some cases the values for the fields like 
+      The following parameters are extracted from Makernotes and EXIF, to help identify which lens
+      was mounted on the camera. If  the value is missing in Makernotes or EXIF, the parameter is set
+      to zero with some exceptions noted below. In some cases the values for the fields like
       CameraFormat and CameraMount are set based on the camera model and/or camera ID.
    <h4>libraw_makernotes_lens_t structure:</h4>
    <ul>
-   <li>LensID (if not -1) and CamID (camera id, if non-zero) values are compatible with 
+   <li>LensID (if not -1) and CamID (camera id, if non-zero) values are compatible with
        those used in exiftool, like |0x0010 CanonModelID| and |22	LensType|
        see http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Canon.html
        or 0x0207/CameraType and 0x0201/LensType (see http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Olympus.html )
@@ -454,10 +458,10 @@ contain maximum aperture available at minimal focal length, maximum aperture ava
    <li>'FocalLengthIn35mmFormat', if non-zero: for some reason certain Samsung cameras record this value in Makernotes instead of the EXIF proper. Also used for Sigma cameras.
   </ul>
   <h4>libraw_nikonlens_t structure:</h4>
-   Contains additional parameters needed to identify the lens on a Nikon camera using a table - 
+   Contains additional parameters needed to identify the lens on a Nikon camera using a table -
    please see Nikon LensID Values at http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Nikon.html
   <h4>libraw_dnglens_t structure:</h4>
-   Contains minimum focal length, maximum focal length, maximum aperture available at minimal focal length, 
+   Contains minimum focal length, maximum focal length, maximum aperture available at minimal focal length,
    and maximum aperture available at maximum focal length, extracted from EXIF field of a DNG raw file.
   <h4>libraw_lensinfo_t structure:</h4>
   Contains all the structures described above, plus parameters extracted directly from EXIF fields:
@@ -510,7 +514,7 @@ changes the output size.
         <br/>
         Remaining 4 values are filled automatically.
         <p>
-          By default settings for rec. BT.709 are used: power 2.222 (i.e. gamm[0]=1/2.222) and slope 4.5. 
+          By default settings for rec. BT.709 are used: power 2.222 (i.e. gamm[0]=1/2.222) and slope 4.5.
           For sRGB curve use gamm[0]=1/2.4 and gamm[1]=12.92, for linear curve set gamm[0]/gamm[1] to 1.0.
       </dd>
       <dt><b>float       user_mul[4];</b></dt>
@@ -521,7 +525,7 @@ changes the output size.
       <dt><b>unsigned    shot_select;</b></dt>
       <dd>
         <b>dcraw keys:</b>  -s <br/>
-        Selection of image number for processing (for formats that contain several RAW images in one file). 
+        Selection of image number for processing (for formats that contain several RAW images in one file).
       </dd>
       <dt><b>float       bright;</b></dt>
       <dd>
@@ -536,7 +540,7 @@ changes the output size.
       <dt><b>int         half_size;</b></dt>
       <dd>
         <b>dcraw keys:</b>       -h <br/>
-        Outputs the image in 50% size. For some formats, it affects <a href=API-notes.html>RAW data reading</a>. 
+        Outputs the image in 50% size. For some formats, it affects <a href=API-notes.html>RAW data reading</a>.
       </dd>
       <dt><b>int         four_color_rgb;</b></dt>
       <dd>
@@ -675,7 +679,7 @@ changes the output size.
         <br/>Default: 0.75. If you set this value above 0.99999, than default value will be used. If you set
         this value below 0.00001, than no maximum adjustment will be performed.
         <br/>
-        Adjusting maximum should not damage any picture (esp. if you use default value) and is very useful for 
+        Adjusting maximum should not damage any picture (esp. if you use default value) and is very useful for
         correcting channel overflow problems (magenta clouds on landscape shots, green-blue highlights for
         indoor shots).
       </dd>
@@ -802,7 +806,7 @@ changes the output size.
  <ul>
  <li>LIBRAW_DP2QOPT_NONE - just unpack the data;
  <li>LIBRAW_DP2Q_INTERPOLATERG - turn on R/G channels interpolation
- <li>LIBRAW_DP2Q_INTERPOLATEAF - turn on data interpolation of low-sensitivity (AF or overexposure control) points on 
+ <li>LIBRAW_DP2Q_INTERPOLATEAF - turn on data interpolation of low-sensitivity (AF or overexposure control) points on
    Quattro sensors.
  </ul>
  </dd>
@@ -867,7 +871,7 @@ changes the output size.
       <dd> Is bitmap data gamma-corrected (always 1 for 8-bit data, may be 0 or 1 for 16-bit).
         Valid only if  type==LIBRAW_IMAGE_BITMAP.</dd>
       <dt><b>unsigned int data_size</b></dt>
-      <dd> Size of <b>data</b> field (in bytes). For bitmap image equal to (height*width*colors * (bits/8)). 
+      <dd> Size of <b>data</b> field (in bytes). For bitmap image equal to (height*width*colors * (bits/8)).
         For JPEG image - exact JPEG size (i.e. extracted  thnumbnail size + JPEG header + EXIF header).
       </dd>
       <dt><b>unsigned char data[]</b></dt>
@@ -878,29 +882,29 @@ changes the output size.
     <a name="datastream"></a>
     <h2>Input abstraction layer</h2>
     <p>
-      RAW data input (read) in LibRaw implemented by calling methods of object derived from 
-      <b>LibRaw_abstract_datastream</b> abstract class. Full list of methods is described in 
-        href="API-CXX.html#datastream">C++ API reference</a>. 
+      RAW data input (read) in LibRaw implemented by calling methods of object derived from
+      <b>LibRaw_abstract_datastream</b> abstract class. Full list of methods is described in
+        href="API-CXX.html#datastream">C++ API reference</a>.
     </p>
     <p>
       There is two ready to use implementations of datastream objects:
     </p>
     <ul>
-      <li><a href="API-CXX.html#file_datastream">LibRaw_file_datastream</a> - file input (filename provided 
+      <li><a href="API-CXX.html#file_datastream">LibRaw_file_datastream</a> - file input (filename provided
         to LibRaw).</li>
       <li><a href="API-CXX.html#buffer_datastream">LibRaw_buffer_datastream</a> - input from memory buffer.</li>
     </ul>
     <p>
-      LibRaw user can create own datastream object derived from 
+      LibRaw user can create own datastream object derived from
       <a href="API-CXX.html#datastream">LibRaw_abstract_datastream</a>. For example, such object may
       implement reading RAW data directly from camera (by remote interface). LibRaw can use these
-      objects via 
+      objects via
       <a href="API-CXX.html#open_datastream">LibRaw::open_datastream()</a> interface.
     </p>
     <p>
-      Datastreams can be used either via 
+      Datastreams can be used either via
       <a href="API-CXX.html#open_datastream">LibRaw::open_datastream()</a> call (in this case datastream
-      object should be created an maintained by user) or via 
+      object should be created an maintained by user) or via
       <a href="API-CXX.html#open_file">LibRaw::open_file()</a> and
       <a href="API-CXX.html#open_buffer">LibRaw::open_buffer()</a> shortcuts.
     </p>
@@ -925,7 +929,7 @@ protected:
       used for temporary switch input stream to temporary memory buffer allocated internally in LibRaw.
     </p>
     <p>
-      Substream usage details described more precisely in 
+      Substream usage details described more precisely in
       <a href="API-CXX.html#own_datastreams">own datastream objects creation guide</a>.
     </p>
 
@@ -940,31 +944,31 @@ the state of data structures is unknown).</p>
     <dl>
       <dt><b> LIBRAW_UNSUFFICIENT_MEMORY</b></dt>
       <dd>Attempt to get memory from the system has failed.<br/>
-      All allocated resources will be freed, <a href="API-CXX.html#recycle">recycle()</a> will be called, and the LibRaw 
+      All allocated resources will be freed, <a href="API-CXX.html#recycle">recycle()</a> will be called, and the LibRaw
 object will be brought to the state &quot;right after creation.&quot;
         </dd>
     <dt><b>LIBRAW_DATA_ERROR</b></dt>
       <dd>A fatal error emerged during data unpacking.<br/>
-        All allocated resources will be freed, <a href="API-CXX.html#recycle">recycle()</a> will be called, and the LibRaw 
+        All allocated resources will be freed, <a href="API-CXX.html#recycle">recycle()</a> will be called, and the LibRaw
 object will be brought to the state &quot;right after creation.&quot;
       </dd>
     <dt><b>LIBRAW_IO_ERROR</b></dt>
       <dd>A fatal error emerged during file reading (premature end-of-file encountered or file is corrupt).<br/>
-        All allocated resources will be freed, <a href="API-CXX.html#recycle">recycle()</a> will be called, and the LibRaw 
+        All allocated resources will be freed, <a href="API-CXX.html#recycle">recycle()</a> will be called, and the LibRaw
 object will be brought to the state &quot;right after creation.&quot;
         </dd>
     <dt><b>LIBRAW_CANCELLED_BY_CALLBACK</b></dt>
-      <dd>Processing cancelled due to calling application demand (by returning nonzero code from 
+      <dd>Processing cancelled due to calling application demand (by returning nonzero code from
         <a  href="API-CXX.html#progress">progress callback</a>).<br/>
         All allocated resources will be freed, <a href="API-CXX.html#recycle">recycle()</a> will be called, and
         the LibRaw  object will be brought to the state &quot;right after creation.&quot;
         </dd>
     <dt><b>LIBRAW_BAD_CROP</b></dt>
       <dd>The incorrect cropping coordinates are set via params.cropbox[]: the left-top corner of cropping
-        rectangle is outside the image. 
+        rectangle is outside the image.
         The processing will be cancelled, all allocated resources will be freed, <a
           href="API-CXX.html#recycle">recycle()</a> will be called, and the LibRaw  object will be brought to the
-        state &quot;right after creation.&quot;  
+        state &quot;right after creation.&quot;
     </dl>
     <p><b>Non-Fatal Errors</b></p>
     <dl>
@@ -982,14 +986,14 @@ object will be brought to the state &quot;right after creation.&quot;
         <a href="API-CXX.html#open_file">open_file()</a>) or the previous stage has ended with an error (e.g.,
          <a href="API-CXX.html#unpack">unpack()</a> is called after <a
           href="API-CXX.html#open_file">open_file()</a> has returned an error).
-      </dd> 
+      </dd>
       <dt><b>LIBRAW_NO_THUMBNAIL</b></dt>
       <dd>Returned upon an attempt to retrieve a thumbnail from a file containing no preview.</dd>
       <dt><b>LIBRAW_UNSUPPORTED_THUMBNAIL</b></dt>
       <dd>RAW file contains a preview of unsupported format.</dd>
     </dl>
 
-    <a name="decoder_flags"></a>    
+    <a name="decoder_flags"></a>
     <h3>enum LibRaw_decoder_flags - RAW data format description</h3>
     <p>
       Depending of capabilities of given data format, the buffer with RAW data may have different layouts:
@@ -1010,7 +1014,7 @@ object will be brought to the state &quot;right after creation.&quot;
       </dd>
       </dl>
 
-    <a name="progress"></a>    
+    <a name="progress"></a>
     <h3>enum LibRaw_progress: Current State of LibRaw Object</h3>
     <p>LibRaw::imgdata.progress_flags contains a bit mask describing all stages of file processing that have already been performed.
     </p>
@@ -1030,7 +1034,7 @@ object will be brought to the state &quot;right after creation.&quot;
       </dd>
       <dt><b>LIBRAW_PROGRESS_SIZE_ADJUST</b></dt>
       <dd>
-        Data sizes adjusted (for files that require such adjustment, namely, certain files from Kodak cameras). 
+        Data sizes adjusted (for files that require such adjustment, namely, certain files from Kodak cameras).
       </dd>
       <dt><b>LIBRAW_PROGRESS_LOAD_RAW</b></dt>
       <dd>
@@ -1067,7 +1071,7 @@ object will be brought to the state &quot;right after creation.&quot;
       <dt><b>LIBRAW_PROGRESS_PRE_INTERPOLATE</b></dt>
       <dd>
        Image size reduction (for the half_size mode) performed, as well as copying of 2nd green channel to the 1st one in points
-    where the second channel is present and the first one is absent. 
+    where the second channel is present and the first one is absent.
       </dd>
       <dt><b>LIBRAW_PROGRESS_INTERPOLATE</b></dt>
       <dd>
@@ -1116,7 +1120,7 @@ object will be brought to the state &quot;right after creation.&quot;
         Reserved for possible future processing stages.
       </dd>
     </dl>
-    
+
     <a name="LibRaw_thumbnail_formats"></a>
     <h3>enum LibRaw_thumbnail_formats: Thumbnail Data Formats</h3>
     <p>Thumbnail data format is written in the imgdata.thumbnail.tformat data field.<br/>
@@ -1127,7 +1131,7 @@ object will be brought to the state &quot;right after creation.&quot;
       <dd>Format unknown or thumbnail  not yet read.
       </dd>
       <dt><b>LIBRAW_THUMBNAIL_JPEG</b></dt>
-      <dd>The thumbnail buffer contains a JPEG file (read from the RAW file &quot;as is,&quot; without any manipulations performed on it). 
+      <dd>The thumbnail buffer contains a JPEG file (read from the RAW file &quot;as is,&quot; without any manipulations performed on it).
       </dd>
       <dt><b>LIBRAW_THUMBNAIL_BITMAP</b></dt>
       <dd>
@@ -1141,7 +1145,7 @@ object will be brought to the state &quot;right after creation.&quot;
       </dd>
       <dt><b>LIBRAW_THUMBNAIL_ROLLEI</b></dt>
       <dd>
-        Data format is presently recognized upon opening of RAW file but not supported: not unpacked into LibRaw::unpack_thumb. 
+        Data format is presently recognized upon opening of RAW file but not supported: not unpacked into LibRaw::unpack_thumb.
       </dd>
     </dl>
     <a name="warnings"></a>
@@ -1220,11 +1224,11 @@ retrieval or postprocessing. Such states are indicated by setting a bit in the i
     <p><b>type</b> field of  libraw_processed_image_t structure may have one of these values:
       </p>
     <dl>
-      <dt><b>LIBRAW_IMAGE_BITMAP</b></dt>    
+      <dt><b>LIBRAW_IMAGE_BITMAP</b></dt>
       <dd>
         The structure contains RGB-bitmap, metadata described in other fields of  libraw_processed_image_t.
       </dd>
-      <dt><b>LIBRAW_IMAGE_JPEG</b></dt>    
+      <dt><b>LIBRAW_IMAGE_JPEG</b></dt>
       <dd>
         libraw_processed_image_t structure contains JPEG image (in memory). Only data_size field is meaningful.
       </dd>

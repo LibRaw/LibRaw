@@ -232,6 +232,7 @@ int main(int ac, char *av[])
 	   if (C.baseline_exposure > -999.f) printf ("Baseline exposure: %04.3f\n", C.baseline_exposure);
 
             printf ("Number of raw images: %d\n", P1.raw_count);
+            if (C.FujiExpoMidPointShift) printf ("Fuji Exposure shift: %04.3f\n", C.FujiExpoMidPointShift);
             if (S.pixel_aspect != 1)
                 printf ("Pixel Aspect Ratio: %0.6f\n", S.pixel_aspect);
             if (T.tlength)
