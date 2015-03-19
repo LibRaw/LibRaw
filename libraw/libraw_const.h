@@ -40,9 +40,9 @@ enum LibRaw_camera_mounts
     LIBRAW_MOUNT_Canon_EF_S=4,
     LIBRAW_MOUNT_Canon_EF_M=5,
     LIBRAW_MOUNT_Nikon_F=6,
-    LIBRAW_MOUNT_Nikon_CX=7,	// used in Nikon 1 series
-    LIBRAW_MOUNT_FT=8,	// original 4/3
-    LIBRAW_MOUNT_mFT=9,	// micro 4/3
+    LIBRAW_MOUNT_Nikon_CX=7,	/* used in Nikon 1 series */
+    LIBRAW_MOUNT_FT=8,	/* original 4/3 */
+    LIBRAW_MOUNT_mFT=9,	/* micro 4/3 */
     LIBRAW_MOUNT_Pentax_K=10,
     LIBRAW_MOUNT_Pentax_Q=11,
     LIBRAW_MOUNT_Pentax_645=12,
@@ -66,15 +66,15 @@ enum LibRaw_camera_formats
     LIBRAW_FORMAT_FF=2,
     LIBRAW_FORMAT_MF=3,
     LIBRAW_FORMAT_APSH=4,
-    LIBRAW_FORMAT_FT=8	
+    LIBRAW_FORMAT_FT=8
   };
 
 
 enum LibRaw_sonyarw2_options
 {
   LIBRAW_SONYARW2_NONE=0,
-  LIBRAW_SONYARW2_BASEONLY=1,  
-  LIBRAW_SONYARW2_DELTAONLY=2,  
+  LIBRAW_SONYARW2_BASEONLY=1,
+  LIBRAW_SONYARW2_DELTAONLY=2,
   LIBRAW_SONYARW2_DELTAZEROBASE=3,
   LIBRAW_SONYARW2_DELTATOVALUE=4
 };
@@ -87,8 +87,8 @@ enum LibRaw_dp2q_options
 
 enum LibRaw_decoder_flags
 {
-  //    LIBRAW_DECODER_LEGACY = 1,      
-  //  LIBRAW_DECODER_FLATFIELD = 1<<1,
+//  LIBRAW_DECODER_LEGACY = 1,
+//  LIBRAW_DECODER_FLATFIELD = 1<<1,
     LIBRAW_DECODER_USEBAYER2 = 1<<3,
     LIBRAW_DECODER_HASCURVE = 1<<4,
     LIBRAW_DECODER_SONYARW2 = 1<<5,

@@ -247,9 +247,9 @@ typedef struct
 
 typedef struct
 {
-	float latitude[3]; // Deg,min,sec
-	float longtitude[3]; // Deg,min,sec
-	float gpstimestamp[3]; // Deg,min,sec
+	float latitude[3]; /* Deg,min,sec */
+	float longtitude[3]; /* Deg,min,sec */
+	float gpstimestamp[3]; /* Deg,min,sec */
 	float altitude;
 	char  altref, latref, longref, gpsstatus;
 	char  gpsparsed;
@@ -372,13 +372,13 @@ typedef struct
 {
 	unsigned long long LensID;
 	char	Lens[128];
-	ushort	LensFormat;		// to characterize the image circle the lens covers
-	ushort	LensMount;		// 'male', lens itself
+	ushort	LensFormat;    /* to characterize the image circle the lens covers */
+	ushort	LensMount;     /* 'male', lens itself */
 	unsigned long CamID;
-	ushort	CameraFormat;	// some of the sensor formats
-	ushort	CameraMount;	// 'female', body throat
+	ushort	CameraFormat;  /* some of the sensor formats */
+	ushort	CameraMount;   /* 'female', body throat */
 	char	body[64];
-	short	FocalType;		// -1/0 is unknown; 1 is fixed focal; 2 is zoom
+	short	FocalType;       /* -1/0 is unknown; 1 is fixed focal; 2 is zoom */
 	char	LensFeatures_pre[16], LensFeatures_suf[16];
 	float	MinFocal, MaxFocal;
 	float	MaxAp4MinFocal, MaxAp4MaxFocal, MinAp4MinFocal, MinAp4MaxFocal;
