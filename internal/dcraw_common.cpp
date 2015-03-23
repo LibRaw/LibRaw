@@ -689,7 +689,7 @@ int CLASS ljpeg_start (struct jhead *jh, int info_only)
 	jh->wide = data[3] << 8 | data[4];
 	jh->clrs = data[5] + jh->sraw;
 
-if (!strcmp(model, "EOS 5DS"))
+if (!strncmp(model, "EOS 5DS", 7))
 {
   jh->wide = data[1] << 8 | data[2];
 	jh->high = data[3] << 8 | data[4];
@@ -8237,7 +8237,7 @@ void CLASS parse_makernote (int base, int uptag)
               }
             break;
 
-            // 5DS R
+            // 5DS / 5DS R
           case 1560:
             imgdata.color.canon_makernotes.CanonColorDataVer = 8;
             imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
@@ -11759,6 +11759,7 @@ void CLASS identify()
     { 5712, 3774,  62, 20, 10,  2 },
     { 5792, 3804, 158, 51,  0,  0 },
     { 5920, 3950, 122, 80,  2,  0 },
+//    { 8896, 5920, 0, 0, 0, 0 },
   };
   static const struct {
     ushort id;

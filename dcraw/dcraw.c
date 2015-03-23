@@ -974,11 +974,6 @@ int CLASS ljpeg_start (struct jhead *jh, int info_only)
 	jh->wide = data[3] << 8 | data[4];
 	jh->clrs = data[5] + jh->sraw;
 
-if (!strcmp(model, "EOS 5DS"))
-{
-  jh->wide = data[1] << 8 | data[2];
-	jh->high = data[3] << 8 | data[4];
-}
 	if (len == 9 && !dng_version) getc(ifp);
 	break;
       case 0xffc4:          // define Huffman tables
@@ -9422,7 +9417,7 @@ void CLASS parse_makernote (int base, int uptag)
               }
             break;
 
-            // 5DS R
+            // 5DS / 5DS R
           case 1560:
             imgdata.color.canon_makernotes.CanonColorDataVer = 8;
             imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
