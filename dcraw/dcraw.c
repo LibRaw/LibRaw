@@ -974,11 +974,6 @@ int CLASS ljpeg_start (struct jhead *jh, int info_only)
 	jh->wide = data[3] << 8 | data[4];
 	jh->clrs = data[5] + jh->sraw;
 
-if (!strcmp(model, "EOS 5DS"))
-{
-  jh->wide = data[1] << 8 | data[2];
-	jh->high = data[3] << 8 | data[4];
-}
 	if (len == 9 && !dng_version) getc(ifp);
 	break;
       case 0xffc4:          // define Huffman tables
@@ -11900,7 +11895,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 9805,-2689,-1312,-5803,13064,3068,-2438,3075,8775 } },
     { "Canon EOS D60", 0, 0xfa0,
       { 6188,-1341,-890,-7168,14489,2937,-2640,3228,8483 } },
-    { "Canon EOS 5DS", -2047, 0x3fff,
+    { "Canon EOS 5DS", 0, 0x3fff,
       { 6722,-635,-963,-4287,12460,2028,-908,2162,5668 } },
     { "Canon EOS 5D Mark III", 0, 0x3c80,
       { 6722,-635,-963,-4287,12460,2028,-908,2162,5668 } },
@@ -13085,7 +13080,7 @@ void CLASS identify()
     { 5712, 3774,  62, 20, 10,  2 },
     { 5792, 3804, 158, 51,  0,  0 },
     { 5920, 3950, 122, 80,  2,  0 },
-    { 8896, 5920, 0, 0,  0,  0 },
+    { 8896, 5920, 160, 64,  0,  0 },
 
   };
   static const struct {
