@@ -487,6 +487,7 @@ void LibRaw:: recycle()
   ZERO(imgdata.color);
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
+  imgdata.color.FujiExpoMidPointShift = -999.f;
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);
   imgdata.lens.makernotes.CanonFocalUnits = 1;

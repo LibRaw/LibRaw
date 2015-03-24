@@ -8233,6 +8233,21 @@ void CLASS parse_makernote (int base, int uptag)
                 imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
               }
             break;
+
+            // 5DS / 5DS R
+          case 1560:
+            imgdata.color.canon_makernotes.CanonColorDataVer = 8;
+            imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+            {
+              fseek (ifp, save1+(0x146<<1), SEEK_SET);			// offset 326 shorts
+              int bls=0;
+              FORC4 bls+=get2();
+              imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+            }
+              fseek (ifp, save1+(0x30f<<1), SEEK_SET);		// offset 783 shorts
+              imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+            break;
+
           }
         fseek (ifp, save1, SEEK_SET);
       }
