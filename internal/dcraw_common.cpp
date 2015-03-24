@@ -789,7 +789,7 @@ ushort * CLASS ljpeg_row (int jrow, struct jhead *jh)
 
 void CLASS lossless_jpeg_load_raw()
 {
-  int jwide, jrow, jcol, val, jidx, i, j, row=0, col=0;
+  int jwide, jhigh, jrow, jcol, val, jidx, i, j, row=0, col=0;
   struct jhead jh;
   ushort *rp;
 
@@ -802,6 +802,8 @@ void CLASS lossless_jpeg_load_raw()
     longjmp (failure, 2);
 #endif
   jwide = jh.wide * jh.clrs;
+  jhigh = jh.high;
+  if (jh.clrs == 4) jhigh *= 2;
 
 #ifdef LIBRAW_LIBRARY_BUILD
   try {
@@ -817,10 +819,10 @@ void CLASS lossless_jpeg_load_raw()
       val = curve[*rp++];
       if (cr2_slice[0]) {
 	jidx = jrow*jwide + jcol;
-	i = jidx / (cr2_slice[1]*jh.high);
+	i = jidx / (cr2_slice[1]*jhigh);
 	if ((j = i >= cr2_slice[0]))
 		 i  = cr2_slice[0];
-	jidx -= i * (cr2_slice[1]*jh.high);
+	jidx -= i * (cr2_slice[1]*jhigh);
 	row = jidx / cr2_slice[1+j];
 	col = jidx % cr2_slice[1+j] + i*cr2_slice[1];
       }
@@ -8982,7 +8984,15 @@ int CLASS parse_tiff_ifd (int base)
 	    tiff_ifd[ifd].bps     = jh.bits;
 	    tiff_ifd[ifd].samples = jh.clrs;
 	    if (!(jh.sraw || (jh.clrs & 1)))
-	      tiff_ifd[ifd].t_width *= jh.clrs;
+	     {
+	        if(jh.clrs == 4)
+		{
+	        	tiff_ifd[ifd].t_width *= 2;
+	        	tiff_ifd[ifd].t_height *= 2;
+		}
+		else
+			tiff_ifd[ifd].t_width *= jh.clrs;
+	     }
 	    i = order;
 	    parse_tiff (tiff_ifd[ifd].offset + 12);
 	    order = i;
@@ -10561,6 +10571,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 9805,-2689,-1312,-5803,13064,3068,-2438,3075,8775 } },
     { "Canon EOS D60", 0, 0xfa0,
       { 6188,-1341,-890,-7168,14489,2937,-2640,3228,8483 } },
+    { "Canon EOS 5DS", -2047, 0x3fff,
+      { 6722,-635,-963,-4287,12460,2028,-908,2162,5668 } },
     { "Canon EOS 5D Mark III", 0, 0x3c80,
       { 6722,-635,-963,-4287,12460,2028,-908,2162,5668 } },
     { "Canon EOS 5D Mark II", 0, 0x3cf0,
@@ -11744,6 +11756,8 @@ void CLASS identify()
     { 5712, 3774,  62, 20, 10,  2 },
     { 5792, 3804, 158, 51,  0,  0 },
     { 5920, 3950, 122, 80,  2,  0 },
+    { 8896, 5920, 0, 0,  0,  0 },
+
   };
   static const struct {
     ushort id;

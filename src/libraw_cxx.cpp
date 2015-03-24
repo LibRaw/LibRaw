@@ -3383,6 +3383,8 @@ static const char  *static_camera_list[] =
 "Canon EOS D30",
 "Canon EOS D60",
 "Canon EOS 5D",
+"Canon EOS 5DS",
+"Canon EOS 5DS R",
 "Canon EOS 5D Mark II",
 "Canon EOS 5D Mark III",
 "Canon EOS 6D",
