@@ -10185,15 +10185,7 @@ int CLASS parse_tiff_ifd (int base)
 	    tiff_ifd[ifd].bps     = jh.bits;
 	    tiff_ifd[ifd].samples = jh.clrs;
 	    if (!(jh.sraw || (jh.clrs & 1)))
-	     {
-	        if(!strcasecmp(make,"Canon") && !strncasecmp(model,"EOS 5DS",7))
-		{
-	        	tiff_ifd[ifd].t_width *= 2;
-	        	tiff_ifd[ifd].t_height *= 2;
-		}
-		else
-			tiff_ifd[ifd].t_width *= jh.clrs;
-	     }
+		tiff_ifd[ifd].t_width *= jh.clrs;
 	    i = order;
 	    parse_tiff (tiff_ifd[ifd].offset + 12);
 	    order = i;
