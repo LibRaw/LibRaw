@@ -7104,7 +7104,7 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
   return;
 }
 
-void CLASS setOlympusBodyFeatures (unsigned long id)
+void CLASS setOlympusBodyFeatures (unsigned long long id)
 {
   imgdata.lens.makernotes.CamID = id;
   if ((id == 0x4434303430) ||

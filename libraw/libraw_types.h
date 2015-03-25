@@ -374,7 +374,7 @@ typedef struct
 	char	Lens[128];
 	ushort	LensFormat;    /* to characterize the image circle the lens covers */
 	ushort	LensMount;     /* 'male', lens itself */
-	unsigned long CamID;
+	unsigned long long  CamID;
 	ushort	CameraFormat;  /* some of the sensor formats */
 	ushort	CameraMount;   /* 'female', body throat */
 	char	body[64];

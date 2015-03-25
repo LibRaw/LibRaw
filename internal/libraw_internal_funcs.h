@@ -36,7 +36,7 @@ it under the terms of the one of three licenses as you choose:
     void	setCanonBodyFeatures (unsigned id);
     void 	processCanonCameraInfo (unsigned id, uchar *CameraInfo);
     void	processNikonLensData (uchar *LensData, unsigned len);
-    void	setOlympusBodyFeatures (unsigned long id);
+    void	setOlympusBodyFeatures (unsigned long long id);
     void	setPhaseOneFeatures (unsigned id);
     void	setPentaxBodyFeatures (unsigned id);
     void	setSonyBodyFeatures (unsigned id);
