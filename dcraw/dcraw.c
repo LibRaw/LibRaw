@@ -1083,7 +1083,7 @@ void CLASS lossless_jpeg_load_raw()
 #endif
   jwide = jh.wide * jh.clrs;
   jhigh = jh.high;
-  if (jh.clrs == 4) jhigh *= 2;
+  if (!strcasecmp(make,"Canon") && !strncasecmp(model,"EOS 5DS",7)) jhigh *= 2;
 
 #ifdef LIBRAW_LIBRARY_BUILD
   try {
@@ -10186,7 +10186,7 @@ int CLASS parse_tiff_ifd (int base)
 	    tiff_ifd[ifd].samples = jh.clrs;
 	    if (!(jh.sraw || (jh.clrs & 1)))
 	     {
-	        if(jh.clrs == 4)
+	        if(!strcasecmp(make,"Canon") && !strncasecmp(model,"EOS 5DS",7))
 		{
 	        	tiff_ifd[ifd].t_width *= 2;
 	        	tiff_ifd[ifd].t_height *= 2;
