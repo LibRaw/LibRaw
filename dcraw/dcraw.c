@@ -7107,9 +7107,9 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
 void CLASS setOlympusBodyFeatures (unsigned long long id)
 {
   imgdata.lens.makernotes.CamID = id;
-  if ((id == 0x4434303430) ||
-      (id == 0x4434303431) ||
-      ((id >= 0x5330303030) && (id <= 0x5330303939)))
+  if ((id == 0x4434303430ULL) ||
+      (id == 0x4434303431ULL) ||
+      ((id >= 0x5330303030ULL) && (id <= 0x5330303939ULL)))
     {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FT;
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FT;
@@ -7120,13 +7120,13 @@ void CLASS setOlympusBodyFeatures (unsigned long long id)
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
     }
 
-  if ((id == 0x4434303430) ||
-      (id == 0x4434303431) ||
-      ((id >= 0x5330303033) && (id <= 0x5330303138)) ||
-      (id == 0x5330303233) ||
-      (id == 0x5330303239) ||
-      (id == 0x5330303330) ||
-      (id == 0x5330303333))
+  if ((id == 0x4434303430ULL) ||
+      (id == 0x4434303431ULL) ||
+      ((id >= 0x5330303033ULL) && (id <= 0x5330303138ULL)) ||
+      (id == 0x5330303233ULL) ||
+      (id == 0x5330303239ULL) ||
+      (id == 0x5330303330ULL) ||
+      (id == 0x5330303333ULL))
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FT;
     }
