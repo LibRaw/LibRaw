@@ -12329,6 +12329,11 @@ void CLASS identify()
   if (!strcmp(make,"Canon") && !fsize && tiff_bps != 15) {
     if (!load_raw)
       load_raw = &CLASS lossless_jpeg_load_raw;
+    if(!strncasecmp(model,"EOS 5DS",7))
+     {
+     	raw_width /= 2;
+	raw_height *=2;
+     }
     for (i=0; i < sizeof canon / sizeof *canon; i++)
       if (raw_width == canon[i][0] && raw_height == canon[i][1]) {
 	width  = raw_width - (left_margin = canon[i][2]);
