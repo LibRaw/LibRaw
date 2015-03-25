@@ -1083,7 +1083,7 @@ void CLASS lossless_jpeg_load_raw()
 #endif
   jwide = jh.wide * jh.clrs;
   jhigh = jh.high;
-  if (!strcasecmp(make,"Canon") && !strncasecmp(model,"EOS 5DS",7)) jhigh *= 2;
+  if(jh.clrs == 4 && jwide >= raw_width*2) jhigh *= 2;
 
 #ifdef LIBRAW_LIBRARY_BUILD
   try {
@@ -10185,7 +10185,21 @@ int CLASS parse_tiff_ifd (int base)
 	    tiff_ifd[ifd].bps     = jh.bits;
 	    tiff_ifd[ifd].samples = jh.clrs;
 	    if (!(jh.sraw || (jh.clrs & 1)))
-		tiff_ifd[ifd].t_width *= jh.clrs;
+	    {
+	 	if(jh.clrs == 4)
+		{
+		  int nwidth = tiff_ifd[ifd].t_width * jh.clrs;
+		  if(nwidth > 2*tiff_ifd[ifd].t_height)
+		  {
+			tiff_ifd[ifd].t_width *=2;
+			tiff_ifd[ifd].t_height *=2;
+		  }
+		  else
+			tiff_ifd[ifd].t_width *= jh.clrs;
+		}
+		else
+			tiff_ifd[ifd].t_width *= jh.clrs;
+	    }
 	    i = order;
 	    parse_tiff (tiff_ifd[ifd].offset + 12);
 	    order = i;
@@ -13650,11 +13664,6 @@ void CLASS identify()
   if (!strcmp(make,"Canon") && !fsize && tiff_bps != 15) {
     if (!load_raw)
       load_raw = &CLASS lossless_jpeg_load_raw;
-    if(!strncasecmp(model,"EOS 5DS",7))
-     {
-     	raw_width /= 2;
-	raw_height *=2;
-     }
     for (i=0; i < sizeof canon / sizeof *canon; i++)
       if (raw_width == canon[i][0] && raw_height == canon[i][1]) {
 	width  = raw_width - (left_margin = canon[i][2]);
