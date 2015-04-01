@@ -7669,7 +7669,7 @@ void CLASS parse_makernote (int base, int uptag)
         }
       }
 
-    else if (!strncmp(make, "PENTAX", 6) &&
+    else if ((!strncmp(make, "PENTAX", 6) || !strncmp(make, "RICOH", 5)) &&
              !strncmp(model, "GR", 2))
       {
         if ((tag == 0x1001) && (type == 3))
@@ -7703,7 +7703,7 @@ void CLASS parse_makernote (int base, int uptag)
             imgdata.lens.makernotes.CurFocal = getreal(type);
           }
 
-        else if (tag == 0x2001)
+        else if ((tag == 0x2001) && !strncmp(model, "GXR", 3))
           {
             short ntags, cur_tag;
             fseek(ifp, 20, SEEK_CUR);
@@ -7725,7 +7725,7 @@ void CLASS parse_makernote (int base, int uptag)
             	case 5:
             	case 6:
             		imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-                        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_RicohModule;
+                imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_RicohModule;
                 break;
               case 8:
                 imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_M;
