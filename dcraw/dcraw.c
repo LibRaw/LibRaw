@@ -6775,7 +6775,8 @@ void CLASS setCanonBodyFeatures (unsigned id)
           else
             if (
                 (id == 0x80000331) ||	// M
-                (id == 0x80000355)		// M2
+                (id == 0x80000355) ||	// M2
+                (id == 0x80000374) 	  // M3
                 )
               {
                 imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -7765,6 +7766,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         else if (tag == 0x10)	// Canon ModelID
           {
             unique_id = get4();
+            if (unique_id == 0x03740000) unique_id = 0x80000374;
             setCanonBodyFeatures(unique_id);
             if (lenCanonCameraInfo) processCanonCameraInfo(unique_id, CanonCameraInfo);
           }
@@ -9322,6 +9324,7 @@ void CLASS parse_makernote (int base, int uptag)
         unique_id = get4();
 
 #ifdef LIBRAW_LIBRARY_BUILD
+        if (unique_id == 0x03740000) unique_id = 0x80000374;
         setCanonBodyFeatures(unique_id);
         if (lenCanonCameraInfo) processCanonCameraInfo(unique_id, CanonCameraInfo);
 #endif
@@ -13092,7 +13095,7 @@ void CLASS identify()
     { 4832, 3228,  62, 51,  0,  0 },
     { 5108, 3349,  98, 13,  0,  0 },
     { 5120, 3318, 142, 45, 62,  0 },
-    { 5280, 3528,  72, 52,  0,  0 },
+    { 5280, 3528,  72, 52,  0,  0 },  /* EOS M */
     { 5344, 3516, 142, 51,  0,  0 },
     { 5344, 3584, 126,100,  0,  2 },
     { 5360, 3516, 158, 51,  0,  0 },
@@ -13101,6 +13104,7 @@ void CLASS identify()
     { 5712, 3774,  62, 20, 10,  2 },
     { 5792, 3804, 158, 51,  0,  0 },
     { 5920, 3950, 122, 80,  2,  0 },
+    { 6096, 4056, 72, 36,  0,  0 },     /* EOS M3 */
     { 8896, 5920, 160, 64,  0,  0 },
 
   };
@@ -13145,6 +13149,7 @@ void CLASS identify()
     { 0x327, "EOS 1200D" },
     { 0x331, "EOS M" },
     { 0x335, "EOS M2" },
+    { 0x374, "EOS M3"},  /* temp */
     { 0x346, "EOS 100D" },
     { 0x347, "EOS 760D" },
     { 0x382, "EOS 5DS" },
