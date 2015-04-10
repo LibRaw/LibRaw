@@ -8200,7 +8200,13 @@ void CLASS parse_makernote (int base, int uptag)
             break;
 
           case 5120:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 5;	// PowerSot G10
+            imgdata.color.canon_makernotes.CanonColorDataVer = 5;	// PowerSot G10, EOS M3
+            {
+              fseek (ifp, save1+(0x108<<1), SEEK_SET);			// offset 264 short
+              int bls=0;
+              FORC4 bls+=get2();
+              imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+            }
             break;
 
           case 1273: case 1275:
