@@ -1467,7 +1467,7 @@ int CLASS phase_one_correct()
   unsigned entries, tag, data, save, col, row, type;
   int len, i, j, k, cip, val[4], dev[4], sum, max;
   int head[9], diff, mindiff=INT_MAX, off_412=0;
-  static const signed char dir[12][2] =
+  /* static */ const signed char dir[12][2] =
     { {-1,-1}, {-1,1}, {1,-1}, {1,1}, {-2,0}, {0,-2}, {0,2}, {2,0},
       {-2,-2}, {-2,2}, {2,-2}, {2,2} };
   float poly[8], num, cfrac, frac, mult[2], *yval[2];
