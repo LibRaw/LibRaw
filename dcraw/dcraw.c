@@ -14037,7 +14037,7 @@ konica_400z:
   } else if (!strcmp(make,"Samsung") && raw_width == 6496) {
     filters = 0x61616161;
 #ifdef LIBRAW_LIBRARY_BUILD
-    if(!black)
+    if(!black && !cblack[0] && !cblack[1] && !cblack[2] && !cblack[3])
 #endif
     black = 1 << (tiff_bps - 7);
   } else if (!strcmp(model,"EX1")) {
