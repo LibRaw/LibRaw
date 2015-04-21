@@ -6527,6 +6527,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
     tag |= uptag << 16;
+    if(len > 1024*1024) goto next; // 1Mb tag? No!
 
     if (!strcmp(make, "Canon"))
       {
@@ -6637,7 +6638,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       {
         if ((tag == 0x0303) && (type != 4))
           {
-            fread(imgdata.lens.makernotes.Lens, len, 1, ifp);
+            fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
           }
 
         if ((tag == 0x3405) ||
@@ -6696,7 +6697,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           }
         else if (tag == 0x0082)				// lens attachment
           {
-            fread(imgdata.lens.makernotes.Attachment, len, 1, ifp);
+            fread(imgdata.lens.makernotes.Attachment, MIN(len,127), 1, ifp);
           }
         else if (tag == 0x0083)				// lens type
           {
@@ -6808,7 +6809,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           {
             uchar sOlyID[7];
             long unsigned OlyID;
-            fread (sOlyID, len, 1, ifp);
+            fread (sOlyID, MIN(len,7), 1, ifp);
             OlyID = sOlyID[0];
             i = 1;
             while (sOlyID[i])
@@ -6837,7 +6838,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             }
           break;
         case 0x20100203:
-          fread(imgdata.lens.makernotes.Lens, len, 1, ifp);
+          fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
           break;
         case 0x20100205:
           imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
@@ -6863,10 +6864,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             imgdata.lens.makernotes.TeleconverterID | fgetc(ifp);
           break;
         case 0x20100303:
-          fread(imgdata.lens.makernotes.Teleconverter, len, 1, ifp);
+          fread(imgdata.lens.makernotes.Teleconverter, MIN(len,127), 1, ifp);
           break;
         case 0x20100403:
-          fread(imgdata.lens.makernotes.Attachment, len, 1, ifp);
+          fread(imgdata.lens.makernotes.Attachment, MIN(len,127), 1, ifp);
           break;
         }
       }
@@ -7376,6 +7377,7 @@ void CLASS parse_makernote (int base, int uptag)
     order = morder;
     tiff_get (base, &tag, &type, &len, &save);
     tag |= uptag << 16;
+    if(len > 1024*1024) continue; // 1Mb tag? No!
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
@@ -7480,7 +7482,7 @@ void CLASS parse_makernote (int base, int uptag)
       {
         if ((tag == 0x0303) && (type != 4))
           {
-            fread(imgdata.lens.makernotes.Lens, len, 1, ifp);
+            fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
           }
 
         if ((tag == 0x3405) ||
@@ -7536,7 +7538,7 @@ void CLASS parse_makernote (int base, int uptag)
           }
         else if (tag == 0x0082)				// lens attachment
           {
-            fread(imgdata.lens.makernotes.Attachment, len, 1, ifp);
+            fread(imgdata.lens.makernotes.Attachment, MIN(len,127), 1, ifp);
           }
         else if (tag == 0x0083)				// lens type
           {
@@ -7608,7 +7610,7 @@ void CLASS parse_makernote (int base, int uptag)
           {
             uchar sOlyID[7];
             long unsigned OlyID;
-            fread (sOlyID, len, 1, ifp);
+            fread (sOlyID, MIN(len,7), 1, ifp);
             OlyID = sOlyID[0];
             i = 1;
             while (sOlyID[i])
@@ -7637,7 +7639,7 @@ void CLASS parse_makernote (int base, int uptag)
             }
           break;
         case 0x20100203:
-          fread(imgdata.lens.makernotes.Lens, len, 1, ifp);
+          fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
           break;
         case 0x20100205:
           imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
@@ -7663,10 +7665,10 @@ void CLASS parse_makernote (int base, int uptag)
             imgdata.lens.makernotes.TeleconverterID | fgetc(ifp);
           break;
         case 0x20100303:
-          fread(imgdata.lens.makernotes.Teleconverter, len, 1, ifp);
+          fread(imgdata.lens.makernotes.Teleconverter, MIN(len,127), 1, ifp);
           break;
         case 0x20100403:
-          fread(imgdata.lens.makernotes.Attachment, len, 1, ifp);
+          fread(imgdata.lens.makernotes.Attachment, MIN(len,127), 1, ifp);
           break;
         }
       }
@@ -8716,8 +8718,8 @@ void CLASS parse_mos (int offset)
 // IB start
 #ifdef LIBRAW_LIBRARY_BUILD
     if (!strcmp(data,"CameraObj_camera_type")) {
-			fread(imgdata.lens.makernotes.body, skip, 1, ifp);
-	}
+	fread(imgdata.lens.makernotes.body, MIN(skip,63), 1, ifp);
+    }
 #endif
 // IB end
     if (!strcmp(data,"JPEG_preview_data")) {
