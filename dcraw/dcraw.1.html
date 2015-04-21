@@ -2,7 +2,7 @@
 <HTML><HEAD><TITLE>Manpage of dcraw</TITLE>
 </HEAD><BODY>
 <H1>dcraw</H1>
-Section: User Commands  (1)<BR>Updated: February 2, 2012<BR><A HREF="#index">Index</A>
+Section: User Commands  (1)<BR>Updated: March 3, 2015<BR><A HREF="#index">Index</A>
 <A HREF="../index.html">Return to Main Contents</A><HR>
 
 
@@ -193,11 +193,11 @@ The default is
 if
 <B>-w</B>
 
-is set,
+is set or the photo is in DNG format,
 <B>-M</B>
 
-otherwise.
-This option only affects Olympus, Leaf, and Phase One cameras.
+otherwise. Besides DNG,
+this option only affects Olympus, Leaf, and Phase One cameras.
 <DT><B>-o [0-5]</B>
 
 <DD>
@@ -382,7 +382,7 @@ row, and UNIX time of death for one pixel.  For example:
 </PRE>
 
 <P>
-These coordinates are before any cropping or rotation, so use
+These coordinates are before any stretching or rotation, so use
 <B>dcraw -j -t 0</B>
 
 to locate dead pixels.
@@ -435,6 +435,6 @@ Written by David Coffin, dcoffin a cybercom o net
 This document was created by
 <A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
 using the manual pages.<BR>
-Time: 18:30:09 GMT, February 25, 2015
+Time: 01:29:54 GMT, April 11, 2015
 </BODY>
 </HTML>
