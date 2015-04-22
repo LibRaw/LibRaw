@@ -6807,12 +6807,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         case 0x0207:
         case 0x20100100:
           {
-            uchar sOlyID[7];
-            long unsigned OlyID;
+            uchar sOlyID[8];
+            unsigned long long OlyID;
             fread (sOlyID, MIN(len,7), 1, ifp);
+	    sOlyID[7] = 0;
             OlyID = sOlyID[0];
             i = 1;
-            while (sOlyID[i])
+            while (i < 7 && sOlyID[i])
               {
                 OlyID = OlyID << 8 | sOlyID[i];
                 i++;
@@ -7608,12 +7609,13 @@ void CLASS parse_makernote (int base, int uptag)
         case 0x0207:
         case 0x20100100:
           {
-            uchar sOlyID[7];
-            long unsigned OlyID;
+            uchar sOlyID[8];
+            unsigned long long OlyID;
             fread (sOlyID, MIN(len,7), 1, ifp);
+	    sOlyID[7] = 0;
             OlyID = sOlyID[0];
             i = 1;
-            while (sOlyID[i])
+            while (i < 7 && sOlyID[i])
               {
                 OlyID = OlyID << 8 | sOlyID[i];
                 i++;
