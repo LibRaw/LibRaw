@@ -1,4 +1,4 @@
-#ifndef IGNOREALL
+ifndef IGNOREALL
 /*
    dcraw.c -- Dave Coffin's raw photo decoder
    Copyright 1997-2015 by Dave Coffin, dcoffin a cybercom o net
@@ -7706,7 +7706,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
     tag |= uptag << 16;
-    if(len > 1024*1024) goto next; // 1Mb tag? No!
+    if(len > 100*1024*1024) goto next; // 100Mb tag? No!
 
     if (!strcmp(make, "Canon"))
       {
@@ -7918,7 +7918,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 	          if (ver97 == 601)  // Coolpix A
 	          {
 	            imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-              imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+                    imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
 	          }
 	        }
         else if (tag == 0x0098)				// contains lens data
@@ -7940,13 +7940,16 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               case 402: lenNikonLensData = 509; break;
               case 403: lenNikonLensData = 879; break;
               }
-            table_buf = (uchar*)malloc(lenNikonLensData);
-            fread(table_buf, lenNikonLensData, 1, ifp);
-            if ((NikonLensDataVersion < 201) && lenNikonLensData)
-            {
-              processNikonLensData(table_buf, lenNikonLensData);
-              lenNikonLensData = 0;
-            }
+            if(lenNikonLensData)
+              {
+                table_buf = (uchar*)malloc(lenNikonLensData);
+                fread(table_buf, lenNikonLensData, 1, ifp);
+                if ((NikonLensDataVersion < 201) && lenNikonLensData)
+                  {
+                    processNikonLensData(table_buf, lenNikonLensData);
+                    lenNikonLensData = 0;
+                  }
+              }
           }
 
         else if (tag == 0xa7)					// shutter count
@@ -8085,7 +8088,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         else if (tag == 0x0207)
           {
             ushort iLensData = 0;
-            table_buf = (uchar*)malloc(len);
+            table_buf = (uchar*)malloc(MAX(len,128));
             fread(table_buf, len, 1, ifp);
             if ((imgdata.lens.makernotes.CamID < 0x12b9c) ||
                 ((imgdata.lens.makernotes.CamID == 0x12b9c) ||	// K100D
@@ -8557,7 +8560,7 @@ void CLASS parse_makernote (int base, int uptag)
     order = morder;
     tiff_get (base, &tag, &type, &len, &save);
     tag |= uptag << 16;
-    if(len > 1024*1024) continue; // 1Mb tag? No!
+    if(len > 100*1024*1024) continue; // 100Mb tag? No!
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
@@ -8772,13 +8775,16 @@ void CLASS parse_makernote (int base, int uptag)
               case 402: lenNikonLensData = 509; break;
               case 403: lenNikonLensData = 879; break;
               }
-            table_buf = (uchar*)malloc(lenNikonLensData);
-            fread(table_buf, lenNikonLensData, 1, ifp);
-            if ((NikonLensDataVersion < 201) && lenNikonLensData)
-            {
-              processNikonLensData(table_buf, lenNikonLensData);
-              lenNikonLensData = 0;
-            }
+            if(lenNikonLensData>0)
+              {
+                table_buf = (uchar*)malloc(lenNikonLensData);
+                fread(table_buf, lenNikonLensData, 1, ifp);
+                if ((NikonLensDataVersion < 201) && lenNikonLensData)
+                  {
+                    processNikonLensData(table_buf, lenNikonLensData);
+                    lenNikonLensData = 0;
+                  }
+              }
           }
       }
 
@@ -8948,7 +8954,7 @@ void CLASS parse_makernote (int base, int uptag)
         else if (tag == 0x0207)
           {
             ushort iLensData = 0;
-            table_buf = (uchar*)malloc(len);
+            table_buf = (uchar*)malloc(MAX(len,128));
             fread(table_buf, len, 1, ifp);
             if ((imgdata.lens.makernotes.CamID < 0x12b9c) ||
                 ((imgdata.lens.makernotes.CamID == 0x12b9c) ||	// K100D
