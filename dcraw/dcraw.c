@@ -1,4 +1,4 @@
-ifndef IGNOREALL
+#ifndef IGNOREALL
 /*
    dcraw.c -- Dave Coffin's raw photo decoder
    Copyright 1997-2015 by Dave Coffin, dcoffin a cybercom o net

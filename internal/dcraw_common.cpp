@@ -21,7 +21,6 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
-#line 265 "dcraw/dcraw.c"
 #include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
@@ -30,7 +29,6 @@ it under the terms of the one of three licenses as you choose:
 #include "libraw/libraw.h"
 #include "internal/defines.h"
 #include "internal/var_defines.h"
-#line 276 "dcraw/dcraw.c"
 int CLASS fcol (int row, int col)
 {
   static const char filter[16][16] =
@@ -77,7 +75,6 @@ char *my_strcasestr (char *haystack, const char *needle)
 }
 #define strcasestr my_strcasestr
 #endif
-#line 345 "dcraw/dcraw.c"
 ushort CLASS sget2 (uchar *s)
 {
   if (order == 0x4949)		/* "II" means little-endian */
@@ -666,7 +663,6 @@ void CLASS canon_load_raw()
 #endif
   FORC(2) free (huff[c]);
 }
-#line 945 "dcraw/dcraw.c"
 
 int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
@@ -1321,7 +1317,6 @@ int CLASS minolta_z2()
     if (tail[i]) nz++;
   return nz > 20;
 }
-#line 1604 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -3641,7 +3636,6 @@ void CLASS redcine_load_raw()
 #endif
 #endif
 }
-#line 4647 "dcraw/dcraw.c"
 void CLASS crop_masked_pixels()
 {
   int row, col;
@@ -3749,7 +3743,6 @@ void CLASS remove_zeroes()
   RUN_CALLBACK(LIBRAW_PROGRESS_REMOVE_ZEROES,1,2);
 #endif
 }
-#line 4920 "dcraw/dcraw.c"
 
 static const uchar xlat[2][256] = {
   { 0xc1,0xbf,0x6d,0x0d,0x59,0xc5,0x13,0x9d,0x83,0x61,0x6b,0x4f,0xc7,0x7f,0x3d,0x3d,
@@ -5530,7 +5523,6 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
-#line 6705 "dcraw/dcraw.c"
 
 static float powf_lim(float a, float b, float limup)
 {
@@ -7389,7 +7381,7 @@ void CLASS parse_makernote (int base, int uptag)
     order = morder;
     tiff_get (base, &tag, &type, &len, &save);
     tag |= uptag << 16;
-    if(len > 1024*1024) continue; // 1Mb tag? No!
+    if(len > 100*1024*1024) continue; // 100Mb tag? No!
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
@@ -8882,7 +8874,6 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 #endif
-#line 10062 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -10579,7 +10570,6 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
-#line 11896 "dcraw/dcraw.c"
 
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
@@ -13265,7 +13255,6 @@ notraw:
 }
 
 
-#line 14670 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -13496,7 +13485,6 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
-#line 14926 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
