@@ -14,7 +14,7 @@ CONFIG(debug,debug|release) {
 	win32:OUTD=release-$$SUFF
 	macx:OUTD=release
 }
-INCLUDEPATH=../../LibRaw
+INCLUDEPATH+=../../LibRaw
 OBJECTS_DIR = $$OUTD/
 MOC_DIR = $$OUTD/
 RCC_DIR = $$OUTD/
