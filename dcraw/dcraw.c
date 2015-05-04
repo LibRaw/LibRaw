@@ -7166,6 +7166,7 @@ void CLASS setPentaxBodyFeatures (unsigned id)
   case 0x12fca:
   case 0x1301a:
   case 0x13024:
+  case 0x1309c:
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Pentax_K;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Pentax_K;
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -12565,11 +12566,11 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 10915,-3677,-982,-5587,12986,2911,-1168,1968,6223 } },
     { "Olympus SP570UZ", 0, 0,
       { 11522,-4044,-1146,-4736,12172,2904,-988,1829,6039 } },
-    {"Olympus SH-2", 0, 0,               
+    {"Olympus SH-2", 0, 0,
 	{10156,-3425,-1077,-2611,11177,1624,-385,1592,5080}},
     { "Olympus STYLUS1",0, 0,
     { 11976,-5518,-545,-1419,10472,846,-475,1766,4524 } },
-    {"Olympus TG-4", 0, 0,                
+    {"Olympus TG-4", 0, 0,
 	{11426,-4159,-1126,-2066,10678,1593,-120,1327,4998}},
     { "Olympus XZ-10", 0, 0,
       { 9777,-3483,-925,-2886,11297,1800,-602,1663,5134 } },
