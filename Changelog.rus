@@ -1,4 +1,8 @@
-﻿2014-01-17 Alex Tutubalin <lexa@lexa.ru>
+﻿2015-05-11 Alex Tutubalin <lexa@lexa.ru>
+  * Исправлена уязвимость в dcraw:ljpeg_start()
+  * LibRaw 0.16.1
+
+2014-01-17 Alex Tutubalin <lexa@lexa.ru>
   * Поддержка камер
     Добавлены: Fujifilm X-E2,XQ1
     Обновлены цветовые данные: Nikon D4, 1 AW1/J3; Fuji X-M2
@@ -13,7 +17,7 @@
   * Исправлены ошибки компиляции при сборке VS2012 с включенным
     OpenMP
   * Исправлена опечатка, не дававшая использовать Demosaic Pack GPL2
-  * LibRaw 0.16.0-Beta1
+  * LibRaw 0.16.0
 
 2013-11-12 Alex Tutubalin <lexa@lexa.ru>
   * Поддержка новых камер
