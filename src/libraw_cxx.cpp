@@ -4399,8 +4399,11 @@ void LibRaw::x3f_thumb_loader()
       char *src0 = (char*)ID->data;
       for(int row = 0; row < ID->rows;row++)
         {
+		  int offset = row * ID->row_stride;
+		  if (offset + ID->columns * 3 > ID->data_size)
+			break;
           char *dest = &imgdata.thumbnail.thumb[row*ID->columns*3];
-          char *src = &src0[row * ID->row_stride];
+          char *src = &src0[offset];
           memmove(dest,src,ID->columns*3);
         }
     }
