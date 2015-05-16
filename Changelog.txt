@@ -1,3 +1,14 @@
+2015-05-16  Alex Tutubalin <lexa@lexa.ru>
+ * fixed several bugs detected by using American Fuzzy Loop
+ * Removed unneeded tile bytecount parser
+ * ABI changed, recompile binary packages. Shlib version incremented too
+ * LibRaw 0.17 Alpha 4
+
+
+2015-05-11  Alex Tutubalin <lexa@lexa.ru>
+ * Fixed dcraw.c ljpeg_start possibly buffer overrun
+ * LibRaw 0.17 Alpha 3
+
 2015-05-08  Alex Tutubalin <lexa@lexa.ru>
  * LibRaw 0.17 Alpha 2.
  * Fixed possible buffer overrun in metadata parser
