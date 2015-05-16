@@ -1,3 +1,7 @@
+2015-05-16 Alex Tutubalin <lexa@lexa.ru>
+  * Fix for several problems reported by AFL run
+  * LibRaw 0.16.2-Release
+
 2015-05-11 Alex Tutubalin <lexa@lexa.ru>
   * Fix for dcraw ljpeg_start() vulnerability
   * LibRaw 0.16.1-Release

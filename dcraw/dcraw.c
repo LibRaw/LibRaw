@@ -845,12 +845,15 @@ int CLASS ljpeg_start (struct jhead *jh, int info_only)
   ushort len;
   uchar data[0x10000];
   const uchar *dp;
+  int cnt = 0;
 
   memset (jh, 0, sizeof *jh);
   jh->restart = INT_MAX;
   fread (data, 2, 1, ifp);
   if (data[1] != 0xd8) return 0;
   do {
+    if(feof(ifp)) return 0;
+    if(cnt++ > 1024) return 0;
     fread (data, 2, 2, ifp);
     tag =  data[0] << 8 | data[1];
     len = (data[2] << 8 | data[3]) - 2;
@@ -6683,16 +6686,6 @@ int CLASS parse_tiff_ifd (int base)
 	  is_raw = 5;
 	}
 	break;
-#ifdef LIBRAW_LIBRARY_BUILD
-      case 325:				/* TileByteCount */
-          tiff_ifd[ifd].tile_maxbytes = 0;
-          for(int jj=0;jj<len;jj++)
-              {
-                  int s = get4();
-                  if(s > tiff_ifd[ifd].tile_maxbytes) tiff_ifd[ifd].tile_maxbytes=s;
-              }
-	break;
-#endif
       case 330:				/* SubIFDs */
 	if (!strcmp(model,"DSLR-A100") && tiff_ifd[ifd].t_width == 3872) {
 	  load_raw = &CLASS sony_arw_load_raw;
@@ -6754,15 +6747,20 @@ int CLASS parse_tiff_ifd (int base)
 	break;
       case 33422:			/* CFAPattern */
       case 64777:			/* Kodak P-series */
-	if ((plen=len) > 16) plen = 16;
-	fread (cfa_pat, 1, plen, ifp);
-	for (colors=cfa=i=0; i < plen && colors < 4; i++) {
-	  colors += !(cfa & (1 << cfa_pat[i]));
-	  cfa |= 1 << cfa_pat[i];
-	}
-	if (cfa == 070) memcpy (cfa_pc,"\003\004\005",3);	/* CMY */
-	if (cfa == 072) memcpy (cfa_pc,"\005\003\004\001",4);	/* GMCY */
-	goto guess_cfa_pc;
+        if(len > 0)
+          {
+            if ((plen=len) > 16) plen = 16;
+            fread (cfa_pat, 1, plen, ifp);
+            for (colors=cfa=i=0; i < plen && colors < 4; i++) {
+              colors += !(cfa & (1 << cfa_pat[i]));
+              cfa |= 1 << cfa_pat[i];
+            }
+            if (cfa == 070) memcpy (cfa_pc,"\003\004\005",3);	/* CMY */
+            if (cfa == 072) memcpy (cfa_pc,"\005\003\004\001",4);	/* GMCY */
+            goto guess_cfa_pc;
+          }
+        else
+          break;
       case 33424:
       case 65024:
 	fseek (ifp, get4()+base, SEEK_SET);
@@ -7098,9 +7096,6 @@ void CLASS apply_tiff()
       tiff_samples  = tiff_ifd[i].samples;
       tile_width    = tiff_ifd[i].t_tile_width;
       tile_length   = tiff_ifd[i].t_tile_length;
-#ifdef LIBRAW_LIBRARY_BUILD
-      data_size     = tile_length < INT_MAX && tile_length>0 ? tiff_ifd[i].tile_maxbytes: tiff_ifd[i].bytes;
-#endif
       raw = i;
     }
   }
@@ -9866,7 +9861,7 @@ konica_400z:
       filters = 0x16161616;
     }
   } else if (!strcmp(make,"Leica") || !strcmp(make,"Panasonic")) {
-    if ((flen - data_offset) / (raw_width*8/7) == raw_height)
+    if (raw_width > 0 && ((flen - data_offset) / (raw_width*8/7) == raw_height))
       load_raw = &CLASS panasonic_load_raw;
     if (!load_raw) {
       load_raw = &CLASS unpacked_load_raw;

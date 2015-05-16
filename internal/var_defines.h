@@ -193,6 +193,7 @@ it under the terms of the one of three licenses as you choose:
 #ifdef LIBRAW_IO_REDEFINED
 #define fread(ptr,size,n,stream) stream->read(ptr,size,n)
 #define fseek(stream,o,w)	 stream->seek(o,w)
+#define feof(stream)             stream->eof()
 #define fseeko(stream,o,w)	 stream->seek(o,w)
 #define ftell(stream)		 stream->tell()
 #define ftello(stream)		 stream->tell()
