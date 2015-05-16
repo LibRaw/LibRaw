@@ -21,6 +21,7 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
+#line 265 "dcraw/dcraw.c"
 #include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
@@ -29,6 +30,7 @@ it under the terms of the one of three licenses as you choose:
 #include "libraw/libraw.h"
 #include "internal/defines.h"
 #include "internal/var_defines.h"
+#line 276 "dcraw/dcraw.c"
 int CLASS fcol (int row, int col)
 {
   static const char filter[16][16] =
@@ -75,6 +77,7 @@ char *my_strcasestr (char *haystack, const char *needle)
 }
 #define strcasestr my_strcasestr
 #endif
+#line 345 "dcraw/dcraw.c"
 ushort CLASS sget2 (uchar *s)
 {
   if (order == 0x4949)		/* "II" means little-endian */
@@ -663,6 +666,7 @@ void CLASS canon_load_raw()
 #endif
   FORC(2) free (huff[c]);
 }
+#line 945 "dcraw/dcraw.c"
 
 int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
@@ -1318,6 +1322,7 @@ int CLASS minolta_z2()
     if (tail[i]) nz++;
   return nz > 20;
 }
+#line 1605 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -3637,6 +3642,7 @@ void CLASS redcine_load_raw()
 #endif
 #endif
 }
+#line 4648 "dcraw/dcraw.c"
 void CLASS crop_masked_pixels()
 {
   int row, col;
@@ -3744,6 +3750,7 @@ void CLASS remove_zeroes()
   RUN_CALLBACK(LIBRAW_PROGRESS_REMOVE_ZEROES,1,2);
 #endif
 }
+#line 4921 "dcraw/dcraw.c"
 
 static const uchar xlat[2][256] = {
   { 0xc1,0xbf,0x6d,0x0d,0x59,0xc5,0x13,0x9d,0x83,0x61,0x6b,0x4f,0xc7,0x7f,0x3d,0x3d,
@@ -5524,6 +5531,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
+#line 6706 "dcraw/dcraw.c"
 
 static float powf_lim(float a, float b, float limup)
 {
@@ -5618,7 +5626,7 @@ void CLASS setCanonBodyFeatures (unsigned id)
 	return;
       }
 
-void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo)
+void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxlen)
 {
   ushort iCanonLensID = 0, iCanonMaxFocal = 0, iCanonMinFocal = 0, iCanonLens = 0, iCanonCurFocal = 0, iCanonFocalType = 0;
   CameraInfo[0] = 0;
@@ -5767,26 +5775,43 @@ void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo)
   }
   if (iCanonFocalType)
     {
+      if(iCanonFocalType>=maxlen) return; // broken;
       imgdata.lens.makernotes.FocalType = CameraInfo[iCanonFocalType];
       if (!imgdata.lens.makernotes.FocalType)	// zero means 'fixed' here, replacing with standard '1'
         imgdata.lens.makernotes.FocalType = 1;
     }
   if (!imgdata.lens.makernotes.CurFocal)
-    imgdata.lens.makernotes.CurFocal = sget2Rev(CameraInfo + iCanonCurFocal);
+    {
+      if(iCanonCurFocal>=maxlen) return; // broken;
+      imgdata.lens.makernotes.CurFocal = sget2Rev(CameraInfo + iCanonCurFocal);
+    }
   if (!imgdata.lens.makernotes.LensID)
-    imgdata.lens.makernotes.LensID = sget2Rev(CameraInfo + iCanonLensID);
+    {
+      if(iCanonLensID>=maxlen) return; // broken;
+      imgdata.lens.makernotes.LensID = sget2Rev(CameraInfo + iCanonLensID);
+    }
   if (!imgdata.lens.makernotes.MinFocal)
-    imgdata.lens.makernotes.MinFocal = sget2Rev(CameraInfo + iCanonMinFocal);
+    {
+      if(iCanonMinFocal>=maxlen) return; // broken;
+      imgdata.lens.makernotes.MinFocal = sget2Rev(CameraInfo + iCanonMinFocal);
+    }
   if (!imgdata.lens.makernotes.MaxFocal)
-    imgdata.lens.makernotes.MaxFocal = sget2Rev(CameraInfo + iCanonMaxFocal);
+    {
+      if(iCanonMaxFocal>=maxlen) return; // broken;
+      imgdata.lens.makernotes.MaxFocal = sget2Rev(CameraInfo + iCanonMaxFocal);
+    }
   if (!imgdata.lens.makernotes.Lens[0] && iCanonLens) {
+    if(iCanonLens+64>=maxlen) return; // broken;
     if (CameraInfo[iCanonLens] < 65)								// non-Canon lens
-      memcpy(imgdata.lens.makernotes.Lens, CameraInfo + iCanonLens, 64);
-    else if (!strncmp((char *)CameraInfo + iCanonLens, "EF-S", 4)) {
-      memcpy(imgdata.lens.makernotes.Lens, "EF-S ", 5);
-      memcpy(imgdata.lens.makernotes.LensFeatures_pre, "EF-E", 4);
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_S;
-      memcpy(imgdata.lens.makernotes.Lens + 5, CameraInfo + iCanonLens + 4, 60);
+      {
+        memcpy(imgdata.lens.makernotes.Lens, CameraInfo + iCanonLens, 64);
+      }
+    else if (!strncmp((char *)CameraInfo + iCanonLens, "EF-S", 4)) 
+      {
+        memcpy(imgdata.lens.makernotes.Lens, "EF-S ", 5);
+        memcpy(imgdata.lens.makernotes.LensFeatures_pre, "EF-E", 4);
+        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_S;
+        memcpy(imgdata.lens.makernotes.Lens + 5, CameraInfo + iCanonLens + 4, 60);
     }
     else if (!strncmp((char *)CameraInfo + iCanonLens, "TS-E", 4)) {
       memcpy(imgdata.lens.makernotes.Lens, "TS-E ", 5);
@@ -5814,7 +5839,6 @@ void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo)
       memcpy(imgdata.lens.makernotes.Lens + 3, CameraInfo + iCanonLens + 2, 62);
     }
   }
-  free(CameraInfo);
   return;
 }
 
@@ -5917,7 +5941,6 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
     {
       memcpy(imgdata.lens.makernotes.Lens, LensData + 680, 64);
     }
-  free (LensData);
   return;
 }
 
@@ -6586,7 +6609,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             unique_id = get4();
             if (unique_id == 0x03740000) unique_id = 0x80000374;
             setCanonBodyFeatures(unique_id);
-            if (lenCanonCameraInfo) processCanonCameraInfo(unique_id, CanonCameraInfo);
+            if (lenCanonCameraInfo)
+              {
+                processCanonCameraInfo(unique_id, CanonCameraInfo,lenCanonCameraInfo);
+                free(CanonCameraInfo);
+                CanonCameraInfo = 0;
+                lenCanonCameraInfo = 0;
+              }
           }
 
         else if (tag == 0x0095 &&		// lens model tag
@@ -6770,6 +6799,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                 if ((NikonLensDataVersion < 201) && lenNikonLensData)
                   {
                     processNikonLensData(table_buf, lenNikonLensData);
+                    free(table_buf);
                     lenNikonLensData = 0;
                   }
               }
@@ -6786,6 +6816,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                 for (i = 0; i < lenNikonLensData; i++)
                   table_buf[i] ^= (cj += ci * ck++);
                 processNikonLensData(table_buf, lenNikonLensData);
+                free(table_buf);
                 lenNikonLensData = 0;
               }
           }
@@ -7605,6 +7636,7 @@ void CLASS parse_makernote (int base, int uptag)
                 if ((NikonLensDataVersion < 201) && lenNikonLensData)
                   {
                     processNikonLensData(table_buf, lenNikonLensData);
+                    free(table_buf);
                     lenNikonLensData = 0;
                   }
               }
@@ -8153,7 +8185,13 @@ void CLASS parse_makernote (int base, int uptag)
 #ifdef LIBRAW_LIBRARY_BUILD
         if (unique_id == 0x03740000) unique_id = 0x80000374;
         setCanonBodyFeatures(unique_id);
-        if (lenCanonCameraInfo) processCanonCameraInfo(unique_id, CanonCameraInfo);
+        if (lenCanonCameraInfo)
+          {
+            processCanonCameraInfo(unique_id, CanonCameraInfo,lenCanonCameraInfo);
+            free(CanonCameraInfo);
+            CanonCameraInfo = 0;
+            lenCanonCameraInfo = 0;
+          }
 #endif
       }
 
@@ -8383,6 +8421,7 @@ void CLASS parse_makernote (int base, int uptag)
           table_buf[i] ^= (cj += ci * ck++);
         processNikonLensData(table_buf, lenNikonLensData);
         lenNikonLensData = 0;
+        free(table_buf);
       }
       if (ver97 == 601)  // Coolpix A
     	{
@@ -8876,6 +8915,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 #endif
+#line 10095 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -10572,6 +10612,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
+#line 11929 "dcraw/dcraw.c"
 
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
@@ -12897,7 +12938,7 @@ konica_400z:
       filters = 0x16161616;
     }
   } else if (!strcmp(make,"Leica") || !strcmp(make,"Panasonic")) {
-    if ((flen - data_offset) / (raw_width*8/7) == raw_height)
+    if (raw_width > 0&& ((flen - data_offset) / (raw_width*8/7) == raw_height) )
       load_raw = &CLASS panasonic_load_raw;
     if (!load_raw) {
       load_raw = &CLASS unpacked_load_raw;
@@ -13215,6 +13256,10 @@ dng_skip:
   if (!load_raw || height < 22 || width < 22 ||
 	tiff_bps > 16 || tiff_samples > 6 || colors > 4)
     is_raw = 0;
+
+  if(raw_width < 22 || raw_width > 64000 || raw_height < 22 || raw_width > 64000)
+    is_raw = 0;
+
 #ifdef NO_JASPER
   if (load_raw == &CLASS redcine_load_raw) {
 #ifdef DCRAW_VERBOSE
@@ -13257,6 +13302,7 @@ notraw:
 }
 
 
+#line 14707 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -13487,6 +13533,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
+#line 14963 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {

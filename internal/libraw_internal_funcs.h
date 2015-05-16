@@ -34,7 +34,7 @@ it under the terms of the one of three licenses as you choose:
     ushort      sget2 (uchar *s);
     ushort      sget2Rev(uchar *s);
     void	setCanonBodyFeatures (unsigned id);
-    void 	processCanonCameraInfo (unsigned id, uchar *CameraInfo);
+    void 	processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxlen);
     void	processNikonLensData (uchar *LensData, unsigned len);
     void	setOlympusBodyFeatures (unsigned long long id);
     void	setPhaseOneFeatures (unsigned id);
