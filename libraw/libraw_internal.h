@@ -161,7 +161,7 @@ struct decode
 
 struct tiff_ifd_t
 {
-    int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes,tile_maxbytes;
+    int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes;
     int t_tile_width, t_tile_length;
 };
 

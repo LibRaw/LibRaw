@@ -947,6 +947,7 @@ int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
   int c, tag;
   ushort len;
+  int cnt = 0;
   uchar data[0x10000];
   const uchar *dp;
 
@@ -955,6 +956,8 @@ int CLASS ljpeg_start (struct jhead *jh, int info_only)
   fread (data, 2, 1, ifp);
   if (data[1] != 0xd8) return 0;
   do {
+    if(feof(ifp)) return 0;
+    if(cnt++ > 1024) return 0; // 1024 tags limit
     fread (data, 2, 2, ifp);
     tag =  data[0] << 8 | data[1];
     len = (data[2] << 8 | data[3]) - 2;
@@ -10286,16 +10289,6 @@ int CLASS parse_tiff_ifd (int base)
 	  is_raw = 5;
 	}
 	break;
-#ifdef LIBRAW_LIBRARY_BUILD
-      case 325:				/* TileByteCount */
-          tiff_ifd[ifd].tile_maxbytes = 0;
-          for(int jj=0;jj<len;jj++)
-              {
-                  int s = get4();
-                  if(s > tiff_ifd[ifd].tile_maxbytes) tiff_ifd[ifd].tile_maxbytes=s;
-              }
-	break;
-#endif
       case 330:				/* SubIFDs */
 	if (!strcmp(model,"DSLR-A100") && tiff_ifd[ifd].t_width == 3872) {
 	  load_raw = &CLASS sony_arw_load_raw;
@@ -10589,8 +10582,9 @@ int CLASS parse_tiff_ifd (int base)
 guess_cfa_pc:
         FORCC tab[cfa_pc[c]] = c;
         cdesc[c] = 0;
-        for (i=16; i--; )
-          filters = filters << 2 | tab[cfa_pat[i % plen]];
+        if(plen>0)
+          for (i=16; i--; )
+            filters = filters << 2 | tab[cfa_pat[i % plen]];
         filters -= !filters;
 	break;
       case 50711:			/* CFALayout */
@@ -10862,9 +10856,6 @@ void CLASS apply_tiff()
       tiff_samples  = tiff_ifd[i].samples;
       tile_width    = tiff_ifd[i].t_tile_width;
       tile_length   = tiff_ifd[i].t_tile_length;
-#ifdef LIBRAW_LIBRARY_BUILD
-      data_size     = tile_length < INT_MAX && tile_length>0 ? tiff_ifd[i].tile_maxbytes: tiff_ifd[i].bytes;
-#endif
       raw = i;
     }
   }
