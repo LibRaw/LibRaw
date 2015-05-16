@@ -9197,7 +9197,7 @@ int CLASS parse_tiff_ifd (int base)
             colors = 3;
             FORC(36) xtrans[0][c] = fgetc(ifp) & 3;
           }
-        else
+        else if(len > 0)
           {
             if ((plen=len) > 16) plen = 16;
             fread (cfa_pat, 1, plen, ifp);
@@ -9397,9 +9397,8 @@ int CLASS parse_tiff_ifd (int base)
 guess_cfa_pc:
         FORCC tab[cfa_pc[c]] = c;
         cdesc[c] = 0;
-        if(plen>0)
-          for (i=16; i--; )
-            filters = filters << 2 | tab[cfa_pat[i % plen]];
+        for (i=16; i--; )
+          filters = filters << 2 | tab[cfa_pat[i % plen]];
         filters -= !filters;
 	break;
       case 50711:			/* CFALayout */
