@@ -1013,6 +1013,8 @@ struct foveon_data_t
   {"Sigma","DP3 Merrill",4928,1632,3900,12,0,4807,1603}, // 2/3 size
   {"Polaroid","x530",1440,1088,2700,10,13,1419,1059},
   // dp2 Q
+  {"Sigma","dp3 Quattro",5888,3672,16383,204,24,5446,3624}, // full size
+  {"Sigma","dp3 Quattro",2944,1836,16383,102,12,2723,1812}, // half size
   {"Sigma","dp2 Quattro",5888,3672,16383,204,24,5446,3624}, // full size
   {"Sigma","dp2 Quattro",2944,1836,16383,102,12,2723,1812}, // half size
   {"Sigma","dp1 Quattro",5888,3672,16383,204,24,5446,3624}, // full size
@@ -4038,6 +4040,7 @@ static const char  *static_camera_list[] =
 "Sigma DP3 Merill",
 "Sigma dp1 Quattro",
 "Sigma dp2 Quattro",
+"Sigma dp3 Quattro",
 "Sinar eMotion 22",
 "Sinar eMotion 54",
 "Sinar eSpirit 65",
@@ -4525,7 +4528,7 @@ void LibRaw::x3f_load_raw()
       imgdata.rawdata.color3_image = (ushort (*)[3])data;
 
 	  if(!strcasecmp(imgdata.idata.make,"Sigma")
-		  && (!strcasecmp(imgdata.idata.model,"dp2 Quattro")  || !strcasecmp(imgdata.idata.model,"dp1 Quattro"))
+		  && (!strcasecmp(imgdata.idata.model,"dp2 Quattro")  || !strcasecmp(imgdata.idata.model,"dp1 Quattro") || !strcasecmp(imgdata.idata.model,"dp3 Quattro"))
 		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATEAF)
 		  )
 	  {
@@ -4540,7 +4543,7 @@ void LibRaw::x3f_load_raw()
 	  }
 
 	  if(!strcasecmp(imgdata.idata.make,"Sigma")
-		  && (!strcasecmp(imgdata.idata.model,"dp2 Quattro") || !strcasecmp(imgdata.idata.model,"dp1 Quattro"))
+		  && (!strcasecmp(imgdata.idata.model,"dp2 Quattro") || !strcasecmp(imgdata.idata.model,"dp1 Quattro") || !strcasecmp(imgdata.idata.model,"dp3 Quattro"))
 		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATERG)
 		  && (imgdata.sizes.raw_width== 5888)
 		  )
