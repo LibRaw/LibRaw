@@ -6980,7 +6980,7 @@ void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxl
       {
         memcpy(imgdata.lens.makernotes.Lens, CameraInfo + iCanonLens, 64);
       }
-    else if (!strncmp((char *)CameraInfo + iCanonLens, "EF-S", 4)) 
+    else if (!strncmp((char *)CameraInfo + iCanonLens, "EF-S", 4))
       {
         memcpy(imgdata.lens.makernotes.Lens, "EF-S ", 5);
         memcpy(imgdata.lens.makernotes.LensFeatures_pre, "EF-E", 4);
@@ -7381,7 +7381,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 298) ||		// DSC-RX1
       (id == 299) ||		// NEX-VG900
       (id == 310) ||		// DSC-RX1R
-      (id == 294)				// SLT-99, Hasselblad HV
+      (id == 294)			// SLT-99, Hasselblad HV
       )
     {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
@@ -7392,7 +7392,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
           (id != 297) &&  // DSC-RX100
           (id != 308) &&  // DSC-RX100M2
           (id != 309) &&  // DSC-RX10
-          (id != 317))    // DSC-RX100M3
+          (id != 317) &&  // DSC-RX100M3
+          (id != 341))    // DSC-RX100M4
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     }
 
@@ -7470,7 +7471,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 308) ||  // DSC-RX100M2
            (id == 309) ||  // DSC-RX10
            (id == 310) ||  // DSC-RX1R
-           (id == 317)     // DSC-RX100M3
+           (id == 317) ||  // DSC-RX100M3
+           (id == 341)     // DSC-RX100M4
            )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
@@ -7599,11 +7601,11 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
       (imgdata.lens.makernotes.CameraMount != LIBRAW_MOUNT_FixedLens))
     {
       if (buf[0])
-        imgdata.lens.makernotes.MaxAp =
+        imgdata.lens.makernotes.MaxAp4CurFocal =
           my_roundf(powf64(2.0f, ((float)SonySubstitution[buf[0]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
 
       if (buf[1])
-        imgdata.lens.makernotes.MinAp =
+        imgdata.lens.makernotes.MinAp4CurFocal =
           my_roundf(powf64(2.0f, ((float)SonySubstitution[buf[1]] / 8.0 - 1.06f) / 2.0f)*10.0f) / 10.0f;
     }
 
@@ -9390,7 +9392,14 @@ void CLASS parse_makernote (int base, int uptag)
             break;
           case 796:
             imgdata.color.canon_makernotes.CanonColorDataVer = 3;	// 1DmkIIN / 5D / 30D / 400D
-
+			imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+			{
+			  fseek (ifp, save1+(0x0c4<<1), SEEK_SET); // offset 196 short
+              int bls=0;
+              FORC4 bls+=get2();
+              imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+			}
+			break;
             // 1DmkIII / 1DSmkIII / 1DmkIV / 5DmkII
             // 7D / 40D / 50D / 60D / 450D / 500D
             // 550D / 1000D / 1100D
@@ -9711,7 +9720,7 @@ get2_rggb:
       fseek (ifp, i, SEEK_CUR);
       FORC4 sraw_mul[c ^ (c >> 1)] = get2();
     }
-    if(!strcasecmp(make,"Samsung"))
+    if(!strncasecmp(make,"Samsung",7))
       {
         if (tag == 0xa020) // get the full Samsung encryption key
             for (i=0; i<11; i++) SamsungKey[i] = get4();
@@ -13219,7 +13228,7 @@ void CLASS identify()
     { 0x139, "ILCE-5000" },  { 0x13d, "DSC-RX100M3" },
     { 0x13e, "ILCE-7S" },    { 0x13f, "ILCA-77M2" },
     { 0x153, "ILCE-5100" },  { 0x154, "ILCE-7M2" },
-    { 0x15a, "ILCE-QX1" },
+    { 0x15a, "ILCE-QX1" },	 { 0x155, "DSC-RX100M4"},
   };
 
   static const struct {
