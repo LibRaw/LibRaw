@@ -21,6 +21,7 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
+#line 265 "dcraw/dcraw.c"
 #include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
@@ -29,6 +30,7 @@ it under the terms of the one of three licenses as you choose:
 #include "libraw/libraw.h"
 #include "internal/defines.h"
 #include "internal/var_defines.h"
+#line 276 "dcraw/dcraw.c"
 int CLASS fcol (int row, int col)
 {
   static const char filter[16][16] =
@@ -75,6 +77,7 @@ char *my_strcasestr (char *haystack, const char *needle)
 }
 #define strcasestr my_strcasestr
 #endif
+#line 345 "dcraw/dcraw.c"
 ushort CLASS sget2 (uchar *s)
 {
   if (order == 0x4949)		/* "II" means little-endian */
@@ -663,6 +666,7 @@ void CLASS canon_load_raw()
 #endif
   FORC(2) free (huff[c]);
 }
+#line 945 "dcraw/dcraw.c"
 
 int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
@@ -1321,6 +1325,7 @@ int CLASS minolta_z2()
     if (tail[i]) nz++;
   return nz > 20;
 }
+#line 1608 "dcraw/dcraw.c"
 void CLASS ppm_thumb()
 {
   char *thumb;
@@ -2146,7 +2151,7 @@ void CLASS nokia_load_raw()
 #endif
   free (data);
   maximum = 0x3ff;
-  if (strcmp(make,"OmniVision")) return;
+  if (strncmp(make,"OmniVision",10)) return;
   row = raw_height/2;
   FORC(width-1) {
     sum[ c & 1] += SQR(RAW(row,c)-RAW(row+1,c+1));
@@ -3640,6 +3645,7 @@ void CLASS redcine_load_raw()
 #endif
 #endif
 }
+#line 4651 "dcraw/dcraw.c"
 void CLASS crop_masked_pixels()
 {
   int row, col;
@@ -3747,6 +3753,7 @@ void CLASS remove_zeroes()
   RUN_CALLBACK(LIBRAW_PROGRESS_REMOVE_ZEROES,1,2);
 #endif
 }
+#line 4924 "dcraw/dcraw.c"
 
 static const uchar xlat[2][256] = {
   { 0xc1,0xbf,0x6d,0x0d,0x59,0xc5,0x13,0x9d,0x83,0x61,0x6b,0x4f,0xc7,0x7f,0x3d,0x3d,
@@ -5527,6 +5534,7 @@ void CLASS parse_thumb_note (int base, unsigned toff, unsigned tlen)
     fseek (ifp, save, SEEK_SET);
   }
 }
+#line 6709 "dcraw/dcraw.c"
 
 static float powf_lim(float a, float b, float limup)
 {
@@ -6551,7 +6559,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     tag |= uptag << 16;
     if(len > 100*1024*1024) goto next; // 100Mb tag? No!
 
-    if (!strcmp(make, "Canon"))
+    if (!strncmp(make, "Canon",5))
       {
         if (tag == 0x0001)				// camera settings
           {
@@ -7315,7 +7323,7 @@ void CLASS parse_makernote (int base, int uptag)
    The MakerNote might have its own TIFF header (possibly with
    its own byte-order!), or it might just be a table.
  */
-  if (!strcmp(make,"Nokia")) return;
+  if (!strncmp(make,"Nokia",5)) return;
   fread (buf, 1, 10, ifp);
   if (!strncmp (buf,"KDK" ,3) ||	/* these aren't TIFF tables */
       !strncmp (buf,"VER" ,3) ||
@@ -7346,19 +7354,19 @@ void CLASS parse_makernote (int base, int uptag)
     order = get2();
     if (buf[0] == 'O') get2();
   } else if (!strncmp (buf,"SONY",4) ||
-						 !strcmp  (buf,"Panasonic")) {
+             !strcmp  (buf,"Panasonic")) {
     goto nf;
   } else if (!strncmp (buf,"FUJIFILM",8)) {
     base = ftell(ifp)-10;
 	nf: order = 0x4949;
     fseek (ifp,  2, SEEK_CUR);
   } else if (!strcmp (buf,"OLYMP") ||
-						 !strcmp (buf,"LEICA") ||
-						 !strcmp (buf,"Ricoh") ||
-						 !strcmp (buf,"EPSON"))
+             !strcmp (buf,"LEICA") ||
+             !strcmp (buf,"Ricoh") ||
+             !strcmp (buf,"EPSON"))
     fseek (ifp, -2, SEEK_CUR);
   else if (!strcmp (buf,"AOC") ||
-					 !strcmp (buf,"QVC"))
+           !strcmp (buf,"QVC"))
     fseek (ifp, -4, SEEK_CUR);
   else {
     fseek (ifp, -10, SEEK_CUR);
@@ -7415,7 +7423,7 @@ void CLASS parse_makernote (int base, int uptag)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
-    if (!strcmp(make, "Canon"))
+    if (!strncmp(make, "Canon",5))
       {
         if (tag == 0x0001)				// camera settings
           {
@@ -8163,7 +8171,7 @@ void CLASS parse_makernote (int base, int uptag)
       fgets (model2, 64, ifp);
     if (tag == 8 && type == 4)
       shot_order = get4();
-    if (tag == 9 && !strcmp(make,"Canon"))
+    if (tag == 9 && !strncmp(make,"Canon",5))
       fread (artist, 64, 1, ifp);
     if (tag == 0xc && len == 4)
       FORC3 cam_mul[(c << 1 | c >> 1) & 3] = getreal(type);
@@ -8200,7 +8208,7 @@ void CLASS parse_makernote (int base, int uptag)
         imgdata.color.OlympusSensorCalibration[0]=getreal(type);
         imgdata.color.OlympusSensorCalibration[1]=getreal(type);
       }
-    if (tag == 0x4001 && len > 500 && !strcasecmp(make,"Canon"))
+    if (tag == 0x4001 && len > 500 && !strncasecmp(make,"Canon",5))
       {
         long int save1 = ftell(ifp);
         switch (len)
@@ -8603,7 +8611,7 @@ void CLASS parse_exif (int base)
 
   kodak = !strncmp(make,"EASTMAN",7) && tiff_nifds < 3;
   entries = get2();
-  if(!strcmp(make,"Hasselblad") && (tiff_nifds > 3) && (entries > 512)) return;
+  if(!strncmp(make,"Hasselblad",10) && (tiff_nifds > 3) && (entries > 512)) return;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
 
@@ -8648,7 +8656,7 @@ void CLASS parse_exif (int base)
       case 33437:  aperture = getreal(type);		break;  // 0x829d FNumber
       case 34855:  iso_speed = get2();			break;
       case 34866:
-        if (iso_speed == 0xffff && (!strcasecmp(make, "SONY") || !strcasecmp(make, "CANON")))
+        if (iso_speed == 0xffff && (!strncasecmp(make, "SONY",4) || !strncasecmp(make, "CANON",5)))
           iso_speed = getreal(type);
         break;
       case 36867:
@@ -8919,6 +8927,7 @@ void CLASS parse_kodak_ifd (int base)
   }
 }
 #endif
+#line 10107 "dcraw/dcraw.c"
 int CLASS parse_tiff_ifd (int base)
 {
   unsigned entries, tag, type, len, plen=16, save;
@@ -9120,7 +9129,7 @@ int CLASS parse_tiff_ifd (int base)
 	  ifd++;  break;
 	}
 #ifdef LIBRAW_LIBRARY_BUILD
-	if (!strcmp(make,"Hasselblad") && libraw_internal_data.unpacker_data.hasselblad_parser_flag) {
+	if (!strncmp(make,"Hasselblad",10) && libraw_internal_data.unpacker_data.hasselblad_parser_flag) {
           fseek (ifp, ftell(ifp)+4, SEEK_SET);
           fseek (ifp, get4()+base, SEEK_SET);
           parse_tiff_ifd (base);
@@ -9704,7 +9713,7 @@ void CLASS apply_tiff()
       case 32773: goto slr;
       case 0:  case 1:
 #ifdef LIBRAW_LIBRARY_BUILD
-        if(!strcasecmp(make,"Nikon") && !strncmp(software,"Nikon Scan",10))
+        if(!strncasecmp(make,"Nikon",5) && !strncmp(software,"Nikon Scan",10))
           {
             load_raw = &CLASS nikon_coolscan_load_raw;
             raw_color = 1;
@@ -9775,7 +9784,7 @@ void CLASS apply_tiff()
   if (!dng_version)
     if ( ((tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 &&
 	  (tiff_compress & -16) != 32768)
-      || (tiff_bps == 8 && !strcasestr(make,"Kodak") &&
+          || (tiff_bps == 8 && !strcasestr(make,"Kodak") &&
 	  !strstr(model2,"DEBUG RAW")))
          && strncmp(software,"Nikon Scan",10))
       is_raw = 0;
@@ -9802,7 +9811,7 @@ void CLASS apply_tiff()
       case 1:
 	if (tiff_ifd[thm].bps <= 8)
 	  write_thumb = &CLASS ppm_thumb;
-	else if (!strcmp(make,"Imacon"))
+	else if (!strncmp(make,"Imacon",6))
 	  write_thumb = &CLASS ppm16_thumb;
 	else
 	  thumb_load_raw = &CLASS kodak_thumb_load_raw;
@@ -10602,6 +10611,7 @@ void CLASS parse_redcine()
     data_offset = get4();
   }
 }
+#line 11928 "dcraw/dcraw.c"
 
 /*
    All matrices are from Adobe DNG Converter unless otherwise noted.
@@ -12248,7 +12258,7 @@ void CLASS identify()
       if (fsize == table[i].fsize) {
 	strcpy (make,  table[i].t_make );
 #ifdef LIBRAW_LIBRARY_BUILD
-        if (!strcmp(make, "Canon"))
+        if (!strncmp(make, "Canon",5))
           {
             imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
             imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
@@ -12312,7 +12322,7 @@ void CLASS identify()
   for (i=0; i < sizeof corp / sizeof *corp; i++)
     if (strcasestr (make, corp[i]))	/* Simplify company names */
 	    strcpy (make, corp[i]);
-  if ((!strcmp(make,"Kodak") || !strcmp(make,"Leica")) &&
+  if ((!strncmp(make,"Kodak",5) || !strncmp(make,"Leica",5)) &&
 	((cp = strcasestr(model," DIGITAL CAMERA")) ||
 	 (cp = strstr(model,"FILE VERSION"))))
      *cp = 0;
@@ -12362,7 +12372,7 @@ void CLASS identify()
       case 34892: load_raw = &CLASS    lossy_dng_load_raw;  break;
       default:    load_raw = 0;
     }
-    if (!strcmp(make, "Canon") && unique_id)
+    if (!strncmp(make, "Canon",5) && unique_id)
       {
         for (i = 0; i < sizeof unique / sizeof *unique; i++)
           if (unique_id == 0x80000000 + unique[i].id)
@@ -12371,7 +12381,7 @@ void CLASS identify()
               break;
             }
       }
-    if (!strcasecmp(make, "Sony") && unique_id)
+    if (!strncasecmp(make, "Sony",4) && unique_id)
       {
         for (i = 0; i < sizeof sonique / sizeof *sonique; i++)
           if (unique_id == sonique[i].id)
@@ -12382,7 +12392,7 @@ void CLASS identify()
       }
     goto dng_skip;
   }
-  if (!strcmp(make,"Canon") && !fsize && tiff_bps != 15) {
+  if (!strncmp(make,"Canon",5) && !fsize && tiff_bps != 15) {
     if (!load_raw)
       load_raw = &CLASS lossless_jpeg_load_raw;
     for (i=0; i < sizeof canon / sizeof *canon; i++)
@@ -12402,7 +12412,7 @@ void CLASS identify()
       top_margin = 16;
     }
   }
-  if (!strcmp(make,"Canon") && unique_id)
+  if (!strncmp(make,"Canon",5) && unique_id)
     {
       for (i=0; i < sizeof unique / sizeof *unique; i++)
         if (unique_id == 0x80000000 + unique[i].id)
@@ -12412,7 +12422,7 @@ void CLASS identify()
           }
     }
 
-  if (!strcasecmp(make,"Sony") && unique_id)
+  if (!strncasecmp(make,"Sony",4) && unique_id)
     {
       for (i=0; i < sizeof sonique / sizeof *sonique; i++)
         if (unique_id == sonique[i].id)
@@ -12422,7 +12432,7 @@ void CLASS identify()
           }
     }
 
-  if (!strcmp(make,"Nikon")) {
+  if (!strncmp(make,"Nikon",5)) {
     if (!load_raw)
       load_raw = &CLASS packed_load_raw;
     if (model[0] == 'E')
@@ -12445,7 +12455,7 @@ void CLASS identify()
     if(!imgdata.params.force_foveon_x3f)
       simple_coeff(0);
 #endif
-  } else if (!strcmp(make,"Canon") && tiff_bps == 15) {
+  } else if (!strncmp(make,"Canon",5) && tiff_bps == 15) {
     switch (width) {
       case 3344: width -= 66;
       case 3872: width -= 6;
@@ -12575,7 +12585,7 @@ canon_a5:
     else width -= 8;
   } else if (!strncmp(model,"D300",4)) {
     width -= 32;
-  } else if (!strcmp(make,"Nikon") && raw_width == 4032) {
+  } else if (!strncmp(make,"Nikon",5) && raw_width == 4032) {
     if(!strcmp(model,"COOLPIX P7700"))
       {
         adobe_coeff ("Nikon","COOLPIX P7700");
@@ -12656,7 +12666,7 @@ canon_a5:
       strcpy (make, "ISG");
       model[0] = 0;
     }
-  } else if (!strcmp(make,"Fujifilm")) {
+  } else if (!strncmp(make,"Fujifilm",8)) {
     if (!strcmp(model+7,"S2Pro")) {
       strcpy (model,"S2Pro");
       height = 2144;
@@ -12691,7 +12701,7 @@ canon_a5:
     goto konica_400z;
   } else if (!strcmp(model,"KD-510Z")) {
     goto konica_510z;
-  } else if (!strcasecmp(make,"Minolta")) {
+  } else if (!strncasecmp(make,"Minolta",7)) {
     if (!load_raw && (maximum = 0xfff))
       load_raw = &CLASS unpacked_load_raw;
     if (!strncmp(model,"DiMAGE A",8)) {
@@ -12730,36 +12740,36 @@ konica_400z:
     data_error = -1;
   } else if (!strcmp(model,"*ist DS")) {
     height -= 2;
-  } else if (!strcmp(make,"Samsung") && raw_width == 4704) {
+  } else if (!strncmp(make,"Samsung",7) && raw_width == 4704) {
     height -= top_margin = 8;
     width -= 2 * (left_margin = 8);
     load_flags = 32;
-  } else if (!strcmp(make,"Samsung") && !strcmp(model,"NX3000")) {
+  } else if (!strncmp(make,"Samsung",7) && !strcmp(model,"NX3000")) {
     top_margin = 24;
     left_margin = 64;
     width = 5472;
     height = 3648;
     filters = 0x61616161;
     colors = 3;
-  } else if (!strcmp(make,"Samsung") && raw_height == 3714) {
+  } else if (!strncmp(make,"Samsung",7) && raw_height == 3714) {
     height -= top_margin = 18;
     left_margin = raw_width - (width = 5536);
     if (raw_width != 5600)
       left_margin = top_margin = 0;
     filters = 0x61616161;
     colors = 3;
-  } else if (!strcmp(make,"Samsung") && raw_width == 5632) {
+  } else if (!strncmp(make,"Samsung",7) && raw_width == 5632) {
     order = 0x4949;
     height = 3694;
     top_margin = 2;
     width  = 5574 - (left_margin = 32 + tiff_bps);
     if (tiff_bps == 12) load_flags = 80;
-  } else if (!strcmp(make,"Samsung") && raw_width == 5664) {
+  } else if (!strncmp(make,"Samsung",7) && raw_width == 5664) {
     height -= top_margin = 17;
     left_margin = 96;
     width = 5544;
     filters = 0x49494949;
-  } else if (!strcmp(make,"Samsung") && raw_width == 6496) {
+  } else if (!strncmp(make,"Samsung",7) && raw_width == 6496) {
     filters = 0x61616161;
 #ifdef LIBRAW_LIBRARY_BUILD
     if(!black && !cblack[0] && !cblack[1] && !cblack[2] && !cblack[3])
@@ -12798,7 +12808,7 @@ konica_400z:
     height = raw_height - (top_margin = 2);
   } else if (!strcmp(model,"640x480")) {
     gamma_curve (0.45, 4.5, 1, 255);
-  } else if (!strcmp(make,"Hasselblad")) {
+  } else if (!strncmp(make,"Hasselblad",10)) {
     if (load_raw == &CLASS lossless_jpeg_load_raw)
       load_raw = &CLASS hasselblad_load_raw;
     if (raw_width == 7262) {
@@ -12807,7 +12817,7 @@ konica_400z:
       top_margin  = 4;
       left_margin = 7;
       filters = 0x61616161;
-      if(!strcasecmp(model,"H3D"))
+      if(!strncasecmp(model,"H3D",3))
         {
           adobe_coeff("Hasselblad","H3DII-39");
           strcpy(model,"H3DII-39");
@@ -12848,7 +12858,7 @@ konica_400z:
       width -= (left_margin = 3) + 7;
       filters = 0x61616161;
     } else if (raw_width == 8282 && raw_height == 6240) {
-      if(!strcasecmp(model,"H5D"))
+      if(!strncasecmp(model,"H5D",3))
         {
           /* H5D 50*/
           left_margin = 54;
@@ -12858,7 +12868,7 @@ konica_400z:
           black = 256;
           strcpy(model,"H5D-50");
         }
-      else if(!strcasecmp(model,"H3D"))
+      else if(!strncasecmp(model,"H3D",3))
         {
           black=0;
           left_margin = 54;
@@ -12882,11 +12892,11 @@ konica_400z:
       is_raw = tiff_samples+1;
       if (!shot_select && !half_size) filters = 0;
     }
-  } else if (!strcmp(make,"Sinar")) {
+  } else if (!strncmp(make,"Sinar",5)) {
     if (!load_raw) load_raw = &CLASS unpacked_load_raw;
     if (is_raw > 1 && !shot_select && !half_size) filters = 0;
     maximum = 0x3fff;
-  } else if (!strcmp(make,"Leaf")) {
+  } else if (!strncmp(make,"Leaf",4)) {
     maximum = 0x3fff;
     fseek (ifp, data_offset, SEEK_SET);
     if (ljpeg_start (&jh, 1) && jh.bits == 15)
@@ -12928,7 +12938,7 @@ konica_400z:
       width -= 2 * (left_margin = 24);
       filters = 0x16161616;
     }
-  } else if (!strcmp(make,"Leica") || !strcmp(make,"Panasonic")) {
+  } else if (!strncmp(make,"Leica",5) || !strncmp(make,"Panasonic",9)) {
     if (raw_width > 0&& ((flen - data_offset) / (raw_width*8/7) == raw_height) )
       load_raw = &CLASS panasonic_load_raw;
     if (!load_raw) {
@@ -12952,7 +12962,7 @@ konica_400z:
     filters = 0x16161616;
     load_raw = &CLASS packed_load_raw;
     load_flags = 30;
-  } else if (!strcmp(make,"Olympus")) {
+  } else if (!strncmp(make,"Olympus",7)) {
     height += height & 1;
     if (exif_cfa) filters = exif_cfa;
     if (width == 4100) width -= 4;
@@ -13001,20 +13011,20 @@ konica_400z:
     mask[0][1] = 9;
     data_offset = 787392;
     load_raw = &CLASS sony_load_raw;
-  } else if (!strcmp(make,"Sony") && raw_width == 3984) {
+  } else if (!strncmp(make,"Sony",4) && raw_width == 3984) {
     width = 3925;
     order = 0x4d4d;
-  } else if (!strcmp(make,"Sony") && raw_width == 4288) {
+  } else if (!strncmp(make,"Sony",4) && raw_width == 4288) {
     width -= 32;
-  } else if (!strcmp(make,"Sony") && raw_width == 4928) {
+  } else if (!strncmp(make,"Sony",4) && raw_width == 4928) {
     if (height < 3280) width -= 8;
-  } else if (!strcmp(make,"Sony") && raw_width == 5504) { // ILCE-3000//5000
+  } else if (!strncmp(make,"Sony",4) && raw_width == 5504) { // ILCE-3000//5000
     width -= height > 3664 ? 8 : 32;
-  } else if (!strcmp(make,"Sony") && raw_width == 6048) {
+  } else if (!strncmp(make,"Sony",4) && raw_width == 6048) {
     width -= 24;
     if (strstr(model,"RX1") || strstr(model,"A99"))
       width -= 6;
-  } else if (!strcmp(make,"Sony") && raw_width == 7392) {
+  } else if (!strncmp(make,"Sony",4) && raw_width == 7392) {
     width -= 30;
   } else if (!strcmp(model,"DSLR-A100")) {
     if (width == 3880) {
@@ -13048,7 +13058,7 @@ konica_400z:
   } else if (!strncasecmp(model,"EasyShare",9)) {
     data_offset = data_offset < 0x15000 ? 0x15000 : 0x17000;
     load_raw = &CLASS packed_load_raw;
-  } else if (!strcasecmp(make,"Kodak")) {
+  } else if (!strncasecmp(make,"Kodak",5)) {
     if (filters == UINT_MAX) filters = 0x61616161;
     if (!strncmp(model,"NC2000",6) ||
 	!strncmp(model,"EOSDCS",6) ||
@@ -13140,7 +13150,7 @@ bw:   colors = 1;
       flip = ~get2() & 3 ? 5:6;
     }
     filters = 0x61616161;
-  } else if (!strcmp(make,"Rollei") && !load_raw) {
+  } else if (!strncmp(make,"Rollei",6) && !load_raw) {
     switch (raw_width) {
       case 1316:
 	height = 1030;
@@ -13293,6 +13303,7 @@ notraw:
 }
 
 
+#line 14708 "dcraw/dcraw.c"
 void CLASS convert_to_rgb()
 {
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -13523,6 +13534,7 @@ int CLASS flip_index (int row, int col)
   if (flip & 1) col = iwidth  - 1 - col;
   return row * iwidth + col;
 }
+#line 14964 "dcraw/dcraw.c"
 void CLASS tiff_set (ushort *ntag,
 	ushort tag, ushort type, int count, int val)
 {
