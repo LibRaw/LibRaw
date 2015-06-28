@@ -8093,15 +8093,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           {
             unique_id = get4();
             setPentaxBodyFeatures(unique_id);
-            if (
-                (dng_writer == CameraDNG) &&
-                (
-                 (unique_id == 0x12f66) ||		// Q10
-                 (unique_id == 0x12f7a) ||		// Q7
-                 (unique_id == 0x12ee4)			  // Q
-                 )
-                )
-              base += 10;
           }
         else if (tag == 0x0013)
           {
@@ -8208,7 +8199,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         else if (tag == 0x0239)		// Q-series lens info (LensInfoQ)
           {
             char LensInfo [20];
-            fseek (ifp, 2, SEEK_CUR);
+            fseek (ifp, 12, SEEK_CUR);
             fread(imgdata.lens.makernotes.Lens, 30, 1, ifp);
             strcat(imgdata.lens.makernotes.Lens, " ");
             fread(LensInfo, 20, 1, ifp);
