@@ -280,8 +280,8 @@ int main(int ac, char *av[])
                             }
                     }
                 else
-//                    printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
-					printf ("%s=%s=%d=%04.3f=%04.3f\n", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure, C.FujiExpoMidPointShift);
+                    printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
+//					printf ("%s=%s=%d=%04.3f=%04.3f\n", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure, C.FujiExpoMidPointShift);
             }
         MyCoolRawProcessor.recycle();
     }// endfor
