@@ -8451,9 +8451,16 @@ void CLASS parse_makernote (int base, int uptag)
       }
 #endif
     if (tag == 0xe01) {		/* Nikon Capture Note */
+#ifdef LIBRAW_LIBRARY_BUILD
+	int loopc = 0;
+#endif
       order = 0x4949;
       fseek (ifp, 22, SEEK_CUR);
       for (offset=22; offset+22 < len; offset += 22+i) {
+#ifdef LIBRAW_LIBRARY_BUILD
+	if(loopc++>1024)
+		throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
 	tag = get4();
 	fseek (ifp, 14, SEEK_CUR);
 	i = get4()-4;
@@ -8670,6 +8677,8 @@ void CLASS parse_gps_libraw(int base)
   unsigned entries, tag, type, len, save, c;
 
   entries = get2();
+  if (entries > 200)
+  	return;
   if (entries > 0)
     imgdata.other.parsed_gps.gpsparsed = 1;
   while (entries--) {
@@ -9360,7 +9369,12 @@ int CLASS parse_tiff_ifd (int base)
       case 50454:			/* Sinar tag */
       case 50455:
 	if (!(cbuf = (char *) malloc(len))) break;
+#ifndef LIBRAW_LIBRARY_BUILD
 	fread (cbuf, 1, len, ifp);
+#else
+	if(fread (cbuf, 1, len, ifp) != len)
+		throw LIBRAW_EXCEPTION_IO_CORRUPT; // cbuf to be free'ed in recycle
+#endif
 	for (cp = cbuf-1; cp && cp < cbuf+len; cp = strchr(cp,'\n'))
 	  if (!strncmp (++cp,"Neutral ",8))
 	    sscanf (cp+8, "%f %f %f", cam_mul, cam_mul+1, cam_mul+2);
@@ -11641,6 +11655,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
   char name[130];
   int i, j;
 
+  if(colors>4 || colors < 1) return;
+
   int bl4=(cblack[0]+cblack[1]+cblack[2]+cblack[3])/4,bl64=0;
   if(cblack[4]*cblack[5]>0)
   {
@@ -13210,6 +13226,16 @@ bw:   colors = 1;
   }
 
 dng_skip:
+  /* Early reject for damaged images */
+  if (!load_raw || height < 22 || width < 22 ||
+	tiff_bps > 16 || tiff_samples > 4 || colors > 4 || colors < 1)
+    {
+      is_raw = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+      RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
+#endif
+      return;
+    }
   if ((use_camera_matrix & (use_camera_wb || dng_version))
 	&& cmatrix[0][0] > 0.125) {
     memcpy (rgb_cam, cmatrix, sizeof cmatrix);
