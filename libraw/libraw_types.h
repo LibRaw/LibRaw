@@ -204,7 +204,7 @@ typedef struct
 	int CanonColorDataSubVer;
 	int SpecularWhiteLevel;
 	int AverageBlackLevel;
-} canon_makernotes_t;
+} libraw_canon_makernotes_t;
 
 typedef struct
 {
@@ -227,7 +227,7 @@ typedef struct
   unsigned    profile_length;
   unsigned    black_stat[8];
   libraw_dng_color_t  dng_color[2];
-  canon_makernotes_t canon_makernotes;
+  libraw_canon_makernotes_t canon_makernotes;
   float	      baseline_exposure;
   int		  OlympusSensorCalibration[2];
   float       FujiExpoMidPointShift;
