@@ -1,5 +1,17 @@
+2015-07-03   Alex Tutubalin <lexa@lexa.ru>
+ * Fixed more problems detected by AFL
+ * strcmp(make,...) -> strncmp(make) to prevent running out of unterminated EXIF value
+ * canon_makernotes_t -> libraw_canon_makernotes_t
+ * New cameras (813 total):
+    Fujifilm X-T10
+    Leica Q
+    Olympus AIR-A01
+    Pentax K3 II (standard mode only, 1-s subframe extracted for 4-shot images)
+    Sigma dp3 Quattro
+    Sony RX100-IV
+
 2015-05-16  Alex Tutubalin <lexa@lexa.ru>
- * fixed several bugs detected by using American Fuzzy Loop
+ * fixed several bugs detected by using American Fuzzy Lop
  * Removed unneeded tile bytecount parser
  * ABI changed, recompile binary packages. Shlib version incremented too
  * LibRaw 0.17 Alpha 4
