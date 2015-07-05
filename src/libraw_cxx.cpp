@@ -1338,6 +1338,11 @@ int LibRaw::unpack(void)
 		)
 		rawspeed_enabled = 0;
 
+	if(!strncasecmp(imgdata.idata.make,"Canon",5) 
+ 		&& !strncasecmp(imgdata.idata.model,"EOS 5DS",7) 
+		&& (load_raw == &LibRaw::canon_sraw_load_raw)
+		rawspeed_enabled = 0;
+
     // RawSpeed Supported,
     if(O.use_rawspeed  && rawspeed_enabled
        && !(is_sraw() && O.sraw_ycc)
@@ -3972,6 +3977,7 @@ static const char  *static_camera_list[] =
 "PhaseOne P 45+",
 "PhaseOne P 65",
 "PhaseOne P 65+",
+"Photron BC2-HD",
 "Pixelink A782",
 "Polaroid x530",
 "Ricoh GR",
