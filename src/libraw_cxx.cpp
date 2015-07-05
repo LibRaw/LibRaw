@@ -1340,7 +1340,7 @@ int LibRaw::unpack(void)
 
 	if(!strncasecmp(imgdata.idata.make,"Canon",5) 
  		&& !strncasecmp(imgdata.idata.model,"EOS 5DS",7) 
-		&& (load_raw == &LibRaw::canon_sraw_load_raw)
+		&& (load_raw == &LibRaw::canon_sraw_load_raw))
 		rawspeed_enabled = 0;
 
     // RawSpeed Supported,
