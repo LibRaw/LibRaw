@@ -985,18 +985,18 @@ void CLASS adobe_copy_pixel (unsigned row, unsigned col, ushort **rp)
 {
   int c;
 
-  if (tiff_samples == 2 && shot_select) (*rp)++;
+  if (is_raw == 2 && shot_select) (*rp)++;
   if (raw_image) {
     if (row < raw_height && col < raw_width)
       RAW(row,col) = curve[**rp];
-    *rp += tiff_samples;
+    *rp += is_raw;
   } else {
     if (row < height && col < width)
       FORC(tiff_samples)
 	image[row*width+col][c] = curve[(*rp)[c]];
     *rp += tiff_samples;
   }
-  if (tiff_samples == 2 && shot_select) (*rp)--;
+  if (is_raw == 2 && shot_select) (*rp)--;
 }
 
 void CLASS lossless_dng_load_raw()
@@ -9576,7 +9576,7 @@ int CLASS parse_tiff (int base)
 
 void CLASS apply_tiff()
 {
-  int max_samp=0, ties=0,os,ns, raw=-1, thm=-1, i;
+  int max_samp=0, raw=-1, thm=-1, i;
   struct jhead jh;
 
   thumb_misc = 16;
@@ -9595,13 +9595,10 @@ void CLASS apply_tiff()
     if (max_samp < tiff_ifd[i].samples)
 	max_samp = tiff_ifd[i].samples;
     if (max_samp > 3) max_samp = 3;
-    os = raw_width*raw_height;
-    ns = tiff_ifd[i].t_width*tiff_ifd[i].t_height;
     if ((tiff_ifd[i].comp != 6 || tiff_ifd[i].samples != 3) &&
         unsigned(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
         (unsigned)tiff_ifd[i].bps < 33 && (unsigned)tiff_ifd[i].samples < 13 &&
-	 ns && ((ns > os && (ties = 1)) ||
-	(ns == os && shot_select == ties++))) {
+	tiff_ifd[i].t_width*tiff_ifd[i].t_height > raw_width*raw_height) {
       raw_width     = tiff_ifd[i].t_width;
       raw_height    = tiff_ifd[i].t_height;
       tiff_bps      = tiff_ifd[i].bps;
@@ -9614,7 +9611,6 @@ void CLASS apply_tiff()
       raw = i;
     }
   }
-  if (is_raw == 1 && ties) is_raw = ties;
   if (!tile_width ) tile_width  = INT_MAX;
   if (!tile_length) tile_length = INT_MAX;
   for (i=tiff_nifds; i--; )
@@ -12302,7 +12298,7 @@ void CLASS identify()
 			width  = 4014;
   if (dng_version) {
     if (filters == UINT_MAX) filters = 0;
-    if (filters) is_raw *= tiff_samples;
+    if (filters) is_raw = tiff_samples;
     else	 colors = tiff_samples;
     switch (tiff_compress) {
     case 0:  /* Compression not set, assuming uncompressed */
