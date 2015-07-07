@@ -2267,7 +2267,6 @@ void CLASS leaf_hdr_load_raw()
 void CLASS unpacked_load_raw()
 {
   int row, col, bits=0;
-
   while (1 << ++bits < maximum);
   read_shorts (raw_image, raw_width*raw_height);
   for (row=0; row < raw_height; row++)
@@ -7465,6 +7464,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 340) ||		// ILCE-7M2
       (id == 318) ||		// ILCE-7S
       (id == 311) ||		// ILCE-7R
+      (id == 347) ||		// ILCE-7RM2
       (id == 306) ||		// ILCE-7
       (id == 298) ||		// DSC-RX1
       (id == 299) ||		// NEX-VG900
@@ -7495,7 +7495,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 318) ||
       (id == 339) ||
       (id == 340) ||
-      (id == 346)	||
+      (id == 346) ||
+      (id == 347) ||
       // NEX:
       (id == 278) ||
       (id == 279) ||
@@ -10747,7 +10748,6 @@ guess_cfa_pc:
 int CLASS parse_tiff (int base)
 {
   int doff;
-
   fseek (ifp, base, SEEK_SET);
   order = get2();
   if (order != 0x4949 && order != 0x4d4d) return 0;
@@ -13174,6 +13174,7 @@ void CLASS identify()
     { 0x13e, "ILCE-7S" },    { 0x13f, "ILCA-77M2" },
     { 0x153, "ILCE-5100" },  { 0x154, "ILCE-7M2" },
     { 0x15a, "ILCE-QX1" },	 { 0x155, "DSC-RX100M4"},
+    { 0x15b, "ILCE-7RM2"},
   };
 
   static const struct {
