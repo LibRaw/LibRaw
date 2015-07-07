@@ -6764,7 +6764,7 @@ void CLASS setCanonBodyFeatures (unsigned id)
               (id == 0x80000269) ||	// 1DX
               (id == 0x80000324) ||	// 1DC
               (id == 0x80000382) ||	// 5DS
-              (id == 0x80000401)		// 5DS R
+              (id == 0x80000401)	// 5DS R
               )
             {
               imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
@@ -6774,7 +6774,7 @@ void CLASS setCanonBodyFeatures (unsigned id)
             if (
                 (id == 0x80000331) ||	// M
                 (id == 0x80000355) ||	// M2
-                (id == 0x80000374) 	  // M3
+                (id == 0x80000374) 	  	// M3
                 )
               {
                 imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -11988,6 +11988,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	    { -4778,9467,2172,4743,-1141,4344,-5146,9908,6077,-1566,11051,557 } },
     { "Canon PowerShot G2", 0, 0,
       { 9087,-2693,-1049,-6715,14382,2537,-2291,2819,7790 } },
+    { "Canon PowerShot G3 X", 0, 0,
+      { 9602,-3823,-937,-2984,11495,1675,-407,1415,5049 } },
     { "Canon PowerShot G3", 0, 0,
       { 9212,-2781,-1073,-6573,14189,2605,-2300,2844,7664 } },
     { "Canon PowerShot G5", 0, 0,
@@ -13511,7 +13513,7 @@ void CLASS identify()
     }
   else if (!memcmp (head,"CI",2))
     parse_cine();
-  if(make[0] == 0) 
+  if(make[0] == 0)
     for (zero_fsize=i=0; i < sizeof table / sizeof *table; i++)
       if (fsize == table[i].fsize) {
 	strcpy (make,  table[i].t_make );
