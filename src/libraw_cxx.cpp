@@ -1019,6 +1019,8 @@ struct foveon_data_t
   {"Sigma","dp2 Quattro",2944,1836,16383,102,12,2723,1812}, // half size
   {"Sigma","dp1 Quattro",5888,3672,16383,204,24,5446,3624}, // full size
   {"Sigma","dp1 Quattro",2944,1836,16383,102,12,2723,1812}, // half size
+  {"Sigma","dp0 Quattro",5888,3672,16383,204,24,5446,3624}, // full size
+  {"Sigma","dp0 Quattro",2944,1836,16383,102,12,2723,1812}, // half size
 };
 const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
@@ -4070,6 +4072,7 @@ static const char  *static_camera_list[] =
 "Sigma DP2S",
 "Sigma DP2X",
 "Sigma DP3 Merill",
+"Sigma dp0 Quattro",
 "Sigma dp1 Quattro",
 "Sigma dp2 Quattro",
 "Sigma dp3 Quattro",
@@ -4561,7 +4564,7 @@ void LibRaw::x3f_load_raw()
       imgdata.rawdata.color3_image = (ushort (*)[3])data;
 
 	  if(!strcasecmp(imgdata.idata.make,"Sigma")
-		  && (!strcasecmp(imgdata.idata.model,"dp2 Quattro")  || !strcasecmp(imgdata.idata.model,"dp1 Quattro") || !strcasecmp(imgdata.idata.model,"dp3 Quattro"))
+		  && !strncasecmp(imgdata.idata.model,"dp",2)  && !strncasecmp(imgdata.idata.model+4,"Quattro",7)
 		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATEAF)
 		  )
 	  {
@@ -4576,7 +4579,7 @@ void LibRaw::x3f_load_raw()
 	  }
 
 	  if(!strcasecmp(imgdata.idata.make,"Sigma")
-		  && (!strcasecmp(imgdata.idata.model,"dp2 Quattro") || !strcasecmp(imgdata.idata.model,"dp1 Quattro") || !strcasecmp(imgdata.idata.model,"dp3 Quattro"))
+		  && !strncasecmp(imgdata.idata.model,"dp",2)  && !strncasecmp(imgdata.idata.model+4,"Quattro",7)
 		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATERG)
 		  && (imgdata.sizes.raw_width== 5888)
 		  )
