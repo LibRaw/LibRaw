@@ -1056,10 +1056,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		imgdata.sizes.left_margin++;
 		imgdata.sizes.width--;
 	}
-	if(!imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Fujifilm") && !strcmp(imgdata.idata.model,"S20Pro"))
+	if(!imgdata.idata.dng_version && !strcmp(imgdata.idata.make,"Fujifilm") 
+           && (!strncmp(imgdata.idata.model,"S20Pro",6) || !strncmp(imgdata.idata.model,"F700",4))
+           )
 	{
-		if(imgdata.idata.raw_count>1)
-			imgdata.idata.raw_count = 1;
+          imgdata.sizes.raw_width/=2;
+          load_raw= &LibRaw::unpacked_load_raw_fuji_f700s20;
 	}
 	if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
 		 && !libraw_internal_data.unpacker_data.load_flags
@@ -1086,7 +1088,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       {
            load_raw= &LibRaw::nikon_load_sraw;
            C.black =0;
-		   memset(C.cblack,0,sizeof(C.cblack));
+           memset(C.cblack,0,sizeof(C.cblack));
            imgdata.idata.filters = 0;
            libraw_internal_data.unpacker_data.tiff_samples=3;
            imgdata.idata.colors = 3;
@@ -1537,6 +1539,23 @@ int LibRaw::unpack(void)
   catch (std::exception ee) {
     EXCEPTION_HANDLER(LIBRAW_EXCEPTION_IO_CORRUPT);
   }
+}
+
+void LibRaw::unpacked_load_raw_fuji_f700s20()
+{
+  int base_offset = 0;
+  int row_size = imgdata.sizes.raw_width * 2; // in bytes
+  if(imgdata.idata.raw_count==2 && imgdata.params.shot_select)
+    {
+      libraw_internal_data.internal_data.input->seek(-row_size,SEEK_SET);
+      base_offset = row_size; // in bytes
+    }
+  unsigned char *buffer = (unsigned char*)malloc(row_size*2);
+  for(int row = 0; row < imgdata.sizes.raw_height; row++)
+    {
+      read_shorts((ushort*)buffer,imgdata.sizes.raw_width * 2);
+      memmove(&imgdata.rawdata.raw_image[row*imgdata.sizes.raw_width],buffer+base_offset,row_size);
+    }
 }
 
 void LibRaw::nikon_load_sraw()

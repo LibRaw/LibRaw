@@ -130,6 +130,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        packed_load_raw();
     float	find_green(int,int,int,int);
     void        unpacked_load_raw();
+    void        unpacked_load_raw_fuji_f700s20();
     void        parse_sinar_ia();
     void        parse_phase_one (int base);
 
