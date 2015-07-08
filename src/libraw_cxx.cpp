@@ -3376,6 +3376,7 @@ static const char  *static_camera_list[] =
 "Canon PowerShot G1 X Mark II",
 "Canon PowerShot G2",
 "Canon PowerShot G3",
+"Canon PowerShot G3 X",
 "Canon PowerShot G5",
 "Canon PowerShot G6",
 "Canon PowerShot G7 (CHDK hack)",
