@@ -1984,17 +1984,7 @@ void CLASS unpacked_load_raw()
 {
   int row, col, bits=0;
   while (1 << ++bits < maximum);
-//  read_shorts (raw_image, raw_width*raw_height);
-
-if (is_raw == 2 && shot_select &&
-	(!strncmp(model, "F700", 4) || !strncmp(model, "S20Pro", 6)))
-{
-//	fseek (ifp, -raw_width, SEEK_CUR);
-	read_shorts (raw_image, (raw_width-1)*raw_height);
-//	for (row=0; row<raw_height; row++)
-//		memcpy (raw_image+row*raw_width, raw_image+row*raw_width+raw_width/2, raw_width);
-} else read_shorts (raw_image, raw_width*raw_height);
-
+  read_shorts (raw_image, raw_width*raw_height);
   for (row=0; row < raw_height; row++)
   {
 #ifdef LIBRAW_LIBRARY_BUILD
