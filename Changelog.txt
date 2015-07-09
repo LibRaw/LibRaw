@@ -1,3 +1,11 @@
+2015-07-09   Alex Tutubalin <lexa@lexa.ru>
+ * Fujifilm F700/S20Pro second frame support
+ * Fixed Black level calculation for Nikon 1 S2
+ * New cameras:
+    Canon G3 X
+    Sigma dp0 Quattro
+ * LibRaw 0.17 Beta 2
+
 2015-07-03   Alex Tutubalin <lexa@lexa.ru>
  * Fixed more problems detected by AFL
  * strcmp(make,...) -> strncmp(make) to prevent running out of unterminated EXIF value
