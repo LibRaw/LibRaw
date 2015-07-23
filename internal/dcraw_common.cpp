@@ -6302,7 +6302,9 @@ void CLASS setSonyBodyFeatures (unsigned id) {
           (id != 308) &&  // DSC-RX100M2
           (id != 309) &&  // DSC-RX10
           (id != 317) &&  // DSC-RX100M3
-          (id != 341))    // DSC-RX100M4
+          (id != 341) &&  // DSC-RX100M4
+          (id != 342)     // DSC-RX10M2
+         )
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     }
 
@@ -6356,7 +6358,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 274) ||
            (id == 275) ||
            (id == 282) ||
-           (id == 283)	||
+           (id == 283) ||
            // SLT:
            (id == 280) ||
            (id == 281) ||
@@ -6366,7 +6368,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 291) ||
            (id == 292) ||
            (id == 294) ||
-           (id == 303)	||
+           (id == 303) ||
            // ILCA:
            (id == 319)
            )
@@ -6382,7 +6384,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 309) ||  // DSC-RX10
            (id == 310) ||  // DSC-RX1R
            (id == 317) ||  // DSC-RX100M3
-           (id == 341)     // DSC-RX100M4
+           (id == 341) ||  // DSC-RX100M4
+           (id == 342)     // DSC-RX10M2
            )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
@@ -11819,41 +11822,66 @@ void CLASS identify()
     { 0x393, "EOS 750D" },
     { 0x401, "EOS 5DS R" },
   }, sonique[] = {
-    { 0x002, "DSC-R1" },     { 0x100, "DSLR-A100" },
-    { 0x101, "DSLR-A900" },  { 0x102, "DSLR-A700" },
-    { 0x103, "DSLR-A200" },  { 0x104, "DSLR-A350" },
+    { 0x002, "DSC-R1" },
+    { 0x100, "DSLR-A100" },
+    { 0x101, "DSLR-A900" },
+    { 0x102, "DSLR-A700" },
+    { 0x103, "DSLR-A200" },
+    { 0x104, "DSLR-A350" },
     { 0x105, "DSLR-A300" },
-    {262,"DSLR-A900"},
-    {263,"DSLR-A380"},
+    { 0x106, "DSLR-A900" },
+    { 0x107, "DSLR-A380" },
     { 0x108, "DSLR-A330" },
-    { 0x109, "DSLR-A230" },  { 0x10a, "DSLR-A290" },
+    { 0x109, "DSLR-A230" },
+    { 0x10a, "DSLR-A290" },
     { 0x10d, "DSLR-A850" },
-    {270,"DSLR-A850"},
+    { 0x10e, "DSLR-A850" },
     { 0x111, "DSLR-A550" },
-    { 0x112, "DSLR-A500" },  { 0x113, "DSLR-A450" },
-    { 0x116, "NEX-5" },      { 0x117, "NEX-3" },
-    { 0x118, "SLT-A33" },    { 0x119, "SLT-A55V" },
-    { 0x11a, "DSLR-A560" },  { 0x11b, "DSLR-A580" },
-    { 0x11c, "NEX-C3" },     { 0x11d, "SLT-A35" },
-    { 0x11e, "SLT-A65V" },   { 0x11f, "SLT-A77V" },
-    { 0x120, "NEX-5N" },     { 0x121, "NEX-7" },
-    {290,"NEX-VG20E"},
-    { 0x123, "SLT-A37" },    { 0x124, "SLT-A57" },
-    { 0x125, "NEX-F3" },     { 0x126, "SLT-A99V" },
-    { 0x127, "NEX-6" },      { 0x128, "NEX-5R" },
-    { 0x129, "DSC-RX100" },  { 0x12a, "DSC-RX1" },
-    {299,"NEX-VG900"},
-    {300,"NEX-VG30E"},
-    { 0x12e, "ILCE-3000" },  { 0x12f, "SLT-A58" },
-    { 0x131, "NEX-3N" },     { 0x132, "ILCE-7" },
-    { 0x133, "NEX-5T" },     { 0x134, "DSC-RX100M2" },
-    { 0x135, "DSC-RX10" },   { 0x136, "DSC-RX1R" },
-    { 0x137, "ILCE-7R" },    { 0x138, "ILCE-6000" },
-    { 0x139, "ILCE-5000" },  { 0x13d, "DSC-RX100M3" },
-    { 0x13e, "ILCE-7S" },    { 0x13f, "ILCA-77M2" },
-    { 0x153, "ILCE-5100" },  { 0x154, "ILCE-7M2" },
-    { 0x15a, "ILCE-QX1" },	 { 0x155, "DSC-RX100M4"},
-    { 0x15b, "ILCE-7RM2"},
+    { 0x112, "DSLR-A500" },
+    { 0x113, "DSLR-A450" },
+    { 0x116, "NEX-5" },
+    { 0x117, "NEX-3" },
+    { 0x118, "SLT-A33" },
+    { 0x119, "SLT-A55V" },
+    { 0x11a, "DSLR-A560" },
+    { 0x11b, "DSLR-A580" },
+    { 0x11c, "NEX-C3" },
+    { 0x11d, "SLT-A35" },
+    { 0x11e, "SLT-A65V" },
+    { 0x11f, "SLT-A77V" },
+    { 0x120, "NEX-5N" },
+    { 0x121, "NEX-7" },
+    { 0x122, "NEX-VG20E"},
+    { 0x123, "SLT-A37" },
+    { 0x124, "SLT-A57" },
+    { 0x125, "NEX-F3" },
+    { 0x126, "SLT-A99V" },
+    { 0x127, "NEX-6" },
+    { 0x128, "NEX-5R" },
+    { 0x129, "DSC-RX100" },
+    { 0x12a, "DSC-RX1" },
+    { 0x12b, "NEX-VG900" },
+    { 0x12c, "NEX-VG30E" },
+    { 0x12e, "ILCE-3000" },
+    { 0x12f, "SLT-A58" },
+    { 0x131, "NEX-3N" },
+    { 0x132, "ILCE-7" },
+    { 0x133, "NEX-5T" },
+    { 0x134, "DSC-RX100M2" },
+    { 0x135, "DSC-RX10" },
+    { 0x136, "DSC-RX1R" },
+    { 0x137, "ILCE-7R" },
+    { 0x138, "ILCE-6000" },
+    { 0x139, "ILCE-5000" },
+    { 0x13d, "DSC-RX100M3" },
+    { 0x13e, "ILCE-7S" },
+    { 0x13f, "ILCA-77M2" },
+    { 0x153, "ILCE-5100" },
+    { 0x154, "ILCE-7M2" },
+    { 0x155, "DSC-RX100M4" },
+    { 0x156, "DSC-RX10M2" },
+    { 0x15a, "ILCE-QX1" },
+    { 0x15b, "ILCE-7RM2" },
   };
 
   static const struct {
