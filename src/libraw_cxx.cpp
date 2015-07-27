@@ -3926,6 +3926,7 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-GM5",
 "Panasonic DMC-GX1",
 "Panasonic DMC-GX7",
+"Panasonic DMC-GX8",
 "Panasonic DMC-L1",
 "Panasonic DMC-L10",
 "Panasonic DMC-LC1",
