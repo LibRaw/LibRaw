@@ -225,6 +225,117 @@ extern "C"
         LibRaw *ip = (LibRaw*) lr->parent_class;
         return ip->COLOR(row,col);
     }
+
+	/* getters/setters used by 3DLut Creator */
+DllDef void libraw_set_demosaic(libraw_data_t *lr,int value)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->imgdata.params.user_qual = value;
+	}
+
+DllDef void libraw_set_output_color(libraw_data_t *lr,int value)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->imgdata.params.output_color = value;
+	}
+
+DllDef void libraw_set_output_bps(libraw_data_t *lr,int value)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->imgdata.params.output_bps = value;
+	}
+
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define LIM(x,min,max) MAX(min,MIN(x,max))
+
+DllDef void libraw_set_gamma(libraw_data_t *lr,int index, float value)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->imgdata.params.gamm[LIM(index,0,5)] = value;
+	}
+
+DllDef void libraw_set_no_auto_bright(libraw_data_t *lr,int value)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->imgdata.params.no_auto_bright = value;
+	}
+
+DllDef void libraw_set_bright(libraw_data_t *lr,float value)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->imgdata.params.bright = value;
+	}
+
+DllDef void libraw_set_highlight(libraw_data_t *lr,int value)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->imgdata.params.highlight = value;
+	}
+
+DllDef void libraw_set_fbdd_noiserd(libraw_data_t *lr,int value)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->imgdata.params.fbdd_noiserd = value;
+	}
+
+DllDef int libraw_get_raw_height(libraw_data_t *lr)
+    {
+        if(!lr) return EINVAL;
+        return lr->sizes.raw_height;
+    }
+
+DllDef int libraw_get_raw_width(libraw_data_t *lr)
+    {
+        if(!lr) return EINVAL;
+        return lr->sizes.raw_width;
+    }
+
+DllDef int libraw_get_iheight(libraw_data_t *lr)
+    {
+        if(!lr) return EINVAL;
+        return lr->sizes.iheight;
+    }
+
+DllDef int libraw_get_iwidth(libraw_data_t *lr)
+    {
+        if(!lr) return EINVAL;
+        return lr->sizes.iwidth;
+    }
+
+
+DllDef float libraw_get_cam_mul(libraw_data_t *lr,int index)
+	{
+		if(!lr) return EINVAL;
+		return lr->color.cam_mul[LIM(index,0,3)];
+	}
+
+DllDef float libraw_get_pre_mul(libraw_data_t *lr,int index)
+	{
+		if(!lr) return EINVAL;
+		return lr->color.pre_mul[LIM(index,0,3)];
+	}
+
+DllDef float libraw_get_rgb_cam(libraw_data_t *lr,int index1, int index2)
+	{
+		if(!lr) return EINVAL;
+		return lr->color.rgb_cam[LIM(index1,0,2)][LIM(index2,0,3)];
+	}
+
+DllDef int libraw_get_color_maximum(libraw_data_t *lr)
+    {
+        if(!lr) return EINVAL;
+        return lr->color.maximum;
+    }
+
 #ifdef __cplusplus
 }
 #endif

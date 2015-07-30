@@ -90,6 +90,24 @@ DllDef    int                 libraw_dcraw_process(libraw_data_t* lr);
 DllDef    libraw_processed_image_t* libraw_dcraw_make_mem_image(libraw_data_t* lr, int *errc);
 DllDef    libraw_processed_image_t* libraw_dcraw_make_mem_thumb(libraw_data_t* lr, int *errc);
 DllDef    void libraw_dcraw_clear_mem(libraw_processed_image_t*);
+    /* getters/setters used by 3DLut Creator */
+DllDef void libraw_set_demosaic(libraw_data_t *lr,int value);
+DllDef void libraw_set_output_color(libraw_data_t *lr,int value);
+DllDef void libraw_set_output_bps(libraw_data_t *lr,int value);
+DllDef void libraw_set_gamma(libraw_data_t *lr,int index, float value);
+DllDef void libraw_set_no_auto_bright(libraw_data_t *lr,int value);
+DllDef void libraw_set_bright(libraw_data_t *lr,float value);
+DllDef void libraw_set_highlight(libraw_data_t *lr,int value);
+DllDef void libraw_set_fbdd_noiserd(libraw_data_t *lr,int value);
+DllDef int libraw_get_raw_height(libraw_data_t *lr);
+DllDef int libraw_get_raw_width(libraw_data_t *lr);
+DllDef int libraw_get_iheight(libraw_data_t *lr);
+DllDef int libraw_get_iwidth(libraw_data_t *lr);
+DllDef float libraw_get_cam_mul(libraw_data_t *lr,int index);
+DllDef float libraw_get_pre_mul(libraw_data_t *lr,int index);
+DllDef float libraw_get_rgb_cam(libraw_data_t *lr,int index1, int index2);
+DllDef int libraw_get_color_maximum(libraw_data_t *lr);
+
 #ifdef __cplusplus
 }
 #endif
