@@ -1067,7 +1067,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	}
 	if(load_raw == &LibRaw::packed_load_raw && !strcasecmp(imgdata.idata.make,"Nikon")
 		 && !libraw_internal_data.unpacker_data.load_flags
-		 && (!strcasecmp(imgdata.idata.model,"D810") || !strcasecmp(imgdata.idata.model,"D4S"))
+		 && (!strncasecmp(imgdata.idata.model,"D810",4) || !strcasecmp(imgdata.idata.model,"D4S"))
 		 && libraw_internal_data.unpacker_data.data_size*2 == imgdata.sizes.raw_height*imgdata.sizes.raw_width*3)
 	{
 		libraw_internal_data.unpacker_data.load_flags = 80;
@@ -3500,7 +3500,9 @@ static const char  *static_camera_list[] =
 "Casio EX-ZR1200",
 "Casio EX-ZR1300",
 "Casio EX-ZR1500",
+"Casio EX-ZR3000",
 "Casio EX-100",
+"Casio EX-100F",
 "Casio EX-10",
 "Casio Exlim Pro 505",
 "Casio Exlim Pro 600",
@@ -3768,6 +3770,7 @@ static const char  *static_camera_list[] =
 "Nikon D800",
 "Nikon D800E",
 "Nikon D810",
+"Nikon D810A",
 "Nikon D3000",
 "Nikon D3100",
 "Nikon D3200",
@@ -3900,6 +3903,7 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-FZ100",
 "Panasonic DMC-FZ150",
 "Panasonic DMC-FZ200",
+"Panasonic DMC-FZ300/330",
 "Panasonic DMC-FZ1000",
 "Panasonic DMC-FX150",
 "Panasonic DMC-G1",
@@ -4093,6 +4097,7 @@ static const char  *static_camera_list[] =
 "Sony A7",
 "Sony A7 II",
 "Sony A7R",
+"Sony A7R II",
 "Sony A7S",
 "Sony ILCA-77M2 (A77-II)",
 "Sony ILCE-3000",
@@ -4105,6 +4110,7 @@ static const char  *static_camera_list[] =
 "Sony DSC-RX1",
 "Sony DSC-RX1R",
 "Sony DSC-RX10",
+"Sony DSC-RX10II",
 "Sony DSC-RX100",
 "Sony DSC-RX100II",
 "Sony DSC-RX100III",
