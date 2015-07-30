@@ -1,3 +1,12 @@
+2015-07-31   Alex Tutubalin <lexa@lexa.ru>
+ * New Cameras:
+   Nikon D810A
+   Panasonic FZ300/330, GX8
+   Sony A7R-II, RX10-II,
+ * C-API extension to support 3DLut Creator
+   Shared lib version incremented because of API extension
+ * LibRaw 0.17 Beta 3
+
 2015-07-09   Alex Tutubalin <lexa@lexa.ru>
  * Fujifilm F700/S20Pro second frame support
  * Fixed Black level calculation for Nikon 1 S2
