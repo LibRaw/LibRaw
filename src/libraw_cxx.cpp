@@ -3597,6 +3597,7 @@ static const char  *static_camera_list[] =
 "Hasselblad CF-31",
 "Hasselblad CF-39",
 "Hasselblad V96C",
+"Hasselblad Lusso",
 "Hasselblad Lunar",
 "Hasselblad Stellar",
 "Hasselblad Stellar II",
