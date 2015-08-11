@@ -8845,10 +8845,15 @@ void CLASS parse_makernote (int base, int uptag)
           imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type)/2);
           break;
         case 0x20100201:
-          imgdata.lens.makernotes.LensID =
-            (unsigned long long)fgetc(ifp)<<16 |
-            (unsigned long long)(fgetc(ifp), fgetc(ifp))<<8 |
-            (unsigned long long)fgetc(ifp);
+          {
+            unsigned long long oly_lensid [3];
+            oly_lensid[0] = fgetc(ifp);
+            fgetc(ifp);
+            oly_lensid[1] = fgetc(ifp);
+            oly_lensid[2] = fgetc(ifp);
+            imgdata.lens.makernotes.LensID =
+              (oly_lensid[0] << 16) | (oly_lensid[1] << 8) | oly_lensid[2];
+          }
           imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FT;
           imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FT;
           if (((imgdata.lens.makernotes.LensID < 0x20000) ||
