@@ -6428,22 +6428,26 @@ void CLASS parseSonyLensFeatures (uchar a, uchar b) {
   if ((imgdata.lens.makernotes.LensMount == LIBRAW_MOUNT_Canon_EF) || !features)
     return;
 
-  imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FF;
-  imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
   imgdata.lens.makernotes.LensFeatures_pre[0] = 0;
   imgdata.lens.makernotes.LensFeatures_suf[0] = 0;
+  if ((features & 0x0200) && (features & 0x0100)) strcpy(imgdata.lens.makernotes.LensFeatures_pre, "E");
+  else if (features & 0x0200) strcpy(imgdata.lens.makernotes.LensFeatures_pre, "FE");
+  else if (features & 0x0100) strcpy(imgdata.lens.makernotes.LensFeatures_pre, "DT");
 
-  if ((features & 0x0200) && (features & 0x0100)) {
-    strcpy(imgdata.lens.makernotes.LensFeatures_pre, "E");
-    imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
-    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sony_E;
-  } else if (features & 0x0200) {
-    strcpy(imgdata.lens.makernotes.LensFeatures_pre, "FE");
-    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sony_E;
-  } else if (features & 0x0100) {
-    strcpy(imgdata.lens.makernotes.LensFeatures_pre, "DT");
-    imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
-  }
+  if (!imgdata.lens.makernotes.LensFormat && !imgdata.lens.makernotes.LensMount)
+    {
+  	  imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FF;
+  	  imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
+
+  	  if ((features & 0x0200) && (features & 0x0100)) {
+  		imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
+  		imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sony_E;
+  	  } else if (features & 0x0200) {
+  		imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sony_E;
+  	  } else if (features & 0x0100) {
+  		imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
+  	  }
+    }
 
   if (features & 0x4000)
     strncat(imgdata.lens.makernotes.LensFeatures_pre, " PZ", sizeof(imgdata.lens.makernotes.LensFeatures_pre));
@@ -7081,6 +7085,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
              (!strncasecmp(make, "Hasselblad", 10) &&
               (!strncasecmp(model, "Stellar", 7) ||
                !strncasecmp(model, "Lunar", 5) ||
+               !strncasecmp(model, "Lusso", 5) ||
                !strncasecmp(model, "HV",2))))
       {
         ushort lid;
@@ -7661,10 +7666,15 @@ void CLASS parse_makernote (int base, int uptag)
           imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type)/2);
           break;
         case 0x20100201:
-          imgdata.lens.makernotes.LensID =
-            (unsigned long long)fgetc(ifp)<<16 |
-            (unsigned long long)(fgetc(ifp), fgetc(ifp))<<8 |
-            (unsigned long long)fgetc(ifp);
+          {
+            unsigned long long oly_lensid [3];
+            oly_lensid[0] = fgetc(ifp);
+            fgetc(ifp);
+            oly_lensid[1] = fgetc(ifp);
+            oly_lensid[2] = fgetc(ifp);
+            imgdata.lens.makernotes.LensID =
+              (oly_lensid[0] << 16) | (oly_lensid[1] << 8) | oly_lensid[2];
+          }
           imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FT;
           imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FT;
           if (((imgdata.lens.makernotes.LensID < 0x20000) ||
@@ -7861,6 +7871,7 @@ void CLASS parse_makernote (int base, int uptag)
              (!strncasecmp(make, "Hasselblad", 10) &&
               (!strncasecmp(model, "Stellar", 7) ||
                !strncasecmp(model, "Lunar", 5) ||
+               !strncasecmp(model, "Lusso", 5) ||
                !strncasecmp(model, "HV",2))))
       {
         ushort lid;
