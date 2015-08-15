@@ -1,60 +1,12 @@
-2015-07-31   Alex Tutubalin <lexa@lexa.ru>
- * New Cameras:
-   Nikon D810A
-   Panasonic FZ300/330, GX8
-   Sony A7R-II, RX10-II,
- * C-API extension to support 3DLut Creator
-   Shared lib version incremented because of API extension
- * LibRaw 0.17 Beta 3
+2015-08-15  Alex Tutubalin <lexa@lexa.ru>
 
-2015-07-09   Alex Tutubalin <lexa@lexa.ru>
- * Fujifilm F700/S20Pro second frame support
- * Fixed Black level calculation for Nikon 1 S2
- * New cameras:
-    Canon G3 X
-    Sigma dp0 Quattro
- * LibRaw 0.17 Beta 2
+ * LibRaw 0.17 
 
-2015-07-03   Alex Tutubalin <lexa@lexa.ru>
- * Fixed more problems detected by AFL
- * strcmp(make,...) -> strncmp(make) to prevent running out of unterminated EXIF value
- * canon_makernotes_t -> libraw_canon_makernotes_t
- * New cameras (813 total):
-    Fujifilm X-T10
-    Leica Q
-    Olympus AIR-A01
-    Pentax K3 II (standard mode only, 1-s subframe extracted for 4-shot images)
-    Sigma dp3 Quattro
-    Sony RX100-IV
-
-2015-05-16  Alex Tutubalin <lexa@lexa.ru>
- * fixed several bugs detected by using American Fuzzy Lop
- * Removed unneeded tile bytecount parser
- * ABI changed, recompile binary packages. Shlib version incremented too
- * LibRaw 0.17 Alpha 4
-
-
-2015-05-11  Alex Tutubalin <lexa@lexa.ru>
  * Fixed dcraw.c ljpeg_start possibly buffer overrun
- * LibRaw 0.17 Alpha 3
 
-2015-05-08  Alex Tutubalin <lexa@lexa.ru>
- * LibRaw 0.17 Alpha 2.
- * Fixed possible buffer overrun in metadata parser
- * New cameras:
-   Canon: 5DS, 5DS R, 750D, 760D, M2, M3
-   Fujifilm: XQ2, X-A2
-   Leica: Monochrom (Typ 246)
-   Nikon: D7200, 1 J5
-   Olympus: SH-2, TG-4
-   Pentax: K-S2
-   Samsung: NX500
- * Minor fixes to make old gcc happy
- * ABI changed, recompile binary packages. Shlib version incremented too
+ * fixed several bugs detected by using American Fuzzy Lop
 
-2015-03-02  Alex Tutubalin <lexa@lexa.ru>
-
- * LibRaw 0.17 Alpha 1.
+ * C-API extension to support 3DLut Creator
 
  * More metadata parsing/extraction:
     - XMP packet extracted (if exists)
@@ -68,23 +20,25 @@
    - params.sony_arw2_hack removed, decoded data are always in 0...17k range (note the difference with dcraw!)
    - Additional processing options for Sony lossy compression techincal analysis.
 
- * Dcraw 9.24 imported (but some changes not approved because Libraw do it better).
+ * Dcraw 9.26 imported (but some changes not approved because Libraw do it better) with some exceptions:
+    - no Pentax K3-II frame selection code 
+    - no built-in JPEG decompressor
 
  * Many improvements in data decoding/processing:
     - Correct decoding of black level values from metadata for many formats, LibRaw do not rely on hardcoded black levels.
 
- * 196 camera models added to supported camera list.
+ * 224 camera models added to supported camera list.
    Some of them are new (released since LibRaw 0.16 come out), some was supported before, but missed from the list.
    Added cameras are:
 
   Alcatel 5035D
   BlackMagic Pocket Cinema Camera, Production Camera 4k
-  Canon PowerShot A550, A3300 IS, G1 X Mark II, G7 X, SD950, SX60 HS, EOS 7D Mark II, EOS 20Da, EOS 60Da, EOS 1200D, EOS-1D C
+  Canon PowerShot A550, A3300 IS, G1 X Mark II, G7 X, SD950, SX60 HS, EOS 7D Mark II, EOS 20Da, EOS 60Da, EOS 1200D, EOS-1D C, 5DS, 5DS R, 750D, 760D, M2, M3, G3 X
   Casio EX-FC300S, EX-FC400S, EX-Z1080, EX-ZR700, EX-ZR710, EX-ZR750, EX-ZR800, EX-ZR850, EX-ZR1000, EX-ZR1100, ZR1200, ZR1300, EX-ZR1500, EX-100, EX-10
   Digital Bolex D16,D16M
   DJI 4384x3288,
   Epson R-D1s, R-D1x
-  FujiFilm E505,S1,S205EXR,HS10,HS11,HS22EXR,HS33EXR,HS35EXR,F505EXR,F605EXR,F775EXR,F900EXR,X100T,X30,X-T1,X-T1 Graphite Silver
+  FujiFilm E505,S1,S205EXR,HS10,HS11,HS22EXR,HS33EXR,HS35EXR,F505EXR,F605EXR,F775EXR,F900EXR,X100T,X30,X-T1,X-T1 Graphite Silver, XQ2, X-A2, X-T10
   Hasselblad H5D-60, H5D-50,H5D-50c,H5D-40,H4D-60,H4D-50,H4D-40,H4D-31,H3DII-22,H3DII-31,H3DII-39,H3DII-50,H3D-22,H3D-31,H3D-39,H2D-22,H2D-39,CF-22,CF-31,CF-39,Stellar II,HV
   HTC UltraPixel
   Imacon Ixpress 96, 96C, 384, 384C (single shot only),132C,  528C (single shot only)
@@ -94,19 +48,21 @@
   Kodak DCS460D, S-1
   Leaf Credo 50
   Lenovo a820
-  Leica Digital-Modul-R, D-Lux (Typ 109), M (Typ 240), Monochrom (Typ 240), M-E, M-P, R8, S, T (Typ 701), X (Typ 113), X2, X-E (Typ 102), V-Lux (Typ 114),
+  Leica Digital-Modul-R, D-Lux (Typ 109), M (Typ 240), Monochrom (Typ 240), M-E, M-P, R8, S, T (Typ 701), X (Typ 113), X2, X-E (Typ 102), V-Lux (Typ 114), Monochrom (Typ 246), Q
   Matrix 4608x3288
-  Nikon D4s, D600, D610, D750, D800, D800E, D810, D3300, D5500, Df, 1 J4, 1 S2, 1 V3, Coolpix P340, Coolscan NEF
+  Nikon D4s, D600, D610, D750, D800, D800E, D810, D3300, D5500, Df, 1 J4, 1 S2, 1 V3, Coolpix P340, Coolscan NEF, D7200, 1 J5,D810A
   Nokia 1200x1600
-  Olympus E-450, E-600, E-PL6, E-PL7, E-M1, E-M10, E-M5 Mark II, SP565UZ, STYLUS1s
-  Panasonic DMC-CM1, DMC-FZ7, DMC-FZ70, DMC-FZ1000, DMC-GF7, DMC-GH4, AG-GH4, DMC-GM1s, DMC-GM5, DMC-LX100, DMC-TZ60/61/SZ40, DMC-TZ70
-  Pentax GR, K110D, K-01,  K-S1, Q, QS-1, 645Z
+  Olympus E-450, E-600, E-PL6, E-PL7, E-M1, E-M10, E-M5 Mark II, SP565UZ, STYLUS1s, SH-2, TG-4, AIR-A01
+  Panasonic DMC-CM1, DMC-FZ7, DMC-FZ70, DMC-FZ1000, DMC-GF7, DMC-GH4, AG-GH4, DMC-GM1s, DMC-GM5, DMC-LX100, DMC-TZ60/61/SZ40, DMC-TZ70, FZ300/330, GX8
+  Pentax GR, K110D, K-01,  K-S1, Q, QS-1, 645Z, K-S2, K3 II
   PhaseOne IQ250, IQ260, IQ260 Achromatic, IQ280, Achromatic+, P 20+, P 21, P 25+, P 30+, P 40+
   Ricoh GXR MOUNT A12, GXR MOUNT A16 24-85mm F3.5-5.5, GXR, S10 24-72mm F2.5-4.4 VC, GXR, GR A12 50mm F2.5 MACRO, GXR, GR LENS A12 28mm F2.5, GXR, GXR P10
-  Samsung GX-1L, NX1, NX5, NX1000, NX1100, NX30, NX300, NX300M, NX3000, NX mini, Galaxy S3, Galaxy Nexus
-  Sigma dp1 Quattro, dp2 Quattro
+  Samsung GX-1L, NX1, NX5, NX1000, NX1100, NX30, NX300, NX300M, NX3000, NX mini, Galaxy S3, Galaxy Nexus, NX500
+  Sigma dp1 Quattro, dp2 Quattro, dp3 Quattro, dp0 Quattro
   Sinar eMotion 22, eMotion 54, eSpirit 65, eMotion 75, eVolution 75, Sinarback 54
-  Sony A7 II, A7S, ILCA-77M2 (A77-II), ILCE-3000, ILCE-5000, ILCE-5100, ILCE-6000, ILCE-QX1, DSC-RX100III, DSLR-A560, NEX-VG20, NEX-VG30, NEX-VG900, IMX135-mipi 13mp, IMX135-QCOM, IMX072-mipi
+  Sony A7 II, A7S, ILCA-77M2 (A77-II), ILCE-3000, ILCE-5000, ILCE-5100, ILCE-6000, ILCE-QX1, DSC-RX100III, DSLR-A560, NEX-VG20, NEX-VG30, NEX-VG900, IMX135-mipi 13mp, IMX135-QCOM, IMX072-mipi, RX100-IV, A7R-II, RX10-II
+
+ * Fujifilm F700/S20Pro second frame support
 
 
 2014-02-01  Alex Tutubalin <lexa@lexa.ru>
