@@ -7082,51 +7082,6 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 		fseek (ifp, 2, SEEK_CUR);
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
 	}
-	else if (WBCTversion == 2)
-	{
-		printf ("\n%s\n", ifname);
-		float kG = 1024.0f, c_bias, m_min;
-		short c, RB = 1;
-		if (unique_id == 0x2920000) {RB = 0; kG += 768.0f;}	// PowerShot G12
-		if (unique_id == 0x2490000) {RB = 0; kG += 256.0f;}	// PowerShot G10
-
-
-			// 0x2460000	PowerShot SX1 IS
-			// 0x2490000	PowerShot G10
-			// 0x2700000	PowerShot G11
-			// 0x2720000	PowerShot S90
-			// 0x2920000	PowerShot G12
-			// 0x2950000	PowerShot S95
-			// 0x3080000	PowerShot G1 X
-			// 0x3110000	PowerShot S100 (new)
-			// 0x3330000	PowerShot G15
-			// 0x3340000	PowerShot SX50 HS
-			// 0x3360000	PowerShot S110 (new)
-			// 0x3540000	PowerShot G16
-			// 0x3550000	PowerShot S120
-			// 0x3640000	PowerShot G1 X Mark II
-			// 0x3750000	PowerShot SX60 HS
-			// 0x3780000	PowerShot G7 X
-			// 0x80000374	EOS M3 (orig. 0x3780000)
-		for (int i=0; i<15; i++)	// tint, ?, kR, kB, CCT
-		{
-			fseek (ifp, 2, SEEK_CUR);
-			c_bias = get2();
-			if (RB)
-			{
-				imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-				imgdata.color.WBCT_Coeffs[i][1] = kG / (float)get2();
-				imgdata.color.WBCT_Coeffs[i][3] = kG / (float)get2();
-			}
-			else
-			{
-				imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-				imgdata.color.WBCT_Coeffs[i][3] = (kG+c_bias) / (float)get2();
-				imgdata.color.WBCT_Coeffs[i][1] = (kG+c_bias) / (float)get2();
-			}
-			imgdata.color.WBCT_Coeffs[i][0] = get2();
-		}
-	}
 	return;
 }
 
