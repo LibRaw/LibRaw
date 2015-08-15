@@ -35,6 +35,8 @@ it under the terms of the one of three licenses as you choose:
     ushort      sget2Rev(uchar *s);
     void	setCanonBodyFeatures (unsigned id);
     void 	processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxlen);
+    void	Canon_WBpresets (int skip1, int skip2);
+    void	Canon_WBCTpresets (short WBCTversion);
     void	processNikonLensData (uchar *LensData, unsigned len);
     void	setOlympusBodyFeatures (unsigned long long id);
     void	setPhaseOneFeatures (unsigned id);
@@ -219,6 +221,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 		void        parse_makernote_0xc634(int base, int uptag, unsigned dng_writer);
     void        parse_exif (int base);
     void        linear_table (unsigned len);
+    void		Kodak_WB_0x08tags(int wb, unsigned type);
     void        parse_kodak_ifd (int base);
     int         parse_tiff_ifd (int base);
     int         parse_tiff (int base);

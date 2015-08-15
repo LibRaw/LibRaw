@@ -1,4 +1,4 @@
-/* 
+/*
   Copyright 2008-2015 LibRaw LLC (info@libraw.org)
 
 LibRaw is free software; you can redistribute it and/or modify
@@ -29,6 +29,37 @@ it under the terms of the one of three licenses as you choose:
 #endif
 #define DCRAW_VERSION "9.25"
 
+// EXIF light sources
+/*
+12 = FL-D; Daylight fluorescent (D 5700K – 7100K) (F1,F5)
+13 = FL-N; Day white fluorescent (N 4600K – 5400K) (F7,F8)
+14 = FL-W; Cool white fluorescent (W 3900K – 4500K) (F2,F6, office, store, warehouse)
+15 = FL-WW; White fluorescent (WW 3200K – 3700K) (F3, residential)
+16 = FL-L; Soft/Warm white fluorescent (L 2600K - 3250K) (F4, kitchen, bath)
+*/
+#define Unknown 0
+#define Daylight 1
+#define Fluorescent 2
+#define Tungsten 3
+#define Flash 4
+#define FineWeather 9
+#define Cloudy 10
+#define Shade 11
+#define FL_D 12
+#define FL_N 13
+#define FL_W 14
+#define FL_WW 15
+#define FL_L 16
+#define Ill_A 17
+#define Ill_B 18
+#define Ill_C 19
+#define D55 20
+#define D65 21
+#define D75 22
+#define D50 23
+#define StudioTungsten 24
+#define EveningSunlight 64
+#define Other 255
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE

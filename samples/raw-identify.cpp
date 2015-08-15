@@ -43,16 +43,103 @@ it under the terms of the one of three licenses as you choose:
 #define C MyCoolRawProcessor.imgdata.color
 #define T MyCoolRawProcessor.imgdata.thumbnail
 
+#define Unknown 0
+#define Daylight 1
+#define Fluorescent 2
+#define Tungsten 3
+#define Flash 4
+#define FineWeather 9
+#define Cloudy 10
+#define Shade 11
+#define FL_D 12
+#define FL_N 13
+#define FL_W 14
+#define FL_WW 15
+#define FL_L 16
+#define Ill_A 17
+#define Ill_B 18
+#define Ill_C 19
+#define D55 20
+#define D65 21
+#define D75 22
+#define D50 23
+#define StudioTungsten 24
+#define EveningSunlight 64
+#define Other 255
+
+const char *EXIF_LightSources[] = {
+	"Unknown",
+	"Daylight",
+	"Fluorescent",
+	"Tungsten",
+	"Flash",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Fine Weather",
+	"Cloudy",
+	"Shade",
+	"Daylight Fluorescent D",
+	"Day White Fluorescent N",
+	"Cool White Fluorescent W",
+	"White Fluorescent WW",
+	"Warm White Fluorescent L",
+	"Illuminant A",
+	"Illuminant B",
+	"Illuminant C",
+	"D55",
+	"D65",
+	"D75",
+	"D50",
+	"ISO Studio Tungsten",
+};
+/*
+table of fluorescents:
+12 = FL-D; Daylight fluorescent (D 5700K – 7100K) (F1,F5)
+13 = FL-N; Day white fluorescent (N 4600K – 5400K) (F7,F8)
+14 = FL-W; Cool white fluorescent (W 3900K – 4500K) (F2,F6, office, store, warehouse)
+15 = FL-WW; White fluorescent (WW 3200K – 3700K) (F3, residential)
+16 = FL-L; Soft/Warm white fluorescent (L 2600K - 3250K) (F4, kitchen, bath)
+*/
+const char *WB_LightSources[] = {
+	"Unknown",
+	"Daylight",
+	"Fluorescent",
+	"Tungsten",
+	"Flash",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Fine Weather",
+	"Cloudy",
+	"Shade",
+	"FL-D",
+	"FL-N",
+	"FL-W",
+	"FL-WW",
+	"FL-L",
+	"Ill. A",
+	"Ill. B",
+	"Ill. C",
+	"D55",
+	"D65",
+	"D75",
+	"D50",
+	"Studio Tungsten",
+};
 
 int main(int ac, char *av[])
 {
-    int verbose = 0, ret,print_unpack=0,print_frame=0;
+    int verbose = 0, ret,print_unpack=0,print_frame=0,print_wb=0;
     LibRaw MyCoolRawProcessor;
 
     for (int i=1;i<ac;i++) {
         if(av[i][0]=='-')
             {
                 if(av[i][1]=='v' && av[i][2]==0) verbose++;
+                if(av[i][1]=='w' && av[i][2]==0) print_wb++;
                 if(av[i][1]=='u' && av[i][2]==0) print_unpack++;
                 if(av[i][1]=='f' && av[i][2]==0) print_frame++;
                 if(av[i][1]=='x' && av[i][2]==0) O.force_foveon_x3f=1;
@@ -232,7 +319,7 @@ int main(int ac, char *av[])
 	   if (C.baseline_exposure > -999.f) printf ("Baseline exposure: %04.3f\n", C.baseline_exposure);
 
             printf ("Number of raw images: %d\n", P1.raw_count);
-            if (C.FujiExpoMidPointShift) printf ("Fuji Exposure shift: %04.3f\n", C.FujiExpoMidPointShift);
+            if (C.FujiExpoMidPointShift > -999.f) printf ("Fuji Exposure shift: %04.3f\n", C.FujiExpoMidPointShift);
             if (S.pixel_aspect != 1)
                 printf ("Pixel Aspect Ratio: %0.6f\n", S.pixel_aspect);
             if (T.tlength)
@@ -249,16 +336,84 @@ int main(int ac, char *av[])
                     for (int i=0; i < 16; i++)
                         putchar (P1.cdesc[MyCoolRawProcessor.fcol(i >> 1,i & 1)]);
                 }
-            printf ("\nDaylight multipliers:");
-            for(int c=0;c<P1.colors;c++) printf (" %f", C.pre_mul[c]);
             if (C.cam_mul[0] > 0)
                 {
-                    printf ("\nCamera multipliers:");
+                    printf ("\nMakernotes 'As shot' multipliers:");
                     for(int c=0;c<4;c++) printf (" %f", C.cam_mul[c]);
                 }
-            printf("\nCam->XYZ matrix:\n");
-            for(int i=0; i< 4; i++)
+
+            for (int cnt=0; cnt<25; cnt++)
+            {
+            	if (C.WB_Coeffs[cnt][0] > 0)
+            	{
+            		printf ("\nMakernotes '%s' multipliers:", EXIF_LightSources[cnt]);
+            		for(int c=0;c<4;c++) printf (" %d", C.WB_Coeffs[cnt][c]);
+            	}
+            }
+            if (C.WB_Coeffs[Other][0] > 0)
+            	{
+            		printf ("\nMakernotes 'Other' multipliers:", EXIF_LightSources[Other]);
+            		for(int c=0;c<4;c++) printf (" %d", C.WB_Coeffs[Other][c]);
+            	}
+            printf("\nXYZ->CamRGB matrix:\n");
+            for(int i=0; i< P1.colors; i++)
                 printf("%6.4f\t%6.4f\t%6.4f\n",C.cam_xyz[i][0],C.cam_xyz[i][1],C.cam_xyz[i][2]);
+
+			if (C.dng_color[0].illuminant < 0xffff)
+				printf ("\nDNG Illuminant 1: %d", C.dng_color[0].illuminant);
+			if (C.dng_color[1].illuminant < 0xffff)
+				printf ("\nDNG Illuminant 2: %d", C.dng_color[1].illuminant);
+
+            if (C.dng_color[0].colormatrix[0][0] > 0)
+            {
+            	printf("\nDNG color matrix 1:\n");
+            	for(int i=0; i< P1.colors; i++)
+            		printf("%6.4f\t%6.4f\t%6.4f\n",C.dng_color[0].colormatrix[i][0],C.dng_color[0].colormatrix[i][1],C.dng_color[0].colormatrix[i][2]);
+            }
+            if (C.dng_color[1].colormatrix[0][0] > 0)
+            {
+            	printf("\nDNG color matrix 2:\n");
+            	for(int i=0; i< P1.colors; i++)
+            		printf("%6.4f\t%6.4f\t%6.4f\n",C.dng_color[1].colormatrix[i][0],C.dng_color[1].colormatrix[i][1],C.dng_color[1].colormatrix[i][2]);
+            }
+
+            if (C.dng_color[0].calibration[0][0] > 0)
+            {
+            	printf("\nDNG calibration matrix 1:\n");
+            	for(int i=0; i< P1.colors; i++)
+            		{
+            			for(int j=0; j< P1.colors; j++)
+                			printf("%6.4f\t",C.dng_color[0].calibration[j][i]);
+                		printf ("\n");
+                	}
+            }
+            if (C.dng_color[1].calibration[0][0] > 0)
+            {
+            	printf("\nDNG calibration matrix 2:\n");
+            	for(int i=0; i< P1.colors; i++)
+            		{
+            			for(int j=0; j< P1.colors; j++)
+                			printf("%6.4f\t",C.dng_color[1].calibration[j][i]);
+                		printf ("\n");
+                	}
+            }
+
+            if (C.dng_color[0].forwardmatrix[0][0] > 0)
+            {
+            	printf("\nDNG forward matrix 1:\n");
+            	for(int i=0; i< P1.colors; i++)
+                	printf("%6.4f\t%6.4f\t%6.4f\n",C.dng_color[0].forwardmatrix[0][i],C.dng_color[0].forwardmatrix[1][i],C.dng_color[0].forwardmatrix[2][i]);
+            }
+            if (C.dng_color[1].forwardmatrix[0][0] > 0)
+            {
+            	printf("\nDNG forward matrix 2:\n");
+            	for(int i=0; i< P1.colors; i++)
+                	printf("%6.4f\t%6.4f\t%6.4f\n",C.dng_color[1].forwardmatrix[0][i],C.dng_color[1].forwardmatrix[1][i],C.dng_color[1].forwardmatrix[2][i]);
+			}
+
+            printf ("Derived D65 multipliers:");
+            for(int c=0;c<P1.colors;c++) printf (" %f", C.pre_mul[c]);
+            printf ("\n");
         }
         else
             {
@@ -279,9 +434,32 @@ int main(int ac, char *av[])
                                 P1.make, P1.model);
                             }
                     }
-                else
-                    printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
-//					printf ("%s=%s=%d=%04.3f=%04.3f\n", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure, C.FujiExpoMidPointShift);
+                else if(print_wb) {
+                	printf ("// %s %s\n",P1.make, P1.model);
+                	for (int cnt=0; cnt<25; cnt++) if (C.WB_Coeffs[cnt][0]) {
+						printf ("{\"%s\", \"%s\", \"%s\", {%6.5ff, 1.0f, %6.5ff, ",
+							P1.make, P1.model, WB_LightSources[cnt],
+							C.WB_Coeffs[cnt][0]/(float)C.WB_Coeffs[cnt][1],
+							C.WB_Coeffs[cnt][2]/(float)C.WB_Coeffs[cnt][1]);
+						    if(C.WB_Coeffs[cnt][1] == C.WB_Coeffs[cnt][3])
+						    	printf ("1.0f}},\n");
+						    else
+						    	printf ("%6.5ff}},\n", C.WB_Coeffs[cnt][3]/(float)C.WB_Coeffs[cnt][1]);
+					}
+					for (int cnt=0; cnt<64; cnt++) if (C.WBCT_Coeffs[cnt][0]) {
+						printf ("{\"%s\", \"%s\", \"%dK\", {%6.5ff, 1.0f, %6.5ff, ",
+							P1.make, P1.model, (int)C.WBCT_Coeffs[cnt][0],
+							C.WBCT_Coeffs[cnt][1]/C.WBCT_Coeffs[cnt][2],
+							C.WBCT_Coeffs[cnt][3]/C.WBCT_Coeffs[cnt][2]);
+						    if(C.WBCT_Coeffs[cnt][2] == C.WBCT_Coeffs[cnt][4])
+						    	printf ("1.0f}},\n");
+						    else
+						    	printf ("%6.5ff}},\n", C.WBCT_Coeffs[cnt][4]/C.WBCT_Coeffs[cnt][2]);
+					} else break;
+					printf ("\n");
+                } else
+//                    printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
+					printf ("%s=%s=%d=%04.3f=%04.3f\n", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure, C.FujiExpoMidPointShift);
             }
         MyCoolRawProcessor.recycle();
     }// endfor

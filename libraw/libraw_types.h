@@ -196,6 +196,7 @@ typedef struct
   unsigned short illuminant;
   float calibration[4][4];
   float colormatrix[4][3];
+  float forwardmatrix[3][4];
 } libraw_dng_color_t;
 
 typedef struct
@@ -232,6 +233,8 @@ typedef struct
   int		  OlympusSensorCalibration[2];
   float       FujiExpoMidPointShift;
   int		digitalBack_color;
+  int		WB_Coeffs[256][4];	// R, G1, B, G2 coeffs
+  float		WBCT_Coeffs[64][5];	// CCT, than R, G1, B, G2 coeffs
 }libraw_colordata_t;
 
 typedef struct
