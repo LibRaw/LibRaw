@@ -159,17 +159,17 @@ struct decode
     int leaf;
 };
 
-struct tiff_ifd_t
-{
-    int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes;
-    int t_tile_width, t_tile_length;
+struct tiff_ifd_t {
+  int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes;
+  int t_tile_width, t_tile_length;
+  float t_shutter;
 };
-
 
 struct jhead {
-  int bits, high, wide, clrs, sraw, psv, restart, vpred[6];
-    ushort *huff[6], *free[4], *row;
+  int algo, bits, high, wide, clrs, sraw, psv, restart, vpred[6];
+  ushort quant[64], idct[64], *huff[20], *free[20], *row;
 };
+
 struct tiff_tag {
   ushort tag, type;
   int count;

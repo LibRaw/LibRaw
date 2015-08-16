@@ -2509,7 +2509,9 @@ void LibRaw::kodak_thumb_loader()
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIM(x,min,max) MAX(min,MIN(x,max))
+#ifndef CLIP
 #define CLIP(x) LIM(x,0,65535)
+#endif
 #define SWAP(a,b) { a ^= b; a ^= (b ^= a); }
 
   // from scale_colors

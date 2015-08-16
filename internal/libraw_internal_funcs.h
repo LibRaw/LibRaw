@@ -75,6 +75,7 @@ void        parse_ciff (int offset, int length, int);
     void        ljpeg_end(struct jhead *jh);
     int         ljpeg_diff (ushort *huff);
     ushort *    ljpeg_row (int jrow, struct jhead *jh);
+    void	ljpeg_idct (struct jhead *jh);
     unsigned    ph1_bithuff (int nbits, ushort *huff);
 
 // Canon DSLRs
@@ -240,7 +241,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     short       guess_byte_order (int words);
 
 // Tiff writer
-    void        tiff_set (ushort *ntag, ushort tag, ushort type, int count, int val);
+    void        tiff_set(struct tiff_hdr *th, ushort *ntag,ushort tag, ushort type, int count, int val);
     void        tiff_head (struct tiff_hdr *th, int full);
 
 // splitted AHD code

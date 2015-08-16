@@ -233,8 +233,8 @@ typedef struct
   int		  OlympusSensorCalibration[2];
   float       FujiExpoMidPointShift;
   int		digitalBack_color;
-  int		WB_Coeffs[256][4];	// R, G1, B, G2 coeffs
-  float		WBCT_Coeffs[64][5];	// CCT, than R, G1, B, G2 coeffs
+  int		WB_Coeffs[256][4];	/* R, G1, B, G2 coeffs */
+  float		WBCT_Coeffs[64][5];	/* CCT, than R, G1, B, G2 coeffs */
 }libraw_colordata_t;
 
 typedef struct
