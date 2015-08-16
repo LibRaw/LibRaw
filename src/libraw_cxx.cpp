@@ -376,8 +376,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.no_interpolation = 0;
   imgdata.params.sraw_ycc = 0;
   imgdata.params.force_foveon_x3f = 0;
-  imgdata.params.x3f_flags = LIBRAW_DP2Q_INTERPOLATERG|LIBRAW_DP2Q_INTERPOLATEAF;
-  imgdata.params.sony_arw2_options = 0;
+  imgdata.params.raw_processing_options = LIBRAW_PROCESSING_DP2Q_INTERPOLATERG|LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF;
   imgdata.params.sony_arw2_posterization_thr = 0;
   imgdata.params.green_matching = 0;
   imgdata.params.coolscan_nef_gamma = 1.0f;
@@ -4575,7 +4574,7 @@ void LibRaw::x3f_load_raw()
 
 	  if(!strcasecmp(imgdata.idata.make,"Sigma")
 		  && !strncasecmp(imgdata.idata.model,"dp",2)  && !strncasecmp(imgdata.idata.model+4,"Quattro",7)
-		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATEAF)
+		  && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF)
 		  )
 	  {
 		  if(imgdata.sizes.raw_width == 5888)
@@ -4590,7 +4589,7 @@ void LibRaw::x3f_load_raw()
 
 	  if(!strcasecmp(imgdata.idata.make,"Sigma")
 		  && !strncasecmp(imgdata.idata.model,"dp",2)  && !strncasecmp(imgdata.idata.model+4,"Quattro",7)
-		  && (imgdata.params.x3f_flags & LIBRAW_DP2Q_INTERPOLATERG)
+		  && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DP2Q_INTERPOLATERG)
 		  && (imgdata.sizes.raw_width== 5888)
 		  )
 			x3f_dpq_interpolate_rg();

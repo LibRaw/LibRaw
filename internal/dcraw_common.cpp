@@ -3273,8 +3273,8 @@ void CLASS sony_arw2_load_raw()
       for (sh=0; sh < 4 && 0x80 << sh <= max-min; sh++);
 #ifdef LIBRAW_LIBRARY_BUILD
       /* flag checks if outside of loop */
-      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_NONE
-         || imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVALUE
+      if(! (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONYARW2_ALLFLAGS) // no flag set
+         || (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE)
          )
         {
           for (bit=30, i=0; i < 16; i++)
@@ -3286,14 +3286,14 @@ void CLASS sony_arw2_load_raw()
               bit += 7;
             }
         }
-      else if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_BASEONLY)
+      else if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONYARW2_BASEONLY)
         {
           for (bit=30, i=0; i < 16; i++)
             if      (i == imax) pix[i] = max;
             else if (i == imin) pix[i] = min;
             else pix[i]=0;
         }
-      else if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTAONLY)
+      else if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONYARW2_DELTAONLY)
         {
           for (bit=30, i=0; i < 16; i++)
             if      (i == imax) pix[i] = 0;
@@ -3304,7 +3304,7 @@ void CLASS sony_arw2_load_raw()
               bit += 7;
             }
         }
-      else if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTAZEROBASE)
+      else if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONYARW2_DELTAZEROBASE)
         {
           for (bit=30, i=0; i < 16; i++)
             if      (i == imax) pix[i] = 0;
@@ -3328,7 +3328,7 @@ void CLASS sony_arw2_load_raw()
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
-      if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVALUE)
+      if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE)
         {
           for (i=0; i < 16; i++, col+=2)
             {
@@ -3355,7 +3355,7 @@ void CLASS sony_arw2_load_raw()
     free (data);
     throw;
   }
-  if(imgdata.params.sony_arw2_options == LIBRAW_SONYARW2_DELTATOVALUE)
+  if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE)
     maximum=10000;
 #endif
   free (data);
