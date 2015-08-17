@@ -330,6 +330,12 @@ int CLASS fcol (int row, int col)
   return FC(row,col);
 }
 
+size_t strnlen(const char *s, size_t n)
+{
+  const char *p = (const char *)memchr(s, 0, n);
+  return(p ? p-s : n);
+}
+
 #ifndef __GLIBC__
 char *my_memmem (char *haystack, size_t haystacklen,
 	      char *needle, size_t needlelen)
@@ -9636,7 +9642,7 @@ void CLASS parse_makernote (int base, int uptag)
 		imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] =
 		  imgdata.color.WBCT_Coeffs[nWB][2];
 	    }
-	  
+
 	  if (tag == 0x20400121)
 	    {
 	      imgdata.color.WB_Coeffs[Flash][0] = get2();
@@ -9707,7 +9713,7 @@ void CLASS parse_makernote (int base, int uptag)
 	      imgdata.color.OlympusSensorCalibration[1]=getreal(type);
 	    }
 	}
-	
+
 	if(tag == 0x20400805 && len == 2 && !strncasecmp(make,"Olympus",7))
 	  {
 	    imgdata.color.OlympusSensorCalibration[0]=getreal(type);
@@ -11240,23 +11246,23 @@ guess_cfa_pc:
 			      imgdata.color.WB_Coeffs[FineWeather][1] = imgdata.color.WB_Coeffs[FineWeather][3] = rafdata[fi];
 			      imgdata.color.WB_Coeffs[FineWeather][0] = rafdata[fi+1];
 			      imgdata.color.WB_Coeffs[FineWeather][2] = rafdata[fi+2];
-			      
+
 			      imgdata.color.WB_Coeffs[Shade][1] = imgdata.color.WB_Coeffs[Shade][3] = rafdata[fi+3];
 			      imgdata.color.WB_Coeffs[Shade][0] = rafdata[fi+4];
 			      imgdata.color.WB_Coeffs[Shade][2] = rafdata[fi+5];
-			      
+
 			      imgdata.color.WB_Coeffs[FL_D][1] = imgdata.color.WB_Coeffs[FL_D][3] = rafdata[fi+6];
 			      imgdata.color.WB_Coeffs[FL_D][0] = rafdata[fi+7];
 			      imgdata.color.WB_Coeffs[FL_D][2] = rafdata[fi+8];
-			      
+
 			      imgdata.color.WB_Coeffs[FL_L][1] = imgdata.color.WB_Coeffs[FL_L][3] = rafdata[fi+9];
 			      imgdata.color.WB_Coeffs[FL_L][0] = rafdata[fi+10];
 			      imgdata.color.WB_Coeffs[FL_L][2] = rafdata[fi+11];
-			      
+
 			      imgdata.color.WB_Coeffs[FL_W][1] = imgdata.color.WB_Coeffs[FL_W][3] = rafdata[fi+12];
 			      imgdata.color.WB_Coeffs[FL_W][0] = rafdata[fi+13];
 			      imgdata.color.WB_Coeffs[FL_W][2] = rafdata[fi+14];
-			      
+
 			      imgdata.color.WB_Coeffs[Tungsten][1] = imgdata.color.WB_Coeffs[Tungsten][3] = rafdata[fi+15];
 			      imgdata.color.WB_Coeffs[Tungsten][0] = rafdata[fi+16];
 			      imgdata.color.WB_Coeffs[Tungsten][2] = rafdata[fi+17];
