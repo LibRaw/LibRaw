@@ -11231,60 +11231,60 @@ guess_cfa_pc:
 		  imgdata.color.WB_Coeffs[fwb[3]][1] = imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
 		  imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
 		  if ((fwb[3] == 17) && lenRAFData)
-		    {
-		      long long f_save = ftell(ifp);
-		      int fj, found = 0;
-		      ushort *rafdata = (ushort*) malloc (sizeof(ushort)*lenRAFData);
-		      fseek (ifp, posRAFData, SEEK_SET);
-		      fread (rafdata, sizeof(ushort), lenRAFData, ifp);
-		      fseek(ifp, f_save, SEEK_SET);
-		      for (int fi=0; fi<(lenRAFData-3); fi++)
+		  {
+		    long long f_save = ftell(ifp);
+		    int fj, found = 0;
+		    ushort *rafdata = (ushort*) malloc (sizeof(ushort)*lenRAFData);
+		    fseek (ifp, posRAFData, SEEK_SET);
+		    fread (rafdata, sizeof(ushort), lenRAFData, ifp);
+		    fseek(ifp, f_save, SEEK_SET);
+		    for (int fi=0; fi<(lenRAFData-3); fi++)
 			{
 			  if ((fwb[0]==rafdata[fi]) && (fwb[1]==rafdata[fi+1]) && (fwb[2]==rafdata[fi+2]))
-			    {
-			      if (rafdata[fi-15] != fwb[0]) continue;
-			      fi = fi - 15;
-			      imgdata.color.WB_Coeffs[FineWeather][1] = imgdata.color.WB_Coeffs[FineWeather][3] = rafdata[fi];
-			      imgdata.color.WB_Coeffs[FineWeather][0] = rafdata[fi+1];
-			      imgdata.color.WB_Coeffs[FineWeather][2] = rafdata[fi+2];
+			  {
+			    if (rafdata[fi-15] != fwb[0]) continue;
+			    fi = fi - 15;
+			    imgdata.color.WB_Coeffs[FineWeather][1] = imgdata.color.WB_Coeffs[FineWeather][3] = rafdata[fi];
+			    imgdata.color.WB_Coeffs[FineWeather][0] = rafdata[fi+1];
+			    imgdata.color.WB_Coeffs[FineWeather][2] = rafdata[fi+2];
 
-			      imgdata.color.WB_Coeffs[Shade][1] = imgdata.color.WB_Coeffs[Shade][3] = rafdata[fi+3];
-			      imgdata.color.WB_Coeffs[Shade][0] = rafdata[fi+4];
-			      imgdata.color.WB_Coeffs[Shade][2] = rafdata[fi+5];
+			    imgdata.color.WB_Coeffs[Shade][1] = imgdata.color.WB_Coeffs[Shade][3] = rafdata[fi+3];
+			    imgdata.color.WB_Coeffs[Shade][0] = rafdata[fi+4];
+			    imgdata.color.WB_Coeffs[Shade][2] = rafdata[fi+5];
 
-			      imgdata.color.WB_Coeffs[FL_D][1] = imgdata.color.WB_Coeffs[FL_D][3] = rafdata[fi+6];
-			      imgdata.color.WB_Coeffs[FL_D][0] = rafdata[fi+7];
-			      imgdata.color.WB_Coeffs[FL_D][2] = rafdata[fi+8];
+			    imgdata.color.WB_Coeffs[FL_D][1] = imgdata.color.WB_Coeffs[FL_D][3] = rafdata[fi+6];
+			    imgdata.color.WB_Coeffs[FL_D][0] = rafdata[fi+7];
+			    imgdata.color.WB_Coeffs[FL_D][2] = rafdata[fi+8];
 
-			      imgdata.color.WB_Coeffs[FL_L][1] = imgdata.color.WB_Coeffs[FL_L][3] = rafdata[fi+9];
-			      imgdata.color.WB_Coeffs[FL_L][0] = rafdata[fi+10];
-			      imgdata.color.WB_Coeffs[FL_L][2] = rafdata[fi+11];
+			    imgdata.color.WB_Coeffs[FL_L][1] = imgdata.color.WB_Coeffs[FL_L][3] = rafdata[fi+9];
+			    imgdata.color.WB_Coeffs[FL_L][0] = rafdata[fi+10];
+			    imgdata.color.WB_Coeffs[FL_L][2] = rafdata[fi+11];
 
-			      imgdata.color.WB_Coeffs[FL_W][1] = imgdata.color.WB_Coeffs[FL_W][3] = rafdata[fi+12];
-			      imgdata.color.WB_Coeffs[FL_W][0] = rafdata[fi+13];
-			      imgdata.color.WB_Coeffs[FL_W][2] = rafdata[fi+14];
+			    imgdata.color.WB_Coeffs[FL_W][1] = imgdata.color.WB_Coeffs[FL_W][3] = rafdata[fi+12];
+			    imgdata.color.WB_Coeffs[FL_W][0] = rafdata[fi+13];
+			    imgdata.color.WB_Coeffs[FL_W][2] = rafdata[fi+14];
 
-			      imgdata.color.WB_Coeffs[Tungsten][1] = imgdata.color.WB_Coeffs[Tungsten][3] = rafdata[fi+15];
-			      imgdata.color.WB_Coeffs[Tungsten][0] = rafdata[fi+16];
-			      imgdata.color.WB_Coeffs[Tungsten][2] = rafdata[fi+17];
+			    imgdata.color.WB_Coeffs[Tungsten][1] = imgdata.color.WB_Coeffs[Tungsten][3] = rafdata[fi+15];
+			    imgdata.color.WB_Coeffs[Tungsten][0] = rafdata[fi+16];
+			    imgdata.color.WB_Coeffs[Tungsten][2] = rafdata[fi+17];
 
-                  for (fj = (fi+18); fj<(lenRAFData-3); fj+=3)
-                    if (rafdata[fj] != fwb[0])
-                    {
-                      found = 1;
-                      break;
-                    }
-                 if (found)
-                 {
-                    fj = fj - 93;
-                    for (int iCCT=0; iCCT < 31; iCCT++)
-                    {
-                      int FujiCCT_K [31] = {2500,2550,2650,2700,2800,2850,2950,3000,3100,3200,3300,3400,3600,3700,3800,4000,4200,4300,4500,4800,5000,5300,5600,5900,6300,6700,7100,7700,8300,9100,10000};
-                      imgdata.color.WBCT_Coeffs[iCCT][0] = FujiCCT_K[iCCT];
-                      imgdata.color.WBCT_Coeffs[iCCT][1] = rafdata[iCCT*3+1+fj];
-                      imgdata.color.WBCT_Coeffs[iCCT][2] = imgdata.color.WBCT_Coeffs[iCCT][4] = rafdata[iCCT*3+fj];
-                      imgdata.color.WBCT_Coeffs[iCCT][3] = rafdata[iCCT*3+2+fj];
-					}
+                for (fj = (fi+18); fj<(lenRAFData-3); fj+=3)
+                  if (rafdata[fj] != fwb[0])
+                  {
+                    found = 1;
+                    break;
+                  }
+                if (found)
+                {
+                  fj = fj - 93;
+                  for (int iCCT=0; iCCT < 31; iCCT++)
+                  {
+                    int FujiCCT_K [31] = {2500,2550,2650,2700,2800,2850,2950,3000,3100,3200,3300,3400,3600,3700,3800,4000,4200,4300,4500,4800,5000,5300,5600,5900,6300,6700,7100,7700,8300,9100,10000};
+                    imgdata.color.WBCT_Coeffs[iCCT][0] = FujiCCT_K[iCCT];
+                    imgdata.color.WBCT_Coeffs[iCCT][1] = rafdata[iCCT*3+1+fj];
+                    imgdata.color.WBCT_Coeffs[iCCT][2] = imgdata.color.WBCT_Coeffs[iCCT][4] = rafdata[iCCT*3+fj];
+                    imgdata.color.WBCT_Coeffs[iCCT][3] = rafdata[iCCT*3+2+fj];
+				  }
 				}
 			    free (rafdata);
 				break;
