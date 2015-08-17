@@ -5897,39 +5897,41 @@ void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxl
 
 void CLASS Canon_WBpresets (int skip1, int skip2)
 {
-	int c;
-	FORC4 imgdata.color.WB_Coeffs[Daylight][c ^ (c >> 1)] = get2();
-    if (skip1) fseek(ifp, skip1, SEEK_CUR);
-	FORC4 imgdata.color.WB_Coeffs[Shade][c ^ (c >> 1)] = get2();
-	if (skip1) fseek(ifp, skip1, SEEK_CUR);
-	FORC4 imgdata.color.WB_Coeffs[Cloudy][c ^ (c >> 1)] = get2();
-	if (skip1) fseek(ifp, skip1, SEEK_CUR);
-	FORC4 imgdata.color.WB_Coeffs[Tungsten][c ^ (c >> 1)] = get2();
-	if (skip1) fseek(ifp, skip1, SEEK_CUR);
-	FORC4 imgdata.color.WB_Coeffs[Fluorescent][c ^ (c >> 1)] = get2();
-	if (skip2) fseek(ifp, skip2, SEEK_CUR);
-	FORC4 imgdata.color.WB_Coeffs[Flash][c ^ (c >> 1)] = get2();
-	return;
+  int c;
+  FORC4 imgdata.color.WB_Coeffs[Daylight][c ^ (c >> 1)] = get2();
+  if (skip1) fseek(ifp, skip1, SEEK_CUR);
+  FORC4 imgdata.color.WB_Coeffs[Shade][c ^ (c >> 1)] = get2();
+  if (skip1) fseek(ifp, skip1, SEEK_CUR);
+  FORC4 imgdata.color.WB_Coeffs[Cloudy][c ^ (c >> 1)] = get2();
+  if (skip1) fseek(ifp, skip1, SEEK_CUR);
+  FORC4 imgdata.color.WB_Coeffs[Tungsten][c ^ (c >> 1)] = get2();
+  if (skip1) fseek(ifp, skip1, SEEK_CUR);
+  FORC4 imgdata.color.WB_Coeffs[Fluorescent][c ^ (c >> 1)] = get2();
+  if (skip2) fseek(ifp, skip2, SEEK_CUR);
+  FORC4 imgdata.color.WB_Coeffs[Flash][c ^ (c >> 1)] = get2();
+  return;
 }
 
 void CLASS Canon_WBCTpresets (short WBCTversion)
 {
-	if (WBCTversion == 0) for (int i=0; i<15; i++)		// tint, as shot R, as shot B, CСT
-	{
+	if (WBCTversion == 0)
+	  for (int i=0; i<15; i++)// tint, as shot R, as shot B, CСT
+	    {
 		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
 		fseek (ifp, 2, SEEK_CUR);
 		imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / (float)get2();
 		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / (float)get2();
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
-	}
-	else if (WBCTversion == 1) for (int i=0; i<15; i++)	// as shot R, as shot B, tint, CСT
-	{
+	    }
+	else if (WBCTversion == 1)
+	  for (int i=0; i<15; i++)	// as shot R, as shot B, tint, CСT
+	    {
 		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
 		imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / (float)get2();
 		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / (float)get2();
 		fseek (ifp, 2, SEEK_CUR);
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
-	}
+	    }
 	return;
 }
 
@@ -7158,14 +7160,15 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         }
         else if (tag == 0x0221)
         {
-        	int nWB = get2();
-        	for (int i = 0; i < nWB; i++)
-        	{
-        		imgdata.color.WBCT_Coeffs[i][0] = (unsigned)0xcfc6 - get2();
-        		fseek(ifp, 2, SEEK_CUR);
-        		imgdata.color.WBCT_Coeffs[i][1] = get2();
-        		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 0x2000;
-        		imgdata.color.WBCT_Coeffs[i][3] = get2();
+	  int nWB = get2();
+	  if(nWB<=sizeof(imgdata.color.WBCT_Coeffs)/sizeof(imgdata.color.WBCT_Coeffs[0]))
+	     for (int i = 0; i < nWB; i++)
+	       {
+		 imgdata.color.WBCT_Coeffs[i][0] = (unsigned)0xcfc6 - get2();
+		 fseek(ifp, 2, SEEK_CUR);
+		 imgdata.color.WBCT_Coeffs[i][1] = get2();
+		 imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 0x2000;
+		 imgdata.color.WBCT_Coeffs[i][3] = get2();
         	}
         }
         else if (tag == 0x022d)
@@ -7182,25 +7185,25 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 //          		adjusted = 1;
 //          	}
 //        	fprintf (stderr, _("\nmakernote_0xc634: buf -=%s=- make -=%s=- model -=%s=- adjusted: %d order 0x%x nWB= %d iWB= %d\n"), buf, make, model, adjusted, order, nWB, iWB);
-			fseek (ifp,2,SEEK_CUR);
-        	FORC4 imgdata.color.WB_Coeffs[Daylight][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[Shade][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[Cloudy][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[Tungsten][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[FL_D][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[FL_N][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[FL_W][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[Flash][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[FL_L][c ^ (c >> 1)] = get2();
-//        	fprintf (stderr, _("Daylight: %d %d %d %d\n"), imgdata.color.WB_Coeffs[Daylight][0], imgdata.color.WB_Coeffs[Daylight][1], imgdata.color.WB_Coeffs[Daylight][2], imgdata.color.WB_Coeffs[Daylight][3]);
+	  fseek (ifp,2,SEEK_CUR);
+	  FORC4 imgdata.color.WB_Coeffs[Daylight][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[Shade][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[Cloudy][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[Tungsten][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[FL_D][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[FL_N][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[FL_W][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[Flash][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[FL_L][c ^ (c >> 1)] = get2();
+	  //        	fprintf (stderr, _("Daylight: %d %d %d %d\n"), imgdata.color.WB_Coeffs[Daylight][0], imgdata.color.WB_Coeffs[Daylight][1], imgdata.color.WB_Coeffs[Daylight][2], imgdata.color.WB_Coeffs[Daylight][3]);
 //        	fprintf (stderr, _("Tungsten: %d %d %d %d\n"), imgdata.color.WB_Coeffs[Tungsten][0], imgdata.color.WB_Coeffs[Tungsten][1], imgdata.color.WB_Coeffs[Tungsten][2], imgdata.color.WB_Coeffs[Tungsten][3]);
 
         }
@@ -7993,68 +7996,69 @@ void CLASS parse_makernote (int base, int uptag)
           }
         else if (tag == 0x020d)
         {
-        	FORC4 imgdata.color.WB_Coeffs[Daylight][c ^ (c >> 1)] = get2();
+	  FORC4 imgdata.color.WB_Coeffs[Daylight][c ^ (c >> 1)] = get2();
         }
         else if (tag == 0x020e)
         {
-        	FORC4 imgdata.color.WB_Coeffs[Shade][c ^ (c >> 1)] = get2();
+	  FORC4 imgdata.color.WB_Coeffs[Shade][c ^ (c >> 1)] = get2();
         }
         else if (tag == 0x020f)
         {
-        	FORC4 imgdata.color.WB_Coeffs[Cloudy][c ^ (c >> 1)] = get2();
+	  FORC4 imgdata.color.WB_Coeffs[Cloudy][c ^ (c >> 1)] = get2();
         }
         else if (tag == 0x0210)
         {
-        	FORC4 imgdata.color.WB_Coeffs[Tungsten][c ^ (c >> 1)] = get2();
+	  FORC4 imgdata.color.WB_Coeffs[Tungsten][c ^ (c >> 1)] = get2();
         }
         else if (tag == 0x0211)
         {
-        	FORC4 imgdata.color.WB_Coeffs[FL_D][c ^ (c >> 1)] = get2();
+	  FORC4 imgdata.color.WB_Coeffs[FL_D][c ^ (c >> 1)] = get2();
         }
         else if (tag == 0x0212)
         {
-        	FORC4 imgdata.color.WB_Coeffs[FL_N][c ^ (c >> 1)] = get2();
+	  FORC4 imgdata.color.WB_Coeffs[FL_N][c ^ (c >> 1)] = get2();
         }
         else if (tag == 0x0213)
         {
-        	FORC4 imgdata.color.WB_Coeffs[FL_W][c ^ (c >> 1)] = get2();
+	  FORC4 imgdata.color.WB_Coeffs[FL_W][c ^ (c >> 1)] = get2();
         }
         else if (tag == 0x0214)
         {
-        	FORC4 imgdata.color.WB_Coeffs[Flash][c ^ (c >> 1)] = get2();
+	  FORC4 imgdata.color.WB_Coeffs[Flash][c ^ (c >> 1)] = get2();
         }
         else if (tag == 0x0221)
         {
-        	int nWB = get2();
-        	for (int i = 0; i < nWB; i++)
-        	{
-        		imgdata.color.WBCT_Coeffs[i][0] = (unsigned)0xcfc6 - get2();
-        		fseek(ifp, 2, SEEK_CUR);
-        		imgdata.color.WBCT_Coeffs[i][1] = get2();
-        		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 0x2000;
-        		imgdata.color.WBCT_Coeffs[i][3] = get2();
-        	}
+	  int nWB = get2();
+	  if(nWB<=sizeof(imgdata.color.WBCT_Coeffs)/sizeof(imgdata.color.WBCT_Coeffs[0]))
+	    for (int i = 0; i < nWB; i++)
+	      {
+		imgdata.color.WBCT_Coeffs[i][0] = (unsigned)0xcfc6 - get2();
+		fseek(ifp, 2, SEEK_CUR);
+		imgdata.color.WBCT_Coeffs[i][1] = get2();
+		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 0x2000;
+		imgdata.color.WBCT_Coeffs[i][3] = get2();
+	      }
         }
         else if (tag == 0x022d)
         {
-        	fseek (ifp,2,SEEK_CUR);
-        	FORC4 imgdata.color.WB_Coeffs[Daylight][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[Shade][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[Cloudy][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[Tungsten][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[FL_D][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[FL_N][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[FL_W][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[Flash][c ^ (c >> 1)] = get2();
-        	getc(ifp);
-        	FORC4 imgdata.color.WB_Coeffs[FL_L][c ^ (c >> 1)] = get2();
+	  fseek (ifp,2,SEEK_CUR);
+	  FORC4 imgdata.color.WB_Coeffs[Daylight][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[Shade][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[Cloudy][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[Tungsten][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[FL_D][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[FL_N][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[FL_W][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[Flash][c ^ (c >> 1)] = get2();
+	  getc(ifp);
+	  FORC4 imgdata.color.WB_Coeffs[FL_L][c ^ (c >> 1)] = get2();
         }
         else if (tag == 0x0239)		// Q-series lens info (LensInfoQ)
           {
@@ -8361,154 +8365,154 @@ void CLASS parse_makernote (int base, int uptag)
     INT64 _pos2 = ftell(ifp);
 	if (!strncasecmp(make,"Olympus",7))
 	{
-		short nWB, tWB;
-		if ((tag == 0x20400102) && (len == 2) &&
-		   (!strncasecmp(model, "E-410", 5) || !strncasecmp(model, "E-510", 5)))
+	  short nWB, tWB;
+	  if ((tag == 0x20400102) && (len == 2) &&
+	      (!strncasecmp(model, "E-410", 5) || !strncasecmp(model, "E-510", 5)))
+	    {
+	      int i;
+	      for (i=0; i<64; i++)
+		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] =
+		  imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
+	      for (i=64; i<256; i++)
+		imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
+	    }
+	  if ((tag >= 0x20400102) && (tag <= 0x2040010d))
+	    {
+	      ushort CT;
+	      nWB = tag-0x20400102;
+	      switch (nWB)
 		{
-			int i;
-			for (i=0; i<64; i++)
-				imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] =
-				imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
-			for (i=64; i<256; i++)
-				imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
+		case 0 : CT = 3000; tWB = Tungsten; break;
+		case 1 : CT = 3300; tWB = 0x100; break;
+		case 2 : CT = 3600; tWB = 0x100; break;
+		case 3 : CT = 3900; tWB = 0x100; break;
+		case 4 : CT = 4000; tWB = FL_W; break;
+		case 5 : CT = 4300; tWB = 0x100; break;
+		case 6 : CT = 4500; tWB = FL_D; break;
+		case 7 : CT = 4800; tWB = 0x100; break;
+		case 8 : CT = 5300; tWB = FineWeather; break;
+		case 9 : CT = 6000; tWB = Cloudy; break;
+		case 10: CT = 6600; tWB = FL_N; break;
+		case 11: CT = 7500; tWB = Shade; break;
+		default: CT = 0; tWB = 0x100;
 		}
-		if ((tag >= 0x20400102) && (tag <= 0x2040010d))
+	      if (CT)
 		{
-			ushort CT;
-			nWB = tag-0x20400102;
-			switch (nWB)
-			{
-			case 0 : CT = 3000; tWB = Tungsten; break;
-			case 1 : CT = 3300; tWB = 0x100; break;
-			case 2 : CT = 3600; tWB = 0x100; break;
-			case 3 : CT = 3900; tWB = 0x100; break;
-			case 4 : CT = 4000; tWB = FL_W; break;
-			case 5 : CT = 4300; tWB = 0x100; break;
-			case 6 : CT = 4500; tWB = FL_D; break;
-			case 7 : CT = 4800; tWB = 0x100; break;
-			case 8 : CT = 5300; tWB = FineWeather; break;
-			case 9 : CT = 6000; tWB = Cloudy; break;
-			case 10: CT = 6600; tWB = FL_N; break;
-			case 11: CT = 7500; tWB = Shade; break;
-			default: CT = 0; tWB = 0x100;
-			}
-			if (CT)
-			{
-				imgdata.color.WBCT_Coeffs[nWB][0] = CT;
-				imgdata.color.WBCT_Coeffs[nWB][1] = get2();
-				imgdata.color.WBCT_Coeffs[nWB][3] = get2();
-				if (len == 4)
-				{
-					imgdata.color.WBCT_Coeffs[nWB][2] = get2();
-					imgdata.color.WBCT_Coeffs[nWB][4] = get2();
-				}
-			}
-			if (tWB != 0x100)
-				FORC4 imgdata.color.WB_Coeffs[tWB][c] = imgdata.color.WBCT_Coeffs[nWB][c+1];
+		  imgdata.color.WBCT_Coeffs[nWB][0] = CT;
+		  imgdata.color.WBCT_Coeffs[nWB][1] = get2();
+		  imgdata.color.WBCT_Coeffs[nWB][3] = get2();
+		  if (len == 4)
+		    {
+		      imgdata.color.WBCT_Coeffs[nWB][2] = get2();
+		      imgdata.color.WBCT_Coeffs[nWB][4] = get2();
+		    }
 		}
-		if ((tag >= 0x20400113) && (tag <= 0x2040011e))
+	      if (tWB != 0x100)
+		FORC4 imgdata.color.WB_Coeffs[tWB][c] = imgdata.color.WBCT_Coeffs[nWB][c+1];
+	    }
+	  if ((tag >= 0x20400113) && (tag <= 0x2040011e))
+	    {
+	      nWB = tag-0x20400113;
+	      imgdata.color.WBCT_Coeffs[nWB][2] = imgdata.color.WBCT_Coeffs[nWB][4] = get2();
+	      switch (nWB)
 		{
-			nWB = tag-0x20400113;
-			imgdata.color.WBCT_Coeffs[nWB][2] = imgdata.color.WBCT_Coeffs[nWB][4] = get2();
-			switch (nWB)
-			{
-			case 0:  tWB = Tungsten; break;
-			case 4:  tWB = FL_W; break;
-			case 6:  tWB = FL_D; break;
-			case 8:  tWB = FineWeather; break;
-			case 9:  tWB = Cloudy; break;
-			case 10: tWB = FL_N; break;
-			case 11: tWB = Shade; break;
-			default: tWB = 0x100;
-			}
-			if (tWB != 0x100)
-				imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] =
-					imgdata.color.WBCT_Coeffs[nWB][2];
+		case 0:  tWB = Tungsten; break;
+		case 4:  tWB = FL_W; break;
+		case 6:  tWB = FL_D; break;
+		case 8:  tWB = FineWeather; break;
+		case 9:  tWB = Cloudy; break;
+		case 10: tWB = FL_N; break;
+		case 11: tWB = Shade; break;
+		default: tWB = 0x100;
 		}
-
-		if (tag == 0x20400121)
+	      if (tWB != 0x100)
+		imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] =
+		  imgdata.color.WBCT_Coeffs[nWB][2];
+	    }
+	  
+	  if (tag == 0x20400121)
+	    {
+	      imgdata.color.WB_Coeffs[Flash][0] = get2();
+	      imgdata.color.WB_Coeffs[Flash][2] = get2();
+	      if (len == 4)
 		{
-			imgdata.color.WB_Coeffs[Flash][0] = get2();
-			imgdata.color.WB_Coeffs[Flash][2] = get2();
-			if (len == 4)
-			{
-				imgdata.color.WB_Coeffs[Flash][1] = get2();
-				imgdata.color.WB_Coeffs[Flash][3] = get2();
-			}
+		  imgdata.color.WB_Coeffs[Flash][1] = get2();
+		  imgdata.color.WB_Coeffs[Flash][3] = get2();
 		}
-		if (tag == 0x2040011f)
+	    }
+	  if (tag == 0x2040011f)
+	    {
+	      imgdata.color.WB_Coeffs[Flash][1] = imgdata.color.WB_Coeffs[Flash][3] = get2();
+	    }
+	  if (tag == 0x30000120)
+	    {
+	      imgdata.color.WB_Coeffs[Shade][0] = get2();
+	      imgdata.color.WB_Coeffs[Shade][2] = get2();
+	      if (len == 2)
 		{
-			imgdata.color.WB_Coeffs[Flash][1] = imgdata.color.WB_Coeffs[Flash][3] = get2();
+		  for (int i=0; i<256; i++)
+		    imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
 		}
-		if (tag == 0x30000120)
-		{
-			imgdata.color.WB_Coeffs[Shade][0] = get2();
-			imgdata.color.WB_Coeffs[Shade][2] = get2();
-			if (len == 2)
-			{
-				for (int i=0; i<256; i++)
-					imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
-			}
-		}
-		if (tag == 0x30000121)
-		{
-			imgdata.color.WB_Coeffs[Cloudy][0] = get2();
-			imgdata.color.WB_Coeffs[Cloudy][2] = get2();
-		}
-		if (tag == 0x30000122)
-		{
-			imgdata.color.WB_Coeffs[FineWeather][0] = get2();
-			imgdata.color.WB_Coeffs[FineWeather][2] = get2();
-		}
-		if (tag == 0x30000123)
-		{
-			imgdata.color.WB_Coeffs[Tungsten][0] = get2();
-			imgdata.color.WB_Coeffs[Tungsten][2] = get2();
-		}
-		if (tag == 0x30000124)
-		{
-			imgdata.color.WB_Coeffs[EveningSunlight][0] = get2();
-			imgdata.color.WB_Coeffs[EveningSunlight][2] = get2();
-		}
-		if (tag == 0x30000130)
-		{
-			imgdata.color.WB_Coeffs[FL_D][0] = get2();
-			imgdata.color.WB_Coeffs[FL_D][2] = get2();
-		}
-		if (tag == 0x30000131)
-		{
-			imgdata.color.WB_Coeffs[FL_N][0] = get2();
-			imgdata.color.WB_Coeffs[FL_N][2] = get2();
-		}
-		if (tag == 0x30000132)
-		{
-			imgdata.color.WB_Coeffs[FL_W][0] = get2();
-			imgdata.color.WB_Coeffs[FL_W][2] = get2();
-		}
-		if (tag == 0x30000133)
-		{
-			imgdata.color.WB_Coeffs[FL_WW][0] = get2();
-			imgdata.color.WB_Coeffs[FL_WW][2] = get2();
-		}
-		if(tag == 0x20400805 && len == 2)
-		{
-			imgdata.color.OlympusSensorCalibration[0]=getreal(type);
-			imgdata.color.OlympusSensorCalibration[1]=getreal(type);
-		}
+	    }
+	  if (tag == 0x30000121)
+	    {
+	      imgdata.color.WB_Coeffs[Cloudy][0] = get2();
+	      imgdata.color.WB_Coeffs[Cloudy][2] = get2();
+	    }
+	  if (tag == 0x30000122)
+	    {
+	      imgdata.color.WB_Coeffs[FineWeather][0] = get2();
+	      imgdata.color.WB_Coeffs[FineWeather][2] = get2();
+	    }
+	  if (tag == 0x30000123)
+	    {
+	      imgdata.color.WB_Coeffs[Tungsten][0] = get2();
+	      imgdata.color.WB_Coeffs[Tungsten][2] = get2();
+	    }
+	  if (tag == 0x30000124)
+	    {
+	      imgdata.color.WB_Coeffs[EveningSunlight][0] = get2();
+	      imgdata.color.WB_Coeffs[EveningSunlight][2] = get2();
+	    }
+	  if (tag == 0x30000130)
+	    {
+	      imgdata.color.WB_Coeffs[FL_D][0] = get2();
+	      imgdata.color.WB_Coeffs[FL_D][2] = get2();
+	    }
+	  if (tag == 0x30000131)
+	    {
+	      imgdata.color.WB_Coeffs[FL_N][0] = get2();
+	      imgdata.color.WB_Coeffs[FL_N][2] = get2();
+	    }
+	  if (tag == 0x30000132)
+	    {
+	      imgdata.color.WB_Coeffs[FL_W][0] = get2();
+	      imgdata.color.WB_Coeffs[FL_W][2] = get2();
+	    }
+	  if (tag == 0x30000133)
+	    {
+	      imgdata.color.WB_Coeffs[FL_WW][0] = get2();
+	      imgdata.color.WB_Coeffs[FL_WW][2] = get2();
+	    }
+	  if(tag == 0x20400805 && len == 2)
+	    {
+	      imgdata.color.OlympusSensorCalibration[0]=getreal(type);
+	      imgdata.color.OlympusSensorCalibration[1]=getreal(type);
+	    }
 	}
 	
-    if(tag == 0x20400805 && len == 2 && !strncasecmp(make,"Olympus",7))
-      {
-        imgdata.color.OlympusSensorCalibration[0]=getreal(type);
-        imgdata.color.OlympusSensorCalibration[1]=getreal(type);
-      }
-    if ((tag == 0x00a9) && !strncasecmp(make,"Canon",5))
-    	{
-    		long int save1 = ftell(ifp);
-    		fseek (ifp, save1+(0x5<<1), SEEK_SET);
+	if(tag == 0x20400805 && len == 2 && !strncasecmp(make,"Olympus",7))
+	  {
+	    imgdata.color.OlympusSensorCalibration[0]=getreal(type);
+	    imgdata.color.OlympusSensorCalibration[1]=getreal(type);
+	  }
+	if ((tag == 0x00a9) && !strncasecmp(make,"Canon",5))
+	  {
+	    long int save1 = ftell(ifp);
+	    fseek (ifp, save1+(0x5<<1), SEEK_SET);
             Canon_WBpresets(0,0);
             fseek (ifp, save1, SEEK_SET);
-    	}
+	  }
     if (tag == 0x4001 && len > 500 && !strncasecmp(make,"Canon",5))
       {
         long int save1 = ftell(ifp);
@@ -8912,24 +8916,24 @@ get2_256:
 #ifdef LIBRAW_LIBRARY_BUILD
 		if (tag == 0xa023)
 		{
-			imgdata.color.WB_Coeffs[Ill_A][0] = get4() - SamsungKey[8];
-			imgdata.color.WB_Coeffs[Ill_A][1] = get4() - SamsungKey[9];
-			imgdata.color.WB_Coeffs[Ill_A][3] = get4() - SamsungKey[10];
-			imgdata.color.WB_Coeffs[Ill_A][2] = get4() - SamsungKey[0];
-			if (imgdata.color.WB_Coeffs[Ill_A][0] < (imgdata.color.WB_Coeffs[Ill_A][1]>>1))
-			{
-				imgdata.color.WB_Coeffs[Ill_A][1] = imgdata.color.WB_Coeffs[Ill_A][1] >> 4;
-				imgdata.color.WB_Coeffs[Ill_A][3] = imgdata.color.WB_Coeffs[Ill_A][3] >> 4;
-			}
+		  imgdata.color.WB_Coeffs[Ill_A][0] = get4() - SamsungKey[8];
+		  imgdata.color.WB_Coeffs[Ill_A][1] = get4() - SamsungKey[9];
+		  imgdata.color.WB_Coeffs[Ill_A][3] = get4() - SamsungKey[10];
+		  imgdata.color.WB_Coeffs[Ill_A][2] = get4() - SamsungKey[0];
+		  if (imgdata.color.WB_Coeffs[Ill_A][0] < (imgdata.color.WB_Coeffs[Ill_A][1]>>1))
+		    {
+		      imgdata.color.WB_Coeffs[Ill_A][1] = imgdata.color.WB_Coeffs[Ill_A][1] >> 4;
+		      imgdata.color.WB_Coeffs[Ill_A][3] = imgdata.color.WB_Coeffs[Ill_A][3] >> 4;
+		    }
 		}
 		if (tag == 0xa024)
 		{
-			FORC4 imgdata.color.WB_Coeffs[D65][c ^ (c >> 1)] = get4() - SamsungKey[c+1];
-			if (imgdata.color.WB_Coeffs[D65][0] < (imgdata.color.WB_Coeffs[D65][1]>>1))
-			{
-				imgdata.color.WB_Coeffs[D65][1] = imgdata.color.WB_Coeffs[D65][1] >> 4;
-				imgdata.color.WB_Coeffs[D65][3] = imgdata.color.WB_Coeffs[D65][3] >> 4;
-			}
+		  FORC4 imgdata.color.WB_Coeffs[D65][c ^ (c >> 1)] = get4() - SamsungKey[c+1];
+		  if (imgdata.color.WB_Coeffs[D65][0] < (imgdata.color.WB_Coeffs[D65][1]>>1))
+		    {
+		      imgdata.color.WB_Coeffs[D65][1] = imgdata.color.WB_Coeffs[D65][1] >> 4;
+		      imgdata.color.WB_Coeffs[D65][3] = imgdata.color.WB_Coeffs[D65][3] >> 4;
+		    }
 		}
 #endif
         if (tag == 0xa030 && len == 9)	// get and decode Samsung color matrix
@@ -9287,8 +9291,8 @@ void CLASS parse_kodak_ifd (int base)
 	  }
 	if (tag == 0xfa2a)
 	  {
-	  	FORC3 imgdata.color.WB_Coeffs[Shade][c] = get4();
-	  	imgdata.color.WB_Coeffs[Shade][3] = imgdata.color.WB_Coeffs[Shade][1];
+	    FORC3 imgdata.color.WB_Coeffs[Shade][c] = get4();
+	    imgdata.color.WB_Coeffs[Shade][3] = imgdata.color.WB_Coeffs[Shade][1];
 	  }
 
     if (tag == 2120 + wbi ||
@@ -9394,23 +9398,23 @@ int CLASS parse_tiff_ifd (int base)
   	switch (tag) {
 	case 0x7480:
 	case 0x7820:
-		FORC3 imgdata.color.WB_Coeffs[Daylight][c] = get2();
-		imgdata.color.WB_Coeffs[Daylight][3] = imgdata.color.WB_Coeffs[Daylight][1];
+	  FORC3 imgdata.color.WB_Coeffs[Daylight][c] = get2();
+	  imgdata.color.WB_Coeffs[Daylight][3] = imgdata.color.WB_Coeffs[Daylight][1];
 	break;
 	case 0x7481:
 	case 0x7821:
-		FORC3 imgdata.color.WB_Coeffs[Cloudy][c] = get2();
-		imgdata.color.WB_Coeffs[Cloudy][3] = imgdata.color.WB_Coeffs[Cloudy][1];
+	  FORC3 imgdata.color.WB_Coeffs[Cloudy][c] = get2();
+	  imgdata.color.WB_Coeffs[Cloudy][3] = imgdata.color.WB_Coeffs[Cloudy][1];
 	break;
 	case 0x7482:
 	case 0x7822:
-		FORC3 imgdata.color.WB_Coeffs[Tungsten][c] = get2();
-		imgdata.color.WB_Coeffs[Tungsten][3] = imgdata.color.WB_Coeffs[Tungsten][1];
+	  FORC3 imgdata.color.WB_Coeffs[Tungsten][c] = get2();
+	  imgdata.color.WB_Coeffs[Tungsten][3] = imgdata.color.WB_Coeffs[Tungsten][1];
 	break;
 	case 0x7483:
 	case 0x7823:
-		FORC3 imgdata.color.WB_Coeffs[Flash][c] = get2();
-		imgdata.color.WB_Coeffs[Flash][3] = imgdata.color.WB_Coeffs[Flash][1];
+	  FORC3 imgdata.color.WB_Coeffs[Flash][c] = get2();
+	  imgdata.color.WB_Coeffs[Flash][3] = imgdata.color.WB_Coeffs[Flash][1];
 	break;
 	case 0x7484:
 	case 0x7824:
@@ -9491,23 +9495,23 @@ int CLASS parse_tiff_ifd (int base)
 	break;
 #ifdef LIBRAW_LIBRARY_BUILD
 	  case 19:
-	  	if(pana_raw)
-	  	{
-	  		ushort nWB, cnt, tWB;
-	  		nWB = get2();
-	  		if (nWB > 0x100) break;
-	  		for (cnt=0; cnt<nWB; cnt++)
-	  		{
-	  			tWB = get2();
-	  			if (tWB < 0x100)
-	  			{
-	  				imgdata.color.WB_Coeffs[tWB][0] = get2();
-	  				imgdata.color.WB_Coeffs[tWB][2] = get2();
-	  				imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = 0x100;
-	  			} else get4();
-	  		}
-	  	}
-		break;
+	    if(pana_raw)
+	      {
+		ushort nWB, cnt, tWB;
+		nWB = get2();
+		if (nWB > 0x100) break;
+		for (cnt=0; cnt<nWB; cnt++)
+		  {
+		    tWB = get2();
+		    if (tWB < 0x100)
+		      {
+			imgdata.color.WB_Coeffs[tWB][0] = get2();
+			imgdata.color.WB_Coeffs[tWB][2] = get2();
+			imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = 0x100;
+		      } else get4();
+		  }
+	      }
+	    break;
 #endif
       case 23:
 	if (type == 3) iso_speed = get2();
@@ -9532,19 +9536,19 @@ int CLASS parse_tiff_ifd (int base)
 #ifdef LIBRAW_LIBRARY_BUILD
 	  	if(pana_raw)
 	  	{
-	  		ushort nWB, cnt, tWB;
-	  		nWB = get2();
-	  		if (nWB > 0x100) break;
-	  		for (cnt=0; cnt<nWB; cnt++)
-	  		{
-	  			tWB = get2();
-	  			if (tWB < 0x100)
-	  			{
-	  				imgdata.color.WB_Coeffs[tWB][0] = get2();
-	  				imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = get2();
-	  				imgdata.color.WB_Coeffs[tWB][2] = get2();
-	  			} else fseek(ifp, 6, SEEK_CUR);
-	  		}
+		  ushort nWB, cnt, tWB;
+		  nWB = get2();
+		  if (nWB > 0x100) break;
+		  for (cnt=0; cnt<nWB; cnt++)
+		    {
+		      tWB = get2();
+		      if (tWB < 0x100)
+			{
+			  imgdata.color.WB_Coeffs[tWB][0] = get2();
+			  imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = get2();
+			  imgdata.color.WB_Coeffs[tWB][2] = get2();
+			} else fseek(ifp, 6, SEEK_CUR);
+		    }
 	  	}
 		break;
 #endif
@@ -10004,57 +10008,57 @@ guess_cfa_pc:
     	FORC4 fwb[c] = get4();
 		if (fwb[3] < 0x100)
 		{
-			imgdata.color.WB_Coeffs[fwb[3]][0] = fwb[1];
-			imgdata.color.WB_Coeffs[fwb[3]][1] = imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
-			imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
-			if ((fwb[3] == 17) && lenRAFData)
+		  imgdata.color.WB_Coeffs[fwb[3]][0] = fwb[1];
+		  imgdata.color.WB_Coeffs[fwb[3]][1] = imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
+		  imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
+		  if ((fwb[3] == 17) && lenRAFData)
+		    {
+		      long long f_save = ftell(ifp);
+		      ushort *rafdata = (ushort*) malloc (sizeof(ushort)*lenRAFData);
+		      fseek (ifp, posRAFData, SEEK_SET);
+		      fread (rafdata, sizeof(ushort), lenRAFData, ifp);
+		      fseek(ifp, f_save, SEEK_SET);
+		      for (int fi=0; fi<(lenRAFData-3); fi++)
 			{
-				long long f_save = ftell(ifp);
-				ushort *rafdata = (ushort*) malloc (sizeof(ushort)*lenRAFData);
-				fseek (ifp, posRAFData, SEEK_SET);
-				fread (rafdata, sizeof(ushort), lenRAFData, ifp);
-				fseek(ifp, f_save, SEEK_SET);
-				for (int fi=0; fi<(lenRAFData-3); fi++)
-				{
-					if ((fwb[0]==rafdata[fi]) && (fwb[1]==rafdata[fi+1]) && (fwb[2]==rafdata[fi+2]))
-					{
-						if (rafdata[fi-15] != fwb[0]) continue;
-						fi = fi - 15;
-						imgdata.color.WB_Coeffs[FineWeather][1] = imgdata.color.WB_Coeffs[FineWeather][3] = rafdata[fi];
-						imgdata.color.WB_Coeffs[FineWeather][0] = rafdata[fi+1];
-						imgdata.color.WB_Coeffs[FineWeather][2] = rafdata[fi+2];
-
-						imgdata.color.WB_Coeffs[Shade][1] = imgdata.color.WB_Coeffs[Shade][3] = rafdata[fi+3];
-						imgdata.color.WB_Coeffs[Shade][0] = rafdata[fi+4];
-						imgdata.color.WB_Coeffs[Shade][2] = rafdata[fi+5];
-
-						imgdata.color.WB_Coeffs[FL_D][1] = imgdata.color.WB_Coeffs[FL_D][3] = rafdata[fi+6];
-						imgdata.color.WB_Coeffs[FL_D][0] = rafdata[fi+7];
-						imgdata.color.WB_Coeffs[FL_D][2] = rafdata[fi+8];
-
-						imgdata.color.WB_Coeffs[FL_L][1] = imgdata.color.WB_Coeffs[FL_L][3] = rafdata[fi+9];
-						imgdata.color.WB_Coeffs[FL_L][0] = rafdata[fi+10];
-						imgdata.color.WB_Coeffs[FL_L][2] = rafdata[fi+11];
-
-						imgdata.color.WB_Coeffs[FL_W][1] = imgdata.color.WB_Coeffs[FL_W][3] = rafdata[fi+12];
-						imgdata.color.WB_Coeffs[FL_W][0] = rafdata[fi+13];
-						imgdata.color.WB_Coeffs[FL_W][2] = rafdata[fi+14];
-
-						imgdata.color.WB_Coeffs[Tungsten][1] = imgdata.color.WB_Coeffs[Tungsten][3] = rafdata[fi+15];
-						imgdata.color.WB_Coeffs[Tungsten][0] = rafdata[fi+16];
-						imgdata.color.WB_Coeffs[Tungsten][2] = rafdata[fi+17];
-						free (rafdata);
+			  if ((fwb[0]==rafdata[fi]) && (fwb[1]==rafdata[fi+1]) && (fwb[2]==rafdata[fi+2]))
+			    {
+			      if (rafdata[fi-15] != fwb[0]) continue;
+			      fi = fi - 15;
+			      imgdata.color.WB_Coeffs[FineWeather][1] = imgdata.color.WB_Coeffs[FineWeather][3] = rafdata[fi];
+			      imgdata.color.WB_Coeffs[FineWeather][0] = rafdata[fi+1];
+			      imgdata.color.WB_Coeffs[FineWeather][2] = rafdata[fi+2];
+			      
+			      imgdata.color.WB_Coeffs[Shade][1] = imgdata.color.WB_Coeffs[Shade][3] = rafdata[fi+3];
+			      imgdata.color.WB_Coeffs[Shade][0] = rafdata[fi+4];
+			      imgdata.color.WB_Coeffs[Shade][2] = rafdata[fi+5];
+			      
+			      imgdata.color.WB_Coeffs[FL_D][1] = imgdata.color.WB_Coeffs[FL_D][3] = rafdata[fi+6];
+			      imgdata.color.WB_Coeffs[FL_D][0] = rafdata[fi+7];
+			      imgdata.color.WB_Coeffs[FL_D][2] = rafdata[fi+8];
+			      
+			      imgdata.color.WB_Coeffs[FL_L][1] = imgdata.color.WB_Coeffs[FL_L][3] = rafdata[fi+9];
+			      imgdata.color.WB_Coeffs[FL_L][0] = rafdata[fi+10];
+			      imgdata.color.WB_Coeffs[FL_L][2] = rafdata[fi+11];
+			      
+			      imgdata.color.WB_Coeffs[FL_W][1] = imgdata.color.WB_Coeffs[FL_W][3] = rafdata[fi+12];
+			      imgdata.color.WB_Coeffs[FL_W][0] = rafdata[fi+13];
+			      imgdata.color.WB_Coeffs[FL_W][2] = rafdata[fi+14];
+			      
+			      imgdata.color.WB_Coeffs[Tungsten][1] = imgdata.color.WB_Coeffs[Tungsten][3] = rafdata[fi+15];
+			      imgdata.color.WB_Coeffs[Tungsten][0] = rafdata[fi+16];
+			      imgdata.color.WB_Coeffs[Tungsten][2] = rafdata[fi+17];
+			      free (rafdata);
 						break;
-					}
-				}
+			    }
 			}
+		    }
 		}
 		FORC4 fwb[c] = get4();
 		if (fwb[3] < 0x100)
 		{
-			imgdata.color.WB_Coeffs[fwb[3]][0] = fwb[1];
-			imgdata.color.WB_Coeffs[fwb[3]][1] = imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
-			imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
+		  imgdata.color.WB_Coeffs[fwb[3]][0] = fwb[1];
+		  imgdata.color.WB_Coeffs[fwb[3]][1] = imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
+		  imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
 		}
     }
     break;
@@ -10499,35 +10503,35 @@ void CLASS parse_minolta (int base)
       case 0x524946:				/* RIF */
     if (!strncasecmp(model,"DSLR-A100", 9))
     {
-		fseek(ifp, 8, SEEK_CUR);
-		imgdata.color.WB_Coeffs[Tungsten][0] = get2();
-		imgdata.color.WB_Coeffs[Tungsten][2] = get2();
-		imgdata.color.WB_Coeffs[Daylight][0] = get2();
-		imgdata.color.WB_Coeffs[Daylight][2] = get2();
-		imgdata.color.WB_Coeffs[Cloudy][0] = get2();
-		imgdata.color.WB_Coeffs[Cloudy][2] = get2();
-		imgdata.color.WB_Coeffs[FL_W][0] = get2();
-		imgdata.color.WB_Coeffs[FL_W][2] = get2();
-		imgdata.color.WB_Coeffs[Flash][0] = get2();
-		imgdata.color.WB_Coeffs[Flash][2] = get2();
-		get4();
-		imgdata.color.WB_Coeffs[Shade][0] = get2();
-		imgdata.color.WB_Coeffs[Shade][2] = get2();
-		imgdata.color.WB_Coeffs[FL_D][0] = get2();
-		imgdata.color.WB_Coeffs[FL_D][2] = get2();
-		imgdata.color.WB_Coeffs[FL_N][0] = get2();
-		imgdata.color.WB_Coeffs[FL_N][2] = get2();
-		imgdata.color.WB_Coeffs[FL_WW][0] = get2();
-		imgdata.color.WB_Coeffs[FL_WW][2] = get2();
-		imgdata.color.WB_Coeffs[Daylight][1] = imgdata.color.WB_Coeffs[Daylight][3] =
-		imgdata.color.WB_Coeffs[Tungsten][1] = imgdata.color.WB_Coeffs[Tungsten][3] =
-		imgdata.color.WB_Coeffs[Flash][1] = imgdata.color.WB_Coeffs[Flash][3] =
-		imgdata.color.WB_Coeffs[Cloudy][1] = imgdata.color.WB_Coeffs[Cloudy][3] =
-		imgdata.color.WB_Coeffs[Shade][1] = imgdata.color.WB_Coeffs[Shade][3] =
-		imgdata.color.WB_Coeffs[FL_D][1] = imgdata.color.WB_Coeffs[FL_D][3] =
-		imgdata.color.WB_Coeffs[FL_N][1] = imgdata.color.WB_Coeffs[FL_N][3] =
-		imgdata.color.WB_Coeffs[FL_W][1] = imgdata.color.WB_Coeffs[FL_W][3] =
-		imgdata.color.WB_Coeffs[FL_WW][1] = imgdata.color.WB_Coeffs[FL_WW][3] = 0x100;
+      fseek(ifp, 8, SEEK_CUR);
+      imgdata.color.WB_Coeffs[Tungsten][0] = get2();
+      imgdata.color.WB_Coeffs[Tungsten][2] = get2();
+      imgdata.color.WB_Coeffs[Daylight][0] = get2();
+      imgdata.color.WB_Coeffs[Daylight][2] = get2();
+      imgdata.color.WB_Coeffs[Cloudy][0] = get2();
+      imgdata.color.WB_Coeffs[Cloudy][2] = get2();
+      imgdata.color.WB_Coeffs[FL_W][0] = get2();
+      imgdata.color.WB_Coeffs[FL_W][2] = get2();
+      imgdata.color.WB_Coeffs[Flash][0] = get2();
+      imgdata.color.WB_Coeffs[Flash][2] = get2();
+      get4();
+      imgdata.color.WB_Coeffs[Shade][0] = get2();
+      imgdata.color.WB_Coeffs[Shade][2] = get2();
+      imgdata.color.WB_Coeffs[FL_D][0] = get2();
+      imgdata.color.WB_Coeffs[FL_D][2] = get2();
+      imgdata.color.WB_Coeffs[FL_N][0] = get2();
+      imgdata.color.WB_Coeffs[FL_N][2] = get2();
+      imgdata.color.WB_Coeffs[FL_WW][0] = get2();
+      imgdata.color.WB_Coeffs[FL_WW][2] = get2();
+      imgdata.color.WB_Coeffs[Daylight][1] = imgdata.color.WB_Coeffs[Daylight][3] =
+	imgdata.color.WB_Coeffs[Tungsten][1] = imgdata.color.WB_Coeffs[Tungsten][3] =
+	imgdata.color.WB_Coeffs[Flash][1] = imgdata.color.WB_Coeffs[Flash][3] =
+	imgdata.color.WB_Coeffs[Cloudy][1] = imgdata.color.WB_Coeffs[Cloudy][3] =
+	imgdata.color.WB_Coeffs[Shade][1] = imgdata.color.WB_Coeffs[Shade][3] =
+	imgdata.color.WB_Coeffs[FL_D][1] = imgdata.color.WB_Coeffs[FL_D][3] =
+	imgdata.color.WB_Coeffs[FL_N][1] = imgdata.color.WB_Coeffs[FL_N][3] =
+	imgdata.color.WB_Coeffs[FL_W][1] = imgdata.color.WB_Coeffs[FL_W][3] =
+	imgdata.color.WB_Coeffs[FL_WW][1] = imgdata.color.WB_Coeffs[FL_WW][3] = 0x100;
     }
 	break;
 #endif
