@@ -775,6 +775,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
 	  d_info->decoder_name = "pentax_4shot_load_raw()";
 	  d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC;
   }
+  else if (load_raw == &LibRaw::deflate_dng_load_raw )
+  {
+	  d_info->decoder_name = "deflate_dng_load_raw()";
+	  d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC;
+  }
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
   else if (load_raw == &LibRaw::foveon_sd_load_raw )
     {
@@ -948,7 +953,9 @@ int LibRaw::open_buffer(void *buffer, size_t size)
     }
   return ret;
 }
-
+void LibRaw::deflate_dng_load_raw()
+{
+}
 void LibRaw::pentax_4shot_load_raw()
 {
 	ushort *plane = (ushort*)malloc(imgdata.sizes.raw_width*imgdata.sizes.raw_height*sizeof(ushort));

@@ -210,7 +210,7 @@ struct decode {
 
 struct tiff_ifd {
   int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes;
-  int t_tile_width, t_tile_length;
+  int t_tile_width, t_tile_length,sample_format,predictor;
   float t_shutter;
 } tiff_ifd[10];
 
@@ -10863,6 +10863,9 @@ int CLASS parse_tiff_ifd (int base)
       case 315:				/* Artist */
 	fread (artist, 64, 1, ifp);
 	break;
+      case 317:
+	tiff_ifd[ifd].predictor = getint(type);
+	break;
       case 322:				/* TileWidth */
 	tiff_ifd[ifd].t_tile_width = getint(type);
 	break;
@@ -10877,6 +10880,9 @@ int CLASS parse_tiff_ifd (int base)
 	  load_raw = &CLASS sinar_4shot_load_raw;
 	  is_raw = 5;
 	}
+	break;
+      case 325:
+	tiff_ifd[ifd].bytes = len > 1 ? ftell(ifp): get4();
 	break;
       case 330:				/* SubIFDs */
 	if (!strcmp(model,"DSLR-A100") && tiff_ifd[ifd].t_width == 3872) {
@@ -10899,6 +10905,9 @@ int CLASS parse_tiff_ifd (int base)
 	  if (parse_tiff_ifd (base)) break;
 	  fseek (ifp, i+4, SEEK_SET);
 	}
+	break;
+      case 339:
+	tiff_ifd[ifd].sample_format = getint(type);
 	break;
       case 400:
 	strcpy (make, "Sarnoff");
@@ -11633,6 +11642,9 @@ void CLASS apply_tiff()
 	  case 32803: load_raw = &CLASS kodak_65000_load_raw;
 	}
       case 32867: case 34892: break;
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 8: break;
+#endif
       default: is_raw = 0;
     }
   if (!dng_version)
@@ -14490,6 +14502,9 @@ void CLASS identify()
       case 0:  /* Compression not set, assuming uncompressed */
       case 1:     load_raw = &CLASS   packed_dng_load_raw;  break;
       case 7:     load_raw = &CLASS lossless_dng_load_raw;  break;
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 8:     load_raw = &CLASS  deflate_dng_load_raw;  break;
+#endif
       case 34892: load_raw = &CLASS    lossy_dng_load_raw;  break;
       default:    load_raw = 0;
     }
@@ -15328,7 +15343,12 @@ bw:   colors = 1;
   }
   /* Early reject for damaged images */
   if (!load_raw || height < 22 || width < 22 ||
-	tiff_bps > 16 || tiff_samples > 4 || colors > 4 || colors < 1)
+#ifdef LIBRAW_LIBRARY_BUILD
+      (tiff_bps > 16 && load_raw != &LibRaw::deflate_dng_load_raw)
+#else
+	tiff_bps > 16
+#endif
+      || tiff_samples > 4 || colors > 4 || colors < 1)
     {
       is_raw = 0;
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -15350,7 +15370,12 @@ bw:   colors = 1;
 dng_skip:
   /* Early reject for damaged images */
   if (!load_raw || height < 22 || width < 22 ||
-	tiff_bps > 16 || tiff_samples > 4 || colors > 4 || colors < 1)
+#ifdef LIBRAW_LIBRARY_BUILD
+      (tiff_bps > 16 && load_raw != &LibRaw::deflate_dng_load_raw)
+#else
+	tiff_bps > 16
+#endif
+      || tiff_samples > 4 || colors > 4 || colors < 1)
     {
       is_raw = 0;
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -15391,7 +15416,12 @@ dng_skip:
         maximum = curve[maximum];
     }
   if (!load_raw || height < 22 || width < 22 ||
-	tiff_bps > 16 || tiff_samples > 6 || colors > 4)
+#ifdef LIBRAW_LIBRARY_BUILD
+      (tiff_bps > 16 && load_raw != &LibRaw::deflate_dng_load_raw)
+#else
+	tiff_bps > 16
+#endif
+      || tiff_samples > 6 || colors > 4)
     is_raw = 0;
 
   if(raw_width < 22 || raw_width > 64000 || raw_height < 22 || raw_width > 64000)

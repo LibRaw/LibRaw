@@ -87,6 +87,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 // Adobe DNG
     void        adobe_copy_pixel (unsigned int row, unsigned int col, ushort **rp);
     void        lossless_dng_load_raw();
+    void        deflate_dng_load_raw();
     void        packed_dng_load_raw();
     void        lossy_dng_load_raw();
 //void        adobe_dng_load_raw_nc();
