@@ -67,6 +67,7 @@ void usage(const char *prog)
 "-K <file> Subtract dark frame (16-bit raw PGM)\n"
 "-k <num>  Set the darkness level\n"
 "-S <num>  Set the saturation level\n"
+"-R <num>  Set raw processing options to num\n"
 "-n <num>  Set threshold for wavelet denoising\n"
 "-H [0-9]  Highlight mode (0=clip, 1=unclip, 2=blend, 3+=rebuild)\n"
 "-t [0-7]  Flip image (0=none, 3=180, 5=90CCW, 6=90CW)\n"
@@ -236,6 +237,7 @@ int main(int argc, char *argv[])
                 break;
               case 'k':  OUT.user_black  = atoi(argv[arg++]);  break;
               case 'S':  OUT.user_sat    = atoi(argv[arg++]);  break;
+              case 'R':  OUT.raw_processing_options = atoi(argv[arg++]);  break;
               case 't':  
                 if(!strcmp(optstr,"-timing"))
                   use_timing=1;

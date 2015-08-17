@@ -1,3 +1,14 @@
+2015-08-17  Alex Tutubalin <lexa@lexa.ru>
+ * params.sony_arw2_options and params.x3f_flags are merged into one
+   bitfiled params.raw_processing_options
+ * enums LibRaw_sonyarw2_options and LibRaw_dp2q_options are merged into one
+   LibRaw_processing_options
+ * default value for params.raw_processing_options is 
+       LIBRAW_PROCESSING_DP2Q_INTERPOLATERG| LIBRAW_PROCESSING_DP2Q_INTERPOLATERG
+ * new processing option LIBRAW_PROCESSING_PENTAXK32_ALLFRAMES
+   turns on 4 frame merge for Pentax K3-II 4-shot images
+ * dcraw_emu: new -R <num> switch allows to set params.raw_processing_options
+
 2015-08-15  Alex Tutubalin <lexa@lexa.ru>
 
  * LibRaw 0.17 
