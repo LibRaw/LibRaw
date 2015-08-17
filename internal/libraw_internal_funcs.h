@@ -93,6 +93,9 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 
 // Pentax
     void        pentax_load_raw();
+    void	pentax_4shot_load_raw();
+    void        (LibRaw:: *pentax_component_load_raw)();
+
     void        pentax_tree();
 
 // Nikon (and Minolta Z2)

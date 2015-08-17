@@ -770,6 +770,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_name = "x3f_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC;
     }
+  else if (load_raw == &LibRaw::pentax_4shot_load_raw )
+  {
+	  d_info->decoder_name = "pentax_4shot_load_raw()";
+	  d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC;
+  }
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
   else if (load_raw == &LibRaw::foveon_sd_load_raw )
     {
@@ -944,6 +949,53 @@ int LibRaw::open_buffer(void *buffer, size_t size)
   return ret;
 }
 
+void LibRaw::pentax_4shot_load_raw()
+{
+	ushort *plane = (ushort*)malloc(imgdata.sizes.raw_width*imgdata.sizes.raw_height*sizeof(ushort));
+	int alloc_sz = imgdata.sizes.raw_width*(imgdata.sizes.raw_height+16)*4*sizeof(ushort);
+	ushort (*result)[4] = (ushort(*)[4]) malloc(alloc_sz);
+	struct movement_t
+	{
+		int row,col;
+	} move[4] = {
+		{1,1}, 
+		{0,1}, 
+		{0,0}, 
+		{1,0}, 
+	};
+
+	int tidx = 0;
+	for(int i=0; i<4; i++)
+	{
+		for(; tidx<16; tidx++)
+			if(tiff_ifd[tidx].t_width == imgdata.sizes.raw_width && tiff_ifd[tidx].t_height == imgdata.sizes.raw_height && tiff_ifd[tidx].bps>8 && tiff_ifd[tidx].samples == 1 )
+				break;
+		if(tidx>=16)
+			break;
+		imgdata.rawdata.raw_image = plane;
+		ID.input->seek(tiff_ifd[tidx].offset, SEEK_SET);
+		imgdata.idata.filters = 0xb4b4b4b4;
+		(this->*pentax_component_load_raw)();
+		for(int row = 0; row < imgdata.sizes.raw_height-move[i].row; row++)
+		{
+			int colors[2];
+			for(int c = 0; c < 2; c++ )
+				colors[c] = COLOR(row,c);
+			ushort *srcrow = &plane[imgdata.sizes.raw_width*row];
+			ushort (*dstrow)[4] = & result[(imgdata.sizes.raw_width)*(row+move[i].row)+move[i].col];
+			for(int col = 0; col < imgdata.sizes.raw_width-move[i].col; col++)
+				dstrow[col][colors[col%2]] = srcrow[col];
+		}
+		tidx++;
+	}
+	// assign things back:
+	imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*8;
+	imgdata.idata.filters = 0;
+	imgdata.rawdata.raw_alloc = imgdata.rawdata.color4_image = result;
+	free(plane);
+	imgdata.rawdata.raw_image = 0;
+}
+
 void LibRaw::hasselblad_full_load_raw()
 {
   int row, col;
@@ -1038,6 +1090,16 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
     identify();
+
+	if(!strcasecmp(imgdata.idata.make,"Pentax") && !strcasecmp(imgdata.idata.model,"K-3 II") && imgdata.idata.raw_count == 4 && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_PENTAXK32_ALLFRAMES))
+	{
+		imgdata.idata.raw_count = 1;
+		imgdata.idata.filters = 0;
+		imgdata.idata.colors = 3;
+		IO.mix_green = 1;
+		pentax_component_load_raw = load_raw;
+		load_raw= &LibRaw::pentax_4shot_load_raw;
+	}
 
 	if (!imgdata.idata.dng_version && !strcmp(imgdata.idata.make, "Leaf") && !strcmp(imgdata.idata.model, "Credo 50"))
 	{
