@@ -148,6 +148,7 @@ class DllDef LibRaw
     void                        set_dataerror_handler(data_callback func, void *data) { callbacks.datacb_data = data; callbacks.data_cb = func;}
     void                        set_progress_handler(progress_callback pcb, void *data) { callbacks.progresscb_data = data; callbacks.progress_cb = pcb;}
 
+	void						convertFloatToInt(float dmin=4096.f, float dmax=32767.f, float dtarget = 16383.f);
     /* helpers */
     static const char*          version();
     static int                  versionNumber();

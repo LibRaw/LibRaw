@@ -214,6 +214,7 @@ typedef struct
   unsigned    black;
   unsigned    data_maximum;
   unsigned    maximum;
+  float		  fmaximum;
   ushort      white[8][8];
   float       cam_mul[4];
   float       pre_mul[4];
@@ -361,6 +362,12 @@ typedef struct
   ushort        (*color4_image)[4] ;
   /* alias to 3-color variand decoded by RawSpeed */
   ushort        (*color3_image)[3];
+  /* float bayer */
+  float			*float_image;
+  /* float 3-component */
+  float			(*float3_image)[3];
+  /* float 4-component */
+  float			(*float4_image)[4];
 
   /* Phase One black level data; */
   short  (*ph1_cblack)[2];
@@ -442,5 +449,33 @@ typedef struct
 #ifdef __cplusplus
 }
 #endif
+
+// Byte order
+#if defined(__POWERPC__)
+#define LibRawBigEndian 1
+
+#elif defined(__INTEL__)
+#define LibRawBigEndian 0
+
+#elif defined(_M_IX86)
+#define LibRawBigEndian 0
+
+#elif defined(_M_X64) || defined(__amd64__)
+#define LibRawBigEndian 0
+
+#elif defined(__LITTLE_ENDIAN__)
+#define LibRawBigEndian 0
+
+#elif defined(__BIG_ENDIAN__)
+#define LibRawBigEndian 1
+#elif defined(_ARM_)
+#define LibRawBigEndian 0
+#else
+#ifndef qXCodeRez
+#error Unable to figure out byte order.
+#endif
+#endif
+
+
 
 #endif

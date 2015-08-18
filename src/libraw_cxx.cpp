@@ -34,7 +34,7 @@ it under the terms of the one of three licenses as you choose:
 #define LIBRAW_LIBRARY_BUILD
 #include "libraw/libraw.h"
 #include "internal/defines.h"
-
+#include <zlib.h>
 
 #if defined(_WIN32)
 #if defined _MSC_VER
@@ -376,7 +376,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.no_interpolation = 0;
   imgdata.params.sraw_ycc = 0;
   imgdata.params.force_foveon_x3f = 0;
-  imgdata.params.raw_processing_options = LIBRAW_PROCESSING_DP2Q_INTERPOLATERG|LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF;
+  imgdata.params.raw_processing_options = LIBRAW_PROCESSING_DP2Q_INTERPOLATERG|LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF | LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT;
   imgdata.params.sony_arw2_posterization_thr = 0;
   imgdata.params.green_matching = 0;
   imgdata.params.coolscan_nef_gamma = 1.0f;
@@ -953,9 +953,426 @@ int LibRaw::open_buffer(void *buffer, size_t size)
     }
   return ret;
 }
+
+inline unsigned int DNG_HalfToFloat (ushort halfValue)
+{
+	int sign 	   = (halfValue >> 15) & 0x00000001;
+	int exponent = (halfValue >> 10) & 0x0000001f;
+	int mantissa =  halfValue		   & 0x000003ff;
+	if (exponent == 0)
+	{
+		if (mantissa == 0)
+		{
+			return (unsigned int) (sign << 31);
+		}
+		else
+		{
+			while (!(mantissa & 0x00000400))
+			{
+				mantissa <<= 1;
+				exponent -=  1;
+			}
+			exponent += 1;
+			mantissa &= ~0x00000400;
+		}
+	}
+	else if (exponent == 31)
+	{
+		if (mantissa == 0)
+		{
+			return (unsigned int) ((sign << 31) | ((0x1eL + 127 - 15) << 23) |  (0x3ffL << 13));
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	exponent += (127 - 15);
+	mantissa <<= 13;
+	return (unsigned int) ((sign << 31) | (exponent << 23) | mantissa);
+}
+
+inline unsigned int DNG_FP24ToFloat (const unsigned char *input)
+{
+	int sign     = (input [0] >> 7) & 0x01;
+	int exponent = (input [0]     ) & 0x7F;
+	int mantissa = (((int) input [1]) << 8) | input[2];
+	if (exponent == 0)
+	{
+		if (mantissa == 0)
+		{
+			return (unsigned int) (sign << 31);
+		}
+		else
+		{
+			while (!(mantissa & 0x00010000))
+			{
+				mantissa <<= 1;
+				exponent -=  1;
+			}
+			exponent += 1;
+			mantissa &= ~0x00010000;
+		}
+	}
+	else if (exponent == 127)
+	{
+		if (mantissa == 0)
+		{
+			return (unsigned int) ((sign << 31) | ((0x7eL + 128 - 64) << 23) |  (0xffffL << 7));
+		}
+		else
+		{
+			// Nan -- Just set to zero.
+			return 0;
+		}
+	}
+	exponent += (128 - 64);
+	mantissa <<= 7;
+	return (uint32) ((sign << 31) | (exponent << 23) | mantissa);
+}
+
+inline void DecodeDeltaBytes (unsigned char *bytePtr, int cols, int channels)
+{
+	if (channels == 1)
+	{
+		unsigned char b0 = bytePtr [0];
+		bytePtr += 1;
+		for (int32 col = 1; col < cols; ++col)
+		{
+			b0 += bytePtr [0];
+			bytePtr [0] = b0;
+			bytePtr += 1;
+		}
+	}
+	else if (channels == 3)
+	{
+		unsigned char b0 = bytePtr [0];
+		unsigned char b1 = bytePtr [1];
+		unsigned char b2 = bytePtr [2];
+		bytePtr += 3;
+		for (int col = 1; col < cols; ++col)
+		{
+			b0 += bytePtr [0];
+			b1 += bytePtr [1];
+			b2 += bytePtr [2];
+			bytePtr [0] = b0;
+			bytePtr [1] = b1;
+			bytePtr [2] = b2;
+			bytePtr += 3;
+		}
+	}
+	else if (channels == 4)
+	{
+		unsigned char b0 = bytePtr [0];
+		unsigned char b1 = bytePtr [1];
+		unsigned char b2 = bytePtr [2];
+		unsigned char b3 = bytePtr [3];
+		bytePtr += 4;
+		for (int32 col = 1; col < cols; ++col)
+		{
+			b0 += bytePtr [0];
+			b1 += bytePtr [1];
+			b2 += bytePtr [2];
+			b3 += bytePtr [3];
+			bytePtr [0] = b0;
+			bytePtr [1] = b1;
+			bytePtr [2] = b2;
+			bytePtr [3] = b3;
+			bytePtr += 4;
+		}
+	}
+	else
+	{
+		for (int col = 1; col < cols; ++col)
+		{
+			for (int chan = 0; chan < channels; ++chan)
+			{
+				bytePtr [chan + channels] += bytePtr [chan];
+			}
+			bytePtr += channels;
+		}
+	}
+}
+
+static void DecodeFPDelta (unsigned char *input,
+	unsigned char *output,
+	int cols,
+	int channels,
+	int bytesPerSample)
+{
+	DecodeDeltaBytes (input, cols * bytesPerSample, channels);
+	int32 rowIncrement = cols * channels;
+
+	if (bytesPerSample == 2)
+	{
+
+#if LibRawBigEndian
+		const unsigned char *input0 = input;
+		const unsigned char *input1 = input + rowIncrement;
+#else
+		const unsigned char *input1 = input;
+		const unsigned char *input0 = input + rowIncrement;
+#endif
+		for (int col = 0; col < rowIncrement; ++col)
+		{
+			output [0] = input0 [col];
+			output [1] = input1 [col];
+			output += 2;
+		}
+	}
+	else if (bytesPerSample == 3)
+	{
+		const unsigned char *input0 = input;
+		const unsigned char *input1 = input + rowIncrement;
+		const unsigned char *input2 = input + rowIncrement * 2;
+		for (int col = 0; col < rowIncrement; ++col)
+		{
+			output [0] = input0 [col];
+			output [1] = input1 [col];
+			output [2] = input2 [col];
+			output += 3;
+		}
+	}
+	else
+	{
+#if LibRawBigEndian
+		const unsigned char *input0 = input;
+		const unsigned char *input1 = input + rowIncrement;
+		const unsigned char *input2 = input + rowIncrement * 2;
+		const unsigned char *input3 = input + rowIncrement * 3;
+#else
+		const unsigned char *input3 = input;
+		const unsigned char *input2 = input + rowIncrement;
+		const unsigned char *input1 = input + rowIncrement * 2;
+		const unsigned char *input0 = input + rowIncrement * 3;
+#endif
+		for (int col = 0; col < rowIncrement; ++col)
+		{
+			output [0] = input0 [col];
+			output [1] = input1 [col];
+			output [2] = input2 [col];
+			output [3] = input3 [col];
+			output += 4;
+		}
+	}
+}	
+
+static float expandFloats(unsigned char * dst, int tileWidth, int bytesps) {
+	float max = 0.f;
+	if (bytesps == 2) {
+		uint16_t * dst16 = (ushort *) dst;
+		uint32_t * dst32 = (unsigned int *) dst;
+		float *f32 = (float*) dst;
+		for (int index = tileWidth - 1; index >= 0; --index) {
+			dst32[index] = DNG_HalfToFloat(dst16[index]);
+			max = MAX(max,f32[index]);
+		}
+	}
+	else if (bytesps == 3) 
+	{
+		uint8_t  * dst8  = ((unsigned char *) dst) + (tileWidth - 1) * 3;
+		uint32_t * dst32 = (unsigned int *) dst;
+		float *f32 = (float*) dst;
+		for (int index = tileWidth - 1; index >= 0; --index, dst8 -= 3) {
+			dst32[index] = DNG_FP24ToFloat(dst8);
+			max = MAX(max,f32[index]);
+		}
+	} 
+	else if (bytesps==4)
+	{
+		float *f32 = (float*) dst;
+		for (int index = 0; index < tileWidth; index++) 
+			max = MAX(max,f32[index]);
+	}
+	return max;	
+}
+
+
 void LibRaw::deflate_dng_load_raw()
 {
+	struct tiff_ifd_t * ifd = &tiff_ifd[0];
+	while (ifd < &tiff_ifd[libraw_internal_data.identify_data.tiff_nifds] && ifd->offset != libraw_internal_data.unpacker_data.data_offset) ++ifd;
+	if (ifd == &tiff_ifd[libraw_internal_data.identify_data.tiff_nifds]) 
+	{
+		throw LIBRAW_EXCEPTION_DECODE_RAW;
+	}
+
+	float *float_raw_image=0;
+	float max = 0.f;
+
+	if(ifd->samples!=1 && ifd->samples!=3 && ifd->samples !=4)
+		throw LIBRAW_EXCEPTION_DECODE_RAW; // Only float deflated supported
+
+	if(libraw_internal_data.unpacker_data.tiff_samples != ifd->samples)
+		throw LIBRAW_EXCEPTION_DECODE_RAW; // Wrong IFD
+
+	if (ifd->sample_format == 3) 
+	{  // Floating point data
+		float_raw_image = (float*)malloc(imgdata.sizes.raw_width * imgdata.sizes.raw_height * ifd->samples*sizeof(float));
+		//imgdata.color.maximum = 65535; 
+		imgdata.color.black = 0;
+		memset(imgdata.color.cblack,0,sizeof(imgdata.color.cblack));
+	}
+	else
+		throw LIBRAW_EXCEPTION_DECODE_RAW; // Only float deflated supported
+
+	int xFactor;
+	switch(ifd->predictor) 
+	{
+		case 3: 
+		default:
+			xFactor = 1; break;
+		case 34894: xFactor = 2; break;
+		case 34895: xFactor = 4; break;
+	}
+
+	if (libraw_internal_data.unpacker_data.tile_length < INT_MAX) 
+	{
+		size_t tilesH = (imgdata.sizes.raw_width + libraw_internal_data.unpacker_data.tile_width - 1) / libraw_internal_data.unpacker_data.tile_width;
+		size_t tilesV = (imgdata.sizes.raw_height + libraw_internal_data.unpacker_data.tile_length - 1) / libraw_internal_data.unpacker_data.tile_length;
+		size_t tileCnt = tilesH * tilesV;
+		if(tileCnt<1 || tileCnt > 1000000)
+			throw LIBRAW_EXCEPTION_DECODE_RAW;
+
+		size_t *tOffsets = (size_t*)malloc(tileCnt*sizeof(size_t));
+		for (int t = 0; t < tileCnt; ++t)
+			tOffsets[t] = get4();
+
+		size_t *tBytes = (size_t*) malloc(tileCnt*sizeof(size_t));
+		unsigned long maxBytesInTile = 0;
+		if (tileCnt == 1) 
+			tBytes[0] = maxBytesInTile = ifd->bytes;
+		else 
+		{
+			libraw_internal_data.internal_data.input->seek(ifd->bytes, SEEK_SET);
+			for (size_t t = 0; t < tileCnt; ++t) 
+			{
+				tBytes[t] = get4();
+				maxBytesInTile = MAX(maxBytesInTile,tBytes[t]);
+			}
+		}
+		unsigned long dstLen = libraw_internal_data.unpacker_data.tile_width * libraw_internal_data.unpacker_data.tile_length * 4 * ifd->samples;
+		unsigned char *cBuffer = (unsigned char*)malloc(maxBytesInTile);
+		unsigned char *uBuffer = (unsigned char*)malloc(dstLen);
+		for (size_t y = 0, t = 0; y < imgdata.sizes.raw_height; y += libraw_internal_data.unpacker_data.tile_length) 
+		{
+			for (size_t x = 0; x < imgdata.sizes.raw_width; x += libraw_internal_data.unpacker_data.tile_width, ++t) 
+			{
+				libraw_internal_data.internal_data.input->seek(tOffsets[t], SEEK_SET);
+				libraw_internal_data.internal_data.input->read(cBuffer, 1, tBytes[t]);
+				int err = uncompress(uBuffer, &dstLen, cBuffer, tBytes[t]);
+				if (err != Z_OK) 
+				{
+					free(tOffsets);
+					free(tBytes);
+					free(cBuffer);
+					free(uBuffer);
+					throw LIBRAW_EXCEPTION_DECODE_RAW;
+					return;
+				}
+				else 
+				{  // Floating point data, all other was rejected at early stage
+					int bytesps = ifd->bps >> 3;
+					size_t rowsInTile = y + libraw_internal_data.unpacker_data.tile_length > imgdata.sizes.raw_height ? imgdata.sizes.raw_height - y : libraw_internal_data.unpacker_data.tile_length;
+					size_t colsInTile= x + libraw_internal_data.unpacker_data.tile_width > imgdata.sizes.raw_width ? imgdata.sizes.raw_width - x : libraw_internal_data.unpacker_data.tile_width;
+				    for (size_t row = 0; row < rowsInTile; ++row) {
+						unsigned char* src = uBuffer + row*libraw_internal_data.unpacker_data.tile_width*bytesps*ifd->samples;
+						unsigned char* dst = (unsigned char*)&float_raw_image[((y+row)*imgdata.sizes.raw_width + x)*ifd->samples];
+						DecodeFPDelta(src, dst, colsInTile/xFactor, ifd->samples*xFactor, bytesps);
+						float lmax = expandFloats(dst, colsInTile*ifd->samples, bytesps);
+						max = MAX(max,lmax);
+					}
+				}
+			}
+		}
+		free(tOffsets);
+		free(tBytes);
+		free(cBuffer);
+		free(uBuffer);
+	}
+	imgdata.color.fmaximum = max;
+
+	// Set fields according to data format
+
+	imgdata.rawdata.raw_alloc = float_raw_image;
+	if(ifd->samples == 1)
+		imgdata.rawdata.float_image = float_raw_image;
+	else if(ifd->samples == 3)
+		imgdata.rawdata.float3_image = (float(*)[3])float_raw_image;
+	else if(ifd->samples == 4)
+		imgdata.rawdata.float4_image = (float(*)[4])float_raw_image;
+
+	if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT)
+		convertFloatToInt(); // with default settings
+
+	//copyFloatDataToInt(float_raw_image, (ushort*)imgdata.rawdata.raw_alloc, imgdata.sizes.raw_width*imgdata.sizes.raw_height*ifd->samples,multip);
+
 }
+
+
+void LibRaw::convertFloatToInt(float dmin/* =4096.f */, float dmax/* =32767.f */, float dtarget /*= 16383.f */)
+{
+	int samples = 0;
+	float *data = 0;
+	if(imgdata.rawdata.float_image)
+	{
+		samples = 1;
+		data = imgdata.rawdata.float_image;
+	}
+	else if (imgdata.rawdata.float3_image)
+	{
+		samples = 3;
+		data = (float*)imgdata.rawdata.float3_image;
+	}
+	else if (imgdata.rawdata.float4_image)
+	{
+		samples = 4;
+		data = (float*)imgdata.rawdata.float4_image;
+	}
+	else
+		return;
+
+	ushort *raw_alloc = (ushort*)malloc(imgdata.sizes.raw_height*imgdata.sizes.raw_width*libraw_internal_data.unpacker_data.tiff_samples*sizeof(ushort));
+	float tmax = MAX(imgdata.color.maximum,1);
+	float datamax = imgdata.color.fmaximum;
+
+	tmax = MAX(tmax,datamax);
+	tmax = MAX(tmax,1.f);
+
+	float multip = 1.f;
+	if(tmax < dmin || tmax > dmax)
+	{
+		multip = dtarget / tmax;
+		imgdata.color.maximum = dtarget;
+	}
+
+	for (size_t i = 0; i < imgdata.sizes.raw_height*imgdata.sizes.raw_width*libraw_internal_data.unpacker_data.tiff_samples; ++i) 
+	{
+		float val = MAX(data[i],0.f);
+		raw_alloc[i] = (ushort)(val*multip);
+	}
+
+	if(samples==1)
+	{
+		imgdata.rawdata.raw_alloc = imgdata.rawdata.raw_image = raw_alloc;
+		imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*2;
+	}
+	else if(samples == 3)
+	{
+		imgdata.rawdata.raw_alloc = imgdata.rawdata.color3_image = (ushort (*)[3]) raw_alloc;
+		imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*6;
+	}
+	else if(samples == 4)
+	{
+		imgdata.rawdata.raw_alloc = imgdata.rawdata.color4_image = (ushort (*)[4]) raw_alloc;
+		imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*8;
+	}
+	free(data); // remove old allocation
+	imgdata.rawdata.float_image = 0;
+	imgdata.rawdata.float3_image = 0;
+	imgdata.rawdata.float4_image = 0;
+}
+
 void LibRaw::pentax_4shot_load_raw()
 {
 	ushort *plane = (ushort*)malloc(imgdata.sizes.raw_width*imgdata.sizes.raw_height*sizeof(ushort));
@@ -1400,6 +1817,8 @@ int LibRaw::unpack(void)
     imgdata.rawdata.raw_image = 0;
     imgdata.rawdata.color4_image = 0;
     imgdata.rawdata.color3_image = 0;
+	imgdata.rawdata.float_image = 0;
+	imgdata.rawdata.float3_image = 0;
 #ifdef USE_RAWSPEED
 	int rawspeed_enabled = 1;
 	if(imgdata.idata.dng_version && libraw_internal_data.unpacker_data.tiff_samples == 2)
@@ -1572,10 +1991,10 @@ int LibRaw::unpack(void)
       crop_masked_pixels(); // calculate black levels
 
     // recover saved
-    if( !(imgdata.idata.filters || P1.colors == 1) && !imgdata.rawdata.color4_image)
+    if( !(imgdata.idata.filters || P1.colors == 1) && !imgdata.rawdata.color4_image && !imgdata.rawdata.color3_image && imgdata.image)
       {
         imgdata.image = 0;
-        imgdata.rawdata.color4_image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
+        imgdata.rawdata.color4_image = (ushort (*)[4]) imgdata.rawdata.raw_alloc; // Assume 4-color raw image from LEGACY decoder
       }
 
     // recover image sizes
@@ -3422,6 +3841,7 @@ static const char  *static_camera_list[] =
 "BlackMagic Cinema Camera",
 "BlackMagic Pocket Cinema Camera",
 "BlackMagic Production Camera 4k",
+"BlackMagic URSA",
 "Canon PowerShot 600",
 "Canon PowerShot A5",
 "Canon PowerShot A5 Zoom",
@@ -3672,7 +4092,7 @@ static const char  *static_camera_list[] =
 "Hasselblad Stellar",
 "Hasselblad Stellar II",
 "Hasselblad HV",
-"HTC UltraPixel",
+HTC UltraPixel",
 "Imacon Ixpress 96, 96C",
 "Imacon Ixpress 384, 384C (single shot only)",
 "Imacon Ixpress 132C",

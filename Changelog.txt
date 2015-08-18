@@ -1,3 +1,22 @@
+2015-08-18  Alex Tutubalin <lexa@lexa.ru>
+ * (experimental) floating point DNG support:
+   - new data fields:
+     imgdata.rawdata.float_image - bayer float data
+     imgdata.rawdata.float3_image - 3-component float data
+     imgdata.rawdata.float4_image - 4-component float data
+     imgdata.color.fmaximum - float data maximum (calculated from real data, rounded to 1.0 if below 1.0)
+  - new raw processing flag 
+     LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT - converts float data to 16-bit integer immediately after decoding
+     with default parameters
+  - new API Call
+    LibRaw::convertFloatToInt(float dmin=4096.f, float dmax=32767.f, float dtarget = 16383.f)
+    converts float/float3/float4_image to raw_image/color3/color4_image with or withou scaling:
+    - if both real data maximum and metadata maximum are within range ( >= dmin && <=dmax),
+      float data are just converted to int
+    - if data is out of range noted above, values are scaled so real data maximum becomes dtarget
+
+ * Fix for DualISO Canon DNG files
+
 2015-08-17  Alex Tutubalin <lexa@lexa.ru>
  * params.sony_arw2_options and params.x3f_flags are merged into one
    bitfiled params.raw_processing_options
@@ -8,6 +27,8 @@
  * new processing option LIBRAW_PROCESSING_PENTAXK32_ALLFRAMES
    turns on 4 frame merge for Pentax K3-II 4-shot images
  * dcraw_emu: new -R <num> switch allows to set params.raw_processing_options
+
+ * dcraw 9.26 completely imported, support for BlackMagic URSA '3:1 compressed' files
 
 2015-08-15  Alex Tutubalin <lexa@lexa.ru>
 
