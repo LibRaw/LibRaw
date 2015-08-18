@@ -12417,7 +12417,9 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
           black   = (ushort) (-table[i].t_black);
           memset(cblack,0,sizeof(cblack));
         }
-      if (table[i].t_maximum) maximum = (ushort) table[i].t_maximum;
+      if (table[i].t_maximum)
+	if(!(dng_version && maximum > 16383))
+	  maximum = (ushort) table[i].t_maximum;
       if (table[i].trans[0]) {
 	for (raw_color = j=0; j < 12; j++)
 #ifdef LIBRAW_LIBRARY_BUILD
