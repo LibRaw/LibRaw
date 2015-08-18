@@ -11268,18 +11268,19 @@ guess_cfa_pc:
 			    imgdata.color.WB_Coeffs[Tungsten][0] = rafdata[fi+16];
 			    imgdata.color.WB_Coeffs[Tungsten][2] = rafdata[fi+17];
 
-                for (fj = (fi+18); fj<(lenRAFData-3); fj+=3)
-                  if (rafdata[fj] != fwb[0])
+                fi += 111;
+                for (fj = fi; fj<(fi+15); fj+=3)
+                  if (rafdata[fj] != rafdata[fi])
                   {
                     found = 1;
                     break;
                   }
                 if (found)
                 {
+                  int FujiCCT_K [31] = {2500,2550,2650,2700,2800,2850,2950,3000,3100,3200,3300,3400,3600,3700,3800,4000,4200,4300,4500,4800,5000,5300,5600,5900,6300,6700,7100,7700,8300,9100,10000};
                   fj = fj - 93;
                   for (int iCCT=0; iCCT < 31; iCCT++)
                   {
-                    int FujiCCT_K [31] = {2500,2550,2650,2700,2800,2850,2950,3000,3100,3200,3300,3400,3600,3700,3800,4000,4200,4300,4500,4800,5000,5300,5600,5900,6300,6700,7100,7700,8300,9100,10000};
                     imgdata.color.WBCT_Coeffs[iCCT][0] = FujiCCT_K[iCCT];
                     imgdata.color.WBCT_Coeffs[iCCT][1] = rafdata[iCCT*3+1+fj];
                     imgdata.color.WBCT_Coeffs[iCCT][2] = imgdata.color.WBCT_Coeffs[iCCT][4] = rafdata[iCCT*3+fj];
