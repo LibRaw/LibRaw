@@ -21,12 +21,14 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
+#line 27 "dcraw/dcraw.c"
 #ifndef USE_JPEG
 #define NO_JPEG
 #endif
 #ifndef USE_JASPER
 #define NO_JASPER
 #endif
+#line 38 "dcraw/dcraw.c"
 #define DCRAW_VERSION "9.26"
 
 // EXIF light sources
@@ -77,6 +79,7 @@ it under the terms of the one of three licenses as you choose:
 #include <string.h>
 #include <time.h>
 #include <sys/types.h>
+#line 97 "dcraw/dcraw.c"
 #ifdef __CYGWIN__
 #include <io.h>
 #endif
@@ -87,6 +90,7 @@ it under the terms of the one of three licenses as you choose:
 #define snprintf _snprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
+#line 111 "dcraw/dcraw.c"
 #else
 #include <unistd.h>
 #include <utime.h>
@@ -128,6 +132,7 @@ typedef unsigned long long UINT64;
 #ifndef LONG_BIT
 #define LONG_BIT (8 * sizeof (long))
 #endif
+#line 226 "dcraw/dcraw.c"
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
@@ -185,6 +190,7 @@ typedef unsigned long long UINT64;
 
 #define RAW(row,col) \
 	raw_image[(row)*raw_width+(col)]
+#line 289 "dcraw/dcraw.c"
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 
