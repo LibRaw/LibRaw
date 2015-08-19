@@ -8,12 +8,17 @@
   - new raw processing flag 
      LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT - converts float data to 16-bit integer immediately after decoding
      with default parameters
-  - new API Call
+  - new API Calls:
+    int LibRaw::is_floating_point() returns non-zero if RAW file contains floating point data
+    int LibRaw::have_fpdata() returns non-zero if rawdata.float*_image is not null (so FP
+    data has unpacked but not converted to integrer, see below).
+
     LibRaw::convertFloatToInt(float dmin=4096.f, float dmax=32767.f, float dtarget = 16383.f)
     converts float/float3/float4_image to raw_image/color3/color4_image with or withou scaling:
     - if both real data maximum and metadata maximum are within range ( >= dmin && <=dmax),
       float data are just converted to int
     - if data is out of range noted above, values are scaled so real data maximum becomes dtarget
+    - if data was rescaled (normalized), scale multiplier is stored in imgdata.color.fnorm
 
  * Fix for DualISO Canon DNG files
 

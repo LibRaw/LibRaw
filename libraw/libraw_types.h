@@ -215,6 +215,7 @@ typedef struct
   unsigned    data_maximum;
   unsigned    maximum;
   float		  fmaximum;
+  float		  fnorm;
   ushort      white[8][8];
   float       cam_mul[4];
   float       pre_mul[4];

@@ -1296,17 +1296,38 @@ void LibRaw::deflate_dng_load_raw()
 
 	imgdata.rawdata.raw_alloc = float_raw_image;
 	if(ifd->samples == 1)
+	{
 		imgdata.rawdata.float_image = float_raw_image;
+		imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*4;
+	}
 	else if(ifd->samples == 3)
+	{
 		imgdata.rawdata.float3_image = (float(*)[3])float_raw_image;
+		imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*12;
+	}
 	else if(ifd->samples == 4)
+	{
 		imgdata.rawdata.float4_image = (float(*)[4])float_raw_image;
+		imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*16;
+	}
 
 	if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT)
 		convertFloatToInt(); // with default settings
+}
 
-	//copyFloatDataToInt(float_raw_image, (ushort*)imgdata.rawdata.raw_alloc, imgdata.sizes.raw_width*imgdata.sizes.raw_height*ifd->samples,multip);
+int LibRaw::is_floating_point()
+{
+	struct tiff_ifd_t * ifd = &tiff_ifd[0];
+	while (ifd < &tiff_ifd[libraw_internal_data.identify_data.tiff_nifds] && ifd->offset != libraw_internal_data.unpacker_data.data_offset) ++ifd;
+	if (ifd == &tiff_ifd[libraw_internal_data.identify_data.tiff_nifds])
+		return 0;
 
+	return ifd->sample_format == 3;
+}
+
+int LibRaw::have_fpdata()
+{
+	return imgdata.rawdata.float_image || imgdata.rawdata.float3_image || imgdata.rawdata.float4_image;
 }
 
 
@@ -1342,9 +1363,11 @@ void LibRaw::convertFloatToInt(float dmin/* =4096.f */, float dmax/* =32767.f */
 	float multip = 1.f;
 	if(tmax < dmin || tmax > dmax)
 	{
-		multip = dtarget / tmax;
-		imgdata.color.maximum = dtarget;
+		imgdata.rawdata.color.fnorm = imgdata.color.fnorm = multip = dtarget / tmax;
+		imgdata.rawdata.color.maximum = imgdata.color.maximum = dtarget;
 	}
+	else 
+		imgdata.rawdata.color.fnorm = imgdata.color.fnorm = 0.f;
 
 	for (size_t i = 0; i < imgdata.sizes.raw_height*imgdata.sizes.raw_width*libraw_internal_data.unpacker_data.tiff_samples; ++i) 
 	{
@@ -1355,17 +1378,17 @@ void LibRaw::convertFloatToInt(float dmin/* =4096.f */, float dmax/* =32767.f */
 	if(samples==1)
 	{
 		imgdata.rawdata.raw_alloc = imgdata.rawdata.raw_image = raw_alloc;
-		imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*2;
+		imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*2;
 	}
 	else if(samples == 3)
 	{
 		imgdata.rawdata.raw_alloc = imgdata.rawdata.color3_image = (ushort (*)[3]) raw_alloc;
-		imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*6;
+		imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*6;
 	}
 	else if(samples == 4)
 	{
 		imgdata.rawdata.raw_alloc = imgdata.rawdata.color4_image = (ushort (*)[4]) raw_alloc;
-		imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*8;
+		imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch = imgdata.sizes.raw_width*8;
 	}
 	free(data); // remove old allocation
 	imgdata.rawdata.float_image = 0;
@@ -1519,7 +1542,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	{
 		imgdata.idata.raw_count = 1;
 		imgdata.idata.filters = 0;
-		imgdata.idata.colors = 3;
+		imgdata.idata.colors = 4;
 		IO.mix_green = 1;
 		pentax_component_load_raw = load_raw;
 		load_raw= &LibRaw::pentax_4shot_load_raw;
