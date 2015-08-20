@@ -451,7 +451,7 @@ typedef struct
 }
 #endif
 
-// Byte order
+/* Byte order */
 #if defined(__POWERPC__)
 #define LibRawBigEndian 1
 

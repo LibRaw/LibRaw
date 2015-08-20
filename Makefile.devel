@@ -4,6 +4,7 @@ PP=./internal/preprocess.pl
 
 CC=gcc
 CXX=g++
+LDADD+=-lz
 
 #CFLAGS=
 
