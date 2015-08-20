@@ -1028,7 +1028,7 @@ inline unsigned int DNG_FP24ToFloat (const unsigned char *input)
 	}
 	exponent += (128 - 64);
 	mantissa <<= 7;
-	return (u_int32_t) ((sign << 31) | (exponent << 23) | mantissa);
+	return (uint32_t) ((sign << 31) | (exponent << 23) | mantissa);
 }
 
 inline void DecodeDeltaBytes (unsigned char *bytePtr, int cols, int channels)
@@ -1037,7 +1037,7 @@ inline void DecodeDeltaBytes (unsigned char *bytePtr, int cols, int channels)
 	{
 		unsigned char b0 = bytePtr [0];
 		bytePtr += 1;
-		for (u_int32_t col = 1; col < cols; ++col)
+		for (uint32_t col = 1; col < cols; ++col)
 		{
 			b0 += bytePtr [0];
 			bytePtr [0] = b0;
@@ -1068,7 +1068,7 @@ inline void DecodeDeltaBytes (unsigned char *bytePtr, int cols, int channels)
 		unsigned char b2 = bytePtr [2];
 		unsigned char b3 = bytePtr [3];
 		bytePtr += 4;
-		for (u_int32_t col = 1; col < cols; ++col)
+		for (uint32_t col = 1; col < cols; ++col)
 		{
 			b0 += bytePtr [0];
 			b1 += bytePtr [1];
