@@ -1846,6 +1846,10 @@ int LibRaw::unpack(void)
 	int rawspeed_enabled = 1;
 	if(imgdata.idata.dng_version && libraw_internal_data.unpacker_data.tiff_samples == 2)
 		rawspeed_enabled = 0;
+
+	if(imgdata.idata.raw_count > 1)
+		rawspeed_enabled = 0;
+
 	// Disable rawspeed for double-sized Oly files
 	if(!strncasecmp(imgdata.idata.make,"Olympus",7) && 
 		( (!strncasecmp(imgdata.idata.model,"E-M5MarkII",10) && imgdata.sizes.raw_width == 9280) || !strncasecmp(imgdata.idata.model,"SH-2",4) || !strncasecmp(imgdata.idata.model,"TG-4",4))
