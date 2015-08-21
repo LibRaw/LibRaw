@@ -252,6 +252,7 @@ protected:
     void        (LibRaw:: *write_fun)();
     void        (LibRaw:: *load_raw)();
     void        (LibRaw:: *thumb_load_raw)();
+    void        (LibRaw:: *pentax_component_load_raw)();
 
     void        kodak_thumb_loader();
     void        write_thumb_ppm_tiff(FILE *); 
