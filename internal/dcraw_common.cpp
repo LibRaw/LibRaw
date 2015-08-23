@@ -94,8 +94,6 @@ ushort CLASS sget2 (uchar *s)
 #define AdobeDNG	2
 
 #ifdef LIBRAW_LIBRARY_BUILD
-long long posRAFData;
-unsigned lenRAFData;
 
 static ushort saneSonyCameraInfo(uchar a, uchar b, uchar c, uchar d, uchar e, uchar f){
 	if ((a >> 4) > 9) return 0;
@@ -10017,15 +10015,15 @@ guess_cfa_pc:
 		  imgdata.color.WB_Coeffs[fwb[3]][0] = fwb[1];
 		  imgdata.color.WB_Coeffs[fwb[3]][1] = imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
 		  imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
-		  if ((fwb[3] == 17) && lenRAFData)
+		  if ((fwb[3] == 17) && libraw_internal_data.unpacker_data.lenRAFData>3)
 		  {
 		    long long f_save = ftell(ifp);
 		    int fj, found = 0;
-		    ushort *rafdata = (ushort*) malloc (sizeof(ushort)*lenRAFData);
-		    fseek (ifp, posRAFData, SEEK_SET);
-		    fread (rafdata, sizeof(ushort), lenRAFData, ifp);
+		    ushort *rafdata = (ushort*) malloc (sizeof(ushort)*libraw_internal_data.unpacker_data.lenRAFData);
+		    fseek (ifp, libraw_internal_data.unpacker_data.posRAFData, SEEK_SET);
+		    fread (rafdata, sizeof(ushort), libraw_internal_data.unpacker_data.lenRAFData, ifp);
 		    fseek(ifp, f_save, SEEK_SET);
-		    for (int fi=0; fi<(lenRAFData-3); fi++)
+		    for (int fi=0; fi<(libraw_internal_data.unpacker_data.lenRAFData-3); fi++)
 			{
 			  if ((fwb[0]==rafdata[fi]) && (fwb[1]==rafdata[fi+1]) && (fwb[2]==rafdata[fi+2]))
 			  {
@@ -11150,8 +11148,8 @@ void CLASS parse_fuji (int offset)
       width = tag;
       height = get4();
 #ifdef LIBRAW_LIBRARY_BUILD
-      posRAFData = save;
-      lenRAFData = (len>>1);
+      libraw_internal_data.unpacker_data.posRAFData = save;
+      libraw_internal_data.unpacker_data.lenRAFData = (len>>1);
 #endif
 	  order = c;
     }
@@ -12883,7 +12881,7 @@ void CLASS identify()
   fseek (ifp, 0, SEEK_SET);
 #ifdef LIBRAW_LIBRARY_BUILD
   fread (head, 1, 64, ifp);
-  lenRAFData = posRAFData = 0;
+  libraw_internal_data.unpacker_data.lenRAFData = libraw_internal_data.unpacker_data.posRAFData = 0;
 #else
   fread (head, 1, 32, ifp);
 #endif

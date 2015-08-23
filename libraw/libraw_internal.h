@@ -139,6 +139,8 @@ typedef struct
     unsigned    tile_width, tile_length,load_flags;
     unsigned    data_error;
 	int			hasselblad_parser_flag;
+  long long posRAFData;
+  unsigned lenRAFData;
 }unpacker_data_t;
 
 
