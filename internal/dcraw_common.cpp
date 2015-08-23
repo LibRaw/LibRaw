@@ -10472,8 +10472,10 @@ void CLASS apply_tiff()
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
     if (i != raw && tiff_ifd[i].samples == max_samp &&
-        tiff_ifd[i].bps>0 && tiff_ifd[i].bps < 33 &&
-        unsigned(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
+        tiff_ifd[i].bps>0 && tiff_ifd[i].bps < 33
+	&& tiff_ifd[i].phint != 32803
+	&& tiff_ifd[i].phint != 34892
+        && unsigned(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
 	tiff_ifd[i].t_width * tiff_ifd[i].t_height / (SQR(tiff_ifd[i].bps)+1) >
 	      thumb_width *       thumb_height / (SQR(thumb_misc)+1)
 	&& tiff_ifd[i].comp != 34892) {
