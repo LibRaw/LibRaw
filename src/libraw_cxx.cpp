@@ -1987,7 +1987,7 @@ int LibRaw::unpack(void)
         // Not allocated on RawSpeed call, try call LibRaw
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_OWNALLOC)
           {
-            // x3f foveon decoder
+            // x3f foveon decoder and DNG float
             // Do nothing! Decoder will allocate data internally
           }
         else if(imgdata.idata.filters || P1.colors == 1) // Bayer image or single color -> decode to raw_image
@@ -2021,10 +2021,11 @@ int LibRaw::unpack(void)
             // x3f foveon decoder only: do nothing
 
           }
-        else if (!(imgdata.idata.filters || P1.colors == 1))
+        else if (!(imgdata.idata.filters || P1.colors == 1) ) // legacy decoder, ownalloc handled above
           {
             // successfully decoded legacy image, attach image to raw_alloc
             imgdata.rawdata.raw_alloc = imgdata.image;
+	    imgdata.rawdata.color4_image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
             imgdata.image = 0;
             // Restore saved values. Note: Foveon have masked frame
             // Other 4-color legacy data: no borders
@@ -2037,13 +2038,6 @@ int LibRaw::unpack(void)
 
     if(imgdata.rawdata.raw_image)
       crop_masked_pixels(); // calculate black levels
-
-    // recover saved
-    if( !(imgdata.idata.filters || P1.colors == 1) && !imgdata.rawdata.color4_image && !imgdata.rawdata.color3_image && imgdata.image)
-      {
-        imgdata.image = 0;
-        imgdata.rawdata.color4_image = (ushort (*)[4]) imgdata.rawdata.raw_alloc; // Assume 4-color raw image from LEGACY decoder
-      }
 
     // recover image sizes
     S.iwidth = save_iwidth;
