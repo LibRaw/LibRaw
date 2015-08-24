@@ -10361,6 +10361,9 @@ void CLASS apply_tiff()
       tiff_bps      = tiff_ifd[i].bps;
       tiff_compress = tiff_ifd[i].comp;
       data_offset   = tiff_ifd[i].offset;
+#ifdef LIBRAW_LIBRARY_BUILD
+      data_size     = tiff_ifd[i].bytes;
+#endif
       tiff_flip     = tiff_ifd[i].t_flip;
       tiff_samples  = tiff_ifd[i].samples;
       tile_width    = tiff_ifd[i].t_tile_width;
