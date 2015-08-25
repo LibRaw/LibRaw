@@ -6863,6 +6863,12 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncasecmp(make, "LEICA", 5))
       {
+        if ((tag == 0x035e) || (tag == 0x035f))
+        {
+          int ind = tag == 0x035e?0:1;
+	      for (int j=0; j < 3; j++)
+	       FORCC imgdata.color.dng_color[ind].forwardmatrix[c][j]= getreal(type);
+        }
         if ((tag == 0x0303) && (type != 4))
           {
             fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
@@ -7700,6 +7706,14 @@ void CLASS parse_makernote (int base, int uptag)
 
     else if (!strncasecmp(make, "LEICA", 5))
       {
+
+        if ((tag == 0x035e) || (tag == 0x035f))
+        {
+          int ind = tag == 0x035e?0:1;
+	      for (int j=0; j < 3; j++)
+	       FORCC imgdata.color.dng_color[ind].forwardmatrix[c][j]= getreal(type);
+        }
+
         if ((tag == 0x0303) && (type != 4))
           {
             fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
