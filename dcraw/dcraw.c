@@ -8070,7 +8070,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncasecmp(make, "LEICA", 5))
       {
-        if ((tag == 0x035e) || (tag == 0x035f))
+        if (((tag == 0x035e) || (tag == 0x035f)) && (type == 10) && (len == 9))
         {
           int ind = tag == 0x035e?0:1;
 	      for (int j=0; j < 3; j++)
@@ -8913,8 +8913,7 @@ void CLASS parse_makernote (int base, int uptag)
 
     else if (!strncasecmp(make, "LEICA", 5))
       {
-
-        if ((tag == 0x035e) || (tag == 0x035f))
+        if (((tag == 0x035e) || (tag == 0x035f)) && (type == 10) && (len == 9))
         {
           int ind = tag == 0x035e?0:1;
 	      for (int j=0; j < 3; j++)
