@@ -2228,8 +2228,14 @@ int LibRaw::raw2image(void)
     if (is_phaseone_compressed())
       {
         phase_one_allocate_tempbuffer();
-        phase_one_subtract_black((ushort*)imgdata.rawdata.raw_alloc,imgdata.rawdata.raw_image);
-        phase_one_correct();
+        int rc = phase_one_subtract_black((ushort*)imgdata.rawdata.raw_alloc,imgdata.rawdata.raw_image);
+	if(rc == 0)
+	  rc = phase_one_correct();
+	if(rc!=0)
+	{
+	  phase_one_free_tempbuffer();
+	  return rc;
+	}
       }
 
     // free and re-allocate image bitmap
@@ -2500,8 +2506,14 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     if (is_phaseone_compressed())
       {
         phase_one_allocate_tempbuffer();
-        phase_one_subtract_black((ushort*)imgdata.rawdata.raw_alloc,imgdata.rawdata.raw_image);
-        phase_one_correct();
+        int rc = phase_one_subtract_black((ushort*)imgdata.rawdata.raw_alloc,imgdata.rawdata.raw_image);
+	if(rc == 0)
+	  rc = phase_one_correct();
+	if(rc!=0)
+	  {
+	    phase_one_free_tempbuffer();
+	    return rc;
+	  }
       }
 
     // process cropping
