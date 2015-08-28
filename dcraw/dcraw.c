@@ -1758,7 +1758,7 @@ int CLASS phase_one_correct()
   /* static */ const signed char dir[12][2] =
     { {-1,-1}, {-1,1}, {1,-1}, {1,1}, {-2,0}, {0,-2}, {0,2}, {2,0},
       {-2,-2}, {-2,2}, {2,-2}, {2,2} };
-  float poly[8], num, cfrac, frac, mult[2], *yval[2];
+  float poly[8], num, cfrac, frac, mult[2], *yval[2]={NULL,NULL};
   ushort *xval[2];
   int qmult_applied = 0, qlin_applied = 0;
 
@@ -1988,9 +1988,11 @@ int CLASS phase_one_correct()
   }
   catch (...)
   {
-	  return LIBRAW_CANCELLED_BY_CALLBACK;
+    if(yval[0]) free(yval[0]);
+    return LIBRAW_CANCELLED_BY_CALLBACK;
   }
 #endif
+  return 0;
 }
 
 void CLASS phase_one_load_raw()
