@@ -181,7 +181,7 @@ typedef struct
     double      pixel_aspect;
     int         flip;
     int         mask[8][4];
-    ushort      OlympusCropID;
+    int         OlympusCropID;
     ushort      OlympusFrame[4];	// upper left XY, lower right XY
 
 

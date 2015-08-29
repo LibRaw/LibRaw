@@ -483,7 +483,7 @@ void LibRaw:: recycle()
 #undef FREE
   ZERO(imgdata.rawdata);
   ZERO(imgdata.sizes);
-  imgdata.sizes.OlympusCropID = 0xffff;
+  imgdata.sizes.OlympusCropID = -1;
   ZERO(imgdata.color);
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
