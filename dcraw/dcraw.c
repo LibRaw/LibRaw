@@ -9069,6 +9069,12 @@ void CLASS parse_makernote (int base, int uptag)
         case 0x1002:
           imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type)/2);
           break;
+        case 0x20401112:
+          imgdata.sizes.OlympusCropID = get2();
+          break;
+        case 0x20401113:
+          FORC4 imgdata.sizes.OlympusFrame[c] = get2();
+          break;
         case 0x20100201:
           {
             unsigned long long oly_lensid [3];
