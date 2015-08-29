@@ -329,9 +329,9 @@ int main(int ac, char *av[])
             printf ("Image size:  %4d x %d\n", S.width, S.height);
             printf ("Output size: %4d x %d\n", S.iwidth, S.iheight);
 
-            if (S.OlympusCropID)
+            if (S.OlympusCropID != 0xffff)
             {
-              printf ("Olympus aspect ID: d\nOlympus crop", S.OlympusCropID);
+              printf ("Olympus aspect ID: %d\nOlympus crop", S.OlympusCropID);
               for (int c=0;c<4;c++) printf (" %d", S.OlympusFrame[c]);
               printf ("\n");
             }
