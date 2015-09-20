@@ -15219,6 +15219,8 @@ konica_400z:
       width -= 6;
   } else if (!strncmp(make,"Sony",4) && raw_width == 7392) {
     width -= 30;
+  } else if (!strncmp(make,"Sony",4) && raw_width == 8000) {
+    width -= 32;
   } else if (!strcmp(model,"DSLR-A100")) {
     if (width == 3880) {
       height--;
