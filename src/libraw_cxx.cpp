@@ -1559,6 +1559,17 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
 
+ 
+    if(imgdata.idata.dng_version &&
+      (
+    (!strcasecmp(imgdata.idata.make,"Leica") && !strcasecmp(imgdata.idata.model,"D-LUX (Typ 109)"))
+	  ||
+	  (!strcasecmp(imgdata.idata.make,"Panasonic") && !strcasecmp(imgdata.idata.model,"LX100"))
+	)
+       )
+      imgdata.sizes.width = 4288;
+
+    
 	if(!strcasecmp(imgdata.idata.make,"Pentax") && !strcasecmp(imgdata.idata.model,"K-3 II") && imgdata.idata.raw_count == 4 && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_PENTAXK32_ALLFRAMES))
 	{
 		imgdata.idata.raw_count = 1;
