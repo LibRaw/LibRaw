@@ -1865,6 +1865,7 @@ int LibRaw::unpack(void)
 	imgdata.rawdata.float3_image = 0;
 #ifdef USE_RAWSPEED
 	int rawspeed_enabled = 1;
+	int rawspeed_ignore_errors = 0;
 	if(imgdata.idata.dng_version && libraw_internal_data.unpacker_data.tiff_samples == 2)
 		rawspeed_enabled = 0;
 
@@ -1881,6 +1882,9 @@ int LibRaw::unpack(void)
  		&& !strncasecmp(imgdata.idata.model,"EOS 5DS",7) 
 		&& (load_raw == &LibRaw::canon_sraw_load_raw))
 		rawspeed_enabled = 0;
+
+	if (imgdata.idata.dng_version && imgdata.idata.colors == 3 && !strcasecmp(imgdata.idata.software, "Adobe Photoshop Lightroom 6.1.1 (Windows)"))
+		rawspeed_ignore_errors = 1;
 
     // RawSpeed Supported,
     if(O.use_rawspeed  && rawspeed_enabled
@@ -1917,7 +1921,7 @@ int LibRaw::unpack(void)
             d->decodeRaw();
             d->decodeMetaData(meta);
             RawImage r = d->mRaw;
-            if( r->errors.size()>0)
+            if( r->errors.size()>0 && !rawspeed_ignore_errors)
               {
                 delete d;
                 _rawspeed_decoder = 0;
