@@ -328,6 +328,14 @@ int main(int ac, char *av[])
 
             printf ("Image size:  %4d x %d\n", S.width, S.height);
             printf ("Output size: %4d x %d\n", S.iwidth, S.iheight);
+
+            if (S.OlympusCropID != -1)
+            {
+              printf ("Olympus aspect ID: %d\nOlympus crop", S.OlympusCropID);
+              for (int c=0;c<4;c++) printf (" %d", S.OlympusFrame[c]);
+              printf ("\n");
+            }
+
             printf ("Raw colors: %d", P1.colors);
             if (P1.filters)
                 {
@@ -360,9 +368,9 @@ int main(int ac, char *av[])
                 printf("%6.4f\t%6.4f\t%6.4f\n",C.cam_xyz[i][0],C.cam_xyz[i][1],C.cam_xyz[i][2]);
 
 			if (C.dng_color[0].illuminant < 0xffff)
-				printf ("\nDNG Illuminant 1: %d", C.dng_color[0].illuminant);
+				printf ("\nDNG Illuminant 1: %s", EXIF_LightSources[C.dng_color[0].illuminant]);
 			if (C.dng_color[1].illuminant < 0xffff)
-				printf ("\nDNG Illuminant 2: %d", C.dng_color[1].illuminant);
+				printf ("\nDNG Illuminant 2: %s", EXIF_LightSources[C.dng_color[1].illuminant]);
 
             if (C.dng_color[0].colormatrix[0][0] > 0)
             {
@@ -411,7 +419,7 @@ int main(int ac, char *av[])
                 	printf("%6.4f\t%6.4f\t%6.4f\n",C.dng_color[1].forwardmatrix[0][i],C.dng_color[1].forwardmatrix[1][i],C.dng_color[1].forwardmatrix[2][i]);
 			}
 
-            printf ("Derived D65 multipliers:");
+            printf ("\nDerived D65 multipliers:");
             for(int c=0;c<P1.colors;c++) printf (" %f", C.pre_mul[c]);
             printf ("\n");
         }
