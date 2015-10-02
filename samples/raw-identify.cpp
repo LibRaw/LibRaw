@@ -64,7 +64,7 @@ it under the terms of the one of three licenses as you choose:
 #define D75 22
 #define D50 23
 #define StudioTungsten 24
-#define EveningSunlight 64
+#define Sunset 64
 #define Other 255
 
 const char *EXIF_LightSources[] = {

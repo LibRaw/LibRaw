@@ -8496,8 +8496,8 @@ void CLASS parse_makernote (int base, int uptag)
 	    }
 	  if (tag == 0x30000124)
 	    {
-	      imgdata.color.WB_Coeffs[EveningSunlight][0] = get2();
-	      imgdata.color.WB_Coeffs[EveningSunlight][2] = get2();
+	      imgdata.color.WB_Coeffs[Sunset][0] = get2();
+	      imgdata.color.WB_Coeffs[Sunset][2] = get2();
 	    }
 	  if (tag == 0x30000130)
 	    {
