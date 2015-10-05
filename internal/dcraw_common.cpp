@@ -9642,7 +9642,7 @@ int CLASS parse_tiff_ifd (int base)
 	      for(int i=0; i< len; i++)
 		tiff_ifd[ifd].strip_offsets[i]=get4()+base;
 	    }
-	  fseek(ifp,SEEK_SET,sav); // restore position
+	  fseek(ifp,sav,SEEK_SET); // restore position
 	}
 	/* fallback */
 #endif
@@ -9686,7 +9686,7 @@ int CLASS parse_tiff_ifd (int base)
 	      for(int i=0; i< len; i++)
 		tiff_ifd[ifd].strip_byte_counts[i]=get4();
 	    }
-	  fseek(ifp,SEEK_SET,sav); // restore position
+	  fseek(ifp,sav,SEEK_SET); // restore position
 	}
 	/* fallback */
 #endif
