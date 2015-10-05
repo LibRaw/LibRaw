@@ -96,12 +96,12 @@ typedef struct
     struct
 #endif
     LibRaw_abstract_datastream *input;
-    FILE        *output;
-    int         input_internal;
-    char        *meta_data;
-    INT64       profile_offset;
-    INT64       toffset;
-	unsigned    pana_black[4];
+  FILE        *output;
+  int         input_internal;
+  char        *meta_data;
+  INT64       profile_offset;
+  INT64       toffset;
+  unsigned    pana_black[4];
 
 } internal_data_t;
 
@@ -164,6 +164,9 @@ struct decode
 struct tiff_ifd_t {
   int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes;
   int t_tile_width, t_tile_length,sample_format,predictor;
+  int rows_per_strip;
+  int *strip_offsets,strip_offsets_count;
+  int *strip_byte_counts,strip_byte_counts_count;
   float t_shutter;
 };
 

@@ -100,6 +100,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 
 // Nikon (and Minolta Z2)
     void        nikon_load_raw();
+    void        nikon_load_striped_packed_raw();
     void        nikon_load_sraw();
     void        nikon_yuv_load_raw();
     void	nikon_coolscan_load_raw();

@@ -782,6 +782,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
 	  d_info->decoder_name = "deflate_dng_load_raw()";
 	  d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC;
   }
+  else if (load_raw == &LibRaw::nikon_load_striped_packed_raw )
+    {
+      d_info->decoder_name = "nikon_load_striped_packed_raw()";
+    }
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
   else if (load_raw == &LibRaw::foveon_sd_load_raw )
     {
@@ -1477,6 +1481,11 @@ void LibRaw::hasselblad_full_load_raw()
         read_shorts (&imgdata.image[row*S.width+col][1], 1); // G
         read_shorts (&imgdata.image[row*S.width+col][0], 1); // R
       }
+}
+
+void LibRaw::nikon_load_striped_packed_raw()
+{
+
 }
 
 struct foveon_data_t

@@ -9622,11 +9622,30 @@ int CLASS parse_tiff_ifd (int base)
       case 272:				/* Model */
 	fgets (model, 64, ifp);
 	break;
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 278:
+	tiff_ifd[ifd].rows_per_strip = getint(type);
+	break;
+#endif
       case 280:				/* Panasonic RW2 offset */
 	if (type != 4) break;
 	load_raw = &CLASS panasonic_load_raw;
 	load_flags = 0x2008;
       case 273:				/* StripOffset */
+#ifdef LIBRAW_LIBRARY_BUILD
+	{
+	  off_t sav = ftell(ifp);
+	  if(len < 16384)
+	    {
+	      tiff_ifd[ifd].strip_offsets = (int*)calloc(len,sizeof(int));
+	      tiff_ifd[ifd].strip_offsets_count = len;
+	      for(int i=0; i< len; i++)
+		tiff_ifd[ifd].strip_offsets[i]=get4()+base;
+	    }
+	  fseek(ifp,SEEK_SET,sav); // restore position
+	}
+	/* fallback */
+#endif
       case 513:				/* JpegIFOffset */
       case 61447:
 	tiff_ifd[ifd].offset = get4()+base;
@@ -9657,6 +9676,20 @@ int CLASS parse_tiff_ifd (int base)
 	tiff_ifd[ifd].samples = getint(type) & 7;
 	break;
       case 279:				/* StripByteCounts */
+#ifdef LIBRAW_LIBRARY_BUILD
+	{
+	  off_t sav = ftell(ifp);
+	  if(len < 16384)
+	    {
+	      tiff_ifd[ifd].strip_byte_counts = (int*)calloc(len,sizeof(int));
+	      tiff_ifd[ifd].strip_byte_counts_count = len;
+	      for(int i=0; i< len; i++)
+		tiff_ifd[ifd].strip_byte_counts[i]=get4();
+	    }
+	  fseek(ifp,SEEK_SET,sav); // restore position
+	}
+	/* fallback */
+#endif
       case 514:
       case 61448:
 	tiff_ifd[ifd].bytes = get4();
@@ -10470,7 +10503,22 @@ void CLASS apply_tiff()
               load_raw = &CLASS packed_load_raw;
               load_flags=80;
             }
-          else
+          else if(tiff_ifd[raw].rows_per_strip && tiff_ifd[raw].strip_offsets_count &&
+		  tiff_ifd[raw].strip_offsets_count == tiff_ifd[raw].strip_byte_counts_count)
+	    {
+	      int fit = 1;
+	      for(int i = 0; i < tiff_ifd[raw].strip_byte_counts_count-1; i++) // all but last
+		if(tiff_ifd[raw].strip_byte_counts[i]*2 != tiff_ifd[raw].rows_per_strip*raw_width*3)
+		  {
+		    fit = 0;
+		    break;
+		  }
+	      if(fit)
+		load_raw = &CLASS nikon_load_striped_packed_raw;
+	      else
+		load_raw = &CLASS nikon_load_raw; // fallback
+	    }
+	else
 #endif
             load_raw = &CLASS nikon_load_raw;			break;
       case 65535:
