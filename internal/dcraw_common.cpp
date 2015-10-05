@@ -9633,17 +9633,15 @@ int CLASS parse_tiff_ifd (int base)
 	load_flags = 0x2008;
       case 273:				/* StripOffset */
 #ifdef LIBRAW_LIBRARY_BUILD
-	{
-	  off_t sav = ftell(ifp);
-	  if(len < 16384)
-	    {
-	      tiff_ifd[ifd].strip_offsets = (int*)calloc(len,sizeof(int));
-	      tiff_ifd[ifd].strip_offsets_count = len;
-	      for(int i=0; i< len; i++)
-		tiff_ifd[ifd].strip_offsets[i]=get4()+base;
-	    }
-	  fseek(ifp,sav,SEEK_SET); // restore position
-	}
+	if(len > 1 && len < 16384)
+	  {
+	    off_t sav = ftell(ifp);
+	    tiff_ifd[ifd].strip_offsets = (int*)calloc(len,sizeof(int));
+	    tiff_ifd[ifd].strip_offsets_count = len;
+	    for(int i=0; i< len; i++)
+	      tiff_ifd[ifd].strip_offsets[i]=get4()+base;
+	    fseek(ifp,sav,SEEK_SET); // restore position
+	  }
 	/* fallback */
 #endif
       case 513:				/* JpegIFOffset */
@@ -9677,17 +9675,15 @@ int CLASS parse_tiff_ifd (int base)
 	break;
       case 279:				/* StripByteCounts */
 #ifdef LIBRAW_LIBRARY_BUILD
-	{
-	  off_t sav = ftell(ifp);
-	  if(len < 16384)
-	    {
-	      tiff_ifd[ifd].strip_byte_counts = (int*)calloc(len,sizeof(int));
-	      tiff_ifd[ifd].strip_byte_counts_count = len;
-	      for(int i=0; i< len; i++)
+	if(len > 1 && len < 16384)
+	  {
+	    off_t sav = ftell(ifp);
+	    tiff_ifd[ifd].strip_byte_counts = (int*)calloc(len,sizeof(int));
+	    tiff_ifd[ifd].strip_byte_counts_count = len;
+	    for(int i=0; i< len; i++)
 		tiff_ifd[ifd].strip_byte_counts[i]=get4();
-	    }
-	  fseek(ifp,sav,SEEK_SET); // restore position
-	}
+	    fseek(ifp,sav,SEEK_SET); // restore position
+	  }
 	/* fallback */
 #endif
       case 514:
