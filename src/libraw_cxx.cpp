@@ -2088,7 +2088,7 @@ int LibRaw::try_dngsdk()
 		negative->Parse (*host, stream, info);
 		negative->PostParse (*host, stream, info);
 		negative->ReadStage1Image (*host, stream, info);
-		const dng_image *stage2 = negative->Stage1Image ();
+		dng_simple_image *stage2 = (dng_simple_image *)negative->Stage1Image ();
 		if(stage2->Bounds().W() != S.raw_width || stage2->Bounds().H()!= S.raw_height)
 		{
 			return LIBRAW_DATA_ERROR;
@@ -2097,12 +2097,10 @@ int LibRaw::try_dngsdk()
 		int pplanes = stage2->Planes();
 		int ptype = stage2->PixelType();
 
-		dng_simple_image resimage(stage2->Bounds(),pplanes,ptype,host->Allocator());
-		resimage.CopyArea(*stage2,stage2->Bounds(),0,0,pplanes);
 		dng_pixel_buffer buffer;
-		resimage.GetPixelBuffer(buffer);
+		stage2->GetPixelBuffer(buffer);
 
-		int pixels =  resimage.Bounds().H () * resimage.Bounds().W () * pplanes;
+		int pixels =  stage2->Bounds().H () * stage2->Bounds().W () * pplanes;
 		imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ptype));
 
 		if(ptype == ttShort && !is_curve_linear())
