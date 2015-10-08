@@ -12502,19 +12502,21 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
   sprintf (name, "%s %s", t_make, t_model);
   for (i=0; i < sizeof table / sizeof *table; i++)
     if (!strncasecmp(name, table[i].prefix, strlen(table[i].prefix))) {
-      if (table[i].t_black>0)
-        {
-          black   = (ushort) table[i].t_black;
-          memset(cblack,0,sizeof(cblack));
-        }
-      else if(table[i].t_black <0 && rblack == 0 )
-        {
-          black   = (ushort) (-table[i].t_black);
-          memset(cblack,0,sizeof(cblack));
-        }
-      if (table[i].t_maximum)
-	if(!(dng_version && maximum > 16383))
-	  maximum = (ushort) table[i].t_maximum;
+      if(!dng_version)
+	{
+	  if (table[i].t_black>0)
+	    {
+	      black   = (ushort) table[i].t_black;
+	      memset(cblack,0,sizeof(cblack));
+	    }
+	  else if(table[i].t_black <0 && rblack == 0 )
+	    {
+	      black   = (ushort) (-table[i].t_black);
+	      memset(cblack,0,sizeof(cblack));
+	    }
+	  if (table[i].t_maximum)
+	      maximum = (ushort) table[i].t_maximum;
+	}
       if (table[i].trans[0]) {
 	for (raw_color = j=0; j < 12; j++)
 #ifdef LIBRAW_LIBRARY_BUILD
