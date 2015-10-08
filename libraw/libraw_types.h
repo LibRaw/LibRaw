@@ -339,6 +339,8 @@ typedef struct
     float wf_deband_treshold[4];
 	/* Raw speed */
     int use_rawspeed;
+	/* DNG SDK */
+	int use_dngsdk;
   /* Disable Auto-scale */
     int no_auto_scale;
   /* Disable intepolation */

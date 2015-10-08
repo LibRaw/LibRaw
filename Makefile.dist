@@ -10,6 +10,9 @@ CFLAGS=-O3  -I. -w
 #LDADD+=-L../RawSpeed/RawSpeed -lrawspeed -L/usr/local/lib -ljpeg -lxml2
 #RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
+# DNG SDK Support
+# CFLAGS+=-DUSE_DNGSDK -I../dng_sdk/source
+# LDADDD+=-L../dng_sdk/release -ldng -ljpeg -lz
 
 # Jasper support for RedCine
 #CFLAGS+=-DUSE_JASPER -I/usr/local/include

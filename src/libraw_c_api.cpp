@@ -42,6 +42,7 @@ extern "C"
         return &(ret->imgdata);
     }
 
+	unsigned libraw_capabilities() { return LibRaw::capabilities();}
     const char*   libraw_version() { return LibRaw::version();}
     const char*   libraw_strprogress(enum LibRaw_progress p) { return LibRaw::strprogress(p);}
     int     libraw_versionNumber() { return LibRaw::versionNumber();}

@@ -46,6 +46,26 @@ it under the terms of the one of three licenses as you choose:
 #endif
 #endif
 
+#ifdef USE_DNGSDK
+
+#if defined(WIN32)
+#define qWinOS 1
+#define qMacOS 0
+#elif defined(__APPLE__)
+#define qWinOS 0
+#define qMacOS 1
+#else
+/* define OS types for DNG here */
+#endif
+#define qDNGXMPDocOps  0 
+#define qDNGUseLibJPEG 1
+#define qDNGXMPFiles   0
+#define qDNGExperimental 1
+#define qDNGThreadSafe 1
+#include "dng_stream.h"
+#endif /* DNGSDK */
+
+
 #define IOERROR() do { throw LIBRAW_EXCEPTION_IO_EOF; } while(0)
 
 class LibRaw_buffer_datastream;
@@ -231,6 +251,45 @@ protected:
 
 #endif
 
+#ifdef USE_DNGSDK
+
+class libraw_dng_stream: public dng_stream
+{
+public:
+	libraw_dng_stream(LibRaw_abstract_datastream* p): dng_stream((dng_abort_sniffer*)NULL,kBigBufferSize,0),parent_stream(p)
+	{
+		if(parent_stream)
+		{
+			off = parent_stream->tell();
+			parent_stream->seek(0UL,SEEK_SET); // seek to start
+		}
+	}
+	~libraw_dng_stream(){ 
+		if(parent_stream)
+			parent_stream->seek(off,SEEK_SET);
+	}
+	virtual uint64 DoGetLength (){
+		if(parent_stream)
+			return parent_stream->size();
+		return 0;
+	}
+	virtual void DoRead (void *data, uint32 count, uint64 offset) 
+	{
+		if(parent_stream)
+		{
+			parent_stream->seek(offset,SEEK_SET);
+			parent_stream->read(data,1,count);
+		}
+	}
+
+private:
+	libraw_dng_stream (const libraw_dng_stream &stream);
+	libraw_dng_stream & operator= (const libraw_dng_stream &stream);
+	LibRaw_abstract_datastream *parent_stream; 
+	INT64 off;
+};
+
+#endif
 
 #endif /* cplusplus */
 

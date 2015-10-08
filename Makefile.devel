@@ -13,6 +13,10 @@ LDADD+=-lz
 # LDADD+=-L../RawSpeed/RawSpeed/release -lrawspeed -L/opt/local/include -ljpeg -lxml2
 # RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
+# DNG SDK Support
+# CFLAGS+=-DUSE_DNGSDK -I../dng_sdk/source
+# LDADDD+=-L../dng_sdk/release -ldng -ljpeg -lz
+
 
 CC=gcc
 CXX=g++

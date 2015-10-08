@@ -65,6 +65,13 @@ typedef unsigned __int64  uint64_t;
 #include <RawSpeed/ColorFilterArray.h>
 #endif
 
+#ifdef USE_DNGSDK
+#include "dng_host.h"
+#include "dng_negative.h"
+#include "dng_simple_image.h"
+#include "dng_info.h"
+#endif
+
 
 #ifdef __cplusplus
 extern "C"
@@ -173,6 +180,24 @@ const float LibRaw_constants::d65_white[3] =  { 0.950456f, 1.0f, 1.088754f };
 const char* LibRaw::version() { return LIBRAW_VERSION_STR;}
 int LibRaw::versionNumber() { return LIBRAW_VERSION; }
 const char* LibRaw::strerror(int p) { return libraw_strerror(p);}
+
+unsigned LibRaw::capabilities()
+{
+	unsigned ret = 0;
+#ifdef USE_RAWSPEED
+	ret |= LIBRAW_CAPS_RAWSPEED;
+#endif
+#ifdef USE_DNGSDK
+	ret |= LIBRAW_CAPS_DNGSDK;
+#endif
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
+	ret |= LIBRAW_CAPS_DEMOSAICSGPL2;
+#endif
+#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
+	ret |= LIBRAW_CAPS_DEMOSAICSGPL3;
+#endif
+	return ret;
+}
 
 LibRaw_colormatrix_type LibRaw::camera_color_type()
 {
@@ -344,6 +369,7 @@ LibRaw:: LibRaw(unsigned int flags)
   ZERO(callbacks);
 
   _rawspeed_camerameta = _rawspeed_decoder = NULL;
+  dnghost =  NULL;
   _x3f_data = NULL;
 
 #ifdef USE_RAWSPEED
@@ -372,6 +398,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.auto_bright_thr = LIBRAW_DEFAULT_AUTO_BRIGHTNESS_THRESHOLD;
   imgdata.params.adjust_maximum_thr= LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD;
   imgdata.params.use_rawspeed = 1;
+  imgdata.params.use_dngsdk = LIBRAW_DNG_DEFAULT;
   imgdata.params.no_auto_scale = 0;
   imgdata.params.no_interpolation = 0;
   imgdata.params.sraw_ycc = 0;
@@ -503,6 +530,7 @@ void LibRaw:: recycle()
     }
   _rawspeed_decoder = 0;
 #endif
+
   if(_x3f_data)
     {
       x3f_clear(_x3f_data);
@@ -960,7 +988,7 @@ int LibRaw::open_buffer(void *buffer, size_t size)
   return ret;
 }
 
-inline unsigned int DNG_HalfToFloat (ushort halfValue)
+inline unsigned int __DNG_HalfToFloat (ushort halfValue)
 {
 	int sign 	   = (halfValue >> 15) & 0x00000001;
 	int exponent = (halfValue >> 10) & 0x0000001f;
@@ -998,7 +1026,7 @@ inline unsigned int DNG_HalfToFloat (ushort halfValue)
 	return (unsigned int) ((sign << 31) | (exponent << 23) | mantissa);
 }
 
-inline unsigned int DNG_FP24ToFloat (const unsigned char *input)
+inline unsigned int __DNG_FP24ToFloat (const unsigned char *input)
 {
 	int sign     = (input [0] >> 7) & 0x01;
 	int exponent = (input [0]     ) & 0x7F;
@@ -1170,7 +1198,7 @@ static float expandFloats(unsigned char * dst, int tileWidth, int bytesps) {
 		uint32_t * dst32 = (unsigned int *) dst;
 		float *f32 = (float*) dst;
 		for (int index = tileWidth - 1; index >= 0; --index) {
-			dst32[index] = DNG_HalfToFloat(dst16[index]);
+			dst32[index] = __DNG_HalfToFloat(dst16[index]);
 			max = MAX(max,f32[index]);
 		}
 	}
@@ -1180,7 +1208,7 @@ static float expandFloats(unsigned char * dst, int tileWidth, int bytesps) {
 		uint32_t * dst32 = (unsigned int *) dst;
 		float *f32 = (float*) dst;
 		for (int index = tileWidth - 1; index >= 0; --index, dst8 -= 3) {
-			dst32[index] = DNG_FP24ToFloat(dst8);
+			dst32[index] = __DNG_FP24ToFloat(dst8);
 			max = MAX(max,f32[index]);
 		}
 	}
@@ -1873,6 +1901,261 @@ void LibRaw::checkCancel()
 #endif
 }
 
+int LibRaw::try_rawspeed()
+{
+#ifdef USE_RAWSPEED
+	int ret=LIBRAW_SUCCESS;
+
+	int rawspeed_ignore_errors = 0;
+	if (imgdata.idata.dng_version && imgdata.idata.colors == 3 && !strcasecmp(imgdata.idata.software, "Adobe Photoshop Lightroom 6.1.1 (Windows)"))
+		rawspeed_ignore_errors = 1;
+
+	// RawSpeed Supported,
+		INT64 spos = ID.input->tell();
+		void *_rawspeed_buffer = 0;
+		try
+		{
+			//                printf("Using rawspeed\n");
+			ID.input->seek(0,SEEK_SET);
+			INT64 _rawspeed_buffer_sz = ID.input->size()+32;
+			_rawspeed_buffer = malloc(_rawspeed_buffer_sz);
+			if(!_rawspeed_buffer) throw LIBRAW_EXCEPTION_ALLOC;
+			ID.input->read(_rawspeed_buffer,_rawspeed_buffer_sz,1);
+			FileMap map((uchar8*)_rawspeed_buffer,_rawspeed_buffer_sz);
+			RawParser t(&map);
+			RawDecoder *d = 0;
+			CameraMetaDataLR *meta = static_cast<CameraMetaDataLR*>(_rawspeed_camerameta);
+			d = t.getDecoder();
+			if(!d) throw "Unable to find decoder";
+			try {
+				d->checkSupport(meta);
+			}
+			catch (const RawDecoderException& e)
+			{
+				imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_UNSUPPORTED;
+				throw e;
+			}
+			d->interpolateBadPixels = FALSE;
+			d->applyStage1DngOpcodes = FALSE;
+			_rawspeed_decoder = static_cast<void*>(d);
+			d->decodeRaw();
+			d->decodeMetaData(meta);
+			RawImage r = d->mRaw;
+			if( r->errors.size()>0 && !rawspeed_ignore_errors)
+			{
+				delete d;
+				_rawspeed_decoder = 0;
+				throw 1;
+			}
+			if (r->isCFA)
+			{
+				imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
+			}
+			else if(r->getCpp()==4)
+			{
+				imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
+				if(r->whitePoint > 0 && r->whitePoint < 65536)
+					C.maximum = r->whitePoint;
+			} else if(r->getCpp() == 3)
+			{
+				imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
+				if(r->whitePoint > 0 && r->whitePoint < 65536)
+					C.maximum = r->whitePoint;
+			}
+			else
+			{
+				delete d;
+				_rawspeed_decoder = 0;
+				ret = LIBRAW_UNSPECIFIED_ERROR;
+			}
+			if(_rawspeed_decoder)
+			{
+				// set sizes
+				iPoint2D rsdim = r->getUncroppedDim();
+				S.raw_pitch = r->pitch;
+				S.raw_width = rsdim.x;
+				S.raw_height = rsdim.y;
+				//C.maximum = r->whitePoint;
+				fix_after_rawspeed(r->blackLevel);
+			}
+			free(_rawspeed_buffer);
+			_rawspeed_buffer = 0;
+			imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROCESSED;
+		}
+		catch (const RawDecoderException& RDE)
+		{
+			imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
+			if (_rawspeed_buffer)
+			{
+				free(_rawspeed_buffer);
+				_rawspeed_buffer = 0;
+			}
+			const char *p = RDE.what();
+			if (!strncmp(RDE.what(), "Decoder canceled", strlen("Decoder canceled")))
+				throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
+			ret = LIBRAW_UNSPECIFIED_ERROR;
+		}
+		catch (...)
+		{
+			// We may get here due to cancellation flag
+			imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
+			if(_rawspeed_buffer)
+			{
+				free(_rawspeed_buffer);
+				_rawspeed_buffer = 0;
+			}
+			ret = LIBRAW_UNSPECIFIED_ERROR;
+		}
+		ID.input->seek(spos,SEEK_SET);
+
+	return ret;
+#else
+	return LIBRAW_NOT_IMPLEMENTED;
+#endif
+}
+
+int LibRaw::valid_for_dngsdk()
+{
+#ifndef USE_DNGSDK
+	return 0;
+#else
+	if(!imgdata.idata.dng_version)
+		return 0;
+	if(!imgdata.params.use_dngsdk)
+		return 0;
+	if(is_floating_point() && (imgdata.params.use_dngsdk & LIBRAW_DNG_FLOAT))
+		return 1;
+	if(!imgdata.idata.filters && (imgdata.params.use_dngsdk & LIBRAW_DNG_LINEAR))
+		return 1;
+//	if(libraw_internal_data.unpacker_data.tiff_bps > 16 && (imgdata.params.use_dngsdk & LIBRAW_DNG_LARGERANGE))
+//		return 1;
+	if(libraw_internal_data.unpacker_data.tiff_samples == 2 && (imgdata.params.use_dngsdk & LIBRAW_DNG_2SAMPLES))
+		return 1;
+	if(imgdata.idata.filters == 9 && (imgdata.params.use_dngsdk & LIBRAW_DNG_XTRANS))
+		return 1;
+	if(is_fuji_rotated() && (imgdata.params.use_dngsdk & LIBRAW_DNG_FUJIROTATED))
+		return 1;
+	if(imgdata.params.use_dngsdk & LIBRAW_DNG_OTHER)
+		return 1;
+	return 0;
+#endif
+}
+
+
+#ifdef USE_DNGSDK
+class dng_negative_no_opcode1: public dng_negative
+{
+public:
+	void clearOpcodes1() { fOpcodeList1.Clear();}
+	void setFullArea() {fLinearizationInfo->fActiveArea = fStage1Image->Bounds(); }
+	dng_negative_no_opcode1 (dng_host &host) : dng_negative(host){}
+
+};
+#endif
+
+int LibRaw::is_curve_linear()
+{
+	for (int i=0; i < 0x10000; i++) 
+		if(imgdata.color.curve[i] != i)
+			return 0;
+	return 1;
+}
+
+
+int LibRaw::try_dngsdk()
+{
+#ifdef USE_DNGSDK
+	if(!dnghost)
+		return LIBRAW_UNSPECIFIED_ERROR;
+
+	dng_host *host = static_cast<dng_host*>(dnghost);
+
+	try
+	{
+		libraw_dng_stream stream(libraw_internal_data.internal_data.input);
+
+		AutoPtr<dng_negative> negative;
+		negative.Reset (host->Make_dng_negative ());
+
+		dng_info info;
+		info.Parse (*host, stream);
+		info.PostParse (*host);
+
+		if (!info.IsValidDNG ())
+		{
+			return LIBRAW_DATA_ERROR;
+		}
+		negative->Parse (*host, stream, info);
+		negative->PostParse (*host, stream, info);
+		negative->ReadStage1Image (*host, stream, info);
+		const dng_image *stage2 = negative->Stage1Image ();
+		if(stage2->Bounds().W() != S.raw_width || stage2->Bounds().H()!= S.raw_height)
+		{
+			return LIBRAW_DATA_ERROR;
+		}
+
+		int pplanes = stage2->Planes();
+		int ptype = stage2->PixelType();
+
+		dng_simple_image resimage(stage2->Bounds(),pplanes,ptype,host->Allocator());
+		resimage.CopyArea(*stage2,stage2->Bounds(),0,0,pplanes);
+		dng_pixel_buffer buffer;
+		resimage.GetPixelBuffer(buffer);
+
+		int pixels =  resimage.Bounds().H () * resimage.Bounds().W () * pplanes;
+		imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ptype));
+
+		if(ptype == ttShort && !is_curve_linear())
+		{
+			ushort *src = (ushort *)buffer.fData;
+			ushort *dst = (ushort*)imgdata.rawdata.raw_alloc;
+			for(int i = 0; i < pixels; i++)
+				dst[i] = imgdata.color.curve[src[i]];
+		}
+		else
+			memmove(imgdata.rawdata.raw_alloc,buffer.fData,pixels * TagTypeSize(ptype));
+
+		S.raw_pitch = S.raw_width*pplanes*TagTypeSize(ptype);
+
+		switch(ptype)
+		{
+		case ttFloat:
+			if(pplanes==1)
+				imgdata.rawdata.float_image = (float*)imgdata.rawdata.raw_alloc;
+			else if(pplanes == 3)
+				imgdata.rawdata.float3_image = (float (*)[3])imgdata.rawdata.raw_alloc;
+			else if(pplanes == 4)
+				imgdata.rawdata.float4_image = (float (*)[4])imgdata.rawdata.raw_alloc;
+			break;
+		case ttShort:
+			if(pplanes==1)
+				imgdata.rawdata.raw_image = (ushort*)imgdata.rawdata.raw_alloc;
+			else if(pplanes == 3)
+				imgdata.rawdata.color3_image = (ushort(*)[3])imgdata.rawdata.raw_alloc;
+			else if(pplanes == 4)
+				imgdata.rawdata.color4_image = (ushort(*)[4])imgdata.rawdata.raw_alloc;
+			break;
+		default:
+			/* do nothing */
+			break;
+		}
+	}
+	catch (...)
+	{
+		return LIBRAW_UNSPECIFIED_ERROR;
+	}
+	return imgdata.rawdata.raw_alloc?LIBRAW_SUCCESS:LIBRAW_UNSPECIFIED_ERROR;
+#else
+	return LIBRAW_UNSPECIFIED_ERROR;
+#endif
+}
+void LibRaw::set_dng_host(void *p)
+{
+#ifdef USE_DNGSDK
+	dnghost = p;
+#endif
+}
+
 int LibRaw::unpack(void)
 {
   CHECK_ORDER_HIGH(LIBRAW_PROGRESS_LOAD_RAW);
@@ -1927,130 +2210,46 @@ int LibRaw::unpack(void)
     imgdata.rawdata.color3_image = 0;
 	imgdata.rawdata.float_image = 0;
 	imgdata.rawdata.float3_image = 0;
-#ifdef USE_RAWSPEED
-	int rawspeed_enabled = 1;
-	int rawspeed_ignore_errors = 0;
-	if(imgdata.idata.dng_version && libraw_internal_data.unpacker_data.tiff_samples == 2)
-		rawspeed_enabled = 0;
 
-	if(imgdata.idata.raw_count > 1)
-		rawspeed_enabled = 0;
-
-	// Disable rawspeed for double-sized Oly files
-	if(!strncasecmp(imgdata.idata.make,"Olympus",7) &&
-		( (!strncasecmp(imgdata.idata.model,"E-M5MarkII",10) && imgdata.sizes.raw_width == 9280) || !strncasecmp(imgdata.idata.model,"SH-2",4) || !strncasecmp(imgdata.idata.model,"TG-4",4))
-		)
-		rawspeed_enabled = 0;
-
-	if(!strncasecmp(imgdata.idata.make,"Canon",5)
- 		&& !strncasecmp(imgdata.idata.model,"EOS 5DS",7)
-		&& (load_raw == &LibRaw::canon_sraw_load_raw))
-		rawspeed_enabled = 0;
-
-	if (imgdata.idata.dng_version && imgdata.idata.colors == 3 && !strcasecmp(imgdata.idata.software, "Adobe Photoshop Lightroom 6.1.1 (Windows)"))
-		rawspeed_ignore_errors = 1;
-
-    // RawSpeed Supported,
-    if(O.use_rawspeed  && rawspeed_enabled
-       && !(is_sraw() && O.sraw_ycc)
-       && (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
-      {
-        INT64 spos = ID.input->tell();
-        void *_rawspeed_buffer = 0;
-        try
-          {
-            //                printf("Using rawspeed\n");
-            ID.input->seek(0,SEEK_SET);
-            INT64 _rawspeed_buffer_sz = ID.input->size()+32;
-            _rawspeed_buffer = malloc(_rawspeed_buffer_sz);
-            if(!_rawspeed_buffer) throw LIBRAW_EXCEPTION_ALLOC;
-            ID.input->read(_rawspeed_buffer,_rawspeed_buffer_sz,1);
-            FileMap map((uchar8*)_rawspeed_buffer,_rawspeed_buffer_sz);
-            RawParser t(&map);
-            RawDecoder *d = 0;
-            CameraMetaDataLR *meta = static_cast<CameraMetaDataLR*>(_rawspeed_camerameta);
-            d = t.getDecoder();
-            if(!d) throw "Unable to find decoder";
-            try {
-              d->checkSupport(meta);
-            }
-            catch (const RawDecoderException& e)
-              {
-                imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_UNSUPPORTED;
-                throw e;
-              }
-            d->interpolateBadPixels = FALSE;
-            d->applyStage1DngOpcodes = FALSE;
-            _rawspeed_decoder = static_cast<void*>(d);
-            d->decodeRaw();
-            d->decodeMetaData(meta);
-            RawImage r = d->mRaw;
-            if( r->errors.size()>0 && !rawspeed_ignore_errors)
-              {
-                delete d;
-                _rawspeed_decoder = 0;
-                throw 1;
-              }
-            if (r->isCFA)
-			{
-              imgdata.rawdata.raw_image = (ushort*) r->getDataUncropped(0,0);
-            }
-			else if(r->getCpp()==4)
-			{
-              imgdata.rawdata.color4_image = (ushort(*)[4]) r->getDataUncropped(0,0);
-			  if(r->whitePoint > 0 && r->whitePoint < 65536)
-					C.maximum = r->whitePoint;
-            } else if(r->getCpp() == 3)
-              {
-                imgdata.rawdata.color3_image = (ushort(*)[3]) r->getDataUncropped(0,0);
-				if(r->whitePoint > 0 && r->whitePoint < 65536)
-					C.maximum = r->whitePoint;
-              }
-            else
-              {
-                delete d;
-                _rawspeed_decoder = 0;
-              }
-            if(_rawspeed_decoder)
-              {
-                // set sizes
-                iPoint2D rsdim = r->getUncroppedDim();
-                S.raw_pitch = r->pitch;
-                S.raw_width = rsdim.x;
-                S.raw_height = rsdim.y;
-                //C.maximum = r->whitePoint;
-                fix_after_rawspeed(r->blackLevel);
-              }
-            free(_rawspeed_buffer);
-            _rawspeed_buffer = 0;
-            imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROCESSED;
-          }
-		catch (const RawDecoderException& RDE)
-		{
-			imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
-			if (_rawspeed_buffer)
-			{
-				free(_rawspeed_buffer);
-				_rawspeed_buffer = 0;
-			}
-			const char *p = RDE.what();
-			if (!strncmp(RDE.what(), "Decoder canceled", strlen("Decoder canceled")))
-				throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
-		}
-        catch (...)
-          {
-            // We may get here due to cancellation flag
-            imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_PROBLEM;
-            if(_rawspeed_buffer)
-              {
-                free(_rawspeed_buffer);
-                _rawspeed_buffer = 0;
-              }
-          }
-        ID.input->seek(spos,SEEK_SET);
-      }
+#ifdef USE_DNGSDK
+	if(imgdata.idata.dng_version && dnghost && valid_for_dngsdk())
+	{
+		int rr = try_dngsdk();
+	}
 #endif
-    if(!imgdata.rawdata.raw_image && !imgdata.rawdata.color4_image && !imgdata.rawdata.color3_image) //RawSpeed failed!
+
+#ifdef USE_RAWSPEED
+	if(!raw_was_read())
+	{
+		int rawspeed_enabled = 1;
+
+		if(imgdata.idata.dng_version && libraw_internal_data.unpacker_data.tiff_samples == 2)
+			rawspeed_enabled = 0;
+
+		if(imgdata.idata.raw_count > 1)
+			rawspeed_enabled = 0;
+
+		// Disable rawspeed for double-sized Oly files
+		if(!strncasecmp(imgdata.idata.make,"Olympus",7) &&
+			( (!strncasecmp(imgdata.idata.model,"E-M5MarkII",10) && imgdata.sizes.raw_width == 9280) || !strncasecmp(imgdata.idata.model,"SH-2",4) || !strncasecmp(imgdata.idata.model,"TG-4",4))
+			)
+			rawspeed_enabled = 0;
+
+		if(!strncasecmp(imgdata.idata.make,"Canon",5)
+			&& !strncasecmp(imgdata.idata.model,"EOS 5DS",7)
+			&& (load_raw == &LibRaw::canon_sraw_load_raw))
+			rawspeed_enabled = 0;
+
+		// RawSpeed Supported,
+		if(O.use_rawspeed  && rawspeed_enabled
+			&& !(is_sraw() && O.sraw_ycc)
+			&& (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
+		{
+			int rr = try_rawspeed();
+		}
+	}
+#endif
+    if(!raw_was_read()) //RawSpeed failed or not run
       {
         // Not allocated on RawSpeed call, try call LibRaw
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_OWNALLOC)
