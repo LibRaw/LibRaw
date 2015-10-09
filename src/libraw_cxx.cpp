@@ -2027,31 +2027,20 @@ int LibRaw::valid_for_dngsdk()
 		return 1;
 	if(!imgdata.idata.filters && (imgdata.params.use_dngsdk & LIBRAW_DNG_LINEAR))
 		return 1;
-//	if(libraw_internal_data.unpacker_data.tiff_bps > 16 && (imgdata.params.use_dngsdk & LIBRAW_DNG_LARGERANGE))
-//		return 1;
-	if(libraw_internal_data.unpacker_data.tiff_samples == 2 && (imgdata.params.use_dngsdk & LIBRAW_DNG_2SAMPLES))
+	if(libraw_internal_data.unpacker_data.tiff_compress == 8 && (imgdata.params.use_dngsdk & LIBRAW_DNG_DEFLATE))
 		return 1;
+	if(libraw_internal_data.unpacker_data.tiff_samples == 2 )
+		return 0; // Always deny 2-samples (old fuji superccd)
 	if(imgdata.idata.filters == 9 && (imgdata.params.use_dngsdk & LIBRAW_DNG_XTRANS))
 		return 1;
-	if(is_fuji_rotated() && (imgdata.params.use_dngsdk & LIBRAW_DNG_FUJIROTATED))
-		return 1;
+	if(is_fuji_rotated())
+		return 0; // refuse 
 	if(imgdata.params.use_dngsdk & LIBRAW_DNG_OTHER)
 		return 1;
 	return 0;
 #endif
 }
 
-
-#ifdef USE_DNGSDK
-class dng_negative_no_opcode1: public dng_negative
-{
-public:
-	void clearOpcodes1() { fOpcodeList1.Clear();}
-	void setFullArea() {fLinearizationInfo->fActiveArea = fStage1Image->Bounds(); }
-	dng_negative_no_opcode1 (dng_host &host) : dng_negative(host){}
-
-};
-#endif
 
 int LibRaw::is_curve_linear()
 {
@@ -2210,7 +2199,7 @@ int LibRaw::unpack(void)
 	imgdata.rawdata.float3_image = 0;
 
 #ifdef USE_DNGSDK
-	if(imgdata.idata.dng_version && dnghost && valid_for_dngsdk())
+	if(imgdata.idata.dng_version && dnghost && valid_for_dngsdk() && load_raw != &LibRaw::pentax_4shot_load_raw)
 	{
 		int rr = try_dngsdk();
 	}
