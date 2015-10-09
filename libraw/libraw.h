@@ -202,8 +202,8 @@ class DllDef LibRaw
   int phase_one_correct();
 
   int  set_rawspeed_camerafile(char *filename);
-  void setCancelFlag();
-  void clearCancelFlag();
+  virtual void setCancelFlag();
+  virtual void clearCancelFlag();
   virtual void adobe_coeff (const char *, const char *, int internal_only=0);
 
   void	set_dng_host(void *);
