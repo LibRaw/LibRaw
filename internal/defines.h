@@ -37,7 +37,7 @@ it under the terms of the one of three licenses as you choose:
 15 = FL-WW; White fluorescent (WW 3200K – 3700K) (F3, residential)
 16 = FL-L; Soft/Warm white fluorescent (L 2600K - 3250K) (F4, kitchen, bath)
 */
-#define Unknown 0
+#define WBI_Unknown 0
 #define Daylight 1
 #define Fluorescent 2
 #define Tungsten 3
