@@ -8013,6 +8013,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           {
             unique_id = get4();
             if (unique_id == 0x03740000) unique_id = 0x80000374;
+            if (unique_id == 0x03840000) unique_id = 0x80000384;
             setCanonBodyFeatures(unique_id);
             if (lenCanonCameraInfo)
               {
@@ -14067,7 +14068,8 @@ void CLASS identify()
     { 0x327, "EOS 1200D" },
     { 0x331, "EOS M" },
     { 0x335, "EOS M2" },
-    { 0x374, "EOS M3"},  /* temp */
+    { 0x374, "EOS M3"},   /* temp */
+    { 0x384, "EOS M10"},  /* temp */
     { 0x346, "EOS 100D" },
     { 0x347, "EOS 760D" },
     { 0x382, "EOS 5DS" },
