@@ -9584,6 +9584,7 @@ void CLASS parse_makernote (int base, int uptag)
 
 #ifdef LIBRAW_LIBRARY_BUILD
         if (unique_id == 0x03740000) unique_id = 0x80000374;
+        if (unique_id == 0x03840000) unique_id = 0x80000384;
         setCanonBodyFeatures(unique_id);
         if (lenCanonCameraInfo)
           {
