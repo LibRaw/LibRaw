@@ -6390,6 +6390,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 269) ||		// a850
       (id == 340) ||		// ILCE-7M2
       (id == 318) ||		// ILCE-7S
+      (id == 350) ||		// ILCE-7SM2
       (id == 311) ||		// ILCE-7R
       (id == 347) ||		// ILCE-7RM2
       (id == 306) ||		// ILCE-7
@@ -6426,6 +6427,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 340) ||
       (id == 346) ||
       (id == 347) ||
+      (id == 350) ||
       // NEX:
       (id == 278) ||
       (id == 279) ||
@@ -12787,6 +12789,7 @@ void CLASS identify()
     { 0x156, "DSC-RX10M2" },
     { 0x15a, "ILCE-QX1" },
     { 0x15b, "ILCE-7RM2" },
+    { 0x15e, "ILCE-7SM2" },
   };
 
   static const struct {
