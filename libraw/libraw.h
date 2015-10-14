@@ -338,7 +338,7 @@ protected:
   void			*_rawspeed_camerameta;
   void          *_rawspeed_decoder;
   void			fix_after_rawspeed(int bl);
-  int			try_rawspeed(); // returns LIBRAW_SUCCESS on success
+  int			try_rawspeed(); /* returns LIBRAW_SUCCESS on success */
   /* Fast cancel flag */
   long          _exitflag;
 

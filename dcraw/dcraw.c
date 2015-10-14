@@ -11652,6 +11652,11 @@ void CLASS apply_tiff()
 	  tiff_bps = 12;
 	  load_raw = &CLASS sony_arw2_load_raw;			break;
 	}
+	if (!strncasecmp(make,"Sony",4) && 
+	    tiff_ifd[raw].bytes == raw_width*raw_height*2) {
+	  tiff_bps = 14;
+	  load_raw = &CLASS unpacked_load_raw;			break;
+	}
 	if (tiff_ifd[raw].bytes*8 != raw_width*raw_height*tiff_bps) {
 	  raw_height += 8;
 	  load_raw = &CLASS sony_arw_load_raw;			break;
@@ -11663,6 +11668,14 @@ void CLASS apply_tiff()
       case 32773: goto slr;
       case 0:  case 1:
 #ifdef LIBRAW_LIBRARY_BUILD
+	// Sony 14-bit uncompressed
+        if(!strncasecmp(make,"Sony",4) && 
+	    tiff_ifd[raw].bytes == raw_width*raw_height*2)
+          {
+	    tiff_bps = 14;
+            load_raw = &CLASS unpacked_load_raw;
+            break;
+	  }
         if(!strncasecmp(make,"Nikon",5) && !strncmp(software,"Nikon Scan",10))
           {
             load_raw = &CLASS nikon_coolscan_load_raw;
@@ -13793,6 +13806,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 5991,-1732,-443,-4100,11989,2381,-704,1467,5992 } },
     { "Sony ILCE-7M2", -512, 0,
       { 5271,-712,-347,-6153,13653,2763,-1601,2366,7242 } },
+    { "Sony ILCE-7SM2", -512, 0,
+      { 5838,-1430,-246,-3497,11477,2297,-748,1885,5778 } },
     { "Sony ILCE-7S", -512, 0,
       { 5838,-1430,-246,-3497,11477,2297,-748,1885,5778 } },
     { "Sony ILCE-7RM2", -512, 0,
