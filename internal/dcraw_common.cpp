@@ -5659,7 +5659,8 @@ void CLASS setCanonBodyFeatures (unsigned id)
             if (
                 (id == 0x80000331) ||	// M
                 (id == 0x80000355) ||	// M2
-                (id == 0x80000374) 	  	// M3
+                (id == 0x80000374) || 	// M3
+                (id == 0x80000384)  	// M10
                 )
               {
                 imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -6805,8 +6806,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         else if (tag == 0x10)	// Canon ModelID
           {
             unique_id = get4();
-            if (unique_id == 0x03740000) unique_id = 0x80000374;
-            if (unique_id == 0x03840000) unique_id = 0x80000384;
+            if (unique_id == 0x03740000) unique_id = 0x80000374;	// M3
+            if (unique_id == 0x03840000) unique_id = 0x80000384;	// M10
             setCanonBodyFeatures(unique_id);
             if (lenCanonCameraInfo)
               {
