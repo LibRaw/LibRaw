@@ -1651,9 +1651,19 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
        )
       imgdata.sizes.width = 4288;
 
-	if (!strncasecmp(imgdata.idata.make, "Sony", 4) && S.raw_width == 8000) // A7R/DNG
+	if (!strncasecmp(imgdata.idata.make, "Sony", 4) && imgdata.idata.dng_version)
 	{
-		S.width = S.raw_width - 32;
+		if(S.raw_width == 3984) S.width = 3925;
+		else if (S.raw_width == 4288) S.width = S.raw_width-32;
+		else if (S.raw_width == 4928 && S.height < 3280) S.width = S.raw_width-8;
+		else if (S.raw_width == 5504) S.width = S.raw_width-(S.height > 3664 ? 8 : 32);
+		else if (S.raw_width == 6048) 
+		{
+			S.width = S.raw_width-24;
+			if (strstr(imgdata.idata.model,"RX1") || strstr(imgdata.idata.model,"A99")) S.width -= 6;
+		}
+		else if (S.raw_width == 7392) S.width = S.raw_width-30;
+		else if(S.raw_width == 8000)	S.width = S.raw_width - 32;
 	}
     
 	if(!strcasecmp(imgdata.idata.make,"Pentax") && !strcasecmp(imgdata.idata.model,"K-3 II") && imgdata.idata.raw_count == 4 && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_PENTAXK32_ALLFRAMES))
