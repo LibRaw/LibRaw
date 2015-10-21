@@ -6397,6 +6397,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 298) ||		// DSC-RX1
       (id == 299) ||		// NEX-VG900
       (id == 310) ||		// DSC-RX1R
+      (id == 344) ||		// DSC-RX1RM2
       (id == 294)			// SLT-99, Hasselblad HV
       )
     {
@@ -6491,6 +6492,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 308) ||  // DSC-RX100M2
            (id == 309) ||  // DSC-RX10
            (id == 310) ||  // DSC-RX1R
+           (id == 344) ||  // DSC-RX1RM2
            (id == 317) ||  // DSC-RX100M3
            (id == 341) ||  // DSC-RX100M4
            (id == 342)     // DSC-RX10M2
@@ -12802,6 +12804,7 @@ void CLASS identify()
     { 0x154, "ILCE-7M2" },
     { 0x155, "DSC-RX100M4" },
     { 0x156, "DSC-RX10M2" },
+    { 0x158, "DSC-RX1RM2" },
     { 0x15a, "ILCE-QX1" },
     { 0x15b, "ILCE-7RM2" },
     { 0x15e, "ILCE-7SM2" },
