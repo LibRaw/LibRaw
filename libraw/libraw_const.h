@@ -77,6 +77,7 @@ enum LibRaw_camera_mounts
     LIBRAW_MOUNT_Leica_T=20,
     LIBRAW_MOUNT_Contax_N=21,
     LIBRAW_MOUNT_Sigma_X3F=22,
+    LIBRAW_MOUNT_Leica_SL=23,
     LIBRAW_MOUNT_FixedLens=99
   };
 

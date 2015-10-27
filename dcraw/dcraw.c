@@ -8809,6 +8809,13 @@ void CLASS parse_makernote (int base, int uptag)
       	  imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_T;
 #endif
       	}
+#ifdef LIBRAW_LIBRARY_BUILD
+      else if (!strncasecmp(model, "LEICA SL", 8))
+      	{
+      	  imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_SL;
+      	  imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
+      	}
+#endif
     }
 
   entries = get2();
@@ -11654,7 +11661,7 @@ void CLASS apply_tiff()
 	  tiff_bps = 12;
 	  load_raw = &CLASS sony_arw2_load_raw;			break;
 	}
-	if (!strncasecmp(make,"Sony",4) && 
+	if (!strncasecmp(make,"Sony",4) &&
 	    tiff_ifd[raw].bytes == raw_width*raw_height*2) {
 	  tiff_bps = 14;
 	  load_raw = &CLASS unpacked_load_raw;			break;
@@ -11671,7 +11678,7 @@ void CLASS apply_tiff()
       case 0:  case 1:
 #ifdef LIBRAW_LIBRARY_BUILD
 	// Sony 14-bit uncompressed
-        if(!strncasecmp(make,"Sony",4) && 
+        if(!strncasecmp(make,"Sony",4) &&
 	    tiff_ifd[raw].bytes == raw_width*raw_height*2)
           {
 	    tiff_bps = 14;
