@@ -455,7 +455,7 @@ int main(int ac, char *av[])
 						    	printf ("%6.5ff}},\n", C.WB_Coeffs[cnt][3]/(float)C.WB_Coeffs[cnt][1]);
 					}
 					for (int cnt=0; cnt<64; cnt++) if (C.WBCT_Coeffs[cnt][0]) {
-						printf ("{\"%s\", \"%s\", \"%dK\", {%6.5ff, 1.0f, %6.5ff, ",
+						printf ("{\"%s\", \"%s\", %d, {%6.5ff, 1.0f, %6.5ff, ",
 							P1.make, P1.model, (int)C.WBCT_Coeffs[cnt][0],
 							C.WBCT_Coeffs[cnt][1]/C.WBCT_Coeffs[cnt][2],
 							C.WBCT_Coeffs[cnt][3]/C.WBCT_Coeffs[cnt][2]);

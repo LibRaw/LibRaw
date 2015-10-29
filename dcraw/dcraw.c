@@ -9840,7 +9840,7 @@ void CLASS parse_makernote (int base, int uptag)
               get2();
               Canon_WBpresets(2,12);
               fseek (ifp, save1+(0xba<<1), SEEK_SET);
-              Canon_WBCTpresets (2);	// BCADT
+              Canon_WBCTpresets (1);	// BCADT
               fseek (ifp, save1+(0x108<<1), SEEK_SET);			// offset 264 short
               int bls=0;
               FORC4 bls+=get2();
