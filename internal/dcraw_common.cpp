@@ -5939,6 +5939,18 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 		fseek (ifp, 2, SEEK_CUR);
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
 	    }
+	else if ((WBCTversion == 2) &&
+		((unique_id == 0x80000374) ||	// M3
+		(unique_id == 0x80000384)))	// M10
+	  for (int i=0; i<15; i++)	// tint, blah, as shot R, as shot B, CСT
+	    {
+		fseek (ifp, 2, SEEK_CUR);
+		fseek (ifp, 2, SEEK_CUR);
+		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+		imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / (float)get2();
+		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / (float)get2();
+		imgdata.color.WBCT_Coeffs[i][0] = get2();
+	    }
 	return;
 }
 
@@ -8633,7 +8645,7 @@ void CLASS parse_makernote (int base, int uptag)
               get2();
               Canon_WBpresets(2,12);
               fseek (ifp, save1+(0xba<<1), SEEK_SET);
-              Canon_WBCTpresets (1);	// BCADT
+              Canon_WBCTpresets (2);	// BCADT
               fseek (ifp, save1+(0x108<<1), SEEK_SET);			// offset 264 short
               int bls=0;
               FORC4 bls+=get2();
