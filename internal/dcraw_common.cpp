@@ -5951,6 +5951,17 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / (float)get2();
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
 	    }
+	else if ((WBCTversion == 2) &&
+		(unique_id == 0x03950000))	// G5 X
+	  for (int i=0; i<15; i++)	// tint, offset, as shot R, as shot B, CСT
+	    {
+		fseek (ifp, 2, SEEK_CUR);
+		fseek (ifp, 2, SEEK_CUR);
+		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+		imgdata.color.WBCT_Coeffs[i][1] = (float)get2() / 512.0f;
+		imgdata.color.WBCT_Coeffs[i][3] = (float)get2() / 512.0f;
+		imgdata.color.WBCT_Coeffs[i][0] = get2();
+	    }
 	return;
 }
 
@@ -8638,7 +8649,7 @@ void CLASS parse_makernote (int base, int uptag)
             break;
 
           case 5120:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 5;	// PowerSot G10, G12, EOS M3
+            imgdata.color.canon_makernotes.CanonColorDataVer = 5;	// PowerSot G10, G12, G5 X, EOS M3
             {
               fseek (ifp, save1+(0x56<<1), SEEK_SET);
               FORC4 imgdata.color.WB_Coeffs[Other][c ^ (c >> 1)] = get2();
