@@ -445,8 +445,8 @@ int main(int ac, char *av[])
                 else if(print_wb) {
                 	printf ("// %s %s\n",P1.make, P1.model);
                 	for (int cnt=0; cnt<25; cnt++) if (C.WB_Coeffs[cnt][0]) {
-						printf ("{\"%s\", \"%s\", \"%s\", {%6.5ff, 1.0f, %6.5ff, ",
-							P1.make, P1.model, WB_LightSources[cnt],
+						printf ("{\"%s\", \"%s\", %d, {%6.5ff, 1.0f, %6.5ff, ",
+							P1.make, P1.model, cnt,
 							C.WB_Coeffs[cnt][0]/(float)C.WB_Coeffs[cnt][1],
 							C.WB_Coeffs[cnt][2]/(float)C.WB_Coeffs[cnt][1]);
 						    if(C.WB_Coeffs[cnt][1] == C.WB_Coeffs[cnt][3])
