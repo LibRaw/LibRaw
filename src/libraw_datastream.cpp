@@ -64,10 +64,11 @@ LibRaw_file_datastream::~LibRaw_file_datastream()
 
 LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
     :filename(fname)
+    ,_fsize(0)
 #ifdef WIN32
     ,wfilename()
 #endif
-    ,jas_file(NULL),_fsize(0)
+    ,jas_file(NULL)
 {
   if (filename.size()>0) 
     {
