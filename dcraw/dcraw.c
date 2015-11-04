@@ -7148,8 +7148,8 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 	    }
 	else if ((WBCTversion == 2) &&
 		((unique_id == 0x80000374) ||	// M3
-		(unique_id == 0x80000384)))	// M10
-	  for (int i=0; i<15; i++)	// tint, blah, as shot R, as shot B, CСT
+		 (unique_id == 0x80000384)))	// M10
+	  for (int i=0; i<15; i++)	// tint, offset, as shot R, as shot B, CСT
 	    {
 		fseek (ifp, 2, SEEK_CUR);
 		fseek (ifp, 2, SEEK_CUR);
@@ -7159,7 +7159,7 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
 	    }
 	else if ((WBCTversion == 2) &&
-		(unique_id == 0x03950000))	// G5 X
+		(unique_id == 0x03950000) || (unique_id == 0x03930000))	// G5 X
 	  for (int i=0; i<15; i++)	// tint, offset, as shot R, as shot B, CСT
 	    {
 		fseek (ifp, 2, SEEK_CUR);
