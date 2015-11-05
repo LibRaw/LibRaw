@@ -2486,6 +2486,11 @@ int LibRaw::is_phaseone_compressed()
   return (load_raw == &LibRaw::phase_one_load_raw_c || load_raw == &LibRaw::phase_one_load_raw);
 }
 
+int LibRaw::is_canon_600()
+{ 
+	return load_raw == &LibRaw::canon_600_load_raw; 
+}
+
 int LibRaw::raw2image(void)
 {
 
