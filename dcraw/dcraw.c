@@ -357,6 +357,13 @@ char *my_strcasestr (char *haystack, const char *needle)
 }
 #define strcasestr my_strcasestr
 #endif
+
+int my_strlen(const char *str)
+{
+	return (int)strnlen(str,0x7fffffff);
+}
+#define strlen(a) my_strlen((a))
+
 //@end COMMON
 
 
