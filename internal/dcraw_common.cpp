@@ -7221,18 +7221,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         }
         else if (tag == 0x022d)
         {
-//        	ushort nWB, iWB, adjusted = 0;
-//	if (!strncmp(model+7, "Q ", 2) || !strncmp(model+7, "Q7 ", 3) || !strncmp(model+7, "Q10 ", 4)) fseek (ifp,-10,SEEK_CUR);
-//         	nWB = getc(ifp);
-//         	iWB = getc(ifp);
-//          	if ((nWB != 11) && (nWB != 12))
-//          	{
-//          		fseek (ifp,8,SEEK_CUR);
-//          		nWB = getc(ifp);
-//          		iWB = getc(ifp);
-//          		adjusted = 1;
-//          	}
-//        	fprintf (stderr, _("\nmakernote_0xc634: buf -=%s=- make -=%s=- model -=%s=- adjusted: %d order 0x%x nWB= %d iWB= %d\n"), buf, make, model, adjusted, order, nWB, iWB);
 	  fseek (ifp,2,SEEK_CUR);
 	  FORC4 imgdata.color.WB_Coeffs[Daylight][c ^ (c >> 1)] = get2();
 	  getc(ifp);
@@ -7251,9 +7239,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 	  FORC4 imgdata.color.WB_Coeffs[Flash][c ^ (c >> 1)] = get2();
 	  getc(ifp);
 	  FORC4 imgdata.color.WB_Coeffs[FL_L][c ^ (c >> 1)] = get2();
-	  //        	fprintf (stderr, _("Daylight: %d %d %d %d\n"), imgdata.color.WB_Coeffs[Daylight][0], imgdata.color.WB_Coeffs[Daylight][1], imgdata.color.WB_Coeffs[Daylight][2], imgdata.color.WB_Coeffs[Daylight][3]);
-//        	fprintf (stderr, _("Tungsten: %d %d %d %d\n"), imgdata.color.WB_Coeffs[Tungsten][0], imgdata.color.WB_Coeffs[Tungsten][1], imgdata.color.WB_Coeffs[Tungsten][2], imgdata.color.WB_Coeffs[Tungsten][3]);
-
         }
         else if (tag == 0x0239)		// Q-series lens info (LensInfoQ)
           {
@@ -10906,24 +10891,30 @@ void CLASS parse_ciff (int offset, int length, int depth)
       }
     }
 #ifdef LIBRAW_LIBRARY_BUILD
-	if (type == 0x10a9) {
-    		fseek (ifp, (0x5<<1), SEEK_CUR);
-            Canon_WBpresets(0,0);
-	}
-    if (type == 0x102d) {
-        fseek(ifp, 44, SEEK_CUR);
-        imgdata.lens.makernotes.LensID = get2();
-        imgdata.lens.makernotes.MaxFocal = get2();
-        imgdata.lens.makernotes.MinFocal = get2();
-        imgdata.lens.makernotes.CanonFocalUnits = get2();
-        if (imgdata.lens.makernotes.CanonFocalUnits != 1)
-          {
+    if (type == 0x10a9)
+      {
+	INT64 o = ftell(ifp);
+	fseek (ifp, (0x5<<1), SEEK_CUR);
+	Canon_WBpresets(0,0);
+	fseek(ifp,o,SEEK_SET);
+      }
+    if (type == 0x102d)
+      {
+	INT64 o = ftell(ifp);
+	fseek(ifp, 44, SEEK_CUR);
+	imgdata.lens.makernotes.LensID = get2();
+	imgdata.lens.makernotes.MaxFocal = get2();
+	imgdata.lens.makernotes.MinFocal = get2();
+	imgdata.lens.makernotes.CanonFocalUnits = get2();
+	if (imgdata.lens.makernotes.CanonFocalUnits != 1)
+	  {
             imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
             imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-          }
-        imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
-        imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
-    }
+	  }
+	imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
+	imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
+	fseek(ifp,o,SEEK_SET);
+      }
 #endif
     if (type == 0x0032) {
       if (len == 768) {			/* EOS D30 */
