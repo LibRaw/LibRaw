@@ -4530,7 +4530,7 @@ static const char  *static_camera_list[] =
 "Leica S2",
 "Leica S (Typ 007)",
 //"Leica S3",
-"Leica SL (Typ 603)",
+"Leica SL (Typ 601)",
 "Leica T (Typ 701)",
 "Leica X1",
 "Leica X (Typ 113)",
