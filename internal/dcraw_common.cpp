@@ -13549,7 +13549,7 @@ canon_a5:
   } else if (!strncmp(model,"COOLPIX P",9) && raw_width != 4032) {
     load_flags = 24;
     filters = 0x94949494;
-    if (model[9] == '7' && iso_speed >= 400)
+    if (model[9] == '7' && (iso_speed >= 400 || iso_speed==0) && !strstr(software,"V1.2") )
       black = 255;
   } else if (!strncmp(model,"1 ",2)) {
     height -= 2;
