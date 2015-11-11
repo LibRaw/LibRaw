@@ -215,7 +215,7 @@ protected:
     void phase_one_allocate_tempbuffer();
     void phase_one_free_tempbuffer();
     virtual int  is_phaseone_compressed();
-	virtual int  is_canon_600();// { return load_raw == &LibRaw::canon_600_load_raw; }
+	virtual int  is_canon_600();
     /* Hotspots */
     virtual void copy_fuji_uncropped(unsigned short cblack[4], unsigned short *dmaxp);
     virtual void copy_bayer(unsigned short cblack[4], unsigned short *dmaxp);

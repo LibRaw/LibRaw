@@ -2381,6 +2381,24 @@ void CLASS unpacked_load_raw()
   }
 }
 
+void CLASS unpacked_load_raw_reversed()
+{
+    int row, col, bits=0;
+    while (1 << ++bits < maximum);
+    for (row=raw_height-1; row >= 0; row--)
+    {
+#ifdef LIBRAW_LIBRARY_BUILD
+	checkCancel();
+#endif
+	read_shorts (&raw_image[row*raw_width], raw_width);
+	for (col=0; col < raw_width; col++)
+		if ((RAW(row,col) >>= load_flags) >> bits
+			&& (unsigned) (row-top_margin) < height
+			&& (unsigned) (col-left_margin) < width) derror();
+    }
+}
+
+
 
 void CLASS sinar_4shot_load_raw()
 {
@@ -14220,6 +14238,7 @@ void CLASS identify()
     { 1540857,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"Samsung","S3" },
     { 10223363,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"Samsung","GalaxyNexus" },
     //   Android Raw dumps id end
+    {  20137344,3664,2748,0, 0, 0, 0,0x40,0x49,0,0,"Aptina","MT9J003",0xffff },
 
     {  2868726,1384,1036, 0, 0, 0, 0,64,0x49,0,8,"Baumer","TXG14",1078 },
     {  5298000,2400,1766,12,12,44, 2,40,0x94,0,2,"Canon","PowerShot SD300" },
@@ -14560,7 +14579,7 @@ void CLASS identify()
 	zero_is_bad = table[i].flags & 2;
 	if (table[i].flags & 1)
 	  parse_external_jpeg();
-	data_offset = table[i].offset;
+	data_offset = table[i].offset == 0xffff?0:table[i].offset;
 	raw_width   = table[i].rw;
 	raw_height  = table[i].rh;
 	left_margin = table[i].lm;
@@ -14588,7 +14607,7 @@ void CLASS identify()
 	    order = 0x4949 | 0x404 * (load_flags & 1);
 	    tiff_bps -= load_flags >> 4;
 	    tiff_bps -= load_flags = load_flags >> 1 & 7;
-	    load_raw = &CLASS unpacked_load_raw;
+	    load_raw = table[i].offset == 0xffff ? &CLASS  unpacked_load_raw_reversed : &CLASS  unpacked_load_raw;
 	}
 	maximum = (1 << tiff_bps) - (1 << table[i].max);
       }
