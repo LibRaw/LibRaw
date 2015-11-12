@@ -6256,6 +6256,10 @@ void CLASS PentaxLensInfo (unsigned id, unsigned len)	// tag 0x0207
 			if (table_buf[iLensData] & 0x70)
 			  imgdata.lens.makernotes.LensFStops =
 				((float)(((table_buf[iLensData] & 0x70) >> 4) ^ 0x07)) / 2.0f + 5.0f;
+
+			imgdata.lens.makernotes.MinFocusDistance = (float)(table_buf[iLensData+3] & 0xf8);
+			imgdata.lens.makernotes.FocusRangeIndex = (float)(table_buf[iLensData+3] & 0x07);
+
 			if ((table_buf[iLensData+14] > 1) &&
 				(fabs(imgdata.lens.makernotes.MaxAp4CurFocal) < 0.7f))
 			  imgdata.lens.makernotes.MaxAp4CurFocal =

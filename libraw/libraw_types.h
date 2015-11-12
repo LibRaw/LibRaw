@@ -402,6 +402,8 @@ typedef struct
 	float	MaxAp, MinAp;
 	float	CurFocal, CurAp;
 	float	MaxAp4CurFocal, MinAp4CurFocal;
+	float	MinFocusDistance;
+	float	FocusRangeIndex;
 	float	LensFStops;
 	unsigned long long TeleconverterID;
 	char	Teleconverter[128];
