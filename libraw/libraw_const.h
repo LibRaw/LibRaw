@@ -23,6 +23,41 @@ it under the terms of the one of three licenses as you choose:
 #define LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD 0.75
 #define LIBRAW_DEFAULT_AUTO_BRIGHTNESS_THRESHOLD 0.01
 
+enum LibRaw_whitebalance_code
+{
+    // EXIF light sources
+    /*
+    12 = FL-D; Daylight fluorescent (D 5700K – 7100K) (F1,F5)
+    13 = FL-N; Day white fluorescent (N 4600K – 5400K) (F7,F8)
+    14 = FL-W; Cool white fluorescent (W 3900K – 4500K) (F2,F6, office, store, warehouse)
+    15 = FL-WW; White fluorescent (WW 3200K – 3700K) (F3, residential)
+    16 = FL-L; Soft/Warm white fluorescent (L 2600K - 3250K) (F4, kitchen, bath)
+    */
+LIBRAW_WBI_Unknown=0,
+LIBRAW_WBI_Daylight=1,
+LIBRAW_WBI_Fluorescent=2,
+LIBRAW_WBI_Tungsten=3,
+LIBRAW_WBI_Flash=4,
+LIBRAW_WBI_FineWeather=9,
+LIBRAW_WBI_Cloudy=10,
+LIBRAW_WBI_Shade=11,
+LIBRAW_WBI_FL_D=12,
+LIBRAW_WBI_FL_N=13,
+LIBRAW_WBI_FL_W=14,
+LIBRAW_WBI_FL_WW=15,
+LIBRAW_WBI_FL_L=16,
+LIBRAW_WBI_Ill_A=17,
+LIBRAW_WBI_Ill_B=18,
+LIBRAW_WBI_Ill_C=19,
+LIBRAW_WBI_D55=20,
+LIBRAW_WBI_D65=21,
+LIBRAW_WBI_D75=22,
+LIBRAW_WBI_D50=23,
+LIBRAW_WBI_StudioTungsten=24,
+LIBRAW_WBI_Sunset=64,
+LIBRAW_WBI_Other=255
+};
+
 enum LibRaw_colormatrix_type
   {
     LIBRAW_CMATRIX_NONE=0,

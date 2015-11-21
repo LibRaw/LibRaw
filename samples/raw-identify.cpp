@@ -43,29 +43,6 @@ it under the terms of the one of three licenses as you choose:
 #define C MyCoolRawProcessor.imgdata.color
 #define T MyCoolRawProcessor.imgdata.thumbnail
 
-#define Unknown 0
-#define Daylight 1
-#define Fluorescent 2
-#define Tungsten 3
-#define Flash 4
-#define FineWeather 9
-#define Cloudy 10
-#define Shade 11
-#define FL_D 12
-#define FL_N 13
-#define FL_W 14
-#define FL_WW 15
-#define FL_L 16
-#define Ill_A 17
-#define Ill_B 18
-#define Ill_C 19
-#define D55 20
-#define D65 21
-#define D75 22
-#define D50 23
-#define StudioTungsten 24
-#define Sunset 64
-#define Other 255
 
 const char *EXIF_LightSources[] = {
 	"Unknown",
@@ -358,10 +335,10 @@ int main(int ac, char *av[])
             		for(int c=0;c<4;c++) printf (" %d", C.WB_Coeffs[cnt][c]);
             	}
             }
-            if (C.WB_Coeffs[Other][0] > 0)
+            if (C.WB_Coeffs[LIBRAW_WBI_Other][0] > 0)
             	{
-            		printf ("\nMakernotes 'Other' multipliers:", EXIF_LightSources[Other]);
-            		for(int c=0;c<4;c++) printf (" %d", C.WB_Coeffs[Other][c]);
+                        printf ("\nMakernotes 'Other' multipliers:");
+                        for(int c=0;c<4;c++) printf (" %d", C.WB_Coeffs[LIBRAW_WBI_Other][c]);
             	}
             printf("\nXYZ->CamRGB matrix:\n");
             for(int i=0; i< P1.colors; i++)

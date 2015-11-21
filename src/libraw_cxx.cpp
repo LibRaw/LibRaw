@@ -5239,11 +5239,11 @@ void LibRaw::parse_x3f()
   }
   // Try to get thumbnail data
   LibRaw_thumbnail_formats format = LIBRAW_THUMBNAIL_UNKNOWN;
-  if(DE = x3f_get_thumb_jpeg(x3f))
+  if( (DE = x3f_get_thumb_jpeg(x3f)))
     {
       format = LIBRAW_THUMBNAIL_JPEG;
     }
-  else if(DE = x3f_get_thumb_plain(x3f))
+  else if( (DE = x3f_get_thumb_plain(x3f)))
     {
       format = LIBRAW_THUMBNAIL_BITMAP;
     }

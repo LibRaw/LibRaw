@@ -1,39 +1,75 @@
-2015-08-18  Alex Tutubalin <lexa@lexa.ru>
- * (experimental) floating point DNG support:
+2015-11-..  Alex Tutubalin <lexa@lexa.ru>
+ * Camera stored white balance coefficients are extracted into:
+   int imgdata.color.WBCoeffs[256][4] - array indexed by EXIF lightsource type
+    for example, WBCoeffs[21][..] contains coefficients for D65 lightsource
+   float imgdata.color.WBCT_Coeffs[64][5] contains white balance data specified
+   for given color temperature: WBCT_Coeffs[i][0] contains temperature value,
+   and [1]..[4] are WB coefficients.
+
+ * LibRaw can be built with Adobe DNG SDK support (you'll need to compile
+   this SDK yourself for your system).
+   To compile/build with DNG SDK specify USE_DNGSDK in compiler flags (you may also need to adjust include  path and linker settings).
+   On Runtime:
+     - create dng_host (or derived class) entity in your program;
+     - pass it to LibRaw:set_dng_host(dng_host *) call to enable DNG SDK use on runtime
+     - adjust imgdata.params.use_dngsdk parameter with one of this values
+       (ORed bitwise):
+       LIBRAW_DNG_NONE - do not use DNG SDK for DNG processing
+       LIBRAW_DNG_FLOAT - process floating point DNGs via Adobe DNG SDK
+       LIBRAW_DNG_LINEAR - process 'linear DNG' (i.e. demosaiced)
+       LIBRAW_DNG_DEFLATE - process DNGs compressed with deflate (gzip)
+       LIBRAW_DNG_XTRANS - process Fuji X-Trans DNGs (6x6 CFA)
+       LIBRAW_DNG_OTHER - process other files (so usual 2x2 bayer)
+     Default value for this field:
+       LIBRAW_DNG_DEFAULT=LIBRAW_DNG_FLOAT|LIBRAW_DNG_LINEAR|LIBRAW_DNG_DEFLATE
+     You also may use this macro to pass all supported DNGs to Adobe SDK:
+       LIBRAW_DNG_ALL = LIBRAW_DNG_FLOAT|LIBRAW_DNG_LINEAR|LIBRAW_DNG_XTRANS|LIBRAW_DNG_OTHER
+ * New API calls
+    unsigned LibRaw::capabilities and C-API libraw_capabilities()
+    allows developers to determine LibRaw compile flags at runtime.
+    Returns ORed bit fields:
+    LIBRAW_CAPS_RAWSPEED - LibRaw was compiled with RawSpeed Support
+    LIBRAW_CAPS_DNGSDK - LibRaw was compiled with Adobe DNG SDK
+    LIBRAW_CAPS_DEMOSAICSGPL2, LIBRAW_CAPS_DEMOSAICSGPL3 - LibRaw was compiled with demosaic packs (GPL2/GPL3)
+ * floating point support:
    - new data fields:
      imgdata.rawdata.float_image - bayer float data
      imgdata.rawdata.float3_image - 3-component float data
      imgdata.rawdata.float4_image - 4-component float data
      imgdata.color.fmaximum - float data maximum (calculated from real data, rounded to 1.0 if below 1.0)
   - new raw processing flag 
-     LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT - converts float data to 16-bit integer immediately after decoding
-     with default parameters
+     LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT - converts float data to 16-bit integer immediately after decoding with default parameters
   - new API Calls:
     int LibRaw::is_floating_point() returns non-zero if RAW file contains floating point data
-    int LibRaw::have_fpdata() returns non-zero if rawdata.float*_image is not null (so FP
-    data has unpacked but not converted to integrer, see below).
-
-    LibRaw::convertFloatToInt(float dmin=4096.f, float dmax=32767.f, float dtarget = 16383.f)
-    converts float/float3/float4_image to raw_image/color3/color4_image with or withou scaling:
-    - if both real data maximum and metadata maximum are within range ( >= dmin && <=dmax),
-      float data are just converted to int
+    int LibRaw::have_fpdata() returns non-zero if rawdata.float*_image is not null (so FP data has unpacked but not converted to integrer, see below).
+    LibRaw::convertFloatToInt(float dmin=4096.f, float dmax=32767.f, float dtarget = 16383.f) converts float/float3/float4_image to raw_image/color3/color4_image with or withou scaling:
+    - if both real data maximum and metadata maximum are within range ( >= dmin && <=dmax), float data are just converted to int
     - if data is out of range noted above, values are scaled so real data maximum becomes dtarget
     - if data was rescaled (normalized), scale multiplier is stored in imgdata.color.fnorm
 
+ * new data field imgdata.color.dng_color.forwardmatrix, the name speaks for itself
  * Fix for DualISO Canon DNG files
-
-2015-08-17  Alex Tutubalin <lexa@lexa.ru>
+ * Fix for Nikon P7000/7100 Firmware 1.2
+ * Fix for Nikon 1 Series 12-bit uncompressed format
+ * Fix for Sony A7 Series uncompressed format (incorrect BitsPerSample in metadata)
  * params.sony_arw2_options and params.x3f_flags are merged into one
    bitfiled params.raw_processing_options
  * enums LibRaw_sonyarw2_options and LibRaw_dp2q_options are merged into one
    LibRaw_processing_options
  * default value for params.raw_processing_options is 
-       LIBRAW_PROCESSING_DP2Q_INTERPOLATERG| LIBRAW_PROCESSING_DP2Q_INTERPOLATERG
+     LIBRAW_PROCESSING_DP2Q_INTERPOLATERG| LIBRAW_PROCESSING_DP2Q_INTERPOLATERG
  * new processing option LIBRAW_PROCESSING_PENTAXK32_ALLFRAMES
    turns on 4 frame merge for Pentax K3-II 4-shot images
  * dcraw_emu: new -R <num> switch allows to set params.raw_processing_options
-
  * dcraw 9.26 completely imported, support for BlackMagic URSA '3:1 compressed' files
+ * Camera support:
+   BlackMagic URSA
+   Canon G5 X, G9 X, EOS M10
+   DXO One
+   Leica S (Typ 007), SL (Typ 601)
+   Olympus E-M10 Mark II
+   Richoh GR II
+   Sony A7S II
 
 2015-08-15  Alex Tutubalin <lexa@lexa.ru>
 

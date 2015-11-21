@@ -31,38 +31,6 @@ it under the terms of the one of three licenses as you choose:
 #line 38 "dcraw/dcraw.c"
 #define DCRAW_VERSION "9.26"
 
-// EXIF light sources
-/*
-12 = FL-D; Daylight fluorescent (D 5700K – 7100K) (F1,F5)
-13 = FL-N; Day white fluorescent (N 4600K – 5400K) (F7,F8)
-14 = FL-W; Cool white fluorescent (W 3900K – 4500K) (F2,F6, office, store, warehouse)
-15 = FL-WW; White fluorescent (WW 3200K – 3700K) (F3, residential)
-16 = FL-L; Soft/Warm white fluorescent (L 2600K - 3250K) (F4, kitchen, bath)
-*/
-#define WBI_Unknown 0
-#define Daylight 1
-#define Fluorescent 2
-#define Tungsten 3
-#define Flash 4
-#define FineWeather 9
-#define Cloudy 10
-#define Shade 11
-#define FL_D 12
-#define FL_N 13
-#define FL_W 14
-#define FL_WW 15
-#define FL_L 16
-#define Ill_A 17
-#define Ill_B 18
-#define Ill_C 19
-#define D55 20
-#define D65 21
-#define D75 22
-#define D50 23
-#define StudioTungsten 24
-#define Sunset 64
-#define Other 255
-
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -79,7 +47,7 @@ it under the terms of the one of three licenses as you choose:
 #include <string.h>
 #include <time.h>
 #include <sys/types.h>
-#line 97 "dcraw/dcraw.c"
+#line 65 "dcraw/dcraw.c"
 #ifdef __CYGWIN__
 #include <io.h>
 #endif
@@ -90,7 +58,7 @@ it under the terms of the one of three licenses as you choose:
 #define snprintf _snprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
-#line 111 "dcraw/dcraw.c"
+#line 79 "dcraw/dcraw.c"
 #else
 #include <unistd.h>
 #include <utime.h>
@@ -132,7 +100,7 @@ typedef unsigned long long UINT64;
 #ifndef LONG_BIT
 #define LONG_BIT (8 * sizeof (long))
 #endif
-#line 226 "dcraw/dcraw.c"
+#line 194 "dcraw/dcraw.c"
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
@@ -190,7 +158,7 @@ typedef unsigned long long UINT64;
 
 #define RAW(row,col) \
 	raw_image[(row)*raw_width+(col)]
-#line 289 "dcraw/dcraw.c"
+#line 257 "dcraw/dcraw.c"
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 
