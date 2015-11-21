@@ -182,7 +182,7 @@ typedef struct
     int         flip;
     int         mask[8][4];
     int         OlympusCropID;
-    ushort      OlympusFrame[4];	// upper left XY, lower right XY
+    ushort      OlympusFrame[4];	/* upper left XY, lower right XY */
 
 
 } libraw_image_sizes_t;

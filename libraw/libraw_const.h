@@ -25,14 +25,14 @@ it under the terms of the one of three licenses as you choose:
 
 enum LibRaw_whitebalance_code
 {
-    // EXIF light sources
-    /*
+/*
+    EXIF light sources
     12 = FL-D; Daylight fluorescent (D 5700K – 7100K) (F1,F5)
     13 = FL-N; Day white fluorescent (N 4600K – 5400K) (F7,F8)
     14 = FL-W; Cool white fluorescent (W 3900K – 4500K) (F2,F6, office, store, warehouse)
     15 = FL-WW; White fluorescent (WW 3200K – 3700K) (F3, residential)
     16 = FL-L; Soft/Warm white fluorescent (L 2600K - 3250K) (F4, kitchen, bath)
-    */
+*/
 LIBRAW_WBI_Unknown=0,
 LIBRAW_WBI_Daylight=1,
 LIBRAW_WBI_Fluorescent=2,
@@ -74,7 +74,7 @@ enum LibRaw_dng_processing
 	LIBRAW_DNG_DEFLATE=4,
 	LIBRAW_DNG_XTRANS=8,
 	LIBRAW_DNG_OTHER=16,
-	//LIBRAW_DNG_LARGERANGE=64, // more than 16 bit integer
+	/*LIBRAW_DNG_LARGERANGE=64,*/ /* more than 16 bit integer */
 	LIBRAW_DNG_ALL = LIBRAW_DNG_FLOAT|LIBRAW_DNG_LINEAR|LIBRAW_DNG_XTRANS|LIBRAW_DNG_OTHER /* |LIBRAW_DNG_LARGERANGE */,
 	LIBRAW_DNG_DEFAULT=LIBRAW_DNG_FLOAT|LIBRAW_DNG_LINEAR|LIBRAW_DNG_DEFLATE
 };

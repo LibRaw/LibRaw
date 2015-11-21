@@ -7373,10 +7373,11 @@ void CLASS PentaxLensInfo (unsigned id, unsigned len)	// tag 0x0207
 	table_buf = (uchar*)malloc(MAX(len,128));
 	fread(table_buf, len, 1, ifp);
 	if ((id < 0x12b9c) ||
-		((id == 0x12b9c) ||	// K100D
-		 (id == 0x12b9d) ||	// K110D
-		 (id == 0x12ba2) &&	// K100D Super
-		 (!table_buf[20] || (table_buf[20] == 0xff))))
+        (((id == 0x12b9c) ||  // K100D
+          (id == 0x12b9d) ||  // K110D
+          (id == 0x12ba2)) && // K100D Super
+		 ((!table_buf[20] ||
+		  (table_buf[20] == 0xff)))))
 	  {
 		iLensData = 3;
 		if (imgdata.lens.makernotes.LensID == -1)
@@ -9225,9 +9226,9 @@ void CLASS parse_makernote (int base, int uptag)
           }
       }
 
-    else if (!strncmp(make, "PENTAX", 6) ||
-             !strncmp(model, "PENTAX", 6) ||
-             (!strncmp(make, "SAMSUNG", 7) && dng_version) &&
+    else if ((!strncmp(make, "PENTAX", 6) ||
+              !strncmp(model, "PENTAX", 6) ||
+             (!strncmp(make, "SAMSUNG", 7) && dng_version)) &&
              strncmp(model, "GR", 2))
       {
         if (tag == 0x0005)
