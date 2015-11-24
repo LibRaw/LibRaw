@@ -1449,7 +1449,8 @@ int LibRaw::unpack(void)
 #endif
     if(!imgdata.rawdata.raw_image && !imgdata.rawdata.color4_image && !imgdata.rawdata.color3_image) //RawSpeed failed!
       {
-        // Not allocated on RawSpeed call, try call LibRaw
+        // Not allocated on RawSpeed call, try call LibRaow
+	int zero_rawimage = 0;
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_OWNALLOC)
           {
             // x3f foveon decoder
@@ -1472,6 +1473,8 @@ int LibRaw::unpack(void)
             // allocate image as temporary buffer, size
             imgdata.rawdata.raw_alloc = 0;
             imgdata.image = (ushort (*)[4]) calloc(S.iwidth*S.iheight,sizeof(*imgdata.image));
+	    imgdata.rawdata.raw_image = (ushort*) imgdata.image ;
+	    zero_rawimage = 1;
           }
         ID.input->seek(libraw_internal_data.unpacker_data.data_offset, SEEK_SET);
 
@@ -1479,6 +1482,8 @@ int LibRaw::unpack(void)
         if(load_raw == &LibRaw::unpacked_load_raw && !strcasecmp(imgdata.idata.make,"Nikon"))
           C.maximum=65535;
         (this->*load_raw)();
+	if(zero_rawimage)
+	  imgdata.rawdata.raw_image = 0;
         if(load_raw == &LibRaw::unpacked_load_raw && !strcasecmp(imgdata.idata.make,"Nikon"))
           C.maximum = m_save;
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_OWNALLOC)
