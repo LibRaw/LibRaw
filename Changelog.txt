@@ -1,3 +1,9 @@
+2015-11-24  Alex Tutubalin <lexa@lexa.ru>
+ * fixed two errors found by fuzzer
+ * phase_one_correct always returns value; handle P1 return codes in postproces
+ sing
+ * LibRaw 0.17.1
+
 2015-08-15  Alex Tutubalin <lexa@lexa.ru>
 
  * LibRaw 0.17 
