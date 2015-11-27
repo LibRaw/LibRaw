@@ -6834,6 +6834,29 @@ static float _CanonConvertAperture(ushort in)
   return powf64(2.0, in/64.0);
 }
 
+static float _CanonConvertEV (short in)
+{
+	short EV, Sign, Frac;
+	float Frac_f;
+	EV = in;
+	if (EV < 0) {
+	  EV = -EV;
+	  Sign = -1;
+	} else {
+	  Sign = 1;
+	}
+	Frac = EV & 0x1f;
+	EV -= Frac;			// remove fraction
+
+	if (Frac == 0x0c) {		// convert 1/3 and 2/3 codes
+	  Frac_f = 32.0f / 3.0f;
+	} else if (Frac == 0x14) {
+	  Frac_f = 64.0f / 3.0f;
+	} else Frac_f = (float) Frac;
+
+	return ((float)Sign * ((float)EV + Frac_f))/32.0f;
+}
+
 void CLASS setCanonBodyFeatures (unsigned id)
       {
       imgdata.lens.makernotes.CamID = id;
@@ -8028,7 +8051,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         else if (tag == 0x0004)			// shot info
           {
             short tempAp;
-            fseek(ifp, 8, SEEK_CUR);
+            fseek(ifp, 30, SEEK_CUR);
+            imgdata.other.FlashEC = _CanonConvertEV((signed short)get2());
+            fseek(ifp, 8-32, SEEK_CUR);
             if ((tempAp = get2()) != 0x7fff)
               imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
             if (imgdata.lens.makernotes.CurAp < 0.7f)
@@ -8102,6 +8127,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
+      case 0x1011: imgdata.other.FlashEC = getreal(type); break;
       case 0x1404: imgdata.lens.makernotes.MinFocal = getreal(type); break;
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
@@ -8878,7 +8904,9 @@ void CLASS parse_makernote (int base, int uptag)
         else if (tag == 0x0004)			// shot info
           {
             short tempAp;
-            fseek(ifp, 8, SEEK_CUR);
+            fseek(ifp, 30, SEEK_CUR);
+            imgdata.other.FlashEC = _CanonConvertEV((signed short)get2());
+            fseek(ifp, 8-32, SEEK_CUR);
             if ((tempAp = get2()) != 0x7fff)
               imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
             if (imgdata.lens.makernotes.CurAp < 0.7f)
@@ -8937,6 +8965,7 @@ void CLASS parse_makernote (int base, int uptag)
 
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
+      case 0x1011: imgdata.other.FlashEC = getreal(type); break;
       case 0x1404: imgdata.lens.makernotes.MinFocal = getreal(type); break;
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
@@ -10518,14 +10547,13 @@ void CLASS parse_kodak_ifd (int base)
   if (entries > 1024) return;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
-#ifdef LIBRAW_LIBRARY_BUILD
     if(callbacks.exif_cb)
       {
         int savepos = ftell(ifp);
         callbacks.exif_cb(callbacks.exifparser_data,tag | 0x20000,type,len,order,ifp);
         fseek(ifp,savepos,SEEK_SET);
       }
-#endif
+    if (tag == 1011) imgdata.other.FlashEC = getreal(type);
     if (tag == 1020) wbi = getint(type);
     if (tag == 1021 && len == 72) {		/* WB set in software */
       fseek (ifp, 40, SEEK_CUR);

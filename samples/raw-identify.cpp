@@ -288,6 +288,7 @@ int main(int ac, char *av[])
             printf ("%0.1f sec\n", P2.shutter);
             printf ("Aperture: f/%0.1f\n", P2.aperture);
             printf ("Focal length: %0.1f mm\n", P2.focal_len);
+            printf ("Flash exposure compensation: %0.2f EV\n", P2.FlashEC);
             if(C.profile)
                 printf ("Embedded ICC profile: yes, %d bytes\n", C.profile_length);
             else
