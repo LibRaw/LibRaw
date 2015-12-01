@@ -346,24 +346,24 @@ int main(int ac, char *av[])
                 printf("%6.4f\t%6.4f\t%6.4f\n",C.cam_xyz[i][0],C.cam_xyz[i][1],C.cam_xyz[i][2]);
 
 			if (C.dng_color[0].illuminant < 0xffff)
-				printf ("\nDNG Illuminant 1: %s", EXIF_LightSources[C.dng_color[0].illuminant]);
-			if (C.dng_color[1].illuminant < 0xffff)
+ 				printf ("\nDNG Illuminant 1: %s", EXIF_LightSources[C.dng_color[0].illuminant]);
+ 			if (C.dng_color[1].illuminant < 0xffff)
 				printf ("\nDNG Illuminant 2: %s", EXIF_LightSources[C.dng_color[1].illuminant]);
 
-            if (C.dng_color[0].colormatrix[0][0] > 0)
+            if (fabsf(C.dng_color[0].colormatrix[0][0]) > 0)
             {
             	printf("\nDNG color matrix 1:\n");
             	for(int i=0; i< P1.colors; i++)
             		printf("%6.4f\t%6.4f\t%6.4f\n",C.dng_color[0].colormatrix[i][0],C.dng_color[0].colormatrix[i][1],C.dng_color[0].colormatrix[i][2]);
             }
-            if (C.dng_color[1].colormatrix[0][0] > 0)
+            if (fabsf(C.dng_color[1].colormatrix[0][0]) > 0)
             {
             	printf("\nDNG color matrix 2:\n");
             	for(int i=0; i< P1.colors; i++)
             		printf("%6.4f\t%6.4f\t%6.4f\n",C.dng_color[1].colormatrix[i][0],C.dng_color[1].colormatrix[i][1],C.dng_color[1].colormatrix[i][2]);
             }
 
-            if (C.dng_color[0].calibration[0][0] > 0)
+            if (fabsf(C.dng_color[0].calibration[0][0]) > 0)
             {
             	printf("\nDNG calibration matrix 1:\n");
             	for(int i=0; i< P1.colors; i++)
@@ -373,7 +373,7 @@ int main(int ac, char *av[])
                 		printf ("\n");
                 	}
             }
-            if (C.dng_color[1].calibration[0][0] > 0)
+            if (fabsf(C.dng_color[1].calibration[0][0]) > 0)
             {
             	printf("\nDNG calibration matrix 2:\n");
             	for(int i=0; i< P1.colors; i++)
@@ -384,13 +384,13 @@ int main(int ac, char *av[])
                 	}
             }
 
-            if (C.dng_color[0].forwardmatrix[0][0] > 0)
+            if (fabsf(C.dng_color[0].forwardmatrix[0][0]) > 0)
             {
             	printf("\nDNG forward matrix 1:\n");
             	for(int i=0; i< P1.colors; i++)
                 	printf("%6.4f\t%6.4f\t%6.4f\n",C.dng_color[0].forwardmatrix[0][i],C.dng_color[0].forwardmatrix[1][i],C.dng_color[0].forwardmatrix[2][i]);
             }
-            if (C.dng_color[1].forwardmatrix[0][0] > 0)
+            if (fabsf(C.dng_color[1].forwardmatrix[0][0]) > 0)
             {
             	printf("\nDNG forward matrix 2:\n");
             	for(int i=0; i< P1.colors; i++)

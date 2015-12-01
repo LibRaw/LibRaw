@@ -7132,11 +7132,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncmp(make, "OLYMPUS", 7))
       {
-        if (tag == 0x2010)
+        if ((tag == 0x2010) || (tag == 0x2020))
           {
             fseek(ifp, save - 4, SEEK_SET);
             fseek(ifp, base + get4(), SEEK_SET);
-            parse_makernote_0xc634(base, 0x2010, dng_writer);
+            parse_makernote_0xc634(base, tag, dng_writer);
           }
 
         switch (tag) {
@@ -7206,6 +7206,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         case 0x20100403:
           fread(imgdata.lens.makernotes.Attachment, MIN(len,127), 1, ifp);
           break;
+        case 0x20200401:
+	      imgdata.other.FlashEC = getreal(type);
+	      break;
         }
       }
 
@@ -10292,9 +10295,9 @@ guess_cfa_pc:
 	  FORCC
             {
 #ifdef LIBRAW_LIBRARY_BUILD
-              imgdata.color.dng_color[i].forwardmatrix[c][j]=
+              imgdata.color.dng_color[i].forwardmatrix[j][c]=
 #endif
-              fm[c][j] = getreal(type);
+              fm[j][c] = getreal(type);
             }
 	break;
 
