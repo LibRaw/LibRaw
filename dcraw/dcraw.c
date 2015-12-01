@@ -9786,18 +9786,18 @@ void CLASS parse_makernote (int base, int uptag)
               imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][0] = get2();
               imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][2] = get2();
 	    }
-	  if(tag == 0x20400805 && len == 2)
+
+	  if((tag == 0x20400805) && (len == 2))
 	    {
 	      imgdata.color.OlympusSensorCalibration[0]=getreal(type);
 	      imgdata.color.OlympusSensorCalibration[1]=getreal(type);
 	    }
+	  if (tag == 0x20200401)
+	    {
+	      imgdata.other.FlashEC = getreal(type);
+	    }
 	}
 
-	if(tag == 0x20400805 && len == 2 && !strncasecmp(make,"Olympus",7))
-	  {
-	    imgdata.color.OlympusSensorCalibration[0]=getreal(type);
-	    imgdata.color.OlympusSensorCalibration[1]=getreal(type);
-	  }
 	if ((tag == 0x00a9) && !strncasecmp(make,"Canon",5))
 	  {
 	    long int save1 = ftell(ifp);
@@ -10165,10 +10165,6 @@ get2_256:
     }
     if ((tag | 0x70) == 0x2070 && (type == 4 || type == 13))
       fseek (ifp, get4()+base, SEEK_SET);
-    if ((tag == 0x2020) && ((type == 7) || (type == 13)))
-      parse_thumb_note (base, 257, 258);
-    if (tag == 0x2040)
-      parse_makernote (base, 0x2040);
 #ifdef LIBRAW_LIBRARY_BUILD
 // IB start
     if (tag == 0x2010)
@@ -10177,14 +10173,19 @@ get2_256:
         parse_makernote(base, 0x2010);
         fseek(ifp,_pos3,SEEK_SET);
       }
-    if ((tag == 0x3000) && !strncasecmp(make,"Olympus",7))
+
+    if (((tag == 0x2020) || (tag == 0x3000)) && !strncasecmp(make,"Olympus",7))
       {
         INT64 _pos3 = ftell(ifp);
-        parse_makernote(base, 0x3000);
+        parse_makernote(base, tag);
         fseek(ifp,_pos3,SEEK_SET);
       }
 // IB end
 #endif
+    if ((tag == 0x2020) && ((type == 7) || (type == 13)))
+      parse_thumb_note (base, 257, 258);
+    if (tag == 0x2040)
+      parse_makernote (base, 0x2040);
     if (tag == 0xb028) {
       fseek (ifp, get4()+base, SEEK_SET);
       parse_thumb_note (base, 136, 137);
