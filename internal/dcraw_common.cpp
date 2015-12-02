@@ -6781,6 +6781,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   unsigned serial = 0;
   unsigned NikonLensDataVersion = 0;
   unsigned lenNikonLensData = 0;
+  unsigned NikonFlashInfoVersion = 0;
 
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
@@ -6965,7 +6966,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         {
           int ind = tag == 0x035e?0:1;
 	      for (int j=0; j < 3; j++)
-	       FORCC imgdata.color.dng_color[ind].forwardmatrix[c][j]= getreal(type);
+	       FORCC imgdata.color.dng_color[ind].forwardmatrix[j][c]= getreal(type);
         }
         if ((tag == 0x0303) && (type != 4))
           {
@@ -7121,6 +7122,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               }
           }
 
+        else if (tag == 0x00a8)		// contains flash data
+          {
+          	for (i = 0; i < 4; i++)
+              {
+                NikonFlashInfoVersion = NikonFlashInfoVersion * 10 + fgetc(ifp) - '0';
+              }
+          }
+
         else if (tag == 37 && (!iso_speed || iso_speed == 65535))
           {
             unsigned char cc;
@@ -7232,6 +7241,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         else if (tag == 0x003f)
           {
             imgdata.lens.makernotes.LensID = fgetc(ifp) << 8 | fgetc(ifp);
+          }
+        else if (tag == 0x004d)
+          {
+            if (type == 9) imgdata.other.FlashEC = getreal(type) / 256.0f;
+            else imgdata.other.FlashEC = (float) ((signed short) fgetc(ifp)) / 6.0f;
           }
         else if (tag == 0x0207)
           {
@@ -7446,6 +7460,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             free(table_buf);
           }
 
+		else if (tag == 0x0104)
+		  {
+		    imgdata.other.FlashEC = getreal(type);
+		  }
+
         else if (tag == 0x0105)					// Teleconverter
           {
             imgdata.lens.makernotes.TeleconverterID = get2();
@@ -7579,6 +7598,8 @@ void CLASS parse_makernote (int base, int uptag)
 #ifdef LIBRAW_LIBRARY_BUILD
   unsigned NikonLensDataVersion = 0;
   unsigned lenNikonLensData = 0;
+
+  unsigned NikonFlashInfoVersion = 0;
 
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
@@ -7806,7 +7827,7 @@ void CLASS parse_makernote (int base, int uptag)
         {
           int ind = tag == 0x035e?0:1;
 	      for (int j=0; j < 3; j++)
-	       FORCC imgdata.color.dng_color[ind].forwardmatrix[c][j]= getreal(type);
+	       FORCC imgdata.color.dng_color[ind].forwardmatrix[j][c]= getreal(type);
         }
 
         if ((tag == 0x0303) && (type != 4))
@@ -7864,6 +7885,14 @@ void CLASS parse_makernote (int base, int uptag)
           {
             imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
             imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+          }
+        else if (tag == 0x0012)
+          {
+            char a, b, c;
+            a = fgetc(ifp);
+            b = fgetc(ifp);
+            c = fgetc(ifp);
+            if (c) imgdata.other.FlashEC = (float)(a*b)/(float)c;
           }
         else if (tag == 0x0082)				// lens attachment
           {
@@ -7931,6 +7960,13 @@ void CLASS parse_makernote (int base, int uptag)
                     free(table_buf);
                     lenNikonLensData = 0;
                   }
+              }
+          }
+        else if (tag == 0x00a8)		// contains flash data
+          {
+          	for (i = 0; i < 4; i++)
+              {
+                NikonFlashInfoVersion = NikonFlashInfoVersion * 10 + fgetc(ifp) - '0';
               }
           }
       }
@@ -8029,6 +8065,12 @@ void CLASS parse_makernote (int base, int uptag)
             imgdata.lens.makernotes.LensID = -1;
             imgdata.lens.makernotes.FocalType = 1;
           }
+
+        else if ((tag == 0x100b) && (type == 10))
+          {
+            imgdata.other.FlashEC = getreal(type);
+          }
+
         else if ((tag == 0x1017) && (get2() == 2))
           {
             strcpy(imgdata.lens.makernotes.Attachment, "Wide-Angle Adapter");
@@ -8042,7 +8084,12 @@ void CLASS parse_makernote (int base, int uptag)
     else if (!strncmp(make, "RICOH", 5) &&
              strncmp(model, "PENTAX", 6))
       {
-        if ((tag == 0x1017) && (get2() == 2))
+    	if ((tag == 0x100b) && (type == 10))
+          {
+            imgdata.other.FlashEC = getreal(type);
+          }
+
+          else if ((tag == 0x1017) && (get2() == 2))
           {
             strcpy(imgdata.lens.makernotes.Attachment, "Wide-Angle Adapter");
           }
@@ -8108,6 +8155,11 @@ void CLASS parse_makernote (int base, int uptag)
         else if (tag == 0x003f)
           {
             imgdata.lens.makernotes.LensID = fgetc(ifp) << 8 | fgetc(ifp);
+          }
+        else if (tag == 0x004d)
+          {
+            if (type == 9) imgdata.other.FlashEC = getreal(type) / 256.0f;
+            else imgdata.other.FlashEC = (float) ((signed short) fgetc(ifp)) / 6.0f;
           }
         else if (tag == 0x0207)
           {
@@ -8316,6 +8368,11 @@ void CLASS parse_makernote (int base, int uptag)
               }
             free(table_buf);
           }
+
+		else if (tag == 0x0104)
+		  {
+		    imgdata.other.FlashEC = getreal(type);
+		  }
 
         else if (tag == 0x0105)					// Teleconverter
           {
