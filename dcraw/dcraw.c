@@ -2207,16 +2207,21 @@ void CLASS phase_one_load_raw_c()
       if (ph1.format == 5 && pixel[col] < 256)
 	pixel[col] = curve[pixel[col]];
     }
-    for (col=0; col < raw_width; col++) {
 #ifndef LIBRAW_LIBRARY_BUILD
-      i = (pixel[col] << 2) - ph1.t_black
+    for (col=0; col < raw_width; col++) {
+      int shift = ph1.format == 8? 0: 2;
+      i = (pixel[col] << shift) - ph1.t_black
 	+ c_black[row][col >= ph1.split_col]
 	+ r_black[col][row >= ph1.split_row];
       if (i > 0) RAW(row,col) = i;
-#else
-      RAW(row,col) = pixel[col] << 2;
-#endif
     }
+#else
+    if(ph1.format == 8)
+      memmove(&RAW(row,0),&pixel[0],raw_width*2);
+    else
+      for (col=0; col < raw_width; col++) 
+      	RAW(row,col) = pixel[col] << 2;
+#endif
   }
 #ifdef LIBRAW_LIBRARY_BUILD
   } catch(...) {
