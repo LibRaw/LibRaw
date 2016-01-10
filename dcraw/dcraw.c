@@ -298,7 +298,7 @@ int CLASS fcol (int row, int col)
   return FC(row,col);
 }
 
-size_t strnlen(const char *s, size_t n)
+static size_t local_strnlen(const char *s, size_t n)
 {
   const char *p = (const char *)memchr(s, 0, n);
   return(p ? p-s : n);
@@ -328,7 +328,7 @@ char *my_strcasestr (char *haystack, const char *needle)
 
 int my_strlen(const char *str)
 {
-	return (int)strnlen(str,0x7fffffff);
+	return (int)local_strnlen(str,0x7fffffff);
 }
 #define strlen(a) my_strlen((a))
 
@@ -16087,7 +16087,7 @@ void CLASS tiff_set (struct tiff_hdr *th, ushort *ntag,
   if (type == 1 && count <= 4)
     FORC(4) tt->val.c[c] = val >> (c << 3);
   else if (type == 2) {
-    count = strnlen((char *)th + val, count-1) + 1;
+    count = local_strnlen((char *)th + val, count-1) + 1;
     if (count <= 4)
       FORC(4) tt->val.c[c] = ((char *)th)[val+c];
   } else if (type == 3 && count <= 2)
