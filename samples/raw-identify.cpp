@@ -159,6 +159,9 @@ int main(int ac, char *av[])
 			printf ("\nMakernotes:\n");
 			printf ("\tDriveMode: %d\n", ShootingInfo.DriveMode);
 			printf ("\tFocusMode: %d\n", ShootingInfo.FocusMode);
+			printf ("\tMeteringMode: %d\n", ShootingInfo.MeteringMode);
+			printf ("\tAFPoint: %d\n", ShootingInfo.AFPoint);
+			printf ("\tExposureMode: %d\n", ShootingInfo.ExposureMode);
 			if (mnLens.body[0])
 			  {
 			  	printf("\tMF Camera Body: %s\n", mnLens.body);
