@@ -37,6 +37,7 @@ it under the terms of the one of three licenses as you choose:
 
 #define mnLens MyCoolRawProcessor.imgdata.lens.makernotes
 #define exifLens MyCoolRawProcessor.imgdata.lens
+#define ShootingInfo MyCoolRawProcessor.imgdata.shootinginfo
 
 #define S MyCoolRawProcessor.imgdata.sizes
 #define O MyCoolRawProcessor.imgdata.params
@@ -156,6 +157,8 @@ int main(int ac, char *av[])
             printf ("\n");
 
 			printf ("\nMakernotes:\n");
+			printf ("\tDriveMode: %d\n", ShootingInfo.DriveMode);
+			printf ("\tFocusMode: %d\n", ShootingInfo.FocusMode);
 			if (mnLens.body[0])
 			  {
 			  	printf("\tMF Camera Body: %s\n", mnLens.body);
