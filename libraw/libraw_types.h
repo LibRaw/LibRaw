@@ -437,14 +437,20 @@ typedef struct
 	libraw_makernotes_lens_t makernotes;
 } libraw_lensinfo_t;
 
+typedef struct
+{
+	short DriveMode;
+	short FocusMode;
+} libraw_shootinginfo_t;
 
 typedef struct
 {
   ushort                      (*image)[4] ;
   libraw_image_sizes_t        sizes;
   libraw_iparams_t            idata;
-  libraw_lensinfo_t			  lens;
-  libraw_output_params_t		params;
+  libraw_lensinfo_t           lens;
+  libraw_shootinginfo_t       shootinginfo;
+  libraw_output_params_t      params;
   unsigned int                progress_flags;
   unsigned int                process_warnings;
   libraw_colordata_t          color;

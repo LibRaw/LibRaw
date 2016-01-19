@@ -2219,7 +2219,7 @@ void CLASS phase_one_load_raw_c()
     if(ph1.format == 8)
       memmove(&RAW(row,0),&pixel[0],raw_width*2);
     else
-      for (col=0; col < raw_width; col++) 
+      for (col=0; col < raw_width; col++)
       	RAW(row,col) = pixel[col] << 2;
 #endif
   }
@@ -8905,6 +8905,9 @@ void CLASS parse_makernote (int base, int uptag)
       {
         if (tag == 0x0001)				// camera settings
           {
+            fseek(ifp, 10, SEEK_CUR);
+            imgdata.shootinginfo.DriveMode = get2();
+            imgdata.shootinginfo.FocusMode = get2();
             fseek(ifp, 44, SEEK_CUR);
             imgdata.lens.makernotes.LensID = get2();
             imgdata.lens.makernotes.MaxFocal = get2();
