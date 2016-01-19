@@ -8908,7 +8908,7 @@ void CLASS parse_makernote (int base, int uptag)
             fseek(ifp, 10, SEEK_CUR);
             imgdata.shootinginfo.DriveMode = get2(); get2();
             imgdata.shootinginfo.FocusMode = get2();
-            fseek(ifp, 30, SEEK_CUR);
+            fseek(ifp, 28, SEEK_CUR);
             imgdata.lens.makernotes.LensID = get2();
             imgdata.lens.makernotes.MaxFocal = get2();
             imgdata.lens.makernotes.MinFocal = get2();
