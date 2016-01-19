@@ -13771,6 +13771,12 @@ canon_a5:
       {
         height -= (top_margin=6);
       }
+    if (!strcmp(model,"X-Pro2")) {
+	width = 6032;
+	height = raw_height;
+	top_margin = 0;
+	left_margin = 0;
+    }
     if (fuji_layout) raw_width *= is_raw;
     if (filters == 9)
       FORC(36) ((char *)xtrans)[c] =
