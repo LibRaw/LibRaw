@@ -8906,9 +8906,9 @@ void CLASS parse_makernote (int base, int uptag)
         if (tag == 0x0001)				// camera settings
           {
             fseek(ifp, 10, SEEK_CUR);
-            imgdata.shootinginfo.DriveMode = get2();
+            imgdata.shootinginfo.DriveMode = get2(); get2();
             imgdata.shootinginfo.FocusMode = get2();
-            fseek(ifp, 44, SEEK_CUR);
+            fseek(ifp, 30, SEEK_CUR);
             imgdata.lens.makernotes.LensID = get2();
             imgdata.lens.makernotes.MaxFocal = get2();
             imgdata.lens.makernotes.MinFocal = get2();

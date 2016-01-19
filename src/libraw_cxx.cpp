@@ -523,6 +523,9 @@ void LibRaw:: recycle()
   ZERO(imgdata.shootinginfo);
   imgdata.shootinginfo.DriveMode = -1;
   imgdata.shootinginfo.FocusMode = -1;
+  imgdata.shootinginfo.MeteringMode = -1;
+  imgdata.shootinginfo.AFPoint = -1;
+  imgdata.shootinginfo.ExposureMode = -1;
 
   _exitflag = 0;
 #ifdef USE_RAWSPEED

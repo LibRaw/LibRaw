@@ -441,6 +441,9 @@ typedef struct
 {
 	short DriveMode;
 	short FocusMode;
+	short MeteringMode;
+	short AFPoint;
+	short ExposureMode;
 } libraw_shootinginfo_t;
 
 typedef struct
