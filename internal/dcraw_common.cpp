@@ -5966,6 +5966,28 @@ void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxl
   return;
 }
 
+void CLASS Canon_CameraSettings ()
+{
+  fseek(ifp, 10, SEEK_CUR);
+  imgdata.shootinginfo.DriveMode = get2(); get2();
+  imgdata.shootinginfo.FocusMode = get2();
+  fseek(ifp, 18, SEEK_CUR);
+  imgdata.shootinginfo.MeteringMode = get2(); get2();
+  imgdata.shootinginfo.AFPoint = get2();
+  imgdata.shootinginfo.ExposureMode = get2(); get2();
+  imgdata.lens.makernotes.LensID = get2();
+  imgdata.lens.makernotes.MaxFocal = get2();
+  imgdata.lens.makernotes.MinFocal = get2();
+  imgdata.lens.makernotes.CanonFocalUnits = get2();
+  if (imgdata.lens.makernotes.CanonFocalUnits != 1)
+    {
+      imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
+      imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
+    }
+  imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
+  imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
+}
+
 void CLASS Canon_WBpresets (int skip1, int skip2)
 {
   int c;
@@ -6852,22 +6874,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     if (!strncmp(make, "Canon",5))
       {
-        if (tag == 0x0001)				// camera settings
-          {
-            fseek(ifp, 44, SEEK_CUR);
-            imgdata.lens.makernotes.LensID = get2();
-            imgdata.lens.makernotes.MaxFocal = get2();
-            imgdata.lens.makernotes.MinFocal = get2();
-            imgdata.lens.makernotes.CanonFocalUnits = get2();
-            if (imgdata.lens.makernotes.CanonFocalUnits != 1)
-              {
-                imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-                imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-              }
-            imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
-            imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
-          }
-
+        if (tag == 0x0001) Canon_CameraSettings();
         else if (tag == 0x0002)			// focal length
           {
             imgdata.lens.makernotes.FocalType = get2();
@@ -7728,28 +7735,7 @@ void CLASS parse_makernote (int base, int uptag)
     INT64 _pos = ftell(ifp);
     if (!strncmp(make, "Canon",5))
       {
-        if (tag == 0x0001)				// camera settings
-          {
-            fseek(ifp, 10, SEEK_CUR);
-            imgdata.shootinginfo.DriveMode = get2(); get2();
-            imgdata.shootinginfo.FocusMode = get2();
-            fseek(ifp, 18, SEEK_CUR);
-            imgdata.shootinginfo.MeteringMode = get2(); get2();
-            imgdata.shootinginfo.AFPoint = get2();
-            imgdata.shootinginfo.ExposureMode = get2(); get2();
-            imgdata.lens.makernotes.LensID = get2();
-            imgdata.lens.makernotes.MaxFocal = get2();
-            imgdata.lens.makernotes.MinFocal = get2();
-            imgdata.lens.makernotes.CanonFocalUnits = get2();
-            if (imgdata.lens.makernotes.CanonFocalUnits != 1)
-              {
-                imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-                imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-              }
-            imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
-            imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
-          }
-
+        if (tag == 0x0001) Canon_CameraSettings();
         else if (tag == 0x0002)			// focal length
           {
             imgdata.lens.makernotes.FocalType = get2();
@@ -11035,18 +11021,7 @@ void CLASS parse_ciff (int offset, int length, int depth)
     if (type == 0x102d)
       {
 	INT64 o = ftell(ifp);
-	fseek(ifp, 44, SEEK_CUR);
-	imgdata.lens.makernotes.LensID = get2();
-	imgdata.lens.makernotes.MaxFocal = get2();
-	imgdata.lens.makernotes.MinFocal = get2();
-	imgdata.lens.makernotes.CanonFocalUnits = get2();
-	if (imgdata.lens.makernotes.CanonFocalUnits != 1)
-	  {
-            imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-            imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-	  }
-	imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
-	imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
+	Canon_CameraSettings();
 	fseek(ifp,o,SEEK_SET);
       }
 #endif
