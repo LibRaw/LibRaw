@@ -162,6 +162,7 @@ int main(int ac, char *av[])
 			printf ("\tMeteringMode: %d\n", ShootingInfo.MeteringMode);
 			printf ("\tAFPoint: %d\n", ShootingInfo.AFPoint);
 			printf ("\tExposureMode: %d\n", ShootingInfo.ExposureMode);
+			printf ("\tImageStabilization: %d\n", ShootingInfo.ImageStabilization);
 			if (mnLens.body[0])
 			  {
 			  	printf("\tMF Camera Body: %s\n", mnLens.body);

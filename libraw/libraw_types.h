@@ -444,6 +444,7 @@ typedef struct
 	short MeteringMode;
 	short AFPoint;
 	short ExposureMode;
+	short ImageStabilization;
 } libraw_shootinginfo_t;
 
 typedef struct

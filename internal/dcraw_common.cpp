@@ -5986,6 +5986,8 @@ void CLASS Canon_CameraSettings ()
     }
   imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
   imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
+  fseek(ifp, 12, SEEK_CUR);
+  imgdata.shootinginfo.ImageStabilization = get2();
 }
 
 void CLASS Canon_WBpresets (int skip1, int skip2)
