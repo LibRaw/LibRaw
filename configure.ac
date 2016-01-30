@@ -16,9 +16,6 @@ AC_SUBST(LIBTOOL_DEPS)
 
 # Config files to generate
 
-CPPFLAGS="$CPPFLAGS -I/usr/local/include"
-LDFLAGS="$LDFLAGS -L/usr/local/lib"
-
 AC_CONFIG_FILES([
 	Makefile
 	libraw.pc
