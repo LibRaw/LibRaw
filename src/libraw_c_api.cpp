@@ -253,6 +253,13 @@ DllDef void libraw_set_output_bps(libraw_data_t *lr,int value)
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIM(x,min,max) MAX(min,MIN(x,max))
 
+DllDef void libraw_set_user_mul(libraw_data_t *lr,int index, float val)
+	{
+		if(!lr) return;
+		LibRaw *ip = (LibRaw*) lr->parent_class;
+		ip->imgdata.params.user_mul[LIM(index,0,3)]=val;
+	}
+
 DllDef void libraw_set_gamma(libraw_data_t *lr,int index, float value)
 	{
 		if(!lr) return;
