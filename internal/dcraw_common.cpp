@@ -5713,7 +5713,8 @@ void CLASS setCanonBodyFeatures (unsigned id)
               (id == 0x80000269) ||	// 1DX
               (id == 0x80000324) ||	// 1DC
               (id == 0x80000382) ||	// 5DS
-              (id == 0x80000401)	// 5DS R
+              (id == 0x80000401) ||	// 5DS R
+              (id == 0x80000328)	// 1DX2
               )
             {
               imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
@@ -12881,6 +12882,7 @@ void CLASS identify()
     { 0x325, "EOS 70D" },
     { 0x326, "EOS 700D" },
     { 0x327, "EOS 1200D" },
+    { 0x328, "EOS-1D X Mark II" },
     { 0x331, "EOS M" },
     { 0x335, "EOS M2" },
     { 0x374, "EOS M3"},   /* temp */
