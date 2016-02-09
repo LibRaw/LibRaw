@@ -10299,6 +10299,15 @@ guess_cfa_pc:
       case 61450:
 	cblack[4] = cblack[5] = MIN(sqrt((double)len),64);
       case 50714:			/* BlackLevel */
+#ifdef LIBRAW_LIBRARY_BUILD
+		if(tiff_ifd[ifd].samples > 1  && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
+		{
+			for(i=0; i < colors && i < 4 && i < len; i++)
+				cblack[i]=(imgdata.color.dng_color[0].dng_blacklevel[i]=getreal(type))+0.5;
+			black = 0;
+		}
+		else
+#endif
         if((cblack[4] * cblack[5] < 2) && len == 1)
           {
             black = getreal(type);
@@ -10317,7 +10326,15 @@ guess_cfa_pc:
 	black += num/len + 0.5;
 	break;
       case 50717:			/* WhiteLevel */
+#ifdef LIBRAW_LIBRARY_BUILD
+	imgdata.color.dng_color[0].dng_whitelevel[0]=
+#endif
 	maximum = getint(type);
+#ifdef LIBRAW_LIBRARY_BUILD
+	if(tiff_ifd[ifd].samples > 1 ) // Linear DNG case
+		for(i=1; i < colors && i < 4 && i < len; i++)
+			imgdata.color.dng_color[0].dng_whitelevel[i]=getint(type);
+#endif
 	break;
       case 50718:			/* DefaultScale */
 	pixel_aspect  = getreal(type);

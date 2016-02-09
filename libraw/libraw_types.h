@@ -200,6 +200,8 @@ typedef struct
   float calibration[4][4];
   float colormatrix[4][3];
   float forwardmatrix[3][4];
+  float dng_blacklevel[4];
+  unsigned dng_whitelevel[4];
 } libraw_dng_color_t;
 
 typedef struct

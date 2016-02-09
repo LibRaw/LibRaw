@@ -1654,7 +1654,29 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
 
- 
+    	// Fix DNG white balance if needed
+	if(imgdata.idata.dng_version && (imgdata.idata.filters == 0) && imgdata.idata.colors > 1 && imgdata.idata.colors < 5)
+	{
+		float delta[4]={0.f,0.f,0.f,0.f};
+		for(int c = 0; c < imgdata.idata.colors ; c++ )
+			delta[c] = imgdata.color.dng_color[0].dng_whitelevel[c] - imgdata.color.dng_color[0].dng_blacklevel[c];
+		float mindelta = delta[0],maxdelta = delta[0];
+		for(int c = 1; c < imgdata.idata.colors; c++)
+		{
+			if(mindelta > delta[c]) mindelta = delta[c];
+			if(maxdelta < delta[c]) maxdelta = delta[c];
+		}
+		if(mindelta > 1 && maxdelta < (mindelta *20)) // safety
+		{
+			for(int c = 0; c < imgdata.idata.colors; c++)
+			{
+				imgdata.color.cam_mul[c] /= (delta[c]/maxdelta);
+				imgdata.color.pre_mul[c] /= (delta[c]/maxdelta);
+			}
+			imgdata.color.maximum = imgdata.color.cblack[0]+maxdelta;
+		}
+	}
+
     if(imgdata.idata.dng_version &&
       (
     (!strcasecmp(imgdata.idata.make,"Leica") && !strcasecmp(imgdata.idata.model,"D-LUX (Typ 109)"))
