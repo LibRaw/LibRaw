@@ -2268,7 +2268,7 @@ int LibRaw::unpack(void)
 
 		// Disable rawspeed for double-sized Oly files
 		if(!strncasecmp(imgdata.idata.make,"Olympus",7) &&
-			( (!strncasecmp(imgdata.idata.model,"E-M5MarkII",10) && imgdata.sizes.raw_width == 9280) || !strncasecmp(imgdata.idata.model,"SH-2",4) || !strncasecmp(imgdata.idata.model,"TG-4",4))
+			( (!strncasecmp(imgdata.idata.model,"E-M5MarkII",10) && imgdata.sizes.raw_width == 9280) || !strncasecmp(imgdata.idata.model,"SH-2",4) || !strncasecmp(imgdata.idata.model,"SH-3",4) || !strncasecmp(imgdata.idata.model,"TG-4",4))
 			)
 			rawspeed_enabled = 0;
 
@@ -4769,6 +4769,7 @@ static const char  *static_camera_list[] =
 "Olympus STYLUS1",
 "Olympus STYLUS1s",
 "Olympus SH-2",
+"Olympus SH-3",
 "Olympus TG-4",
 "Olympus XZ-1",
 "Olympus XZ-2",
