@@ -11907,8 +11907,9 @@ void CLASS apply_tiff()
          && strncmp(software,"Nikon Scan",10))
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
-    if (i != raw && tiff_ifd[i].samples == max_samp &&
-        tiff_ifd[i].bps>0 && tiff_ifd[i].bps < 33
+    if (i != raw 
+        && (tiff_ifd[i].samples == max_samp || (tiff_ifd[i].comp == 7 && tiff_ifd[i].samples == 1)) /* Allow 1-bps JPEGs */
+        && tiff_ifd[i].bps>0 && tiff_ifd[i].bps < 33
 	&& tiff_ifd[i].phint != 32803
 	&& tiff_ifd[i].phint != 34892
         && unsigned(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
