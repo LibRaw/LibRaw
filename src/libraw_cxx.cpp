@@ -515,6 +515,11 @@ void LibRaw:: recycle()
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
   imgdata.color.FujiExpoMidPointShift = -999.f;
+  imgdata.color.FujiDynamicRange = 0xffff;
+  imgdata.color.FujiFilmMode = 0xffff;
+  imgdata.color.FujiDynamicRangeSetting = 0xffff;
+  imgdata.color.FujiDevelopmentDynamicRange = 0xffff;
+  imgdata.color.FujiAutoDynamicRange = 0xffff;
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);

@@ -218,7 +218,7 @@ typedef struct
   unsigned    data_maximum;
   unsigned    maximum;
   float		  fmaximum;
-  float		  fnorm;
+  float       fnorm;
   ushort      white[8][8];
   float       cam_mul[4];
   float       pre_mul[4];
@@ -234,12 +234,17 @@ typedef struct
   unsigned    black_stat[8];
   libraw_dng_color_t  dng_color[2];
   libraw_canon_makernotes_t canon_makernotes;
-  float	      baseline_exposure;
-  int		  OlympusSensorCalibration[2];
-  float       FujiExpoMidPointShift;
-  int		digitalBack_color;
-  int		WB_Coeffs[256][4];	/* R, G1, B, G2 coeffs */
-  float		WBCT_Coeffs[64][5];	/* CCT, than R, G1, B, G2 coeffs */
+  float      baseline_exposure;
+  int        OlympusSensorCalibration[2];
+  float      FujiExpoMidPointShift;
+  ushort     FujiDynamicRange;
+  ushort     FujiFilmMode;
+  ushort     FujiDynamicRangeSetting;
+  ushort     FujiDevelopmentDynamicRange;
+  ushort     FujiAutoDynamicRange;
+  int        digitalBack_color;
+  int        WB_Coeffs[256][4];      /* R, G1, B, G2 coeffs */
+  float      WBCT_Coeffs[64][5];     /* CCT, than R, G1, B, G2 coeffs */
 }libraw_colordata_t;
 
 typedef struct

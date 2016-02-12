@@ -8144,10 +8144,16 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
+      case 0x1400: imgdata.color.FujiDynamicRange = get2(); break;
+      case 0x1401: imgdata.color.FujiFilmMode = get2(); break;
+      case 0x1402: imgdata.color.FujiDynamicRangeSetting = get2(); break;
+      case 0x1403: imgdata.color.FujiDevelopmentDynamicRange = get2(); break;
+      case 0x140b: imgdata.color.FujiAutoDynamicRange = get2(); break;
       case 0x1404: imgdata.lens.makernotes.MinFocal = getreal(type); break;
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
       case 0x1407: imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type); break;
+      case 0x1422: imgdata.shootinginfo.ImageStabilization = (get2()<<9) + get2();
       }
 
     else if (!strncasecmp(make, "LEICA", 5))
@@ -8990,10 +8996,16 @@ void CLASS parse_makernote (int base, int uptag)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
+      case 0x1400: imgdata.color.FujiDynamicRange = get2(); break;
+      case 0x1401: imgdata.color.FujiFilmMode = get2(); break;
+      case 0x1402: imgdata.color.FujiDynamicRangeSetting = get2(); break;
+      case 0x1403: imgdata.color.FujiDevelopmentDynamicRange = get2(); break;
+      case 0x140b: imgdata.color.FujiAutoDynamicRange = get2(); break;
       case 0x1404: imgdata.lens.makernotes.MinFocal = getreal(type); break;
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
       case 0x1407: imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type); break;
+      case 0x1422: imgdata.shootinginfo.ImageStabilization = (get2()<<9) + get2();
       }
 
     else if (!strncasecmp(make, "LEICA", 5))
