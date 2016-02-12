@@ -1,4 +1,4 @@
-﻿/* Library for accessing X3F Files 
+/* Library for accessing X3F Files 
 ----------------------------------------------------------------
 BSD-style License
 ----------------------------------------------------------------
