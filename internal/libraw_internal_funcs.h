@@ -35,6 +35,7 @@ it under the terms of the one of three licenses as you choose:
     ushort      sget2Rev(uchar *s);
     void	setCanonBodyFeatures (unsigned id);
     void 	processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxlen);
+    void	Canon_CameraSettings();
     void	Canon_WBpresets (int skip1, int skip2);
     void	Canon_WBCTpresets (short WBCTversion);
     void	processNikonLensData (uchar *LensData, unsigned len);

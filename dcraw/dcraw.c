@@ -2219,7 +2219,7 @@ void CLASS phase_one_load_raw_c()
     if(ph1.format == 8)
       memmove(&RAW(row,0),&pixel[0],raw_width*2);
     else
-      for (col=0; col < raw_width; col++) 
+      for (col=0; col < raw_width; col++)
       	RAW(row,col) = pixel[col] << 2;
 #endif
   }
@@ -6888,7 +6888,8 @@ void CLASS setCanonBodyFeatures (unsigned id)
               (id == 0x80000269) ||	// 1DX
               (id == 0x80000324) ||	// 1DC
               (id == 0x80000382) ||	// 5DS
-              (id == 0x80000401)	// 5DS R
+              (id == 0x80000401) ||	// 5DS R
+              (id == 0x80000328)	// 1DX2
               )
             {
               imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
@@ -7139,6 +7140,30 @@ void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxl
     }
   }
   return;
+}
+
+void CLASS Canon_CameraSettings ()
+{
+  fseek(ifp, 10, SEEK_CUR);
+  imgdata.shootinginfo.DriveMode = get2(); get2();
+  imgdata.shootinginfo.FocusMode = get2();
+  fseek(ifp, 18, SEEK_CUR);
+  imgdata.shootinginfo.MeteringMode = get2(); get2();
+  imgdata.shootinginfo.AFPoint = get2();
+  imgdata.shootinginfo.ExposureMode = get2(); get2();
+  imgdata.lens.makernotes.LensID = get2();
+  imgdata.lens.makernotes.MaxFocal = get2();
+  imgdata.lens.makernotes.MinFocal = get2();
+  imgdata.lens.makernotes.CanonFocalUnits = get2();
+  if (imgdata.lens.makernotes.CanonFocalUnits != 1)
+    {
+      imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
+      imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
+    }
+  imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
+  imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
+  fseek(ifp, 12, SEEK_CUR);
+  imgdata.shootinginfo.ImageStabilization = get2();
 }
 
 void CLASS Canon_WBpresets (int skip1, int skip2)
@@ -8027,22 +8052,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     if (!strncmp(make, "Canon",5))
       {
-        if (tag == 0x0001)				// camera settings
-          {
-            fseek(ifp, 44, SEEK_CUR);
-            imgdata.lens.makernotes.LensID = get2();
-            imgdata.lens.makernotes.MaxFocal = get2();
-            imgdata.lens.makernotes.MinFocal = get2();
-            imgdata.lens.makernotes.CanonFocalUnits = get2();
-            if (imgdata.lens.makernotes.CanonFocalUnits != 1)
-              {
-                imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-                imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-              }
-            imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
-            imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
-          }
-
+        if (tag == 0x0001) Canon_CameraSettings();
         else if (tag == 0x0002)			// focal length
           {
             imgdata.lens.makernotes.FocalType = get2();
@@ -8134,10 +8144,16 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
+      case 0x1400: imgdata.color.FujiDynamicRange = get2(); break;
+      case 0x1401: imgdata.color.FujiFilmMode = get2(); break;
+      case 0x1402: imgdata.color.FujiDynamicRangeSetting = get2(); break;
+      case 0x1403: imgdata.color.FujiDevelopmentDynamicRange = get2(); break;
+      case 0x140b: imgdata.color.FujiAutoDynamicRange = get2(); break;
       case 0x1404: imgdata.lens.makernotes.MinFocal = getreal(type); break;
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
       case 0x1407: imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type); break;
+      case 0x1422: imgdata.shootinginfo.ImageStabilization = (get2()<<9) + get2();
       }
 
     else if (!strncasecmp(make, "LEICA", 5))
@@ -8903,22 +8919,7 @@ void CLASS parse_makernote (int base, int uptag)
     INT64 _pos = ftell(ifp);
     if (!strncmp(make, "Canon",5))
       {
-        if (tag == 0x0001)				// camera settings
-          {
-            fseek(ifp, 44, SEEK_CUR);
-            imgdata.lens.makernotes.LensID = get2();
-            imgdata.lens.makernotes.MaxFocal = get2();
-            imgdata.lens.makernotes.MinFocal = get2();
-            imgdata.lens.makernotes.CanonFocalUnits = get2();
-            if (imgdata.lens.makernotes.CanonFocalUnits != 1)
-              {
-                imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-                imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-              }
-            imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
-            imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
-          }
-
+        if (tag == 0x0001) Canon_CameraSettings();
         else if (tag == 0x0002)			// focal length
           {
             imgdata.lens.makernotes.FocalType = get2();
@@ -8995,10 +8996,16 @@ void CLASS parse_makernote (int base, int uptag)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
+      case 0x1400: imgdata.color.FujiDynamicRange = get2(); break;
+      case 0x1401: imgdata.color.FujiFilmMode = get2(); break;
+      case 0x1402: imgdata.color.FujiDynamicRangeSetting = get2(); break;
+      case 0x1403: imgdata.color.FujiDevelopmentDynamicRange = get2(); break;
+      case 0x140b: imgdata.color.FujiAutoDynamicRange = get2(); break;
       case 0x1404: imgdata.lens.makernotes.MinFocal = getreal(type); break;
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
       case 0x1407: imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type); break;
+      case 0x1422: imgdata.shootinginfo.ImageStabilization = (get2()<<9) + get2();
       }
 
     else if (!strncasecmp(make, "LEICA", 5))
@@ -12228,18 +12235,7 @@ void CLASS parse_ciff (int offset, int length, int depth)
     if (type == 0x102d)
       {
 	INT64 o = ftell(ifp);
-	fseek(ifp, 44, SEEK_CUR);
-	imgdata.lens.makernotes.LensID = get2();
-	imgdata.lens.makernotes.MaxFocal = get2();
-	imgdata.lens.makernotes.MinFocal = get2();
-	imgdata.lens.makernotes.CanonFocalUnits = get2();
-	if (imgdata.lens.makernotes.CanonFocalUnits != 1)
-	  {
-            imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-            imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-	  }
-	imgdata.lens.makernotes.MaxAp = _CanonConvertAperture(get2());
-	imgdata.lens.makernotes.MinAp = _CanonConvertAperture(get2());
+	Canon_CameraSettings();
 	fseek(ifp,o,SEEK_SET);
       }
 #endif
@@ -14252,6 +14248,7 @@ void CLASS identify()
     { 0x325, "EOS 70D" },
     { 0x326, "EOS 700D" },
     { 0x327, "EOS 1200D" },
+    { 0x328, "EOS-1D X Mark II" },
     { 0x331, "EOS M" },
     { 0x335, "EOS M2" },
     { 0x374, "EOS M3"},   /* temp */

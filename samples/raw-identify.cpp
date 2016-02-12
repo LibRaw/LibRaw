@@ -37,6 +37,7 @@ it under the terms of the one of three licenses as you choose:
 
 #define mnLens MyCoolRawProcessor.imgdata.lens.makernotes
 #define exifLens MyCoolRawProcessor.imgdata.lens
+#define ShootingInfo MyCoolRawProcessor.imgdata.shootinginfo
 
 #define S MyCoolRawProcessor.imgdata.sizes
 #define O MyCoolRawProcessor.imgdata.params
@@ -156,6 +157,12 @@ int main(int ac, char *av[])
             printf ("\n");
 
 			printf ("\nMakernotes:\n");
+			printf ("\tDriveMode: %d\n", ShootingInfo.DriveMode);
+			printf ("\tFocusMode: %d\n", ShootingInfo.FocusMode);
+			printf ("\tMeteringMode: %d\n", ShootingInfo.MeteringMode);
+			printf ("\tAFPoint: %d\n", ShootingInfo.AFPoint);
+			printf ("\tExposureMode: %d\n", ShootingInfo.ExposureMode);
+			printf ("\tImageStabilization: %d\n", ShootingInfo.ImageStabilization);
 			if (mnLens.body[0])
 			  {
 			  	printf("\tMF Camera Body: %s\n", mnLens.body);
@@ -298,6 +305,14 @@ int main(int ac, char *av[])
 
             printf ("Number of raw images: %d\n", P1.raw_count);
             if (C.FujiExpoMidPointShift > -999.f) printf ("Fuji Exposure shift: %04.3f\n", C.FujiExpoMidPointShift);
+
+  if (C.FujiDynamicRange != 0xffff) printf ("Fuji Dynamic Range: %d\n", C.FujiDynamicRange);
+  if (C.FujiFilmMode != 0xffff) printf ("Fuji Film Mode: %d\n", C.FujiFilmMode);
+  if (C.FujiDynamicRangeSetting != 0xffff) printf ("Fuji Dynamic Range Setting: %d\n", C.FujiDynamicRangeSetting);
+  if (C.FujiDevelopmentDynamicRange != 0xffff) printf ("Fuji Development Dynamic Range: %d\n", C.FujiDevelopmentDynamicRange);
+  if (C.FujiAutoDynamicRange != 0xffff) printf ("Fuji Auto Dynamic Range: %d\n", C.FujiAutoDynamicRange);
+
+
             if (S.pixel_aspect != 1)
                 printf ("Pixel Aspect Ratio: %0.6f\n", S.pixel_aspect);
             if (T.tlength)

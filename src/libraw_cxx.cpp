@@ -515,11 +515,23 @@ void LibRaw:: recycle()
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
   imgdata.color.FujiExpoMidPointShift = -999.f;
+  imgdata.color.FujiDynamicRange = 0xffff;
+  imgdata.color.FujiFilmMode = 0xffff;
+  imgdata.color.FujiDynamicRangeSetting = 0xffff;
+  imgdata.color.FujiDevelopmentDynamicRange = 0xffff;
+  imgdata.color.FujiAutoDynamicRange = 0xffff;
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);
   imgdata.lens.makernotes.CanonFocalUnits = 1;
   imgdata.lens.makernotes.LensID = 0xffffffffffffffffULL;
+  ZERO(imgdata.shootinginfo);
+  imgdata.shootinginfo.DriveMode = -1;
+  imgdata.shootinginfo.FocusMode = -1;
+  imgdata.shootinginfo.MeteringMode = -1;
+  imgdata.shootinginfo.AFPoint = -1;
+  imgdata.shootinginfo.ExposureMode = -1;
+  imgdata.shootinginfo.ImageStabilization = -1;
 
   _exitflag = 0;
 #ifdef USE_RAWSPEED
@@ -1548,7 +1560,7 @@ void LibRaw::nikon_load_striped_packed_raw()
 	rbits = bwide * 8 - S.raw_width * tiff_bps;
 	if (load_flags & 1) bwide = bwide * 16 / 15;
 	bite = 8 + (load_flags & 24);
-	for (row=0; row < S.raw_height; row++) 
+	for (row=0; row < S.raw_height; row++)
 	{
 		checkCancel();
 		if(!(row%ifd->rows_per_strip))
@@ -1558,9 +1570,9 @@ void LibRaw::nikon_load_striped_packed_raw()
 			libraw_internal_data.internal_data.input->seek(ifd->strip_offsets[stripcnt],SEEK_SET);
 			stripcnt++;
 		}
-		for (col=0; col < S.raw_width; col++) 
+		for (col=0; col < S.raw_width; col++)
 		{
-			for (vbits -= tiff_bps; vbits < 0; vbits += bite) 
+			for (vbits -= tiff_bps; vbits < 0; vbits += bite)
 			{
 				bitbuf <<= bite;
 				for (i=0; i < bite; i+=8)
@@ -1654,28 +1666,28 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
 
-    	// Fix DNG white balance if needed
-	if(imgdata.idata.dng_version && (imgdata.idata.filters == 0) && imgdata.idata.colors > 1 && imgdata.idata.colors < 5)
-	{
-		float delta[4]={0.f,0.f,0.f,0.f};
-		for(int c = 0; c < imgdata.idata.colors ; c++ )
-			delta[c] = imgdata.color.dng_color[0].dng_whitelevel[c] - imgdata.color.dng_color[0].dng_blacklevel[c];
-		float mindelta = delta[0],maxdelta = delta[0];
-		for(int c = 1; c < imgdata.idata.colors; c++)
-		{
-			if(mindelta > delta[c]) mindelta = delta[c];
-			if(maxdelta < delta[c]) maxdelta = delta[c];
-		}
-		if(mindelta > 1 && maxdelta < (mindelta *20)) // safety
-		{
-			for(int c = 0; c < imgdata.idata.colors; c++)
-			{
-				imgdata.color.cam_mul[c] /= (delta[c]/maxdelta);
-				imgdata.color.pre_mul[c] /= (delta[c]/maxdelta);
-			}
-			imgdata.color.maximum = imgdata.color.cblack[0]+maxdelta;
-		}
-	}
+    // Fix DNG white balance if needed
+    if(imgdata.idata.dng_version && (imgdata.idata.filters == 0) && imgdata.idata.colors > 1 && imgdata.idata.colors < 5)
+      {
+	float delta[4]={0.f,0.f,0.f,0.f};
+	for(int c = 0; c < imgdata.idata.colors ; c++ )
+	  delta[c] = imgdata.color.dng_color[0].dng_whitelevel[c] - imgdata.color.dng_color[0].dng_blacklevel[c];
+	float mindelta = delta[0],maxdelta = delta[0];
+	for(int c = 1; c < imgdata.idata.colors; c++)
+	  {
+	    if(mindelta > delta[c]) mindelta = delta[c];
+	    if(maxdelta < delta[c]) maxdelta = delta[c];
+	  }
+	if(mindelta > 1 && maxdelta < (mindelta *20)) // safety
+	  {
+	    for(int c = 0; c < imgdata.idata.colors; c++)
+	      {
+		imgdata.color.cam_mul[c] /= (delta[c]/maxdelta);
+		imgdata.color.pre_mul[c] /= (delta[c]/maxdelta);
+	      }
+	    imgdata.color.maximum = imgdata.color.cblack[0]+maxdelta;
+	  }
+      }
 
     if(imgdata.idata.dng_version &&
       (
@@ -1692,7 +1704,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		else if (S.raw_width == 4288) S.width = S.raw_width-32;
 		else if (S.raw_width == 4928 && S.height < 3280) S.width = S.raw_width-8;
 		else if (S.raw_width == 5504) S.width = S.raw_width-(S.height > 3664 ? 8 : 32);
-		else if (S.raw_width == 6048) 
+		else if (S.raw_width == 6048)
 		{
 			S.width = S.raw_width-24;
 			if (strstr(imgdata.idata.model,"RX1") || strstr(imgdata.idata.model,"A99")) S.width -= 6;
@@ -1700,7 +1712,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		else if (S.raw_width == 7392) S.width = S.raw_width-30;
 		else if(S.raw_width == 8000)	S.width = S.raw_width - 32;
 	}
-    
+
 	if(!strcasecmp(imgdata.idata.make,"Pentax") && !strcasecmp(imgdata.idata.model,"K-3 II") && imgdata.idata.raw_count == 4 && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_PENTAXK32_ALLFRAMES))
 	{
 		imgdata.idata.raw_count = 1;
@@ -2084,7 +2096,7 @@ int LibRaw::valid_for_dngsdk()
 	if(imgdata.idata.filters == 9 && (imgdata.params.use_dngsdk & LIBRAW_DNG_XTRANS))
 		return 1;
 	if(is_fuji_rotated())
-		return 0; // refuse 
+		return 0; // refuse
 	if(imgdata.params.use_dngsdk & LIBRAW_DNG_OTHER)
 		return 1;
 	return 0;
@@ -2094,7 +2106,7 @@ int LibRaw::valid_for_dngsdk()
 
 int LibRaw::is_curve_linear()
 {
-	for (int i=0; i < 0x10000; i++) 
+	for (int i=0; i < 0x10000; i++)
 		if(imgdata.color.curve[i] != i)
 			return 0;
 	return 1;
@@ -2530,8 +2542,8 @@ int LibRaw::is_phaseone_compressed()
 }
 
 int LibRaw::is_canon_600()
-{ 
-	return load_raw == &LibRaw::canon_600_load_raw; 
+{
+	return load_raw == &LibRaw::canon_600_load_raw;
 }
 
 int LibRaw::raw2image(void)
