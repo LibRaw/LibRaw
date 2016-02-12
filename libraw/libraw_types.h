@@ -181,10 +181,6 @@ typedef struct
     double      pixel_aspect;
     int         flip;
     int         mask[8][4];
-    int         OlympusCropID;
-    ushort      OlympusFrame[4];	/* upper left XY, lower right XY */
-
-
 } libraw_image_sizes_t;
 
 struct ph1_t
@@ -204,6 +200,13 @@ typedef struct
   unsigned dng_whitelevel[4];
 } libraw_dng_color_t;
 
+typedef struct
+{
+  int         OlympusCropID;
+  ushort      OlympusFrame[4];	/* upper left XY, lower right XY */
+  int        OlympusSensorCalibration[2];
+} libraw_olympus_makernotes_t;
+  
 typedef struct
 {
 	int CanonColorDataVer;
@@ -235,20 +238,22 @@ typedef struct
   unsigned    profile_length;
   unsigned    black_stat[8];
   libraw_dng_color_t  dng_color[2];
-  libraw_canon_makernotes_t canon_makernotes;
   float      baseline_exposure;
-  int        OlympusSensorCalibration[2];
+  int        digitalBack_color;
+  int        WB_Coeffs[256][4];      /* R, G1, B, G2 coeffs */
+  float      WBCT_Coeffs[64][5];     /* CCT, than R, G1, B, G2 coeffs */
+}libraw_colordata_t;
+
+typedef struct
+{
   float      FujiExpoMidPointShift;
   ushort     FujiDynamicRange;
   ushort     FujiFilmMode;
   ushort     FujiDynamicRangeSetting;
   ushort     FujiDevelopmentDynamicRange;
   ushort     FujiAutoDynamicRange;
-  int        digitalBack_color;
-  int        WB_Coeffs[256][4];      /* R, G1, B, G2 coeffs */
-  float      WBCT_Coeffs[64][5];     /* CCT, than R, G1, B, G2 coeffs */
-}libraw_colordata_t;
-
+} libraw_fuji_info_t;  
+  
 typedef struct
 {
     enum LibRaw_thumbnail_formats tformat;
@@ -280,7 +285,7 @@ typedef struct
     time_t      timestamp;
     unsigned    shot_order;
     unsigned    gpsdata[32];
-	libraw_gps_info_t parsed_gps;
+  libraw_gps_info_t parsed_gps;
     char        desc[512],
                 artist[64];
     float       FlashEC;
@@ -436,14 +441,21 @@ typedef struct
 
 typedef struct
 {
-	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAp;
-	char LensMake[128], Lens[128];
-	ushort FocalLengthIn35mmFormat;
-	libraw_nikonlens_t nikon;
-	libraw_dnglens_t dng;
-	libraw_makernotes_lens_t makernotes;
+  float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAp;
+  char LensMake[128], Lens[128];
+  ushort FocalLengthIn35mmFormat;
+  libraw_nikonlens_t nikon;
+  libraw_dnglens_t dng;
+  libraw_makernotes_lens_t makernotes;
 } libraw_lensinfo_t;
 
+typedef struct
+{
+  libraw_canon_makernotes_t canon;
+  libraw_fuji_info_t fuji;
+  libraw_olympus_makernotes_t olympus;
+} libraw_makernotes_t;
+  
 typedef struct
 {
 	short DriveMode;
@@ -460,6 +472,7 @@ typedef struct
   libraw_image_sizes_t        sizes;
   libraw_iparams_t            idata;
   libraw_lensinfo_t           lens;
+  libraw_makernotes_t         makernotes;
   libraw_shootinginfo_t       shootinginfo;
   libraw_output_params_t      params;
   unsigned int                progress_flags;

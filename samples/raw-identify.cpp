@@ -40,8 +40,10 @@ it under the terms of the one of three licenses as you choose:
 #define ShootingInfo MyCoolRawProcessor.imgdata.shootinginfo
 
 #define S MyCoolRawProcessor.imgdata.sizes
+#define Oly MyCoolRawProcessor.imgdata.makernotes.olympus
 #define O MyCoolRawProcessor.imgdata.params
 #define C MyCoolRawProcessor.imgdata.color
+#define F MyCoolRawProcessor.imgdata.makernotes.fuji
 #define T MyCoolRawProcessor.imgdata.thumbnail
 
 
@@ -304,13 +306,13 @@ int main(int ac, char *av[])
 	   if (C.baseline_exposure > -999.f) printf ("Baseline exposure: %04.3f\n", C.baseline_exposure);
 
             printf ("Number of raw images: %d\n", P1.raw_count);
-            if (C.FujiExpoMidPointShift > -999.f) printf ("Fuji Exposure shift: %04.3f\n", C.FujiExpoMidPointShift);
+            if (F.FujiExpoMidPointShift > -999.f) printf ("Fuji Exposure shift: %04.3f\n", F.FujiExpoMidPointShift);
 
-  if (C.FujiDynamicRange != 0xffff) printf ("Fuji Dynamic Range: %d\n", C.FujiDynamicRange);
-  if (C.FujiFilmMode != 0xffff) printf ("Fuji Film Mode: %d\n", C.FujiFilmMode);
-  if (C.FujiDynamicRangeSetting != 0xffff) printf ("Fuji Dynamic Range Setting: %d\n", C.FujiDynamicRangeSetting);
-  if (C.FujiDevelopmentDynamicRange != 0xffff) printf ("Fuji Development Dynamic Range: %d\n", C.FujiDevelopmentDynamicRange);
-  if (C.FujiAutoDynamicRange != 0xffff) printf ("Fuji Auto Dynamic Range: %d\n", C.FujiAutoDynamicRange);
+	    if (F.FujiDynamicRange != 0xffff) printf ("Fuji Dynamic Range: %d\n", F.FujiDynamicRange);
+	    if (F.FujiFilmMode != 0xffff) printf ("Fuji Film Mode: %d\n", F.FujiFilmMode);
+	    if (F.FujiDynamicRangeSetting != 0xffff) printf ("Fuji Dynamic Range Setting: %d\n", F.FujiDynamicRangeSetting);
+	    if (F.FujiDevelopmentDynamicRange != 0xffff) printf ("Fuji Development Dynamic Range: %d\n", F.FujiDevelopmentDynamicRange);
+	    if (F.FujiAutoDynamicRange != 0xffff) printf ("Fuji Auto Dynamic Range: %d\n", F.FujiAutoDynamicRange);
 
 
             if (S.pixel_aspect != 1)
@@ -322,10 +324,10 @@ int main(int ac, char *av[])
             printf ("Image size:  %4d x %d\n", S.width, S.height);
             printf ("Output size: %4d x %d\n", S.iwidth, S.iheight);
 
-            if (S.OlympusCropID != -1)
+            if (Oly.OlympusCropID != -1)
             {
-              printf ("Olympus aspect ID: %d\nOlympus crop", S.OlympusCropID);
-              for (int c=0;c<4;c++) printf (" %d", S.OlympusFrame[c]);
+              printf ("Olympus aspect ID: %d\nOlympus crop", Oly.OlympusCropID);
+              for (int c=0;c<4;c++) printf (" %d", Oly.OlympusFrame[c]);
               printf ("\n");
             }
 
@@ -460,7 +462,7 @@ int main(int ac, char *av[])
 					printf ("\n");
                 } else
 //                    printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
-					printf ("%s=%s=%d=%04.3f=%04.3f\n", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure, C.FujiExpoMidPointShift);
+					printf ("%s=%s=%d=%04.3f=%04.3f\n", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure, F.FujiExpoMidPointShift);
             }
         MyCoolRawProcessor.recycle();
     }// endfor

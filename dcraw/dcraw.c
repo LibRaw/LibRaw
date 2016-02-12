@@ -8144,11 +8144,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
-      case 0x1400: imgdata.color.FujiDynamicRange = get2(); break;
-      case 0x1401: imgdata.color.FujiFilmMode = get2(); break;
-      case 0x1402: imgdata.color.FujiDynamicRangeSetting = get2(); break;
-      case 0x1403: imgdata.color.FujiDevelopmentDynamicRange = get2(); break;
-      case 0x140b: imgdata.color.FujiAutoDynamicRange = get2(); break;
+      case 0x1400: imgdata.makernotes.fuji.FujiDynamicRange = get2(); break;
+      case 0x1401: imgdata.makernotes.fuji.FujiFilmMode = get2(); break;
+      case 0x1402: imgdata.makernotes.fuji.FujiDynamicRangeSetting = get2(); break;
+      case 0x1403: imgdata.makernotes.fuji.FujiDevelopmentDynamicRange = get2(); break;
+      case 0x140b: imgdata.makernotes.fuji.FujiAutoDynamicRange = get2(); break;
       case 0x1404: imgdata.lens.makernotes.MinFocal = getreal(type); break;
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
@@ -8996,11 +8996,11 @@ void CLASS parse_makernote (int base, int uptag)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
-      case 0x1400: imgdata.color.FujiDynamicRange = get2(); break;
-      case 0x1401: imgdata.color.FujiFilmMode = get2(); break;
-      case 0x1402: imgdata.color.FujiDynamicRangeSetting = get2(); break;
-      case 0x1403: imgdata.color.FujiDevelopmentDynamicRange = get2(); break;
-      case 0x140b: imgdata.color.FujiAutoDynamicRange = get2(); break;
+      case 0x1400: imgdata.makernotes.fuji.FujiDynamicRange = get2(); break;
+      case 0x1401: imgdata.makernotes.fuji.FujiFilmMode = get2(); break;
+      case 0x1402: imgdata.makernotes.fuji.FujiDynamicRangeSetting = get2(); break;
+      case 0x1403: imgdata.makernotes.fuji.FujiDevelopmentDynamicRange = get2(); break;
+      case 0x140b: imgdata.makernotes.fuji.FujiAutoDynamicRange = get2(); break;
       case 0x1404: imgdata.lens.makernotes.MinFocal = getreal(type); break;
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
@@ -9182,10 +9182,10 @@ void CLASS parse_makernote (int base, int uptag)
           imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type)/2);
           break;
         case 0x20401112:
-          imgdata.sizes.OlympusCropID = get2();
+          imgdata.makernotes.olympus.OlympusCropID = get2();
           break;
         case 0x20401113:
-          FORC4 imgdata.sizes.OlympusFrame[c] = get2();
+          FORC4 imgdata.makernotes.olympus.OlympusFrame[c] = get2();
           break;
         case 0x20100201:
           {
@@ -9861,8 +9861,8 @@ void CLASS parse_makernote (int base, int uptag)
 
 	  if((tag == 0x20400805) && (len == 2))
 	    {
-	      imgdata.color.OlympusSensorCalibration[0]=getreal(type);
-	      imgdata.color.OlympusSensorCalibration[1]=getreal(type);
+	      imgdata.makernotes.olympus.OlympusSensorCalibration[0]=getreal(type);
+	      imgdata.makernotes.olympus.OlympusSensorCalibration[1]=getreal(type);
 	    }
 	  if (tag == 0x20200401)
 	    {
@@ -9883,7 +9883,7 @@ void CLASS parse_makernote (int base, int uptag)
         switch (len)
           {
           case 582:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 1;	// 20D / 350D
+            imgdata.makernotes.canon.CanonColorDataVer = 1;	// 20D / 350D
             {
             	fseek (ifp, save1+(0x23<<1), SEEK_SET);
             	Canon_WBpresets(2,2);
@@ -9892,7 +9892,7 @@ void CLASS parse_makernote (int base, int uptag)
             }
             break;
           case 653:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 2;	// 1Dmk2 / 1DsMK2
+            imgdata.makernotes.canon.CanonColorDataVer = 2;	// 1Dmk2 / 1DsMK2
             {
             	fseek (ifp, save1+(0x27<<1), SEEK_SET);
             	Canon_WBpresets(2,12);
@@ -9901,8 +9901,8 @@ void CLASS parse_makernote (int base, int uptag)
             }
             break;
           case 796:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 3;	// 1DmkIIN / 5D / 30D / 400D
-			imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+            imgdata.makernotes.canon.CanonColorDataVer = 3;	// 1DmkIIN / 5D / 30D / 400D
+			imgdata.makernotes.canon.CanonColorDataSubVer = get2();
 			{
 			  fseek (ifp, save1+(0x4e<<1), SEEK_SET);
               Canon_WBpresets(2,12);
@@ -9911,7 +9911,7 @@ void CLASS parse_makernote (int base, int uptag)
               fseek (ifp, save1+(0x0c4<<1), SEEK_SET); // offset 196 short
               int bls=0;
               FORC4 bls+=get2();
-              imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
 			}
 			break;
             // 1DmkIII / 1DSmkIII / 1DmkIV / 5DmkII
@@ -9919,8 +9919,8 @@ void CLASS parse_makernote (int base, int uptag)
             // 550D / 1000D / 1100D
           case 674: case 692: case 702: case 1227: case 1250:
           case 1251: case 1337: case 1338: case 1346:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 4;
-            imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+            imgdata.makernotes.canon.CanonColorDataVer = 4;
+            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
             {
             	fseek (ifp, save1+(0x53<<1), SEEK_SET);
             	Canon_WBpresets(2,12);
@@ -9929,29 +9929,29 @@ void CLASS parse_makernote (int base, int uptag)
               fseek (ifp, save1+(0x0e7<<1), SEEK_SET); // offset 231 short
               int bls=0;
               FORC4 bls+=get2();
-              imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
-            if ((imgdata.color.canon_makernotes.CanonColorDataSubVer == 4)
-                || (imgdata.color.canon_makernotes.CanonColorDataSubVer == 5))
+            if ((imgdata.makernotes.canon.CanonColorDataSubVer == 4)
+                || (imgdata.makernotes.canon.CanonColorDataSubVer == 5))
               {
                 fseek (ifp, save1+(0x2b9<<1), SEEK_SET);		// offset 697 shorts
-                imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
               }
-            else if ((imgdata.color.canon_makernotes.CanonColorDataSubVer == 6) ||
-                     (imgdata.color.canon_makernotes.CanonColorDataSubVer == 7))
+            else if ((imgdata.makernotes.canon.CanonColorDataSubVer == 6) ||
+                     (imgdata.makernotes.canon.CanonColorDataSubVer == 7))
               {
                 fseek (ifp, save1+(0x2d0<<1), SEEK_SET);		// offset 720 shorts
-                imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
               }
-            else if (imgdata.color.canon_makernotes.CanonColorDataSubVer == 9)
+            else if (imgdata.makernotes.canon.CanonColorDataSubVer == 9)
               {
                 fseek (ifp, save1+(0x2d4<<1), SEEK_SET);		// offset 724 shorts
-                imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
               }
             break;
 
           case 5120:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 5;	// PowerSot G10, G12, G5 X, EOS M3
+            imgdata.makernotes.canon.CanonColorDataVer = 5;	// PowerSot G10, G12, G5 X, EOS M3
             {
               fseek (ifp, save1+(0x56<<1), SEEK_SET);
               FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
@@ -9962,13 +9962,13 @@ void CLASS parse_makernote (int base, int uptag)
               fseek (ifp, save1+(0x108<<1), SEEK_SET);			// offset 264 short
               int bls=0;
               FORC4 bls+=get2();
-              imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
             break;
 
           case 1273: case 1275:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 6;	// 600D / 1200D
-            imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+            imgdata.makernotes.canon.CanonColorDataVer = 6;	// 600D / 1200D
+            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
             {
               fseek (ifp, save1+(0x67<<1), SEEK_SET);
               Canon_WBpresets(2,12);
@@ -9977,16 +9977,16 @@ void CLASS parse_makernote (int base, int uptag)
               fseek (ifp, save1+(0x0fb<<1), SEEK_SET);			// offset 251 short
               int bls=0;
               FORC4 bls+=get2();
-              imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
             fseek (ifp, save1+(0x1e4<<1), SEEK_SET);			// offset 484 shorts
-            imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+            imgdata.makernotes.canon.SpecularWhiteLevel = get2();
             break;
 
             // 1DX / 5DmkIII / 6D / 100D / 650D / 700D / EOS M / 7DmkII / 750D / 760D
           case 1312: case 1313: case 1316: case 1506:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 7;
-            imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+            imgdata.makernotes.canon.CanonColorDataVer = 7;
+            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
             {
               fseek (ifp, save1+(0x80<<1), SEEK_SET);
               Canon_WBpresets(2,12);
@@ -9995,23 +9995,23 @@ void CLASS parse_makernote (int base, int uptag)
               fseek (ifp, save1+(0x114<<1), SEEK_SET);			// offset 276 shorts
               int bls=0;
               FORC4 bls+=get2();
-              imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
-            if (imgdata.color.canon_makernotes.CanonColorDataSubVer == 10)
+            if (imgdata.makernotes.canon.CanonColorDataSubVer == 10)
               {
                 fseek (ifp, save1+(0x1fd<<1), SEEK_SET);		// offset 509 shorts
-                imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
-              } else if (imgdata.color.canon_makernotes.CanonColorDataSubVer == 11)
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+              } else if (imgdata.makernotes.canon.CanonColorDataSubVer == 11)
               {
                 fseek (ifp, save1+(0x2dd<<1), SEEK_SET);		// offset 733 shorts
-                imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
               }
             break;
 
             // 5DS / 5DS R
           case 1560:
-            imgdata.color.canon_makernotes.CanonColorDataVer = 8;
-            imgdata.color.canon_makernotes.CanonColorDataSubVer = get2();
+            imgdata.makernotes.canon.CanonColorDataVer = 8;
+            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
             {
               fseek (ifp, save1+(0x85<<1), SEEK_SET);
               Canon_WBpresets(2,12);
@@ -10020,10 +10020,10 @@ void CLASS parse_makernote (int base, int uptag)
               fseek (ifp, save1+(0x146<<1), SEEK_SET);			// offset 326 shorts
               int bls=0;
               FORC4 bls+=get2();
-              imgdata.color.canon_makernotes.AverageBlackLevel = bls/4;
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
               fseek (ifp, save1+(0x30f<<1), SEEK_SET);		// offset 783 shorts
-              imgdata.color.canon_makernotes.SpecularWhiteLevel = get2();
+              imgdata.makernotes.canon.SpecularWhiteLevel = get2();
             break;
 
           }
@@ -12564,7 +12564,7 @@ void CLASS parse_fuji (int offset)
 // IB start
 #ifdef LIBRAW_LIBRARY_BUILD
     } else if (tag == 0x9650) {
-      imgdata.color.FujiExpoMidPointShift = ((short)get2()) / ((float)get2());
+      imgdata.makernotes.fuji.FujiExpoMidPointShift = ((short)get2()) / ((float)get2());
     } else if (tag == 0x2100) {
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c ^ 1] = get2();
     } else if (tag == 0x2200) {
