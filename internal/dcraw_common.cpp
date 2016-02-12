@@ -13798,6 +13798,7 @@ canon_a5:
     if (width == 4032 || width == 4952) left_margin = 0;
     if (width == 3328 && (width -= 66)) left_margin = 34;
     if (width == 4936) left_margin = 4;
+    if (width == 6032) left_margin = 0;
     if (!strcmp(model,"HS50EXR") ||
 	!strcmp(model,"F900EXR")) {
       width += 2;
@@ -13808,13 +13809,6 @@ canon_a5:
       {
         height -= (top_margin=6);
       }
-#if 0
-    if (!strcmp(model,"X-Pro2")) {
-	width = 6032;
-	top_margin = 0;
-	left_margin = 0;
-    }
-#endif
     if (fuji_layout) raw_width *= is_raw;
     if (filters == 9)
       FORC(36) ((char *)xtrans)[c] =
