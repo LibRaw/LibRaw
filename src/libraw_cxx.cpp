@@ -5055,6 +5055,8 @@ static const char  *static_camera_list[] =
 "Sony IMX135-mipi 13mp",
 "Sony IMX135-QCOM",
 "Sony IMX072-mipi",
+"Sony IMX298-mipi 16mp",
+"Sony IMX219-mipi 8mp",
 "STV680 VGA",
 "ptGrey GRAS-50S5C",
 "JaiPulnix BB-500CL",

@@ -12590,6 +12590,7 @@ void CLASS parse_fuji (int offset)
       c = order;
       order = 0x4949;
       if ((tag = get4()) > 10000) tag = get4();
+      if (tag > 10000) tag = get4();
       width = tag;
       height = get4();
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -14348,6 +14349,8 @@ void CLASS identify()
     { 16424960,4208,3120, 0, 0, 0, 0, 1,0x16,0,0,"Sony","IMX135-mipi 13mp" },
     { 17522688,4212,3120, 0, 0, 0, 0, 0,0x16,0,0,"Sony","IMX135-QCOM" },
     { 10223360,2608,1960, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX072-mipi" },
+    { 20500480,4656,3496, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX298-mipi 16mp" },
+    { 10186752,3264,2448, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX219-mipi 8mp" },	
     { 5107712,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"HTC","UltraPixel" },
     { 1540857,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"Samsung","S3" },
     { 10223363,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"Samsung","GalaxyNexus" },
@@ -15124,12 +15127,13 @@ canon_a5:
       {
         height -= (top_margin=6);
       }
+#if 0
     if (!strcmp(model,"X-Pro2")) {
 	width = 6032;
-	height = raw_height;
 	top_margin = 0;
 	left_margin = 0;
     }
+#endif
     if (fuji_layout) raw_width *= is_raw;
     if (filters == 9)
       FORC(36) ((char *)xtrans)[c] =
