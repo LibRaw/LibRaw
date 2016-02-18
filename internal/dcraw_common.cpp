@@ -12941,6 +12941,7 @@ void CLASS identify()
     { 0x384, "EOS M10"},  /* temp */
     { 0x346, "EOS 100D" },
     { 0x347, "EOS 760D" },
+    { 0x350, "EOS 80D"},
     { 0x382, "EOS 5DS" },
     { 0x393, "EOS 750D" },
     { 0x401, "EOS 5DS R" },
