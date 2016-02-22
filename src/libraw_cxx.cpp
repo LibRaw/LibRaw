@@ -19,6 +19,9 @@ it under the terms of the one of three licenses as you choose:
 
  */
 
+#ifdef ANDROID
+#include <swab.h>
+#endif
 #include <math.h>
 #include <errno.h>
 #include <float.h>
