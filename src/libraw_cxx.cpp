@@ -521,6 +521,7 @@ void LibRaw:: recycle()
   imgdata.makernotes.fuji.FujiDynamicRangeSetting = 0xffff;
   imgdata.makernotes.fuji.FujiDevelopmentDynamicRange = 0xffff;
   imgdata.makernotes.fuji.FujiAutoDynamicRange = 0xffff;
+  imgdata.makernotes.sony.SonyCameraType = 0xffff;
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);

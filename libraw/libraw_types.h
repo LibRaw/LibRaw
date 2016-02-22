@@ -206,7 +206,7 @@ typedef struct
   ushort      OlympusFrame[4];	/* upper left XY, lower right XY */
   int        OlympusSensorCalibration[2];
 } libraw_olympus_makernotes_t;
-  
+
 typedef struct
 {
 	int CanonColorDataVer;
@@ -252,8 +252,13 @@ typedef struct
   ushort     FujiDynamicRangeSetting;
   ushort     FujiDevelopmentDynamicRange;
   ushort     FujiAutoDynamicRange;
-} libraw_fuji_info_t;  
-  
+} libraw_fuji_info_t;
+
+typedef struct
+{
+  ushort     SonyCameraType;
+} libraw_sony_info_t;
+
 typedef struct
 {
     enum LibRaw_thumbnail_formats tformat;
@@ -454,8 +459,9 @@ typedef struct
   libraw_canon_makernotes_t canon;
   libraw_fuji_info_t fuji;
   libraw_olympus_makernotes_t olympus;
+  libraw_sony_info_t sony;
 } libraw_makernotes_t;
-  
+
 typedef struct
 {
 	short DriveMode;

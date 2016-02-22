@@ -7695,7 +7695,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 299) ||		// NEX-VG900
       (id == 310) ||		// DSC-RX1R
       (id == 344) ||		// DSC-RX1RM2
-      (id == 294)			// SLT-99, Hasselblad HV
+      (id == 294)		// SLT-99, Hasselblad HV
       )
     {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
@@ -7713,40 +7713,44 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     }
 
-  if (	// E-mount cameras
-      // ILCE:
-      (id == 302) ||
-      (id == 306) ||
-      (id == 311) ||
-      (id == 312) ||
-      (id == 313) ||
-      (id == 318) ||
-      (id == 339) ||
-      (id == 340) ||
-      (id == 346) ||
-      (id == 347) ||
-      (id == 350) ||
-      // NEX:
-      (id == 278) ||
-      (id == 279) ||
-      (id == 284) ||
-      (id == 288) ||
-      (id == 289) ||
-      (id == 290) ||
-      (id == 293) ||
-      (id == 295) ||
-      (id == 296) ||
-      (id == 299) ||
-      (id == 300) ||
-      (id == 305) ||
-      (id == 307)
-      )
+  if      (               // E-mount cameras, ILCE series
+           (id == 302) ||
+           (id == 306) ||
+           (id == 311) ||
+           (id == 312) ||
+           (id == 313) ||
+           (id == 318) ||
+           (id == 339) ||
+           (id == 340) ||
+           (id == 346) ||
+           (id == 347) ||
+           (id == 350)
+          )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Sony_E;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_ILCE;
+    }
+  else if (               // E-mount cameras, NEX series
+           (id == 278) ||
+           (id == 279) ||
+           (id == 284) ||
+           (id == 288) ||
+           (id == 289) ||
+           (id == 290) ||
+           (id == 293) ||
+           (id == 295) ||
+           (id == 296) ||
+           (id == 299) ||
+           (id == 300) ||
+           (id == 305) ||
+           (id == 307)
+          )
+    {
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Sony_E;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_NEX;
     }
 
-  else if (	// A-mount cameras
-           // DSLR:
+  else if (	// A-mount cameras, DSLR series
            (id == 256) ||
            (id == 257) ||
            (id == 258) ||
@@ -7764,8 +7768,13 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 274) ||
            (id == 275) ||
            (id == 282) ||
-           (id == 283) ||
-           // SLT:
+           (id == 283)
+          )
+    {
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_DSLR;
+    }
+  else if (	// A-mount cameras, SLT series
            (id == 280) ||
            (id == 281) ||
            (id == 285) ||
@@ -7774,12 +7783,18 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 291) ||
            (id == 292) ||
            (id == 294) ||
-           (id == 303) ||
-           // ILCA:
-           (id == 319)
-           )
+           (id == 303)
+          )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_SLT;
+    }
+  else if (	// A-mount cameras, ILCA series
+           (id == 319)
+          )
+    {
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_ILCA;
     }
 
   else if (	// DSC
@@ -7797,6 +7812,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_DSC;
     }
   return;
 }
