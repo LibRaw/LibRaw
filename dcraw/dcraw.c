@@ -7407,6 +7407,11 @@ void CLASS setPentaxBodyFeatures (unsigned id)
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Pentax_K;
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     break;
+  case 0x13092:
+    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Pentax_K;
+    imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Pentax_K;
+    imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
+    break;
   case 0x12e08:
   case 0x13010:
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Pentax_645;
@@ -7434,10 +7439,10 @@ void CLASS PentaxLensInfo (unsigned id, unsigned len)	// tag 0x0207
 	uchar *table_buf;
 	table_buf = (uchar*)malloc(MAX(len,128));
 	fread(table_buf, len, 1, ifp);
-	if ((id < 0x12b9c) ||
-        (((id == 0x12b9c) ||  // K100D
-          (id == 0x12b9d) ||  // K110D
-          (id == 0x12ba2)) && // K100D Super
+	if ((id < 0x12b9c)  ||
+        (((id == 0x12b9c)   ||  // K100D
+          (id == 0x12b9d)   ||  // K110D
+          (id == 0x12ba2)) &&   // K100D Super
 		 ((!table_buf[20] ||
 		  (table_buf[20] == 0xff)))))
 	  {
@@ -7695,7 +7700,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 299) ||		// NEX-VG900
       (id == 310) ||		// DSC-RX1R
       (id == 344) ||		// DSC-RX1RM2
-      (id == 294)			// SLT-99, Hasselblad HV
+      (id == 294)		// SLT-99, Hasselblad HV
       )
     {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
@@ -7713,40 +7718,44 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     }
 
-  if (	// E-mount cameras
-      // ILCE:
-      (id == 302) ||
-      (id == 306) ||
-      (id == 311) ||
-      (id == 312) ||
-      (id == 313) ||
-      (id == 318) ||
-      (id == 339) ||
-      (id == 340) ||
-      (id == 346) ||
-      (id == 347) ||
-      (id == 350) ||
-      // NEX:
-      (id == 278) ||
-      (id == 279) ||
-      (id == 284) ||
-      (id == 288) ||
-      (id == 289) ||
-      (id == 290) ||
-      (id == 293) ||
-      (id == 295) ||
-      (id == 296) ||
-      (id == 299) ||
-      (id == 300) ||
-      (id == 305) ||
-      (id == 307)
-      )
+  if      (               // E-mount cameras, ILCE series
+           (id == 302) ||
+           (id == 306) ||
+           (id == 311) ||
+           (id == 312) ||
+           (id == 313) ||
+           (id == 318) ||
+           (id == 339) ||
+           (id == 340) ||
+           (id == 346) ||
+           (id == 347) ||
+           (id == 350)
+          )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Sony_E;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_ILCE;
+    }
+  else if (               // E-mount cameras, NEX series
+           (id == 278) ||
+           (id == 279) ||
+           (id == 284) ||
+           (id == 288) ||
+           (id == 289) ||
+           (id == 290) ||
+           (id == 293) ||
+           (id == 295) ||
+           (id == 296) ||
+           (id == 299) ||
+           (id == 300) ||
+           (id == 305) ||
+           (id == 307)
+          )
+    {
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Sony_E;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_NEX;
     }
 
-  else if (	// A-mount cameras
-           // DSLR:
+  else if (	// A-mount cameras, DSLR series
            (id == 256) ||
            (id == 257) ||
            (id == 258) ||
@@ -7764,8 +7773,13 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 274) ||
            (id == 275) ||
            (id == 282) ||
-           (id == 283) ||
-           // SLT:
+           (id == 283)
+          )
+    {
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_DSLR;
+    }
+  else if (	// A-mount cameras, SLT series
            (id == 280) ||
            (id == 281) ||
            (id == 285) ||
@@ -7774,12 +7788,18 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 291) ||
            (id == 292) ||
            (id == 294) ||
-           (id == 303) ||
-           // ILCA:
-           (id == 319)
-           )
+           (id == 303)
+          )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_SLT;
+    }
+  else if (	// A-mount cameras, ILCA series
+           (id == 319)
+          )
+    {
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_ILCA;
     }
 
   else if (	// DSC
@@ -7797,6 +7817,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+      imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_DSC;
     }
   return;
 }
@@ -11919,7 +11940,7 @@ void CLASS apply_tiff()
          && strncmp(software,"Nikon Scan",10))
       is_raw = 0;
   for (i=0; i < tiff_nifds; i++)
-    if (i != raw 
+    if (i != raw
         && (tiff_ifd[i].samples == max_samp || (tiff_ifd[i].comp == 7 && tiff_ifd[i].samples == 1)) /* Allow 1-bps JPEGs */
         && tiff_ifd[i].bps>0 && tiff_ifd[i].bps < 33
 	&& tiff_ifd[i].phint != 32803
@@ -13240,7 +13261,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 10450,-4329,-878,-3217,11105,2421,-752,1758,6519 } },
     { "Fujifilm X-Pro1", 0, 0,
       { 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
-    { "Fujifilm X-Pro2", 0, 0,  
+    { "Fujifilm X-Pro2", 0, 0,
       { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
     { "Fujifilm X-A1", 0, 0,
 	{ 11086,-4555,-839,-3512,11310,2517,-815,1341,5940 } },
@@ -13613,7 +13634,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Olympus E-M5", 0, 0xfe1,
       { 8380,-2630,-639,-2887,10725,2496,-627,1427,5438 } },
     {"Olympus PEN-F",0, 0, /* temp */
-      {9841,-3069,-592,-1893,9743,2080,-804,1629,4819}},  
+      {9841,-3069,-592,-1893,9743,2080,-804,1629,4819}},
     { "Olympus SP350", 0, 0,
       { 12078,-4836,-1069,-6671,14306,2578,-786,939,7418 } },
     { "Olympus SP3", 0, 0,
@@ -14260,6 +14281,7 @@ void CLASS identify()
     { 0x384, "EOS M10"},  /* temp */
     { 0x346, "EOS 100D" },
     { 0x347, "EOS 760D" },
+    { 0x350, "EOS 80D"},
     { 0x382, "EOS 5DS" },
     { 0x393, "EOS 750D" },
     { 0x401, "EOS 5DS R" },
@@ -14352,7 +14374,7 @@ void CLASS identify()
     { 17522688,4212,3120, 0, 0, 0, 0, 0,0x16,0,0,"Sony","IMX135-QCOM" },
     { 10223360,2608,1960, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX072-mipi" },
     { 20500480,4656,3496, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX298-mipi 16mp" },
-    { 10186752,3264,2448, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX219-mipi 8mp" },	
+    { 10186752,3264,2448, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX219-mipi 8mp" },
     { 5107712,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"HTC","UltraPixel" },
     { 1540857,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"Samsung","S3" },
     { 10223363,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"Samsung","GalaxyNexus" },

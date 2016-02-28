@@ -125,6 +125,15 @@ enum LibRaw_camera_formats
     LIBRAW_FORMAT_FT=8
   };
 
+enum LibRaw_sony_cameratypes
+  {
+    LIBRAW_SONY_DSC=1,
+    LIBRAW_SONY_DSLR=2,
+    LIBRAW_SONY_NEX=3,
+    LIBRAW_SONY_SLT=4,
+    LIBRAW_SONY_ILCE=5,
+    LIBRAW_SONY_ILCA=6
+  };
 
 enum LibRaw_processing_options
   {
