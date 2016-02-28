@@ -262,6 +262,11 @@ struct ph1 {
 //@end DEFINES
 
 /* @out COMMON
+
+#ifdef ANDROID
+#include <libraw_swab.h>
+#endif
+
 #include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
