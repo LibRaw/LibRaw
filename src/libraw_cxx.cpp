@@ -4846,6 +4846,7 @@ static const char  *static_camera_list[] =
 "Panasonic DMC-TZ60/61/SZ40",
 "Panasonic DMC-TZ70/71/ZS50",
 "Panasonic DMC-TZ80/81/85/ZS60",
+"Panasonic DMC-TZ100/101/ZS100",
 "Pentax *ist D",
 "Pentax *ist DL",
 "Pentax *ist DL2",
