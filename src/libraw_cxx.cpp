@@ -37,7 +37,9 @@ it under the terms of the one of three licenses as you choose:
 #define LIBRAW_LIBRARY_BUILD
 #include "libraw/libraw.h"
 #include "internal/defines.h"
+#ifdef USE_ZLIB
 #include <zlib.h>
+#endif
 
 #if defined(_WIN32)
 #if defined _MSC_VER
@@ -1019,6 +1021,7 @@ int LibRaw::open_buffer(void *buffer, size_t size)
   return ret;
 }
 
+#ifdef USE_ZLIB
 inline unsigned int __DNG_HalfToFloat (ushort halfValue)
 {
 	int sign 	   = (halfValue >> 15) & 0x00000001;
@@ -1252,7 +1255,6 @@ static float expandFloats(unsigned char * dst, int tileWidth, int bytesps) {
 	return max;
 }
 
-
 void LibRaw::deflate_dng_load_raw()
 {
 	struct tiff_ifd_t * ifd = &tiff_ifd[0];
@@ -1395,6 +1397,13 @@ void LibRaw::deflate_dng_load_raw()
 	if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT)
 		convertFloatToInt(); // with default settings
 }
+#else
+void LibRaw::deflate_dng_load_raw()
+{
+
+ throw LIBRAW_EXCEPTION_DECODE_RAW;
+}
+#endif
 
 int LibRaw::is_floating_point()
 {
