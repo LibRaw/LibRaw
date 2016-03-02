@@ -10147,7 +10147,7 @@ void CLASS parse_makernote (int base, int uptag)
 
     if (tag == 0xa7) {	// shutter count
       NikonKey = fgetc(ifp)^fgetc(ifp)^fgetc(ifp)^fgetc(ifp);
-      if ( (unsigned) (ver97-200) < 17) {
+        if ( (unsigned) (ver97-200) < 17) {
         ci = xlat[0][serial & 0xff];
         cj = xlat[1][NikonKey];
         ck = 0x60;
@@ -14348,6 +14348,7 @@ void CLASS identify()
     { 0x15a, "ILCE-QX1" },
     { 0x15b, "ILCE-7RM2" },
     { 0x15e, "ILCE-7SM2" },
+    { 0x165, "ILCE-6300" },
   };
 
   static const struct {
