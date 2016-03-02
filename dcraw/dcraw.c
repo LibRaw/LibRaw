@@ -8010,6 +8010,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
   uchar NikonKey, ci, cj, ck;
   unsigned serial = 0;
+  unsigned custom_serial = 0;
   unsigned NikonLensDataVersion = 0;
   unsigned lenNikonLensData = 0;
   unsigned NikonFlashInfoVersion = 0;
@@ -8243,7 +8244,20 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       {
         if (tag == 0x1d)							// serial number
           while ((c = fgetc(ifp)) && c != EOF)
-            serial = serial * 10 + (isdigit(c) ? c - '0' : c % 10);
+          {
+            if ((!custom_serial) && (!isdigit(c)))
+            {
+              if ((strlen(model) == 3) && (!strcmp(model,"D50")))
+              {
+                custom_serial = 34;
+              }
+              else
+              {
+                custom_serial = 96;
+              }
+            }
+            serial = serial*10 + (isdigit(c) ? c - '0' : c % 10);
+          }
         else if (tag == 0x000a)
           {
             imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
@@ -8332,18 +8346,24 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           {
             NikonKey = fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp);
             if ((NikonLensDataVersion > 200) && lenNikonLensData)
+            {
+              if (custom_serial)
+              {
+                ci = xlat[0][custom_serial];
+              }
+              else
               {
                 ci = xlat[0][serial & 0xff];
-                cj = xlat[1][NikonKey];
-                ck = 0x60;
-                for (i = 0; i < lenNikonLensData; i++)
-                  table_buf[i] ^= (cj += ci * ck++);
-                processNikonLensData(table_buf, lenNikonLensData);
-                free(table_buf);
-                lenNikonLensData = 0;
               }
+              cj = xlat[1][NikonKey];
+              ck = 0x60;
+              for (i = 0; i < lenNikonLensData; i++)
+                table_buf[i] ^= (cj += ci * ck++);
+              processNikonLensData(table_buf, lenNikonLensData);
+              lenNikonLensData = 0;
+              free(table_buf);
+            }
           }
-
         else if (tag == 0x00a8)		// contains flash data
           {
           	for (i = 0; i < 4; i++)
@@ -8818,6 +8838,7 @@ void CLASS parse_makernote (int base, int uptag)
   uchar NikonKey;
 
 #ifdef LIBRAW_LIBRARY_BUILD
+  unsigned custom_serial = 0;
   unsigned NikonLensDataVersion = 0;
   unsigned lenNikonLensData = 0;
 
@@ -10084,7 +10105,24 @@ void CLASS parse_makernote (int base, int uptag)
     }
     if (tag == 0x1d)
       while ((c = fgetc(ifp)) && c != EOF)
+#ifdef LIBRAW_LIBRARY_BUILD
+      {
+        if ((!custom_serial) && (!isdigit(c)))
+        {
+          if ((strlen(model) == 3) && (!strcmp(model,"D50")))
+          {
+            custom_serial = 34;
+          }
+          else
+          {
+            custom_serial = 96;
+          }
+        }
+#endif
 	serial = serial*10 + (isdigit(c) ? c - '0' : c % 10);
+#ifdef LIBRAW_LIBRARY_BUILD
+      }
+#endif
     if (tag == 0x29 && type == 1) {  // Canon PowerShot G9
       c = wbi < 18 ? "012347800000005896"[wbi]-'0' : 0;
       fseek (ifp, 8 + c*32, SEEK_CUR);
@@ -10147,7 +10185,7 @@ void CLASS parse_makernote (int base, int uptag)
 
     if (tag == 0xa7) {	// shutter count
       NikonKey = fgetc(ifp)^fgetc(ifp)^fgetc(ifp)^fgetc(ifp);
-      if ( (unsigned) (ver97-200) < 17) {
+        if ( (unsigned) (ver97-200) < 17) {
         ci = xlat[0][serial & 0xff];
         cj = xlat[1][NikonKey];
         ck = 0x60;
@@ -10160,7 +10198,14 @@ void CLASS parse_makernote (int base, int uptag)
 #ifdef LIBRAW_LIBRARY_BUILD
       if ((NikonLensDataVersion > 200) && lenNikonLensData)
       {
-        ci = xlat[0][serial & 0xff];
+        if (custom_serial)
+        {
+          ci = xlat[0][custom_serial];
+        }
+        else
+        {
+          ci = xlat[0][serial & 0xff];
+        }
         cj = xlat[1][NikonKey];
         ck = 0x60;
         for (i = 0; i < lenNikonLensData; i++)
@@ -14354,6 +14399,7 @@ void CLASS identify()
     { 0x15a, "ILCE-QX1" },
     { 0x15b, "ILCE-7RM2" },
     { 0x15e, "ILCE-7SM2" },
+    { 0x165, "ILCE-6300" },
   };
 
   static const struct {
