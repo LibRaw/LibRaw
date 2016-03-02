@@ -8818,6 +8818,7 @@ void CLASS parse_makernote (int base, int uptag)
   uchar NikonKey;
 
 #ifdef LIBRAW_LIBRARY_BUILD
+  unsigned custom_serial = 0;
   unsigned NikonLensDataVersion = 0;
   unsigned lenNikonLensData = 0;
 
@@ -10084,7 +10085,24 @@ void CLASS parse_makernote (int base, int uptag)
     }
     if (tag == 0x1d)
       while ((c = fgetc(ifp)) && c != EOF)
+#ifdef LIBRAW_LIBRARY_BUILD
+      {
+        if ((!custom_serial) && (!isdigit(c)))
+        {
+          if ((strlen(model) == 3) && (!strcmp(model,"D50")))
+          {
+            custom_serial = 34;
+          }
+          else
+          {
+            custom_serial = 96;
+          }
+        }
+#endif
 	serial = serial*10 + (isdigit(c) ? c - '0' : c % 10);
+#ifdef LIBRAW_LIBRARY_BUILD
+      }
+#endif
     if (tag == 0x29 && type == 1) {  // Canon PowerShot G9
       c = wbi < 18 ? "012347800000005896"[wbi]-'0' : 0;
       fseek (ifp, 8 + c*32, SEEK_CUR);
@@ -10160,7 +10178,14 @@ void CLASS parse_makernote (int base, int uptag)
 #ifdef LIBRAW_LIBRARY_BUILD
       if ((NikonLensDataVersion > 200) && lenNikonLensData)
       {
-        ci = xlat[0][serial & 0xff];
+        if (custom_serial)
+        {
+          ci = xlat[0][custom_serial];
+        }
+        else
+        {
+          ci = xlat[0][serial & 0xff];
+        }
         cj = xlat[1][NikonKey];
         ck = 0x60;
         for (i = 0; i < lenNikonLensData; i++)
