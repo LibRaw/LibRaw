@@ -6620,7 +6620,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_SLT;
     }
   else if (	// A-mount cameras, ILCA series
-           (id == 319)
+           id == 319 // parentness removed to make clang happy
           )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
@@ -12737,6 +12737,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 4913,-541,-202,-6130,13513,2906,-1564,2151,7183 } },
     { "Sony ILCE-7", -512, 0,
       { 5271,-712,-347,-6153,13653,2763,-1601,2366,7242 } },
+    { "Sony ILCE-6300", -512, 0,
+      { 530, -79, -57, -56, 1183, -102, -10, -15, 610 } },
     { "Sony ILCE", -512, 0,	/* 3000, 5000, 5100, 6000, and QX1 */
       { 5991,-1456,-455,-4764,12135,2980,-707,1425,6701 } },
     { "Sony NEX-5N", -512, 0,
