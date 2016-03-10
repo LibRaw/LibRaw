@@ -366,8 +366,6 @@ LibRaw:: LibRaw(unsigned int flags)
   verbose = 0;
 #endif
   ZERO(imgdata);
-  imgdata.lens.makernotes.CanonFocalUnits = 1;
-  imgdata.lens.makernotes.LensID = 0xffffffffffffffffULL;
 
   cleargps(&imgdata.other.parsed_gps);
   ZERO(libraw_internal_data);
@@ -528,6 +526,11 @@ void LibRaw:: recycle()
   imgdata.makernotes.fuji.FujiAutoDynamicRange = 0xffff;
   imgdata.makernotes.sony.SonyCameraType = 0xffff;
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
+
+  for(int i = 0; i < 4; i++)
+   imgdata.color.dng_color[0].analogbalance[i]=
+   imgdata.color.dng_color[1].analogbalance[i]=1.0f;
+
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);
   imgdata.lens.makernotes.CanonFocalUnits = 1;

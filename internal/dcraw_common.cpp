@@ -10473,7 +10473,12 @@ guess_cfa_pc:
             }
 	break;
       case 50727:			/* AnalogBalance */
-	FORCC ab[c] = getreal(type);
+	FORCC{
+#ifdef LIBRAW_LIBRARY_BUILD
+              imgdata.color.dng_color[0].analogbalance[c]=
+#endif
+	      ab[c] = getreal(type);
+	}
 	break;
       case 50728:			/* AsShotNeutral */
 	FORCC asn[c] = getreal(type);
