@@ -603,7 +603,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     }
   else if (load_raw == &LibRaw::lossless_jpeg_load_raw)
     {
-      // Check rbayer
       d_info->decoder_name = "lossless_jpeg_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED;
     }
@@ -614,15 +613,13 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     }
   else if (load_raw == &LibRaw::lossless_dng_load_raw)
     {
-      // Check rbayer
       d_info->decoder_name = "lossless_dng_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_ADOBECOPYPIXEL;
     }
   else if (load_raw == &LibRaw::packed_dng_load_raw)
     {
-      // Check rbayer
       d_info->decoder_name = "packed_dng_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED;
+      d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_ADOBECOPYPIXEL;
     }
   else if (load_raw == &LibRaw::pentax_load_raw )
     {
@@ -631,7 +628,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
     }
   else if (load_raw == &LibRaw::nikon_load_raw)
     {
-      // Check rbayer
       d_info->decoder_name = "nikon_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
     }
@@ -2331,6 +2327,9 @@ int LibRaw::unpack(void)
 			&& (load_raw == &LibRaw::canon_sraw_load_raw))
 			rawspeed_enabled = 0;
 
+		if(imgdata.idata.dng_version && imgdata.idata.filters==0 && libraw_internal_data.unpacker_data.tiff_bps == 8) // Disable for 8 bit
+			rawspeed_enabled = 0;
+
 		if(load_raw == &LibRaw::packed_load_raw && !strncasecmp(imgdata.idata.make,"Nikon",5) && !strncasecmp(imgdata.idata.model,"E",1) )
 			rawspeed_enabled = 0;
 
@@ -2346,7 +2345,7 @@ int LibRaw::unpack(void)
     if(!raw_was_read()) //RawSpeed failed or not run
       {
         // Not allocated on RawSpeed call, try call LibRaow
-	int zero_rawimage = 0;
+		int zero_rawimage = 0;
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_OWNALLOC)
           {
             // x3f foveon decoder and DNG float
@@ -2369,8 +2368,11 @@ int LibRaw::unpack(void)
             // allocate image as temporary buffer, size
             imgdata.rawdata.raw_alloc = 0;
             imgdata.image = (ushort (*)[4]) calloc(S.iwidth*S.iheight,sizeof(*imgdata.image));
-	    imgdata.rawdata.raw_image = (ushort*) imgdata.image ;
-	    zero_rawimage = 1;
+			if(!(decoder_info.decoder_flags &  LIBRAW_DECODER_ADOBECOPYPIXEL))
+			{
+				imgdata.rawdata.raw_image = (ushort*) imgdata.image ;
+				zero_rawimage = 1;
+			}
           }
         ID.input->seek(libraw_internal_data.unpacker_data.data_offset, SEEK_SET);
 
@@ -2378,8 +2380,8 @@ int LibRaw::unpack(void)
         if(load_raw == &LibRaw::unpacked_load_raw && !strcasecmp(imgdata.idata.make,"Nikon"))
           C.maximum=65535;
         (this->*load_raw)();
-	if(zero_rawimage)
-	  imgdata.rawdata.raw_image = 0;
+		if(zero_rawimage)
+			imgdata.rawdata.raw_image = 0;
         if(load_raw == &LibRaw::unpacked_load_raw && !strcasecmp(imgdata.idata.make,"Nikon"))
           C.maximum = m_save;
         if(decoder_info.decoder_flags &  LIBRAW_DECODER_OWNALLOC)
@@ -2391,7 +2393,7 @@ int LibRaw::unpack(void)
           {
             // successfully decoded legacy image, attach image to raw_alloc
             imgdata.rawdata.raw_alloc = imgdata.image;
-	    imgdata.rawdata.color4_image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
+		    imgdata.rawdata.color4_image = (ushort (*)[4]) imgdata.rawdata.raw_alloc;
             imgdata.image = 0;
             // Restore saved values. Note: Foveon have masked frame
             // Other 4-color legacy data: no borders
