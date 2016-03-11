@@ -13024,6 +13024,7 @@ void CLASS identify()
     { 0x382, "EOS 5DS" },
     { 0x393, "EOS 750D" },
     { 0x401, "EOS 5DS R" },
+    { 0x404, "EOS 1300D" },
   }, sonique[] = {
     { 0x002, "DSC-R1" },
     { 0x100, "DSLR-A100" },
