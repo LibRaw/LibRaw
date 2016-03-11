@@ -1,5 +1,5 @@
 # Additional compiler flags (OpenMP, SSEx, AVX, ...)
-COPT_OPT=/arch:SSE2 /arch:AVX
+COPT_OPT=/arch:SSE2 #/arch:AVX
 
 # Compile with RawSpeed support
 #CFLAGS_RAWSPEED=/DUSE_RAWSPEED /I"..\\RawSpeed" /I"..\\RawSpeed\include" /I"..\\RawSpeed\include\libjpeg"

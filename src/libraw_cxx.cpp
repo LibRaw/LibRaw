@@ -2106,6 +2106,8 @@ int LibRaw::valid_for_dngsdk()
 		return 1;
 	if(!imgdata.idata.filters && (imgdata.params.use_dngsdk & LIBRAW_DNG_LINEAR))
 		return 1;
+	if(libraw_internal_data.unpacker_data.tiff_bps == 8 && (imgdata.params.use_dngsdk & LIBRAW_DNG_8BIT))
+		return 1;
 	if(libraw_internal_data.unpacker_data.tiff_compress == 8 && (imgdata.params.use_dngsdk & LIBRAW_DNG_DEFLATE))
 		return 1;
 	if(libraw_internal_data.unpacker_data.tiff_samples == 2 )
@@ -2169,7 +2171,10 @@ int LibRaw::try_dngsdk()
 		stage2->GetPixelBuffer(buffer);
 
 		int pixels =  stage2->Bounds().H () * stage2->Bounds().W () * pplanes;
-		imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ptype));
+		if(ptype == ttByte )
+			imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ttShort));
+		else
+			imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ptype));
 
 		if(ptype == ttShort && !is_curve_linear())
 		{
@@ -2177,11 +2182,29 @@ int LibRaw::try_dngsdk()
 			ushort *dst = (ushort*)imgdata.rawdata.raw_alloc;
 			for(int i = 0; i < pixels; i++)
 				dst[i] = imgdata.color.curve[src[i]];
+			S.raw_pitch = S.raw_width*pplanes*TagTypeSize(ptype);
+		}
+		if(ptype == ttByte)
+		{
+			unsigned char *src = (unsigned char *)buffer.fData;
+			ushort *dst = (ushort*)imgdata.rawdata.raw_alloc;
+			if(is_curve_linear())
+			{
+				for(int i = 0; i < pixels; i++)
+					dst[i] = src[i];
+			}
+			else
+			{
+				for(int i = 0; i < pixels; i++)
+					dst[i] = imgdata.color.curve[src[i]];
+			}
+			S.raw_pitch = S.raw_width*pplanes*TagTypeSize(ttShort);
 		}
 		else
+		{
 			memmove(imgdata.rawdata.raw_alloc,buffer.fData,pixels * TagTypeSize(ptype));
-
-		S.raw_pitch = S.raw_width*pplanes*TagTypeSize(ptype);
+			S.raw_pitch = S.raw_width*pplanes*TagTypeSize(ptype);
+		}
 
 		switch(ptype)
 		{
@@ -2193,6 +2216,8 @@ int LibRaw::try_dngsdk()
 			else if(pplanes == 4)
 				imgdata.rawdata.float4_image = (float (*)[4])imgdata.rawdata.raw_alloc;
 			break;
+
+		case ttByte:
 		case ttShort:
 			if(pplanes==1)
 				imgdata.rawdata.raw_image = (ushort*)imgdata.rawdata.raw_alloc;
