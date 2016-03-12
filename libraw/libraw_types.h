@@ -215,7 +215,7 @@ typedef struct
 	int SpecularWhiteLevel;
 	int AverageBlackLevel;
 
-	unsigned long long AFPointsInFocus1D;
+	uchar AFPointsInFocus1D[8];
 	short ContinuousDrive;
 	short FocusMode;
 	short AFPoint;
