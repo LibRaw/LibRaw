@@ -253,6 +253,10 @@ typedef struct
   ushort     FujiDynamicRangeSetting;
   ushort     FujiDevelopmentDynamicRange;
   ushort     FujiAutoDynamicRange;
+  ushort     FujiFocusMode;
+  ushort     FujiAFMode;
+  ushort     FujiFocusPixel[2];
+  ushort     FujiImageStabilization[3];
 } libraw_fuji_info_t;
 
 typedef struct

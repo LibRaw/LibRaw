@@ -518,12 +518,18 @@ void LibRaw:: recycle()
   imgdata.makernotes.olympus.OlympusCropID = -1;
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
+
   imgdata.makernotes.fuji.FujiExpoMidPointShift = -999.f;
   imgdata.makernotes.fuji.FujiDynamicRange = 0xffff;
   imgdata.makernotes.fuji.FujiFilmMode = 0xffff;
   imgdata.makernotes.fuji.FujiDynamicRangeSetting = 0xffff;
   imgdata.makernotes.fuji.FujiDevelopmentDynamicRange = 0xffff;
   imgdata.makernotes.fuji.FujiAutoDynamicRange = 0xffff;
+  imgdata.makernotes.fuji.FujiFocusMode = 0xffff;
+  imgdata.makernotes.fuji.FujiAFMode = 0xffff;
+  imgdata.makernotes.fuji.FujiFocusPixel[0] = imgdata.makernotes.fuji.FujiFocusPixel[1] = 0xffff;
+  imgdata.makernotes.fuji.FujiImageStabilization[0] = imgdata.makernotes.fuji.FujiImageStabilization[1] = imgdata.makernotes.fuji.FujiImageStabilization[2] = 0xffff;
+
   imgdata.makernotes.sony.SonyCameraType = 0xffff;
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
 
