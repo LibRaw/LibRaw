@@ -203,10 +203,29 @@ typedef struct
 
 typedef struct
 {
-  int         OlympusCropID;
-  ushort      OlympusFrame[4];	/* upper left XY, lower right XY */
-  int        OlympusSensorCalibration[2];
+  int		OlympusCropID;
+  ushort	OlympusFrame[4];	/* upper left XY, lower right XY */
+  int		OlympusSensorCalibration[2];
+  ushort	FocusMode[2];
+  ushort	AutoFocus;
+  ushort	AFPoint;
+  unsigned	AFAreas[64];
+  double	AFPointSelected[5];
+  ushort	AFResult;
+  unsigned	ImageStabilization;
+
 } libraw_olympus_makernotes_t;
+
+typedef struct
+{
+  ushort	FocusMode;
+  uchar		AFPointMode;
+  ushort	AFPointSelected[2];
+  unsigned	AFPointsInFocus;
+  uchar		DriveMode[4];
+  uchar		SRResult;
+  uchar		ShakeReduction;
+} libraw_pentax_makernotes_t;
 
 typedef struct
 {
