@@ -214,7 +214,49 @@ typedef struct
 	int CanonColorDataSubVer;
 	int SpecularWhiteLevel;
 	int AverageBlackLevel;
+
+	uchar AFPointsInFocus1D[8];
+	short ContinuousDrive;
+	short FocusMode;
+	short AFPoint;
+	short FocusContinuous;
+	short ImageStabilization;
+	short AFPointsInFocus30D;
+	ushort AFPointsInFocus5D;	// bytes in reverse
+	ushort AFAreaMode;
+	ushort NumAFPoints;
+	ushort ValidAFPoints;
+	ushort AFImageWidth;
+	ushort AFImageHeight;
+	short AFAreaWidths[61];		// cycle to NumAFPoints
+	short AFAreaHeights[61];	// --''--
+	short AFAreaXPositions[61];	// --''--
+	short AFAreaYPositions[61];	// --''--
+	short AFPointsInFocus[4];	// cycle to floor((NumAFPoints+15)/16)
+	short AFPointsSelected[4];	// --''--
+	ushort PrimaryAFPoint;
 } libraw_canon_makernotes_t;
+
+typedef struct
+{
+	char FocusMode[7];
+	uchar AFPoint;
+	ushort AFPointsInFocus;
+	uchar ContrastDetectAF;
+	uchar AFAreaMode;
+	uchar PhaseDetectAF;
+	uchar PrimaryAFPoint;
+	uchar AFPointsUsed[29];
+	ushort AFImageWidth;
+	ushort AFImageHeight;
+	ushort AFAreaXPposition;
+	ushort AFAreaYPosition;
+	ushort AFAreaWidth;
+	ushort AFAreaHeight;
+	uchar ContrastDetectAFInFocus;
+	uchar VibrationReduction;
+	uchar VRMode;
+} libraw_nikon_makernotes_t;
 
 typedef struct
 {
@@ -253,6 +295,10 @@ typedef struct
   ushort     FujiDynamicRangeSetting;
   ushort     FujiDevelopmentDynamicRange;
   ushort     FujiAutoDynamicRange;
+  ushort     FujiFocusMode;
+  ushort     FujiAFMode;
+  ushort     FujiFocusPixel[2];
+  ushort     FujiImageStabilization[3];
 } libraw_fuji_info_t;
 
 typedef struct

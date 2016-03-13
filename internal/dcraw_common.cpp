@@ -6996,6 +6996,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
+      case 0x1021: imgdata.makernotes.fuji.FujiFocusMode = get2(); break;
+      case 0x1022: imgdata.makernotes.fuji.FujiAFMode = get2(); break;
+      case 0x1023: imgdata.makernotes.fuji.FujiFocusPixel[0] = get2();
+                   imgdata.makernotes.fuji.FujiFocusPixel[1] = get2();
+      break;
       case 0x1400: imgdata.makernotes.fuji.FujiDynamicRange = get2(); break;
       case 0x1401: imgdata.makernotes.fuji.FujiFilmMode = get2(); break;
       case 0x1402: imgdata.makernotes.fuji.FujiDynamicRangeSetting = get2(); break;
@@ -7005,7 +7010,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
       case 0x1407: imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type); break;
-      case 0x1422: imgdata.shootinginfo.ImageStabilization = (get2()<<9) + get2();
+      case 0x1422: imgdata.makernotes.fuji.FujiImageStabilization[0] = get2();
+                   imgdata.makernotes.fuji.FujiImageStabilization[1] = get2();
+                   imgdata.makernotes.fuji.FujiImageStabilization[2] = get2();
+                   imgdata.shootinginfo.ImageStabilization = (imgdata.makernotes.fuji.FujiImageStabilization[0]<<9) + imgdata.makernotes.fuji.FujiImageStabilization[1];
+      break;
       }
 
     else if (!strncasecmp(make, "LEICA", 5))
@@ -7868,6 +7877,11 @@ void CLASS parse_makernote (int base, int uptag)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
+      case 0x1021: imgdata.makernotes.fuji.FujiFocusMode = get2(); break;
+      case 0x1022: imgdata.makernotes.fuji.FujiAFMode = get2(); break;
+      case 0x1023: imgdata.makernotes.fuji.FujiFocusPixel[0] = get2();
+                   imgdata.makernotes.fuji.FujiFocusPixel[1] = get2();
+      break;
       case 0x1400: imgdata.makernotes.fuji.FujiDynamicRange = get2(); break;
       case 0x1401: imgdata.makernotes.fuji.FujiFilmMode = get2(); break;
       case 0x1402: imgdata.makernotes.fuji.FujiDynamicRangeSetting = get2(); break;
@@ -7877,7 +7891,11 @@ void CLASS parse_makernote (int base, int uptag)
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
       case 0x1407: imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type); break;
-      case 0x1422: imgdata.shootinginfo.ImageStabilization = (get2()<<9) + get2();
+      case 0x1422: imgdata.makernotes.fuji.FujiImageStabilization[0] = get2();
+                   imgdata.makernotes.fuji.FujiImageStabilization[1] = get2();
+                   imgdata.makernotes.fuji.FujiImageStabilization[2] = get2();
+                   imgdata.shootinginfo.ImageStabilization = (imgdata.makernotes.fuji.FujiImageStabilization[0]<<9) + imgdata.makernotes.fuji.FujiImageStabilization[1];
+      break;
       }
 
     else if (!strncasecmp(make, "LEICA", 5))
@@ -13024,6 +13042,7 @@ void CLASS identify()
     { 0x382, "EOS 5DS" },
     { 0x393, "EOS 750D" },
     { 0x401, "EOS 5DS R" },
+    { 0x404, "EOS 1300D" },
   }, sonique[] = {
     { 0x002, "DSC-R1" },
     { 0x100, "DSLR-A100" },
