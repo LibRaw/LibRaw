@@ -239,6 +239,27 @@ typedef struct
 
 typedef struct
 {
+	char FocusMode[7];
+	uchar AFPoint;
+	ushort AFPointsInFocus;
+	uchar ContrastDetectAF;
+	uchar AFAreaMode;
+	uchar PhaseDetectAF;
+	uchar PrimaryAFPoint;
+	uchar AFPointsUsed[29];
+	ushort AFImageWidth;
+	ushort AFImageHeight;
+	ushort AFAreaXPposition;
+	ushort AFAreaYPosition;
+	ushort AFAreaWidth;
+	ushort AFAreaHeight;
+	uchar ContrastDetectAFInFocus;
+	uchar VibrationReduction;
+	uchar VRMode;
+} libraw_nikon_makernotes_t;
+
+typedef struct
+{
   ushort      curve[0x10000];
   unsigned    cblack[4102];
   unsigned    black;
