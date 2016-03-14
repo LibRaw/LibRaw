@@ -8171,10 +8171,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
-      case 0x1021: imgdata.makernotes.fuji.FujiFocusMode = get2(); break;
-      case 0x1022: imgdata.makernotes.fuji.FujiAFMode = get2(); break;
-      case 0x1023: imgdata.makernotes.fuji.FujiFocusPixel[0] = get2();
-                   imgdata.makernotes.fuji.FujiFocusPixel[1] = get2();
+      case 0x1021: imgdata.makernotes.fuji.FocusMode = get2(); break;
+      case 0x1022: imgdata.makernotes.fuji.AFMode = get2(); break;
+      case 0x1023: imgdata.makernotes.fuji.FocusPixel[0] = get2();
+                   imgdata.makernotes.fuji.FocusPixel[1] = get2();
       break;
       case 0x1400: imgdata.makernotes.fuji.FujiDynamicRange = get2(); break;
       case 0x1401: imgdata.makernotes.fuji.FujiFilmMode = get2(); break;
@@ -8185,10 +8185,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
       case 0x1407: imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type); break;
-      case 0x1422: imgdata.makernotes.fuji.FujiImageStabilization[0] = get2();
-                   imgdata.makernotes.fuji.FujiImageStabilization[1] = get2();
-                   imgdata.makernotes.fuji.FujiImageStabilization[2] = get2();
-                   imgdata.shootinginfo.ImageStabilization = (imgdata.makernotes.fuji.FujiImageStabilization[0]<<9) + imgdata.makernotes.fuji.FujiImageStabilization[1];
+      case 0x1422: imgdata.makernotes.fuji.ImageStabilization[0] = get2();
+                   imgdata.makernotes.fuji.ImageStabilization[1] = get2();
+                   imgdata.makernotes.fuji.ImageStabilization[2] = get2();
+                   imgdata.shootinginfo.ImageStabilization = (imgdata.makernotes.fuji.ImageStabilization[0]<<9) + imgdata.makernotes.fuji.ImageStabilization[1];
       break;
       }
 
@@ -9052,10 +9052,10 @@ void CLASS parse_makernote (int base, int uptag)
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
-      case 0x1021: imgdata.makernotes.fuji.FujiFocusMode = get2(); break;
-      case 0x1022: imgdata.makernotes.fuji.FujiAFMode = get2(); break;
-      case 0x1023: imgdata.makernotes.fuji.FujiFocusPixel[0] = get2();
-                   imgdata.makernotes.fuji.FujiFocusPixel[1] = get2();
+      case 0x1021: imgdata.makernotes.fuji.FocusMode = get2(); break;
+      case 0x1022: imgdata.makernotes.fuji.AFMode = get2(); break;
+      case 0x1023: imgdata.makernotes.fuji.FocusPixel[0] = get2();
+                   imgdata.makernotes.fuji.FocusPixel[1] = get2();
       break;
       case 0x1400: imgdata.makernotes.fuji.FujiDynamicRange = get2(); break;
       case 0x1401: imgdata.makernotes.fuji.FujiFilmMode = get2(); break;
@@ -9066,10 +9066,10 @@ void CLASS parse_makernote (int base, int uptag)
       case 0x1405: imgdata.lens.makernotes.MaxFocal = getreal(type); break;
       case 0x1406: imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type); break;
       case 0x1407: imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type); break;
-      case 0x1422: imgdata.makernotes.fuji.FujiImageStabilization[0] = get2();
-                   imgdata.makernotes.fuji.FujiImageStabilization[1] = get2();
-                   imgdata.makernotes.fuji.FujiImageStabilization[2] = get2();
-                   imgdata.shootinginfo.ImageStabilization = (imgdata.makernotes.fuji.FujiImageStabilization[0]<<9) + imgdata.makernotes.fuji.FujiImageStabilization[1];
+      case 0x1422: imgdata.makernotes.fuji.ImageStabilization[0] = get2();
+                   imgdata.makernotes.fuji.ImageStabilization[1] = get2();
+                   imgdata.makernotes.fuji.ImageStabilization[2] = get2();
+                   imgdata.shootinginfo.ImageStabilization = (imgdata.makernotes.fuji.ImageStabilization[0]<<9) + imgdata.makernotes.fuji.ImageStabilization[1];
       break;
       }
 

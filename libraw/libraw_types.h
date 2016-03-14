@@ -153,7 +153,7 @@ typedef struct
 {
   char        make[64];
   char        model[64];
-  char		  	software[64];
+  char        software[64];
   unsigned    raw_count;
   unsigned    dng_version;
   unsigned    is_foveon;
@@ -163,24 +163,24 @@ typedef struct
   char        xtrans_abs[6][6];
   char        cdesc[5];
   unsigned    xmplen;
-  char	      *xmpdata;
+  char        *xmpdata;
 
 }libraw_iparams_t;
 
 typedef struct
 {
-    ushort      raw_height,
-                raw_width,
-                height,
-                width,
-                top_margin,
-                left_margin;
-    ushort      iheight,
-                iwidth;
-    unsigned    raw_pitch;
-    double      pixel_aspect;
-    int         flip;
-    int         mask[8][4];
+  ushort      raw_height,
+              raw_width,
+              height,
+              width,
+              top_margin,
+              left_margin;
+  ushort      iheight,
+              iwidth;
+  unsigned    raw_pitch;
+  double      pixel_aspect;
+  int         flip;
+  int         mask[8][4];
 } libraw_image_sizes_t;
 
 struct ph1_t
@@ -192,90 +192,102 @@ struct ph1_t
 
 typedef struct
 {
-  unsigned short illuminant;
-  float calibration[4][4];
-  float colormatrix[4][3];
-  float forwardmatrix[3][4];
-  float dng_blacklevel[4];
-  unsigned dng_whitelevel[4];
-  float analogbalance[4];
+  ushort       illuminant;
+  float        calibration[4][4];
+  float        colormatrix[4][3];
+  float        forwardmatrix[3][4];
+  float        dng_blacklevel[4];
+  unsigned     dng_whitelevel[4];
+  float        analogbalance[4];
 } libraw_dng_color_t;
 
 typedef struct
 {
-  int		OlympusCropID;
-  ushort	OlympusFrame[4];	/* upper left XY, lower right XY */
-  int		OlympusSensorCalibration[2];
-  ushort	FocusMode[2];
-  ushort	AutoFocus;
-  ushort	AFPoint;
-  unsigned	AFAreas[64];
-  double	AFPointSelected[5];
-  ushort	AFResult;
-  unsigned	ImageStabilization;
-
-} libraw_olympus_makernotes_t;
-
-typedef struct
-{
-  ushort	FocusMode;
-  uchar		AFPointMode;
-  ushort	AFPointSelected[2];
-  unsigned	AFPointsInFocus;
-  uchar		DriveMode[4];
-  uchar		SRResult;
-  uchar		ShakeReduction;
-} libraw_pentax_makernotes_t;
-
-typedef struct
-{
-	int CanonColorDataVer;
-	int CanonColorDataSubVer;
-	int SpecularWhiteLevel;
-	int AverageBlackLevel;
-
-	uchar AFPointsInFocus1D[8];
-	short ContinuousDrive;
-	short FocusMode;
-	short AFPoint;
-	short FocusContinuous;
-	short ImageStabilization;
-	short AFPointsInFocus30D;
-	ushort AFPointsInFocus5D;	// bytes in reverse
-	ushort AFAreaMode;
-	ushort NumAFPoints;
-	ushort ValidAFPoints;
-	ushort AFImageWidth;
-	ushort AFImageHeight;
-	short AFAreaWidths[61];		// cycle to NumAFPoints
-	short AFAreaHeights[61];	// --''--
-	short AFAreaXPositions[61];	// --''--
-	short AFAreaYPositions[61];	// --''--
-	short AFPointsInFocus[4];	// cycle to floor((NumAFPoints+15)/16)
-	short AFPointsSelected[4];	// --''--
-	ushort PrimaryAFPoint;
+  int          CanonColorDataVer;
+  int          CanonColorDataSubVer;
+  int          SpecularWhiteLevel;
+  int          AverageBlackLevel;
+  uchar        AFPointsInFocus1D[8];
+  short        ContinuousDrive;
+  short        FocusMode;
+  short        AFPoint;
+  short        FocusContinuous;
+  short        ImageStabilization;
+  short        AFPointsInFocus30D;
+  ushort       AFPointsInFocus5D;        // bytes in reverse
+  ushort       AFAreaMode;
+  ushort       NumAFPoints;
+  ushort       ValidAFPoints;
+  ushort       AFImageWidth;
+  ushort       AFImageHeight;
+  short        AFAreaWidths[61];        // cycle to NumAFPoints
+  short        AFAreaHeights[61];       // --''--
+  short        AFAreaXPositions[61];    // --''--
+  short        AFAreaYPositions[61];    // --''--
+  short        AFPointsInFocus[4];      // cycle to floor((NumAFPoints+15)/16)
+  short        AFPointsSelected[4];     // --''--
+  ushort       PrimaryAFPoint;
 } libraw_canon_makernotes_t;
 
 typedef struct
 {
-	char FocusMode[7];
-	uchar AFPoint;
-	ushort AFPointsInFocus;
-	uchar ContrastDetectAF;
-	uchar AFAreaMode;
-	uchar PhaseDetectAF;
-	uchar PrimaryAFPoint;
-	uchar AFPointsUsed[29];
-	ushort AFImageWidth;
-	ushort AFImageHeight;
-	ushort AFAreaXPposition;
-	ushort AFAreaYPosition;
-	ushort AFAreaWidth;
-	ushort AFAreaHeight;
-	uchar ContrastDetectAFInFocus;
-	uchar VibrationReduction;
-	uchar VRMode;
+  float        FujiExpoMidPointShift;
+  ushort       FujiDynamicRange;
+  ushort       FujiFilmMode;
+  ushort       FujiDynamicRangeSetting;
+  ushort       FujiDevelopmentDynamicRange;
+  ushort       FujiAutoDynamicRange;
+  ushort       FocusMode;
+  ushort       AFMode;
+  ushort       FocusPixel[2];
+  ushort       ImageStabilization[3];
+} libraw_fuji_info_t;
+
+typedef struct
+{
+  char         FocusMode[7];
+  uchar        AFPoint;
+  ushort       AFPointsInFocus;
+  uchar        ContrastDetectAF;
+  uchar        AFAreaMode;
+  uchar        PhaseDetectAF;
+  uchar        PrimaryAFPoint;
+  uchar        AFPointsUsed[29];
+  ushort       AFImageWidth;
+  ushort       AFImageHeight;
+  ushort       AFAreaXPposition;
+  ushort       AFAreaYPosition;
+  ushort       AFAreaWidth;
+  ushort       AFAreaHeight;
+  uchar        ContrastDetectAFInFocus;
+  uchar        VibrationReduction;
+  uchar        VRMode;
 } libraw_nikon_makernotes_t;
+
+typedef struct
+{
+  int          OlympusCropID;
+  ushort       OlympusFrame[4];	/* upper left XY, lower right XY */
+  int          OlympusSensorCalibration[2];
+  ushort       FocusMode[2];
+  ushort       AutoFocus;
+  ushort       AFPoint;
+  unsigned     AFAreas[64];
+  double       AFPointSelected[5];
+  ushort       AFResult;
+  unsigned     ImageStabilization;
+} libraw_olympus_makernotes_t;
+
+typedef struct
+{
+  ushort       FocusMode;
+  uchar        AFPointMode;
+  ushort       AFPointSelected[2];
+  unsigned     AFPointsInFocus;
+  uchar        DriveMode[4];
+  uchar        SRResult;
+  uchar        ShakeReduction;
+} libraw_pentax_makernotes_t;
 
 typedef struct
 {
@@ -304,21 +316,7 @@ typedef struct
   int        digitalBack_color;
   int        WB_Coeffs[256][4];      /* R, G1, B, G2 coeffs */
   float      WBCT_Coeffs[64][5];     /* CCT, than R, G1, B, G2 coeffs */
-}libraw_colordata_t;
-
-typedef struct
-{
-  float      FujiExpoMidPointShift;
-  ushort     FujiDynamicRange;
-  ushort     FujiFilmMode;
-  ushort     FujiDynamicRangeSetting;
-  ushort     FujiDevelopmentDynamicRange;
-  ushort     FujiAutoDynamicRange;
-  ushort     FujiFocusMode;
-  ushort     FujiAFMode;
-  ushort     FujiFocusPixel[2];
-  ushort     FujiImageStabilization[3];
-} libraw_fuji_info_t;
+} libraw_colordata_t;
 
 typedef struct
 {
@@ -471,50 +469,50 @@ typedef struct
 
 typedef struct
 {
-	unsigned long long LensID;
-	char	Lens[128];
-	ushort	LensFormat;    /* to characterize the image circle the lens covers */
-	ushort	LensMount;     /* 'male', lens itself */
-	unsigned long long  CamID;
-	ushort	CameraFormat;  /* some of the sensor formats */
-	ushort	CameraMount;   /* 'female', body throat */
-	char	body[64];
-	short	FocalType;       /* -1/0 is unknown; 1 is fixed focal; 2 is zoom */
-	char	LensFeatures_pre[16], LensFeatures_suf[16];
-	float	MinFocal, MaxFocal;
-	float	MaxAp4MinFocal, MaxAp4MaxFocal, MinAp4MinFocal, MinAp4MaxFocal;
-	float	MaxAp, MinAp;
-	float	CurFocal, CurAp;
-	float	MaxAp4CurFocal, MinAp4CurFocal;
-	float	MinFocusDistance;
-	float	FocusRangeIndex;
-	float	LensFStops;
-	unsigned long long TeleconverterID;
-	char	Teleconverter[128];
-	unsigned long long AdapterID;
-	char	Adapter[128];
-	unsigned long long AttachmentID;
-	char	Attachment[128];
-	short CanonFocalUnits;
-	float	FocalLengthIn35mmFormat;
+  unsigned long long LensID;
+  char         Lens[128];
+  ushort       LensFormat;    /* to characterize the image circle the lens covers */
+  ushort       LensMount;     /* 'male', lens itself */
+  unsigned long long  CamID;
+  ushort       CameraFormat;  /* some of the sensor formats */
+  ushort       CameraMount;   /* 'female', body throat */
+  char         body[64];
+  short        FocalType;       /* -1/0 is unknown; 1 is fixed focal; 2 is zoom */
+  char         LensFeatures_pre[16], LensFeatures_suf[16];
+  float        MinFocal, MaxFocal;
+  float        MaxAp4MinFocal, MaxAp4MaxFocal, MinAp4MinFocal, MinAp4MaxFocal;
+  float        MaxAp, MinAp;
+  float        CurFocal, CurAp;
+  float        MaxAp4CurFocal, MinAp4CurFocal;
+  float        MinFocusDistance;
+  float        FocusRangeIndex;
+  float        LensFStops;
+  unsigned long long TeleconverterID;
+  char         Teleconverter[128];
+  unsigned long long AdapterID;
+  char         Adapter[128];
+  unsigned long long AttachmentID;
+  char         Attachment[128];
+  short        CanonFocalUnits;
+  float        FocalLengthIn35mmFormat;
 } libraw_makernotes_lens_t;
 
 typedef struct
 {
-	float NikonEffectiveMaxAp;
-	uchar NikonLensIDNumber, NikonLensFStops, NikonMCUVersion, NikonLensType;
+  float        NikonEffectiveMaxAp;
+  uchar        NikonLensIDNumber, NikonLensFStops, NikonMCUVersion, NikonLensType;
 } libraw_nikonlens_t;
 
 typedef struct
 {
-	float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal;
+  float        MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal;
 } libraw_dnglens_t;
 
 typedef struct
 {
-  float MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAp;
-  char LensMake[128], Lens[128];
-  ushort FocalLengthIn35mmFormat;
+  float        MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAp;
+  char         LensMake[128], Lens[128];
+  ushort       FocalLengthIn35mmFormat;
   libraw_nikonlens_t nikon;
   libraw_dnglens_t dng;
   libraw_makernotes_lens_t makernotes;
