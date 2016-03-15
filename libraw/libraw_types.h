@@ -207,14 +207,24 @@ typedef struct
   int          CanonColorDataSubVer;
   int          SpecularWhiteLevel;
   int          AverageBlackLevel;
-  uchar        AFPointsInFocus1D[8];
-  short        ContinuousDrive;
+// metering
+  short        MeteringMode;
+  short        SpotMeteringMode;
+  uchar        FlashMeteringMode;
+  short        FlashExposureLock;
+  short        ExposureMode;
+  short        AESetting;
+  uchar        HighlightTonePriority;
+// stabilization
+  short        ImageStabilization;
+// focus
   short        FocusMode;
   short        AFPoint;
   short        FocusContinuous;
-  short        ImageStabilization;
   short        AFPointsInFocus30D;
+  uchar        AFPointsInFocus1D[8];
   ushort       AFPointsInFocus5D;        // bytes in reverse
+// AFInfo
   ushort       AFAreaMode;
   ushort       NumAFPoints;
   ushort       ValidAFPoints;
@@ -227,6 +237,15 @@ typedef struct
   short        AFPointsInFocus[4];      // cycle to floor((NumAFPoints+15)/16)
   short        AFPointsSelected[4];     // --''--
   ushort       PrimaryAFPoint;
+// flash
+  short        FlashMode;
+  short        FlashActivity;
+  short        FlashBits;
+  short        ManualFlashOutput;
+  short        FlashOutput;
+  short        FlashGuideNumber;
+// drive
+  short        ContinuousDrive;
 } libraw_canon_makernotes_t;
 
 typedef struct
