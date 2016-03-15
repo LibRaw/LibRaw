@@ -265,11 +265,16 @@ typedef struct
 
 typedef struct
 {
-  char         FocusMode[7];
+
   double       ExposureBracketValue;
   ushort       ActiveDLighting;
   ushort       ShootingMode;
+// stabilization
   uchar        ImageStabilization[7];
+  uchar        VibrationReduction;
+  uchar        VRMode;
+// focus
+  char         FocusMode[7];
   uchar        AFPoint;
   ushort       AFPointsInFocus;
   uchar        ContrastDetectAF;
@@ -284,8 +289,6 @@ typedef struct
   ushort       AFAreaWidth;
   ushort       AFAreaHeight;
   uchar        ContrastDetectAFInFocus;
-  uchar        VibrationReduction;
-  uchar        VRMode;
 // flash
   char         FlashSetting[13];
   char         FlashType[20];
@@ -335,142 +338,140 @@ typedef struct
 
 typedef struct
 {
-  ushort      curve[0x10000];
-  unsigned    cblack[4102];
-  unsigned    black;
-  unsigned    data_maximum;
-  unsigned    maximum;
-  float		  fmaximum;
-  float       fnorm;
-  ushort      white[8][8];
-  float       cam_mul[4];
-  float       pre_mul[4];
-  float       cmatrix[3][4];
-  float       rgb_cam[3][4];
-  float       cam_xyz[4][3];
-  struct ph1_t       phase_one_data;
-  float       flash_used;
-  float       canon_ev;
-  char        model2[64];
-  void        *profile;
-  unsigned    profile_length;
-  unsigned    black_stat[8];
-  libraw_dng_color_t  dng_color[2];
-  float      baseline_exposure;
-  int        digitalBack_color;
-  int        WB_Coeffs[256][4];      /* R, G1, B, G2 coeffs */
-  float      WBCT_Coeffs[64][5];     /* CCT, than R, G1, B, G2 coeffs */
-} libraw_colordata_t;
-
-typedef struct
-{
-  ushort     SonyCameraType;
+  ushort       SonyCameraType;
 } libraw_sony_info_t;
 
 typedef struct
 {
-    enum LibRaw_thumbnail_formats tformat;
-    ushort      twidth,
-                theight;
-    unsigned    tlength;
-    int         tcolors;
+  ushort       curve[0x10000];
+  unsigned     cblack[4102];
+  unsigned     black;
+  unsigned     data_maximum;
+  unsigned     maximum;
+  float        fmaximum;
+  float        fnorm;
+  ushort       white[8][8];
+  float        cam_mul[4];
+  float        pre_mul[4];
+  float        cmatrix[3][4];
+  float        rgb_cam[3][4];
+  float        cam_xyz[4][3];
+  struct ph1_t       phase_one_data;
+  float        flash_used;
+  float        canon_ev;
+  char         model2[64];
+  void         *profile;
+  unsigned     profile_length;
+  unsigned     black_stat[8];
+  libraw_dng_color_t  dng_color[2];
+  float        baseline_exposure;
+  int          digitalBack_color;
+  int          WB_Coeffs[256][4];      /* R, G1, B, G2 coeffs */
+  float        WBCT_Coeffs[64][5];     /* CCT, than R, G1, B, G2 coeffs */
+} libraw_colordata_t;
 
-    char       *thumb;
+typedef struct
+{
+  enum LibRaw_thumbnail_formats tformat;
+  ushort       twidth,
+               theight;
+  unsigned     tlength;
+  int          tcolors;
+  char         *thumb;
 }libraw_thumbnail_t;
 
 typedef struct
 {
-	float latitude[3]; /* Deg,min,sec */
-	float longtitude[3]; /* Deg,min,sec */
-	float gpstimestamp[3]; /* Deg,min,sec */
-	float altitude;
-	char  altref, latref, longref, gpsstatus;
-	char  gpsparsed;
-
+  float        latitude[3]; /* Deg,min,sec */
+  float        longtitude[3]; /* Deg,min,sec */
+  float        gpstimestamp[3]; /* Deg,min,sec */
+  float        altitude;
+  char         altref, latref, longref, gpsstatus;
+  char         gpsparsed;
 } libraw_gps_info_t;
 
 typedef struct
 {
-    float       iso_speed;
-    float       shutter;
-    float       aperture;
-    float       focal_len;
-    time_t      timestamp;
-    unsigned    shot_order;
-    unsigned    gpsdata[32];
+  float        iso_speed;
+  float        shutter;
+  float        aperture;
+  float        focal_len;
+  time_t       timestamp;
+  unsigned     shot_order;
+  unsigned     gpsdata[32];
   libraw_gps_info_t parsed_gps;
-    char        desc[512],
-                artist[64];
-    float       FlashEC;
+  char         desc[512],
+               artist[64];
+  float        FlashEC;
 } libraw_imgother_t;
 
 typedef struct
 {
-    unsigned    greybox[4];     /* -A  x1 y1 x2 y2 */
-    unsigned    cropbox[4];     /* -B x1 y1 x2 y2 */
-    double      aber[4];        /* -C */
-    double      gamm[6];        /* -g */
-    float       user_mul[4];    /* -r mul0 mul1 mul2 mul3 */
-    unsigned    shot_select;    /* -s */
-    float       bright;         /* -b */
-    float       threshold;      /*  -n */
-    int         half_size;      /* -h */
-    int         four_color_rgb; /* -f */
-    int         highlight;      /* -H */
-    int         use_auto_wb;    /* -a */
-    int         use_camera_wb;  /* -w */
-    int         use_camera_matrix; /* +M/-M */
-    int         output_color;   /* -o */
-    char        *output_profile; /* -o */
-    char        *camera_profile; /* -p */
-    char        *bad_pixels;    /* -P */
-    char        *dark_frame;    /* -K */
-    int         output_bps;     /* -4 */
-    int         output_tiff;    /* -T */
-    int         user_flip;      /* -t */
-    int         user_qual;      /* -q */
-    int         user_black;     /* -k */
-    int		user_cblack[4];
-    int         user_sat;       /* -S */
+  unsigned    greybox[4];     /* -A  x1 y1 x2 y2 */
+  unsigned    cropbox[4];     /* -B x1 y1 x2 y2 */
+  double      aber[4];        /* -C */
+  double      gamm[6];        /* -g */
+  float       user_mul[4];    /* -r mul0 mul1 mul2 mul3 */
+  unsigned    shot_select;    /* -s */
+  float       bright;         /* -b */
+  float       threshold;      /*  -n */
+  int         half_size;      /* -h */
+  int         four_color_rgb; /* -f */
+  int         highlight;      /* -H */
+  int         use_auto_wb;    /* -a */
+  int         use_camera_wb;  /* -w */
+  int         use_camera_matrix; /* +M/-M */
+  int         output_color;   /* -o */
+  char        *output_profile; /* -o */
+  char        *camera_profile; /* -p */
+  char        *bad_pixels;    /* -P */
+  char        *dark_frame;    /* -K */
+  int         output_bps;     /* -4 */
+  int         output_tiff;    /* -T */
+  int         user_flip;      /* -t */
+  int         user_qual;      /* -q */
+  int         user_black;     /* -k */
+  int		user_cblack[4];
+  int         user_sat;       /* -S */
 
-    int         med_passes;     /* -m */
-    float       auto_bright_thr;
-    float       adjust_maximum_thr;
-    int         no_auto_bright; /* -W */
-    int         use_fuji_rotate;/* -j */
-    int         green_matching;
-    /* DCB parameters */
-    int         dcb_iterations;
-    int         dcb_enhance_fl;
-    int         fbdd_noiserd;
-    /* VCD parameters */
-    int         eeci_refine;
-    int         es_med_passes;
-    /* AMaZE*/
-    int         ca_correc;
-    float       cared;
-    float	cablue;
-    int cfaline;
-    float linenoise;
-    int cfa_clean;
-    float lclean;
-    float cclean;
-    int cfa_green;
-    float green_thresh;
-    int exp_correc;
-    float exp_shift;
-    float exp_preser;
-   /* WF debanding */
-    int   wf_debanding;
-    float wf_deband_treshold[4];
+  int         med_passes;     /* -m */
+  float       auto_bright_thr;
+  float       adjust_maximum_thr;
+  int         no_auto_bright; /* -W */
+  int         use_fuji_rotate;/* -j */
+  int         green_matching;
+  /* DCB parameters */
+  int         dcb_iterations;
+  int         dcb_enhance_fl;
+  int         fbdd_noiserd;
+  /* VCD parameters */
+  int         eeci_refine;
+  int         es_med_passes;
+  /* AMaZE*/
+  int         ca_correc;
+  float       cared;
+  float	cablue;
+  int cfaline;
+  float linenoise;
+  int cfa_clean;
+  float lclean;
+  float cclean;
+  int cfa_green;
+  float green_thresh;
+  int exp_correc;
+  float exp_shift;
+  float exp_preser;
+ /* WF debanding */
+  int   wf_debanding;
+  float wf_deband_treshold[4];
 	/* Raw speed */
     int use_rawspeed;
 	/* DNG SDK */
 	int use_dngsdk;
   /* Disable Auto-scale */
-    int no_auto_scale;
+  int no_auto_scale;
   /* Disable intepolation */
-    int no_interpolation;
+  int no_interpolation;
   /* Disable sRAW YCC to RGB conversion */
   int sraw_ycc;
   /* Force use x3f data decoding either if demosaic pack GPL2 enabled */
