@@ -260,11 +260,16 @@ typedef struct
   ushort       AFMode;
   ushort       FocusPixel[2];
   ushort       ImageStabilization[3];
+  ushort       FlashMode;
 } libraw_fuji_info_t;
 
 typedef struct
 {
   char         FocusMode[7];
+  double       ExposureBracketValue;
+  ushort       ActiveDLighting;
+  ushort       ShootingMode;
+  uchar        ImageStabilization[7];
   uchar        AFPoint;
   ushort       AFPointsInFocus;
   uchar        ContrastDetectAF;
@@ -281,6 +286,26 @@ typedef struct
   uchar        ContrastDetectAFInFocus;
   uchar        VibrationReduction;
   uchar        VRMode;
+// flash
+  char         FlashSetting[13];
+  char         FlashType[20];
+  uchar        FlashExposureCompensation[4];
+  uchar        ExternalFlashExposureComp[4];
+  uchar        FlashExposureBracketValue[4];
+  uchar        FlashMode;
+  signed char  FlashExposureCompensation2;
+  signed char  FlashExposureCompensation3;
+  signed char  FlashExposureCompensation4;
+  uchar        FlashSource;
+  uchar        FlashFirmware[2];
+  uchar        ExternalFlashFlags;
+  uchar        FlashControlCommanderMode;
+  uchar        FlashOutputAndCompensation;
+  uchar        FlashFocalLength;
+  uchar        FlashGNDistance;
+  uchar        FlashGroupControlMode[4];
+  uchar        FlashGroupOutputAndCompensation[4];
+  uchar        FlashColorFilter;
 } libraw_nikon_makernotes_t;
 
 typedef struct
