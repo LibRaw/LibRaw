@@ -8898,8 +8898,8 @@ void CLASS parse_makernote (int base, int uptag)
               }
             break;
 
-            // 5DS / 5DS R
-          case 1560:
+            // 5DS / 5DS R / 80D
+          case 1560: case 1592:
             imgdata.makernotes.canon.CanonColorDataVer = 8;
             imgdata.makernotes.canon.CanonColorDataSubVer = get2();
             {
