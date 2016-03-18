@@ -4357,6 +4357,7 @@ static const char  *static_camera_list[] =
 "Canon EOS 60D",
 "Canon EOS 60Da",
 "Canon EOS 70D",
+"Canon EOS 80D",
 "Canon EOS 300D / Digital Rebel / Kiss Digital",
 "Canon EOS 350D / Digital Rebel XT / Kiss Digital N",
 "Canon EOS 400D / Digital Rebel XTi / Kiss Digital X",
