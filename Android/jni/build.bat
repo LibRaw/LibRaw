@@ -1,1 +1,0 @@
-ndk-build -j4
