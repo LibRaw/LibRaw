@@ -1620,7 +1620,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 			}
 		}
 
-		if (S.width & 1 == 1)
+		if ((S.width & 1) == 1)
 		{
 			for (int i=0; i<2; i++)
 			{		   
@@ -1679,7 +1679,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 
 			for (int i=0; i<4; i++)
 			{
-				int padding = i<2 && (S.width & 1 == 1) ? 1 : 0;
+				int padding = i<2 && ((S.width & 1) == 1) ? 1 : 0;
 				right_edge[i]=width_d2 + block_radius[f] + padding;
 			}
 
@@ -1700,7 +1700,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 						source_line[col][i]=line_block_filtered[col+block_radius[f]][i];
 				}
 
-				if (S.width & 1 == 1)
+				if ((S.width & 1) == 1)
 				{
 					for (int i=0; i<2; i++)
 						source_line[width_d2][i]=line_block_filtered[width_d2+block_radius[f]][i];
@@ -1717,7 +1717,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 						source_line[col][i]=line_block_filtered[col+block_radius[f]][i]/divider[f];
 				}
 
-				if (S.width & 1 == 1)
+				if ((S.width & 1) == 1)
 				{
 					for (int i=0; i<2; i++)
 						source_line[width_d2][i]=line_block_filtered[width_d2+block_radius[f]][i]/divider[f];
@@ -1756,7 +1756,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 			}
 		}
 
-		if (S.width & 1 == 1)
+		if ((S.width & 1) == 1)
 		{
 			for (int i=0; i<2; i++)
 				*dst[i]=source_line[col][i];
@@ -1795,7 +1795,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 			}
 		}
 		
-		if (S.height & 1 == 1)
+		if ((S.height & 1) == 1)
 		{
 			for (int i=0; i<2; i++)
 			{		   
@@ -1854,7 +1854,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 
 			for (int i=0; i<4; i++)
 			{
-				int padding = (i<2) && (S.height & 1 == 1) ? 1 : 0;
+				int padding = (i<2) && ((S.height & 1) == 1) ? 1 : 0;
 				lower_edge[i]=height_d2 + block_radius[f] + padding;
 			}
 
@@ -1875,7 +1875,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 						source_line[row][i]=line_block_filtered[row+block_radius[f]][i];
 				}
 
-				if (S.height & 1 == 1)
+				if ((S.height & 1) == 1)
 				{
 					for (int i=0; i<2; i++)
 						source_line[height_d2][i]=line_block_filtered[height_d2+block_radius[f]][i];
@@ -1892,7 +1892,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 						source_line[row][i]=line_block_filtered[row+block_radius[f]][i]/divider[f];
 				}
 
-				if (S.height & 1 == 1)
+				if ((S.height & 1) == 1)
 				{
 					for (int i=0; i<2; i++)
 						source_line[height_d2][i]=line_block_filtered[height_d2+block_radius[f]][i]/divider[f];
@@ -1931,7 +1931,7 @@ void LibRaw::wf_bayer4_block_filter(int* radius_list, void* src_image, int src_i
 			}
 		}
 
-		if (S.height & 1 == 1)
+		if ((S.height & 1) == 1)
 		{
 			for (int i=0; i<2; i++)
 				*dst[i]=source_line[height_d2][i];
