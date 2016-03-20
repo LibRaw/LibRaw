@@ -255,8 +255,7 @@ enum LibRaw_progress
 
     LIBRAW_PROGRESS_THUMB_LOAD          = 1<<28,
     LIBRAW_PROGRESS_TRESERVED1          = 1<<29,
-    LIBRAW_PROGRESS_TRESERVED2          = 1<<30,
-    LIBRAW_PROGRESS_TRESERVED3          = 1<<31
+    LIBRAW_PROGRESS_TRESERVED2          = 1<<30
 };
 #define LIBRAW_PROGRESS_THUMB_MASK 0x0fffffff
 
