@@ -458,20 +458,6 @@ typedef struct
 }
 #endif
 
-//Endianness detection for Android NDK
-#ifdef ANDROID
-#include <endian.h>
-#ifdef _BYTE_ORDER
-#if _BYTE_ORDER == _LITTLE_ENDIAN
-#define __LITTLE_ENDIAN__ 1
-#undef __BIG_ENDIAN__
-#elif _BYTE_ORDER == _BIG_ENDIAN
-#define __BIG_ENDIAN__ 1
-#undef __LITTLE_ENDIAN__
-#endif
-#endif
-#endif //ANDROID
-
 /* Byte order */
 #if defined(__POWERPC__)
 #define LibRawBigEndian 1
