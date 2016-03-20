@@ -434,7 +434,7 @@ void * LibRaw_buffer_datastream::make_jas_stream()
 
 int LibRaw_buffer_datastream::jpeg_src(void *jpegdata)
 {
-#if defined(NO_JPEG) || !defined (USE_JPEG8)
+#if defined(NO_JPEG) || !defined (USE_JPEG)
   return -1;
 #else
   j_decompress_ptr cinfo = (j_decompress_ptr) jpegdata;

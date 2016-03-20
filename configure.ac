@@ -51,25 +51,14 @@ AC_ARG_ENABLE([jpeg],
 	esac],[jpeg=true])
 
 if test x$jpeg = xtrue; then
-        AC_CHECK_LIB([jpeg], [jpeg_stdio_src],
+        AC_CHECK_LIB([jpeg], [jpeg_mem_src],
                 [
                         AC_CHECK_HEADERS([jpeglib.h], [
-                                CPPFLAGS="$CPPFLAGS -DUSE_JPEG"
+                                CPPFLAGS="$CPPFLAGS -DUSE_JPEG -DUSE_JPEG8"
                                 LIBS="$LIBS -ljpeg"
                         ], AC_MSG_WARN([no jpeg headers found]))
                 ],
                 AC_MSG_WARN([libjpeg not found])
-        )
-fi
-
-if test x$jpeg = xtrue; then
-        AC_CHECK_LIB([jpeg], [jpeg_mem_src],
-                [
-                        AC_CHECK_HEADERS([jpeglib.h], [
-                                CPPFLAGS="$CPPFLAGS -DUSE_JPEG8"
-                        ], AC_MSG_WARN([no jpeg8 headers found]))
-                ],
-                AC_MSG_WARN([libjpeg8 not found - disabling decoding JPEG data from memory buffer])
         )
 fi
 
