@@ -4988,6 +4988,7 @@ static const char  *static_camera_list[] =
 "Samsung GX10",
 "Samsung GX20",
 "Samsung Galaxy NX (EK-GN120)",
+"Samsung Galaxy S7 (SM-G935F)",
 "Samsung NX1",
 "Samsung NX5",
 "Samsung NX10",
