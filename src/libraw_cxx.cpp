@@ -4386,6 +4386,7 @@ static const char  *static_camera_list[] =
 "Canon EOS-1D Mark IV",
 "Canon EOS-1Ds Mark II",
 "Canon EOS-1Ds Mark III",
+"Canon EOS-1D X Mark II",
 "Casio QV-2000UX",
 "Casio QV-3000EX",
 "Casio QV-3500EX",
