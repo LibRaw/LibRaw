@@ -7712,16 +7712,20 @@ void CLASS setSonyBodyFeatures (unsigned id) {
     {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
     }
-  else
-    {
-      if ((id != 002) &&  // DSC-R1
-          (id != 297) &&  // DSC-RX100
-          (id != 308) &&  // DSC-RX100M2
-          (id != 309) &&  // DSC-RX10
-          (id != 317) &&  // DSC-RX100M3
-          (id != 341) &&  // DSC-RX100M4
-          (id != 342)     // DSC-RX10M2
+  else if ((id == 297) ||  // DSC-RX100
+           (id == 308) ||  // DSC-RX100M2
+           (id == 309) ||  // DSC-RX10
+           (id == 317) ||  // DSC-RX100M3
+           (id == 341) ||  // DSC-RX100M4
+           (id == 342) ||  // DSC-RX10M2
+           (id == 355)     // DSC-RX10M3
          )
+    {
+      imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_1INCH;
+    }
+
+  else if (id != 002)     // DSC-R1
+    {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     }
 
@@ -7819,7 +7823,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 344) ||  // DSC-RX1RM2
            (id == 317) ||  // DSC-RX100M3
            (id == 341) ||  // DSC-RX100M4
-           (id == 342)     // DSC-RX10M2
+           (id == 342) ||  // DSC-RX10M2
+           (id == 355)     // DSC-RX10M3
            )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
@@ -13716,7 +13721,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 9422,-3258,-711,-2655,10898,2015,-512,1354,5512 } },
     { "Olympus E-M5", 0, 0xfe1,
       { 8380,-2630,-639,-2887,10725,2496,-627,1427,5438 } },
-    {"Olympus PEN-F",0, 0, 
+    {"Olympus PEN-F",0, 0,
       {9476,-3182,-765,-2613,10958,1893,-449,1315,5268}},
     { "Olympus SP350", 0, 0,
       { 12078,-4836,-1069,-6671,14306,2578,-786,939,7418 } },
@@ -14054,7 +14059,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 6596,-2079,-562,-4782,13016,1933,-970,1581,5181 } },
     { "Sony DSC-RX100", -800, 0,
       { 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
-    { "Sony DSC-RX10",0, 0, /* And M2 too */
+    { "Sony DSC-RX10",0, 0, /* And M2/M3 too */
 	  { 6679,-1825,-745,-5047,13256,1953,-1580,2422,5183 } },
     { "Sony DSC-RX1RM2", -512, 0,
       { 6629,-1900,-483,-4618,12349,2550,-622,1381,6514 } },
@@ -14455,6 +14460,7 @@ void CLASS identify()
     { 0x15a, "ILCE-QX1" },
     { 0x15b, "ILCE-7RM2" },
     { 0x15e, "ILCE-7SM2" },
+    { 0x163, "DSC-RX10M3" },
     { 0x165, "ILCE-6300" },
   };
 
