@@ -123,6 +123,7 @@ enum LibRaw_camera_formats
     LIBRAW_FORMAT_FF=2,
     LIBRAW_FORMAT_MF=3,
     LIBRAW_FORMAT_APSH=4,
+    LIBRAW_FORMAT_1INCH=5,
     LIBRAW_FORMAT_FT=8
   };
 
