@@ -7276,7 +7276,7 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
     imgdata.lens.makernotes.CameraFormat = imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_1INCH;
   }
   else
-    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F;
+    imgdata.lens.makernotes.LensMount = imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Nikon_F;
 
   if (imgdata.lens.nikon.NikonLensType & 0x20)
   {
