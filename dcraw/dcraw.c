@@ -7272,7 +7272,7 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
 
   if (imgdata.lens.nikon.NikonLensType & 0x10)
   {
-    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_CX;
+    imgdata.lens.makernotes.LensMount = imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Nikon_CX;
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_1INCH;
   }
   else
@@ -7282,6 +7282,7 @@ void CLASS processNikonLensData (uchar *LensData, unsigned len)
   {
     strcpy(imgdata.lens.makernotes.Adapter, "FT-1");
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F;
+    imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Nikon_CX;
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_1INCH;
   }
 
