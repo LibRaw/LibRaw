@@ -6636,7 +6636,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_SLT;
     }
   else if (	// A-mount cameras, ILCA series
-           id == 319 // parentness removed to make clang happy
+           (id == 319)  ||
+           (id == 353)           // parentness removed to make clang happy
           )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
@@ -13146,6 +13147,7 @@ void CLASS identify()
     { 0x15a, "ILCE-QX1" },
     { 0x15b, "ILCE-7RM2" },
     { 0x15e, "ILCE-7SM2" },
+    { 0x161, "ILCA-68" },
     { 0x163, "DSC-RX10M3" },
     { 0x165, "ILCE-6300" },
   };
