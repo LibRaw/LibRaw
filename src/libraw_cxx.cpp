@@ -2183,7 +2183,7 @@ int LibRaw::try_dngsdk()
 				dst[i] = imgdata.color.curve[src[i]];
 			S.raw_pitch = S.raw_width*pplanes*TagTypeSize(ptype);
 		}
-		if(ptype == ttByte)
+		else if(ptype == ttByte)
 		{
 			unsigned char *src = (unsigned char *)buffer.fData;
 			ushort *dst = (ushort*)imgdata.rawdata.raw_alloc;
@@ -5060,7 +5060,7 @@ static const char  *static_camera_list[] =
 "Sony A7R II",
 "Sony A7S",
 "Sony A7S II",
-// Wait for sample: "Sony ILCA-68 (A68)",
+"Sony ILCA-68 (A68)",
 "Sony ILCA-77M2 (A77-II)",
 "Sony ILCE-3000",
 "Sony ILCE-5000",
