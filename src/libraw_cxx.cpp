@@ -5493,14 +5493,23 @@ void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep, int scale)
 				int blocal = pixel0[2],bnear = pixf[2];
 				if(blocal < imgdata.color.black+16 || bnear < imgdata.color.black+16	)
 				{
+					if(pixel0[0] < imgdata.color.black)	pixel0[0] = imgdata.color.black;
+					if(pixel0[1] < imgdata.color.black)	pixel0[1] = imgdata.color.black;
 					pixel0[0] = CLIP((pixel0[0] - imgdata.color.black)*4 + imgdata.color.black,16383);
 					pixel0[1] = CLIP((pixel0[1] - imgdata.color.black)*4 + imgdata.color.black,16383);
 				}
 				else
 				{
 					float multip = float(bnear - imgdata.color.black)/float(blocal-imgdata.color.black);
-					pixel0[0] = CLIP(((float(pixf[0]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[0]-imgdata.color.black)*3.75 + imgdata.color.black))/2,16383);
-					pixel0[1] = CLIP(((float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[1]-imgdata.color.black)*3.75 + imgdata.color.black))/2,16383);
+					if(pixel0[0] < imgdata.color.black)	pixel0[0] = imgdata.color.black;
+					if(pixel0[1] < imgdata.color.black)	pixel0[1] = imgdata.color.black;
+					float pixf0 = pixf[0];
+					if(pixf0 < imgdata.color.black) pixf0 = imgdata.color.black;
+					float pixf1 = pixf[1];
+					if(pixf1 < imgdata.color.black) pixf1 = imgdata.color.black;
+
+					pixel0[0] = CLIP(((float(pixf0-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[0]-imgdata.color.black)*3.75 + imgdata.color.black))/2,16383);
+					pixel0[1] = CLIP(((float(pixf1-imgdata.color.black)*multip + imgdata.color.black)+((pixel0[1]-imgdata.color.black)*3.75 + imgdata.color.black))/2,16383);
 					//pixel0[1] = float(pixf[1]-imgdata.color.black)*multip + imgdata.color.black;
 				}
 			}
