@@ -5131,6 +5131,7 @@ static const char  *static_camera_list[] =
 "JaiPulnix BB-500CL",
 "JaiPulnix BB-500GE",
 "SVS SVS625CL",
+"YUNEEC CGO4",
    NULL
 };
 
