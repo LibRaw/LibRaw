@@ -207,6 +207,11 @@ struct ph1 {
 
 #define my_swap(type, i, j) {type t = i; i = j; j = t;}
 
+static float fMAX(float a, float b)
+{
+  return MAX(a,b);
+}
+
 /*
    In order to inline this calculation, I make the risky
    assumption that all filter patterns can be described
@@ -1584,7 +1589,8 @@ void CLASS nikon_yuv_load_raw()
 {
   int row, col, yuv[4], rgb[3], b, c;
   UINT64 bitbuf=0;
-
+  float cmul[4];
+  FORC4 { cmul[c] == cam_mul[c]>0.001f?cam_mul[c]:1.f; }
   for (row=0; row < raw_height; row++)
   {
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -1600,7 +1606,7 @@ void CLASS nikon_yuv_load_raw()
       rgb[0] = yuv[b] + 1.370705*yuv[3];
       rgb[1] = yuv[b] - 0.337633*yuv[2] - 0.698001*yuv[3];
       rgb[2] = yuv[b] + 1.732446*yuv[2];
-      FORC3 image[row*width+col][c] = curve[LIM(rgb[c],0,0xfff)] / cam_mul[c];
+      FORC3 image[row*width+col][c] = curve[LIM(rgb[c],0,0xfff)] / cmul[c];
     }
   }
 }
@@ -7167,7 +7173,7 @@ void CLASS Canon_CameraSettings ()
   imgdata.lens.makernotes.MaxFocal = get2();
   imgdata.lens.makernotes.MinFocal = get2();
   imgdata.lens.makernotes.CanonFocalUnits = get2();
-  if (imgdata.lens.makernotes.CanonFocalUnits != 1)
+  if (imgdata.lens.makernotes.CanonFocalUnits > 1)
     {
       imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
       imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
@@ -7202,16 +7208,16 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 	    {
 		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
 		fseek (ifp, 2, SEEK_CUR);
-		imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / (float)get2();
-		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / (float)get2();
+		imgdata.color.WBCT_Coeffs[i][1] = 1024.0f /fMAX(get2(),1.f) ;
+		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f /fMAX(get2(),1.f);
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
 	    }
 	else if (WBCTversion == 1)
 	  for (int i=0; i<15; i++)	// as shot R, as shot B, tint, CСT
 	    {
 		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-		imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / (float)get2();
-		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / (float)get2();
+		imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(get2(),1.f);
+		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(get2(),1.f);
 		fseek (ifp, 2, SEEK_CUR);
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
 	    }
@@ -7223,8 +7229,8 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 		fseek (ifp, 2, SEEK_CUR);
 		fseek (ifp, 2, SEEK_CUR);
 		imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-		imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / (float)get2();
-		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / (float)get2();
+		imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(1.f,get2());
+		imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(1.f,get2());
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
 	    }
 	else if ((WBCTversion == 2) &&
@@ -8998,8 +9004,7 @@ void CLASS parse_makernote (int base, int uptag)
           {
             imgdata.lens.makernotes.FocalType = get2();
             imgdata.lens.makernotes.CurFocal = get2();
-            if ((imgdata.lens.makernotes.CanonFocalUnits != 1) &&
-                imgdata.lens.makernotes.CanonFocalUnits)
+            if (imgdata.lens.makernotes.CanonFocalUnits > 1)
               {
                 imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
               }
@@ -10737,7 +10742,7 @@ void CLASS parse_kodak_ifd (int base)
     if (tag == 1020) wbi = getint(type);
     if (tag == 1021 && len == 72) {		/* WB set in software */
       fseek (ifp, 40, SEEK_CUR);
-      FORC3 cam_mul[c] = 2048.0 / get2();
+      FORC3 cam_mul[c] = 2048.0 / fMAX(1.0f,get2());
       wbi = -2;
     }
 
@@ -10798,19 +10803,19 @@ void CLASS parse_kodak_ifd (int base)
     if (tag == 1020) wbi = getint(type);
     if (tag == 1021 && len == 72) {		/* WB set in software */
       fseek (ifp, 40, SEEK_CUR);
-      FORC3 cam_mul[c] = 2048.0 / get2();
+      FORC3 cam_mul[c] = 2048.0 / fMAX(1.0,get2());
       wbi = -2;
     }
     if (tag == 2118) wbtemp = getint(type);
     if (tag == 2120 + wbi && wbi >= 0)
-      FORC3 cam_mul[c] = 2048.0 / getreal(type);
+      FORC3 cam_mul[c] = 2048.0 / fMAX(1.0,getreal(type));
     if (tag == 2130 + wbi)
       FORC3 mul[c] = getreal(type);
     if (tag == 2140 + wbi && wbi >= 0)
       FORC3 {
 	for (num=i=0; i < 4; i++)
 	  num += getreal(type) * pow (wbtemp/100.0, i);
-	cam_mul[c] = 2048 / (num * mul[c]);
+	cam_mul[c] = 2048 / fMAX(1.0,(num * mul[c]));
       }
     if (tag == 2317) linear_table (len);
     if (tag == 6020) iso_speed = getint(type);
@@ -11343,7 +11348,7 @@ int CLASS parse_tiff_ifd (int base)
 	  if (!use_camera_wb) continue;
 	  num = 0;
 	  FORC4 num += rgb_cam[i][c];
-	  FORC4 rgb_cam[i][c] /= num;
+	  FORC4 rgb_cam[i][c] /= MAX(1,num);
 	}
 	break;
       case 34310:			/* Leaf metadata */
@@ -12389,7 +12394,8 @@ void CLASS parse_ciff (int offset, int length, int depth)
       imgdata.lens.makernotes.FocalType = len & 0xffff;
       if (imgdata.lens.makernotes.FocalType == 2) {
         imgdata.lens.makernotes.CanonFocalUnits = 32;
-        imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
+	if(imgdata.lens.makernotes.CanonFocalUnits>1)
+	  imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
       }
       focal_len = imgdata.lens.makernotes.CurFocal;
 #else
@@ -12676,7 +12682,7 @@ void CLASS parse_fuji (int offset)
 // IB start
 #ifdef LIBRAW_LIBRARY_BUILD
     } else if (tag == 0x9650) {
-      imgdata.makernotes.fuji.FujiExpoMidPointShift = ((short)get2()) / ((float)get2());
+      imgdata.makernotes.fuji.FujiExpoMidPointShift = ((short)get2()) / fMAX(1.0f,get2());
     } else if (tag == 0x2100) {
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c ^ 1] = get2();
     } else if (tag == 0x2200) {

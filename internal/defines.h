@@ -112,6 +112,11 @@ typedef unsigned long long UINT64;
 
 #define my_swap(type, i, j) {type t = i; i = j; j = t;}
 
+static float fMAX(float a, float b)
+{
+  return MAX(a,b);
+}
+
 /*
    In order to inline this calculation, I make the risky
    assumption that all filter patterns can be described

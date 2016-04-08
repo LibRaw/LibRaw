@@ -538,7 +538,7 @@ typedef struct
   char         Adapter[128];
   unsigned long long AttachmentID;
   char         Attachment[128];
-  short        CanonFocalUnits;
+  ushort        CanonFocalUnits;
   float        FocalLengthIn35mmFormat;
 } libraw_makernotes_lens_t;
 
