@@ -7818,7 +7818,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
     }
   else if (	// A-mount cameras, ILCA series
            (id == 319)  ||
-           (id == 353)           // parentness removed to make clang happy
+           (id == 353)
           )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
