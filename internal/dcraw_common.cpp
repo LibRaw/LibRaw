@@ -6638,7 +6638,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
     }
   else if (	// A-mount cameras, ILCA series
            (id == 319)  ||
-           (id == 353)           // parentness removed to make clang happy
+           (id == 353)
           )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
@@ -12085,6 +12085,10 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 4932, -835, 141, -4878, 11868, 3437, -1138, 1961, 7067 } },
     { "Hasselblad H5D-50",0, 0, /* Adobe */
       { 5656, -659, -346, -3923, 12306, 1791, -1602, 3509, 5442 } },
+
+    { "HTC One A9", 64, 1023,
+      { 16314, -1727, -234, -2154, 11449, 4034, -4256, 254, 7477 } },
+
     { "Imacon Ixpress", 0, 0,		/* DJC */
       { 7025,-1415,-704,-5188,13765,1424,-1248,2742,6038 } },
     { "Kodak NC2000", 0, 0,
