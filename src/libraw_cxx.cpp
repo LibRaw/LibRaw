@@ -4534,7 +4534,7 @@ static const char  *static_camera_list[] =
 "Hasselblad Stellar II",
 "Hasselblad HV",
 "HTC UltraPixel",
-//"HTC One (A9)",
+"HTC One (A9)",
 "HTC One (M9)",
 "Imacon Ixpress 96, 96C",
 "Imacon Ixpress 384, 384C (single shot only)",
