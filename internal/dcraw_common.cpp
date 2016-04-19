@@ -8788,7 +8788,6 @@ void CLASS parse_makernote (int base, int uptag)
     if (tag == 0x4001 && len > 500 && !strncasecmp(make,"Canon",5))
       {
         long int save1 = ftell(ifp);
-        printf ("\nColorData length: %d\n", len);
         switch (len)
           {
           case 582:
@@ -8917,7 +8916,7 @@ void CLASS parse_makernote (int base, int uptag)
               }
             break;
 
-            // 5DS / 5DS R / 80D
+            // 5DS / 5DS R / 80D / 1300D
           case 1560: case 1592: case 1353:
             imgdata.makernotes.canon.CanonColorDataVer = 8;
             imgdata.makernotes.canon.CanonColorDataSubVer = get2();
@@ -8931,8 +8930,16 @@ void CLASS parse_makernote (int base, int uptag)
               FORC4 bls+=get2();
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
-              fseek (ifp, save1+(0x30f<<1), SEEK_SET);		// offset 783 shorts
-              imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+              if (imgdata.makernotes.canon.CanonColorDataSubVer == 14)  // 1300D
+                {
+                  fseek (ifp, save1+(0x231<<1), SEEK_SET);
+                  imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                }
+              else
+                {
+                  fseek (ifp, save1+(0x30f<<1), SEEK_SET);		// offset 783 shorts
+                  imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                }
             break;
 
           }
