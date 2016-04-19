@@ -9968,6 +9968,7 @@ void CLASS parse_makernote (int base, int uptag)
     if (tag == 0x4001 && len > 500 && !strncasecmp(make,"Canon",5))
       {
         long int save1 = ftell(ifp);
+        printf ("\nColorData length: %d\n", len);
         switch (len)
           {
           case 582:
@@ -10096,8 +10097,8 @@ void CLASS parse_makernote (int base, int uptag)
               }
             break;
 
-            // 5DS / 5DS R / 80D
-          case 1560: case 1592:
+            // 5DS / 5DS R / 80D / 1300D
+          case 1560: case 1592: case 1353:
             imgdata.makernotes.canon.CanonColorDataVer = 8;
             imgdata.makernotes.canon.CanonColorDataSubVer = get2();
             {
