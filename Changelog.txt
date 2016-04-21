@@ -1,4 +1,35 @@
-2015-11-..  Alex Tutubalin <lexa@lexa.ru>
+2016-04-21  Alex Tutubalin <lexa@lexa.ru>
+
+ 0.18-201604 intermediate
+ 
+ * zlib library is optional
+   Use -DUSE_ZLIB to compile with zlib (to provide deflate DNG support)
+ * libjpeg version: jpeg_mem_src() is mandatory, so use libjpeg-turbo
+   or libjpeg 8+
+ * Fixes in vng_intepolate to make modern compilers happy
+ * More metadata:
+    - per channel DNG black/whitelevel
+    - DNG analog balance
+    - makernotes metadata reordered to vendor specific data fields
+ * C-API: void libraw_set_user_mul(libraw_data_t *lr,int index, float val);
+ * support for BW Jpeg previews
+ * 8-bit DNG support via DNG SDK
+ * better intepolation of low-sensitivity pixels on Sigma Quattro files
+ * Camera support:
+    BlackMagic Micro Cinema Camera, URSA Mini
+    Canon 80D, 1300D, 1DX MkII
+    Fujifilm X-Pro2 (uncompressed RAW only), X70, X-E2S
+    HTC One A9 and M9
+    Leica M (Typ 262) and X-U (Typ 113)
+    Nikon D5
+    Olympus Pen F, SH-3
+    Panasonic DMC-GX80/85, DMC-TZ80/81/85/ZS60, DMC-TZ100/101/ZS100
+    PhaseOne IQ150, IQ180 IR, IQ3 (all models)
+    Samsung Galaxy S7 (SM-G935F)
+    Sony ILCA-68, ILCE-6300, RX1R II, RX10 III
+    YUNEEC CGO4
+   
+2015-11-24  Alex Tutubalin <lexa@lexa.ru>
  * Camera stored white balance coefficients are extracted into:
    int imgdata.color.WBCoeffs[256][4] - array indexed by EXIF lightsource type
     for example, WBCoeffs[21][..] contains coefficients for D65 lightsource
