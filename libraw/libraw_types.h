@@ -203,6 +203,11 @@ typedef struct
 
 typedef struct
 {
+  float        romm_cam[9];
+} libraw_P1_color_t;
+
+typedef struct
+{
   int          CanonColorDataVer;
   int          CanonColorDataSubVer;
   int          SpecularWhiteLevel;
@@ -368,6 +373,7 @@ typedef struct
   int          digitalBack_color;
   int          WB_Coeffs[256][4];      /* R, G1, B, G2 coeffs */
   float        WBCT_Coeffs[64][5];     /* CCT, than R, G1, B, G2 coeffs */
+  libraw_P1_color_t  P1_color[2];
 } libraw_colordata_t;
 
 typedef struct

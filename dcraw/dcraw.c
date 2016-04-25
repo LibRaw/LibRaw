@@ -12588,6 +12588,9 @@ void CLASS parse_phase_one (int base)
       case 0x100:  flip = "0653"[data & 3]-'0';  break;
       case 0x106:
 	for (i=0; i < 9; i++)
+#ifdef LIBRAW_LIBRARY_BUILD
+	imgdata.color.P1_color[0].romm_cam[i]=
+#endif
 	  ((float *)romm_cam)[i] = getreal(11);
 	romm_coeff (romm_cam);
 	break;
@@ -12613,6 +12616,12 @@ void CLASS parse_phase_one (int base)
       case 0x223:  ph1.black_col = data+base;		break;
       case 0x224:  ph1.split_row = data;		break;
       case 0x225:  ph1.black_row = data+base;		break;
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 0x226:
+	for (i=0; i < 9; i++)
+	  imgdata.color.P1_color[1].romm_cam[i] = getreal(11);
+	break;
+#endif
       case 0x301:
 	model[63] = 0;
 	fread (model, 1, 63, ifp);
