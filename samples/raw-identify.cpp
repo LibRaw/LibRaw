@@ -367,6 +367,20 @@ int main(int ac, char *av[])
  			if (C.dng_color[1].illuminant < 0xffff)
 				printf ("\nDNG Illuminant 2: %s", EXIF_LightSources[C.dng_color[1].illuminant]);
 
+            if (fabsf(C.P1_color[0].romm_cam[0]) > 0)
+            {
+              printf("\nPhaseOne Matrix1:\n");
+              for(int i=0; i< 3; i++)
+            	printf("%6.4f\t%6.4f\t%6.4f\n",C.P1_color[0].romm_cam[i*3],C.P1_color[0].romm_cam[i*3+1],C.P1_color[0].romm_cam[i*3+2]);
+            }
+
+            if (fabsf(C.P1_color[1].romm_cam[0]) > 0)
+            {
+              printf("\nPhaseOne Matrix2:\n");
+              for(int i=0; i< 3; i++)
+            	printf("%6.4f\t%6.4f\t%6.4f\n",C.P1_color[1].romm_cam[i*3],C.P1_color[1].romm_cam[i*3+1],C.P1_color[1].romm_cam[i*3+2]);
+            }
+
             if (fabsf(C.dng_color[0].colormatrix[0][0]) > 0)
             {
             	printf("\nDNG color matrix 1:\n");
