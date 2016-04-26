@@ -15863,7 +15863,7 @@ dng_skip:
 #endif
       return;
     }
-  if ((use_camera_matrix & (use_camera_wb || dng_version))
+  if ((use_camera_matrix & ((use_camera_wb || dng_version) | 0x2) )
 	&& cmatrix[0][0] > 0.125) {
     memcpy (rgb_cam, cmatrix, sizeof cmatrix);
     raw_color = 0;
