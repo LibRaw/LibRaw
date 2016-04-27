@@ -3569,6 +3569,34 @@ void LibRaw::kodak_thumb_loader()
 
 
 // ������� thumbnail �� �����, ������ thumb_format � ������������ � ��������
+
+int LibRaw::thumbOK(INT64 maxsz)
+{
+	if (!ID.input) return 0;
+	if (!ID.toffset) return 0;
+	INT64 fsize = ID.input->size();
+	if (fsize > 0x7fffffffU) return 0; // No thumb for raw > 2Gb
+	int tsize = 0;
+	int tcol = (T.tcolors > 0 && T.tcolors < 4) ? T.tcolors : 3;
+	if (write_thumb == &LibRaw::jpeg_thumb)
+		tsize = T.tlength;
+	else if (write_thumb == &LibRaw::ppm_thumb)
+		tsize = tcol * T.twidth * T.theight;
+	else if (write_thumb == &LibRaw::ppm16_thumb)
+		tsize = tcol * T.twidth * T.theight * 2;
+	else if (write_thumb == &LibRaw::x3f_thumb_loader)
+	{
+		tsize = x3f_thumb_size();
+	}
+	else // Kodak => no check
+		tsize = 1;
+	if (tsize < 0)
+		return 0;
+	if (maxsz > 0 && tsize > maxsz)
+		return 0;
+	return (tsize + ID.toffset <= fsize)?1:0;
+}
+
 int LibRaw::unpack_thumb(void)
 {
   CHECK_ORDER_LOW(LIBRAW_PROGRESS_IDENTIFY);
@@ -5386,6 +5414,22 @@ void LibRaw::parse_x3f()
       libraw_internal_data.internal_data.toffset = DE->input.offset;
       write_thumb = &LibRaw::x3f_thumb_loader;
     }
+}
+
+INT64 LibRaw::x3f_thumb_size()
+{
+	x3f_t *x3f = (x3f_t*)_x3f_data;
+	if (!x3f) return -1; // No data pointer set
+	x3f_directory_entry_t *DE = x3f_get_thumb_jpeg(x3f);
+	if (!DE)
+		DE = x3f_get_thumb_plain(x3f);
+	if (!DE)
+		return -1;
+	if (X3F_OK != x3f_load_data(x3f, DE))
+		return -1;
+	x3f_directory_entry_header_t *DEH = &DE->header;
+	x3f_image_data_t *ID = &DEH->data_subsection.image_data;
+	return ID->data_size;
 }
 
 void LibRaw::x3f_thumb_loader()

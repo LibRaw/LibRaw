@@ -135,7 +135,7 @@ class DllDef LibRaw
 	void							recycle_datastream();
     int                         unpack(void);
     int                         unpack_thumb(void);
-
+	int							thumbOK(INT64 maxsz=-1);
     int                         adjust_sizes_info_only(void);
     LibRaw_colormatrix_type	camera_color_type();
     int                         subtract_black();
@@ -263,6 +263,7 @@ protected:
     void        kodak_thumb_loader();
     void        write_thumb_ppm_tiff(FILE *); 
     void        x3f_thumb_loader();
+	INT64		x3f_thumb_size();
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
     void        foveon_thumb_loader (void);
 #endif
