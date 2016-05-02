@@ -87,8 +87,9 @@ class DllDef LibRaw_abstract_datastream
     virtual int         eof() = 0;
     virtual void *      make_jas_stream() = 0;
     virtual int         jpeg_src(void *) { return -1; }
-    /* Make buffer from current offset */
-
+	/* reimplement in subclass to use parallel access in xtrans_load_raw() if OpenMP is not used */
+	virtual int			lock() { return 1;} /* success */
+	virtual void		unlock(){}
     /* subfile parsing not implemented in base class */
     virtual const char* fname(){ return NULL;};
 #if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
@@ -97,7 +98,6 @@ class DllDef LibRaw_abstract_datastream
 #endif
     virtual int         subfile_open(const char*) { return -1;}
     virtual void        subfile_close() { }
-
 
     virtual int		tempbuffer_open(void*, size_t);
     virtual void	tempbuffer_close();
