@@ -30,7 +30,7 @@ it under the terms of the one of three licenses as you choose:
     double	wf_filter_energy       (int r1_greenmode, int r1, int r2_greenmode, int r2);
 
 
-// inline functions
+/* inline functions */
     ushort      sget2 (uchar *s);
     ushort      sget2Rev(uchar *s);
     void	setCanonBodyFeatures (unsigned id);
@@ -56,7 +56,7 @@ it under the terms of the one of three licenses as you choose:
     double      getreal (int type);
     void        read_shorts (ushort *pixel, int count);
 
-// Canon P&S cameras
+/* Canon P&S cameras */
     void        canon_600_fixed_wb (int temp);
     int         canon_600_color (int ratio[2], int mar);
     void        canon_600_auto_wb();
@@ -259,6 +259,13 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void ahd_interpolate_combine_homogeneous_pixels(int top, int left, ushort (*rgb)[TS][TS][3], char (*homogeneity_map)[TS][2]);
 
 #undef TS
+
+	void parse_xtrans_header();
+	void xtrans_compressed_load_raw();
+	void init_xtrans(struct xtrans_params* info);
+	void init_xtrans_block(struct xtrans_block* info, const struct xtrans_params *params, INT64 raw_offset, unsigned dsize);
+	void copy_line_to_xtrans(struct xtrans_block* info, int cur_line, int cur_block, int cur_block_width);
+	void xtrans_decode_block(struct xtrans_block* info, const struct xtrans_params * params, int cur_line);
 
 // LibRaw demosaic packs  functions
 // AMaZe

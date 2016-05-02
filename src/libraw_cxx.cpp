@@ -74,6 +74,7 @@ typedef unsigned __int64  uint64_t;
 #include "dng_info.h"
 #endif
 
+#include "libraw_xtrans_compressed.cpp"
 
 #ifdef __cplusplus
 extern "C"
@@ -600,6 +601,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_name = "canon_600_load_raw()";
 	  d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC;
     }
+  else if (load_raw == &LibRaw::xtrans_compressed_load_raw)
+  {
+	  d_info->decoder_name = "xtrans_compressed_load_raw()";
+  }
   else if (load_raw == &LibRaw::canon_load_raw)
     {
       d_info->decoder_name = "canon_load_raw()";
@@ -1681,6 +1686,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
     identify();
+
+	// XTrans Compressed?
+	if (!imgdata.idata.dng_version && !strcasecmp(imgdata.idata.make, "Fujifilm") && (load_raw == &LibRaw::unpacked_load_raw))
+	{
+		if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 2 != libraw_internal_data.unpacker_data.data_size)
+			parse_xtrans_header();
+	}
 
     // Fix DNG white balance if needed
     if(imgdata.idata.dng_version && (imgdata.idata.filters == 0) && imgdata.idata.colors > 1 && imgdata.idata.colors < 5)
@@ -4484,7 +4496,7 @@ static const char  *static_camera_list[] =
 "FujiFilm F800EXR",
 "FujiFilm F900EXR",
 "FujiFilm X-Pro1",
-"FujiFilm X-Pro2 (uncompressed RAW only)",
+"FujiFilm X-Pro2",
 "FujiFilm X-S1",
 "FujiFilm XQ1",
 "FujiFilm XQ2",
