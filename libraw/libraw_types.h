@@ -212,7 +212,7 @@ typedef struct
   int          CanonColorDataSubVer;
   int          SpecularWhiteLevel;
   int          AverageBlackLevel;
-// metering
+/* metering */
   short        MeteringMode;
   short        SpotMeteringMode;
   uchar        FlashMeteringMode;
@@ -220,36 +220,36 @@ typedef struct
   short        ExposureMode;
   short        AESetting;
   uchar        HighlightTonePriority;
-// stabilization
+/* stabilization */
   short        ImageStabilization;
-// focus
+/* focus */
   short        FocusMode;
   short        AFPoint;
   short        FocusContinuous;
   short        AFPointsInFocus30D;
   uchar        AFPointsInFocus1D[8];
-  ushort       AFPointsInFocus5D;        // bytes in reverse
-// AFInfo
+  ushort       AFPointsInFocus5D;        /* bytes in reverse*/
+/* AFInfo */
   ushort       AFAreaMode;
   ushort       NumAFPoints;
   ushort       ValidAFPoints;
   ushort       AFImageWidth;
   ushort       AFImageHeight;
-  short        AFAreaWidths[61];        // cycle to NumAFPoints
-  short        AFAreaHeights[61];       // --''--
-  short        AFAreaXPositions[61];    // --''--
-  short        AFAreaYPositions[61];    // --''--
-  short        AFPointsInFocus[4];      // cycle to floor((NumAFPoints+15)/16)
-  short        AFPointsSelected[4];     // --''--
+  short        AFAreaWidths[61];        /* cycle to NumAFPoints */
+  short        AFAreaHeights[61];       /* --''--               */
+  short        AFAreaXPositions[61];    /* --''--               */
+  short        AFAreaYPositions[61];    /* --''--               */
+  short        AFPointsInFocus[4];      /* cycle to floor((NumAFPoints+15)/16) */
+  short        AFPointsSelected[4];     /* --''--               */   
   ushort       PrimaryAFPoint;
-// flash
+/* flash */
   short        FlashMode;
   short        FlashActivity;
   short        FlashBits;
   short        ManualFlashOutput;
   short        FlashOutput;
   short        FlashGuideNumber;
-// drive
+/* drive */
   short        ContinuousDrive;
 } libraw_canon_makernotes_t;
 
@@ -274,11 +274,11 @@ typedef struct
   double       ExposureBracketValue;
   ushort       ActiveDLighting;
   ushort       ShootingMode;
-// stabilization
+/* stabilization */
   uchar        ImageStabilization[7];
   uchar        VibrationReduction;
   uchar        VRMode;
-// focus
+/* focus */
   char         FocusMode[7];
   uchar        AFPoint;
   ushort       AFPointsInFocus;
@@ -294,7 +294,7 @@ typedef struct
   ushort       AFAreaWidth;
   ushort       AFAreaHeight;
   uchar        ContrastDetectAFInFocus;
-// flash
+/* flash */
   char         FlashSetting[13];
   char         FlashType[20];
   uchar        FlashExposureCompensation[4];
@@ -606,6 +606,18 @@ typedef struct
 } libraw_data_t;
 
 
+struct xtrans_params
+{
+	char        *q_table;        /* quantization table */
+	int         q_point[5];      /* quantization points */
+	int         max_bits;
+	int         min_value;
+	int         raw_bits;
+	int         total_values;
+	int			maxDiff;
+	ushort      line_width;
+};
+
 #ifdef __cplusplus
 }
 #endif
@@ -635,7 +647,5 @@ typedef struct
 #error Unable to figure out byte order.
 #endif
 #endif
-
-
 
 #endif

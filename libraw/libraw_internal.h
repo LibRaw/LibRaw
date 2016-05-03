@@ -141,9 +141,8 @@ typedef struct
 	int			hasselblad_parser_flag;
   long long posRAFData;
   unsigned lenRAFData;
+  int fuji_total_lines, fuji_total_blocks, fuji_block_width, fuji_bits;
 }unpacker_data_t;
-
-
 
 typedef struct
 {
