@@ -2113,6 +2113,8 @@ int LibRaw::valid_for_dngsdk()
 		return 0;
 	if(!imgdata.params.use_dngsdk)
 		return 0;
+	if (load_raw == &LibRaw::lossy_dng_load_raw)
+		return 0;
 	if(is_floating_point() && (imgdata.params.use_dngsdk & LIBRAW_DNG_FLOAT))
 		return 1;
 	if(!imgdata.idata.filters && (imgdata.params.use_dngsdk & LIBRAW_DNG_LINEAR))
