@@ -157,7 +157,7 @@ void LibRaw::init_xtrans_block(struct xtrans_block* info, const struct xtrans_pa
 	merror(info->linealloc, "init_xtrans_block()");
 	
 	INT64 fsize = libraw_internal_data.internal_data.input->size();
-	info->max_read_size = _min(unsigned(fsize-raw_offset),dsize);
+	info->max_read_size = _min(unsigned(fsize-raw_offset),dsize+16); // Data size may be incorrect?
 
 	info->input = libraw_internal_data.internal_data.input;
 	info->linebuf[_R0] = info->linealloc;
