@@ -2113,6 +2113,8 @@ int LibRaw::valid_for_dngsdk()
 		return 0;
 	if(!imgdata.params.use_dngsdk)
 		return 0;
+	if (load_raw == &LibRaw::lossy_dng_load_raw)
+		return 0;
 	if(is_floating_point() && (imgdata.params.use_dngsdk & LIBRAW_DNG_FLOAT))
 		return 1;
 	if(!imgdata.idata.filters && (imgdata.params.use_dngsdk & LIBRAW_DNG_LINEAR))
@@ -4524,7 +4526,7 @@ static const char  *static_camera_list[] =
 "FujiFilm F800EXR",
 "FujiFilm F900EXR",
 "FujiFilm X-Pro1",
-"FujiFilm X-Pro2 (uncompressed RAW only)",
+"FujiFilm X-Pro2",
 "FujiFilm X-S1",
 "FujiFilm XQ1",
 "FujiFilm XQ2",
