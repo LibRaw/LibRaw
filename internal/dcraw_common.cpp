@@ -7846,6 +7846,11 @@ void CLASS parse_makernote (int base, int uptag)
             if (!aperture) aperture = imgdata.lens.makernotes.CurAp;
           }
 
+        else if ((tag == 0x000c) && (!imgdata.shootinginfo.BodySerial[0]))
+          {
+             sprintf(imgdata.shootinginfo.BodySerial, "%d", get4());
+          }
+
         else if (tag == 0x000d)			// camera info
           {
             CanonCameraInfo = (uchar*)malloc(len);
@@ -8056,6 +8061,10 @@ void CLASS parse_makernote (int base, int uptag)
                     lenNikonLensData = 0;
                   }
               }
+          }
+        else if (tag == 0x00a0)
+          {
+            fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
           }
         else if (tag == 0x00a8)		// contains flash data
           {
@@ -8972,7 +8981,7 @@ void CLASS parse_makernote (int base, int uptag)
       if (tag == 0x1b) tag = 0x1018;
       if (tag == 0x1c) tag = 0x1017;
     }
-    if (tag == 0x1d)
+    if (tag == 0x1d) {
       while ((c = fgetc(ifp)) && c != EOF)
 #ifdef LIBRAW_LIBRARY_BUILD
       {
@@ -8991,7 +9000,10 @@ void CLASS parse_makernote (int base, int uptag)
 	serial = serial*10 + (isdigit(c) ? c - '0' : c % 10);
 #ifdef LIBRAW_LIBRARY_BUILD
       }
+      if (!imgdata.shootinginfo.BodySerial[0])
+        sprintf(imgdata.shootinginfo.BodySerial, "%d", serial);
 #endif
+    }
     if (tag == 0x29 && type == 1) {  // Canon PowerShot G9
       c = wbi < 18 ? "012347800000005896"[wbi]-'0' : 0;
       fseek (ifp, 8 + c*32, SEEK_CUR);
@@ -9313,6 +9325,9 @@ void CLASS parse_exif (int base)
 #ifdef LIBRAW_LIBRARY_BUILD
     case 0xa405:		// FocalLengthIn35mmFormat
       imgdata.lens.FocalLengthIn35mmFormat = get2();
+      break;
+    case 0xa431:		// BodySerialNumber
+      fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
       break;
     case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
       imgdata.lens.MinFocal = getreal(type);
@@ -9682,7 +9697,6 @@ int CLASS parse_tiff_ifd (int base)
   if (entries > 512) return 1;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
-
 #ifdef LIBRAW_LIBRARY_BUILD
     if(callbacks.exif_cb)
       {
@@ -10133,6 +10147,9 @@ int CLASS parse_tiff_ifd (int base)
     case 0xa405:		// FocalLengthIn35mmFormat
       imgdata.lens.FocalLengthIn35mmFormat = get2();
       break;
+    case 0xa431:		// BodySerialNumber
+      fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+      break;
     case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
       imgdata.lens.MinFocal = getreal(type);
       imgdata.lens.MaxFocal = getreal(type);
@@ -10154,7 +10171,7 @@ int CLASS parse_tiff_ifd (int base)
         imgdata.lens.Lens[0] = 0;
       break;
     case 0x9205:
-				imgdata.lens.EXIF_MaxAp = powf64(2.0f, (getreal(type) / 2.0f));
+      imgdata.lens.EXIF_MaxAp = powf64(2.0f, (getreal(type) / 2.0f));
       break;
 // IB end
 #endif

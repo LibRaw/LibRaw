@@ -140,6 +140,8 @@ int main(int ac, char *av[])
             printf ("\nFilename: %s\n", av[i]);
             printf ("Timestamp: %s", ctime(&(P2.timestamp)));
             printf ("Camera: %s %s\n", P1.make, P1.model);
+            if (ShootingInfo.BodySerial[0])
+               printf ("Body serial: %s\n", ShootingInfo.BodySerial);
             if (P2.artist[0])
                 printf ("Owner: %s\n", P2.artist);
             if (P1.dng_version) {
@@ -476,7 +478,7 @@ int main(int ac, char *av[])
 					printf ("\n");
                 } else
 //                    printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
-					printf ("%s=%s=%d=%04.3f=%04.3f\n", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure, F.FujiExpoMidPointShift);
+					printf ("%s=%s=%d=%04.3f=%04.3f=Body serial: =%s=\n", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure, F.FujiExpoMidPointShift, ShootingInfo.BodySerial);
             }
         MyCoolRawProcessor.recycle();
     }// endfor

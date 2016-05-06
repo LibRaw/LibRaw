@@ -240,7 +240,7 @@ typedef struct
   short        AFAreaXPositions[61];    /* --''--               */
   short        AFAreaYPositions[61];    /* --''--               */
   short        AFPointsInFocus[4];      /* cycle to floor((NumAFPoints+15)/16) */
-  short        AFPointsSelected[4];     /* --''--               */   
+  short        AFPointsSelected[4];     /* --''--               */
   ushort       PrimaryAFPoint;
 /* flash */
   short        FlashMode;
@@ -585,6 +585,7 @@ typedef struct
 	short AFPoint;
 	short ExposureMode;
 	short ImageStabilization;
+	char BodySerial[64];
 } libraw_shootinginfo_t;
 
 typedef struct
