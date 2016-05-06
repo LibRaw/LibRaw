@@ -93,7 +93,7 @@ object/demosaic_packs.o: internal/demosaic_packs.cpp
 object/dcraw_fileio.o: internal/dcraw_fileio.cpp
 	g++ -c ${LCMS_DEF} ${CFLAGS} -o object/dcraw_fileio.o internal/dcraw_fileio.cpp
 
-object/libraw_cxx.o: src/libraw_cxx.cpp
+object/libraw_cxx.o: src/libraw_cxx.cpp src/libraw_xtrans_compressed.cpp
 	g++ -c ${LCMS_DEF} ${CFLAGS} -o object/libraw_cxx.o src/libraw_cxx.cpp
 
 object/libraw_datastream.o: src/libraw_datastream.cpp
