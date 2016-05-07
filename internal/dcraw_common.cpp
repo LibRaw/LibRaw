@@ -8078,6 +8078,12 @@ void CLASS parse_makernote (int base, int uptag)
     else if (!strncmp(make, "OLYMPUS", 7))
       {
         switch (tag) {
+        case 0x0404:
+        case 0x101a:
+        case 0x20100101:
+          if (!imgdata.shootinginfo.BodySerial[0])
+            fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        break;
         case 0x0207:
         case 0x20100100:
           {
