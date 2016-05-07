@@ -6844,6 +6844,16 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
   else if (imgdata.lens.makernotes.CameraMount != LIBRAW_MOUNT_FixedLens)
     parseSonyLensFeatures (SonySubstitution[buf[0x116]],
                            SonySubstitution[buf[0x117]]);
+
+   if ((id==347) || (id==350) || (id==357))
+     sprintf(imgdata.shootinginfo.BodySerial, "%06lx", ((long)SonySubstitution[buf[0x88]]<<40) + ((long)SonySubstitution[buf[0x89]]<<32) + (SonySubstitution[buf[0x8a]]<<24) + (SonySubstitution[buf[0x8b]]<<16) + (SonySubstitution[buf[0x8c]]<<8) +SonySubstitution[buf[0x8d]]);
+
+   else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) && (id > 279) && (id != 282) && (id != 283))
+     sprintf(imgdata.shootinginfo.BodySerial, "%05lx", ((long)SonySubstitution[buf[0xf0]]<<32) + (SonySubstitution[buf[0xf1]]<<24) + (SonySubstitution[buf[0xf2]]<<16) + (SonySubstitution[buf[0xf3]]<<8) +SonySubstitution[buf[0xf4]]);
+
+   else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E) && (id != 288) && (id != 289)  && (id != 290))
+     sprintf(imgdata.shootinginfo.BodySerial, "%04x", (SonySubstitution[buf[0x7c]]<<24) + (SonySubstitution[buf[0x7d]]<<16) + (SonySubstitution[buf[0x7e]]<<8) +SonySubstitution[buf[0x7f]]);
+
   return;
 }
 
