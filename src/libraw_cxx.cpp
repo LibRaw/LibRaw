@@ -1741,7 +1741,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		else if(S.raw_width == 8000)	S.width = S.raw_width - 32;
 	}
 
-	if(!strcasecmp(imgdata.idata.make,"Pentax") && !strcasecmp(imgdata.idata.model,"K-3 II") && imgdata.idata.raw_count == 4 && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_PENTAXK32_ALLFRAMES))
+	if(!strcasecmp(imgdata.idata.make,"Pentax") &&  /*!strcasecmp(imgdata.idata.model,"K-3 II")  &&*/ imgdata.idata.raw_count == 4 && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_PENTAX_PS_ALLFRAMES))
 	{
 		imgdata.idata.raw_count = 1;
 		imgdata.idata.filters = 0;
