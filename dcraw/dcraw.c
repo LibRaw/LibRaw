@@ -8581,6 +8581,15 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 		 imgdata.color.WBCT_Coeffs[i][3] = get2();
         	}
         }
+        else if (tag == 0x0215)
+        {
+          fseek (ifp, 16, SEEK_CUR);
+          sprintf(imgdata.shootinginfo.BodySerial, "%d", get4());
+        }
+        else if (tag == 0x0229)
+        {
+          fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        }
         else if (tag == 0x022d)
         {
 	  fseek (ifp,2,SEEK_CUR);
@@ -9089,6 +9098,7 @@ void CLASS parse_makernote (int base, int uptag)
 
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
+      case 0x0010: fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp); break;
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
       case 0x1021: imgdata.makernotes.fuji.FocusMode = get2(); break;
       case 0x1022: imgdata.makernotes.fuji.AFMode = get2(); break;
@@ -9510,6 +9520,15 @@ void CLASS parse_makernote (int base, int uptag)
 		imgdata.color.WBCT_Coeffs[i][3] = get2();
 	      }
         }
+        else if (tag == 0x0215)
+        {
+          fseek (ifp, 16, SEEK_CUR);
+          sprintf(imgdata.shootinginfo.BodySerial, "%d", get4());
+        }
+        else if (tag == 0x0229)
+        {
+                fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        }
         else if (tag == 0x022d)
         {
 	  fseek (ifp,2,SEEK_CUR);
@@ -9592,7 +9611,6 @@ void CLASS parse_makernote (int base, int uptag)
                !strncasecmp(model, "HV",2))))
       {
         ushort lid;
-
         if (tag == 0xb001)			// Sony ModelID
         {
           unique_id = get2();
@@ -9618,14 +9636,13 @@ void CLASS parse_makernote (int base, int uptag)
                  strncasecmp(model, "DSLR-A100", 9) &&
                  strncasecmp(model, "NEX-5C", 6) &&
                  !strncasecmp(make, "SONY", 4) &&
-                 ((len == 368) ||			// a700
+                 ((len == 368) ||		// a700
                   (len == 5478) ||		// a850, a900
                   (len == 5506) ||		// a200, a300, a350
                   (len == 6118) ||		// a230, a290, a330, a380, a390
-
-                  // a450, a500, a550, a560, a580
-                  // a33, a35, a55
-                  // NEX3, NEX5, NEX5C, NEXC3, VG10E
+                  				// a450, a500, a550, a560, a580
+                  				// a33, a35, a55
+                  				// NEX3, NEX5, NEX5C, NEXC3, VG10E
                   (len == 15360))
                  )
           {
@@ -9669,10 +9686,17 @@ void CLASS parse_makernote (int base, int uptag)
             free(table_buf);
           }
 
-		else if (tag == 0x0104)
-		  {
-		    imgdata.other.FlashEC = getreal(type);
-		  }
+        else if ((tag == 0x0020) &&				// WBInfoA100, needs 0xb028 processing
+                 !strncasecmp(model, "DSLR-A100", 9))
+	  {
+	    fseek(ifp,0x49dc,SEEK_CUR);
+	    fread(imgdata.shootinginfo.BodySerial, 12, 1, ifp);
+	  }
+
+	else if (tag == 0x0104)
+	  {
+	    imgdata.other.FlashEC = getreal(type);
+	  }
 
         else if (tag == 0x0105)					// Teleconverter
           {
