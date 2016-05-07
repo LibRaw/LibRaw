@@ -8347,7 +8347,7 @@ void CLASS parse_makernote (int base, int uptag)
         }
         else if (tag == 0x0229)
         {
-                fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+          fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
         }
         else if (tag == 0x022d)
         {
@@ -8402,6 +8402,10 @@ void CLASS parse_makernote (int base, int uptag)
         else if (tag == 0x0003)
           {
             unique_id = imgdata.lens.makernotes.CamID = get4();
+          }
+         else if (tag == 0xa002)
+          {
+             fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
           }
         else if (tag == 0xa003)
           {
