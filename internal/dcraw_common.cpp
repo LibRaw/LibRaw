@@ -13319,6 +13319,8 @@ void CLASS identify()
   memset (cblack, 0, sizeof cblack);
   memset (white, 0, sizeof white);
   memset (mask, 0, sizeof mask);
+  memset (make, 0, sizeof make);
+  memset (model, 0, sizeof model);
   thumb_offset = thumb_length = thumb_width = thumb_height = 0;
   load_raw = thumb_load_raw = 0;
   write_thumb = &CLASS jpeg_thumb;
