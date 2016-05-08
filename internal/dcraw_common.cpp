@@ -93,6 +93,13 @@ int my_strlen(const char *str)
 }
 #define strlen(a) my_strlen((a))
 
+template <typename T, size_t  N>
+static void remove_trailing_spaces(T (&str) [N]) {
+	if(!N) return;
+	str[N - 1] = '\0'; // force null-terminate, in case of not
+	for (size_t i(N - 2); (i >= 0) && (str[i] == ' '); --i) {str[i] = '\0';} ///* Remove trailing spaces */
+}
+
 ushort CLASS sget2 (uchar *s)
 {
   if (order == 0x4949)		/* "II" means little-endian */
@@ -13602,10 +13609,12 @@ void CLASS identify()
      *cp = 0;
   if (!strncasecmp(model,"PENTAX",6))
     strcpy (make, "Pentax");
-  cp = make + strlen(make);		/* Remove trailing spaces */
-  while (*--cp == ' ') *cp = 0;
-  cp = model + strlen(model);
-  while (*--cp == ' ') *cp = 0;
+  //cp = make + strlen(make);		/* Remove trailing spaces */
+  //while (*--cp == ' ') *cp = 0;
+  remove_trailing_spaces(make); //fixed undefined behavior
+  //cp = model + strlen(model);
+  //while (*--cp == ' ') *cp = 0;
+  remove_trailing_spaces(model); //fixed undefined behavior
   i = strlen(make);			/* Remove make from model */
   if (!strncasecmp (model, make, i) && model[i++] == ' ')
     memmove (model, model+i, 64-i);
