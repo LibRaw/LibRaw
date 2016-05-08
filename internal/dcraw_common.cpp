@@ -11174,6 +11174,9 @@ void CLASS parse_ciff (int offset, int length, int depth)
     if ((((type >> 8) + 8) | 8) == 0x38) {
       parse_ciff (ftell(ifp), len, depth+1); /* Parse a sub-table */
     }
+#ifdef LIBRAW_LIBRARY_BUILD
+    if (type == 0x3004) parse_ciff (ftell(ifp), len, depth+1);
+#endif
     if (type == 0x0810)
       fread (artist, 64, 1, ifp);
     if (type == 0x080a) {
@@ -11197,11 +11200,11 @@ void CLASS parse_ciff (int offset, int length, int depth)
       shutter = powf64(2.0f, -int_to_float((get4(),get4())));
       aperture = powf64(2.0f, int_to_float(get4())/2);
 #ifdef LIBRAW_LIBRARY_BUILD
-			imgdata.lens.makernotes.CurAp = aperture;
+      imgdata.lens.makernotes.CurAp = aperture;
 #endif
     }
     if (type == 0x102a) {
-			//      iso_speed = pow (2.0, (get4(),get2())/32.0 - 4) * 50;
+//      iso_speed = pow (2.0, (get4(),get2())/32.0 - 4) * 50;
       iso_speed = powf64(2.0f, ((get2(),get2()) + get2())/32.0f - 5.0f) * 100.0f;
 #ifdef LIBRAW_LIBRARY_BUILD
       aperture  = _CanonConvertAperture((get2(),get2()));
@@ -11237,6 +11240,10 @@ void CLASS parse_ciff (int offset, int length, int depth)
 	INT64 o = ftell(ifp);
 	Canon_CameraSettings();
 	fseek(ifp,o,SEEK_SET);
+      }
+    if (type == 0x580b)
+      {
+        sprintf(imgdata.shootinginfo.BodySerial, "%d", len);
       }
 #endif
     if (type == 0x0032) {
