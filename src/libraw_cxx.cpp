@@ -509,10 +509,13 @@ void LibRaw:: recycle()
   FREE(imgdata.rawdata.raw_alloc);
   FREE(imgdata.idata.xmpdata);
 #undef FREE
-  ZERO(imgdata.rawdata);
   ZERO(imgdata.sizes);
-  ZERO(imgdata.color);
+  ZERO(imgdata.idata);
   ZERO(imgdata.makernotes);
+  ZERO(imgdata.color);
+  ZERO(imgdata.other);
+  ZERO(imgdata.thumbnail);
+  ZERO(imgdata.rawdata);
   imgdata.makernotes.olympus.OlympusCropID = -1;
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
