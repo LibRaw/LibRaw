@@ -11395,11 +11395,6 @@ void CLASS parse_phase_one (int base)
   float romm_cam[3][3];
   char *cp;
 
-#ifdef LIBRAW_LIBRARY_BUILD
-	char body_id[3];
-	body_id[0] = 0;
-#endif
-
   memset (&ph1, 0, sizeof ph1);
   fseek (ifp, base, SEEK_SET);
   order = get4() & 0xffff;
@@ -11418,11 +11413,12 @@ void CLASS parse_phase_one (int base)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     case 0x0102:
-      fread(body_id, 1, 3, ifp);
-      if ((body_id[0] == 0x4c) && (body_id[1] == 0x49)) {
-        body_id[1] = body_id[2];
+      fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+      if ((imgdata.shootinginfo.BodySerial[0] == 0x4c) && (imgdata.shootinginfo.BodySerial[1] == 0x49)) {
+        unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[2] & 0x3f)) - 0x41;
+      } else {
+        unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[1] & 0x3f)) - 0x41;
       }
-      unique_id = (((body_id[0] & 0x3f) << 5) | (body_id[1] & 0x3f)) - 0x41;
       setPhaseOneFeatures(unique_id);
       break;
     case 0x0401:
@@ -11519,7 +11515,7 @@ void CLASS parse_phase_one (int base)
   }
 
 #ifdef LIBRAW_LIBRARY_BUILD
-  if (!imgdata.lens.makernotes.body[0] && !body_id[0]) {
+  if (!imgdata.lens.makernotes.body[0] && !imgdata.shootinginfo.BodySerial[0]) {
     fseek (ifp, meta_offset, SEEK_SET);
     order = get2();
     fseek (ifp, 6, SEEK_CUR);
@@ -11532,11 +11528,12 @@ void CLASS parse_phase_one (int base)
       save = ftell(ifp);
       fseek (ifp, meta_offset+data, SEEK_SET);
       if (tag == 0x0407) {
-        fread(body_id, 1, 3, ifp);
-        if ((body_id[0] == 0x4c) && (body_id[1] == 0x49)) {
-          body_id[1] = body_id[2];
+        fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        if ((imgdata.shootinginfo.BodySerial[0] == 0x4c) && (imgdata.shootinginfo.BodySerial[1] == 0x49)) {
+          unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[2] & 0x3f)) - 0x41;
+        } else {
+          unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[1] & 0x3f)) - 0x41;
         }
-        unique_id = (((body_id[0] & 0x3f) << 5) | (body_id[1] & 0x3f)) - 0x41;
         setPhaseOneFeatures(unique_id);
       }
       fseek (ifp, save, SEEK_SET);
