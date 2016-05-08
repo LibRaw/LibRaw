@@ -8026,13 +8026,13 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
                            SonySubstitution[buf[0x117]]);
 
    if ((id==347) || (id==350) || (id==357))
-     sprintf(imgdata.shootinginfo.BodySerial, "%06lx", ((long)SonySubstitution[buf[0x88]]<<40) + ((long)SonySubstitution[buf[0x89]]<<32) + (SonySubstitution[buf[0x8a]]<<24) + (SonySubstitution[buf[0x8b]]<<16) + (SonySubstitution[buf[0x8c]]<<8) +SonySubstitution[buf[0x8d]]);
+     sprintf(imgdata.shootinginfo.InternalBodySerial, "%06lx", ((long)SonySubstitution[buf[0x88]]<<40) + ((long)SonySubstitution[buf[0x89]]<<32) + (SonySubstitution[buf[0x8a]]<<24) + (SonySubstitution[buf[0x8b]]<<16) + (SonySubstitution[buf[0x8c]]<<8) +SonySubstitution[buf[0x8d]]);
 
    else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) && (id > 279) && (id != 282) && (id != 283))
-     sprintf(imgdata.shootinginfo.BodySerial, "%05lx", ((long)SonySubstitution[buf[0xf0]]<<32) + (SonySubstitution[buf[0xf1]]<<24) + (SonySubstitution[buf[0xf2]]<<16) + (SonySubstitution[buf[0xf3]]<<8) +SonySubstitution[buf[0xf4]]);
+     sprintf(imgdata.shootinginfo.InternalBodySerial, "%05lx", ((long)SonySubstitution[buf[0xf0]]<<32) + (SonySubstitution[buf[0xf1]]<<24) + (SonySubstitution[buf[0xf2]]<<16) + (SonySubstitution[buf[0xf3]]<<8) +SonySubstitution[buf[0xf4]]);
 
    else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E) && (id != 288) && (id != 289)  && (id != 290))
-     sprintf(imgdata.shootinginfo.BodySerial, "%04x", (SonySubstitution[buf[0x7c]]<<24) + (SonySubstitution[buf[0x7d]]<<16) + (SonySubstitution[buf[0x7e]]<<8) +SonySubstitution[buf[0x7f]]);
+     sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x", (SonySubstitution[buf[0x7c]]<<24) + (SonySubstitution[buf[0x7d]]<<16) + (SonySubstitution[buf[0x7e]]<<8) +SonySubstitution[buf[0x7f]]);
 
   return;
 }
@@ -8584,7 +8584,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         else if (tag == 0x0215)
         {
           fseek (ifp, 16, SEEK_CUR);
-          sprintf(imgdata.shootinginfo.BodySerial, "%d", get4());
+          sprintf(imgdata.shootinginfo.InternalBodySerial, "%d", get4());
         }
         else if (tag == 0x0229)
         {
@@ -9098,7 +9098,7 @@ void CLASS parse_makernote (int base, int uptag)
 
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
-      case 0x0010: fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp); break;
+      case 0x0010: fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp); break;
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
       case 0x1021: imgdata.makernotes.fuji.FocusMode = get2(); break;
       case 0x1022: imgdata.makernotes.fuji.AFMode = get2(); break;
@@ -9283,6 +9283,10 @@ void CLASS parse_makernote (int base, int uptag)
         case 0x20100101:
           if (!imgdata.shootinginfo.BodySerial[0])
             fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        break;
+        case 0x20100102:
+          if (!imgdata.shootinginfo.InternalBodySerial[0])
+            fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
         break;
         case 0x0207:
         case 0x20100100:
@@ -9523,7 +9527,7 @@ void CLASS parse_makernote (int base, int uptag)
         else if (tag == 0x0215)
         {
           fseek (ifp, 16, SEEK_CUR);
-          sprintf(imgdata.shootinginfo.BodySerial, "%d", get4());
+          sprintf(imgdata.shootinginfo.InternalBodySerial, "%d", get4());
         }
         else if (tag == 0x0229)
         {
@@ -9694,7 +9698,7 @@ void CLASS parse_makernote (int base, int uptag)
                  !strncasecmp(model, "DSLR-A100", 9))
 	  {
 	    fseek(ifp,0x49dc,SEEK_CUR);
-	    fread(imgdata.shootinginfo.BodySerial, 12, 1, ifp);
+	    fread(imgdata.shootinginfo.InternalBodySerial, MIN(12, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
 	  }
 
 	else if (tag == 0x0104)

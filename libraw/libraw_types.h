@@ -586,6 +586,7 @@ typedef struct
 	short ExposureMode;
 	short ImageStabilization;
 	char BodySerial[64];
+	char InternalBodySerial[64]; /* this may be PCB or sensor serial, depends on make/model*/
 } libraw_shootinginfo_t;
 
 typedef struct
