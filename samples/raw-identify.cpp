@@ -495,6 +495,9 @@ int main(int ac, char *av[])
                    if (ShootingInfo.BodySerial[0]) {
                      trimSpaces(ShootingInfo.BodySerial);
                      printf ("=Body serial: =%s=\n", ShootingInfo.BodySerial);
+                   } else if (C.model2[0] && !strncasecmp(P1.make, "Kodak", 5)) {
+                     trimSpaces(C.model2);
+                     printf ("=Body serial: =%s=\n", C.model2);
                    } else if (ShootingInfo.InternalBodySerial[0]) {
                      trimSpaces(ShootingInfo.InternalBodySerial);
                      printf ("=Body assembly serial: =%s=\n", ShootingInfo.InternalBodySerial);
