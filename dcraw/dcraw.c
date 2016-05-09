@@ -14293,7 +14293,19 @@ float CLASS find_green (int bps, int bite, int off0, int off1)
   return 100 * log(sum[0]/sum[1]);
 }
 
-
+#ifdef LIBRAW_LIBRARY_BUILD
+static void remove_trailing_spaces(char *string, size_t len)
+{
+  if(len<1) return; // not needed, b/c sizeof of make/model is 64
+  string[len-1]=0;
+  if(len<3) return; // also not needed
+  for(int i=len-2; i>=0; i--)
+    if(string[i]==' ')
+      string[i]=0;
+    else
+      break;
+}
+#endif
 /*
    Identify which camera created this file, and set global variables
    accordingly.
@@ -14916,7 +14928,10 @@ void CLASS identify()
       filters = 0x16161616;
     } else is_raw = 0;
   }
-
+#ifdef LIBRAW_LIBRARY_BUILD
+  // make sure strings are terminated
+  desc[511] = artist[63] = make[63] = model[63] = model2[63] = 0;
+#endif
   for (i=0; i < sizeof corp / sizeof *corp; i++)
     if (strcasestr (make, corp[i]))	/* Simplify company names */
 	    strcpy (make, corp[i]);
@@ -14926,10 +14941,15 @@ void CLASS identify()
      *cp = 0;
   if (!strncasecmp(model,"PENTAX",6))
     strcpy (make, "Pentax");
+#ifdef LIBRAW_LIBRARY_BUILD
+  remove_trailing_spaces(make,sizeof(make));
+  remove_trailing_spaces(model,sizeof(model));
+#else
   cp = make + strlen(make);		/* Remove trailing spaces */
   while (*--cp == ' ') *cp = 0;
   cp = model + strlen(model);
   while (*--cp == ' ') *cp = 0;
+#endif
   i = strlen(make);			/* Remove make from model */
   if (!strncasecmp (model, make, i) && model[i++] == ' ')
     memmove (model, model+i, 64-i);

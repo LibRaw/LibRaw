@@ -151,6 +151,7 @@ typedef struct
 
 typedef struct
 {
+  char	      guard[4];
   char        make[64];
   char        model[64];
   char        software[64];
