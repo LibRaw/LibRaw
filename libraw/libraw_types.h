@@ -365,6 +365,8 @@ typedef struct
   float        flash_used;
   float        canon_ev;
   char         model2[64];
+  char         UniqueCameraModel[64];
+  char         LocalizedCameraModel[64];
   void         *profile;
   unsigned     profile_length;
   unsigned     black_stat[8];
@@ -616,7 +618,7 @@ struct xtrans_params
 	int         min_value;
 	int         raw_bits;
 	int         total_values;
-	int			maxDiff;
+	int         maxDiff;
 	ushort      line_width;
 };
 

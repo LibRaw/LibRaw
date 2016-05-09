@@ -10369,8 +10369,15 @@ int CLASS parse_tiff_ifd (int base)
 	is_raw = 1;
 	break;
       case 50708:			/* UniqueCameraModel */
+#ifdef LIBRAW_LIBRARY_BUILD
+        fread(imgdata.color.UniqueCameraModel, MIN(len, sizeof(imgdata.color.UniqueCameraModel)), 1, ifp);
+#endif
 	if (model[0]) break;
+#ifndef LIBRAW_LIBRARY_BUILD
 	fgets (make, 64, ifp);
+#else
+        strncpy (make, imgdata.color.UniqueCameraModel, MIN(len, sizeof(imgdata.color.UniqueCameraModel)));
+#endif
 	if ((cp = strchr(make,' '))) {
 	  strcpy(model,cp+1);
 	  *cp = 0;
@@ -10487,6 +10494,11 @@ guess_cfa_pc:
 
       case 61450:
 	cblack[4] = cblack[5] = MIN(sqrt((double)len),64);
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 50709:
+        fread(imgdata.color.LocalizedCameraModel, MIN(len, sizeof(imgdata.color.LocalizedCameraModel)), 1, ifp);
+      break;
+#endif
       case 50714:			/* BlackLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
 		if(tiff_ifd[ifd].samples > 1  && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
@@ -10555,7 +10567,7 @@ guess_cfa_pc:
 	break;
 
 	case 0xc714:			/* ForwardMatrix1 */
-    case 0xc715:			/* ForwardMatrix2 */
+        case 0xc715:			/* ForwardMatrix2 */
 #ifdef LIBRAW_LIBRARY_BUILD
         i = tag == 0xc714?0:1;
 #endif
@@ -11304,12 +11316,12 @@ void CLASS parse_ciff (int offset, int length, int depth)
     if (type == 0x5814) canon_ev   = int_to_float(len);
     if (type == 0x5817) shot_order = len;
     if (type == 0x5834)
-		{
-			unique_id  = len;
+      {
+         unique_id  = len;
 #ifdef LIBRAW_LIBRARY_BUILD
-			setCanonBodyFeatures(unique_id);
+         setCanonBodyFeatures(unique_id);
 #endif
-		}
+      }
     if (type == 0x580e) timestamp  = len;
     if (type == 0x180e) timestamp  = get4();
 #ifdef LOCALTIME
