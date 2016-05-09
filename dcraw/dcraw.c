@@ -12435,7 +12435,8 @@ void CLASS parse_ciff (int offset, int length, int depth)
       }
     if (type == 0x580b)
       {
-        sprintf(imgdata.shootinginfo.BodySerial, "%d", len);
+        if (strcmp(model,"Canon EOS D30")) sprintf(imgdata.shootinginfo.BodySerial, "%d", len);
+        else sprintf(imgdata.shootinginfo.BodySerial, "%0x-%05d", len>>16, len&0xffff);
       }
 #endif
     if (type == 0x0032) {

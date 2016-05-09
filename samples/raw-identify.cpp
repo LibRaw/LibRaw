@@ -113,10 +113,11 @@ const char *WB_LightSources[] = {
 void trimSpaces(char *s)
 {
   char *p = s;
+  if (!strncasecmp(p, "NO=", 3)) p = p+3; /* fixes for Nikon D70, D70s */
   int l = strlen(p);
   if(!l) return;
-  while(isspace(p[l - 1])) p[--l] = 0;  /* trim trailing spaces */
-  while(*p && isspace(*p)) ++p, --l;    /* trim leading spaces */
+  while(isspace(p[l - 1])) p[--l] = 0;    /* trim trailing spaces */
+  while(*p && isspace(*p)) ++p, --l;      /* trim leading spaces */
   memmove(s, p, l + 1);
 }
 
@@ -492,10 +493,10 @@ int main(int ac, char *av[])
                 {
 //                    printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
                    printf ("%s=%s=%d=%04.3f", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure);
-                   if (ShootingInfo.BodySerial[0]) {
+                   if (ShootingInfo.BodySerial[0] && !(ShootingInfo.BodySerial[0] == 48 && !ShootingInfo.BodySerial[1])) {
                      trimSpaces(ShootingInfo.BodySerial);
                      printf ("=Body serial: =%s=\n", ShootingInfo.BodySerial);
-                   } else if (C.model2[0] && !strncasecmp(P1.make, "Kodak", 5)) {
+                   } else if (C.model2[0] && (!strncasecmp(P1.make, "Kodak", 5) || !strcmp(P1.model, "EOS D2000C"))) {
                      trimSpaces(C.model2);
                      printf ("=Body serial: =%s=\n", C.model2);
                    } else if (ShootingInfo.InternalBodySerial[0]) {
