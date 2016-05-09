@@ -11557,6 +11557,7 @@ int CLASS parse_tiff_ifd (int base)
       case 50708:			/* UniqueCameraModel */
 #ifdef LIBRAW_LIBRARY_BUILD
         fread(imgdata.color.UniqueCameraModel, MIN(len, sizeof(imgdata.color.UniqueCameraModel)), 1, ifp);
+        imgdata.color.UniqueCameraModel[sizeof(imgdata.color.UniqueCameraModel)-1] = 0;
 #endif
 	if (model[0]) break;
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -11683,6 +11684,7 @@ guess_cfa_pc:
 #ifdef LIBRAW_LIBRARY_BUILD
       case 50709:
         fread(imgdata.color.LocalizedCameraModel, MIN(len, sizeof(imgdata.color.LocalizedCameraModel)), 1, ifp);
+        imgdata.color.LocalizedCameraModel[sizeof(imgdata.color.LocalizedCameraModel)-1] = 0;
       break;
 #endif
       case 50714:			/* BlackLevel */
