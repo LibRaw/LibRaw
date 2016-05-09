@@ -110,6 +110,17 @@ const char *WB_LightSources[] = {
 	"Studio Tungsten",
 };
 
+void trimSpaces(char *s)
+{
+  char *p = s;
+  if (!strncasecmp(p, "NO=", 3)) p = p+3; /* fix for Nikon D70, D70s */
+  int l = strlen(p);
+  if(!l) return;
+  while(isspace(p[l - 1])) p[--l] = 0;    /* trim trailing spaces */
+  while(*p && isspace(*p)) ++p, --l;      /* trim leading spaces */
+  memmove(s, p, l + 1);
+}
+
 int main(int ac, char *av[])
 {
     int verbose = 0, ret,print_unpack=0,print_frame=0,print_wb=0;
@@ -140,6 +151,10 @@ int main(int ac, char *av[])
             printf ("\nFilename: %s\n", av[i]);
             printf ("Timestamp: %s", ctime(&(P2.timestamp)));
             printf ("Camera: %s %s\n", P1.make, P1.model);
+            if (ShootingInfo.BodySerial[0]) {
+               trimSpaces(ShootingInfo.BodySerial);
+               printf ("Body serial: %s\n", ShootingInfo.BodySerial);
+            }
             if (P2.artist[0])
                 printf ("Owner: %s\n", P2.artist);
             if (P1.dng_version) {
@@ -475,8 +490,37 @@ int main(int ac, char *av[])
 					} else break;
 					printf ("\n");
                 } else
-//                    printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
-					printf ("%s=%s=%d=%04.3f=%04.3f\n", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure, F.FujiExpoMidPointShift);
+                {
+                   printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
+                   printf ("\nFilename: %s\n", av[i]);
+                   printf ("%s=%s=%d=%04.3f", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure);
+                   if (ShootingInfo.BodySerial[0] && !(ShootingInfo.BodySerial[0] == 48 && !ShootingInfo.BodySerial[1])) {
+                     trimSpaces(ShootingInfo.BodySerial);
+                     printf ("=Body serial: =%s=\n", ShootingInfo.BodySerial);
+                   } else if (C.model2[0] && (!strncasecmp(P1.make, "Kodak", 5) || !strcmp(P1.model, "EOS D2000C"))) {
+                     trimSpaces(C.model2);
+                     printf ("=Body serial: =%s=\n", C.model2);
+                   } else if (ShootingInfo.InternalBodySerial[0]) {
+                     trimSpaces(ShootingInfo.InternalBodySerial);
+                     printf ("=Body assembly serial: =%s=\n", ShootingInfo.InternalBodySerial);
+                   } else printf ("\n");
+
+// print comma-separated
+//                    printf ("%s,%s,%s,", av[i], P1.make, P1.model);
+//                    if (ShootingInfo.BodySerial[0] && !(ShootingInfo.BodySerial[0] == 48 && !ShootingInfo.BodySerial[1])) {
+//                      trimSpaces(ShootingInfo.BodySerial);
+//                      printf ("%s,", ShootingInfo.BodySerial);
+//                    } else if (C.model2[0] && (!strncasecmp(P1.make, "Kodak", 5) || !strcmp(P1.model, "EOS D2000C"))) {
+//                      trimSpaces(C.model2);
+//                      printf ("%s,", C.model2);
+//                    } else printf (",");
+//                    if (ShootingInfo.InternalBodySerial[0]) {
+//                      trimSpaces(ShootingInfo.InternalBodySerial);
+//                      printf ("%s", ShootingInfo.InternalBodySerial);
+//                    }
+//                    printf ("\n");
+
+                }
             }
         MyCoolRawProcessor.recycle();
     }// endfor

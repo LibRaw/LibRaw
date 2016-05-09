@@ -6844,6 +6844,16 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
   else if (imgdata.lens.makernotes.CameraMount != LIBRAW_MOUNT_FixedLens)
     parseSonyLensFeatures (SonySubstitution[buf[0x116]],
                            SonySubstitution[buf[0x117]]);
+
+   if ((id==347) || (id==350) || (id==357))
+     sprintf(imgdata.shootinginfo.InternalBodySerial, "%06lx", ((long)SonySubstitution[buf[0x88]]<<40) + ((long)SonySubstitution[buf[0x89]]<<32) + (SonySubstitution[buf[0x8a]]<<24) + (SonySubstitution[buf[0x8b]]<<16) + (SonySubstitution[buf[0x8c]]<<8) +SonySubstitution[buf[0x8d]]);
+
+   else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) && (id > 279) && (id != 282) && (id != 283))
+     sprintf(imgdata.shootinginfo.InternalBodySerial, "%05lx", ((long)SonySubstitution[buf[0xf0]]<<32) + (SonySubstitution[buf[0xf1]]<<24) + (SonySubstitution[buf[0xf2]]<<16) + (SonySubstitution[buf[0xf3]]<<8) +SonySubstitution[buf[0xf4]]);
+
+   else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E) && (id != 288) && (id != 289)  && (id != 290))
+     sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x", (SonySubstitution[buf[0x7c]]<<24) + (SonySubstitution[buf[0x7d]]<<16) + (SonySubstitution[buf[0x7e]]<<8) +SonySubstitution[buf[0x7f]]);
+
   return;
 }
 
@@ -7391,6 +7401,15 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 		 imgdata.color.WBCT_Coeffs[i][3] = get2();
         	}
         }
+        else if (tag == 0x0215)
+        {
+          fseek (ifp, 16, SEEK_CUR);
+          sprintf(imgdata.shootinginfo.InternalBodySerial, "%d", get4());
+        }
+        else if (tag == 0x0229)
+        {
+          fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        }
         else if (tag == 0x022d)
         {
 	  fseek (ifp,2,SEEK_CUR);
@@ -7846,6 +7865,11 @@ void CLASS parse_makernote (int base, int uptag)
             if (!aperture) aperture = imgdata.lens.makernotes.CurAp;
           }
 
+        else if ((tag == 0x000c) && (!imgdata.shootinginfo.BodySerial[0]))
+          {
+             sprintf(imgdata.shootinginfo.BodySerial, "%d", get4());
+          }
+
         else if (tag == 0x000d)			// camera info
           {
             CanonCameraInfo = (uchar*)malloc(len);
@@ -7894,6 +7918,7 @@ void CLASS parse_makernote (int base, int uptag)
 
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
+      case 0x0010: fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp); break;
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
       case 0x1021: imgdata.makernotes.fuji.FocusMode = get2(); break;
       case 0x1022: imgdata.makernotes.fuji.AFMode = get2(); break;
@@ -8057,6 +8082,10 @@ void CLASS parse_makernote (int base, int uptag)
                   }
               }
           }
+        else if (tag == 0x00a0)
+          {
+            fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+          }
         else if (tag == 0x00a8)		// contains flash data
           {
           	for (i = 0; i < 4; i++)
@@ -8069,6 +8098,16 @@ void CLASS parse_makernote (int base, int uptag)
     else if (!strncmp(make, "OLYMPUS", 7))
       {
         switch (tag) {
+        case 0x0404:
+        case 0x101a:
+        case 0x20100101:
+          if (!imgdata.shootinginfo.BodySerial[0])
+            fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        break;
+        case 0x20100102:
+          if (!imgdata.shootinginfo.InternalBodySerial[0])
+            fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
+        break;
         case 0x0207:
         case 0x20100100:
           {
@@ -8305,6 +8344,15 @@ void CLASS parse_makernote (int base, int uptag)
 		imgdata.color.WBCT_Coeffs[i][3] = get2();
 	      }
         }
+        else if (tag == 0x0215)
+        {
+          fseek (ifp, 16, SEEK_CUR);
+          sprintf(imgdata.shootinginfo.InternalBodySerial, "%d", get4());
+        }
+        else if (tag == 0x0229)
+        {
+          fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        }
         else if (tag == 0x022d)
         {
 	  fseek (ifp,2,SEEK_CUR);
@@ -8359,6 +8407,10 @@ void CLASS parse_makernote (int base, int uptag)
           {
             unique_id = imgdata.lens.makernotes.CamID = get4();
           }
+         else if (tag == 0xa002)
+          {
+             fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+          }
         else if (tag == 0xa003)
           {
             imgdata.lens.makernotes.LensID = get2();
@@ -8387,7 +8439,6 @@ void CLASS parse_makernote (int base, int uptag)
                !strncasecmp(model, "HV",2))))
       {
         ushort lid;
-
         if (tag == 0xb001)			// Sony ModelID
         {
           unique_id = get2();
@@ -8413,14 +8464,13 @@ void CLASS parse_makernote (int base, int uptag)
                  strncasecmp(model, "DSLR-A100", 9) &&
                  strncasecmp(model, "NEX-5C", 6) &&
                  !strncasecmp(make, "SONY", 4) &&
-                 ((len == 368) ||			// a700
+                 ((len == 368) ||		// a700
                   (len == 5478) ||		// a850, a900
                   (len == 5506) ||		// a200, a300, a350
                   (len == 6118) ||		// a230, a290, a330, a380, a390
-
-                  // a450, a500, a550, a560, a580
-                  // a33, a35, a55
-                  // NEX3, NEX5, NEX5C, NEXC3, VG10E
+                  				// a450, a500, a550, a560, a580
+                  				// a33, a35, a55
+                  				// NEX3, NEX5, NEX5C, NEXC3, VG10E
                   (len == 15360))
                  )
           {
@@ -8464,10 +8514,17 @@ void CLASS parse_makernote (int base, int uptag)
             free(table_buf);
           }
 
-		else if (tag == 0x0104)
-		  {
-		    imgdata.other.FlashEC = getreal(type);
-		  }
+        else if ((tag == 0x0020) &&				// WBInfoA100, needs 0xb028 processing
+                 !strncasecmp(model, "DSLR-A100", 9))
+	  {
+	    fseek(ifp,0x49dc,SEEK_CUR);
+	    fread(imgdata.shootinginfo.InternalBodySerial, MIN(12, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
+	  }
+
+	else if (tag == 0x0104)
+	  {
+	    imgdata.other.FlashEC = getreal(type);
+	  }
 
         else if (tag == 0x0105)					// Teleconverter
           {
@@ -8972,7 +9029,7 @@ void CLASS parse_makernote (int base, int uptag)
       if (tag == 0x1b) tag = 0x1018;
       if (tag == 0x1c) tag = 0x1017;
     }
-    if (tag == 0x1d)
+    if (tag == 0x1d) {
       while ((c = fgetc(ifp)) && c != EOF)
 #ifdef LIBRAW_LIBRARY_BUILD
       {
@@ -8991,7 +9048,10 @@ void CLASS parse_makernote (int base, int uptag)
 	serial = serial*10 + (isdigit(c) ? c - '0' : c % 10);
 #ifdef LIBRAW_LIBRARY_BUILD
       }
+      if (!imgdata.shootinginfo.BodySerial[0])
+        sprintf(imgdata.shootinginfo.BodySerial, "%d", serial);
 #endif
+    }
     if (tag == 0x29 && type == 1) {  // Canon PowerShot G9
       c = wbi < 18 ? "012347800000005896"[wbi]-'0' : 0;
       fseek (ifp, 8 + c*32, SEEK_CUR);
@@ -9314,6 +9374,9 @@ void CLASS parse_exif (int base)
     case 0xa405:		// FocalLengthIn35mmFormat
       imgdata.lens.FocalLengthIn35mmFormat = get2();
       break;
+    case 0xa431:		// BodySerialNumber
+      fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+      break;
     case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
       imgdata.lens.MinFocal = getreal(type);
       imgdata.lens.MaxFocal = getreal(type);
@@ -9578,6 +9641,8 @@ void CLASS parse_kodak_ifd (int base)
     if (tag == 0x0849) Kodak_WB_0x08tags(LIBRAW_WBI_Tungsten, type);
     if (tag == 0x084a) Kodak_WB_0x08tags(LIBRAW_WBI_Fluorescent, type);
     if (tag == 0x084b) Kodak_WB_0x08tags(LIBRAW_WBI_Flash, type);
+        if (tag == 0x09ce) fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
+        if (tag == 0xfa00) fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
 	if (tag == 0xfa27)
 	  {
                 FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c] = get4();
@@ -9682,7 +9747,6 @@ int CLASS parse_tiff_ifd (int base)
   if (entries > 512) return 1;
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
-
 #ifdef LIBRAW_LIBRARY_BUILD
     if(callbacks.exif_cb)
       {
@@ -10133,6 +10197,9 @@ int CLASS parse_tiff_ifd (int base)
     case 0xa405:		// FocalLengthIn35mmFormat
       imgdata.lens.FocalLengthIn35mmFormat = get2();
       break;
+    case 0xa431:		// BodySerialNumber
+      fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+      break;
     case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
       imgdata.lens.MinFocal = getreal(type);
       imgdata.lens.MaxFocal = getreal(type);
@@ -10154,7 +10221,7 @@ int CLASS parse_tiff_ifd (int base)
         imgdata.lens.Lens[0] = 0;
       break;
     case 0x9205:
-				imgdata.lens.EXIF_MaxAp = powf64(2.0f, (getreal(type) / 2.0f));
+      imgdata.lens.EXIF_MaxAp = powf64(2.0f, (getreal(type) / 2.0f));
       break;
 // IB end
 #endif
@@ -10302,8 +10369,16 @@ int CLASS parse_tiff_ifd (int base)
 	is_raw = 1;
 	break;
       case 50708:			/* UniqueCameraModel */
+#ifdef LIBRAW_LIBRARY_BUILD
+        fread(imgdata.color.UniqueCameraModel, MIN(len, sizeof(imgdata.color.UniqueCameraModel)), 1, ifp);
+        imgdata.color.UniqueCameraModel[sizeof(imgdata.color.UniqueCameraModel)-1] = 0;
+#endif
 	if (model[0]) break;
+#ifndef LIBRAW_LIBRARY_BUILD
 	fgets (make, 64, ifp);
+#else
+        strncpy (make, imgdata.color.UniqueCameraModel, MIN(len, sizeof(imgdata.color.UniqueCameraModel)));
+#endif
 	if ((cp = strchr(make,' '))) {
 	  strcpy(model,cp+1);
 	  *cp = 0;
@@ -10420,6 +10495,12 @@ guess_cfa_pc:
 
       case 61450:
 	cblack[4] = cblack[5] = MIN(sqrt((double)len),64);
+#ifdef LIBRAW_LIBRARY_BUILD
+      case 50709:
+        fread(imgdata.color.LocalizedCameraModel, MIN(len, sizeof(imgdata.color.LocalizedCameraModel)), 1, ifp);
+        imgdata.color.LocalizedCameraModel[sizeof(imgdata.color.LocalizedCameraModel)-1] = 0;
+      break;
+#endif
       case 50714:			/* BlackLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
 		if(tiff_ifd[ifd].samples > 1  && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
@@ -10488,7 +10569,7 @@ guess_cfa_pc:
 	break;
 
 	case 0xc714:			/* ForwardMatrix1 */
-    case 0xc715:			/* ForwardMatrix2 */
+        case 0xc715:			/* ForwardMatrix2 */
 #ifdef LIBRAW_LIBRARY_BUILD
         i = tag == 0xc714?0:1;
 #endif
@@ -11113,6 +11194,9 @@ void CLASS parse_ciff (int offset, int length, int depth)
     if ((((type >> 8) + 8) | 8) == 0x38) {
       parse_ciff (ftell(ifp), len, depth+1); /* Parse a sub-table */
     }
+#ifdef LIBRAW_LIBRARY_BUILD
+    if (type == 0x3004) parse_ciff (ftell(ifp), len, depth+1);
+#endif
     if (type == 0x0810)
       fread (artist, 64, 1, ifp);
     if (type == 0x080a) {
@@ -11136,11 +11220,11 @@ void CLASS parse_ciff (int offset, int length, int depth)
       shutter = powf64(2.0f, -int_to_float((get4(),get4())));
       aperture = powf64(2.0f, int_to_float(get4())/2);
 #ifdef LIBRAW_LIBRARY_BUILD
-			imgdata.lens.makernotes.CurAp = aperture;
+      imgdata.lens.makernotes.CurAp = aperture;
 #endif
     }
     if (type == 0x102a) {
-			//      iso_speed = pow (2.0, (get4(),get2())/32.0 - 4) * 50;
+//      iso_speed = pow (2.0, (get4(),get2())/32.0 - 4) * 50;
       iso_speed = powf64(2.0f, ((get2(),get2()) + get2())/32.0f - 5.0f) * 100.0f;
 #ifdef LIBRAW_LIBRARY_BUILD
       aperture  = _CanonConvertAperture((get2(),get2()));
@@ -11176,6 +11260,11 @@ void CLASS parse_ciff (int offset, int length, int depth)
 	INT64 o = ftell(ifp);
 	Canon_CameraSettings();
 	fseek(ifp,o,SEEK_SET);
+      }
+    if (type == 0x580b)
+      {
+        if (strcmp(model,"Canon EOS D30")) sprintf(imgdata.shootinginfo.BodySerial, "%d", len);
+        else sprintf(imgdata.shootinginfo.BodySerial, "%0x-%05d", len>>16, len&0xffff);
       }
 #endif
     if (type == 0x0032) {
@@ -11229,12 +11318,12 @@ void CLASS parse_ciff (int offset, int length, int depth)
     if (type == 0x5814) canon_ev   = int_to_float(len);
     if (type == 0x5817) shot_order = len;
     if (type == 0x5834)
-		{
-			unique_id  = len;
+      {
+         unique_id  = len;
 #ifdef LIBRAW_LIBRARY_BUILD
-			setCanonBodyFeatures(unique_id);
+         setCanonBodyFeatures(unique_id);
 #endif
-		}
+      }
     if (type == 0x580e) timestamp  = len;
     if (type == 0x180e) timestamp  = get4();
 #ifdef LOCALTIME
@@ -11321,11 +11410,6 @@ void CLASS parse_phase_one (int base)
   float romm_cam[3][3];
   char *cp;
 
-#ifdef LIBRAW_LIBRARY_BUILD
-	char body_id[3];
-	body_id[0] = 0;
-#endif
-
   memset (&ph1, 0, sizeof ph1);
   fseek (ifp, base, SEEK_SET);
   order = get4() & 0xffff;
@@ -11344,11 +11428,12 @@ void CLASS parse_phase_one (int base)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     case 0x0102:
-      fread(body_id, 1, 3, ifp);
-      if ((body_id[0] == 0x4c) && (body_id[1] == 0x49)) {
-        body_id[1] = body_id[2];
+      fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+      if ((imgdata.shootinginfo.BodySerial[0] == 0x4c) && (imgdata.shootinginfo.BodySerial[1] == 0x49)) {
+        unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[2] & 0x3f)) - 0x41;
+      } else {
+        unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[1] & 0x3f)) - 0x41;
       }
-      unique_id = (((body_id[0] & 0x3f) << 5) | (body_id[1] & 0x3f)) - 0x41;
       setPhaseOneFeatures(unique_id);
       break;
     case 0x0401:
@@ -11445,7 +11530,7 @@ void CLASS parse_phase_one (int base)
   }
 
 #ifdef LIBRAW_LIBRARY_BUILD
-  if (!imgdata.lens.makernotes.body[0] && !body_id[0]) {
+  if (!imgdata.lens.makernotes.body[0] && !imgdata.shootinginfo.BodySerial[0]) {
     fseek (ifp, meta_offset, SEEK_SET);
     order = get2();
     fseek (ifp, 6, SEEK_CUR);
@@ -11458,11 +11543,12 @@ void CLASS parse_phase_one (int base)
       save = ftell(ifp);
       fseek (ifp, meta_offset+data, SEEK_SET);
       if (tag == 0x0407) {
-        fread(body_id, 1, 3, ifp);
-        if ((body_id[0] == 0x4c) && (body_id[1] == 0x49)) {
-          body_id[1] = body_id[2];
+        fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        if ((imgdata.shootinginfo.BodySerial[0] == 0x4c) && (imgdata.shootinginfo.BodySerial[1] == 0x49)) {
+          unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[2] & 0x3f)) - 0x41;
+        } else {
+          unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[1] & 0x3f)) - 0x41;
         }
-        unique_id = (((body_id[0] & 0x3f) << 5) | (body_id[1] & 0x3f)) - 0x41;
         setPhaseOneFeatures(unique_id);
       }
       fseek (ifp, save, SEEK_SET);
@@ -11887,7 +11973,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Canon PowerShot G3", 0, 0,
       { 9212,-2781,-1073,-6573,14189,2605,-2300,2844,7664 } },
     {"Canon PowerShot G5 X",0, 0,
-      { 9920,-3574,-806,-1943,9758,1942,-774,1848,4523 } },  /* LibRaw  */
+      {9602,-3823,-937,-2984,11495,1675,-407,1415,5049}},
     { "Canon PowerShot G5", 0, 0,
       { 9757,-2872,-933,-5972,13861,2301,-1622,2328,7212 } },
     { "Canon PowerShot G6", 0, 0,
@@ -11895,7 +11981,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Canon PowerShot G7 X", 0, 0,
       { 9602,-3823,-937,-2984,11495,1675,-407,1415,5049 } },
     {"Canon PowerShot G9 X",0, 0,
-      { 9659,-3410,-773,-1905,9734,1912,-626,1725,4711 } },  /* LibRaw  */
+      {9602,-3823,-937,-2984,11495,1675,-407,1415,5049}},
     { "Canon PowerShot G9", 0, 0,
       { 7368,-2141,-598,-5621,13254,2625,-1418,1696,5743 } },
     { "Canon PowerShot Pro1", 0, 0,
@@ -12272,7 +12358,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
 	{ 8322,-3112,-1047,-6367,14342,2179,-988,1638,6394 } },
     { "Nikon D7200", 0, 0,
 	{ 8322,-3112,-1047,-6367,14342,2179,-988,1638,6394 } },
-    { "Nikon D750", 0, 0,
+    { "Nikon D750", -600, 0,
       { 9020,-2890,-715,-4535,12436,2348,-934,1919,7086 } },
     { "Nikon D700", 0, 0,
       { 8139,-2171,-663,-8747,16541,2295,-1925,2008,8093 } },
