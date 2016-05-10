@@ -7962,6 +7962,7 @@ void CLASS parse_makernote (int base, int uptag)
              ynum[ynum_len] = 0;
              for ( int j = 0; ynum[j] && ynum[j+1] && sscanf(ynum+j, "%2x", &c); j += 2) ystr[j/2] = c;
              ystr[ynum_len / 2 + 1] = 0;
+             strcpy (model2, ystr);
 
              if (i == 0) {
                if (nwords == 1) snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s %d:%s:%s", words[0]+strlen(words[0])-12, ystr, year, mm, dd);
