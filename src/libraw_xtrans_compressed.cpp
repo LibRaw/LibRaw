@@ -1,9 +1,9 @@
 /* -*- C++ -*-
  * File: libraw_xtrans_compressed.cpp
- * Copyright (C) 2016 Alexey Danilchenko 
+ * Copyright (C) 2016 Alexey Danilchenko
  *
  * Adopted to LibRaw by Alex Tutubalin, lexa@lexa.ru
- * LibRaw Fujifilm/compressed decoder 
+ * LibRaw Fujifilm/compressed decoder
 
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of three licenses as you choose:
@@ -155,7 +155,7 @@ void LibRaw::init_xtrans_block(struct xtrans_block* info, const struct xtrans_pa
 {
 	info->linealloc = (ushort*)calloc(sizeof(ushort),_ltotal*(params->line_width+2));
 	merror(info->linealloc, "init_xtrans_block()");
-	
+
 	INT64 fsize = libraw_internal_data.internal_data.input->size();
 	info->max_read_size = _min(unsigned(fsize-raw_offset),dsize+16); // Data size may be incorrect?
 
@@ -212,10 +212,10 @@ void LibRaw::copy_line_to_xtrans(struct xtrans_block* info, int cur_line, int cu
 			switch (imgdata.idata.xtrans_abs[row_count][(pixel_count % 6)])
 			{
 			case 0:     // red
-				line_buf = lineBufR[row_count >> 1]; 
+				line_buf = lineBufR[row_count >> 1];
 				break;
 			case 1:     // green
-				line_buf = lineBufG[row_count]; 
+				line_buf = lineBufG[row_count];
 				break;
 			case 2:     // blue
 				line_buf = lineBufB[row_count >> 1];
@@ -652,7 +652,7 @@ void LibRaw::xtrans_decode_strip(const struct xtrans_params* info_common, int cu
 	int cur_block_width, cur_line;
 	unsigned line_size;
 	struct xtrans_block info;
-	
+
 	init_xtrans_block(&info, info_common, raw_offset,dsize);
 	line_size = sizeof(ushort)*(info_common->line_width+2);
 
@@ -678,7 +678,7 @@ void LibRaw::xtrans_decode_strip(const struct xtrans_params* info_common, int cu
 
 		for(int i=0; i < 3; i++)
 		{
-			memset(info.linebuf[ztable[i].a], 0, ztable[i].b*line_size);	
+			memset(info.linebuf[ztable[i].a], 0, ztable[i].b*line_size);
 			info.linebuf[ztable[i].a][0]					= info.linebuf[ztable[i].a-1][1];
 			info.linebuf[ztable[i].a][info_common->line_width + 1] = info.linebuf[ztable[i].a-1][info_common->line_width];
 		}
