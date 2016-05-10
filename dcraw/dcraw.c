@@ -379,6 +379,24 @@ ushort CLASS sget2 (uchar *s)
 
 #ifdef LIBRAW_LIBRARY_BUILD
 
+
+static int getwords(char *line, char *words[], int maxwords)
+{
+  char *p = line;
+  int nwords = 0;
+
+  while(1)
+  {
+    while(isspace(*p)) p++;
+    if(*p == '\0') return nwords;
+    words[nwords++] = p;
+    while(!isspace(*p) && *p != '\0') p++;
+    if(*p == '\0') return nwords;
+    *p++ = '\0';
+    if(nwords >= maxwords) return nwords;
+  }
+}
+
 static ushort saneSonyCameraInfo(uchar a, uchar b, uchar c, uchar d, uchar e, uchar f){
 	if ((a >> 4) > 9) return 0;
 	else if ((a & 0x0f) > 9) return 0;
@@ -9098,7 +9116,39 @@ void CLASS parse_makernote (int base, int uptag)
 
     else if (!strncmp(make, "FUJI", 4))
       switch (tag) {
-      case 0x0010: fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp); break;
+      case 0x0010: {
+         char FujiSerial[sizeof(imgdata.shootinginfo.InternalBodySerial)];
+         char *words[4];
+         char yy[2], mm[3], dd[3], dst[16], ynum[16];
+         int year, nwords, ynum_len;
+         uint c;
+         fread(FujiSerial, MIN(len, sizeof(FujiSerial)), 1, ifp);
+         nwords = getwords(FujiSerial, words, 4);
+         for (int i = 0; i < nwords; i++) {
+           mm[2] = dd[2] = 0;
+           if (strlen(words[i]) < 18)
+              if (i == 0) strcpy (imgdata.shootinginfo.InternalBodySerial, words[0]);
+              else snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s", imgdata.shootinginfo.InternalBodySerial, words[i]);
+           else
+           {
+             strncpy (dd, words[i]+strlen(words[i])-14, 2);
+             strncpy (mm, words[i]+strlen(words[i])-16, 2);
+             strncpy (yy, words[i]+strlen(words[i])-18, 2);
+             year = (yy[0]-'0')*10 + (yy[1]-'0');
+             if (year <70) year += 2000; else year += 1900;
+
+             ynum_len = (int)strlen(words[i])-18;
+             strncpy(ynum, words[i], ynum_len);
+             ynum[ynum_len] = 0;
+             for ( int j = 0; ynum[j] && ynum[j+1] && sscanf(ynum+j, "%2x", &c); j += 2) dst[j/2] = c;
+             dst[ynum_len / 2 + 1] = 0;
+
+             if (i == 0) snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %d:%s:%s %s", dst, year, mm, dd, words[0]+strlen(words[0])-12);
+             else snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s %d:%s:%s %s", imgdata.shootinginfo.InternalBodySerial, dst, year, mm, dd, words[i]+strlen(words[i])-12);
+           }
+         }
+      }
+      break;
       case 0x1011: imgdata.other.FlashEC = getreal(type); break;
       case 0x1021: imgdata.makernotes.fuji.FocusMode = get2(); break;
       case 0x1022: imgdata.makernotes.fuji.AFMode = get2(); break;
@@ -14391,7 +14441,7 @@ float CLASS find_green (int bps, int bite, int off0, int off1)
 #ifdef LIBRAW_LIBRARY_BUILD
 static void remove_trailing_spaces(char *string, size_t len)
 {
-  if(len<1) return; 
+  if(len<1) return;
   string[len-1]=0;
   if(len<3) return;
   for(int i=len-2; i>=0; i--)
