@@ -565,7 +565,7 @@ typedef struct
 typedef struct
 {
   float        MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAp;
-  char         LensMake[128], Lens[128];
+  char         LensMake[128], Lens[128], LensSerial[128], InternalLensSerial[128];
   ushort       FocalLengthIn35mmFormat;
   libraw_nikonlens_t nikon;
   libraw_dnglens_t dng;

@@ -7292,6 +7292,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         case 0x1002:
           imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type)/2);
           break;
+        case 0x20100102:
+          if (!imgdata.shootinginfo.InternalBodySerial[0])
+            fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
+            if (!isdigit(imgdata.shootinginfo.InternalBodySerial[0])) imgdata.shootinginfo.InternalBodySerial[0]=0;
+        break;
         case 0x20100201:
           imgdata.lens.makernotes.LensID =
             (unsigned long long)fgetc(ifp)<<16 |
@@ -7306,8 +7311,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
             }
           break;
+        case 0x20100202:
+          fread(imgdata.lens.LensSerial, MIN(len,sizeof(imgdata.lens.LensSerial)), 1, ifp);
+          break;
         case 0x20100203:
-          fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
+          fread(imgdata.lens.makernotes.Lens, MIN(len,sizeof(imgdata.lens.makernotes.Lens)), 1, ifp);
           break;
         case 0x20100205:
           imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
@@ -8206,8 +8214,11 @@ void CLASS parse_makernote (int base, int uptag)
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
             }
           break;
+        case 0x20100202:
+          fread(imgdata.lens.LensSerial, MIN(len,sizeof(imgdata.lens.LensSerial)), 1, ifp);
+          break;
         case 0x20100203:
-          fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
+          fread(imgdata.lens.makernotes.Lens, MIN(len,sizeof(imgdata.lens.makernotes.Lens)), 1, ifp);
           break;
         case 0x20100205:
           imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
@@ -9436,6 +9447,9 @@ void CLASS parse_exif (int base)
       imgdata.lens.MaxAp4MinFocal = getreal(type);
       imgdata.lens.MaxAp4MaxFocal = getreal(type);
       break;
+    case 0xa435:		// LensSerialNumber
+      fread(imgdata.lens.LensSerial, MIN(len, sizeof(imgdata.lens.LensSerial)), 1, ifp);
+      break;
     case 0xc630:		// DNG LensInfo, Lens Specification per EXIF standard
       imgdata.lens.dng.MinFocal = getreal(type);
       imgdata.lens.dng.MaxFocal = getreal(type);
@@ -10258,6 +10272,9 @@ int CLASS parse_tiff_ifd (int base)
       imgdata.lens.MaxFocal = getreal(type);
       imgdata.lens.MaxAp4MinFocal = getreal(type);
       imgdata.lens.MaxAp4MaxFocal = getreal(type);
+      break;
+    case 0xa435:		// LensSerialNumber
+      fread(imgdata.lens.LensSerial, MIN(len, sizeof(imgdata.lens.LensSerial)), 1, ifp);
       break;
     case 0xc630:		// DNG LensInfo, Lens Specification per EXIF standard
       imgdata.lens.MinFocal = getreal(type);
