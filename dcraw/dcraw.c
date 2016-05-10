@@ -9119,7 +9119,7 @@ void CLASS parse_makernote (int base, int uptag)
       case 0x0010: {
          char FujiSerial[sizeof(imgdata.shootinginfo.InternalBodySerial)];
          char *words[4];
-         char yy[2], mm[3], dd[3], dst[16], ynum[16];
+         char yy[2], mm[3], dd[3], ystr[16], ynum[16];
          int year, nwords, ynum_len;
          uint c;
          fread(FujiSerial, MIN(len, sizeof(FujiSerial)), 1, ifp);
@@ -9140,11 +9140,13 @@ void CLASS parse_makernote (int base, int uptag)
              ynum_len = (int)strlen(words[i])-18;
              strncpy(ynum, words[i], ynum_len);
              ynum[ynum_len] = 0;
-             for ( int j = 0; ynum[j] && ynum[j+1] && sscanf(ynum+j, "%2x", &c); j += 2) dst[j/2] = c;
-             dst[ynum_len / 2 + 1] = 0;
+             for ( int j = 0; ynum[j] && ynum[j+1] && sscanf(ynum+j, "%2x", &c); j += 2) ystr[j/2] = c;
+             ystr[ynum_len / 2 + 1] = 0;
 
-             if (i == 0) snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %d:%s:%s %s", dst, year, mm, dd, words[0]+strlen(words[0])-12);
-             else snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s %d:%s:%s %s", imgdata.shootinginfo.InternalBodySerial, dst, year, mm, dd, words[i]+strlen(words[i])-12);
+             if (i == 0) {
+               if (nwords == 1) snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s %d:%s:%s", words[0]+strlen(words[0])-12, ystr, year, mm, dd);
+               else snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %d:%s:%s %s", ystr, year, mm, dd, words[0]+strlen(words[0])-12);
+             } else snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s %d:%s:%s %s", imgdata.shootinginfo.InternalBodySerial, ystr, year, mm, dd, words[i]+strlen(words[i])-12);
            }
          }
       }
