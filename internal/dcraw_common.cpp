@@ -7264,12 +7264,20 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncmp(make, "OLYMPUS", 7))
       {
+        int SubDirOffsetValid =
+              strncmp (model, "E-300", 5) &&
+              strncmp (model, "E-330", 5) &&
+              strncmp (model, "E-400", 5) &&
+              strncmp (model, "E-500", 5) &&
+              strncmp (model, "E-1", 3);
+
         if ((tag == 0x2010) || (tag == 0x2020))
           {
             fseek(ifp, save - 4, SEEK_SET);
             fseek(ifp, base + get4(), SEEK_SET);
             parse_makernote_0xc634(base, tag, dng_writer);
           }
+        if (!SubDirOffsetValid && (len > 4)) goto skip_Oly_broken_tags;
 
         switch (tag) {
         case 0x0207:
@@ -7293,9 +7301,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type)/2);
           break;
         case 0x20100102:
-          if (!imgdata.shootinginfo.InternalBodySerial[0])
             fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
-            if (!isdigit(imgdata.shootinginfo.InternalBodySerial[0])) imgdata.shootinginfo.InternalBodySerial[0]=0;
         break;
         case 0x20100201:
           imgdata.lens.makernotes.LensID =
@@ -7312,7 +7318,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             }
           break;
         case 0x20100202:
-          fread(imgdata.lens.LensSerial, MIN(len,sizeof(imgdata.lens.LensSerial)), 1, ifp);
+          if ((!imgdata.lens.LensSerial[0]))
+              fread(imgdata.lens.LensSerial, MIN(len,sizeof(imgdata.lens.LensSerial)), 1, ifp);
           break;
         case 0x20100203:
           fread(imgdata.lens.makernotes.Lens, MIN(len,sizeof(imgdata.lens.makernotes.Lens)), 1, ifp);
@@ -7350,6 +7357,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 	      imgdata.other.FlashEC = getreal(type);
 	      break;
         }
+        skip_Oly_broken_tags:;
       }
 
     else if (!strncmp(make, "PENTAX", 6) ||

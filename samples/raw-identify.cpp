@@ -494,19 +494,20 @@ int main(int ac, char *av[])
 //                   printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
 //                   printf ("%s=%s=%d=%04.3f", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure);
                    trimSpaces(P1.make); trimSpaces(P1.model);
-                   printf ("%s %s", P1.make, P1.model);
-                   if (ShootingInfo.BodySerial[0] && !(ShootingInfo.BodySerial[0] == 48 && !ShootingInfo.BodySerial[1])) {
-                     trimSpaces(ShootingInfo.BodySerial);
-                     printf ("=Body: =%s=", ShootingInfo.BodySerial);
-                   } else if (C.model2[0] && (!strncasecmp(P1.make, "Kodak", 5) || !strcmp(P1.model, "EOS D2000C"))) {
-                     trimSpaces(C.model2);
-                     printf ("=Body: =%s=", C.model2);
-                   }
-                   if (ShootingInfo.InternalBodySerial[0]) {
-                     trimSpaces(ShootingInfo.InternalBodySerial);
-                     printf ("=PCB: =%s=", ShootingInfo.InternalBodySerial);
-                   }
-                   printf ("\n");
+                   trimSpaces(C.model2);
+                   trimSpaces(ShootingInfo.BodySerial); trimSpaces(ShootingInfo.InternalBodySerial);
+                   printf ("%s=%s", P1.make, P1.model);
+                   if (ShootingInfo.BodySerial[0] && !(ShootingInfo.BodySerial[0] == 48 && !ShootingInfo.BodySerial[1]))
+                      printf ("=Body#: %s", ShootingInfo.BodySerial);
+                   else if (C.model2[0] && (!strncasecmp(P1.make, "Kodak", 5) || !strcmp(P1.model, "EOS D2000C")))
+                      printf ("=Body#: %s", C.model2);
+                   if (ShootingInfo.InternalBodySerial[0])
+                      printf ("=Assy#: %s", ShootingInfo.InternalBodySerial);
+                   if (exifLens.LensSerial[0])
+                      printf ("=Lens#: %s", exifLens.LensSerial);
+                   if (exifLens.InternalLensSerial[0])
+                      printf ("=LensAssy#: %s", exifLens.InternalLensSerial);
+                   printf ("=\n");
 
 // print comma-separated
 //                    printf ("%s,%s,%s,", av[i], P1.make, P1.model);
