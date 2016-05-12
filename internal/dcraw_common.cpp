@@ -7268,12 +7268,20 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncmp(make, "OLYMPUS", 7))
       {
+        int SubDirOffsetValid =
+              strncmp (model, "E-300", 5) &&
+              strncmp (model, "E-330", 5) &&
+              strncmp (model, "E-400", 5) &&
+              strncmp (model, "E-500", 5) &&
+              strncmp (model, "E-1", 3);
+
         if ((tag == 0x2010) || (tag == 0x2020))
           {
             fseek(ifp, save - 4, SEEK_SET);
             fseek(ifp, base + get4(), SEEK_SET);
             parse_makernote_0xc634(base, tag, dng_writer);
           }
+        if (!SubDirOffsetValid && (len > 4)) goto skip_Oly_broken_tags;
 
         switch (tag) {
         case 0x0207:
@@ -7296,6 +7304,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         case 0x1002:
           imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type)/2);
           break;
+        case 0x20100102:
+            fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
+        break;
         case 0x20100201:
           imgdata.lens.makernotes.LensID =
             (unsigned long long)fgetc(ifp)<<16 |
@@ -7310,8 +7321,12 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
             }
           break;
+        case 0x20100202:
+          if ((!imgdata.lens.LensSerial[0]))
+              fread(imgdata.lens.LensSerial, MIN(len,sizeof(imgdata.lens.LensSerial)), 1, ifp);
+          break;
         case 0x20100203:
-          fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
+          fread(imgdata.lens.makernotes.Lens, MIN(len,sizeof(imgdata.lens.makernotes.Lens)), 1, ifp);
           break;
         case 0x20100205:
           imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
@@ -7346,6 +7361,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 	      imgdata.other.FlashEC = getreal(type);
 	      break;
         }
+        skip_Oly_broken_tags:;
       }
 
     else if (!strncmp(make, "PENTAX", 6) ||
@@ -7492,6 +7508,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             imgdata.lens.makernotes.LensID = get2();
             if (imgdata.lens.makernotes.LensID)
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Samsung_NX;
+          }
+        else if (tag == 0xa005)
+          {
+            fread(imgdata.lens.InternalLensSerial, MIN(len,sizeof(imgdata.lens.InternalLensSerial)), 1, ifp);
           }
         else if (tag == 0xa019)
           {
@@ -7966,6 +7986,7 @@ void CLASS parse_makernote (int base, int uptag)
              ynum[ynum_len] = 0;
              for ( int j = 0; ynum[j] && ynum[j+1] && sscanf(ynum+j, "%2x", &c); j += 2) ystr[j/2] = c;
              ystr[ynum_len / 2 + 1] = 0;
+             strcpy (model2, ystr);
 
              if (i == 0) {
                if (nwords == 1) snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s %d:%s:%s", words[0]+strlen(words[0])-12, ystr, year, mm, dd);
@@ -8209,8 +8230,11 @@ void CLASS parse_makernote (int base, int uptag)
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
             }
           break;
+        case 0x20100202:
+          fread(imgdata.lens.LensSerial, MIN(len,sizeof(imgdata.lens.LensSerial)), 1, ifp);
+          break;
         case 0x20100203:
-          fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
+          fread(imgdata.lens.makernotes.Lens, MIN(len,sizeof(imgdata.lens.makernotes.Lens)), 1, ifp);
           break;
         case 0x20100205:
           imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
@@ -8247,7 +8271,33 @@ void CLASS parse_makernote (int base, int uptag)
     else if ((!strncmp(make, "PENTAX", 6) || !strncmp(make, "RICOH", 5)) &&
              !strncmp(model, "GR", 2))
       {
-        if ((tag == 0x1001) && (type == 3))
+        if (tag == 0x0005)
+    	  {
+    	     char buffer[17];
+    	     int count=0;
+    	     fread(buffer, 16, 1, ifp);
+    	     buffer[16] = 0;
+    	     for (int i=0; i<16; i++)
+    	     {
+//    	        sprintf(imgdata.shootinginfo.InternalBodySerial+2*i, "%02x", buffer[i]);
+    	        if ((isblank(buffer[i])) ||
+    	            (buffer[i] == 0x2D) ||
+    	            (isalnum(buffer[i])))
+    	        count++;
+    	     }
+    	     if (count == 16)
+    	     {
+    	        sprintf (imgdata.shootinginfo.BodySerial, "%8s", buffer+8);
+    	        buffer[8] = 0;
+    	        sprintf (imgdata.shootinginfo.InternalBodySerial, "%8s", buffer);
+    	     }
+    	     else
+    	     {
+    	        sprintf (imgdata.shootinginfo.BodySerial, "%02x%02x%02x%02x", buffer[4], buffer[5], buffer[6], buffer[7]);
+    	        sprintf (imgdata.shootinginfo.InternalBodySerial, "%02x%02x%02x%02x", buffer[8], buffer[9], buffer[10], buffer[11]);
+    	     }
+    	  }
+        else if ((tag == 0x1001) && (type == 3))
           {
             imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
             imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
@@ -8274,7 +8324,15 @@ void CLASS parse_makernote (int base, int uptag)
     else if (!strncmp(make, "RICOH", 5) &&
              strncmp(model, "PENTAX", 6))
       {
-    	if ((tag == 0x100b) && (type == 10))
+    	if ((tag == 0x0005) && !strncmp(model, "GXR", 3))
+    	  {
+    	     char buffer[9];
+    	     buffer[8] = 0;
+    	     fread(buffer, 8, 1, ifp);
+    	     sprintf (imgdata.shootinginfo.InternalBodySerial, "%8s", buffer);
+    	  }
+
+    	else if ((tag == 0x100b) && (type == 10))
           {
             imgdata.other.FlashEC = getreal(type);
           }
@@ -8301,26 +8359,29 @@ void CLASS parse_makernote (int base, int uptag)
                 cur_tag = get2();
               }
             fseek(ifp, 6, SEEK_CUR);
-            fseek(ifp, get4()+34, SEEK_SET);
+            fseek(ifp, get4()+16, SEEK_SET);
+            fread(imgdata.shootinginfo.BodySerial, 16, 1, ifp);
+            get2();
             imgdata.lens.makernotes.LensID = getc(ifp) - '0';
-            switch(imgdata.lens.makernotes.LensID)
-              {
-            	case 1:
-            	case 2:
-            	case 3:
-            	case 5:
-            	case 6:
-            		imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-                imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_RicohModule;
-                break;
+            switch(imgdata.lens.makernotes.LensID) {
+              case 1:
+              case 2:
+              case 3:
+              case 5:
+              case 6:
+            	imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+            	imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_RicohModule;
+              break;
               case 8:
-                imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_M;
-                imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
-                imgdata.lens.makernotes.LensID = -1;
-                break;
+            	imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_M;
+            	imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
+            	imgdata.lens.makernotes.LensID = -1;
+              break;
               default:
-              	imgdata.lens.makernotes.LensID = -1;
-              }
+            	imgdata.lens.makernotes.LensID = -1;
+            }
+            fseek(ifp, 13, SEEK_CUR);
+            fread(imgdata.lens.LensSerial, 16, 1, ifp);
           }
       }
 
@@ -8472,6 +8533,10 @@ void CLASS parse_makernote (int base, int uptag)
             imgdata.lens.makernotes.LensID = get2();
             if (imgdata.lens.makernotes.LensID)
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Samsung_NX;
+          }
+        else if (tag == 0xa005)
+          {
+            fread(imgdata.lens.InternalLensSerial, MIN(len,sizeof(imgdata.lens.InternalLensSerial)), 1, ifp);
           }
         else if (tag == 0xa019)
           {
@@ -9438,6 +9503,9 @@ void CLASS parse_exif (int base)
       imgdata.lens.MaxAp4MinFocal = getreal(type);
       imgdata.lens.MaxAp4MaxFocal = getreal(type);
       break;
+    case 0xa435:		// LensSerialNumber
+      fread(imgdata.lens.LensSerial, MIN(len, sizeof(imgdata.lens.LensSerial)), 1, ifp);
+      break;
     case 0xc630:		// DNG LensInfo, Lens Specification per EXIF standard
       imgdata.lens.dng.MinFocal = getreal(type);
       imgdata.lens.dng.MaxFocal = getreal(type);
@@ -10262,6 +10330,9 @@ int CLASS parse_tiff_ifd (int base)
       imgdata.lens.MaxFocal = getreal(type);
       imgdata.lens.MaxAp4MinFocal = getreal(type);
       imgdata.lens.MaxAp4MaxFocal = getreal(type);
+      break;
+    case 0xa435:		// LensSerialNumber
+      fread(imgdata.lens.LensSerial, MIN(len, sizeof(imgdata.lens.LensSerial)), 1, ifp);
       break;
     case 0xc630:		// DNG LensInfo, Lens Specification per EXIF standard
       imgdata.lens.MinFocal = getreal(type);
