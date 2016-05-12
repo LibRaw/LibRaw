@@ -7282,9 +7282,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             parse_makernote_0xc634(base, tag, dng_writer);
           }
         if (!SubDirOffsetValid &&
-            (((type == 1) || (type == 2) || (type == 6) || (type == 7) && (len > 4)) ||
-             ((type == 3) || (type == 8) && (len > 2)) ||
-             ((type == 4) || (type == 9) && (len > 1))))
+            ((len > 4) ||
+             ((type == 3) || (type == 8) && (len > 2))  ||
+             ((type == 4) || (type == 9) && (len > 1))  || (type == 5) || (type > 9)))
         goto skip_Oly_broken_tags;
 
         switch (tag) {
