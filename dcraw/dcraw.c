@@ -8461,7 +8461,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             fseek(ifp, base + get4(), SEEK_SET);
             parse_makernote_0xc634(base, tag, dng_writer);
           }
-        if (!SubDirOffsetValid && (len > 4)) goto skip_Oly_broken_tags;
+        if (!SubDirOffsetValid &&
+            (((type == 1) || (type == 2) || (type == 6) || (type == 7) && (len > 4)) ||
+             ((type == 3) || (type == 8) && (len > 2)) ||
+             ((type == 4) || (type == 9) && (len > 1))))
+        goto skip_Oly_broken_tags;
 
         switch (tag) {
         case 0x0207:
