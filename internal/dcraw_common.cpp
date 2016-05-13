@@ -9662,6 +9662,22 @@ void CLASS parse_mos (int offset)
     if (!strcmp(data,"CameraObj_camera_type")) {
 	fread(imgdata.lens.makernotes.body, MIN(skip,63), 1, ifp);
     }
+    if (!strcmp(data,"back_serial_number")) {
+       char buffer [sizeof(imgdata.shootinginfo.BodySerial)];
+       char *words[4];
+       int nwords;
+       fread(buffer, MIN(skip, sizeof(buffer)), 1, ifp);
+       nwords = getwords(buffer, words, 4);
+       strcpy (imgdata.shootinginfo.BodySerial, words[0]);
+    }
+    if (!strcmp(data,"CaptProf_serial_number")) {
+       char buffer [sizeof(imgdata.shootinginfo.InternalBodySerial)];
+       char *words[4];
+       int nwords;
+       fread(buffer, MIN(skip, sizeof(buffer)), 1, ifp);
+       nwords = getwords(buffer, words, 4);
+       strcpy (imgdata.shootinginfo.InternalBodySerial, words[0]);
+    }
 #endif
 // IB end
     if (!strcmp(data,"JPEG_preview_data")) {
