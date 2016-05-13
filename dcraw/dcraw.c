@@ -10728,7 +10728,7 @@ void CLASS parse_exif (int base)
         break;
       case 37385:  flash_used = getreal(type);          break;
       case 37386:  focal_len = getreal(type);		break;
-      case 37500:  parse_makernote (base, 0);		break;	// tag 0x927c
+      case 37500:  parse_makernote (base, 0); 		break;	// tag 0x927c
       case 40962:  if (kodak) raw_width  = get4();	break;
       case 40963:  if (kodak) raw_height = get4();	break;
       case 41730:
@@ -13260,6 +13260,8 @@ void CLASS parse_foveon()
 	  if (!strcmp (name, "FLENGTH"))
 	    focal_len = atof(value);
 #ifdef LIBRAW_LIBRARY_BUILD
+	  if (!strcmp (name, "CAMSERIAL"))
+	    strcpy (imgdata.shootinginfo.BodySerial, value);
 	  if (!strcmp (name, "FLEQ35MM"))
             imgdata.lens.makernotes.FocalLengthIn35mmFormat = atof(value);
           if (!strcmp (name, "LENSARANGE"))
