@@ -10327,6 +10327,7 @@ int CLASS parse_tiff_ifd (int base)
       imgdata.lens.FocalLengthIn35mmFormat = get2();
       break;
     case 0xa431:		// BodySerialNumber
+    case 0xc62f:
       fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
       break;
     case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
