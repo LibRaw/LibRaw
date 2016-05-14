@@ -6714,7 +6714,7 @@ void CLASS parseSonyLensType2 (uchar a, uchar b) {
   return;
 }
 
-#define strnXcat(buf,string) strncat(buf,string,sizeof(buf)-strlen(buf)-1)
+#define strnXcat(buf,string) strncat(buf,string,LIM(sizeof(buf)-strlen(buf)-1,0,sizeof(buf)))
 
 void CLASS parseSonyLensFeatures (uchar a, uchar b) {
 
