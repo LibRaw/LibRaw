@@ -6426,6 +6426,8 @@ void CLASS parseSonyLensType2 (uchar a, uchar b) {
   return;
 }
 
+#define strnXcat(buf,string) strncat(buf,string,LIM(sizeof(buf)-strlen(buf)-1,0,sizeof(buf)))
+
 void CLASS parseSonyLensFeatures (uchar a, uchar b) {
 
   ushort features;
@@ -6456,41 +6458,42 @@ void CLASS parseSonyLensFeatures (uchar a, uchar b) {
     }
 
   if (features & 0x4000)
-    strncat(imgdata.lens.makernotes.LensFeatures_pre, " PZ", sizeof(imgdata.lens.makernotes.LensFeatures_pre));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_pre, " PZ");
 
   if (features & 0x0008)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " G", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " G");
   else if (features & 0x0004)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " ZA", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " ZA" );
 
   if ((features & 0x0020) && (features & 0x0040))
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " Macro", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " Macro");
   else if (features & 0x0020)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " STF", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " STF");
   else if (features & 0x0040)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " Reflex", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " Reflex");
   else if (features & 0x0080)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " Fisheye", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " Fisheye");
 
   if (features & 0x0001)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " SSM", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " SSM");
   else if (features & 0x0002)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " SAM", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " SAM");
 
   if (features & 0x8000)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " OSS", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " OSS");
 
   if (features & 0x2000)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " LE", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " LE");
 
   if (features & 0x0800)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " II", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " II");
 
   if (imgdata.lens.makernotes.LensFeatures_suf[0] == ' ')
     memmove(imgdata.lens.makernotes.LensFeatures_suf, imgdata.lens.makernotes.LensFeatures_suf+1, strlen(imgdata.lens.makernotes.LensFeatures_suf));
 
   return;
 }
+#undef strnXcat
 
 void CLASS process_Sony_0x940c (uchar * buf)
 {
