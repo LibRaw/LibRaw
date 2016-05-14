@@ -14574,9 +14574,9 @@ float CLASS find_green (int bps, int bite, int off0, int off1)
 #ifdef LIBRAW_LIBRARY_BUILD
 static void remove_trailing_spaces(char *string, size_t len)
 {
-  if(len<1) return;
+  if(len<1) return; // not needed, b/c sizeof of make/model is 64
   string[len-1]=0;
-  if(len<3) return;
+  if(len<3) return; // also not needed
   for(int i=len-2; i>=0; i--)
     if(string[i]==' ')
       string[i]=0;
