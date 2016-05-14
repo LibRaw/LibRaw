@@ -12979,10 +12979,14 @@ static void remove_trailing_spaces(char *string, size_t len)
   string[len-1]=0;
   if(len<3) return; // also not needed
   for(int i=len-2; i>=0; i--)
-    if(string[i]==' ')
+  {
+    if(string[i] == 0)
+      continue;
+    else if(isspace(string[i]))
       string[i]=0;
     else
       break;
+  }
 }
 #endif
 /*
