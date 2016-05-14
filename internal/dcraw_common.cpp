@@ -7284,7 +7284,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             fseek(ifp, base + get4(), SEEK_SET);
             parse_makernote_0xc634(base, tag, dng_writer);
           }
-        if (!SubDirOffsetValid && (len > 4)) goto skip_Oly_broken_tags;
+        if (!SubDirOffsetValid &&
+            ((len > 4) ||
+             ((type == 3) || (type == 8) && (len > 2))  ||
+             ((type == 4) || (type == 9) && (len > 1))  || (type == 5) || (type > 9)))
+        goto skip_Oly_broken_tags;
 
         switch (tag) {
         case 0x0207:
@@ -9547,7 +9551,7 @@ void CLASS parse_exif (int base)
         break;
       case 37385:  flash_used = getreal(type);          break;
       case 37386:  focal_len = getreal(type);		break;
-      case 37500:  parse_makernote (base, 0);		break;	// tag 0x927c
+      case 37500:  parse_makernote (base, 0); 		break;	// tag 0x927c
       case 40962:  if (kodak) raw_width  = get4();	break;
       case 40963:  if (kodak) raw_height = get4();	break;
       case 41730:
@@ -9660,6 +9664,22 @@ void CLASS parse_mos (int offset)
 #ifdef LIBRAW_LIBRARY_BUILD
     if (!strcmp(data,"CameraObj_camera_type")) {
 	fread(imgdata.lens.makernotes.body, MIN(skip,63), 1, ifp);
+    }
+    if (!strcmp(data,"back_serial_number")) {
+       char buffer [sizeof(imgdata.shootinginfo.BodySerial)];
+       char *words[4];
+       int nwords;
+       fread(buffer, MIN(skip, sizeof(buffer)), 1, ifp);
+       nwords = getwords(buffer, words, 4);
+       strcpy (imgdata.shootinginfo.BodySerial, words[0]);
+    }
+    if (!strcmp(data,"CaptProf_serial_number")) {
+       char buffer [sizeof(imgdata.shootinginfo.InternalBodySerial)];
+       char *words[4];
+       int nwords;
+       fread(buffer, MIN(skip, sizeof(buffer)), 1, ifp);
+       nwords = getwords(buffer, words, 4);
+       strcpy (imgdata.shootinginfo.InternalBodySerial, words[0]);
     }
 #endif
 // IB end
@@ -10326,6 +10346,7 @@ int CLASS parse_tiff_ifd (int base)
       imgdata.lens.FocalLengthIn35mmFormat = get2();
       break;
     case 0xa431:		// BodySerialNumber
+    case 0xc62f:
       fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
       break;
     case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
