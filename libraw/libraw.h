@@ -161,6 +161,7 @@ class DllDef LibRaw
     static const char*          strerror(int p);
     /* dcraw emulation */
     int                         dcraw_ppm_tiff_writer(const char *filename);
+    int                         dcraw_ppm_tiff_writer(int fd);
     int                         dcraw_thumb_writer(const char *fname);
     int                         dcraw_process(void);
     /* information calls */
