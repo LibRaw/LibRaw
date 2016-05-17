@@ -270,6 +270,7 @@ protected:
     
     int         own_filtering_supported(){ return 0;}
     void        identify();
+    int         dcraw_ppm_tiff_writer(FILE* f);
     void        write_ppm_tiff ();
     void        convert_to_rgb();
     void        remove_zeroes();
