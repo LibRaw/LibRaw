@@ -9152,7 +9152,7 @@ void CLASS parse_makernote (int base, int uptag)
          char *words[4];
          char yy[2], mm[3], dd[3], ystr[16], ynum[16];
          int year, nwords, ynum_len;
-         uint c;
+         unsigned c;
          fread(FujiSerial, MIN(len, sizeof(FujiSerial)), 1, ifp);
          nwords = getwords(FujiSerial, words, 4);
          for (int i = 0; i < nwords; i++) {
@@ -9467,7 +9467,7 @@ void CLASS parse_makernote (int base, int uptag)
     	     for (int i=0; i<16; i++)
     	     {
 //    	        sprintf(imgdata.shootinginfo.InternalBodySerial+2*i, "%02x", buffer[i]);
-    	        if ((isblank(buffer[i])) ||
+    	        if ((isspace(buffer[i])) ||
     	            (buffer[i] == 0x2D) ||
     	            (isalnum(buffer[i])))
     	        count++;
