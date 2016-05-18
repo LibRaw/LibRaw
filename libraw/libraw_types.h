@@ -241,7 +241,7 @@ typedef struct
   short        AFAreaXPositions[61];    /* --''--               */
   short        AFAreaYPositions[61];    /* --''--               */
   short        AFPointsInFocus[4];      /* cycle to floor((NumAFPoints+15)/16) */
-  short        AFPointsSelected[4];     /* --''--               */   
+  short        AFPointsSelected[4];     /* --''--               */
   ushort       PrimaryAFPoint;
 /* flash */
   short        FlashMode;
@@ -366,6 +366,8 @@ typedef struct
   float        flash_used;
   float        canon_ev;
   char         model2[64];
+  char         UniqueCameraModel[64];
+  char         LocalizedCameraModel[64];
   void         *profile;
   unsigned     profile_length;
   unsigned     black_stat[8];
@@ -563,7 +565,7 @@ typedef struct
 typedef struct
 {
   float        MinFocal, MaxFocal, MaxAp4MinFocal, MaxAp4MaxFocal, EXIF_MaxAp;
-  char         LensMake[128], Lens[128];
+  char         LensMake[128], Lens[128], LensSerial[128], InternalLensSerial[128];
   ushort       FocalLengthIn35mmFormat;
   libraw_nikonlens_t nikon;
   libraw_dnglens_t dng;
@@ -586,6 +588,8 @@ typedef struct
 	short AFPoint;
 	short ExposureMode;
 	short ImageStabilization;
+	char BodySerial[64];
+	char InternalBodySerial[64]; /* this may be PCB or sensor serial, depends on make/model*/
 } libraw_shootinginfo_t;
 
 typedef struct
@@ -615,7 +619,7 @@ struct xtrans_params
 	int         min_value;
 	int         raw_bits;
 	int         total_values;
-	int			maxDiff;
+	int         maxDiff;
 	ushort      line_width;
 };
 

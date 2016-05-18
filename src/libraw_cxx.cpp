@@ -1842,7 +1842,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       }
 
 	// Adjust BL for Panasonic
-    if(load_raw == &LibRaw::panasonic_load_raw && (!strcasecmp(imgdata.idata.make,"Panasonic") || !strcasecmp(imgdata.idata.make,"Leica") ||  !strcasecmp(imgdata.idata.make,"YUNEEC")) 
+    if(load_raw == &LibRaw::panasonic_load_raw && (!strcasecmp(imgdata.idata.make,"Panasonic") || !strcasecmp(imgdata.idata.make,"Leica") ||  !strcasecmp(imgdata.idata.make,"YUNEEC"))
        &&  ID.pana_black[0] && ID.pana_black[1] && ID.pana_black[2])
       {
         C.black=0;
@@ -4383,6 +4383,7 @@ static const char  *static_camera_list[] =
 "Canon PowerShot SX220 HS (CHDK hack)",
 "Canon PowerShot SX20 IS (CHDK hack)",
 "Canon PowerShot SX30 IS (CHDK hack)",
+"Canon PowerShot IXUS 160 (CHDK hack)",
 "Canon EOS D30",
 "Canon EOS D60",
 "Canon EOS 5D",
@@ -5330,6 +5331,8 @@ void LibRaw::parse_x3f()
 				  strcpy (imgdata.idata.make, value);
 			  if (!strcmp (name, "CAMMODEL"))
 				  strcpy (imgdata.idata.model, value);
+			  if (!strcmp (name, "CAMSERIAL"))
+				  strcpy (imgdata.shootinginfo.BodySerial, value);
 			  if (!strcmp (name, "WB_DESC"))
 				  strcpy (imgdata.color.model2, value);
 			  if (!strcmp (name, "TIME"))
