@@ -9546,8 +9546,8 @@ void CLASS parse_makernote (int base, int uptag)
                 cur_tag = get2();
               }
             fseek(ifp, 6, SEEK_CUR);
-            fseek(ifp, get4()+16, SEEK_SET);
-            fread(imgdata.shootinginfo.BodySerial, 16, 1, ifp);
+            fseek(ifp, get4()+20, SEEK_SET);
+            fread(imgdata.shootinginfo.BodySerial, 12, 1, ifp);
             get2();
             imgdata.lens.makernotes.LensID = getc(ifp) - '0';
             switch(imgdata.lens.makernotes.LensID) {
@@ -9567,8 +9567,8 @@ void CLASS parse_makernote (int base, int uptag)
               default:
             	imgdata.lens.makernotes.LensID = -1;
             }
-            fseek(ifp, 13, SEEK_CUR);
-            fread(imgdata.lens.LensSerial, 16, 1, ifp);
+            fseek(ifp, 17, SEEK_CUR);
+            fread(imgdata.lens.LensSerial, 12, 1, ifp);
           }
       }
 
