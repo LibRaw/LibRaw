@@ -114,6 +114,7 @@ void usage(const char *prog)
 "-agreen <g> equilibrate green\n"
 #endif
 "-aexpo <e p> exposure correction\n"
+"-apentax4shot enables merge of 4-shot pentax files\n"
 // WF
 "-dbnd <r g b g> debanding\n"
 #ifndef WIN32
@@ -297,7 +298,11 @@ int main(int argc, char *argv[])
                     OUT.exp_correc = 1;
                     OUT.exp_shift = (float)atof(argv[arg++]);
                     OUT.exp_preser = (float)atof(argv[arg++]);
-                  }	
+                  }
+	        else if(!strcmp(optstr,"-apentax4shot"))
+		 {
+		    OUT.raw_processing_options |= LIBRAW_PROCESSING_PENTAX_PS_ALLFRAMES;
+		 }
                 else
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL3
                   if(!strcmp(optstr,"-acae")) 

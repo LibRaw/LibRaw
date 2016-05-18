@@ -1527,6 +1527,7 @@ void LibRaw::pentax_4shot_load_raw()
 		imgdata.rawdata.raw_image = plane;
 		ID.input->seek(tiff_ifd[tidx].offset, SEEK_SET);
 		imgdata.idata.filters = 0xb4b4b4b4;
+		libraw_internal_data.unpacker_data.data_offset = tiff_ifd[tidx].offset;
 		(this->*pentax_component_load_raw)();
 		for(int row = 0; row < imgdata.sizes.raw_height-move[i].row; row++)
 		{
