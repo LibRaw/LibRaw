@@ -115,6 +115,7 @@ void usage(const char *prog)
 #endif
 "-aexpo <e p> exposure correction\n"
 "-apentax4shot enables merge of 4-shot pentax files\n"
+"-apentax4shotorder 3102 sets pentax 4-shot alignment order\n"
 // WF
 "-dbnd <r g b g> debanding\n"
 #ifndef WIN32
@@ -302,6 +303,10 @@ int main(int argc, char *argv[])
 	        else if(!strcmp(optstr,"-apentax4shot"))
 		 {
 		    OUT.raw_processing_options |= LIBRAW_PROCESSING_PENTAX_PS_ALLFRAMES;
+		 }
+	        else if(!strcmp(optstr,"-apentax4shotorder"))
+		 {
+		    strncpy(OUT.p4shot_order,argv[arg++],5);
 		 }
                 else
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL3

@@ -30,6 +30,8 @@ it under the terms of the one of three licenses as you choose:
 
 #ifdef WIN32
 #define snprintf _snprintf
+#define strcasecmp stricmp
+#define strncasecmp strnicmp
 #endif
 
 #define P1 MyCoolRawProcessor.imgdata.idata

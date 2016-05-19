@@ -492,6 +492,7 @@ typedef struct
   int sony_arw2_posterization_thr;
   /* Nikon Coolscan */
   float coolscan_nef_gamma;
+  char p4shot_order[5];
 }libraw_output_params_t;
 
 typedef struct

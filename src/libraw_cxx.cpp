@@ -1509,7 +1509,7 @@ void LibRaw::pentax_4shot_load_raw()
 	struct movement_t
 	{
 		int row,col;
-	} move[4] = {
+	} _move[4] = {
 		{1,1},
 		{0,1},
 		{0,0},
@@ -1519,6 +1519,17 @@ void LibRaw::pentax_4shot_load_raw()
 	int tidx = 0;
 	for(int i=0; i<4; i++)
 	{
+		int move_row,move_col;
+		if(imgdata.params.p4shot_order[i] >= '0' && imgdata.params.p4shot_order[i] <= '3')
+		{
+			move_row = (imgdata.params.p4shot_order[i]-'0' & 2)?1:0;
+			move_col = (imgdata.params.p4shot_order[i]-'0' & 1)?1:0;
+		}
+		else
+		{
+			move_row = _move[i].row;
+			move_col = _move[i].col;
+		}
 		for(; tidx<16; tidx++)
 			if(tiff_ifd[tidx].t_width == imgdata.sizes.raw_width && tiff_ifd[tidx].t_height == imgdata.sizes.raw_height && tiff_ifd[tidx].bps>8 && tiff_ifd[tidx].samples == 1 )
 				break;
@@ -1529,14 +1540,14 @@ void LibRaw::pentax_4shot_load_raw()
 		imgdata.idata.filters = 0xb4b4b4b4;
 		libraw_internal_data.unpacker_data.data_offset = tiff_ifd[tidx].offset;
 		(this->*pentax_component_load_raw)();
-		for(int row = 0; row < imgdata.sizes.raw_height-move[i].row; row++)
+		for(int row = 0; row < imgdata.sizes.raw_height-move_row; row++)
 		{
 			int colors[2];
 			for(int c = 0; c < 2; c++ )
 				colors[c] = COLOR(row,c);
 			ushort *srcrow = &plane[imgdata.sizes.raw_width*row];
-			ushort (*dstrow)[4] = & result[(imgdata.sizes.raw_width)*(row+move[i].row)+move[i].col];
-			for(int col = 0; col < imgdata.sizes.raw_width-move[i].col; col++)
+			ushort (*dstrow)[4] = & result[(imgdata.sizes.raw_width)*(row+move_row)+move_col];
+			for(int col = 0; col < imgdata.sizes.raw_width-move_col; col++)
 				dstrow[col][colors[col%2]] = srcrow[col];
 		}
 		tidx++;
