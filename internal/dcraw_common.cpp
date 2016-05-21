@@ -10645,14 +10645,15 @@ guess_cfa_pc:
     break;
 #endif
 
-      case 61450:
-	cblack[4] = cblack[5] = MIN(sqrt((double)len),64);
 #ifdef LIBRAW_LIBRARY_BUILD
       case 50709:
         fread(imgdata.color.LocalizedCameraModel, MIN(len, sizeof(imgdata.color.LocalizedCameraModel)), 1, ifp);
         imgdata.color.LocalizedCameraModel[sizeof(imgdata.color.LocalizedCameraModel)-1] = 0;
       break;
 #endif
+
+      case 61450:
+	cblack[4] = cblack[5] = MIN(sqrt((double)len),64);
       case 50714:			/* BlackLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
 		if(tiff_ifd[ifd].samples > 1  && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
@@ -14045,7 +14046,7 @@ void CLASS identify()
 	  width = 7376;
 	}
     }
-  } 
+  }
   else if (!strncmp(make,"Canon",5) && tiff_bps == 15) {
     switch (width) {
       case 3344: width -= 66;
