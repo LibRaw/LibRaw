@@ -6700,7 +6700,8 @@ void CLASS parseSonyLensType2 (uchar a, uchar b) {
       case 2:
       case 3:
       case 6:
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
+        if (imgdata.lens.makernotes.LensMount != LIBRAW_MOUNT_Canon_EF)
+           imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
         break;
       case 44:
       case 78:
@@ -6845,7 +6846,6 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
       parseSonyLensType2 (SonySubstitution[buf[0x0108]],		// LensType2 - Sony lens ids
                           SonySubstitution[buf[0x0107]]);
     }
-
   if ((imgdata.lens.makernotes.LensID == -1) &&
       (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) &&
       (buf[0x010a] | buf[0x0109]))
