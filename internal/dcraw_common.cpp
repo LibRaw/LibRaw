@@ -6713,6 +6713,7 @@ void CLASS parseSonyLensType2 (uchar a, uchar b) {
     }
   else
     imgdata.lens.makernotes.LensID = lid2;
+    if ((lid2 >= 50481) && (lid2 < 50500)) strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
   return;
 }
 
