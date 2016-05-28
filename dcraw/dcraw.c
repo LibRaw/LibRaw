@@ -7874,26 +7874,32 @@ void CLASS parseSonyLensType2 (uchar a, uchar b) {
   if (!lid2) return;
   if (lid2 < 0x100)
     {
-      imgdata.lens.makernotes.AdapterID = lid2;
-      switch (lid2) {
-      case 1:
-      case 2:
-      case 3:
-      case 6:
-        if ((imgdata.lens.makernotes.LensMount != LIBRAW_MOUNT_Canon_EF) &&
-            (imgdata.lens.makernotes.LensMount  != LIBRAW_MOUNT_Sigma_X3F))
-           imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
+      if ((imgdata.lens.makernotes.AdapterID != 0x4900) &&
+          (imgdata.lens.makernotes.AdapterID != 0xEF00))
+      {
+        imgdata.lens.makernotes.AdapterID = lid2;
+        switch (lid2) {
+        case 1:
+        case 2:
+        case 3:
+        case 6:
+          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
         break;
-      case 44:
-      case 78:
-      case 239:
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
+        case 44:
+        case 78:
+        case 239:
+          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
         break;
+        }
       }
     }
   else
     imgdata.lens.makernotes.LensID = lid2;
-    if ((lid2 >= 50481) && (lid2 < 50500)) strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
+    if ((lid2 >= 50481) && (lid2 < 50500))
+    {
+      strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
+      imgdata.lens.makernotes.AdapterID = 0x4900;
+    }
   return;
 }
 
@@ -8044,7 +8050,8 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
       if ((imgdata.lens.makernotes.LensID > 0x4900) &&
           (imgdata.lens.makernotes.LensID <= 0x5900))
         {
-          imgdata.lens.makernotes.LensID -= 0x4900;
+          imgdata.lens.makernotes.AdapterID = 0x4900;
+          imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
           imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sigma_X3F;
           strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
         }
@@ -8052,7 +8059,8 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
       else if ((imgdata.lens.makernotes.LensID > 0xEF00) &&
           (imgdata.lens.makernotes.LensID < 0xFFFF))
         {
-          imgdata.lens.makernotes.LensID -= 0xEF00;
+          imgdata.lens.makernotes.AdapterID = 0xEF00;
+          imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
           imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
         }
     }
@@ -8896,15 +8904,17 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             if ((imgdata.lens.makernotes.LensID > 0x4900) &&
                 (imgdata.lens.makernotes.LensID <= 0x5900))
             {
-              imgdata.lens.makernotes.LensID -= 0x4900;
+              imgdata.lens.makernotes.AdapterID = 0x4900;
+              imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sigma_X3F;
               strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
             }
 
-           else if ((imgdata.lens.makernotes.LensID > 0xEF00) &&
+            else if ((imgdata.lens.makernotes.LensID > 0xEF00) &&
                 (imgdata.lens.makernotes.LensID < 0xFFFF))
             {
-              imgdata.lens.makernotes.LensID -= 0xEF00;
+              imgdata.lens.makernotes.AdapterID = 0xEF00;
+              imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
             }
             if (tag == 0x010c) imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
@@ -9930,7 +9940,8 @@ void CLASS parse_makernote (int base, int uptag)
             if ((imgdata.lens.makernotes.LensID > 0x4900) &&
                 (imgdata.lens.makernotes.LensID <= 0x5900))
             {
-              imgdata.lens.makernotes.LensID -= 0x4900;
+              imgdata.lens.makernotes.AdapterID = 0x4900;
+              imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sigma_X3F;
               strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
             }
@@ -9938,7 +9949,8 @@ void CLASS parse_makernote (int base, int uptag)
             else if ((imgdata.lens.makernotes.LensID > 0xEF00) &&
                 (imgdata.lens.makernotes.LensID < 0xFFFF))
             {
-              imgdata.lens.makernotes.LensID -= 0xEF00;
+              imgdata.lens.makernotes.AdapterID = 0xEF00;
+              imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
               imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
             }
             if (tag == 0x010c) imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
