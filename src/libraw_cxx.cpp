@@ -5382,7 +5382,8 @@ void LibRaw::parse_x3f()
 				}
 				if (!strcmp (name, "LENSMODEL"))
 				{
-					imgdata.lens.makernotes.LensID = atoi(value);
+					char *sp;
+                                        imgdata.lens.makernotes.LensID = strtol (value, &sp, 16); // atoi(value);
 					if (imgdata.lens.makernotes.LensID)
 					 imgdata.lens.makernotes.LensMount = Sigma_X3F;
 				}
