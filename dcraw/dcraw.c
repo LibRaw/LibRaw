@@ -7443,6 +7443,7 @@ void CLASS setPentaxBodyFeatures (unsigned id)
   case 0x1301a:
   case 0x13024:
   case 0x1309c:
+  case 0x13222:
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Pentax_K;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Pentax_K;
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
