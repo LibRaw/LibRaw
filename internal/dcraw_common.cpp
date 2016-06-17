@@ -6878,7 +6878,8 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
         }
 
       else if ((imgdata.lens.makernotes.LensID > 0xEF00) &&
-          (imgdata.lens.makernotes.LensID < 0xFFFF))
+          (imgdata.lens.makernotes.LensID < 0xFFFF)      &&
+          (imgdata.lens.makernotes.LensID != 0xFF00))
         {
           imgdata.lens.makernotes.AdapterID = 0xEF00;
           imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
@@ -7732,7 +7733,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             }
 
             else if ((imgdata.lens.makernotes.LensID > 0xEF00) &&
-                (imgdata.lens.makernotes.LensID < 0xFFFF))
+                (imgdata.lens.makernotes.LensID < 0xFFFF)      &&
+                (imgdata.lens.makernotes.LensID != 0xFF00))
             {
               imgdata.lens.makernotes.AdapterID = 0xEF00;
               imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
@@ -8768,7 +8770,8 @@ void CLASS parse_makernote (int base, int uptag)
             }
 
             else if ((imgdata.lens.makernotes.LensID > 0xEF00) &&
-                (imgdata.lens.makernotes.LensID < 0xFFFF))
+                (imgdata.lens.makernotes.LensID < 0xFFFF)      &&
+                (imgdata.lens.makernotes.LensID != 0xFF00))
             {
               imgdata.lens.makernotes.AdapterID = 0xEF00;
               imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
