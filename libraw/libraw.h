@@ -109,6 +109,10 @@ DllDef float libraw_get_cam_mul(libraw_data_t *lr,int index);
 DllDef float libraw_get_pre_mul(libraw_data_t *lr,int index);
 DllDef float libraw_get_rgb_cam(libraw_data_t *lr,int index1, int index2);
 DllDef int libraw_get_color_maximum(libraw_data_t *lr);
+DllDef void libraw_set_ca_correction(libraw_data_t *lr,int ca_correc, float ca_red, float ca_blue);
+DllDef void libraw_set_cfalinenoise(libraw_data_t *lr,int cfaline, float linenoise);
+DllDef void libraw_set_wf_debanding(libraw_data_t *lr, int wf_debanding, float wfd0, float wfd1, float wfd2, float wfd3);
+DllDef void libraw_set_interpolation_passes(libraw_data_t *lr,int passes);
 
 #ifdef __cplusplus
 }
