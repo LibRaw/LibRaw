@@ -210,6 +210,49 @@ LibRaw_colormatrix_type LibRaw::camera_color_type()
   return LIBRAW_CMATRIX_OTHER;
 
 }
+unsigned LibRaw:: parse_custom_cameras(unsigned limit, libraw_custom_camera_t table[], char** list)
+{
+  if(!list) return 0;
+  unsigned index = 0;
+  for(int i=0; i< limit; i++)
+    {
+      if(!list[i]) break;
+      if(strlen(list[i])<10) continue;
+      char *string = strdup(list[i]);
+      char *start = string;
+      bzero(&table[index],sizeof(table[0]));
+      for(int j = 0; start && j < 14; j++)
+	{
+	  char *end = strchr(start,',');
+	  if(end) { *end = 0; end++; } // move to next char
+	  while(isspace(*start) && *start) start++; // skip leading spaces?
+	  unsigned val = strtol(start,0,10);
+	  switch(j)
+	    {
+	    case 0:  table[index].fsize = val; break;
+	    case 1:  table[index].rw = val;    break;
+	    case 2:  table[index].rh = val;    break;
+	    case 3:  table[index].lm = val;    break;
+	    case 4:  table[index].tm = val;    break;
+	    case 5:  table[index].rm = val;    break;
+	    case 6:  table[index].bm = val;    break;
+	    case 7:  table[index].lf = val;    break;
+	    case 8:  table[index].cf = val;    break;
+	    case 9:  table[index].max = val;    break;
+	    case 10:  table[index].flags = val;    break;
+	    case 11: strncpy(table[index].t_make,start,sizeof(table[index].t_make)-1);    break;
+	    case 12: strncpy(table[index].t_model,start,sizeof(table[index].t_model)-1);    break;
+	    case 13:  table[index].offset = val;    break;
+	    default: break;
+	    }
+	  start = end;
+	}
+      free(string);
+      if(table[index].t_make[0])
+	  index++;
+    }
+  return index;
+}
 
 void LibRaw::derror()
 {
@@ -407,6 +450,7 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.raw_processing_options = LIBRAW_PROCESSING_DP2Q_INTERPOLATERG|LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF | LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT;
   imgdata.params.sony_arw2_posterization_thr = 0;
   imgdata.params.green_matching = 0;
+  imgdata.params.custom_camera_strings=0;
   imgdata.params.coolscan_nef_gamma = 1.0f;
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
@@ -4562,6 +4606,7 @@ static const char  *static_camera_list[] =
 "FujiFilm XF1",
 "FujiFilm X-T1",
 "FujiFilm X-T1 Graphite Silver",
+"FujiFilm X-T2",
 "FujiFilm X-T10",
 "FujiFilm IS-1",
 "Hasselblad H5D-60",

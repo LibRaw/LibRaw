@@ -493,6 +493,8 @@ typedef struct
   /* Nikon Coolscan */
   float coolscan_nef_gamma;
   char p4shot_order[5];
+  /* Custom camera list */
+  char **custom_camera_strings;
 }libraw_output_params_t;
 
 typedef struct
@@ -593,6 +595,14 @@ typedef struct
 	char InternalBodySerial[64]; /* this may be PCB or sensor serial, depends on make/model*/
 } libraw_shootinginfo_t;
 
+typedef struct {
+    unsigned fsize;
+    ushort rw, rh;
+    uchar lm, tm, rm, bm, lf, cf, max, flags;
+    char t_make[10], t_model[20];
+    ushort offset;
+} libraw_custom_camera_t;
+  
 typedef struct
 {
   ushort                      (*image)[4] ;

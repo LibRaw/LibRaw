@@ -13692,6 +13692,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 10763,-4560,-917,-3346,11311,2322,-475,1135,5843 } },
     { "Fujifilm X-T1", 0, 0,
       { 8458,-2451,-855,-4597,12447,2407,-1475,2482,6526 } },
+    { "Fujifilm X-T2", 0, 0,
+      { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
     { "Fujifilm XQ1", 0, 0,
       { 9252,-2704,-1064,-5893,14265,1717,-1101,2341,4349 } },
     { "Fujifilm XQ2", 0, 0,
@@ -14637,6 +14639,8 @@ static void remove_trailing_spaces(char *string, size_t len)
       break;
   }
 }
+
+
 #endif
 /*
    Identify which camera created this file, and set global variables
@@ -14833,13 +14837,20 @@ void CLASS identify()
     { 0x165, "ILCE-6300" },
   };
 
+#ifdef LIBRAW_LIBRARY_BUILD
+  static const libraw_custom_camera_t
+    const_table[]
+#else    
   static const struct {
     unsigned fsize;
     ushort rw, rh;
     uchar lm, tm, rm, bm, lf, cf, max, flags;
     char t_make[10], t_model[20];
     ushort offset;
-  } table[] = {
+  }
+  table[]  
+#endif
+   = {
     {   786432,1024, 768, 0, 0, 0, 0, 0,0x94,0,0,"AVT","F-080C" },
     {  1447680,1392,1040, 0, 0, 0, 0, 0,0x94,0,0,"AVT","F-145C" },
     {  1920000,1600,1200, 0, 0, 0, 0, 0,0x94,0,0,"AVT","F-201C" },
@@ -14905,16 +14916,6 @@ void CLASS identify()
     { 18702336,4096,3044, 0, 0,24, 0,80,0x94,7,1,"Casio","EX-ZR100" },
     {  7684000,2260,1700, 0, 0, 0, 0,13,0x94,0,1,"Casio","QV-4000" },
     {   787456,1024, 769, 0, 1, 0, 0, 0,0x49,0,0,"Creative","PC-CAM 600" },
-    { 43704960,4080,5356, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF4052C Full" },
-    { 42837504,4008,5344, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF4052C 3:4" },
-    { 32128128,4008,4008, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF4052C 1:1" },
-    { 24096096,4008,3006, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF4052C 4:3" },
-    { 18068064,4008,2254, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF4052C 16:9" },
-    { 67686894,5049,6703, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF5066C Full" },
-    { 66573312,4992,6668, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF5066C 3:4" },
-    { 49840128,4992,4992, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF5066C 1:1" },
-    { 37400064,4992,3746, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF5066C 4:3" },
-    { 28035072,4992,2808, 0, 0, 0, 0,0,0x94,0,0,"Dalsa", "FTF5066C 16:9" },
     { 28829184,4384,3288, 0, 0, 0, 0,36,0x61,0,0,"DJI" },
     { 15151104,4608,3288, 0, 0, 0, 0, 0,0x94,0,0,"Matrix" },
     {  3840000,1600,1200, 0, 0, 0, 0,65,0x49,0,0,"Foculus","531C" },
@@ -14966,6 +14967,11 @@ void CLASS identify()
     {  1409024,1376,1024, 0, 0, 1, 0, 0,0x49,0,0,"Sony","XCD-SX910CR" },
     {  2818048,1376,1024, 0, 0, 1, 0,97,0x49,0,0,"Sony","XCD-SX910CR" },
   };
+#ifdef LIBRAW_LIBRARY_BUILD
+    libraw_custom_camera_t
+      table[64 + sizeof(const_table)/sizeof(const_table[0])];
+#endif
+
   static const char *corp[] =
     { "AgfaPhoto", "Canon", "Casio", "Epson", "Fujifilm",
       "Mamiya", "Minolta", "Motorola", "Kodak", "Konica", "Leica",
@@ -14979,6 +14985,13 @@ void CLASS identify()
   int hlen, flen, fsize, zero_fsize=1, i, c;
   struct jhead jh;
 
+#ifdef LIBRAW_LIBRARY_BUILD
+  unsigned camera_count = parse_custom_cameras(64,table,imgdata.params.custom_camera_strings);
+  for(int q = 0; q < sizeof(const_table)/sizeof(const_table[0]); q++)
+	memmove(&table[q+camera_count],&const_table[q],sizeof(const_table[0]));
+  camera_count += sizeof(const_table)/sizeof(const_table[0]);
+#endif
+  
   tiff_flip = flip = filters = UINT_MAX;	/* unknown */
   raw_height = raw_width = fuji_width = fuji_layout = cr2_slice[0] = 0;
   maximum = height = width = top_margin = left_margin = 0;
@@ -15199,7 +15212,11 @@ void CLASS identify()
   else if (!memcmp (head,"CI",2))
     parse_cine();
   if(make[0] == 0)
+#ifdef LIBRAW_LIBRARY_BUILD
+    for (zero_fsize=i=0; i < camera_count; i++)
+#else
     for (zero_fsize=i=0; i < sizeof table / sizeof *table; i++)
+#endif      
       if (fsize == table[i].fsize) {
 	strcpy (make,  table[i].t_make );
 #ifdef LIBRAW_LIBRARY_BUILD

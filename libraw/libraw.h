@@ -278,6 +278,7 @@ protected:
 
     int         own_filtering_supported(){ return 0;}
     void        identify();
+    unsigned    parse_custom_cameras(unsigned limit, libraw_custom_camera_t table[], char** list);
     void        write_ppm_tiff ();
     void        convert_to_rgb();
     void        remove_zeroes();
