@@ -218,9 +218,10 @@ unsigned LibRaw:: parse_custom_cameras(unsigned limit, libraw_custom_camera_t ta
     {
       if(!list[i]) break;
       if(strlen(list[i])<10) continue;
-      char *string = strdup(list[i]);
+      char *string =  (char*)malloc(strlen(list[i])+1);
+	  strcpy(string,list[i]);
       char *start = string;
-      bzero(&table[index],sizeof(table[0]));
+      memset(&table[index],0,sizeof(table[0]));
       for(int j = 0; start && j < 14; j++)
 	{
 	  char *end = strchr(start,',');
