@@ -1748,10 +1748,26 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     identify();
 
 	// XTrans Compressed?
-	if (!imgdata.idata.dng_version && !strcasecmp(imgdata.idata.make, "Fujifilm") && (load_raw == &LibRaw::unpacked_load_raw))
+	if (!imgdata.idata.dng_version && !strcasecmp(imgdata.idata.make, "Fujifilm") && (load_raw == &LibRaw::unpacked_load_raw) )
 	{
 		if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 2 != libraw_internal_data.unpacker_data.data_size)
 			parse_xtrans_header();
+
+		if(imgdata.idata.filters == 9)
+		{
+			// Adjust top/left margins for X-Trans
+			int newtm = imgdata.sizes.top_margin%6?(imgdata.sizes.top_margin/6+1)*6 : imgdata.sizes.top_margin;
+			int newlm = imgdata.sizes.left_margin%6?(imgdata.sizes.left_margin/6+1)*6 : imgdata.sizes.left_margin;
+			if(newtm != imgdata.sizes.top_margin || newlm != imgdata.sizes.left_margin)
+			{
+				imgdata.sizes.height -= (newtm - imgdata.sizes.top_margin);
+				imgdata.sizes.top_margin = newtm;
+				imgdata.sizes.width -= (newlm - imgdata.sizes.left_margin);
+				imgdata.sizes.left_margin = newlm;
+				for(int c = 0; c < 36; c++)
+					imgdata.idata.xtrans[0][c] = imgdata.idata.xtrans_abs[0][c];
+			}
+		}
 	}
 
     // Fix DNG white balance if needed
