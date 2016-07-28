@@ -8997,6 +8997,7 @@ void CLASS parse_makernote (int base, int uptag)
 	    {
 	      imgdata.makernotes.olympus.OlympusSensorCalibration[0]=getreal(type);
 	      imgdata.makernotes.olympus.OlympusSensorCalibration[1]=getreal(type);
+	      FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.olympus.OlympusSensorCalibration[0];
 	    }
 	  if (tag == 0x20200401)
 	    {
@@ -9070,17 +9071,20 @@ void CLASS parse_makernote (int base, int uptag)
               {
                 fseek (ifp, save1+(0x2b9<<1), SEEK_SET);		// offset 697 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               }
             else if ((imgdata.makernotes.canon.CanonColorDataSubVer == 6) ||
                      (imgdata.makernotes.canon.CanonColorDataSubVer == 7))
               {
                 fseek (ifp, save1+(0x2d0<<1), SEEK_SET);		// offset 720 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               }
             else if (imgdata.makernotes.canon.CanonColorDataSubVer == 9)
               {
                 fseek (ifp, save1+(0x2d4<<1), SEEK_SET);		// offset 724 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               }
             break;
 
@@ -9115,6 +9119,7 @@ void CLASS parse_makernote (int base, int uptag)
             }
             fseek (ifp, save1+(0x1e4<<1), SEEK_SET);			// offset 484 shorts
             imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+            FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
             break;
 
             // 1DX / 5DmkIII / 6D / 100D / 650D / 700D / EOS M / 7DmkII / 750D / 760D
@@ -9135,10 +9140,12 @@ void CLASS parse_makernote (int base, int uptag)
               {
                 fseek (ifp, save1+(0x1fd<<1), SEEK_SET);		// offset 509 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               } else if (imgdata.makernotes.canon.CanonColorDataSubVer == 11)
               {
                 fseek (ifp, save1+(0x2dd<<1), SEEK_SET);		// offset 733 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               }
             break;
 
@@ -9160,11 +9167,13 @@ void CLASS parse_makernote (int base, int uptag)
                 {
                   fseek (ifp, save1+(0x231<<1), SEEK_SET);
                   imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                  FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
                 }
               else
                 {
                   fseek (ifp, save1+(0x30f<<1), SEEK_SET);		// offset 783 shorts
                   imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                  FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
                 }
             break;
 
@@ -9953,29 +9962,29 @@ int CLASS parse_tiff_ifd (int base)
   	switch (tag) {
 	case 0x7480:
 	case 0x7820:
-          FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1];
+	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = get2();
+	    imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1];
 	break;
 	case 0x7481:
 	case 0x7821:
-          FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1];
+	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c] = get2();
+	    imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1];
 	break;
 	case 0x7482:
 	case 0x7822:
-          FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1];
+	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c] = get2();
+	    imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1];
 	break;
 	case 0x7483:
 	case 0x7823:
-          FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1];
+	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c] = get2();
+	    imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1];
 	break;
 	case 0x7484:
 	case 0x7824:
-		imgdata.color.WBCT_Coeffs[0][0] = 4500;
-		FORC3 imgdata.color.WBCT_Coeffs[0][c+1] = get2();
-		imgdata.color.WBCT_Coeffs[0][4] = imgdata.color.WBCT_Coeffs[0][2];
+	    imgdata.color.WBCT_Coeffs[0][0] = 4500;
+	    FORC3 imgdata.color.WBCT_Coeffs[0][c+1] = get2();
+	    imgdata.color.WBCT_Coeffs[0][4] = imgdata.color.WBCT_Coeffs[0][2];
 	break;
 	case 0x7486:
                 FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][c] = get2();
@@ -10002,24 +10011,28 @@ int CLASS parse_tiff_ifd (int base)
                 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][1];
 	break;
 	case 0x782a:
-		imgdata.color.WBCT_Coeffs[1][0] = 8500;
-		FORC3 imgdata.color.WBCT_Coeffs[1][c+1] = get2();
-		imgdata.color.WBCT_Coeffs[1][4] = imgdata.color.WBCT_Coeffs[1][2];
+	    imgdata.color.WBCT_Coeffs[1][0] = 8500;
+	    FORC3 imgdata.color.WBCT_Coeffs[1][c+1] = get2();
+	    imgdata.color.WBCT_Coeffs[1][4] = imgdata.color.WBCT_Coeffs[1][2];
 	break;
 	case 0x782b:
-		imgdata.color.WBCT_Coeffs[2][0] = 6000;
-		FORC3 imgdata.color.WBCT_Coeffs[2][c+1] = get2();
-		imgdata.color.WBCT_Coeffs[2][4] = imgdata.color.WBCT_Coeffs[2][2];
+	    imgdata.color.WBCT_Coeffs[2][0] = 6000;
+	    FORC3 imgdata.color.WBCT_Coeffs[2][c+1] = get2();
+	    imgdata.color.WBCT_Coeffs[2][4] = imgdata.color.WBCT_Coeffs[2][2];
 	break;
 	case 0x782c:
-		imgdata.color.WBCT_Coeffs[3][0] = 3200;
+	    imgdata.color.WBCT_Coeffs[3][0] = 3200;
                 FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][c] = imgdata.color.WBCT_Coeffs[3][c+1] = get2();
                 imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][3] = imgdata.color.WBCT_Coeffs[3][4] = imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][1];
 	break;
 	case 0x782d:
-		imgdata.color.WBCT_Coeffs[4][0] = 2500;
-		FORC3 imgdata.color.WBCT_Coeffs[4][c+1] = get2();
-		imgdata.color.WBCT_Coeffs[4][4] = imgdata.color.WBCT_Coeffs[4][2];
+	    imgdata.color.WBCT_Coeffs[4][0] = 2500;
+	    FORC3 imgdata.color.WBCT_Coeffs[4][c+1] = get2();
+	    imgdata.color.WBCT_Coeffs[4][4] = imgdata.color.WBCT_Coeffs[4][2];
+	break;
+	case 0x787f:
+	    FORC3 imgdata.color.linear_max[c] = get2();
+	    imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
 	break;
 	}
   }
@@ -13515,7 +13528,7 @@ void CLASS identify()
 #ifdef LIBRAW_LIBRARY_BUILD
   static const libraw_custom_camera_t
     const_table[]
-#else    
+#else
   static const struct {
     unsigned fsize;
     ushort rw, rh;
@@ -13523,7 +13536,7 @@ void CLASS identify()
     char t_make[10], t_model[20];
     ushort offset;
   }
-  table[]  
+  table[]
 #endif
    = {
     {   786432,1024, 768, 0, 0, 0, 0, 0,0x94,0,0,"AVT","F-080C" },
@@ -13666,7 +13679,7 @@ void CLASS identify()
 	memmove(&table[q+camera_count],&const_table[q],sizeof(const_table[0]));
   camera_count += sizeof(const_table)/sizeof(const_table[0]);
 #endif
-  
+
   tiff_flip = flip = filters = UINT_MAX;	/* unknown */
   raw_height = raw_width = fuji_width = fuji_layout = cr2_slice[0] = 0;
   maximum = height = width = top_margin = left_margin = 0;
@@ -13891,7 +13904,7 @@ void CLASS identify()
     for (zero_fsize=i=0; i < camera_count; i++)
 #else
     for (zero_fsize=i=0; i < sizeof table / sizeof *table; i++)
-#endif      
+#endif
       if (fsize == table[i].fsize) {
 	strcpy (make,  table[i].t_make );
 #ifdef LIBRAW_LIBRARY_BUILD

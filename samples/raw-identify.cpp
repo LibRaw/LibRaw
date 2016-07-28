@@ -356,6 +356,11 @@ int main(int ac, char *av[])
                     for (int i=0; i < 16; i++)
                         putchar (P1.cdesc[MyCoolRawProcessor.fcol(i >> 1,i & 1)]);
                 }
+            if (C.linear_max[0] > 0)
+                {
+                    printf ("\nHighlight linearity limits:");
+                    for(int c=0;c<4;c++) printf (" %d", C.linear_max[c]);
+                }
             if (C.cam_mul[0] > 0)
                 {
                     printf ("\nMakernotes 'As shot' multipliers:");

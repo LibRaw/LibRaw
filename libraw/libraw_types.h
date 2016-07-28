@@ -354,6 +354,7 @@ typedef struct
   unsigned     black;
   unsigned     data_maximum;
   unsigned     maximum;
+  unsigned     linear_max[4];
   float        fmaximum;
   float        fnorm;
   ushort       white[8][8];
@@ -602,7 +603,7 @@ typedef struct {
     char t_make[10], t_model[20];
     ushort offset;
 } libraw_custom_camera_t;
-  
+
 typedef struct
 {
   ushort                      (*image)[4] ;
