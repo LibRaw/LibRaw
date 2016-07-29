@@ -8596,6 +8596,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             if (type == 9) imgdata.other.FlashEC = getreal(type) / 256.0f;
             else imgdata.other.FlashEC = (float) ((signed short) fgetc(ifp)) / 6.0f;
           }
+         else if (tag == 0x007e)
+           {
+             imgdata.color.linear_max[0] =
+             imgdata.color.linear_max[1] =
+             imgdata.color.linear_max[2] =
+             imgdata.color.linear_max[3] = get4();
+           }
         else if (tag == 0x0207)
           {
             PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
@@ -9629,6 +9636,13 @@ void CLASS parse_makernote (int base, int uptag)
             if (type == 9) imgdata.other.FlashEC = getreal(type) / 256.0f;
             else imgdata.other.FlashEC = (float) ((signed short) fgetc(ifp)) / 6.0f;
           }
+         else if (tag == 0x007e)
+           {
+             imgdata.color.linear_max[0] =
+             imgdata.color.linear_max[1] =
+             imgdata.color.linear_max[2] =
+             imgdata.color.linear_max[3] = get4();
+           }
         else if (tag == 0x0207)
           {
             PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
