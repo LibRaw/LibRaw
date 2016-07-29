@@ -11244,41 +11244,46 @@ int CLASS parse_tiff_ifd (int base)
         if(pana_raw && len == 1 && type ==3)
           pana_black[3]+=i;
 #endif
-        break;
+      break;
       case 8:
       case 10:
 #ifdef LIBRAW_LIBRARY_BUILD
         if(pana_raw && len == 1 && type ==3)
           pana_black[3]+=get2();
 #endif
-        break;
+      break;
+      case 14: case 15: case 16:
+#ifdef LIBRAW_LIBRARY_BUILD
+        if(pana_raw) {
+          imgdata.color.linear_max[tag-14] = get2();
+          if (tag == 15 ) imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
+        }
+#endif
+      break;
       case 17: case 18:
 	if (type == 3 && len == 1)
 	  cam_mul[(tag-17)*2] = get2() / 256.0;
 	break;
 #ifdef LIBRAW_LIBRARY_BUILD
-	  case 19:
-	    if(pana_raw)
-	      {
-		ushort nWB, cnt, tWB;
-		nWB = get2();
-		if (nWB > 0x100) break;
-		for (cnt=0; cnt<nWB; cnt++)
-		  {
-		    tWB = get2();
-		    if (tWB < 0x100)
-		      {
-			imgdata.color.WB_Coeffs[tWB][0] = get2();
-			imgdata.color.WB_Coeffs[tWB][2] = get2();
-			imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = 0x100;
-		      } else get4();
-		  }
-	      }
-	    break;
+      case 19:
+	if(pana_raw) {
+	  ushort nWB, cnt, tWB;
+	  nWB = get2();
+	  if (nWB > 0x100) break;
+	  for (cnt=0; cnt<nWB; cnt++) {
+	    tWB = get2();
+	    if (tWB < 0x100) {
+	      imgdata.color.WB_Coeffs[tWB][0] = get2();
+	      imgdata.color.WB_Coeffs[tWB][2] = get2();
+	      imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = 0x100;
+	    } else get4();
+	  }
+	}
+      break;
 #endif
       case 23:
 	if (type == 3) iso_speed = get2();
-	break;
+      break;
       case 28: case 29: case 30:
 #ifdef LIBRAW_LIBRARY_BUILD
         if(pana_raw && len == 1 && type ==3)
@@ -11297,23 +11302,20 @@ int CLASS parse_tiff_ifd (int base)
 	break;
       case 39:
 #ifdef LIBRAW_LIBRARY_BUILD
-	  	if(pana_raw)
-	  	{
-		  ushort nWB, cnt, tWB;
-		  nWB = get2();
-		  if (nWB > 0x100) break;
-		  for (cnt=0; cnt<nWB; cnt++)
-		    {
-		      tWB = get2();
-		      if (tWB < 0x100)
-			{
-			  imgdata.color.WB_Coeffs[tWB][0] = get2();
-			  imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = get2();
-			  imgdata.color.WB_Coeffs[tWB][2] = get2();
-			} else fseek(ifp, 6, SEEK_CUR);
-		    }
-	  	}
-		break;
+	if(pana_raw) {
+	    ushort nWB, cnt, tWB;
+	    nWB = get2();
+	    if (nWB > 0x100) break;
+	    for (cnt=0; cnt<nWB; cnt++) {
+	        tWB = get2();
+	        if (tWB < 0x100) {
+	            imgdata.color.WB_Coeffs[tWB][0] = get2();
+	            imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = get2();
+	            imgdata.color.WB_Coeffs[tWB][2] = get2();
+	        } else fseek(ifp, 6, SEEK_CUR);
+	    }
+	}
+	break;
 #endif
 	if (len < 50 || cam_mul[0]) break;
 	fseek (ifp, 12, SEEK_CUR);
