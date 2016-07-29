@@ -8602,12 +8602,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
              imgdata.color.linear_max[1] =
              imgdata.color.linear_max[2] =
              imgdata.color.linear_max[3] = get4();
+             FORC4 imgdata.color.linear_max[c] += cblack[c+6];
            }
-        else if (tag == 0x0200)
-          {
-            FORC4 cblack[c ^ c >> 1] = get2();
-            FORC4 imgdata.color.linear_max[c] += cblack[c];
-          }
         else if (tag == 0x0207)
           {
             PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
@@ -9651,6 +9647,7 @@ void CLASS parse_makernote (int base, int uptag)
         else if (tag == 0x0200)
           {
             FORC4 cblack[c ^ c >> 1] = get2();
+            fseek (ifp, -8, SEEK_CUR);
             FORC4 imgdata.color.linear_max[c] += cblack[c];
           }
         else if (tag == 0x0207)
@@ -10538,10 +10535,8 @@ void CLASS parse_makernote (int base, int uptag)
       }
     if (tag == 0x200 && len == 3)
       shot_order = (get4(),get4());
-#ifndef LIBRAW_LIBRARY_BUILD
     if (tag == 0x200 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2();
-#endif
     if (tag == 0x201 && len == 4)
          FORC4 cam_mul[c ^ (c >> 1)] = get2();
     if (tag == 0x220 && type == 7)
@@ -11951,7 +11946,7 @@ guess_cfa_pc:
               cblack[6+c] = getreal(type);
             black = 0;
           }
-	break;
+      break;
       case 50715:			/* BlackLevelDeltaH */
       case 50716:			/* BlackLevelDeltaV */
 	for (num=i=0; i < len && i < 65536; i++)
