@@ -9842,6 +9842,10 @@ void CLASS parse_kodak_ifd (int base)
     if (tag == 0x0849) Kodak_WB_0x08tags(LIBRAW_WBI_Tungsten, type);
     if (tag == 0x084a) Kodak_WB_0x08tags(LIBRAW_WBI_Fluorescent, type);
     if (tag == 0x084b) Kodak_WB_0x08tags(LIBRAW_WBI_Flash, type);
+    if (tag == 0x0e93) imgdata.color.linear_max[0] =
+                         imgdata.color.linear_max[1] =
+                         imgdata.color.linear_max[2] =
+                         imgdata.color.linear_max[3] = get2();
         if (tag == 0x09ce) fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
         if (tag == 0xfa00) fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
 	if (tag == 0xfa27)
