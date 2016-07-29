@@ -8603,6 +8603,11 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
              imgdata.color.linear_max[2] =
              imgdata.color.linear_max[3] = get4();
            }
+        else if (tag == 0x0200)
+          {
+            FORC4 cblack[c ^ c >> 1] = get2();
+            FORC4 imgdata.color.linear_max[c] += cblack[c];
+          }
         else if (tag == 0x0207)
           {
             PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
@@ -9643,6 +9648,11 @@ void CLASS parse_makernote (int base, int uptag)
              imgdata.color.linear_max[2] =
              imgdata.color.linear_max[3] = get4();
            }
+        else if (tag == 0x0200)
+          {
+            FORC4 cblack[c ^ c >> 1] = get2();
+            FORC4 imgdata.color.linear_max[c] += cblack[c];
+          }
         else if (tag == 0x0207)
           {
             PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
@@ -10528,8 +10538,10 @@ void CLASS parse_makernote (int base, int uptag)
       }
     if (tag == 0x200 && len == 3)
       shot_order = (get4(),get4());
+#ifndef LIBRAW_LIBRARY_BUILD
     if (tag == 0x200 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2();
+#endif
     if (tag == 0x201 && len == 4)
          FORC4 cam_mul[c ^ (c >> 1)] = get2();
     if (tag == 0x220 && type == 7)
