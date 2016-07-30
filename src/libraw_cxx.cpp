@@ -1924,6 +1924,22 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       }
     }
 
+    // Correct WB for Samsung GX20
+    if  (!strcasecmp(imgdata.idata.make,"Samsung") && !strcasecmp(imgdata.idata.model,"GX20")) {
+      C.WB_Coeffs[LIBRAW_WBI_Daylight][2] = (int) ((float) (C.WB_Coeffs[LIBRAW_WBI_Daylight][2]) * 2.56f);
+      C.WB_Coeffs[LIBRAW_WBI_Shade][2] = (int) ((float) (C.WB_Coeffs[LIBRAW_WBI_Shade][2]) * 2.56f);
+      C.WB_Coeffs[LIBRAW_WBI_Cloudy][2] = (int) ((float) (C.WB_Coeffs[LIBRAW_WBI_Cloudy][2]) * 2.56f);
+      C.WB_Coeffs[LIBRAW_WBI_Tungsten][2] = (int) ((float) (C.WB_Coeffs[LIBRAW_WBI_Tungsten][2]) * 2.56f);
+      C.WB_Coeffs[LIBRAW_WBI_FL_D][2] = (int) ((float) (C.WB_Coeffs[LIBRAW_WBI_FL_D][2]) * 2.56f);
+      C.WB_Coeffs[LIBRAW_WBI_FL_N][2] = (int) ((float) (C.WB_Coeffs[LIBRAW_WBI_FL_N][2]) * 2.56f);
+      C.WB_Coeffs[LIBRAW_WBI_FL_W][2] = (int) ((float) (C.WB_Coeffs[LIBRAW_WBI_FL_W][2]) * 2.56f);
+      C.WB_Coeffs[LIBRAW_WBI_Flash][2] = (int) ((float) (C.WB_Coeffs[LIBRAW_WBI_Flash][2]) * 2.56f);
+      for (int c=0; c<64; c++) {
+        if (imgdata.color.WBCT_Coeffs[c][0] > 0.0f) {
+          imgdata.color.WBCT_Coeffs[c][3] *= 2.56f;
+        }
+      }
+    }
 
 	// Adjust BL for Panasonic
     if(load_raw == &LibRaw::panasonic_load_raw && (!strcasecmp(imgdata.idata.make,"Panasonic") || !strcasecmp(imgdata.idata.make,"Leica") ||  !strcasecmp(imgdata.idata.make,"YUNEEC"))
