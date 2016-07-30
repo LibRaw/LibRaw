@@ -1913,6 +1913,19 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           C.cblack[6+c]/=4;
       }
 
+    // Adjust Highlight Linearity limit for Pentax
+    if ((load_raw == &LibRaw::pentax_load_raw) &&
+        (!strcasecmp(imgdata.idata.make,"Pentax") || !strcasecmp(imgdata.idata.model,"Pentax"))) {
+      for (int c=0; c<4; c++)
+        C.linear_max[c] += imgdata.color.cblack[c];
+    }
+    if (imgdata.idata.dng_version &&
+        (!strcasecmp(imgdata.idata.make,"Pentax") || !strcasecmp(imgdata.idata.model,"Pentax")) &&
+        strncasecmp(imgdata.idata.model, "GR", 2)) {
+      for (int c=0; c<4; c++)
+        C.linear_max[c] += imgdata.color.cblack[c+6];
+    }
+
 	// Adjust BL for Panasonic
     if(load_raw == &LibRaw::panasonic_load_raw && (!strcasecmp(imgdata.idata.make,"Panasonic") || !strcasecmp(imgdata.idata.make,"Leica") ||  !strcasecmp(imgdata.idata.make,"YUNEEC"))
        &&  ID.pana_black[0] && ID.pana_black[1] && ID.pana_black[2])
