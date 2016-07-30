@@ -354,7 +354,7 @@ typedef struct
   unsigned     black;
   unsigned     data_maximum;
   unsigned     maximum;
-  unsigned     linear_max[4];
+  long         linear_max[4];
   float        fmaximum;
   float        fnorm;
   ushort       white[8][8];

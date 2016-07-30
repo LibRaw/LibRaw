@@ -8601,7 +8601,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
              imgdata.color.linear_max[0] =
              imgdata.color.linear_max[1] =
              imgdata.color.linear_max[2] =
-             imgdata.color.linear_max[3] = get4();
+             imgdata.color.linear_max[3] = (long)(-1) * get4();
            }
         else if (tag == 0x0207)
           {
@@ -9641,7 +9641,7 @@ void CLASS parse_makernote (int base, int uptag)
              imgdata.color.linear_max[0] =
              imgdata.color.linear_max[1] =
              imgdata.color.linear_max[2] =
-             imgdata.color.linear_max[3] = get4();
+             imgdata.color.linear_max[3] = (long)(-1) * get4();
            }
         else if (tag == 0x0207)
           {
