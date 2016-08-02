@@ -1924,6 +1924,14 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       }
     }
 
+    if  (!strcasecmp(imgdata.idata.make,"Nikon") && (!C.linear_max[0]) && (C.maximum > 1024) && (load_raw != &LibRaw::nikon_load_sraw)) {
+      C.linear_max[0] =
+        C.linear_max[1] =
+        C.linear_max[2] =
+        C.linear_max[3] =
+        (long) ((float)(C.maximum) / 1.07f);
+    }
+
     // Correct WB for Samsung GX20
     if  (!strcasecmp(imgdata.idata.make,"Samsung") && !strcasecmp(imgdata.idata.model,"GX20")) {
       C.WB_Coeffs[LIBRAW_WBI_Daylight][2] = (int) ((float) (C.WB_Coeffs[LIBRAW_WBI_Daylight][2]) * 2.56f);
