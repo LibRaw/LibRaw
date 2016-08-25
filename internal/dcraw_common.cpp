@@ -7416,6 +7416,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             if (type == 9) imgdata.other.FlashEC = getreal(type) / 256.0f;
             else imgdata.other.FlashEC = (float) ((signed short) fgetc(ifp)) / 6.0f;
           }
+         else if (tag == 0x007e)
+           {
+             imgdata.color.linear_max[0] =
+             imgdata.color.linear_max[1] =
+             imgdata.color.linear_max[2] =
+             imgdata.color.linear_max[3] = (long)(-1) * get4();
+           }
         else if (tag == 0x0207)
           {
             PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
@@ -8449,6 +8456,13 @@ void CLASS parse_makernote (int base, int uptag)
             if (type == 9) imgdata.other.FlashEC = getreal(type) / 256.0f;
             else imgdata.other.FlashEC = (float) ((signed short) fgetc(ifp)) / 6.0f;
           }
+         else if (tag == 0x007e)
+           {
+             imgdata.color.linear_max[0] =
+             imgdata.color.linear_max[1] =
+             imgdata.color.linear_max[2] =
+             imgdata.color.linear_max[3] = (long)(-1) * get4();
+           }
         else if (tag == 0x0207)
           {
             PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
@@ -8997,6 +9011,7 @@ void CLASS parse_makernote (int base, int uptag)
 	    {
 	      imgdata.makernotes.olympus.OlympusSensorCalibration[0]=getreal(type);
 	      imgdata.makernotes.olympus.OlympusSensorCalibration[1]=getreal(type);
+	      FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.olympus.OlympusSensorCalibration[0];
 	    }
 	  if (tag == 0x20200401)
 	    {
@@ -9070,17 +9085,20 @@ void CLASS parse_makernote (int base, int uptag)
               {
                 fseek (ifp, save1+(0x2b9<<1), SEEK_SET);		// offset 697 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               }
             else if ((imgdata.makernotes.canon.CanonColorDataSubVer == 6) ||
                      (imgdata.makernotes.canon.CanonColorDataSubVer == 7))
               {
                 fseek (ifp, save1+(0x2d0<<1), SEEK_SET);		// offset 720 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               }
             else if (imgdata.makernotes.canon.CanonColorDataSubVer == 9)
               {
                 fseek (ifp, save1+(0x2d4<<1), SEEK_SET);		// offset 724 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               }
             break;
 
@@ -9115,6 +9133,7 @@ void CLASS parse_makernote (int base, int uptag)
             }
             fseek (ifp, save1+(0x1e4<<1), SEEK_SET);			// offset 484 shorts
             imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+            FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
             break;
 
             // 1DX / 5DmkIII / 6D / 100D / 650D / 700D / EOS M / 7DmkII / 750D / 760D
@@ -9135,10 +9154,12 @@ void CLASS parse_makernote (int base, int uptag)
               {
                 fseek (ifp, save1+(0x1fd<<1), SEEK_SET);		// offset 509 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               } else if (imgdata.makernotes.canon.CanonColorDataSubVer == 11)
               {
                 fseek (ifp, save1+(0x2dd<<1), SEEK_SET);		// offset 733 shorts
                 imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
               }
             break;
 
@@ -9160,11 +9181,13 @@ void CLASS parse_makernote (int base, int uptag)
                 {
                   fseek (ifp, save1+(0x231<<1), SEEK_SET);
                   imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                  FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
                 }
               else
                 {
                   fseek (ifp, save1+(0x30f<<1), SEEK_SET);		// offset 783 shorts
                   imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                  FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
                 }
             break;
 
@@ -9447,27 +9470,32 @@ get2_256:
         if (tag == 0xa021) // get and decode Samsung cam_mul array
             FORC4 cam_mul[c ^ (c >> 1)] = get4() - SamsungKey[c];
 #ifdef LIBRAW_LIBRARY_BUILD
-		if (tag == 0xa023)
-		{
-                  imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] = get4() - SamsungKey[8];
-                  imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] = get4() - SamsungKey[9];
-                  imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] = get4() - SamsungKey[10];
-                  imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][2] = get4() - SamsungKey[0];
-                  if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1]>>1))
-		    {
-                      imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] >> 4;
-                      imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] >> 4;
-		    }
-		}
-		if (tag == 0xa024)
-		{
-                  FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][c ^ (c >> 1)] = get4() - SamsungKey[c+1];
-                  if (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1]>>1))
-		    {
-                      imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] >> 4;
-                      imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] >> 4;
-		    }
-		}
+        if (tag == 0xa023)
+          {
+            imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] = get4() - SamsungKey[8];
+            imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] = get4() - SamsungKey[9];
+            imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] = get4() - SamsungKey[10];
+            imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][2] = get4() - SamsungKey[0];
+            if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1]>>1))
+              {
+                imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] >> 4;
+                imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] >> 4;
+              }
+          }
+        if (tag == 0xa024)
+          {
+            FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][c ^ (c >> 1)] = get4() - SamsungKey[c+1];
+            if (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1]>>1))
+              {
+                imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] >> 4;
+                imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] >> 4;
+              }
+          }
+        if (tag == 0xa025)
+           imgdata.color.linear_max[0]=
+             imgdata.color.linear_max[1]=
+             imgdata.color.linear_max[2]=
+             imgdata.color.linear_max[3]= get4() - SamsungKey[0];
 #endif
         if (tag == 0xa030 && len == 9)	// get and decode Samsung color matrix
             for (i=0; i < 3; i++)
@@ -9828,6 +9856,10 @@ void CLASS parse_kodak_ifd (int base)
     if (tag == 0x0849) Kodak_WB_0x08tags(LIBRAW_WBI_Tungsten, type);
     if (tag == 0x084a) Kodak_WB_0x08tags(LIBRAW_WBI_Fluorescent, type);
     if (tag == 0x084b) Kodak_WB_0x08tags(LIBRAW_WBI_Flash, type);
+    if (tag == 0x0e93) imgdata.color.linear_max[0] =
+                         imgdata.color.linear_max[1] =
+                         imgdata.color.linear_max[2] =
+                         imgdata.color.linear_max[3] = get2();
         if (tag == 0x09ce) fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
         if (tag == 0xfa00) fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
 	if (tag == 0xfa27)
@@ -9953,29 +9985,29 @@ int CLASS parse_tiff_ifd (int base)
   	switch (tag) {
 	case 0x7480:
 	case 0x7820:
-          FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1];
+	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = get2();
+	    imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1];
 	break;
 	case 0x7481:
 	case 0x7821:
-          FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1];
+	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c] = get2();
+	    imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1];
 	break;
 	case 0x7482:
 	case 0x7822:
-          FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1];
+	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c] = get2();
+	    imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1];
 	break;
 	case 0x7483:
 	case 0x7823:
-          FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1];
+	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c] = get2();
+	    imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1];
 	break;
 	case 0x7484:
 	case 0x7824:
-		imgdata.color.WBCT_Coeffs[0][0] = 4500;
-		FORC3 imgdata.color.WBCT_Coeffs[0][c+1] = get2();
-		imgdata.color.WBCT_Coeffs[0][4] = imgdata.color.WBCT_Coeffs[0][2];
+	    imgdata.color.WBCT_Coeffs[0][0] = 4500;
+	    FORC3 imgdata.color.WBCT_Coeffs[0][c+1] = get2();
+	    imgdata.color.WBCT_Coeffs[0][4] = imgdata.color.WBCT_Coeffs[0][2];
 	break;
 	case 0x7486:
                 FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][c] = get2();
@@ -10002,24 +10034,28 @@ int CLASS parse_tiff_ifd (int base)
                 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][1];
 	break;
 	case 0x782a:
-		imgdata.color.WBCT_Coeffs[1][0] = 8500;
-		FORC3 imgdata.color.WBCT_Coeffs[1][c+1] = get2();
-		imgdata.color.WBCT_Coeffs[1][4] = imgdata.color.WBCT_Coeffs[1][2];
+	    imgdata.color.WBCT_Coeffs[1][0] = 8500;
+	    FORC3 imgdata.color.WBCT_Coeffs[1][c+1] = get2();
+	    imgdata.color.WBCT_Coeffs[1][4] = imgdata.color.WBCT_Coeffs[1][2];
 	break;
 	case 0x782b:
-		imgdata.color.WBCT_Coeffs[2][0] = 6000;
-		FORC3 imgdata.color.WBCT_Coeffs[2][c+1] = get2();
-		imgdata.color.WBCT_Coeffs[2][4] = imgdata.color.WBCT_Coeffs[2][2];
+	    imgdata.color.WBCT_Coeffs[2][0] = 6000;
+	    FORC3 imgdata.color.WBCT_Coeffs[2][c+1] = get2();
+	    imgdata.color.WBCT_Coeffs[2][4] = imgdata.color.WBCT_Coeffs[2][2];
 	break;
 	case 0x782c:
-		imgdata.color.WBCT_Coeffs[3][0] = 3200;
+	    imgdata.color.WBCT_Coeffs[3][0] = 3200;
                 FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][c] = imgdata.color.WBCT_Coeffs[3][c+1] = get2();
                 imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][3] = imgdata.color.WBCT_Coeffs[3][4] = imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][1];
 	break;
 	case 0x782d:
-		imgdata.color.WBCT_Coeffs[4][0] = 2500;
-		FORC3 imgdata.color.WBCT_Coeffs[4][c+1] = get2();
-		imgdata.color.WBCT_Coeffs[4][4] = imgdata.color.WBCT_Coeffs[4][2];
+	    imgdata.color.WBCT_Coeffs[4][0] = 2500;
+	    FORC3 imgdata.color.WBCT_Coeffs[4][c+1] = get2();
+	    imgdata.color.WBCT_Coeffs[4][4] = imgdata.color.WBCT_Coeffs[4][2];
+	break;
+	case 0x787f:
+	    FORC3 imgdata.color.linear_max[c] = get2();
+	    imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
 	break;
 	}
   }
@@ -10036,41 +10072,46 @@ int CLASS parse_tiff_ifd (int base)
         if(pana_raw && len == 1 && type ==3)
           pana_black[3]+=i;
 #endif
-        break;
+      break;
       case 8:
       case 10:
 #ifdef LIBRAW_LIBRARY_BUILD
         if(pana_raw && len == 1 && type ==3)
           pana_black[3]+=get2();
 #endif
-        break;
+      break;
+      case 14: case 15: case 16:
+#ifdef LIBRAW_LIBRARY_BUILD
+        if(pana_raw) {
+          imgdata.color.linear_max[tag-14] = get2();
+          if (tag == 15 ) imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
+        }
+#endif
+      break;
       case 17: case 18:
 	if (type == 3 && len == 1)
 	  cam_mul[(tag-17)*2] = get2() / 256.0;
 	break;
 #ifdef LIBRAW_LIBRARY_BUILD
-	  case 19:
-	    if(pana_raw)
-	      {
-		ushort nWB, cnt, tWB;
-		nWB = get2();
-		if (nWB > 0x100) break;
-		for (cnt=0; cnt<nWB; cnt++)
-		  {
-		    tWB = get2();
-		    if (tWB < 0x100)
-		      {
-			imgdata.color.WB_Coeffs[tWB][0] = get2();
-			imgdata.color.WB_Coeffs[tWB][2] = get2();
-			imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = 0x100;
-		      } else get4();
-		  }
-	      }
-	    break;
+      case 19:
+	if(pana_raw) {
+	  ushort nWB, cnt, tWB;
+	  nWB = get2();
+	  if (nWB > 0x100) break;
+	  for (cnt=0; cnt<nWB; cnt++) {
+	    tWB = get2();
+	    if (tWB < 0x100) {
+	      imgdata.color.WB_Coeffs[tWB][0] = get2();
+	      imgdata.color.WB_Coeffs[tWB][2] = get2();
+	      imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = 0x100;
+	    } else get4();
+	  }
+	}
+      break;
 #endif
       case 23:
 	if (type == 3) iso_speed = get2();
-	break;
+      break;
       case 28: case 29: case 30:
 #ifdef LIBRAW_LIBRARY_BUILD
         if(pana_raw && len == 1 && type ==3)
@@ -10089,23 +10130,20 @@ int CLASS parse_tiff_ifd (int base)
 	break;
       case 39:
 #ifdef LIBRAW_LIBRARY_BUILD
-	  	if(pana_raw)
-	  	{
-		  ushort nWB, cnt, tWB;
-		  nWB = get2();
-		  if (nWB > 0x100) break;
-		  for (cnt=0; cnt<nWB; cnt++)
-		    {
-		      tWB = get2();
-		      if (tWB < 0x100)
-			{
-			  imgdata.color.WB_Coeffs[tWB][0] = get2();
-			  imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = get2();
-			  imgdata.color.WB_Coeffs[tWB][2] = get2();
-			} else fseek(ifp, 6, SEEK_CUR);
-		    }
-	  	}
-		break;
+	if(pana_raw) {
+	    ushort nWB, cnt, tWB;
+	    nWB = get2();
+	    if (nWB > 0x100) break;
+	    for (cnt=0; cnt<nWB; cnt++) {
+	        tWB = get2();
+	        if (tWB < 0x100) {
+	            imgdata.color.WB_Coeffs[tWB][0] = get2();
+	            imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = get2();
+	            imgdata.color.WB_Coeffs[tWB][2] = get2();
+	        } else fseek(ifp, 6, SEEK_CUR);
+	    }
+	}
+	break;
 #endif
 	if (len < 50 || cam_mul[0]) break;
 	fseek (ifp, 12, SEEK_CUR);
@@ -10715,7 +10753,7 @@ guess_cfa_pc:
               cblack[6+c] = getreal(type);
             black = 0;
           }
-	break;
+      break;
       case 50715:			/* BlackLevelDeltaH */
       case 50716:			/* BlackLevelDeltaV */
 	for (num=i=0; i < len && i < 65536; i++)
@@ -13515,7 +13553,7 @@ void CLASS identify()
 #ifdef LIBRAW_LIBRARY_BUILD
   static const libraw_custom_camera_t
     const_table[]
-#else    
+#else
   static const struct {
     unsigned fsize;
     ushort rw, rh;
@@ -13523,7 +13561,7 @@ void CLASS identify()
     char t_make[10], t_model[20];
     ushort offset;
   }
-  table[]  
+  table[]
 #endif
    = {
     {   786432,1024, 768, 0, 0, 0, 0, 0,0x94,0,0,"AVT","F-080C" },
@@ -13539,17 +13577,43 @@ void CLASS identify()
 
 //   Android Raw dumps id start
 //   File Size in bytes Horizontal Res Vertical Flag then bayer order eg 0x16 bbgr 0x94 rggb
-    { 16424960,4208,3120, 0, 0, 0, 0, 1,0x16,0,0,"Sony","IMX135-mipi 13mp" },
-    { 17522688,4212,3120, 0, 0, 0, 0, 0,0x16,0,0,"Sony","IMX135-QCOM" },
-    { 10223360,2608,1960, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX072-mipi" },
-    { 20500480,4656,3496, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX298-mipi 16mp" },
+    {  1540857,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"Samsung","S3" },
+    {  2658304,1212,1096, 0, 0, 0, 0, 1 ,0x16,0,0,"LG","G3FrontMipi" },
+    {  2842624,1296,1096, 0, 0, 0, 0, 1 ,0x16,0,0,"LG","G3FrontQCOM" },
+    {  2969600,1976,1200, 0, 0, 0, 0, 1 ,0x16,0,0,"Xiaomi","MI3wMipi" },
+    {  3170304,1976,1200, 0, 0, 0, 0, 1 ,0x16,0,0,"Xiaomi","MI3wQCOM" },
+    {  3763584,1584,1184, 0, 0, 0, 0, 96,0x61,0,0,"I_Mobile","I_StyleQ6" },
+    {  5107712,2688,1520, 0, 0, 0, 0, 1 ,0x61,0,0,"OmniVisi","UltraPixel1" },
+    {  5382640,2688,1520, 0, 0, 0, 0, 1 ,0x61,0,0,"OmniVisi","UltraPixel2" },
+    {  5664912,2688,1520, 0, 0, 0, 0, 1 ,0x61,0,0,"OmniVisi","4688" },
+    {  5664912,2688,1520, 0, 0, 0, 0, 1 ,0x61,0,0,"OmniVisi","4688" },
+    {  5364240,2688,1520, 0, 0, 0, 0, 1 ,0x61,0,0,"OmniVisi","4688" },
+    {  6299648,2592,1944, 0, 0, 0, 0, 1 ,0x16,0,0,"OmniVisi","OV5648" },
+    {  6721536,2592,1944, 0, 0, 0, 0, 0 ,0x16,0,0,"OmniVisi","OV56482" },
+    {  6746112,2592,1944, 0, 0, 0, 0, 0 ,0x16,0,0,"HTC","OneSV" },
+    {  9631728,2532,1902, 0, 0, 0, 0, 96,0x61,0,0,"Sony","5mp" },
+    {  9830400,2560,1920, 0, 0, 0, 0, 96,0x61,0,0,"NGM","ForwardArt" },
     { 10186752,3264,2448, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX219-mipi 8mp" },
-    { 5107712,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"HTC","UltraPixel" },
-    { 1540857,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"Samsung","S3" },
-    { 10223363,2688,1520, 0, 0, 0, 0, 1,0x61,0,0,"Samsung","GalaxyNexus" },
+    { 10223360,2608,1944, 0, 0, 0, 0, 96,0x16,0,0,"Sony","IMX" },
+    { 10782464,3282,2448, 0, 0, 0, 0, 0 ,0x16,0,0,"HTC","MyTouch4GSlide" },
+    { 10788864,3282,2448, 0, 0, 0, 0, 0, 0x16,0,0,"Xperia","L" },
+    { 15967488,3264,2446, 0, 0, 0, 0, 96,0x16,0,0,"OmniVison","OV8850" },
+    { 16224256,4208,3082, 0, 0, 0, 0, 1, 0x16,0,0,"LG","G3MipiL" },
+    { 16424960,4208,3120, 0, 0, 0, 0, 1, 0x16,0,0,"IMX135","MipiL" },
+    { 17326080,4164,3120, 0, 0, 0, 0, 1, 0x16,0,0,"LG","G3LQCom" },
+    { 17522688,4212,3120, 0, 0, 0, 0, 0,0x16,0,0,"Sony","IMX135-QCOM" },
+    { 19906560,4608,3456, 0, 0, 0, 0, 1, 0x16,0,0,"Gione","E7mipi" },
+    { 19976192,5312,2988, 0, 0, 0, 0, 1, 0x16,0,0,"LG","G4" },
+    { 20389888,4632,3480, 0, 0, 0, 0, 1, 0x16,0,0,"Xiaomi","RedmiNote3Pro" },
+    { 20500480,4656,3496, 0, 0, 0, 0, 1,0x94,0,0,"Sony","IMX298-mipi 16mp" },
+    { 21233664,4608,3456, 0, 0, 0, 0, 1, 0x16,0,0,"Gione","E7qcom" },
+    { 26023936,4192,3104, 0, 0, 0, 0, 96,0x94,0,0,"THL","5000" },
+    { 26257920,4208,3120, 0, 0, 0, 0, 96,0x94,0,0,"Sony","IMX214" },
+    { 26357760,4224,3120, 0, 0, 0, 0, 96,0x61,0,0,"OV","13860" },
+    { 41312256,5248,3936, 0, 0, 0, 0, 96,0x61,0,0,"Meizu","MX4" },
+    { 42923008,5344,4016, 0, 0, 0, 0, 96,0x61,0,0,"Sony","IMX230" },
     //   Android Raw dumps id end
     {  20137344,3664,2748,0, 0, 0, 0,0x40,0x49,0,0,"Aptina","MT9J003",0xffff },
-
     {  2868726,1384,1036, 0, 0, 0, 0,64,0x49,0,8,"Baumer","TXG14",1078 },
     {  5298000,2400,1766,12,12,44, 2,40,0x94,0,2,"Canon","PowerShot SD300" },
     {  6553440,2664,1968, 4, 4,44, 4,40,0x94,0,2,"Canon","PowerShot A460" },
@@ -13666,7 +13730,7 @@ void CLASS identify()
 	memmove(&table[q+camera_count],&const_table[q],sizeof(const_table[0]));
   camera_count += sizeof(const_table)/sizeof(const_table[0]);
 #endif
-  
+
   tiff_flip = flip = filters = UINT_MAX;	/* unknown */
   raw_height = raw_width = fuji_width = fuji_layout = cr2_slice[0] = 0;
   maximum = height = width = top_margin = left_margin = 0;
@@ -13891,7 +13955,7 @@ void CLASS identify()
     for (zero_fsize=i=0; i < camera_count; i++)
 #else
     for (zero_fsize=i=0; i < sizeof table / sizeof *table; i++)
-#endif      
+#endif
       if (fsize == table[i].fsize) {
 	strcpy (make,  table[i].t_make );
 #ifdef LIBRAW_LIBRARY_BUILD
