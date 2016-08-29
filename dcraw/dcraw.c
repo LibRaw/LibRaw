@@ -8245,6 +8245,19 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                 fread(imgdata.lens.makernotes.Lens + 5, 58, 1, ifp);
               }
           }
+        else if (tag == 0x00e0)			// sensor info
+          {
+            imgdata.makernotes.canon.SensorWidth           = (get2(),get2());
+            imgdata.makernotes.canon.SensorHeight          = get2();
+            imgdata.makernotes.canon.SensorLeftBorder      = (get2(),get2(),get2());
+            imgdata.makernotes.canon.SensorTopBorder       = get2();
+            imgdata.makernotes.canon.SensorRightBorder     = get2();
+            imgdata.makernotes.canon.SensorBottomBorder    = get2();
+            imgdata.makernotes.canon.BlackMaskLeftBorder   = get2();
+            imgdata.makernotes.canon.BlackMaskTopBorder    = get2();
+            imgdata.makernotes.canon.BlackMaskRightBorder  = get2();
+            imgdata.makernotes.canon.BlackMaskBottomBorder = get2();
+          }
       }
 
     else if (!strncmp(make, "FUJI", 4))
@@ -9181,6 +9194,21 @@ void CLASS parse_makernote (int base, int uptag)
                 fread(imgdata.lens.makernotes.Lens + 5, 58, 1, ifp);
               }
           }
+
+        else if (tag == 0x00e0)			// sensor info
+          {
+            imgdata.makernotes.canon.SensorWidth           = (get2(),get2());
+            imgdata.makernotes.canon.SensorHeight          = get2();
+            imgdata.makernotes.canon.SensorLeftBorder      = (get2(),get2(),get2());
+            imgdata.makernotes.canon.SensorTopBorder       = get2();
+            imgdata.makernotes.canon.SensorRightBorder     = get2();
+            imgdata.makernotes.canon.SensorBottomBorder    = get2();
+            imgdata.makernotes.canon.BlackMaskLeftBorder   = get2();
+            imgdata.makernotes.canon.BlackMaskTopBorder    = get2();
+            imgdata.makernotes.canon.BlackMaskRightBorder  = get2();
+            imgdata.makernotes.canon.BlackMaskBottomBorder = get2();
+          }
+
       }
 
     else if (!strncmp(make, "FUJI", 4))

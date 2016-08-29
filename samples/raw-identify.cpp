@@ -41,13 +41,14 @@ it under the terms of the one of three licenses as you choose:
 #define exifLens MyCoolRawProcessor.imgdata.lens
 #define ShootingInfo MyCoolRawProcessor.imgdata.shootinginfo
 
-#define S MyCoolRawProcessor.imgdata.sizes
-#define Oly MyCoolRawProcessor.imgdata.makernotes.olympus
-#define O MyCoolRawProcessor.imgdata.params
-#define C MyCoolRawProcessor.imgdata.color
-#define F MyCoolRawProcessor.imgdata.makernotes.fuji
-#define T MyCoolRawProcessor.imgdata.thumbnail
+#define S     MyCoolRawProcessor.imgdata.sizes
+#define O     MyCoolRawProcessor.imgdata.params
+#define C     MyCoolRawProcessor.imgdata.color
+#define T     MyCoolRawProcessor.imgdata.thumbnail
 
+#define Canon MyCoolRawProcessor.imgdata.makernotes.canon
+#define Fuji  MyCoolRawProcessor.imgdata.makernotes.fuji
+#define Oly   MyCoolRawProcessor.imgdata.makernotes.olympus
 
 const char *EXIF_LightSources[] = {
 	"Unknown",
@@ -323,13 +324,13 @@ int main(int ac, char *av[])
 	   if (C.baseline_exposure > -999.f) printf ("Baseline exposure: %04.3f\n", C.baseline_exposure);
 
             printf ("Number of raw images: %d\n", P1.raw_count);
-            if (F.FujiExpoMidPointShift > -999.f) printf ("Fuji Exposure shift: %04.3f\n", F.FujiExpoMidPointShift);
+            if (Fuji.FujiExpoMidPointShift > -999.f) printf ("Fuji Exposure shift: %04.3f\n", Fuji.FujiExpoMidPointShift);
 
-	    if (F.FujiDynamicRange != 0xffff) printf ("Fuji Dynamic Range: %d\n", F.FujiDynamicRange);
-	    if (F.FujiFilmMode != 0xffff) printf ("Fuji Film Mode: %d\n", F.FujiFilmMode);
-	    if (F.FujiDynamicRangeSetting != 0xffff) printf ("Fuji Dynamic Range Setting: %d\n", F.FujiDynamicRangeSetting);
-	    if (F.FujiDevelopmentDynamicRange != 0xffff) printf ("Fuji Development Dynamic Range: %d\n", F.FujiDevelopmentDynamicRange);
-	    if (F.FujiAutoDynamicRange != 0xffff) printf ("Fuji Auto Dynamic Range: %d\n", F.FujiAutoDynamicRange);
+	    if (Fuji.FujiDynamicRange != 0xffff) printf ("Fuji Dynamic Range: %d\n", Fuji.FujiDynamicRange);
+	    if (Fuji.FujiFilmMode != 0xffff) printf ("Fuji Film Mode: %d\n", Fuji.FujiFilmMode);
+	    if (Fuji.FujiDynamicRangeSetting != 0xffff) printf ("Fuji Dynamic Range Setting: %d\n", Fuji.FujiDynamicRangeSetting);
+	    if (Fuji.FujiDevelopmentDynamicRange != 0xffff) printf ("Fuji Development Dynamic Range: %d\n", Fuji.FujiDevelopmentDynamicRange);
+	    if (Fuji.FujiAutoDynamicRange != 0xffff) printf ("Fuji Auto Dynamic Range: %d\n", Fuji.FujiAutoDynamicRange);
 
 
             if (S.pixel_aspect != 1)
@@ -340,6 +341,17 @@ int main(int ac, char *av[])
 
             printf ("Image size:  %4d x %d\n", S.width, S.height);
             printf ("Output size: %4d x %d\n", S.iwidth, S.iheight);
+
+            if (Canon.SensorWidth)			printf("SensorWidth          = %d\n", Canon.SensorWidth);
+            if (Canon.SensorHeight)		printf("SensorHeight         = %d\n", Canon.SensorHeight);
+            if (Canon.SensorLeftBorder)		printf("SensorLeftBorder     = %d\n", Canon.SensorLeftBorder);
+            if (Canon.SensorTopBorder)		printf("SensorTopBorder      = %d\n", Canon.SensorTopBorder);
+            if (Canon.SensorRightBorder)		printf("SensorRightBorder    = %d\n", Canon.SensorRightBorder);
+            if (Canon.SensorBottomBorder)	printf("SensorBottomBorder   = %d\n", Canon.SensorBottomBorder);
+            if (Canon.BlackMaskLeftBorder)	printf("BlackMaskLeftBorder  = %d\n", Canon.BlackMaskLeftBorder);
+            if (Canon.BlackMaskTopBorder)	printf("BlackMaskTopBorder   = %d\n", Canon.BlackMaskTopBorder);
+            if (Canon.BlackMaskRightBorder)	printf("BlackMaskRightBorder = %d\n", Canon.BlackMaskRightBorder);
+            if (Canon.BlackMaskBottomBorder)	printf("BlackMaskBottomBorder= %d\n", Canon.BlackMaskBottomBorder);
 
             if (Oly.OlympusCropID != -1)
             {

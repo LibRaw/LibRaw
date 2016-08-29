@@ -252,6 +252,18 @@ typedef struct
   short        FlashGuideNumber;
 /* drive */
   short        ContinuousDrive;
+/* sensor */
+  short        SensorWidth;
+  short        SensorHeight;
+  short        SensorLeftBorder;
+  short        SensorTopBorder;
+  short        SensorRightBorder;
+  short        SensorBottomBorder;
+  short        BlackMaskLeftBorder;
+  short        BlackMaskTopBorder;
+  short        BlackMaskRightBorder;
+  short        BlackMaskBottomBorder;
+
 } libraw_canon_makernotes_t;
 
 typedef struct
