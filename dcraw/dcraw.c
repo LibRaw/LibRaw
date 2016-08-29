@@ -6914,15 +6914,16 @@ void CLASS setCanonBodyFeatures (unsigned id)
               (id == 0x80000167) ||	// 1Ds
               (id == 0x80000188) ||	// 1Ds2
               (id == 0x80000215) ||	// 1Ds3
+              (id == 0x80000269) ||	// 1DX
+              (id == 0x80000328) ||	// 1DX2
+              (id == 0x80000324) ||	// 1DC
               (id == 0x80000213) ||	// 5D
               (id == 0x80000218) ||	// 5D2
               (id == 0x80000285) ||	// 5D3
-              (id == 0x80000302) ||	// 6D
-              (id == 0x80000269) ||	// 1DX
-              (id == 0x80000324) ||	// 1DC
+              (id == 0x80000349) ||	// 5D4
               (id == 0x80000382) ||	// 5DS
               (id == 0x80000401) ||	// 5DS R
-              (id == 0x80000328)	// 1DX2
+              (id == 0x80000302) 	// 6D
               )
             {
               imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
@@ -10343,7 +10344,7 @@ void CLASS parse_makernote (int base, int uptag)
               }
             break;
 
-            // 5DS / 5DS R / 80D / 1300D
+            // 5DS / 5DS R / 80D / 1300D / 5D4
           case 1560: case 1592: case 1353:
             imgdata.makernotes.canon.CanonColorDataVer = 8;
             imgdata.makernotes.canon.CanonColorDataSubVer = get2();
@@ -13418,6 +13419,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 6188,-1341,-890,-7168,14489,2937,-2640,3228,8483 } },
     { "Canon EOS 5DS", 0, 0x3c96,
       { 6250,-711,-808,-5153,12794,2636,-1249,2198,5610 } },
+    { "Canon EOS 5D Mark IV", 0, 0,	/* temp */
+      { 7457,-671,-937,-4849,12495,2643,-1213,2354,5492 } },
     { "Canon EOS 5D Mark III", 0, 0x3c80,
       { 6722,-635,-963,-4287,12460,2028,-908,2162,5668 } },
     { "Canon EOS 5D Mark II", 0, 0x3cf0,
@@ -13739,7 +13742,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Fujifilm XQ2", 0, 0,
       { 9252,-2704,-1064,-5893,14265,1717,-1101,2341,4349 } },
     { "GITUP GIT2", 3200, 0,
-      {8489, -2583,-1036,-8051,15583,2643,-1307,1407,7354}},  
+      {8489, -2583,-1036,-8051,15583,2643,-1307,1407,7354}},
     { "Hasselblad Lunar", 0, 0,
       { 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
     { "Hasselblad Stellar", -800, 0,
@@ -14806,6 +14809,7 @@ void CLASS identify()
     { 0x384, "EOS M10"},  /* temp */
     { 0x346, "EOS 100D" },
     { 0x347, "EOS 760D" },
+    { 0x349, "EOS 5D Mark IV" },
     { 0x350, "EOS 80D"},
     { 0x382, "EOS 5DS" },
     { 0x393, "EOS 750D" },
