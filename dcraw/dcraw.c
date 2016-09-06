@@ -10827,20 +10827,9 @@ void CLASS parse_exif (int base)
         if ((fabs(ape = getreal(type))<256.0) && (!aperture))
           aperture = powf64(2.0, ape/2);
         break;
-      case 37385:  flash_used = getreal(type);        break;
+      case 37385:  flash_used = getreal(type);          break;
       case 37386:  focal_len = getreal(type);		break;
-      case 37500:  	                         // tag 0x927c
-#ifdef LIBRAW_LIBRARY_BUILD
-       if (((make[0] == '\0') && (!strncmp(model, "ov5647",6))) ||
-           ((!strncmp(make, "RaspberryPi",11)) && (!strncmp(model, "RP_imx219",9)))) {
-         char mn_text[512];
-         fgets(mn_text, len, ifp);
-         printf ("\n===>%s<===\n", mn_text);
-       }
-       else
-#endif
-        parse_makernote (base, 0);
-        break;
+      case 37500:  parse_makernote (base, 0); 		break;	// tag 0x927c
       case 40962:  if (kodak) raw_width  = get4();	break;
       case 40963:  if (kodak) raw_height = get4();	break;
       case 41730:
