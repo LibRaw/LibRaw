@@ -10832,10 +10832,17 @@ void CLASS parse_exif (int base)
       case 37500:  	                         // tag 0x927c
 #ifdef LIBRAW_LIBRARY_BUILD
        if (((make[0] == '\0') && (!strncmp(model, "ov5647",6))) ||
+           ((!strncmp(make, "RaspberryPi",11)) && (!strncmp(model, "RP_OV5647",9))) ||
            ((!strncmp(make, "RaspberryPi",11)) && (!strncmp(model, "RP_imx219",9)))) {
          char mn_text[512];
+         char* pos;
          fgets(mn_text, len, ifp);
-         printf ("\n===>%s<===\n", mn_text);
+         pos = strstr(mn_text, "gain_r=");
+         if (pos) cam_mul[0] = atof(pos+7);
+         pos = strstr(mn_text, "gain_b=");
+         if (pos) cam_mul[2] = atof(pos+7);
+         if ((cam_mul[0] > 0.001f) && (cam_mul[2] > 0.001f)) cam_mul[1] = cam_mul[3] = 1.0f;
+         else cam_mul[0] = cam_mul[2] = 0.0f;
        }
        else
 #endif
@@ -14166,8 +14173,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 10901,-4095,-1074,-1141,9208,2293,-62,1417,5158 } },
     { "Olympus XZ-2", 0, 0,
       { 9777,-3483,-925,-2886,11297,1800,-602,1663,5134 } },
-    { "OmniVision", 0, 0,		/* DJC */
-      { 12782,-4059,-379,-478,9066,1413,1340,1513,5176 } },
+    { "OmniVision", 16, 0,
+      { 12782,-4059,-379,-478,9066,1413,1340,1513,5176 } }, /* DJC */
     { "Pentax *ist DL2", 0, 0,
       { 10504,-2438,-1189,-8603,16207,2531,-1022,863,12242 } },
     { "Pentax *ist DL", 0, 0,
