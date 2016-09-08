@@ -3251,7 +3251,9 @@ libraw_processed_image_t * LibRaw::dcraw_make_mem_thumb(int *errcode)
 {
   if(!T.thumb)
     {
-      if ( !ID.toffset)
+      if ( !ID.toffset
+        && !(imgdata.thumbnail.tlength>0 && load_raw == &LibRaw::broadcom_load_raw) // RPi
+        )
         {
           if(errcode) *errcode= LIBRAW_NO_THUMBNAIL;
         }
@@ -3705,7 +3707,9 @@ void LibRaw::kodak_thumb_loader()
 int LibRaw::thumbOK(INT64 maxsz)
 {
 	if (!ID.input) return 0;
-	if (!ID.toffset) return 0;
+	if (!ID.toffset
+		&& !(imgdata.thumbnail.tlength > 0 && load_raw == &LibRaw::broadcom_load_raw) // RPi
+		) return 0;
 	INT64 fsize = ID.input->size();
 	if (fsize > 0x7fffffffU) return 0; // No thumb for raw > 2Gb
 	int tsize = 0;
