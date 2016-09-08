@@ -751,6 +751,12 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
       d_info->decoder_name = "packed_load_raw()";
       d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
     }
+  else if (load_raw == &LibRaw::broadcom_load_raw )
+    {
+      // UNTESTED
+      d_info->decoder_name = "broadcom_load_raw()";
+      d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC;
+    }
   else if (load_raw == &LibRaw::nokia_load_raw )
     {
       // UNTESTED
