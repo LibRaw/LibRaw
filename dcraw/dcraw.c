@@ -2547,7 +2547,6 @@ void CLASS parse_broadcom () {
   } header;
 
   header.bayer_order = 0;
-  raw_stride = 0;
   fseek (ifp, 0xb0 - 0x20, SEEK_CUR);
   fread (&header, 1, sizeof(header), ifp);
   raw_stride = ((((((header.uwidth + header.padding_right)*5)+3)>>2) + 0x1f)&(~0x1f));
@@ -2568,21 +2567,18 @@ void CLASS parse_broadcom () {
   }
 }
 
-
 void CLASS broadcom_load_raw() {
 
   uchar *data, *dp;
-  int rev, dwide, row, col, c;
+  int rev, row, col, c;
 
   rev = 3 * (order == 0x4949);
-  if (raw_stride == 0) dwide = (raw_width * 5 + 1) / 4;
-  else dwide = raw_stride;
-  data = (uchar *) malloc (dwide*2);
+  data = (uchar *) malloc (raw_stride*2);
   merror (data, "broadcom_load_raw()");
 
   for (row=0; row < raw_height; row++) {
-    if (fread (data+dwide, 1, dwide, ifp) < dwide) derror();
-    FORC(dwide) data[c] = data[dwide+(c ^ rev)];
+    if (fread (data+raw_stride, 1, raw_stride, ifp) < raw_stride) derror();
+    FORC(raw_stride) data[c] = data[raw_stride+(c ^ rev)];
     for (dp=data, col=0; col < raw_width; dp+=5, col+=4)
       FORC4 RAW(row,col+c) = (dp[c] << 2) | (dp[4] >> (c << 1) & 3);
   }
@@ -15476,12 +15472,13 @@ void CLASS identify()
     } else
       if (!(strncmp(model,"ov5647",6) && strncmp(model,"RP_OV5647",9)) && sz >= 0x61b800 &&
         !fseek (ifp, -0x61b800, SEEK_END) &&
-	  fread (head, 1, 32, ifp) && !strcmp(head,"BRCMn")) {
+	  fread (head, 1, 0x20, ifp) && !strcmp(head,"BRCMn")) {
       strcpy (make, "Broadcom");
       if (!strncmp(model,"ov5647",6))
         strcpy (model, "RPi OV5647 v.1");
       else
         strcpy (model, "RPi OV5647 v.2");
+      if (raw_height > raw_width) flip = 5;
       data_offset = ftell(ifp) + 0x8000 - 0x20;
       parse_broadcom();
 	black = 16;
