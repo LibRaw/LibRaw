@@ -12196,6 +12196,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 11438,-3762,-1115,-2409,9914,2497,-1227,2295,5300 } },
     { "Apple QuickTake", 0, 0,		/* DJC */
       { 21392,-5653,-3353,2406,8010,-415,7166,1427,2078 } },
+    { "Broadcom RPi OV5647", 16, 0,
+      { 12782,-4059,-379,-478,9066,1413,1340,1513,5176 } }, /* DJC */
     { "Canon EOS D2000", 0, 0,
       { 24542,-10860,-3401,-1490,11370,-297,2858,-605,3225 } },
     { "Canon EOS D6000", 0, 0,
@@ -14134,7 +14136,8 @@ void CLASS identify()
     if (!strncmp(model,"RP_imx219",9) && sz >= 0x9cb600 &&
         !fseek (ifp, -0x9cb600, SEEK_END) &&
 	  fread (head, 1, 0x20, ifp) && !strcmp(head,"BRCMo")) {
-	strcpy (make, "Sony");
+	strcpy (make, "Broadcom");
+	strcpy (model, "RPi IMX219");
 	if (raw_height > raw_width) flip = 5;
 	data_offset = ftell(ifp) + 0x8000 - 0x20;
 	parse_broadcom();
@@ -14144,8 +14147,22 @@ void CLASS identify()
       thumb_offset = 0;
       thumb_length = sz - 0x9cb600 - 1;
     } else
-#endif
-
+      if (!(strncmp(model,"ov5647",6) && strncmp(model,"RP_OV5647",9)) && sz >= 0x61b800 &&
+        !fseek (ifp, -0x61b800, SEEK_END) &&
+	  fread (head, 1, 32, ifp) && !strcmp(head,"BRCMn")) {
+      strcpy (make, "Broadcom");
+      if (!strncmp(model,"ov5647",6))
+        strcpy (model, "RPi OV5647 v.1");
+      else
+        strcpy (model, "RPi OV5647 v.2");
+      data_offset = ftell(ifp) + 0x8000 - 0x20;
+      parse_broadcom();
+	black = 16;
+	maximum = 0x3ff;
+	load_raw = &CLASS broadcom_load_raw;
+      thumb_offset = 0;
+      thumb_length = sz - 0x61b800 - 1;
+#else
     if (!(strncmp(model,"ov",2) && strncmp(model,"RP_OV",5)) && sz>=6404096 &&
         !fseek (ifp, -6404096, SEEK_END) &&
 	  fread (head, 1, 32, ifp) && !strcmp(head,"BRCMn")) {
@@ -14155,6 +14172,7 @@ void CLASS identify()
       raw_width = 2611;
       load_raw = &CLASS nokia_load_raw;
       filters = 0x16161616;
+#endif
     } else is_raw = 0;
   }
 #ifdef LIBRAW_LIBRARY_BUILD
