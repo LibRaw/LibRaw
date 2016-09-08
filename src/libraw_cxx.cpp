@@ -3738,7 +3738,9 @@ int LibRaw::unpack_thumb(void)
     if(!libraw_internal_data.internal_data.input)
       return LIBRAW_INPUT_CLOSED;
 
-    if ( !ID.toffset)
+    if ( !ID.toffset && 
+		!(imgdata.thumbnail.tlength>0 && load_raw == &LibRaw::broadcom_load_raw) // RPi
+		)
       {
         return LIBRAW_NO_THUMBNAIL;
       }
