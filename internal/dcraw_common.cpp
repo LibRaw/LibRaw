@@ -14131,7 +14131,7 @@ void CLASS identify()
 #ifdef LIBRAW_LIBRARY_BUILD
     if (!strncmp(model,"RP_imx219",9) && sz >= 0x9cb600 &&
         !fseek (ifp, -0x9cb600, SEEK_END) &&
-	  fread (head, 1, 0x20, ifp) && !strcmp(head,"BRCMo")) {
+	  fread (head, 1, 0x20, ifp) && !strncmp(head, "BRCM", 4)) {
 	strcpy (make, "Broadcom");
 	strcpy (model, "RPi IMX219");
 	if (raw_height > raw_width) flip = 5;
@@ -14145,7 +14145,7 @@ void CLASS identify()
     } else
       if (!(strncmp(model,"ov5647",6) && strncmp(model,"RP_OV5647",9)) && sz >= 0x61b800 &&
         !fseek (ifp, -0x61b800, SEEK_END) &&
-	  fread (head, 1, 0x20, ifp) && !strcmp(head,"BRCMn")) {
+	  fread (head, 1, 0x20, ifp) && !strncmp(head, "BRCM", 4)) {
       strcpy (make, "Broadcom");
       if (!strncmp(model,"ov5647",6))
         strcpy (model, "RPi OV5647 v.1");
