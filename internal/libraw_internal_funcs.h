@@ -144,6 +144,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        parse_phase_one (int base);
 
 // Misc P&S cameras
+    void        parse_broadcom();
+    void        broadcom_load_raw();
     void        nokia_load_raw();
     void        android_loose_load_raw();
     void        android_tight_load_raw();

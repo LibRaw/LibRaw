@@ -106,8 +106,6 @@ ushort CLASS sget2 (uchar *s)
 #define AdobeDNG	2
 
 #ifdef LIBRAW_LIBRARY_BUILD
-
-
 static int getwords(char *line, char *words[], int maxwords)
 {
   char *p = line;
@@ -2243,6 +2241,70 @@ void CLASS packed_load_raw()
   }
 }
 
+#ifdef LIBRAW_LIBRARY_BUILD
+
+ushort raw_stride;
+
+void CLASS parse_broadcom () {
+
+/* This structure is at offset 0xb0 from the 'BRCM' ident. */
+  struct {
+    uint8_t umode[32];
+    uint16_t uwidth;
+    uint16_t uheight;
+    uint16_t padding_right;
+    uint16_t padding_down;
+    uint32_t unknown_block[6];
+    uint16_t transform;
+    uint16_t format;
+    uint8_t bayer_order;
+    uint8_t bayer_format;
+  } header;
+
+  header.bayer_order = 0;
+  raw_stride = 0;
+  fseek (ifp, 0xb0 - 0x20, SEEK_CUR);
+  fread (&header, 1, sizeof(header), ifp);
+  raw_stride = ((((((header.uwidth + header.padding_right)*5)+3)>>2) + 0x1f)&(~0x1f));
+  raw_width = width = header.uwidth;
+  raw_height = height = header.uheight;
+  filters = 0x16161616;  /* default Bayer order is 2, BGGR */
+
+  switch (header.bayer_order) {
+    case 0: /* RGGB */
+      filters = 0x94949494;
+      break;
+    case 1: /* GBRG */
+      filters = 0x49494949;
+      break;
+    case 3: /* GRBG */
+      filters = 0x61616161;
+      break;
+  }
+}
+
+
+void CLASS broadcom_load_raw() {
+
+  uchar *data, *dp;
+  int rev, dwide, row, col, c;
+
+  rev = 3 * (order == 0x4949);
+  if (raw_stride == 0) dwide = (raw_width * 5 + 1) / 4;
+  else dwide = raw_stride;
+  data = (uchar *) malloc (dwide*2);
+  merror (data, "broadcom_load_raw()");
+
+  for (row=0; row < raw_height; row++) {
+    if (fread (data+dwide, 1, dwide, ifp) < dwide) derror();
+    FORC(dwide) data[c] = data[dwide+(c ^ rev)];
+    for (dp=data, col=0; col < raw_width; dp+=5, col+=4)
+      FORC4 RAW(row,col+c) = (dp[c] << 2) | (dp[4] >> (c << 1) & 3);
+  }
+  free (data);
+}
+#endif
+
 void CLASS nokia_load_raw()
 {
   uchar  *data,  *dp;
@@ -3832,6 +3894,12 @@ sides:
     mask[0][2] = top_margin;
     mask[0][3] = width;
   }
+#ifdef LIBRAW_LIBRARY_BUILD
+  if (load_raw == &CLASS broadcom_load_raw) {
+    mask[0][2] = top_margin;
+    mask[0][3] = width;
+  }
+#endif
 mask_set:
   memset (mblack, 0, sizeof mblack);
   for (zero=m=0; m < 8; m++)
@@ -11938,13 +12006,13 @@ int CLASS parse_jpeg (int offset)
     order = get2();
     hlen  = get4();
     if (get4() == 0x48454150)		/* "HEAP" */
-		{
+    {
 #ifdef LIBRAW_LIBRARY_BUILD
-			imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-			imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
 #endif
       parse_ciff (save+hlen, len-hlen, 0);
-		}
+    }
     if (parse_tiff (save+6)) apply_tiff();
     fseek (ifp, save+len, SEEK_SET);
   }
@@ -14062,9 +14130,25 @@ void CLASS identify()
     parse_jpeg(0);
     fseek(ifp,0,SEEK_END);
     int sz = ftell(ifp);
+#ifdef LIBRAW_LIBRARY_BUILD
+    if (!strncmp(model,"RP_imx219",9) && sz >= 0x9cb600 &&
+        !fseek (ifp, -0x9cb600, SEEK_END) &&
+	  fread (head, 1, 0x20, ifp) && !strcmp(head,"BRCMo")) {
+	strcpy (make, "Sony");
+	if (raw_height > raw_width) flip = 5;
+	data_offset = ftell(ifp) + 0x8000 - 0x20;
+	parse_broadcom();
+	black = 66;
+	maximum = 0x3ff;
+	load_raw = &CLASS broadcom_load_raw;
+//      thumb_offset = 0;
+//      thumb_length = sz - 0x9cb600 - 1;
+    } else
+#endif
+
     if (!(strncmp(model,"ov",2) && strncmp(model,"RP_OV",5)) && sz>=6404096 &&
         !fseek (ifp, -6404096, SEEK_END) &&
-	fread (head, 1, 32, ifp) && !strcmp(head,"BRCMn")) {
+	  fread (head, 1, 32, ifp) && !strcmp(head,"BRCMn")) {
       strcpy (make, "OmniVision");
       data_offset = ftell(ifp) + 0x8000-32;
       width = raw_width;
