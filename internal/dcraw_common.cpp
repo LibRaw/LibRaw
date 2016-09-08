@@ -14141,8 +14141,8 @@ void CLASS identify()
 	black = 66;
 	maximum = 0x3ff;
 	load_raw = &CLASS broadcom_load_raw;
-//      thumb_offset = 0;
-//      thumb_length = sz - 0x9cb600 - 1;
+      thumb_offset = 0;
+      thumb_length = sz - 0x9cb600 - 1;
     } else
 #endif
 
