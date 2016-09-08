@@ -13519,8 +13519,11 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 11438,-3762,-1115,-2409,9914,2497,-1227,2295,5300 } },
     { "Apple QuickTake", 0, 0,		/* DJC */
       { 21392,-5653,-3353,2406,8010,-415,7166,1427,2078 } },
-    { "Broadcom RPi OV5647", 16, 0,
+    { "Broadcom RPi OV5647", 16, 0x3ff,
       { 12782,-4059,-379,-478,9066,1413,1340,1513,5176 } }, /* DJC */
+{"Broadcom RPi IMX219", 66, 0x3ff,
+// { 6434,165,-855,-4539,13515,1542,-905,2443,5131 } },  /* LibRaw devOther CC24Classic_CT_6500_Observer_cie_1931 */
+{ 5302,1083,-728,-5320,14112,1699,-863,2371,5136 } },  /* LibRaw devOther CC24Classic_CT_4000_Observer_cie_1931 */
     { "Canon EOS D2000", 0, 0,
       { 24542,-10860,-3401,-1490,11370,-297,2858,-605,3225 } },
     { "Canon EOS D6000", 0, 0,
