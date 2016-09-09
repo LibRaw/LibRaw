@@ -5154,6 +5154,8 @@ static const char  *static_camera_list[] =
 "Photron BC2-HD",
 "Pixelink A782",
 "Polaroid x530",
+"RaspberryPi Camera",
+"RaspberryPi Camera V2",
 "Ricoh GR",
 "Ricoh GR Digital",
 "Ricoh GR Digital II",
