@@ -121,13 +121,13 @@ regenerate:
 	${PP} -N -DFILEIO dcraw/dcraw.c >internal/dcraw_fileio.cpp
 
 internal/defines.h: dcraw/dcraw.c  ${PP}
-	${PP} -DDEFINES dcraw/dcraw.c  >internal/defines.h
+	${PP} -N -DDEFINES dcraw/dcraw.c  >internal/defines.h
 
 internal/dcraw_common.cpp: dcraw/dcraw.c internal/defines.h  ${PP} Makefile.devel
 	${PP} -N -DCOMMON dcraw/dcraw.c >internal/dcraw_common.cpp
 
 internal/dcraw_fileio.cpp: dcraw/dcraw.c internal/defines.h  ${PP} Makefile.devel
-	${PP} -DFILEIO dcraw/dcraw.c >internal/dcraw_fileio.cpp
+	${PP} -N -DFILEIO dcraw/dcraw.c >internal/dcraw_fileio.cpp
 
 object/dcraw_common.o: internal/dcraw_common.cpp ${LR_INCLUDES}
 	$(CXX) -c -DLIBRAW_NOTHREADS ${CFLAGS} ${LCMS_DEF} -o object/dcraw_common.o internal/dcraw_common.cpp
