@@ -459,6 +459,9 @@ LibRaw:: LibRaw(unsigned int flags)
   _exitflag = 0;
   tls = new LibRaw_TLS;
   tls->init();
+
+  interpolate_bayer = 0;
+  interpolate_xtrans = 0;
 }
 
 int LibRaw::set_rawspeed_camerafile(char *filename)
@@ -614,6 +617,8 @@ void LibRaw:: recycle()
   memmgr.cleanup();
   imgdata.thumbnail.tformat = LIBRAW_THUMBNAIL_UNKNOWN;
   imgdata.progress_flags = 0;
+
+  load_raw = thumb_load_raw = 0;
 
   tls->init();
 }
@@ -4300,7 +4305,12 @@ int LibRaw::dcraw_process(void)
     if (P1.filters  && !O.no_interpolation)
       {
         if (noiserd>0 && P1.colors==3 && P1.filters) fbdd(noiserd);
-        if (quality == 0)
+
+		if(P1.filters>1000 && interpolate_bayer)
+			(this->*interpolate_bayer)();
+		else if(P1.filters==9 && interpolate_xtrans)
+			(this->*interpolate_xtrans)();
+        else if (quality == 0)
           lin_interpolate();
         else if (quality == 1 || P1.colors > 3)
           vng_interpolate();
