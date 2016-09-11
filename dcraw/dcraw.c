@@ -16013,9 +16013,10 @@ konica_400z:
   } else if (strstr(model,"WB550")) {
     strcpy (model, "WB550");
   } else if (!strcmp(model,"EX2F")) {
-    height = 3045;
-    width  = 4070;
-    top_margin = 3;
+    height = 3030;
+    width  = 4040;
+    top_margin = 15;
+    left_margin=24;
     order = 0x4949;
     filters = 0x49494949;
     load_raw = &CLASS unpacked_load_raw;
