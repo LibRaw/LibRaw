@@ -5241,6 +5241,7 @@ static const char  *static_camera_list[] =
 "Sigma dp1 Quattro",
 "Sigma dp2 Quattro",
 "Sigma dp3 Quattro",
+"Sigma sd Quattro",
 "Sinar eMotion 22",
 "Sinar eMotion 54",
 "Sinar eSpirit 65",
