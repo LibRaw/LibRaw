@@ -217,6 +217,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        x3f_load_raw();
     void        x3f_dpq_interpolate_rg();
 	void        x3f_dpq_interpolate_af(int xstep, int ystep, int scale); // 1x1 af pixels
+	void        x3f_dpq_interpolate_af_sd(int xstart,int ystart, int xend, int yend, int xstep, int ystep, int scale); // sd Quattro interpolation
 
 // CAM/RGB
     void        pseudoinverse (double (*in)[3], double (*out)[3], int size);

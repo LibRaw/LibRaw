@@ -1739,6 +1739,9 @@ struct foveon_data_t
   {"Sigma","dp1 Quattro",2944,1836,16383,102,12,2723,1812}, // half size
   {"Sigma","dp0 Quattro",5888,3672,16383,204,24,5446,3624}, // full size
   {"Sigma","dp0 Quattro",2944,1836,16383,102,12,2723,1812}, // half size
+  // Sigma sd Quattro
+  {"Sigma","sd Quattro",5888,3776,16383,204,76,5446,3624}, // full size
+  {"Sigma","sd Quattro",2944,1888,16383,102,38,2723,1812}, // half size
 };
 const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
@@ -5561,10 +5564,15 @@ void LibRaw::parse_x3f()
 		  libraw_internal_data.internal_data.input->read(buf,2048,1);
 		  libraw_internal_data.internal_data.input->seek(pos,SEEK_SET);
 		  unsigned char *fnd=(unsigned char*)lr_memmem(buf,2048,"SIGMA dp",8);
+		  unsigned char *fndsd=(unsigned char*)lr_memmem(buf,2048,"sd Quatt",8);
 		  if(fnd)
 		  {
 			  unsigned char *nm = fnd+8;
 			  snprintf(imgdata.idata.model,64,"dp%c Quattro",*nm<='9' && *nm >='0' ? *nm: '2');
+		  }
+		  else if(fndsd)
+		  {
+			  snprintf(imgdata.idata.model,64,"sd Quattro");
 		  }
 		  else
 #endif
@@ -5743,6 +5751,62 @@ void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep, int scale)
 		}
 }
 
+void LibRaw::x3f_dpq_interpolate_af_sd(int xstart,int ystart, int xend, int yend, int xstep, int ystep, int scale)
+{
+	unsigned short *image = (ushort*)imgdata.rawdata.color3_image;
+	unsigned int rowpitch = imgdata.rawdata.sizes.raw_pitch/2; // in 16-bit words
+	// Interpolate single pixel
+	for(int y = ystart;  y< yend && y < imgdata.rawdata.sizes.height+imgdata.rawdata.sizes.top_margin; y+=ystep)
+	{
+		uint16_t* row0 = &image[imgdata.sizes.raw_width*3*y]; // Наша строка
+		uint16_t* row1 = &image[imgdata.sizes.raw_width*3*(y+1)]; // Следующая строка
+		uint16_t* row_minus = &image[imgdata.sizes.raw_width*3*(y-scale)]; // Строка выше
+		uint16_t* row_plus = &image[imgdata.sizes.raw_width*3*(y+scale)]; // Строка ниже AF-point (scale=2 -> ниже row1
+		uint16_t* row_minus1 = &image[imgdata.sizes.raw_width*3*(y-1)]; 
+		for(int x = xstart; x< xend && x < imgdata.rawdata.sizes.width+imgdata.rawdata.sizes.left_margin; x+= xstep)
+		{
+			uint16_t* pixel00 = &row0[x*3]; // Current pixel
+			float sumR = 0.f,sumG=0.f;
+			for(int xx = -scale; xx <= scale; xx+= scale)
+			{
+				sumR += row_minus[(x+xx)*3];
+				sumR += row_plus[(x+xx)*3];
+				sumG += row_minus[(x+xx)*3+1];
+				sumG += row_plus[(x+xx)*3+1];
+				if(xx)
+				{
+					sumR += row0[(x+xx)*3];
+					sumG += row0[(x+xx)*3+1];
+				}
+			}
+			pixel00[0] = sumR/8.f;
+			pixel00[1] = sumG/8.f;
+
+			uint16_t* pixel0G = &row0[x*3+3]; // right pixel
+			if(scale == 2)
+			{
+				uint16_t* pixel1G = &row1[x*3+3]; // right pixel
+				float sumG0 = 0, sumG1 = 0.f;
+				for(int xx = -scale; xx <= scale; xx+= scale)
+				{
+					sumG0 += row_minus1[(x+xx)*3+2];
+					sumG0 += row_plus[(x+xx)*3+2];
+					if(xx)
+					{
+						sumG0 += row0[(x+xx)*3+2];
+						sumG1 += row1[(x+xx)*3+2];
+					}
+				}
+				pixel0G[2] = sumG0/5.f;
+				pixel1G[2] = sumG1/5.f;
+			}
+
+			//			uint16_t* pixel10 = &row1[x*3]; // Pixel below current
+//			uint16_t* pixel_bottom = &row_plus[x*3];
+		}
+	}
+}
+
 
 void LibRaw::x3f_load_raw()
 {
@@ -5754,6 +5818,9 @@ void LibRaw::x3f_load_raw()
       x3f_directory_entry_t *DE = x3f_get_raw(x3f);
       x3f_directory_entry_header_t *DEH = &DE->header;
       x3f_image_data_t *ID = &DEH->data_subsection.image_data;
+	  if(!ID)
+		  throw LIBRAW_EXCEPTION_IO_CORRUPT;
+	  x3f_quattro_t *Q = ID->quattro;
       x3f_huffman_t *HUF = ID->huffman;
       x3f_true_t *TRU = ID->tru;
       uint16_t *data = NULL;
@@ -5763,38 +5830,72 @@ void LibRaw::x3f_load_raw()
           goto end;
         }
       if (HUF != NULL)
-        data = HUF->x3rgb16.element;
+        data = HUF->x3rgb16.data;
       if (TRU != NULL)
-        data = TRU->x3rgb16.element;
+        data = TRU->x3rgb16.data;
       if (data == NULL)
         {
           raise_error = 1;
           goto end;
-        }
-      imgdata.rawdata.color3_image = (ushort (*)[3])data;
+        } 
 
-	  if(!strcasecmp(imgdata.idata.make,"Sigma")
-		  && !strncasecmp(imgdata.idata.model,"dp",2)  && !strncasecmp(imgdata.idata.model+4,"Quattro",7)
-		  && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF)
-		  )
+	  size_t datasize = S.raw_height*S.raw_width*3*sizeof(unsigned short);
+	  S.raw_pitch = S.raw_width*3*sizeof(unsigned short);
+	  if(!(imgdata.rawdata.raw_alloc = malloc(datasize)))
+		  throw LIBRAW_EXCEPTION_ALLOC;
+
+      imgdata.rawdata.color3_image = (ushort (*)[3])imgdata.rawdata.raw_alloc;
+	  if(HUF)
+		  memmove(imgdata.rawdata.raw_alloc,data,datasize);
+	  else if(TRU && (!Q || !Q->quattro_layout))
+		  memmove(imgdata.rawdata.raw_alloc,data,datasize);
+	  else if(TRU && Q)
 	  {
-		  if(imgdata.sizes.raw_width == 5888)
+		  // Move quattro data in place
+		  // R/B plane
+		  for(int prow = 0; prow < TRU->x3rgb16.rows && prow < S.raw_height/2; prow++)
 		  {
-			  x3f_dpq_interpolate_af(32,8,2);
+			  ushort (*destrow)[3] = (unsigned short (*)[3]) &imgdata.rawdata.color3_image[prow*2*S.raw_pitch/3/sizeof(ushort)][0];
+			  ushort (*srcrow)[3] = (unsigned short (*)[3]) &data[prow*TRU->x3rgb16.row_stride];
+			  for(int pcol = 0; pcol < TRU->x3rgb16.columns && pcol < S.raw_width/2; pcol++)
+			  {
+				  destrow[pcol*2][0] = srcrow[pcol][0];
+				  destrow[pcol*2][1] = srcrow[pcol][1];
+			  }
 		  }
-		  if(imgdata.sizes.raw_width == 2944)
+		  for(int row = 0; row < Q->top16.rows && row < S.raw_height; row++)
 		  {
-			  x3f_dpq_interpolate_af(16,4,1);
+			  ushort (*destrow)[3] = (unsigned short (*)[3]) &imgdata.rawdata.color3_image[row*S.raw_pitch/3/sizeof(ushort)][0];
+			  ushort (*srcrow) = (unsigned short *) &Q->top16.data[row * Q->top16.columns];
+			  for(int col = 0; col < Q->top16.columns && col < S.raw_width; col++)
+				  destrow[col][2] = srcrow[col];
 		  }
 	  }
 
-	  if(!strcasecmp(imgdata.idata.make,"Sigma")
-		  && !strncasecmp(imgdata.idata.model,"dp",2)  && !strncasecmp(imgdata.idata.model+4,"Quattro",7)
-		  && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DP2Q_INTERPOLATERG)
-		  && (imgdata.sizes.raw_width== 5888)
+#if 1
+	  if(TRU && Q  && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF) 
 		  )
+	  {
+		  if(imgdata.sizes.raw_width == 5888 && imgdata.sizes.raw_height == 3672) // dpN Quattro normal
+		  {
+			  x3f_dpq_interpolate_af(32,8,2);
+		  }
+		  else if(imgdata.sizes.raw_width == 5888 && imgdata.sizes.raw_height == 3776) // sd Quattro normal raw
+		  {
+			  x3f_dpq_interpolate_af_sd(216,464,imgdata.sizes.width+464,3312,16,32,2);
+		  }
+		  else if(imgdata.sizes.raw_width == 2944 && imgdata.sizes.raw_height == 1836) // dpN Quattro small raw
+		  {
+			  x3f_dpq_interpolate_af(16,4,1);
+		  }
+		  else if(imgdata.sizes.raw_width == 2944 && imgdata.sizes.raw_height == 1888) // sd Quattro small
+		  {
+			  x3f_dpq_interpolate_af_sd(108,232,imgdata.sizes.width+232,1656,8,16,1);
+		  }
+	  }
+#endif
+	  if(TRU && Q && Q->quattro_layout  && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DP2Q_INTERPOLATERG)  )
 			x3f_dpq_interpolate_rg();
-
 
   }
   else
