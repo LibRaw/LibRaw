@@ -14282,6 +14282,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 8170,-2725,-639,-4440,12017,2744,-771,1465,6599 } },
     { "Pentax K-5", 0, 0,
       { 8713,-2833,-743,-4342,11900,2772,-722,1543,6247 } },
+    { "Pentax K-70", 0, 0,
+      {8049, -2060,-1264,-4358, 12953, 1514, -1096, 1965, 6074 }},
     { "Pentax K-7", 0, 0,
       { 9142,-2947,-678,-8648,16967,1663,-2224,2898,8615 } },
     { "Pentax K-S1", 0, 0,
@@ -15544,6 +15546,8 @@ void CLASS identify()
     {			width  = 4309; filters = 0x16161616; }
   if (width >= 4960 && !strncmp(model,"K-5",3))
     { left_margin = 10; width  = 4950; filters = 0x16161616; }
+  if (width == 6080 && !strcmp(model,"K-70"))
+     { height  = 4016; top_margin=32; width=6020; left_margin = 60; }
   if (width == 4736 && !strcmp(model,"K-7"))
     { height  = 3122;   width  = 4684; filters = 0x16161616; top_margin = 2; }
   if (width == 6080 && !strcmp(model,"K-3 II")) /* moved back */
