@@ -6998,7 +6998,8 @@ void CLASS setCanonBodyFeatures (unsigned id)
                 (id == 0x80000331) ||	// M
                 (id == 0x80000355) ||	// M2
                 (id == 0x80000374) || 	// M3
-                (id == 0x80000384)  	// M10
+                (id == 0x80000384) || 	// M10
+                (id == 0x80000394)  	// M5
                 )
               {
                 imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -8262,6 +8263,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             unique_id = get4();
             if (unique_id == 0x03740000) unique_id = 0x80000374;	// M3
             if (unique_id == 0x03840000) unique_id = 0x80000384;	// M10
+            if (unique_id == 0x03940000) unique_id = 0x80000394;	// M5
             setCanonBodyFeatures(unique_id);
             if (lenCanonCameraInfo)
               {
@@ -10135,6 +10137,7 @@ void CLASS parse_makernote (int base, int uptag)
 #ifdef LIBRAW_LIBRARY_BUILD
         if (unique_id == 0x03740000) unique_id = 0x80000374;
         if (unique_id == 0x03840000) unique_id = 0x80000384;
+        if (unique_id == 0x03940000) unique_id = 0x80000394;
         setCanonBodyFeatures(unique_id);
         if (lenCanonCameraInfo)
           {
@@ -13599,6 +13602,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 6939, -1016, -866, -4428, 12473, 2177, -1175, 2178, 6162 } },
     { "Canon EOS M3", 0, 0,
       { 6362,-823,-847,-4426,12109,2616,-743,1857,5635 } },
+    { "Canon EOS M5", 0, 0,  /* temp, copy from Canon 80D */
+      { 7457,-671,-937,-4849,12495,2643,-1213,2354,5492 } },
     { "Canon EOS M10", 0, 0,
       { 6400,-480,-888,-5294,13416,2047,-1296,2203,6137 } },
     { "Canon EOS M", 0, 0,
@@ -14343,6 +14348,14 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
     { "Leica C (Typ 112)", -15, 0,
       { 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
+
+{ "Panasonic DMC-LX9", -15, 0,  /* markets: DMC-LX9, DMC-LX10, DMC-LX15 */
+      { 10148,-3743,-991,-2837,11366,1659,-701,1893,4899 } },
+{ "Panasonic DMC-LX10", -15, 0,
+      { 10148,-3743,-991,-2837,11366,1659,-701,1893,4899 } },
+{ "Panasonic DMC-LX15", -15, 0,
+      { 10148,-3743,-991,-2837,11366,1659,-701,1893,4899 } },
+
     { "Panasonic DMC-LX1", 0, 0xf7f,
       { 10704,-4187,-1230,-8314,15952,2501,-920,945,8927 } },
     { "Leica D-Lux (Typ 109)", 0, 0xf7f,
@@ -14930,6 +14943,7 @@ void CLASS identify()
     { 0x335, "EOS M2" },
     { 0x374, "EOS M3"},   /* temp */
     { 0x384, "EOS M10"},  /* temp */
+    { 0x394, "EOS M5"},   /* temp */
     { 0x346, "EOS 100D" },
     { 0x347, "EOS 760D" },
     { 0x349, "EOS 5D Mark IV" },
