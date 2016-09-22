@@ -3350,17 +3350,32 @@ int LibRaw::dcraw_ppm_tiff_writer(const char *filename)
   if(!filename)
     return ENOENT;
   FILE *f = fopen(filename,"wb");
+  return dcraw_ppm_tiff_writer(f);
+}
 
+int LibRaw::dcraw_ppm_tiff_writer(int fd)
+{
+  CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
+
+  if(!imgdata.image)
+    return LIBRAW_OUT_OF_ORDER_CALL;
+
+  FILE *f = fdopen(fd,"wb");
+  return dcraw_ppm_tiff_writer(f);
+}
+
+int LibRaw::dcraw_ppm_tiff_writer(FILE* f)
+{
   if(!f)
     return errno;
 
   try {
     if(!libraw_internal_data.output_data.histogram)
-      {
-        libraw_internal_data.output_data.histogram =
-          (int (*)[LIBRAW_HISTOGRAM_SIZE]) malloc(sizeof(*libraw_internal_data.output_data.histogram)*4);
-        merror(libraw_internal_data.output_data.histogram,"LibRaw::dcraw_ppm_tiff_writer()");
-      }
+    {
+      libraw_internal_data.output_data.histogram =
+              (int (*)[LIBRAW_HISTOGRAM_SIZE]) malloc(sizeof(*libraw_internal_data.output_data.histogram)*4);
+      merror(libraw_internal_data.output_data.histogram,"LibRaw::dcraw_ppm_tiff_writer()");
+    }
     libraw_internal_data.internal_data.output = f;
     write_ppm_tiff();
     SET_PROC_FLAG(LIBRAW_PROGRESS_FLIP);

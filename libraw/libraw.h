@@ -161,6 +161,7 @@ class DllDef LibRaw
     static const char*          strerror(int p);
     /* dcraw emulation */
     int                         dcraw_ppm_tiff_writer(const char *filename);
+    int                         dcraw_ppm_tiff_writer(int fd);
     int                         dcraw_thumb_writer(const char *fname);
     int                         dcraw_process(void);
     /* information calls */
@@ -269,6 +270,7 @@ protected:
     
     int         own_filtering_supported(){ return 0;}
     void        identify();
+    int         dcraw_ppm_tiff_writer(FILE* f);
     void        write_ppm_tiff ();
     void        convert_to_rgb();
     void        remove_zeroes();
