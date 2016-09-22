@@ -373,6 +373,7 @@ typedef struct
   float        cam_mul[4];
   float        pre_mul[4];
   float        cmatrix[3][4];
+  float        ccm[3][4];
   float        rgb_cam[3][4];
   float        cam_xyz[4][3];
   struct ph1_t       phase_one_data;

@@ -9592,10 +9592,14 @@ get2_256:
              imgdata.color.linear_max[1]=
              imgdata.color.linear_max[2]=
              imgdata.color.linear_max[3]= get4() - SamsungKey[0];
-#endif
-        if (tag == 0xa030 && len == 9)	// get and decode Samsung color matrix
+        if (tag == 0xa030 && len == 9)
             for (i=0; i < 3; i++)
-              FORC3 cmatrix[i][c] = (short)((get4() + SamsungKey[i*3+c]))/256.0;
+              FORC3 imgdata.color.ccm[i][c] = (float)((short)((get4() + SamsungKey[i*3+c])))/256.0;
+#endif
+        if (tag == 0xa031 && len == 9)	// get and decode Samsung color matrix
+            for (i=0; i < 3; i++)
+              FORC3 cmatrix[i][c] = (float)((short)((get4() + SamsungKey[i*3+c])))/256.0;
+
         if (tag == 0xa028)
           FORC4 cblack[c ^ (c >> 1)] = get4() - SamsungKey[c];
       }
@@ -9744,11 +9748,11 @@ void CLASS parse_exif (int base)
          for (l=0; l<4; l++) {
            num = 0.0;
            for (c=0; c<3; c++) {
-             cmatrix[l][c] = (float)atoi(pos);
-             num += cmatrix[l][c];
+             imgdata.color.ccm[l][c] = (float)atoi(pos);
+             num += imgdata.color.ccm[l][c];
              pos = strtok (NULL, ",");
            }
-           if (num > 0.01) FORC3 cmatrix[l][c] = cmatrix[l][c] / num;
+           if (num > 0.01) FORC3 imgdata.color.ccm[l][c] = imgdata.color.ccm[l][c] / num;
          }
        }
        else
@@ -10493,13 +10497,18 @@ int CLASS parse_tiff_ifd (int base)
 	i = (cam_mul[1] == 1024 && cam_mul[2] == 1024) << 1;
 	SWAP (cam_mul[i],cam_mul[i+1])
 	break;
+#ifdef LIBRAW_LIBRARY_BUILD
     case 30720: // Sony matrix, Sony_SR2SubIFD_0x7800
-      for (i=0; i < 3; i++)
-        FORC3 cmatrix[i][c] = ((short) get2()) / 1024.0;
-#ifdef DCRAW_VERBOSE
-	if (verbose) fprintf (stderr, _(" Sony matrix:\n%f %f %f\n%f %f %f\n%f %f %f\n"), cmatrix[0][0],  cmatrix[0][1], cmatrix[0][2], cmatrix[1][0], cmatrix[1][1], cmatrix[1][2], cmatrix[2][0], cmatrix[2][1], cmatrix[2][2]);
+      for (i=0; i < 3; i++) {
+        float num = 0.0;
+        for (c=0; c<3; c++) {
+          imgdata.color.ccm[i][c] = (float) ((short)get2());
+          num += imgdata.color.ccm[i][c];
+        }
+        if (num > 0.01) FORC3 imgdata.color.ccm[i][c] = imgdata.color.ccm[i][c] / num;
+      }
+      break;
 #endif
-	break;
     case 29456: // Sony black level, Sony_SR2SubIFD_0x7310, no more needs to be divided by 4
       FORC4 cblack[c ^ c >> 1] = get2();
       i = cblack[3];
