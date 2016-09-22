@@ -9723,6 +9723,10 @@ void CLASS parse_exif (int base)
            ((!strncmp(make, "RaspberryPi",11)) && (!strncmp(model, "RP_imx219",9)))) {
          char mn_text[512];
          char* pos;
+         char ccms[512];
+         ushort l;
+         float num;
+
          fgets(mn_text, len, ifp);
          pos = strstr(mn_text, "gain_r=");
          if (pos) cam_mul[0] = atof(pos+7);
@@ -9730,6 +9734,22 @@ void CLASS parse_exif (int base)
          if (pos) cam_mul[2] = atof(pos+7);
          if ((cam_mul[0] > 0.001f) && (cam_mul[2] > 0.001f)) cam_mul[1] = cam_mul[3] = 1.0f;
          else cam_mul[0] = cam_mul[2] = 0.0f;
+
+         pos = strstr(mn_text, "ccm=") + 4;
+         l = strstr(pos, " ") - pos;
+         memcpy (ccms, pos, l);
+         ccms[l] = '\0';
+
+         pos = strtok (ccms, ",");
+         for (l=0; l<4; l++) {
+           num = 0.0;
+           for (c=0; c<3; c++) {
+             cmatrix[l][c] = (float)atoi(pos);
+             num += cmatrix[l][c];
+             pos = strtok (NULL, ",");
+           }
+           if (num > 0.01) FORC3 cmatrix[l][c] = cmatrix[l][c] / num;
+         }
        }
        else
 #endif
