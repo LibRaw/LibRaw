@@ -341,6 +341,7 @@ typedef struct
   double       AFPointSelected[5];
   ushort       AFResult;
   unsigned     ImageStabilization;
+  ushort       ColorSpace;
 } libraw_olympus_makernotes_t;
 
 typedef struct

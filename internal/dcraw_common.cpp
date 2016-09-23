@@ -7867,12 +7867,6 @@ void CLASS parse_makernote (int base, int uptag)
   short morder, sorder=order;
   char buf[10];
   unsigned SamsungKey[11];
-  static const double rgb_adobe[3][3] =		// inv(sRGB2XYZ_D65) * AdobeRGB2XYZ_D65
-    {{ 1.398283396477404,     -0.398283116703571, 4.427165001263944E-08},
-     {-1.233904514232401E-07,  0.999999995196570, 3.126724276714121e-08},
-     { 4.561487232726535E-08, -0.042938290466635, 1.042938250416105    }};
-
-  float adobe_cam [3][3];
   uchar NikonKey;
 
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -8974,6 +8968,9 @@ void CLASS parse_makernote (int base, int uptag)
 	if (!strncasecmp(make,"Olympus",7))
 	{
 	  short nWB, tWB;
+	  if ((tag == 0x20300108) || (tag == 0x20310109))
+	      imgdata.makernotes.olympus.ColorSpace = get2();
+
 	  if ((tag == 0x20400102) && (len == 2) &&
 	      (!strncasecmp(model, "E-410", 5) || !strncasecmp(model, "E-510", 5)))
 	    {
@@ -9495,21 +9492,15 @@ void CLASS parse_makernote (int base, int uptag)
       goto get2_256;
     }
     if ((tag == 0x1011 && len == 9) || tag == 0x20400200)
-      {
-        if(!strncasecmp(make,"Olympus", 7))
-          {
-            int j,k;
-            for (i=0; i < 3; i++)
-              FORC3 adobe_cam[i][c] = ((short) get2()) / 256.0;
-            for (i=0; i < 3; i++)
-              for (j=0; j < 3; j++)
-                for (cmatrix[i][j] = k=0; k < 3; k++)
-                  cmatrix[i][j] += rgb_adobe[i][k] * adobe_cam[k][j];
-          }
-        else
           for (i=0; i < 3; i++)
+#ifdef LIBRAW_LIBRARY_BUILD
+           if (!imgdata.makernotes.olympus.ColorSpace)
+#endif
             FORC3 cmatrix[i][c] = ((short) get2()) / 256.0;
-      }
+#ifdef LIBRAW_LIBRARY_BUILD
+           else
+            FORC3 imgdata.color.ccm[i][c] = ((short) get2()) / 256.0;
+#endif
     if ((tag == 0x1012 || tag == 0x20400600) && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x1017 || tag == 0x20400100)
@@ -9533,7 +9524,11 @@ get2_256:
         fseek(ifp,_pos3,SEEK_SET);
       }
 
-    if (((tag == 0x2020) || (tag == 0x3000)) && !strncasecmp(make,"Olympus",7))
+    if (
+         ((tag == 0x2020) || (tag == 0x3000) || (tag == 0x2030) || (tag == 0x2031)) &&
+         ((type == 7) || (type == 13)) &&
+         !strncasecmp(make,"Olympus",7)
+       )
       {
         INT64 _pos3 = ftell(ifp);
         parse_makernote(base, tag);
