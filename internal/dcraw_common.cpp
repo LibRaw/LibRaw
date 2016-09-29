@@ -6620,6 +6620,7 @@ void CLASS setSonyBodyFeatures (unsigned id) {
       (id == 299) ||		// NEX-VG900
       (id == 310) ||		// DSC-RX1R
       (id == 344) ||		// DSC-RX1RM2
+      (id == 354) ||		// ILCA-99M2
       (id == 294)		// SLT-99, Hasselblad HV
       )
     {
@@ -6720,7 +6721,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
     }
   else if (	// A-mount cameras, ILCA series
            (id == 319)  ||
-           (id == 353)
+           (id == 353)  ||
+           (id == 354)
           )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
@@ -13713,6 +13715,7 @@ void CLASS identify()
     { 0x15b, "ILCE-7RM2" },
     { 0x15e, "ILCE-7SM2" },
     { 0x161, "ILCA-68" },
+    { 0x162, "ILCA-99M2" },
     { 0x163, "DSC-RX10M3" },
     { 0x165, "ILCE-6300" },
   };
