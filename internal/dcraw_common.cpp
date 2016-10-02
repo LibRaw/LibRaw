@@ -6096,7 +6096,7 @@ void CLASS Canon_WBpresets (int skip1, int skip2)
   if (skip1) fseek(ifp, skip1, SEEK_CUR);
   FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c ^ (c >> 1)] = get2();
   if (skip1) fseek(ifp, skip1, SEEK_CUR);
-  FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][c ^ (c >> 1)] = get2();
+  FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][c ^ (c >> 1)] = get2();
   if (skip2) fseek(ifp, skip2, SEEK_CUR);
   FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c ^ (c >> 1)] = get2();
   return;
@@ -6124,7 +6124,8 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 	    }
 	else if ((WBCTversion == 2) &&
 		((unique_id == 0x80000374) ||	// M3
-		 (unique_id == 0x80000384)))	// M10
+		 (unique_id == 0x80000384) ||	// M10
+		 (unique_id == 0x03970000)))	// G7 X Mark II
 	  for (int i=0; i<15; i++)	// tint, offset, as shot R, as shot B, CСT
 	    {
 		fseek (ifp, 2, SEEK_CUR);
@@ -6135,7 +6136,7 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 		imgdata.color.WBCT_Coeffs[i][0] = get2();
 	    }
 	else if ((WBCTversion == 2) &&
-                ((unique_id == 0x03950000) || (unique_id == 0x03930000)))	// G5 X
+                ((unique_id == 0x03950000) || (unique_id == 0x03930000)))	// G5 X, G9 X
 	  for (int i=0; i<15; i++)	// tint, offset, as shot R, as shot B, CСT
 	    {
 		fseek (ifp, 2, SEEK_CUR);
@@ -9201,12 +9202,27 @@ void CLASS parse_makernote (int base, int uptag)
             imgdata.makernotes.canon.CanonColorDataVer = 5;	// PowerSot G10, G12, G5 X, EOS M3
             {
               fseek (ifp, save1+(0x56<<1), SEEK_SET);
-              FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
-              get2();
-              Canon_WBpresets(2,12);
-              fseek (ifp, save1+(0xba<<1), SEEK_SET);
-              Canon_WBCTpresets (2);	// BCADT
-              fseek (ifp, save1+(0x108<<1), SEEK_SET);			// offset 264 short
+              if (unique_id == 0x03970000)  // G7 X Mark II
+              {
+                fseek(ifp, 18, SEEK_CUR);
+                FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
+                fseek(ifp, 8, SEEK_CUR);
+                Canon_WBpresets(8,24);
+                fseek(ifp, 168, SEEK_CUR);
+                FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][c ^ (c >> 1)] = get2();
+                fseek(ifp, 24, SEEK_CUR);
+                Canon_WBCTpresets (2);  // BCADT
+                fseek(ifp, 6, SEEK_CUR);
+              }
+              else
+              {
+                FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
+                get2();
+                Canon_WBpresets(2,12);
+                fseek (ifp, save1+(0xba<<1), SEEK_SET);
+                Canon_WBCTpresets (2);  // BCADT
+                fseek (ifp, save1+(0x108<<1), SEEK_SET);  // offset 264 short
+              }
               int bls=0;
               FORC4 bls+=get2();
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
@@ -13048,11 +13064,11 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Leica C (Typ 112)", -15, 0,
       { 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
 
-{ "Panasonic DMC-LX9", -15, 0,  /* markets: DMC-LX9, DMC-LX10, DMC-LX15 */
+    { "Panasonic DMC-LX9", -15, 0,  /* markets: LX9 LX10 LX15 */
       { 10148,-3743,-991,-2837,11366,1659,-701,1893,4899 } },
-{ "Panasonic DMC-LX10", -15, 0,
+    { "Panasonic DMC-LX10", -15, 0,  /* markets: LX9 LX10 LX15 */
       { 10148,-3743,-991,-2837,11366,1659,-701,1893,4899 } },
-{ "Panasonic DMC-LX15", -15, 0,
+    { "Panasonic DMC-LX15", -15, 0,  /* markets: LX9 LX10 LX15 */
       { 10148,-3743,-991,-2837,11366,1659,-701,1893,4899 } },
 
     { "Panasonic DMC-LX1", 0, 0xf7f,
@@ -13109,7 +13125,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 8294,-2891,-651,-3869,11590,2595,-1183,2267,5352 } },
     { "Panasonic DMC-G7", -15, 0xfff,
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
-    { "Panasonic DMC-G8", -15, 0xfff, /* G8/80/81/85 */
+    { "Panasonic DMC-G8", -15, 0xfff,  /* markets: DMC-G8, DMC-G80, DMC-G81, DMC-G85 */
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
     { "Panasonic DMC-GF1", -15, 0xf92,
       { 7888,-1902,-1011,-8106,16085,2099,-2353,2866,7330 } },
@@ -13141,39 +13157,39 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 8238,-3244,-679,-3921,11814,2384,-836,2022,5852 } },
     { "Panasonic DMC-GX1", -15, 0,
       { 6763,-1919,-863,-3868,11515,2684,-1216,2387,5879 } },
-    { "Panasonic DMC-GX85", -15, 0,
+    { "Panasonic DMC-GX85", -15, 0,  /* markets: GX85 GX80 GX7MK2 */
       { 7771,-3020,-629,4029,11950,2345,-821,1977,6119 } },
-    { "Panasonic DMC-GX80", -15, 0,
+    { "Panasonic DMC-GX80", -15, 0,  /* markets: GX85 GX80 GX7MK2 */
       { 7771,-3020,-629,4029,11950,2345,-821,1977,6119 } },
-    { "Panasonic DMC-GX7MK2", -15, 0,
+    { "Panasonic DMC-GX7MK2", -15, 0,  /* markets: GX85 GX80 GX7MK2 */
       { 7771,-3020,-629,4029,11950,2345,-821,1977,6119 } },
     { "Panasonic DMC-GX7", -15,0,
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
     { "Panasonic DMC-GX8", -15,0,
       { 7564,-2263,-606,-3148,11239,2177,-540,1435,4853 } },
-    { "Panasonic DMC-TZ6", -15, 0,
+    { "Panasonic DMC-TZ6", -15, 0,  /* markets: ZS40 TZ60 TZ61 */
       { 8607,-2822,-808,-3755,11930,2049,-820,2060,5224 } },
-    { "Panasonic DMC-TZ8", -15, 0,
+    { "Panasonic DMC-TZ8", -15, 0,  /* markets: ZS60 TZ80 TZ81 TZ85 */
       { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
-    { "Panasonic DMC-ZS4", -15, 0,
+    { "Panasonic DMC-ZS4", -15, 0,  /* markets: ZS40 TZ60 TZ61 */
       { 8607,-2822,-808,-3755,11930,2049,-820,2060,5224 } },
-    { "Panasonic DMC-TZ7", -15, 0,
+    { "Panasonic DMC-TZ7", -15, 0,  /* markets: ZS50 TZ70 TZ71 */
       { 8802,-3135,-789,-3151,11468,1904,-550,1745,4810 } },
-    { "Panasonic DMC-ZS5", -15, 0,
+    { "Panasonic DMC-ZS5", -15, 0,  /* markets: ZS50 TZ70 TZ71 */
       { 8802,-3135,-789,-3151,11468,1904,-550,1745,4810 } },
-    { "Panasonic DMC-ZS6", -15, 0,
+    { "Panasonic DMC-ZS6", -15, 0,  /* markets: ZS60 TZ80 TZ81 TZ85 */
       { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
-    { "Panasonic DMC-ZS100", -15, 0,
+    { "Panasonic DMC-ZS100", -15, 0,  /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-ZS110", -15, 0, /* same as ZS100 */
+    { "Panasonic DMC-ZS110", -15, 0,  /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-TZ100", -15, 0,    /* same ID as DMC-ZS100 */
+    { "Panasonic DMC-TZ100", -15, 0,  /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-TZ101", -15, 0,    /* same ID as DMC-ZS100 */
+    { "Panasonic DMC-TZ101", -15, 0,  /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-TZ110", -15, 0,    /* same ID as DMC-ZS100 */
+    { "Panasonic DMC-TZ110", -15, 0,  /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-TX1", -15, 0,    /* same ID as DMC-ZS100 */
+    { "Panasonic DMC-TX1", -15, 0,  /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
     { "Leica S (Typ 007)", 0, 0,
      { 6063,-2234,-231,-5210,13787,1500,-1043,2866,6997 } },
