@@ -106,8 +106,9 @@ ushort CLASS sget2 (uchar *s)
 #define AdobeDNG	2
 
 #ifdef LIBRAW_LIBRARY_BUILD
-static int getwords(char *line, char *words[], int maxwords)
+static int getwords(char *line, char *words[], int maxwords,int maxlen)
 {
+  line[maxlen-1] = 0;
   char *p = line;
   int nwords = 0;
 
@@ -8104,7 +8105,7 @@ void CLASS parse_makernote (int base, int uptag)
          int year, nwords, ynum_len;
          unsigned c;
          fread(FujiSerial, MIN(len, sizeof(FujiSerial)), 1, ifp);
-         nwords = getwords(FujiSerial, words, 4);
+         nwords = getwords(FujiSerial, words, 4,sizeof(imgdata.shootinginfo.InternalBodySerial));
          for (int i = 0; i < nwords; i++) {
            mm[2] = dd[2] = 0;
            if (strlen(words[i]) < 18)
@@ -9850,7 +9851,7 @@ void CLASS parse_mos (int offset)
        char *words[4];
        int nwords;
        fread(buffer, MIN(skip, sizeof(buffer)), 1, ifp);
-       nwords = getwords(buffer, words, 4);
+       nwords = getwords(buffer, words, 4,sizeof(imgdata.shootinginfo.BodySerial));
        strcpy (imgdata.shootinginfo.BodySerial, words[0]);
     }
     if (!strcmp(data,"CaptProf_serial_number")) {
@@ -9858,7 +9859,7 @@ void CLASS parse_mos (int offset)
        char *words[4];
        int nwords;
        fread(buffer, MIN(skip, sizeof(buffer)), 1, ifp);
-       nwords = getwords(buffer, words, 4);
+       nwords = getwords(buffer, words, 4,sizeof(imgdata.shootinginfo.InternalBodySerial));
        strcpy (imgdata.shootinginfo.InternalBodySerial, words[0]);
     }
 #endif
