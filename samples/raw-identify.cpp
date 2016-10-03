@@ -415,6 +415,27 @@ int main(int ac, char *av[])
             	printf("%6.4f\t%6.4f\t%6.4f\n",C.P1_color[1].romm_cam[i*3],C.P1_color[1].romm_cam[i*3+1],C.P1_color[1].romm_cam[i*3+2]);
             }
 
+            if (fabsf(C.cmatrix[0][0]) > 0)
+            {
+            	printf("\ncamRGB -> sRGB Matrix:\n");
+            	for(int i=0; i< P1.colors; i++)
+            		{
+            			for(int j=0; j< P1.colors; j++)
+                			printf("%6.4f\t",C.cmatrix[j][i]);
+                		printf ("\n");
+                	}
+            }
+
+            if (fabsf(C.ccm[0][0]) > 0)
+            {
+            	printf("\nColor Correction Matrix:\n");
+            	for(int i=0; i< P1.colors; i++)
+            		{
+            			for(int j=0; j< P1.colors; j++)
+                			printf("%6.4f\t",C.ccm[j][i]);
+                		printf ("\n");
+                	}
+            }
             if (fabsf(C.dng_color[0].colormatrix[0][0]) > 0)
             {
             	printf("\nDNG color matrix 1:\n");
