@@ -6355,6 +6355,22 @@ void CLASS setPentaxBodyFeatures (unsigned id)
   return;
 }
 
+void CLASS PentaxISO (ushort c)
+{
+  int code [] = {3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 50, 100, 200, 400, 800, 1600, 3200, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278};
+  double value []  = {50, 64, 80, 100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600, 2000, 2500, 3200, 4000, 5000, 6400, 8000, 10000, 12800, 16000, 20000, 25600, 32000, 40000, 51200, 64000, 80000, 102400, 128000, 160000, 204800, 50, 100, 200, 400, 800, 1600, 3200, 50, 70, 100, 140, 200, 280, 400, 560, 800, 1100, 1600, 2200, 3200, 4500, 6400, 9000, 12800, 18000, 25600, 36000, 51200};
+  int numel = sizeof(code)/sizeof(code[0]);
+  int i;
+  for (i = 0; i < numel; i++) {
+    if (code[i] == c) {
+      iso_speed = value[i];
+      return;
+    }
+  }
+  if (i == numel) iso_speed = 65535.0f;
+  return;
+}
+
 void CLASS PentaxLensInfo (unsigned id, unsigned len)	// tag 0x0207
 {
 	ushort iLensData = 0;
@@ -7487,6 +7503,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           {
             imgdata.lens.makernotes.CurAp = (float)get2()/10.0f;
           }
+        else if (tag == 0x0014)
+          {
+            PentaxISO(get2());
+          }
         else if (tag == 0x001d)
           {
             imgdata.lens.makernotes.CurFocal = (float)get4()/100.0f;
@@ -8535,6 +8555,10 @@ void CLASS parse_makernote (int base, int uptag)
         else if (tag == 0x0013)
           {
             imgdata.lens.makernotes.CurAp = (float)get2()/10.0f;
+          }
+        else if (tag == 0x0014)
+          {
+            PentaxISO(get2());
           }
         else if (tag == 0x001d)
           {

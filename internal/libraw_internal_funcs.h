@@ -42,6 +42,7 @@ it under the terms of the one of three licenses as you choose:
     void	setOlympusBodyFeatures (unsigned long long id);
     void	setPhaseOneFeatures (unsigned id);
     void	setPentaxBodyFeatures (unsigned id);
+    void	PentaxISO (ushort c);
     void	PentaxLensInfo (unsigned id, unsigned len);
     void	setSonyBodyFeatures (unsigned id);
     void	parseSonyLensType2 (uchar a, uchar b);
