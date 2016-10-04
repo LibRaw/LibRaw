@@ -723,7 +723,6 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
   I->output.file = NULL;
 
   if (infile == NULL) {
-    I->error = "No infile";
     return x3f;
   }
 
