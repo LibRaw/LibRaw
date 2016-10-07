@@ -7830,7 +7830,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 317) ||  // DSC-RX100M3
            (id == 341) ||  // DSC-RX100M4
            (id == 342) ||  // DSC-RX10M2
-           (id == 355)     // DSC-RX10M3
+           (id == 355) ||  // DSC-RX10M3
+           (id == 356)     // DSC-RX100M5
          )
     {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_1INCH;
@@ -7938,7 +7939,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 317) ||  // DSC-RX100M3
            (id == 341) ||  // DSC-RX100M4
            (id == 342) ||  // DSC-RX10M2
-           (id == 355)     // DSC-RX10M3
+           (id == 355) ||  // DSC-RX10M3
+           (id == 356)     // DSC-RX100M5
            )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
@@ -15087,6 +15089,7 @@ void CLASS identify()
     { 0x161, "ILCA-68" },
     { 0x162, "ILCA-99M2" },
     { 0x163, "DSC-RX10M3" },
+    { 0x164, "DSC-RX100M5"},
     { 0x165, "ILCE-6300" },
   };
 

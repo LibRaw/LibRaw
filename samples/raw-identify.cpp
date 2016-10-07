@@ -195,6 +195,7 @@ int main(int ac, char *av[])
 					case 2:  printf("FF\n"); break;
 					case 3:  printf("MF\n"); break;
 					case 4:  printf("APS-H\n"); break;
+					case 5:  printf("1\"\n"); break;
 					case 8:  printf("4/3\n"); break;
 					default: printf("Unknown\n"); break;
 				}
