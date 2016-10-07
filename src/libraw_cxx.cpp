@@ -5294,6 +5294,7 @@ static const char  *static_camera_list[] =
 "Sony DSC-RX100II",
 "Sony DSC-RX100III",
 "Sony DSC-RX100IV",
+"Sony DSC-RX100V",
 "Sony DSC-V3",
 "Sony DSLR-A100",
 "Sony DSLR-A200",
