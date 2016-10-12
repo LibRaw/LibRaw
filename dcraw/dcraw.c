@@ -194,7 +194,7 @@ struct ph1 {
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
-#define FORCC FORC(colors)
+#define FORCC for (c=0; c < colors && c < 4; c++)
 
 #define SQR(x) ((x)*(x))
 #define ABS(x) (((int)(x) ^ ((int)(x) >> 31)) - ((int)(x) >> 31))
@@ -268,10 +268,6 @@ static float fMAX(float a, float b)
 
 /* @out COMMON
 
-#ifdef ANDROID
-#include <libraw_swab.h>
-#endif
-
 #include <math.h>
 #define CLASS LibRaw::
 #include "libraw/libraw_types.h"
@@ -313,6 +309,15 @@ static size_t local_strnlen(const char *s, size_t n)
   const char *p = (const char *)memchr(s, 0, n);
   return(p ? p-s : n);
 }
+#ifdef LIBRAW_LIBRARY_BUILD
+static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
+{
+ int r = fp->read(buf,len,1);
+ buf[len-1] = 0;
+ return r;
+}
+#define stmread(buf,maxlen,fp) stread(buf,MIN(maxlen,sizeof(buf)),fp)
+#endif
 
 #ifndef __GLIBC__
 char *my_memmem (char *haystack, size_t haystacklen,
@@ -7539,7 +7544,7 @@ void CLASS PentaxISO (ushort c)
 {
   int code [] = {3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 50, 100, 200, 400, 800, 1600, 3200, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278};
   double value []  = {50, 64, 80, 100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600, 2000, 2500, 3200, 4000, 5000, 6400, 8000, 10000, 12800, 16000, 20000, 25600, 32000, 40000, 51200, 64000, 80000, 102400, 128000, 160000, 204800, 50, 100, 200, 400, 800, 1600, 3200, 50, 70, 100, 140, 200, 280, 400, 560, 800, 1100, 1600, 2200, 3200, 4500, 6400, 9000, 12800, 18000, 25600, 36000, 51200};
-  int numel = sizeof(code)/sizeof(code[0]);
+#define numel (sizeof(code)/sizeof(code[0]))
   int i;
   for (i = 0; i < numel; i++) {
     if (code[i] == c) {
@@ -7548,8 +7553,8 @@ void CLASS PentaxISO (ushort c)
     }
   }
   if (i == numel) iso_speed = 65535.0f;
-  return;
 }
+#undef numel
 
 void CLASS PentaxLensInfo (unsigned id, unsigned len)	// tag 0x0207
 {
@@ -8192,6 +8197,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
   short morder, sorder = order;
   char buf[10];
+  INT64 fsize = ifp->size();
 
   fread(buf, 1, 10, ifp);
   if (!strcmp(buf, "Nikon")) {
@@ -8240,6 +8246,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   while (entries--) {
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
+    INT64 pos = ifp->tell();
+    if(len > 8 && pos+len > 2* fsize) continue;
     tag |= uptag << 16;
     if(len > 100*1024*1024) goto next; // 100Mb tag? No!
 
@@ -8273,7 +8281,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             if (!aperture) aperture = imgdata.lens.makernotes.CurAp;
           }
 
-        else if (tag == 0x000d)			// camera info
+        else if (tag == 0x000d && len < 256000)			// camera info
           {
             CanonCameraInfo = (uchar*)malloc(len);
             fread(CanonCameraInfo, len, 1, ifp);
@@ -8382,7 +8390,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         }
         if ((tag == 0x0303) && (type != 4))
           {
-            fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
+            stmread(imgdata.lens.makernotes.Lens, len,ifp);
           }
 
         if ((tag == 0x3405) ||
@@ -8454,7 +8462,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           }
         else if (tag == 0x0082)				// lens attachment
           {
-            fread(imgdata.lens.makernotes.Attachment, MIN(len,127), 1, ifp);
+            stmread(imgdata.lens.makernotes.Attachment, len, ifp);
           }
         else if (tag == 0x0083)				// lens type
           {
@@ -8613,7 +8621,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type)/2);
           break;
         case 0x20100102:
-            fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
+            stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
         break;
         case 0x20100201:
           imgdata.lens.makernotes.LensID =
@@ -8631,10 +8639,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           break;
         case 0x20100202:
           if ((!imgdata.lens.LensSerial[0]))
-              fread(imgdata.lens.LensSerial, MIN(len,sizeof(imgdata.lens.LensSerial)), 1, ifp);
+              stmread(imgdata.lens.LensSerial, len, ifp);
           break;
         case 0x20100203:
-          fread(imgdata.lens.makernotes.Lens, MIN(len,sizeof(imgdata.lens.makernotes.Lens)), 1, ifp);
+          stmread(imgdata.lens.makernotes.Lens,len, ifp);
           break;
         case 0x20100205:
           imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
@@ -8660,10 +8668,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             imgdata.lens.makernotes.TeleconverterID | fgetc(ifp);
           break;
         case 0x20100303:
-          fread(imgdata.lens.makernotes.Teleconverter, MIN(len,127), 1, ifp);
+          stmread(imgdata.lens.makernotes.Teleconverter, len, ifp);
           break;
         case 0x20100403:
-          fread(imgdata.lens.makernotes.Attachment, MIN(len,127), 1, ifp);
+          stmread(imgdata.lens.makernotes.Attachment,len, ifp);
           break;
         case 0x20200401:
 	      imgdata.other.FlashEC = getreal(type);
@@ -8711,7 +8719,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
            }
         else if (tag == 0x0207)
           {
-            PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
+	    if(len < 65535) // Safety belt
+               PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
           }
         else if (tag == 0x020d)
         {
@@ -8765,7 +8774,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         }
         else if (tag == 0x0229)
         {
-          fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+          stmread(imgdata.shootinginfo.BodySerial, len, ifp);
         }
         else if (tag == 0x022d)
         {
@@ -8792,9 +8801,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           {
             char LensInfo [20];
             fseek (ifp, 12, SEEK_CUR);
-            fread(imgdata.lens.makernotes.Lens, 30, 1, ifp);
+            stread(imgdata.lens.makernotes.Lens, 30, ifp);
             strcat(imgdata.lens.makernotes.Lens, " ");
-            fread(LensInfo, 20, 1, ifp);
+            stread(LensInfo, 20, ifp);
             strcat(imgdata.lens.makernotes.Lens, LensInfo);
           }
       }
@@ -8830,7 +8839,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           }
         else if (tag == 0xa005)
           {
-            fread(imgdata.lens.InternalLensSerial, MIN(len,sizeof(imgdata.lens.InternalLensSerial)), 1, ifp);
+            stmread(imgdata.lens.InternalLensSerial, len, ifp);
           }
         else if (tag == 0xa019)
           {
@@ -8945,7 +8954,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             imgdata.lens.makernotes.TeleconverterID = get2();
           }
 
-        else if (tag == 0x0114)					// CameraSettings
+        else if (tag == 0x0114 && len < 65535)					// CameraSettings
           {
             table_buf = (uchar*)malloc(len);
             fread(table_buf, len, 1, ifp);
@@ -8978,7 +8987,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             free(table_buf);
           }
 
-        else if (tag == 0x9050)		// little endian
+        else if (tag == 0x9050 && len < 256000)		// little endian
           {
             table_buf_0x9050 = (uchar*)malloc(len);
             table_buf_0x9050_present = 1;
@@ -8992,7 +9001,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               }
           }
 
-        else if (tag == 0x940c)
+        else if (tag == 0x940c && len < 256000)
           {
             table_buf_0x940c = (uchar*)malloc(len);
             table_buf_0x940c_present = 1;
@@ -9029,7 +9038,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
             if (tag == 0x010c) imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
           }
 
-        else if (tag == 0xb02a)					// Sony LensSpec
+        else if (tag == 0xb02a && len < 256000)	// Sony LensSpec
           {
             table_buf = (uchar*)malloc(len);
             fread(table_buf, len, 1, ifp);
@@ -9090,6 +9099,8 @@ void CLASS parse_makernote (int base, int uptag)
   ushort table_buf_0x9050_present = 0;
   uchar *table_buf_0x940c;
   ushort table_buf_0x940c_present = 0;
+
+  INT64 fsize = ifp->size();
 #endif
 /*
    The MakerNote might have its own TIFF header (possibly with
@@ -9194,14 +9205,15 @@ void CLASS parse_makernote (int base, int uptag)
   entries = get2();
   if (entries > 1000) return;
   morder = order;
+
   while (entries--) {
     order = morder;
     tiff_get (base, &tag, &type, &len, &save);
     tag |= uptag << 16;
-    if(len > 100*1024*1024) continue; // 100Mb tag? No!
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
+    if(len > 8 && _pos+len > 2* fsize) continue;
     if (!strncmp(make, "Canon",5))
       {
         if (tag == 0x0001) Canon_CameraSettings();
@@ -9236,7 +9248,7 @@ void CLASS parse_makernote (int base, int uptag)
              sprintf(imgdata.shootinginfo.BodySerial, "%d", get4());
           }
 
-        else if (tag == 0x000d)			// camera info
+        else if (tag == 0x000d && len < 256000)	// camera info
           {
             CanonCameraInfo = (uchar*)malloc(len);
             fread(CanonCameraInfo, len, 1, ifp);
@@ -9305,7 +9317,7 @@ void CLASS parse_makernote (int base, int uptag)
          char yy[2], mm[3], dd[3], ystr[16], ynum[16];
          int year, nwords, ynum_len;
          unsigned c;
-         fread(FujiSerial, MIN(len, sizeof(FujiSerial)), 1, ifp);
+         stmread(FujiSerial, len, ifp);
          nwords = getwords(FujiSerial, words, 4,sizeof(imgdata.shootinginfo.InternalBodySerial));
          for (int i = 0; i < nwords; i++) {
            mm[2] = dd[2] = 0;
@@ -9368,7 +9380,7 @@ void CLASS parse_makernote (int base, int uptag)
 
         if ((tag == 0x0303) && (type != 4))
           {
-            fread(imgdata.lens.makernotes.Lens, MIN(len,127), 1, ifp);
+            stmread(imgdata.lens.makernotes.Lens, len, ifp);
           }
 
         if ((tag == 0x3405) ||
@@ -9432,7 +9444,7 @@ void CLASS parse_makernote (int base, int uptag)
           }
         else if (tag == 0x0082)				// lens attachment
           {
-            fread(imgdata.lens.makernotes.Attachment, MIN(len,127), 1, ifp);
+            stmread(imgdata.lens.makernotes.Attachment, len, ifp);
           }
         else if (tag == 0x0083)				// lens type
           {
@@ -9500,7 +9512,7 @@ void CLASS parse_makernote (int base, int uptag)
           }
         else if (tag == 0x00a0)
           {
-            fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+            stmread(imgdata.shootinginfo.BodySerial, len, ifp);
           }
         else if (tag == 0x00a8)		// contains flash data
           {
@@ -9518,11 +9530,11 @@ void CLASS parse_makernote (int base, int uptag)
         case 0x101a:
         case 0x20100101:
           if (!imgdata.shootinginfo.BodySerial[0])
-            fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+            stmread(imgdata.shootinginfo.BodySerial, len, ifp);
         break;
         case 0x20100102:
           if (!imgdata.shootinginfo.InternalBodySerial[0])
-            fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
+            stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
         break;
         case 0x0207:
         case 0x20100100:
@@ -9570,10 +9582,10 @@ void CLASS parse_makernote (int base, int uptag)
             }
           break;
         case 0x20100202:
-          fread(imgdata.lens.LensSerial, MIN(len,sizeof(imgdata.lens.LensSerial)), 1, ifp);
+          stmread(imgdata.lens.LensSerial, len, ifp);
           break;
         case 0x20100203:
-          fread(imgdata.lens.makernotes.Lens, MIN(len,sizeof(imgdata.lens.makernotes.Lens)), 1, ifp);
+          stmread(imgdata.lens.makernotes.Lens, len, ifp);
           break;
         case 0x20100205:
           imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
@@ -9599,10 +9611,10 @@ void CLASS parse_makernote (int base, int uptag)
             imgdata.lens.makernotes.TeleconverterID | fgetc(ifp);
           break;
         case 0x20100303:
-          fread(imgdata.lens.makernotes.Teleconverter, MIN(len,127), 1, ifp);
+          stmread(imgdata.lens.makernotes.Teleconverter, len, ifp);
           break;
         case 0x20100403:
-          fread(imgdata.lens.makernotes.Attachment, MIN(len,127), 1, ifp);
+          stmread(imgdata.lens.makernotes.Attachment, len, ifp);
           break;
         }
       }
@@ -9699,7 +9711,7 @@ void CLASS parse_makernote (int base, int uptag)
               }
             fseek(ifp, 6, SEEK_CUR);
             fseek(ifp, get4()+20, SEEK_SET);
-            fread(imgdata.shootinginfo.BodySerial, 12, 1, ifp);
+            stread(imgdata.shootinginfo.BodySerial, 12, ifp);
             get2();
             imgdata.lens.makernotes.LensID = getc(ifp) - '0';
             switch(imgdata.lens.makernotes.LensID) {
@@ -9720,7 +9732,7 @@ void CLASS parse_makernote (int base, int uptag)
             	imgdata.lens.makernotes.LensID = -1;
             }
             fseek(ifp, 17, SEEK_CUR);
-            fread(imgdata.lens.LensSerial, 12, 1, ifp);
+            stread(imgdata.lens.LensSerial, 12, ifp);
           }
       }
 
@@ -9764,7 +9776,8 @@ void CLASS parse_makernote (int base, int uptag)
            }
         else if (tag == 0x0207)
           {
-            PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
+	    if(len < 65535) // Safety belt
+            	PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
           }
         else if (tag == 0x020d)
         {
@@ -9818,7 +9831,7 @@ void CLASS parse_makernote (int base, int uptag)
         }
         else if (tag == 0x0229)
         {
-          fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+          stmread(imgdata.shootinginfo.BodySerial, len, ifp);
         }
         else if (tag == 0x022d)
         {
@@ -9845,9 +9858,9 @@ void CLASS parse_makernote (int base, int uptag)
           {
             char LensInfo [20];
             fseek (ifp, 2, SEEK_CUR);
-            fread(imgdata.lens.makernotes.Lens, 30, 1, ifp);
+            stread(imgdata.lens.makernotes.Lens, 30, ifp);
             strcat(imgdata.lens.makernotes.Lens, " ");
-            fread(LensInfo, 20, 1, ifp);
+            stread(LensInfo, 20, ifp);
             strcat(imgdata.lens.makernotes.Lens, LensInfo);
           }
       }
@@ -9876,7 +9889,7 @@ void CLASS parse_makernote (int base, int uptag)
           }
          else if (tag == 0xa002)
           {
-             fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+             stmread(imgdata.shootinginfo.BodySerial, len, ifp);
           }
         else if (tag == 0xa003)
           {
@@ -9886,7 +9899,7 @@ void CLASS parse_makernote (int base, int uptag)
           }
         else if (tag == 0xa005)
           {
-            fread(imgdata.lens.InternalLensSerial, MIN(len,sizeof(imgdata.lens.InternalLensSerial)), 1, ifp);
+            stmread(imgdata.lens.InternalLensSerial, len, ifp);
           }
         else if (tag == 0xa019)
           {
@@ -9989,7 +10002,7 @@ void CLASS parse_makernote (int base, int uptag)
                  !strncasecmp(model, "DSLR-A100", 9))
 	  {
 	    fseek(ifp,0x49dc,SEEK_CUR);
-	    fread(imgdata.shootinginfo.InternalBodySerial, MIN(12, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
+	    stmread(imgdata.shootinginfo.InternalBodySerial, 12, ifp);
 	  }
 
 	else if (tag == 0x0104)
@@ -10002,7 +10015,7 @@ void CLASS parse_makernote (int base, int uptag)
             imgdata.lens.makernotes.TeleconverterID = get2();
           }
 
-        else if (tag == 0x0114)					// CameraSettings
+        else if (tag == 0x0114 && len < 256000)		// CameraSettings
           {
             table_buf = (uchar*)malloc(len);
             fread(table_buf, len, 1, ifp);
@@ -10035,7 +10048,7 @@ void CLASS parse_makernote (int base, int uptag)
             free(table_buf);
           }
 
-        else if (tag == 0x9050)		// little endian
+        else if (tag == 0x9050 && len < 256000)		// little endian
           {
             table_buf_0x9050 = (uchar*)malloc(len);
             table_buf_0x9050_present = 1;
@@ -10049,7 +10062,7 @@ void CLASS parse_makernote (int base, int uptag)
               }
           }
 
-        else if (tag == 0x940c)
+        else if (tag == 0x940c && len <256000)
           {
             table_buf_0x940c = (uchar*)malloc(len);
             table_buf_0x940c_present = 1;
@@ -10086,7 +10099,7 @@ void CLASS parse_makernote (int base, int uptag)
             if (tag == 0x010c) imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
           }
 
-        else if (tag == 0xb02a)					// Sony LensSpec
+        else if (tag == 0xb02a && len < 256000)	// Sony LensSpec
           {
             table_buf = (uchar*)malloc(len);
             fread(table_buf, len, 1, ifp);
@@ -10874,13 +10887,17 @@ void CLASS parse_exif (int base)
   kodak = !strncmp(make,"EASTMAN",7) && tiff_nifds < 3;
   entries = get2();
   if(!strncmp(make,"Hasselblad",10) && (tiff_nifds > 3) && (entries > 512)) return;
+#ifdef LIBRAW_LIBRARY_BUILD
+  INT64 fsize = ifp->size();
+#endif
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
 
 #ifdef LIBRAW_LIBRARY_BUILD
+    INT64 savepos = ftell(ifp);
+    if(len > 8 && savepos + len > fsize*2) continue;
     if(callbacks.exif_cb)
       {
-        int savepos = ftell(ifp);
         callbacks.exif_cb(callbacks.exifparser_data,tag,type,len,order,ifp);
         fseek(ifp,savepos,SEEK_SET);
       }
@@ -10891,7 +10908,7 @@ void CLASS parse_exif (int base)
       imgdata.lens.FocalLengthIn35mmFormat = get2();
       break;
     case 0xa431:		// BodySerialNumber
-      fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+      stmread(imgdata.shootinginfo.BodySerial, len, ifp);
       break;
     case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
       imgdata.lens.MinFocal = getreal(type);
@@ -10900,7 +10917,7 @@ void CLASS parse_exif (int base)
       imgdata.lens.MaxAp4MaxFocal = getreal(type);
       break;
     case 0xa435:		// LensSerialNumber
-      fread(imgdata.lens.LensSerial, MIN(len, sizeof(imgdata.lens.LensSerial)), 1, ifp);
+      stmread(imgdata.lens.LensSerial, len, ifp);
       break;
     case 0xc630:		// DNG LensInfo, Lens Specification per EXIF standard
       imgdata.lens.dng.MinFocal = getreal(type);
@@ -10909,10 +10926,10 @@ void CLASS parse_exif (int base)
       imgdata.lens.dng.MaxAp4MaxFocal = getreal(type);
       break;
     case 0xa433:		// LensMake
-      fread(imgdata.lens.LensMake, MIN(len,sizeof(imgdata.lens.LensMake)), 1, ifp);
+      stmread(imgdata.lens.LensMake, len, ifp);
       break;
     case 0xa434:		// LensModel
-      fread(imgdata.lens.Lens, MIN(len, sizeof(imgdata.lens.LensMake)), 1, ifp);
+      stmread(imgdata.lens.Lens, len, ifp);
       if (!strncmp(imgdata.lens.Lens, "----", 4))
         imgdata.lens.Lens[0] = 0;
       break;
@@ -11003,6 +11020,7 @@ void CLASS parse_gps_libraw(int base)
     imgdata.other.parsed_gps.gpsparsed = 1;
   while (entries--) {
     tiff_get(base, &tag, &type, &len, &save);
+    if(len > 1024) continue; // no GPS tags are 1k or larger
     switch (tag) {
     case 1:  imgdata.other.parsed_gps.latref = getc(ifp); break;
     case 3:  imgdata.other.parsed_gps.longref = getc(ifp); break;
@@ -11036,6 +11054,7 @@ void CLASS parse_gps (int base)
   entries = get2();
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
+    if(len > 1024) continue; // no GPS tags are 1k or larger
     switch (tag) {
       case 1: case 3: case 5:
 	gpsdata[29+tag/2] = getc(ifp);			break;
@@ -11090,13 +11109,13 @@ void CLASS parse_mos (int offset)
 // IB start
 #ifdef LIBRAW_LIBRARY_BUILD
     if (!strcmp(data,"CameraObj_camera_type")) {
-	fread(imgdata.lens.makernotes.body, MIN(skip,63), 1, ifp);
+	stmread(imgdata.lens.makernotes.body, skip, ifp);
     }
     if (!strcmp(data,"back_serial_number")) {
        char buffer [sizeof(imgdata.shootinginfo.BodySerial)];
        char *words[4];
        int nwords;
-       fread(buffer, MIN(skip, sizeof(buffer)), 1, ifp);
+       stmread(buffer, skip, ifp);
        nwords = getwords(buffer, words, 4,sizeof(imgdata.shootinginfo.BodySerial));
        strcpy (imgdata.shootinginfo.BodySerial, words[0]);
     }
@@ -11104,7 +11123,7 @@ void CLASS parse_mos (int offset)
        char buffer [sizeof(imgdata.shootinginfo.InternalBodySerial)];
        char *words[4];
        int nwords;
-       fread(buffer, MIN(skip, sizeof(buffer)), 1, ifp);
+       stmread(buffer, skip, ifp);
        nwords = getwords(buffer, words, 4,sizeof(imgdata.shootinginfo.InternalBodySerial));
        strcpy (imgdata.shootinginfo.InternalBodySerial, words[0]);
     }
@@ -11194,11 +11213,13 @@ void CLASS parse_kodak_ifd (int base)
 
   entries = get2();
   if (entries > 1024) return;
+  INT64 fsize = ifp->size();
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
+    INT64 savepos = ftell(ifp);
+    if(len > 8 && len + savepos > 2*fsize) continue;
     if(callbacks.exif_cb)
       {
-        int savepos = ftell(ifp);
         callbacks.exif_cb(callbacks.exifparser_data,tag | 0x20000,type,len,order,ifp);
         fseek(ifp,savepos,SEEK_SET);
       }
@@ -11218,8 +11239,10 @@ void CLASS parse_kodak_ifd (int base)
                          imgdata.color.linear_max[1] =
                          imgdata.color.linear_max[2] =
                          imgdata.color.linear_max[3] = get2();
-        if (tag == 0x09ce) fread(imgdata.shootinginfo.InternalBodySerial, MIN(len, sizeof(imgdata.shootinginfo.InternalBodySerial)), 1, ifp);
-        if (tag == 0xfa00) fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        if (tag == 0x09ce) 
+		stmread(imgdata.shootinginfo.InternalBodySerial,len, ifp);
+        if (tag == 0xfa00) 
+		stmread(imgdata.shootinginfo.BodySerial, len, ifp);
 	if (tag == 0xfa27)
 	  {
                 FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c] = get4();
@@ -11328,12 +11351,16 @@ int CLASS parse_tiff_ifd (int base)
       cc[j][i] = i == j;
   entries = get2();
   if (entries > 512) return 1;
+#ifdef LIBRAW_LIBRARY_BUILD
+  INT64 fsize = ifp->size();
+#endif
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
 #ifdef LIBRAW_LIBRARY_BUILD
+    INT64 savepos = ftell(ifp);
+    if(len > 8 && len + savepos > fsize*2) continue; // skip tag pointing out of 2xfile
     if(callbacks.exif_cb)
       {
-        int savepos = ftell(ifp);
         callbacks.exif_cb(callbacks.exifparser_data,tag|(pana_raw?0x30000:0),type,len,order,ifp);
         fseek(ifp,savepos,SEEK_SET);
       }
@@ -11697,7 +11724,7 @@ int CLASS parse_tiff_ifd (int base)
         if((type == 1 || type == 2 || type == 6 || type == 7) && len > 1 && len < 5100000)
           {
             xmpdata = (char*)malloc(xmplen = len+1);
-            fread(xmpdata,len,1,ifp);
+            stread(xmpdata,len,ifp);
             xmpdata[len]=0;
           }
         break;
@@ -11795,7 +11822,7 @@ int CLASS parse_tiff_ifd (int base)
       break;
     case 0xa431:		// BodySerialNumber
     case 0xc62f:
-      fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+      stmread(imgdata.shootinginfo.BodySerial, len, ifp);
       break;
     case 0xa432:		// LensInfo, 42034dec, Lens Specification per EXIF standard
       imgdata.lens.MinFocal = getreal(type);
@@ -11804,7 +11831,7 @@ int CLASS parse_tiff_ifd (int base)
       imgdata.lens.MaxAp4MaxFocal = getreal(type);
       break;
     case 0xa435:		// LensSerialNumber
-      fread(imgdata.lens.LensSerial, MIN(len, sizeof(imgdata.lens.LensSerial)), 1, ifp);
+      stmread(imgdata.lens.LensSerial, len, ifp);
       break;
     case 0xc630:		// DNG LensInfo, Lens Specification per EXIF standard
       imgdata.lens.MinFocal = getreal(type);
@@ -11813,10 +11840,10 @@ int CLASS parse_tiff_ifd (int base)
       imgdata.lens.MaxAp4MaxFocal = getreal(type);
       break;
     case 0xa433:		// LensMake
-      fread(imgdata.lens.LensMake, MIN(len, sizeof(imgdata.lens.LensMake)), 1, ifp);
+      stmread(imgdata.lens.LensMake, len, ifp);
       break;
     case 0xa434:		// LensModel
-      fread(imgdata.lens.Lens, MIN(len, sizeof(imgdata.lens.Lens)), 1, ifp);
+      stmread(imgdata.lens.Lens, len, ifp);
       if (!strncmp(imgdata.lens.Lens, "----", 4))
         imgdata.lens.Lens[0] = 0;
       break;
@@ -11934,13 +11961,14 @@ int CLASS parse_tiff_ifd (int base)
 	break;
       case 50454:			/* Sinar tag */
       case 50455:
-	if (!(cbuf = (char *) malloc(len))) break;
+	if (len > 2560000 || !(cbuf = (char *) malloc(len))) break;
 #ifndef LIBRAW_LIBRARY_BUILD
 	fread (cbuf, 1, len, ifp);
 #else
 	if(fread (cbuf, 1, len, ifp) != len)
 		throw LIBRAW_EXCEPTION_IO_CORRUPT; // cbuf to be free'ed in recycle
 #endif
+        cbuf[len-1] = 0;
 	for (cp = cbuf-1; cp && cp < cbuf+len; cp = strchr(cp,'\n'))
 	  if (!strncmp (++cp,"Neutral ",8))
 	    sscanf (cp+8, "%f %f %f", cam_mul, cam_mul+1, cam_mul+2);
@@ -11970,7 +11998,7 @@ int CLASS parse_tiff_ifd (int base)
 	break;
       case 50708:			/* UniqueCameraModel */
 #ifdef LIBRAW_LIBRARY_BUILD
-        fread(imgdata.color.UniqueCameraModel, MIN(len, sizeof(imgdata.color.UniqueCameraModel)), 1, ifp);
+        stmread(imgdata.color.UniqueCameraModel, len, ifp);
         imgdata.color.UniqueCameraModel[sizeof(imgdata.color.UniqueCameraModel)-1] = 0;
 #endif
 	if (model[0]) break;
@@ -12019,7 +12047,7 @@ guess_cfa_pc:
 		  imgdata.color.WB_Coeffs[fwb[3]][0] = fwb[1];
 		  imgdata.color.WB_Coeffs[fwb[3]][1] = imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
 		  imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
-		  if ((fwb[3] == 17) && libraw_internal_data.unpacker_data.lenRAFData>3)
+		  if ((fwb[3] == 17) && libraw_internal_data.unpacker_data.lenRAFData>3 && libraw_internal_data.unpacker_data.lenRAFData < 10240000)
 		  {
 		    long long f_save = ftell(ifp);
 		    int fj, found = 0;
@@ -12095,8 +12123,7 @@ guess_cfa_pc:
 
 #ifdef LIBRAW_LIBRARY_BUILD
       case 50709:
-        fread(imgdata.color.LocalizedCameraModel, MIN(len, sizeof(imgdata.color.LocalizedCameraModel)), 1, ifp);
-        imgdata.color.LocalizedCameraModel[sizeof(imgdata.color.LocalizedCameraModel)-1] = 0;
+        stmread(imgdata.color.LocalizedCameraModel,len, ifp);
       break;
 #endif
 
@@ -12303,7 +12330,7 @@ guess_cfa_pc:
     }
     fseek (ifp, save, SEEK_SET);
   }
-  if (sony_length && (buf = (unsigned *) malloc(sony_length))) {
+  if (sony_length && sony_length < 10240000 && (buf = (unsigned *) malloc(sony_length))) {
     fseek (ifp, sony_offset, SEEK_SET);
     fread (buf, sony_length, 1, ifp);
     sony_decrypt (buf, sony_length/4, 1, sony_key);
@@ -13034,7 +13061,7 @@ void CLASS parse_phase_one (int base)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     case 0x0102:
-      fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+      stmread(imgdata.shootinginfo.BodySerial, len, ifp);
       if ((imgdata.shootinginfo.BodySerial[0] == 0x4c) && (imgdata.shootinginfo.BodySerial[1] == 0x49)) {
         unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[2] & 0x3f)) - 0x41;
       } else {
@@ -13051,10 +13078,10 @@ void CLASS parse_phase_one (int base)
       else imgdata.lens.makernotes.CurFocal = getreal(type);
       break;
     case 0x0410:
-      fread(imgdata.lens.makernotes.body, 1, len, ifp);
+      stmread(imgdata.lens.makernotes.body, len, ifp);
       break;
     case 0x0412:
-      fread(imgdata.lens.makernotes.Lens, 1, len, ifp);
+      stmread(imgdata.lens.makernotes.Lens, len, ifp);
       break;
     case 0x0414:
       if (type == 4) {
@@ -13149,7 +13176,7 @@ void CLASS parse_phase_one (int base)
       save = ftell(ifp);
       fseek (ifp, meta_offset+data, SEEK_SET);
       if (tag == 0x0407) {
-        fread(imgdata.shootinginfo.BodySerial, MIN(len, sizeof(imgdata.shootinginfo.BodySerial)), 1, ifp);
+        stmread(imgdata.shootinginfo.BodySerial, len, ifp);
         if ((imgdata.shootinginfo.BodySerial[0] == 0x4c) && (imgdata.shootinginfo.BodySerial[1] == 0x49)) {
           unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[2] & 0x3f)) - 0x41;
         } else {
@@ -15374,7 +15401,7 @@ void CLASS identify()
     fseek (ifp, 104, SEEK_SET);
     imgdata.lens.makernotes.MaxAp4CurFocal = powf64(2.0f, ((float)get4())/16.0f);
     fseek (ifp, 124, SEEK_SET);
-    fread(imgdata.lens.makernotes.Lens, 32, 1, ifp);
+    stmread(imgdata.lens.makernotes.Lens, 32, ifp);
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Contax_N;
     if (imgdata.lens.makernotes.Lens[0])
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Contax_N;

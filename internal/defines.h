@@ -99,7 +99,7 @@ typedef unsigned long long UINT64;
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
-#define FORCC FORC(colors)
+#define FORCC for (c=0; c < colors && c < 4; c++)
 
 #define SQR(x) ((x)*(x))
 #define ABS(x) (((int)(x) ^ ((int)(x) >> 31)) - ((int)(x) >> 31))
