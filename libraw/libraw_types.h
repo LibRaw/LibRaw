@@ -279,6 +279,14 @@ typedef struct
   ushort       FocusPixel[2];
   ushort       ImageStabilization[3];
   ushort       FlashMode;
+  ushort       WB_Preset;
+  ushort       ShutterType;
+  ushort       ExrMode;
+  ushort       Macro;
+  unsigned     Rating;
+  ushort       FrameRate;
+  ushort       FrameWidth;
+  ushort       FrameHeight;
 } libraw_fuji_info_t;
 
 typedef struct
