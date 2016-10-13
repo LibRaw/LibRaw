@@ -1176,12 +1176,22 @@ void CLASS canon_sraw_load_raw()
   short *rp=0, (*ip)[4];
   int jwide, slice, scol, ecol, row, col, jrow=0, jcol=0, pix[3], c;
   int v[3]={0,0,0}, ver, hue;
+#ifdef LIBRAW_LIBRARY_BUILD
+  int saved_w = width, saved_h = height;
+#endif
   char *cp;
 
   if (!ljpeg_start (&jh, 0) || jh.clrs < 4) return;
   jwide = (jh.wide >>= 1) * jh.clrs;
 
+
 #ifdef LIBRAW_LIBRARY_BUILD
+  if(load_flags & 256)
+  {
+	width = raw_width;
+	height = raw_height;
+  }
+
   try {
 #endif
   for (ecol=slice=0; slice <= cr2_slice[0]; slice++) {
@@ -1238,6 +1248,8 @@ void CLASS canon_sraw_load_raw()
     {
       ljpeg_end (&jh);
       maximum = 0x3fff;
+      height = saved_h;
+      width = saved_w;
       return;
     }
 #endif
@@ -1306,6 +1318,8 @@ void CLASS canon_sraw_load_raw()
       ljpeg_end (&jh);
       throw ;
   }
+  height = saved_h;
+  width = saved_w;
 #endif
   ljpeg_end (&jh);
   maximum = 0x3fff;
