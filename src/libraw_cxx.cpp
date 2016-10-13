@@ -1761,6 +1761,21 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
 
+	if (!strcasecmp(imgdata.idata.make, "Canon") && !strcasecmp(imgdata.idata.model, "EOS 80D") 
+		&& (load_raw == &LibRaw::canon_sraw_load_raw) )
+	{
+		if(imgdata.sizes.raw_width == 4032 && imgdata.sizes.raw_height == 3402)
+		{
+			imgdata.sizes.raw_width = 4536;
+			imgdata.sizes.left_margin = 28;
+			imgdata.sizes.iwidth = imgdata.sizes.width = imgdata.sizes.raw_width - imgdata.sizes.left_margin;
+			imgdata.sizes.raw_height = 3024;
+			imgdata.sizes.top_margin = 8;
+			imgdata.sizes.iheight = imgdata.sizes.height = imgdata.sizes.raw_height - imgdata.sizes.top_margin;
+			libraw_internal_data.unpacker_data.load_flags |= 256;
+		}
+	}
+
 	// XTrans Compressed?
 	if (!imgdata.idata.dng_version && !strcasecmp(imgdata.idata.make, "Fujifilm") && (load_raw == &LibRaw::unpacked_load_raw) )
 	{
@@ -2507,10 +2522,10 @@ int LibRaw::unpack(void)
             S.iwidth = S.width;
             S.iheight= S.height;
             IO.shrink = 0;
-            S.raw_pitch = S.width*8;
+            S.raw_pitch = S.raw_width*8;
             // allocate image as temporary buffer, size
             imgdata.rawdata.raw_alloc = 0;
-            imgdata.image = (ushort (*)[4]) calloc(S.iwidth*S.iheight,sizeof(*imgdata.image));
+            imgdata.image = (ushort (*)[4]) calloc(S.raw_width*S.raw_height,sizeof(*imgdata.image));
 			if(!(decoder_info.decoder_flags &  LIBRAW_DECODER_ADOBECOPYPIXEL))
 			{
 				imgdata.rawdata.raw_image = (ushort*) imgdata.image ;
@@ -2540,10 +2555,13 @@ int LibRaw::unpack(void)
             imgdata.image = 0;
             // Restore saved values. Note: Foveon have masked frame
             // Other 4-color legacy data: no borders
-            S.raw_width = S.width;
-            S.left_margin = 0;
-            S.raw_height = S.height;
-            S.top_margin = 0;
+			if(!(libraw_internal_data.unpacker_data.load_flags & 256))
+			{
+				S.raw_width = S.width;
+				S.left_margin = 0;
+				S.raw_height = S.height;
+				S.top_margin = 0;
+			}
           }
       }
 
