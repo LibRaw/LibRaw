@@ -49,6 +49,7 @@ it under the terms of the one of three licenses as you choose:
     void 	parseSonyLensFeatures (uchar a, uchar b);
     void	process_Sony_0x9050 (uchar * buf, unsigned id);
     void	process_Sony_0x940c (uchar * buf);
+    void      parseFujiMakernotes (unsigned tag, unsigned type);
 
     ushort      get2();
     unsigned    sget4 (uchar *s);
