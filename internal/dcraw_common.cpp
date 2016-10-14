@@ -6307,7 +6307,7 @@ void CLASS setOlympusBodyFeatures (unsigned long long id)
   return;
 }
 
-void CLASS parseCanonMakernotes (unsigned tag, unsigned type) {
+void CLASS parseCanonMakernotes (unsigned tag, unsigned type, unsigned len) {
 
 if (tag == 0x0001) Canon_CameraSettings();
         else if (tag == 0x0002)			// focal length
@@ -6373,6 +6373,15 @@ if (tag == 0x0001) Canon_CameraSettings();
                 fread(imgdata.lens.makernotes.Lens + 5, 58, 1, ifp);
               }
           }
+
+        else if (tag == 0x00a9)
+          {
+            long int save1 = ftell(ifp);
+            fseek (ifp, save1+(0x5<<1), SEEK_SET);
+            Canon_WBpresets(0,0);
+            fseek (ifp, save1, SEEK_SET);
+          }
+
         else if (tag == 0x00e0)			// sensor info
           {
             imgdata.makernotes.canon.SensorWidth           = (get2(),get2());
@@ -6386,6 +6395,191 @@ if (tag == 0x0001) Canon_CameraSettings();
             imgdata.makernotes.canon.BlackMaskRightBorder  = get2();
             imgdata.makernotes.canon.BlackMaskBottomBorder = get2();
           }
+
+    if (tag == 0x4001 && len > 500)
+      {
+        int c;
+        long int save1 = ftell(ifp);
+        switch (len)
+          {
+          case 582:
+            imgdata.makernotes.canon.CanonColorDataVer = 1;	// 20D / 350D
+            {
+            	fseek (ifp, save1+(0x23<<1), SEEK_SET);
+            	Canon_WBpresets(2,2);
+            	fseek (ifp, save1+(0x4b<<1), SEEK_SET);
+              	Canon_WBCTpresets (1);	// ABCT
+            }
+            break;
+          case 653:
+            imgdata.makernotes.canon.CanonColorDataVer = 2;	// 1Dmk2 / 1DsMK2
+            {
+            	fseek (ifp, save1+(0x27<<1), SEEK_SET);
+            	Canon_WBpresets(2,12);
+            	fseek (ifp, save1+(0xa4<<1), SEEK_SET);
+              	Canon_WBCTpresets (1);	// ABCT
+            }
+            break;
+          case 796:
+            imgdata.makernotes.canon.CanonColorDataVer = 3;	// 1DmkIIN / 5D / 30D / 400D
+			imgdata.makernotes.canon.CanonColorDataSubVer = get2();
+			{
+			  fseek (ifp, save1+(0x4e<<1), SEEK_SET);
+              Canon_WBpresets(2,12);
+              fseek (ifp, save1+(0x85<<1), SEEK_SET);
+              Canon_WBCTpresets (0);	// BCAT
+              fseek (ifp, save1+(0x0c4<<1), SEEK_SET); // offset 196 short
+              int bls=0;
+              FORC4 bls+=get2();
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
+			}
+			break;
+            // 1DmkIII / 1DSmkIII / 1DmkIV / 5DmkII
+            // 7D / 40D / 50D / 60D / 450D / 500D
+            // 550D / 1000D / 1100D
+          case 674: case 692: case 702: case 1227: case 1250:
+          case 1251: case 1337: case 1338: case 1346:
+            imgdata.makernotes.canon.CanonColorDataVer = 4;
+            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
+            {
+            	fseek (ifp, save1+(0x53<<1), SEEK_SET);
+            	Canon_WBpresets(2,12);
+            	fseek (ifp, save1+(0xa8<<1), SEEK_SET);
+              	Canon_WBCTpresets (0);	// BCAT
+              fseek (ifp, save1+(0x0e7<<1), SEEK_SET); // offset 231 short
+              int bls=0;
+              FORC4 bls+=get2();
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
+            }
+            if ((imgdata.makernotes.canon.CanonColorDataSubVer == 4)
+                || (imgdata.makernotes.canon.CanonColorDataSubVer == 5))
+              {
+                fseek (ifp, save1+(0x2b9<<1), SEEK_SET);		// offset 697 shorts
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+              }
+            else if ((imgdata.makernotes.canon.CanonColorDataSubVer == 6) ||
+                     (imgdata.makernotes.canon.CanonColorDataSubVer == 7))
+              {
+                fseek (ifp, save1+(0x2d0<<1), SEEK_SET);		// offset 720 shorts
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+              }
+            else if (imgdata.makernotes.canon.CanonColorDataSubVer == 9)
+              {
+                fseek (ifp, save1+(0x2d4<<1), SEEK_SET);		// offset 724 shorts
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+              }
+            break;
+
+          case 5120:
+            imgdata.makernotes.canon.CanonColorDataVer = 5;	// PowerSot G10, G12, G5 X, EOS M3
+            {
+              fseek (ifp, save1+(0x56<<1), SEEK_SET);
+              if (unique_id == 0x03970000)  // G7 X Mark II
+              {
+                fseek(ifp, 18, SEEK_CUR);
+                FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
+                fseek(ifp, 8, SEEK_CUR);
+                Canon_WBpresets(8,24);
+                fseek(ifp, 168, SEEK_CUR);
+                FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][c ^ (c >> 1)] = get2();
+                fseek(ifp, 24, SEEK_CUR);
+                Canon_WBCTpresets (2);  // BCADT
+                fseek(ifp, 6, SEEK_CUR);
+              }
+              else
+              {
+                FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
+                get2();
+                Canon_WBpresets(2,12);
+                fseek (ifp, save1+(0xba<<1), SEEK_SET);
+                Canon_WBCTpresets (2);  // BCADT
+                fseek (ifp, save1+(0x108<<1), SEEK_SET);  // offset 264 short
+              }
+              int bls=0;
+              FORC4 bls+=get2();
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
+            }
+            break;
+
+          case 1273: case 1275:
+            imgdata.makernotes.canon.CanonColorDataVer = 6;	// 600D / 1200D
+            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
+            {
+              fseek (ifp, save1+(0x67<<1), SEEK_SET);
+              Canon_WBpresets(2,12);
+              fseek (ifp, save1+(0xbc<<1), SEEK_SET);
+              Canon_WBCTpresets (0);	// BCAT
+              fseek (ifp, save1+(0x0fb<<1), SEEK_SET);			// offset 251 short
+              int bls=0;
+              FORC4 bls+=get2();
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
+            }
+            fseek (ifp, save1+(0x1e4<<1), SEEK_SET);			// offset 484 shorts
+            imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+            FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+            break;
+
+            // 1DX / 5DmkIII / 6D / 100D / 650D / 700D / EOS M / 7DmkII / 750D / 760D
+          case 1312: case 1313: case 1316: case 1506:
+            imgdata.makernotes.canon.CanonColorDataVer = 7;
+            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
+            {
+              fseek (ifp, save1+(0x80<<1), SEEK_SET);
+              Canon_WBpresets(2,12);
+              fseek (ifp, save1+(0xd5<<1), SEEK_SET);
+              Canon_WBCTpresets (0);	// BCAT
+              fseek (ifp, save1+(0x114<<1), SEEK_SET);			// offset 276 shorts
+              int bls=0;
+              FORC4 bls+=get2();
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
+            }
+            if (imgdata.makernotes.canon.CanonColorDataSubVer == 10)
+              {
+                fseek (ifp, save1+(0x1fd<<1), SEEK_SET);		// offset 509 shorts
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+              } else if (imgdata.makernotes.canon.CanonColorDataSubVer == 11)
+              {
+                fseek (ifp, save1+(0x2dd<<1), SEEK_SET);		// offset 733 shorts
+                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+              }
+            break;
+
+            // 5DS / 5DS R / 80D / 1300D / 5D4
+          case 1560: case 1592: case 1353:
+            imgdata.makernotes.canon.CanonColorDataVer = 8;
+            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
+            {
+              fseek (ifp, save1+(0x85<<1), SEEK_SET);
+              Canon_WBpresets(2,12);
+              fseek (ifp, save1+(0x107<<1), SEEK_SET);
+              Canon_WBCTpresets (0);	// BCAT
+              fseek (ifp, save1+(0x146<<1), SEEK_SET);			// offset 326 shorts
+              int bls=0;
+              FORC4 bls+=get2();
+              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
+            }
+              if (imgdata.makernotes.canon.CanonColorDataSubVer == 14)  // 1300D
+                {
+                  fseek (ifp, save1+(0x231<<1), SEEK_SET);
+                  imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                  FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+                }
+              else
+                {
+                  fseek (ifp, save1+(0x30f<<1), SEEK_SET);		// offset 783 shorts
+                  imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+                  FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+                }
+            break;
+
+          }
+        fseek (ifp, save1, SEEK_SET);
+      }
 }
 
 void CLASS setPentaxBodyFeatures (unsigned id)
@@ -7225,7 +7419,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               }
           }
 
-        else parseCanonMakernotes (tag, len);
+        else parseCanonMakernotes (tag, type, len);
       }
 
     else if (!strncmp(make, "FUJI", 4))
@@ -8090,7 +8284,7 @@ void CLASS parse_makernote (int base, int uptag)
               }
           }
 
-        else parseCanonMakernotes (tag, len);
+        else parseCanonMakernotes (tag, type, len);
       }
 
     else if (!strncmp(make, "FUJI", 4)) {
@@ -9082,198 +9276,6 @@ void CLASS parse_makernote (int base, int uptag)
 	      imgdata.other.FlashEC = getreal(type);
 	    }
 	}
-
-	if ((tag == 0x00a9) && !strncasecmp(make,"Canon",5))
-	  {
-	    long int save1 = ftell(ifp);
-	    fseek (ifp, save1+(0x5<<1), SEEK_SET);
-            Canon_WBpresets(0,0);
-            fseek (ifp, save1, SEEK_SET);
-	  }
-    if (tag == 0x4001 && len > 500 && !strncasecmp(make,"Canon",5))
-      {
-        long int save1 = ftell(ifp);
-        switch (len)
-          {
-          case 582:
-            imgdata.makernotes.canon.CanonColorDataVer = 1;	// 20D / 350D
-            {
-            	fseek (ifp, save1+(0x23<<1), SEEK_SET);
-            	Canon_WBpresets(2,2);
-            	fseek (ifp, save1+(0x4b<<1), SEEK_SET);
-              	Canon_WBCTpresets (1);	// ABCT
-            }
-            break;
-          case 653:
-            imgdata.makernotes.canon.CanonColorDataVer = 2;	// 1Dmk2 / 1DsMK2
-            {
-            	fseek (ifp, save1+(0x27<<1), SEEK_SET);
-            	Canon_WBpresets(2,12);
-            	fseek (ifp, save1+(0xa4<<1), SEEK_SET);
-              	Canon_WBCTpresets (1);	// ABCT
-            }
-            break;
-          case 796:
-            imgdata.makernotes.canon.CanonColorDataVer = 3;	// 1DmkIIN / 5D / 30D / 400D
-			imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-			{
-			  fseek (ifp, save1+(0x4e<<1), SEEK_SET);
-              Canon_WBpresets(2,12);
-              fseek (ifp, save1+(0x85<<1), SEEK_SET);
-              Canon_WBCTpresets (0);	// BCAT
-              fseek (ifp, save1+(0x0c4<<1), SEEK_SET); // offset 196 short
-              int bls=0;
-              FORC4 bls+=get2();
-              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
-			}
-			break;
-            // 1DmkIII / 1DSmkIII / 1DmkIV / 5DmkII
-            // 7D / 40D / 50D / 60D / 450D / 500D
-            // 550D / 1000D / 1100D
-          case 674: case 692: case 702: case 1227: case 1250:
-          case 1251: case 1337: case 1338: case 1346:
-            imgdata.makernotes.canon.CanonColorDataVer = 4;
-            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-            {
-            	fseek (ifp, save1+(0x53<<1), SEEK_SET);
-            	Canon_WBpresets(2,12);
-            	fseek (ifp, save1+(0xa8<<1), SEEK_SET);
-              	Canon_WBCTpresets (0);	// BCAT
-              fseek (ifp, save1+(0x0e7<<1), SEEK_SET); // offset 231 short
-              int bls=0;
-              FORC4 bls+=get2();
-              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
-            }
-            if ((imgdata.makernotes.canon.CanonColorDataSubVer == 4)
-                || (imgdata.makernotes.canon.CanonColorDataSubVer == 5))
-              {
-                fseek (ifp, save1+(0x2b9<<1), SEEK_SET);		// offset 697 shorts
-                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
-              }
-            else if ((imgdata.makernotes.canon.CanonColorDataSubVer == 6) ||
-                     (imgdata.makernotes.canon.CanonColorDataSubVer == 7))
-              {
-                fseek (ifp, save1+(0x2d0<<1), SEEK_SET);		// offset 720 shorts
-                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
-              }
-            else if (imgdata.makernotes.canon.CanonColorDataSubVer == 9)
-              {
-                fseek (ifp, save1+(0x2d4<<1), SEEK_SET);		// offset 724 shorts
-                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
-              }
-            break;
-
-          case 5120:
-            imgdata.makernotes.canon.CanonColorDataVer = 5;	// PowerSot G10, G12, G5 X, EOS M3
-            {
-              fseek (ifp, save1+(0x56<<1), SEEK_SET);
-              if (unique_id == 0x03970000)  // G7 X Mark II
-              {
-                fseek(ifp, 18, SEEK_CUR);
-                FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
-                fseek(ifp, 8, SEEK_CUR);
-                Canon_WBpresets(8,24);
-                fseek(ifp, 168, SEEK_CUR);
-                FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][c ^ (c >> 1)] = get2();
-                fseek(ifp, 24, SEEK_CUR);
-                Canon_WBCTpresets (2);  // BCADT
-                fseek(ifp, 6, SEEK_CUR);
-              }
-              else
-              {
-                FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
-                get2();
-                Canon_WBpresets(2,12);
-                fseek (ifp, save1+(0xba<<1), SEEK_SET);
-                Canon_WBCTpresets (2);  // BCADT
-                fseek (ifp, save1+(0x108<<1), SEEK_SET);  // offset 264 short
-              }
-              int bls=0;
-              FORC4 bls+=get2();
-              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
-            }
-            break;
-
-          case 1273: case 1275:
-            imgdata.makernotes.canon.CanonColorDataVer = 6;	// 600D / 1200D
-            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-            {
-              fseek (ifp, save1+(0x67<<1), SEEK_SET);
-              Canon_WBpresets(2,12);
-              fseek (ifp, save1+(0xbc<<1), SEEK_SET);
-              Canon_WBCTpresets (0);	// BCAT
-              fseek (ifp, save1+(0x0fb<<1), SEEK_SET);			// offset 251 short
-              int bls=0;
-              FORC4 bls+=get2();
-              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
-            }
-            fseek (ifp, save1+(0x1e4<<1), SEEK_SET);			// offset 484 shorts
-            imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-            FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
-            break;
-
-            // 1DX / 5DmkIII / 6D / 100D / 650D / 700D / EOS M / 7DmkII / 750D / 760D
-          case 1312: case 1313: case 1316: case 1506:
-            imgdata.makernotes.canon.CanonColorDataVer = 7;
-            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-            {
-              fseek (ifp, save1+(0x80<<1), SEEK_SET);
-              Canon_WBpresets(2,12);
-              fseek (ifp, save1+(0xd5<<1), SEEK_SET);
-              Canon_WBCTpresets (0);	// BCAT
-              fseek (ifp, save1+(0x114<<1), SEEK_SET);			// offset 276 shorts
-              int bls=0;
-              FORC4 bls+=get2();
-              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
-            }
-            if (imgdata.makernotes.canon.CanonColorDataSubVer == 10)
-              {
-                fseek (ifp, save1+(0x1fd<<1), SEEK_SET);		// offset 509 shorts
-                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
-              } else if (imgdata.makernotes.canon.CanonColorDataSubVer == 11)
-              {
-                fseek (ifp, save1+(0x2dd<<1), SEEK_SET);		// offset 733 shorts
-                imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-                FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
-              }
-            break;
-
-            // 5DS / 5DS R / 80D / 1300D / 5D4
-          case 1560: case 1592: case 1353:
-            imgdata.makernotes.canon.CanonColorDataVer = 8;
-            imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-            {
-              fseek (ifp, save1+(0x85<<1), SEEK_SET);
-              Canon_WBpresets(2,12);
-              fseek (ifp, save1+(0x107<<1), SEEK_SET);
-              Canon_WBCTpresets (0);	// BCAT
-              fseek (ifp, save1+(0x146<<1), SEEK_SET);			// offset 326 shorts
-              int bls=0;
-              FORC4 bls+=get2();
-              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
-            }
-              if (imgdata.makernotes.canon.CanonColorDataSubVer == 14)  // 1300D
-                {
-                  fseek (ifp, save1+(0x231<<1), SEEK_SET);
-                  imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-                  FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
-                }
-              else
-                {
-                  fseek (ifp, save1+(0x30f<<1), SEEK_SET);		// offset 783 shorts
-                  imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-                  FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
-                }
-            break;
-
-          }
-        fseek (ifp, save1, SEEK_SET);
-      }
-
     fseek(ifp,_pos2,SEEK_SET);
 
 #endif
