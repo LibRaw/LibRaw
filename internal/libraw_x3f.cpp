@@ -733,7 +733,7 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
 
   if (H->identifier != X3F_FOVb) {
     x3f_delete(x3f);
-    return NULL;
+	return NULL;
   }
 
   GET4(H->version);
@@ -776,7 +776,11 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
   /* Traverse the directory */
   for (d=0; d<DS->num_directory_entries; d++) {
     x3f_directory_entry_t *DE = &DS->directory_entry[d];
+	if (!DE)
+		goto _err;
     x3f_directory_entry_header_t *DEH = &DE->header;
+	if (!DEH)
+		goto _err;
     uint32_t save_dir_pos;
 
     /* Read the directory entry info */
@@ -801,7 +805,8 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
 
     if (DEH->identifier == X3F_SECp) {
       x3f_property_list_t *PL = &DEH->data_subsection.property_list;
-
+	  if (!PL)
+		  goto _err;
       /* Read the property part of the header */
       GET4(PL->num_properties);
       GET4(PL->character_format);
@@ -815,7 +820,8 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
 
     if (DEH->identifier == X3F_SECi) {
       x3f_image_data_t *ID = &DEH->data_subsection.image_data;
-
+	  if (!ID)
+		  goto _err;
       /* Read the image part of the header */
       GET4(ID->type);
       GET4(ID->format);
@@ -833,7 +839,8 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
 
     if (DEH->identifier == X3F_SECc) {
       x3f_camf_t *CAMF = &DEH->data_subsection.camf;
-
+	  if (!CAMF)
+		  goto _err;
       /* Read the CAMF part of the header */
       GET4(CAMF->type);
       GET4(CAMF->tN.val0);
@@ -860,6 +867,10 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
   }
 
   return x3f;
+_err:
+  if (x3f) free(x3f);
+  return NULL;
+
 }
 
 /* --------------------------------------------------------------------- */
@@ -883,20 +894,27 @@ static void free_camf_entry(camf_entry_t *entry)
 		return X3F_ARGUMENT_ERROR;
 
 	DS = &x3f->directory_section;
+	if (DS->num_directory_entries > 1000)
+		return X3F_ARGUMENT_ERROR;
 
 	for (d=0; d<DS->num_directory_entries; d++) {
 		x3f_directory_entry_t *DE = &DS->directory_entry[d];
+		if (!DE)
+			continue;
 		x3f_directory_entry_header_t *DEH = &DE->header;
-
+		if (!DEH)
+			continue;
 		if (DEH->identifier == X3F_SECp) {
 			x3f_property_list_t *PL = &DEH->data_subsection.property_list;
-			int i;
+			if (PL)
+			{
+				int i;
 
-			for (i=0; i<PL->property_table.size; i++) {
-				FREE(PL->property_table.element[i].name_utf8);
-				FREE(PL->property_table.element[i].value_utf8);
+				for (i = 0; i < PL->property_table.size; i++) {
+					FREE(PL->property_table.element[i].name_utf8);
+					FREE(PL->property_table.element[i].value_utf8);
+				}
 			}
-
 			FREE(PL->property_table.element);
 			FREE(PL->data);
 		}
@@ -904,25 +922,27 @@ static void free_camf_entry(camf_entry_t *entry)
 		if (DEH->identifier == X3F_SECi) {
 			x3f_image_data_t *ID = &DEH->data_subsection.image_data;
 
-			cleanup_huffman(&ID->huffman);
-
-			cleanup_true(&ID->tru);
-
-			cleanup_quattro(&ID->quattro);
-
-			FREE(ID->data);
+			if (ID)
+			{
+				cleanup_huffman(&ID->huffman);
+				cleanup_true(&ID->tru);
+				cleanup_quattro(&ID->quattro);
+				FREE(ID->data);
+			}
 		}
 
 		if (DEH->identifier == X3F_SECc) {
 			x3f_camf_t *CAMF = &DEH->data_subsection.camf;
 			int i;
-
-			FREE(CAMF->data);
-			FREE(CAMF->table.element);
-			cleanup_huffman_tree(&CAMF->tree);
-			FREE(CAMF->decoded_data);
-			for (i=0; i < CAMF->entry_table.size; i++) {
-				free_camf_entry(&CAMF->entry_table.element[i]);
+			if (CAMF)
+			{
+				FREE(CAMF->data);
+				FREE(CAMF->table.element);
+				cleanup_huffman_tree(&CAMF->tree);
+				FREE(CAMF->decoded_data);
+				for (i = 0; i < CAMF->entry_table.size; i++) {
+					free_camf_entry(&CAMF->entry_table.element[i]);
+				}
 			}
 			FREE(CAMF->entry_table.element);
 		}
@@ -1554,8 +1574,8 @@ static void x3f_load_image_verbatim(x3f_info_t *I, x3f_directory_entry_t *DE)
 {
 	x3f_directory_entry_header_t *DEH = &DE->header;
 	x3f_image_data_t *ID = &DEH->data_subsection.image_data;
-
-	ID->data_size = read_data_block(&ID->data, I, DE, 0);
+	if (!ID->data_size)
+		ID->data_size = read_data_block(&ID->data, I, DE, 0);
 }
 
 static void x3f_load_property_list(x3f_info_t *I, x3f_directory_entry_t *DE)
@@ -1568,7 +1588,8 @@ static void x3f_load_property_list(x3f_info_t *I, x3f_directory_entry_t *DE)
 
 	GET_PROPERTY_TABLE(PL->property_table, PL->num_properties);
 
-	PL->data_size = read_data_block(&PL->data, I, DE, 0);
+	if (!PL->data_size)
+		PL->data_size = read_data_block(&PL->data, I, DE, 0);
 
 	for (i=0; i<PL->num_properties; i++) {
 		x3f_property_t *P = &PL->property_table.element[i];
@@ -1622,7 +1643,8 @@ static void x3f_load_true(x3f_info_t *I,
 	GET_TABLE(TRU->plane_size, GET4, TRUE_PLANES,uint32_t);
 
 	/* Read image data */
-	ID->data_size = read_data_block(&ID->data, I, DE, 0);
+	if (!ID->data_size)
+		ID->data_size = read_data_block(&ID->data, I, DE, 0);
 
 	/* TODO: can it be fewer than 8 bits? Maybe taken from TRU->table? */
 	new_huffman_tree(&TRU->tree, 8);
@@ -1693,7 +1715,8 @@ static void x3f_load_huffman_compressed(x3f_info_t *I,
 
 	GET_TABLE(HUF->table, GET4, table_size,uint32_t);
 
-	ID->data_size = read_data_block(&ID->data, I, DE, row_offsets_size);
+	if (!ID->data_size)
+		ID->data_size = read_data_block(&ID->data, I, DE, row_offsets_size);
 
 	GET_TABLE(HUF->row_offsets, GET4, ID->rows,uint32_t);
 
@@ -1712,7 +1735,8 @@ static void x3f_load_huffman_not_compressed(x3f_info_t *I,
 	x3f_directory_entry_header_t *DEH = &DE->header;
 	x3f_image_data_t *ID = &DEH->data_subsection.image_data;
 
-	ID->data_size = read_data_block(&ID->data, I, DE, 0);
+	if (!ID->data_size)
+		ID->data_size = read_data_block(&ID->data, I, DE, 0);
 
 	simple_decode(I, DE, bits, row_stride);
 }
@@ -2270,7 +2294,8 @@ static void x3f_load_camf(x3f_info_t *I, x3f_directory_entry_t *DE)
 
 	read_data_set_offset(I, DE, X3F_CAMF_HEADER_SIZE);
 
-	CAMF->data_size = read_data_block(&CAMF->data, I, DE, 0);
+	if (!CAMF->data_size)
+		CAMF->data_size = read_data_block(&CAMF->data, I, DE, 0);
 
 	switch (CAMF->type) {
 	case 2:			/* Older SD9-SD14 */
