@@ -38,6 +38,7 @@ it under the terms of the one of three licenses as you choose:
     void	Canon_CameraSettings();
     void	Canon_WBpresets (int skip1, int skip2);
     void	Canon_WBCTpresets (short WBCTversion);
+    void      parseCanonMakernotes (unsigned tag, unsigned type);
     void	processNikonLensData (uchar *LensData, unsigned len);
     void	setOlympusBodyFeatures (unsigned long long id);
     void	setPhaseOneFeatures (unsigned id);
