@@ -6307,6 +6307,87 @@ void CLASS setOlympusBodyFeatures (unsigned long long id)
   return;
 }
 
+void CLASS parseCanonMakernotes (unsigned tag, unsigned type) {
+
+if (tag == 0x0001) Canon_CameraSettings();
+        else if (tag == 0x0002)			// focal length
+          {
+            imgdata.lens.makernotes.FocalType = get2();
+            imgdata.lens.makernotes.CurFocal = get2();
+            if (imgdata.lens.makernotes.CanonFocalUnits > 1)
+              {
+                imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
+              }
+          }
+
+        else if (tag == 0x0004)			// shot info
+          {
+            short tempAp;
+            fseek(ifp, 30, SEEK_CUR);
+            imgdata.other.FlashEC = _CanonConvertEV((signed short)get2());
+            fseek(ifp, 8-32, SEEK_CUR);
+            if ((tempAp = get2()) != 0x7fff)
+              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
+            if (imgdata.lens.makernotes.CurAp < 0.7f)
+            {
+              fseek(ifp, 32, SEEK_CUR);
+              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
+            }
+            if (!aperture) aperture = imgdata.lens.makernotes.CurAp;
+          }
+
+        else if (tag == 0x0095 &&		// lens model tag
+                 !imgdata.lens.makernotes.Lens[0])
+          {
+            fread(imgdata.lens.makernotes.Lens, 2, 1, ifp);
+            imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
+            if (imgdata.lens.makernotes.Lens[0] < 65)					// non-Canon lens
+              fread(imgdata.lens.makernotes.Lens + 2, 62, 1, ifp);
+            else
+              {
+                char efs[2];
+                imgdata.lens.makernotes.LensFeatures_pre[0] = imgdata.lens.makernotes.Lens[0];
+                imgdata.lens.makernotes.LensFeatures_pre[1] = imgdata.lens.makernotes.Lens[1];
+                fread(efs, 2, 1, ifp);
+                if (efs[0] == 45 && (efs[1] == 83 || efs[1] == 69 || efs[1] == 77))
+                  {	// "EF-S, TS-E, MP-E, EF-M" lenses
+                    imgdata.lens.makernotes.Lens[2] = imgdata.lens.makernotes.LensFeatures_pre[2] = efs[0];
+                    imgdata.lens.makernotes.Lens[3] = imgdata.lens.makernotes.LensFeatures_pre[3] = efs[1];
+                    imgdata.lens.makernotes.Lens[4] = 32;
+                    if (efs[1] == 83)
+                      {
+                        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_S;
+                        imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
+                      }
+                    else if (efs[1] == 77)
+                      {
+                        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_M;
+                      }
+                  }
+                else
+                  {																// "EF" lenses
+                    imgdata.lens.makernotes.Lens[2] = 32;
+                    imgdata.lens.makernotes.Lens[3] = efs[0];
+                    imgdata.lens.makernotes.Lens[4] = efs[1];
+                  }
+                fread(imgdata.lens.makernotes.Lens + 5, 58, 1, ifp);
+              }
+          }
+        else if (tag == 0x00e0)			// sensor info
+          {
+            imgdata.makernotes.canon.SensorWidth           = (get2(),get2());
+            imgdata.makernotes.canon.SensorHeight          = get2();
+            imgdata.makernotes.canon.SensorLeftBorder      = (get2(),get2(),get2());
+            imgdata.makernotes.canon.SensorTopBorder       = get2();
+            imgdata.makernotes.canon.SensorRightBorder     = get2();
+            imgdata.makernotes.canon.SensorBottomBorder    = get2();
+            imgdata.makernotes.canon.BlackMaskLeftBorder   = get2();
+            imgdata.makernotes.canon.BlackMaskTopBorder    = get2();
+            imgdata.makernotes.canon.BlackMaskRightBorder  = get2();
+            imgdata.makernotes.canon.BlackMaskBottomBorder = get2();
+          }
+}
+
 void CLASS setPentaxBodyFeatures (unsigned id)
 {
   imgdata.lens.makernotes.CamID = id;
@@ -7121,42 +7202,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     if (!strncmp(make, "Canon",5))
       {
-        if (tag == 0x0001) Canon_CameraSettings();
-        else if (tag == 0x0002)			// focal length
-          {
-            imgdata.lens.makernotes.FocalType = get2();
-            imgdata.lens.makernotes.CurFocal = get2();
-            if ((imgdata.lens.makernotes.CanonFocalUnits != 1) &&
-                imgdata.lens.makernotes.CanonFocalUnits)
-              {
-                imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-              }
-          }
-
-        else if (tag == 0x0004)			// shot info
-          {
-            short tempAp;
-            fseek(ifp, 30, SEEK_CUR);
-            imgdata.other.FlashEC = _CanonConvertEV((signed short)get2());
-            fseek(ifp, 8-32, SEEK_CUR);
-            if ((tempAp = get2()) != 0x7fff)
-              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
-            if (imgdata.lens.makernotes.CurAp < 0.7f)
-            {
-              fseek(ifp, 32, SEEK_CUR);
-              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
-            }
-            if (!aperture) aperture = imgdata.lens.makernotes.CurAp;
-          }
-
-        else if (tag == 0x000d && len < 256000)			// camera info
+        if (tag == 0x000d && len < 256000) // camera info
           {
             CanonCameraInfo = (uchar*)malloc(len);
             fread(CanonCameraInfo, len, 1, ifp);
             lenCanonCameraInfo = len;
           }
 
-        else if (tag == 0x10)	// Canon ModelID
+        else if (tag == 0x10)	 // Canon ModelID
           {
             unique_id = get4();
             if (unique_id == 0x03740000) unique_id = 0x80000374;	// M3
@@ -7172,56 +7225,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               }
           }
 
-        else if (tag == 0x0095 &&		// lens model tag
-                 !imgdata.lens.makernotes.Lens[0])
-          {
-            fread(imgdata.lens.makernotes.Lens, 2, 1, ifp);
-            imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
-            if (imgdata.lens.makernotes.Lens[0] < 65)					// non-Canon lens
-              fread(imgdata.lens.makernotes.Lens + 2, 62, 1, ifp);
-            else
-              {
-                char efs[2];
-                imgdata.lens.makernotes.LensFeatures_pre[0] = imgdata.lens.makernotes.Lens[0];
-                imgdata.lens.makernotes.LensFeatures_pre[1] = imgdata.lens.makernotes.Lens[1];
-                fread(efs, 2, 1, ifp);
-                if (efs[0] == 45 && (efs[1] == 83 || efs[1] == 69 || efs[1] == 77))
-                  {	// "EF-S, TS-E, MP-E, EF-M" lenses
-                    imgdata.lens.makernotes.Lens[2] = imgdata.lens.makernotes.LensFeatures_pre[2] = efs[0];
-                    imgdata.lens.makernotes.Lens[3] = imgdata.lens.makernotes.LensFeatures_pre[3] = efs[1];
-                    imgdata.lens.makernotes.Lens[4] = 32;
-                    if (efs[1] == 83)
-                      {
-                        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_S;
-                        imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
-                      }
-                    else if (efs[1] == 77)
-                      {
-                        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_M;
-                      }
-                  }
-                else
-                  {																// "EF" lenses
-                    imgdata.lens.makernotes.Lens[2] = 32;
-                    imgdata.lens.makernotes.Lens[3] = efs[0];
-                    imgdata.lens.makernotes.Lens[4] = efs[1];
-                  }
-                fread(imgdata.lens.makernotes.Lens + 5, 58, 1, ifp);
-              }
-          }
-        else if (tag == 0x00e0)			// sensor info
-          {
-            imgdata.makernotes.canon.SensorWidth           = (get2(),get2());
-            imgdata.makernotes.canon.SensorHeight          = get2();
-            imgdata.makernotes.canon.SensorLeftBorder      = (get2(),get2(),get2());
-            imgdata.makernotes.canon.SensorTopBorder       = get2();
-            imgdata.makernotes.canon.SensorRightBorder     = get2();
-            imgdata.makernotes.canon.SensorBottomBorder    = get2();
-            imgdata.makernotes.canon.BlackMaskLeftBorder   = get2();
-            imgdata.makernotes.canon.BlackMaskTopBorder    = get2();
-            imgdata.makernotes.canon.BlackMaskRightBorder  = get2();
-            imgdata.makernotes.canon.BlackMaskBottomBorder = get2();
-          }
+        else parseCanonMakernotes (tag, len);
       }
 
     else if (!strncmp(make, "FUJI", 4))
@@ -8063,97 +8067,30 @@ void CLASS parse_makernote (int base, int uptag)
     if(len > 8 && _pos+len > 2* fsize) continue;
     if (!strncmp(make, "Canon",5))
       {
-        if (tag == 0x0001) Canon_CameraSettings();
-        else if (tag == 0x0002)			// focal length
-          {
-            imgdata.lens.makernotes.FocalType = get2();
-            imgdata.lens.makernotes.CurFocal = get2();
-            if (imgdata.lens.makernotes.CanonFocalUnits > 1)
-              {
-                imgdata.lens.makernotes.CurFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
-              }
-          }
-
-        else if (tag == 0x0004)			// shot info
-          {
-            short tempAp;
-            fseek(ifp, 30, SEEK_CUR);
-            imgdata.other.FlashEC = _CanonConvertEV((signed short)get2());
-            fseek(ifp, 8-32, SEEK_CUR);
-            if ((tempAp = get2()) != 0x7fff)
-              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(tempAp);
-            if (imgdata.lens.makernotes.CurAp < 0.7f)
-            {
-              fseek(ifp, 32, SEEK_CUR);
-              imgdata.lens.makernotes.CurAp = _CanonConvertAperture(get2());
-            }
-            if (!aperture) aperture = imgdata.lens.makernotes.CurAp;
-          }
-
-        else if ((tag == 0x000c) && (!imgdata.shootinginfo.BodySerial[0]))
-          {
-             sprintf(imgdata.shootinginfo.BodySerial, "%d", get4());
-          }
-
-        else if (tag == 0x000d && len < 256000)	// camera info
+        if (tag == 0x000d && len < 256000)	// camera info
           {
             CanonCameraInfo = (uchar*)malloc(len);
             fread(CanonCameraInfo, len, 1, ifp);
             lenCanonCameraInfo = len;
           }
 
-        else if (tag == 0x0095 &&		// lens model tag
-                 !imgdata.lens.makernotes.Lens[0])
+        else if (tag == 0x10)	// Canon ModelID
           {
-            fread(imgdata.lens.makernotes.Lens, 2, 1, ifp);
-            imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
-            if (imgdata.lens.makernotes.Lens[0] < 65)					// non-Canon lens
-              fread(imgdata.lens.makernotes.Lens + 2, 62, 1, ifp);
-            else
+            unique_id = get4();
+            if (unique_id == 0x03740000) unique_id = 0x80000374;	// M3
+            if (unique_id == 0x03840000) unique_id = 0x80000384;	// M10
+            if (unique_id == 0x03940000) unique_id = 0x80000394;	// M5
+            setCanonBodyFeatures(unique_id);
+            if (lenCanonCameraInfo)
               {
-                char efs[2];
-                imgdata.lens.makernotes.LensFeatures_pre[0] = imgdata.lens.makernotes.Lens[0];
-                imgdata.lens.makernotes.LensFeatures_pre[1] = imgdata.lens.makernotes.Lens[1];
-                fread(efs, 2, 1, ifp);
-                if (efs[0] == 45 && (efs[1] == 83 || efs[1] == 69 || efs[1] == 77))
-                  {	// "EF-S, TS-E, MP-E, EF-M" lenses
-                    imgdata.lens.makernotes.Lens[2] = imgdata.lens.makernotes.LensFeatures_pre[2] = efs[0];
-                    imgdata.lens.makernotes.Lens[3] = imgdata.lens.makernotes.LensFeatures_pre[3] = efs[1];
-                    imgdata.lens.makernotes.Lens[4] = 32;
-                    if (efs[1] == 83)
-                      {
-                        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_S;
-                        imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
-                      }
-                    else if (efs[1] == 77)
-                      {
-                        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_M;
-                      }
-                  }
-                else
-                  {																// "EF" lenses
-                    imgdata.lens.makernotes.Lens[2] = 32;
-                    imgdata.lens.makernotes.Lens[3] = efs[0];
-                    imgdata.lens.makernotes.Lens[4] = efs[1];
-                  }
-                fread(imgdata.lens.makernotes.Lens + 5, 58, 1, ifp);
+                processCanonCameraInfo(unique_id, CanonCameraInfo,lenCanonCameraInfo);
+                free(CanonCameraInfo);
+                CanonCameraInfo = 0;
+                lenCanonCameraInfo = 0;
               }
           }
 
-        else if (tag == 0x00e0)			// sensor info
-          {
-            imgdata.makernotes.canon.SensorWidth           = (get2(),get2());
-            imgdata.makernotes.canon.SensorHeight          = get2();
-            imgdata.makernotes.canon.SensorLeftBorder      = (get2(),get2(),get2());
-            imgdata.makernotes.canon.SensorTopBorder       = get2();
-            imgdata.makernotes.canon.SensorRightBorder     = get2();
-            imgdata.makernotes.canon.SensorBottomBorder    = get2();
-            imgdata.makernotes.canon.BlackMaskLeftBorder   = get2();
-            imgdata.makernotes.canon.BlackMaskTopBorder    = get2();
-            imgdata.makernotes.canon.BlackMaskRightBorder  = get2();
-            imgdata.makernotes.canon.BlackMaskBottomBorder = get2();
-          }
-
+        else parseCanonMakernotes (tag, len);
       }
 
     else if (!strncmp(make, "FUJI", 4)) {
@@ -8993,24 +8930,9 @@ void CLASS parse_makernote (int base, int uptag)
 	  flip = "065"[c]-'0';
     }
 
-    if (tag == 0x10 && type == 4)
-      {
-        unique_id = get4();
-
-#ifdef LIBRAW_LIBRARY_BUILD
-        if (unique_id == 0x03740000) unique_id = 0x80000374;
-        if (unique_id == 0x03840000) unique_id = 0x80000384;
-        if (unique_id == 0x03940000) unique_id = 0x80000394;
-        setCanonBodyFeatures(unique_id);
-        if (lenCanonCameraInfo)
-          {
-            processCanonCameraInfo(unique_id, CanonCameraInfo,lenCanonCameraInfo);
-            free(CanonCameraInfo);
-            CanonCameraInfo = 0;
-            lenCanonCameraInfo = 0;
-          }
+#ifndef LIBRAW_LIBRARY_BUILD
+    if (tag == 0x10 && type == 4) unique_id = get4();
 #endif
-      }
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos2 = ftell(ifp);
