@@ -1761,10 +1761,20 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     identify();
 
-	if (!strcasecmp(imgdata.idata.make, "Canon") && !strcasecmp(imgdata.idata.model, "EOS 80D") 
-		&& (load_raw == &LibRaw::canon_sraw_load_raw) )
+	if (!strcasecmp(imgdata.idata.make, "Canon")  && (load_raw == &LibRaw::canon_sraw_load_raw) && imgdata.sizes.raw_width>0)
 	{
-		if(imgdata.sizes.raw_width == 4032 && imgdata.sizes.raw_height == 3402)
+		float ratio = float(imgdata.sizes.raw_height) / float(imgdata.sizes.raw_width);
+
+		if((ratio < 0.57 || ratio > 0.75) && imgdata.makernotes.canon.SensorHeight>1 && imgdata.makernotes.canon.SensorWidth > 1)
+		{
+			imgdata.sizes.raw_width = imgdata.makernotes.canon.SensorWidth;
+			imgdata.sizes.left_margin = imgdata.makernotes.canon.SensorLeftBorder;
+			imgdata.sizes.iwidth = imgdata.sizes.width = imgdata.makernotes.canon.SensorRightBorder - imgdata.makernotes.canon.SensorLeftBorder+1;
+			imgdata.sizes.raw_height = imgdata.makernotes.canon.SensorHeight;
+			imgdata.sizes.top_margin = imgdata.makernotes.canon.SensorTopBorder;
+			imgdata.sizes.iheight = imgdata.sizes.height = imgdata.makernotes.canon.SensorBottomBorder - imgdata.makernotes.canon.SensorTopBorder+1;
+		}
+		else if(imgdata.sizes.raw_width == 4032 && imgdata.sizes.raw_height == 3402 && !strcasecmp(imgdata.idata.model, "EOS 80D")) // 80D hardcoded
 		{
 			imgdata.sizes.raw_width = 4536;
 			imgdata.sizes.left_margin = 28;
@@ -2476,13 +2486,8 @@ int LibRaw::unpack(void)
 
 		// Disable rawspeed for double-sized Oly files
 		if(!strncasecmp(imgdata.idata.make,"Olympus",7) &&
-			( (!strncasecmp(imgdata.idata.model,"E-M5MarkII",10) && imgdata.sizes.raw_width == 9280) || !strncasecmp(imgdata.idata.model,"SH-2",4) || !strncasecmp(imgdata.idata.model,"SH-3",4) || !strncasecmp(imgdata.idata.model,"TG-4",4))
+			( ( imgdata.sizes.raw_width > 6000) || !strncasecmp(imgdata.idata.model,"SH-2",4) || !strncasecmp(imgdata.idata.model,"SH-3",4) || !strncasecmp(imgdata.idata.model,"TG-4",4))
 			)
-			rawspeed_enabled = 0;
-
-		if(!strncasecmp(imgdata.idata.make,"Canon",5)
-			&& !strncasecmp(imgdata.idata.model,"EOS 5DS",7)
-			&& (load_raw == &LibRaw::canon_sraw_load_raw))
 			rawspeed_enabled = 0;
 
 		if(imgdata.idata.dng_version && imgdata.idata.filters==0 && libraw_internal_data.unpacker_data.tiff_bps == 8) // Disable for 8 bit
