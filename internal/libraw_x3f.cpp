@@ -712,6 +712,7 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
 /* extern */ x3f_t *x3f_new_from_file(LibRaw_abstract_datastream *infile)
 {
 	if (!infile) return NULL;
+  	INT64 fsize = infile->size();
 	x3f_t *x3f = (x3f_t *)calloc(1, sizeof(x3f_t));
 	x3f_info_t *I = NULL;
 	x3f_header_t *H = NULL;
@@ -774,7 +775,6 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
   }
 
   /* Traverse the directory */
-  INT64 fsize = infile->size();
   for (d=0; d<DS->num_directory_entries; d++) {
     x3f_directory_entry_t *DE = &DS->directory_entry[d];
 	if (!DE)
