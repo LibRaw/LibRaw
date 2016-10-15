@@ -711,52 +711,50 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
 
 /* extern */ x3f_t *x3f_new_from_file(LibRaw_abstract_datastream *infile)
 {
-  x3f_t *x3f = (x3f_t *)calloc(1, sizeof(x3f_t));
-  x3f_info_t *I = NULL;
-  x3f_header_t *H = NULL;
-  x3f_directory_section_t *DS = NULL;
-  int i, d;
+	if (!infile) return NULL;
+  	INT64 fsize = infile->size();
+	x3f_t *x3f = (x3f_t *)calloc(1, sizeof(x3f_t));
+	x3f_info_t *I = NULL;
+	x3f_header_t *H = NULL;
+	x3f_directory_section_t *DS = NULL;
+	int i, d;
 
-  I = &x3f->info;
-  I->error = NULL;
-  I->input.file = infile;
-  I->output.file = NULL;
+	I = &x3f->info;
+	I->error = NULL;
+	I->input.file = infile;
+	I->output.file = NULL;
 
-  if (infile == NULL) {
-    return x3f;
-  }
 
   /* Read file header */
-  H = &x3f->header;
-  infile->seek(0, SEEK_SET);
-  GET4(H->identifier);
+	H = &x3f->header;
+	infile->seek(0, SEEK_SET);
+	GET4(H->identifier);
 
-  if (H->identifier != X3F_FOVb) {
-    x3f_delete(x3f);
-	return NULL;
-  }
+	if (H->identifier != X3F_FOVb) {
+		free(x3f);
+		return NULL;
+	}
 
-  GET4(H->version);
-  GETN(H->unique_identifier, SIZE_UNIQUE_IDENTIFIER);
-  /* TODO: the meaning of the rest of the header for version >= 4.0
-           (Quattro) is unknown */
-  if (H->version < X3F_VERSION_4_0) {
-    GET4(H->mark_bits);
-    GET4(H->columns);
-    GET4(H->rows);
-    GET4(H->rotation);
-    if (H->version >= X3F_VERSION_2_1) {
-      int num_ext_data =
-	H->version >= X3F_VERSION_3_0 ? NUM_EXT_DATA_3_0 : NUM_EXT_DATA_2_1;
+	GET4(H->version);
+	GETN(H->unique_identifier, SIZE_UNIQUE_IDENTIFIER);
+	/* TODO: the meaning of the rest of the header for version >= 4.0 (Quattro) is unknown */
+	if (H->version < X3F_VERSION_4_0) {
+		GET4(H->mark_bits);
+		GET4(H->columns);
+		GET4(H->rows);
+		GET4(H->rotation);
+		if (H->version >= X3F_VERSION_2_1) {
+			int num_ext_data =
+				H->version >= X3F_VERSION_3_0 ? NUM_EXT_DATA_3_0 : NUM_EXT_DATA_2_1;
 
-      GETN(H->white_balance, SIZE_WHITE_BALANCE);
-      if (H->version >= X3F_VERSION_2_3)
-	GETN(H->color_mode, SIZE_COLOR_MODE);
-      GETN(H->extended_types, num_ext_data);
-      for (i=0; i<num_ext_data; i++)
-	GET4F(H->extended_data[i]);
-    }
-  }
+			GETN(H->white_balance, SIZE_WHITE_BALANCE);
+			if (H->version >= X3F_VERSION_2_3)
+				GETN(H->color_mode, SIZE_COLOR_MODE);
+			GETN(H->extended_types, num_ext_data);
+			for (i = 0; i < num_ext_data; i++)
+				GET4F(H->extended_data[i]);
+		}
+	}
 
   /* Go to the beginning of the directory */
   infile->seek(-4, SEEK_END);
@@ -767,6 +765,9 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
   GET4(DS->identifier);
   GET4(DS->version);
   GET4(DS->num_directory_entries);
+
+  if (DS->num_directory_entries > 50)
+	  goto _err; // too much direntries, most likely broken file
 
   if (DS->num_directory_entries > 0) {
     size_t size = DS->num_directory_entries * sizeof(x3f_directory_entry_t);
@@ -786,6 +787,8 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
     /* Read the directory entry info */
     GET4(DE->input.offset);
     GET4(DE->input.size);
+	if (DE->input.offset + DE->input.size > fsize * 2)
+		goto _err;
 
     DE->output.offset = 0;
     DE->output.size = 0;
@@ -868,7 +871,13 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
 
   return x3f;
 _err:
-  if (x3f) free(x3f);
+  if (x3f)
+  {
+	  DS = &x3f->directory_section;
+	  if (DS && DS->directory_entry)
+		  free(DS->directory_entry);
+	  free(x3f);
+  }
   return NULL;
 
 }
@@ -894,7 +903,7 @@ static void free_camf_entry(camf_entry_t *entry)
 		return X3F_ARGUMENT_ERROR;
 
 	DS = &x3f->directory_section;
-	if (DS->num_directory_entries > 1000)
+	if (DS->num_directory_entries > 50)
 		return X3F_ARGUMENT_ERROR;
 
 	for (d=0; d<DS->num_directory_entries; d++) {
@@ -1560,8 +1569,12 @@ static uint32_t read_data_block(void **data,
 	x3f_directory_entry_t *DE,
 	uint32_t footer)
 {
+	INT64 fpos = I->input.file->tell();
 	uint32_t size =
-		DE->input.size + DE->input.offset - I->input.file->tell() - footer;
+		DE->input.size + DE->input.offset - fpos - footer;
+	
+	if (fpos + size > I->input.file->size())
+		throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
 	*data = (void *)malloc(size);
 
@@ -1570,6 +1583,17 @@ static uint32_t read_data_block(void **data,
 	return size;
 }
 
+static uint32_t data_block_size(void **data,
+	x3f_info_t *I,
+	x3f_directory_entry_t *DE,
+	uint32_t footer)
+{
+	uint32_t size =
+		DE->input.size + DE->input.offset - I->input.file->tell() - footer;
+	return size;
+}
+
+
 static void x3f_load_image_verbatim(x3f_info_t *I, x3f_directory_entry_t *DE)
 {
 	x3f_directory_entry_header_t *DEH = &DE->header;
@@ -1577,6 +1601,14 @@ static void x3f_load_image_verbatim(x3f_info_t *I, x3f_directory_entry_t *DE)
 	if (!ID->data_size)
 		ID->data_size = read_data_block(&ID->data, I, DE, 0);
 }
+
+static int32_t x3f_load_image_verbatim_size(x3f_info_t *I, x3f_directory_entry_t *DE)
+{
+	x3f_directory_entry_header_t *DEH = &DE->header;
+	x3f_image_data_t *ID = &DEH->data_subsection.image_data;
+	return data_block_size(&ID->data, I, DE, 0);
+}
+
 
 static void x3f_load_property_list(x3f_info_t *I, x3f_directory_entry_t *DE)
 {
@@ -1600,6 +1632,7 @@ static void x3f_load_property_list(x3f_info_t *I, x3f_directory_entry_t *DE)
 		P->value_utf8 = 0;//utf16le_to_utf8(P->value);
 	}
 }
+
 
 static void x3f_load_true(x3f_info_t *I,
 	x3f_directory_entry_t *DE)
@@ -1794,9 +1827,20 @@ static void x3f_load_pixmap(x3f_info_t *I, x3f_directory_entry_t *DE)
 	x3f_load_image_verbatim(I, DE);
 }
 
+static uint32_t x3f_load_pixmap_size(x3f_info_t *I, x3f_directory_entry_t *DE)
+{
+	return x3f_load_image_verbatim_size(I, DE);
+}
+
+
 static void x3f_load_jpeg(x3f_info_t *I, x3f_directory_entry_t *DE)
 {
 	x3f_load_image_verbatim(I, DE);
+}
+
+static uint32_t x3f_load_jpeg_size(x3f_info_t *I, x3f_directory_entry_t *DE)
+{
+	return x3f_load_image_verbatim_size(I, DE);
 }
 
 static void x3f_load_image(x3f_info_t *I, x3f_directory_entry_t *DE)
@@ -1831,6 +1875,26 @@ static void x3f_load_image(x3f_info_t *I, x3f_directory_entry_t *DE)
 		throw LIBRAW_EXCEPTION_IO_CORRUPT;
 	}
 }
+
+// Used only for thumbnail size estimation
+static uint32_t x3f_load_image_size(x3f_info_t *I, x3f_directory_entry_t *DE)
+{
+	x3f_directory_entry_header_t *DEH = &DE->header;
+	x3f_image_data_t *ID = &DEH->data_subsection.image_data;
+
+	read_data_set_offset(I, DE, X3F_IMAGE_HEADER_SIZE);
+
+	switch (ID->type_format) {
+	case X3F_IMAGE_THUMB_PLAIN:
+		return x3f_load_pixmap_size(I, DE);
+	case X3F_IMAGE_THUMB_JPEG:
+		return x3f_load_jpeg_size(I, DE);
+		break;
+	default:
+		return 0;
+	}
+}
+
 
 static void x3f_load_camf_decode_type2(x3f_camf_t *CAMF)
 {
@@ -2340,6 +2404,23 @@ static void x3f_load_camf(x3f_info_t *I, x3f_directory_entry_t *DE)
 	}
 	return X3F_OK;
 }
+
+/* extern */ int64_t x3f_load_data_size(x3f_t *x3f, x3f_directory_entry_t *DE)
+{
+	x3f_info_t *I = &x3f->info;
+
+	if (DE == NULL)
+		return -1;
+
+	switch (DE->header.identifier) 
+	{
+	case X3F_SECi:
+		return x3f_load_image_size(I, DE);
+	default:
+		return 0;
+	}
+}
+
 
 /* extern */ x3f_return_t x3f_load_image_block(x3f_t *x3f, x3f_directory_entry_t *DE)
 {
