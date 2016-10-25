@@ -4,16 +4,13 @@
  * Created: Sat Mar  8 , 2008
  * LibRaw error codes
 LibRaw is free software; you can redistribute it and/or modify
-it under the terms of the one of three licenses as you choose:
+it under the terms of the one of two licenses as you choose:
 
 1. GNU LESSER GENERAL PUBLIC LICENSE version 2.1
    (See file LICENSE.LGPL provided in LibRaw distribution archive for details).
 
 2. COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
    (See file LICENSE.CDDL provided in LibRaw distribution archive for details).
-
-3. LibRaw Software License 27032010
-   (See file LICENSE.LibRaw.pdf provided in LibRaw distribution archive for details).
 
  */
 
@@ -57,14 +54,6 @@ LIBRAW_WBI_StudioTungsten=24,
 LIBRAW_WBI_Sunset=64,
 LIBRAW_WBI_Other=255
 };
-
-enum LibRaw_colormatrix_type
-  {
-    LIBRAW_CMATRIX_NONE=0,
-    LIBRAW_CMATRIX_DNG=1,
-    LIBRAW_CMATRIX_DIGBACK=2,
-    LIBRAW_CMATRIX_OTHER=4
-  };
 
 enum LibRaw_dng_processing
 {

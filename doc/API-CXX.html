@@ -1,33 +1,31 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-  <head>
-    <title>LibRaw C++ API</title>
-  </head>
+<html><head>
+    <title>LibRaw C++ API</title></head>
 
   <body>
-    <a href=index.html>[back to Index]</a>
+    <a href="index.html">[back to Index]</a>
     <h1>LibRaw C++ API</h1>
     <p>Contents</p>
     <ol>
       <li><a href="#LibRaw">LibRaw Objects</a> </li>
       <li><a href="#return">Returned values</a></li>
-      <li><a  href="#dataload">Methods Loading Data from a File</a>
+      <li><a href="#dataload">Methods Loading Data from a File</a>
         <ul>
           <li><a href="#open_datastream">int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)</a></li>
-          <li><a  href="#open_file">int LibRaw::open_file(const char *rawfile[,INT64 bigfile_size])</a></li>
-          <li><a  href="#open_buffer">int LibRaw::open_buffer(void *buffer, size_t bufsize)</a></li>
-          <li><a  href="#unpack">int LibRaw::unpack(void)</a></li>
-          <li><a  href="#unpack_thumb">int LibRaw::unpack_thumb(void)</a></li>
+          <li><a href="#open_file">int LibRaw::open_file(const char *rawfile[,INT64 bigfile_size])</a></li>
+          <li><a href="#open_buffer">int LibRaw::open_buffer(void *buffer, size_t bufsize)</a></li>
+          <li><a href="#unpack">int LibRaw::unpack(void)</a></li>
+          <li><a href="#unpack_thumb">int LibRaw::unpack_thumb(void)</a></li>
           </ul>
         </li>
-      <li><a  href="#utility">Auxiliary Functions</a>
+      <li><a href="#utility">Auxiliary Functions</a>
         <ul>
           <li>Library version info
             <ul>
               <li><a href="#version">const char* LibRaw::version()</a></li>
               <li><a href="#versionNumber">int LibRaw::versionNumber()</a></li>
               <li><a href="#LIBRAW_CHECK_VERSION">bool LIBRAW_CHECK_VERSION(major,minor,patch)</a>
-            </ul>
+            </li></ul>
           </li>
           <li>List of supported cameras
             <ul>
@@ -39,15 +37,14 @@
           <li><a href="#get_decoder_info">int LibRaw::get_decoder_info(libraw_decoder_info_t *)</a></li>
           <li><a href="#unpack_function_name">const char* LibRaw::unpack_function_name()</a></li>
           <li><a href="#COLOR">int LibRaw::COLOR()</a>
-          <li><a href="#camera_color_type">int LibRaw::camera_color_type()</a>
-          <li><a href="#error_count">int LibRaw::error_count()</a>
-          <li><a href="#setCancelFlag">void LibRaw::setCancelFlag()</a>
-          <li><a href="#clearCancelFlag">void LibRaw::clearCancelFlag()</a>
-          <li><a href="#subtract_black">int LibRaw::subtract_black()</a>
-          <li><a href="#ycc">Support for YCC formats</a>
-          <li><a  href="#recycle">void LibRaw::recycle_datastream(void)</a></li>
+          </li><li><a href="#error_count">int LibRaw::error_count()</a>
+          </li><li><a href="#setCancelFlag">void LibRaw::setCancelFlag()</a>
+          </li><li><a href="#clearCancelFlag">void LibRaw::clearCancelFlag()</a>
+          </li><li><a href="#subtract_black">int LibRaw::subtract_black()</a>
+          </li><li><a href="#ycc">Support for YCC formats</a>
+          </li><li><a href="#recycle">void LibRaw::recycle_datastream(void)</a></li>
           <li><a href="#recycle">void LibRaw::recycle(void)</a></li>
-          <li><a href="#~LibRaw">LibRaw::~LibRaw()</a></li>
+          <li><a href="#%7ELibRaw">LibRaw::~LibRaw()</a></li>
           <li><a href="#strprogress">const char* LibRaw::strprogress(enum LibRaw_progress code)</a></li>
           <li><a href="#libraw_strerror">const char* LibRaw::strerror(int errorcode)</a></li>
           <li><a href="#callbacks">Setting Error Notification Functions</a>
@@ -60,19 +57,19 @@
             </li>
           </ul>
         </li>
-    <li><a  href="#dcrawemu">Data Postprocessing: Emulation of dcraw Behavior</a>
+    <li><a href="#dcrawemu">Data Postprocessing: Emulation of dcraw Behavior</a>
         <ul>
-          <li><a  href="#dcraw_params">Parameter Setting</a></li>
+          <li><a href="#dcraw_params">Parameter Setting</a></li>
           <li><a href="#raw2image">int LibRaw::raw2image</a></li>
           <li><a href="#free_image">void LibRaw::free_image</a></li>
-          <li><a  href="#adjust_sizes_info_only">int LibRaw::adjust_sizes_info_only(void)</a></li>
-          <li><a  href="#dcraw_process">int LibRaw::dcraw_process(void)</a></li>
+          <li><a href="#adjust_sizes_info_only">int LibRaw::adjust_sizes_info_only(void)</a></li>
+          <li><a href="#dcraw_process">int LibRaw::dcraw_process(void)</a></li>
         </ul>
       </li>
-      <li><a  href="#dcrawrite">Data Output to Files: Emulation of dcraw Behavior</a>
+      <li><a href="#dcrawrite">Data Output to Files: Emulation of dcraw Behavior</a>
         <ul>
-          <li><a  href="#dcraw_ppm_tiff_writer">int LibRaw::dcraw_ppm_tiff_writer(const char *outfile)</a></li>
-          <li><a  href="#dcraw_thumb_writer">int LibRaw::dcraw_thumb_writer(const char *thumbfile)</a></li>
+          <li><a href="#dcraw_ppm_tiff_writer">int LibRaw::dcraw_ppm_tiff_writer(const char *outfile)</a></li>
+          <li><a href="#dcraw_thumb_writer">int LibRaw::dcraw_thumb_writer(const char *thumbfile)</a></li>
         </ul>
       </li>
       <li>
@@ -98,15 +95,15 @@
       </li>
       <li><a href="#datastream">Input layer abstraction</a>
         <ul>
-          <li><a href="LibRaw_abstract_datastream">class LibRaw_abstract_datastream - abstract RAW read interface<a>
-            <ul>
-              <li><a href="#datastream_methods">LibRaw_abstract_datastream class methods</a>
+          <li><a href="LibRaw_abstract_datastream">class LibRaw_abstract_datastream - abstract RAW read interface</a><a>
+            </a><ul>
+<a>              <li></li></a><a href="#datastream_methods">LibRaw_abstract_datastream class methods</a>
                 <ul>
                   <li><a href="#datastream_methods_utility">Object verification</a></li>
                   <li><a href="#datastream_methods_read">Stream read and positioning</a></li>
                   <li><a href="#datastream_methods_other">Other methods</a></li>
                 </ul>
-              </li>
+              
             </ul>
           </li>
           <li><a href="#datastream_derived">Derived input classes included in LibRaw</a>
@@ -120,8 +117,7 @@
             <ul>
               <li><a href="#substream">substream field: secondary input stream</a></li>
             </ul>
-          <li>
-        </ul>
+          </li></ul>
       </li>
     </ol>
 
@@ -130,14 +126,8 @@
     <p>
      The main LibRaw object (class) is created either without parameters or with flags determining the object behavior.
     </p>
-    <pre>
-#include "libraw/libraw.h"
-...
-
-   LibRaw ImageProcessor(unsigned int flags=0);
-...
-    </pre>
-    <p>Flags (several flags are combined via operator |, i.e., bitwise OR):</P>
+    <pre>#include "libraw/libraw.h"<br>...<br><br>   LibRaw ImageProcessor(unsigned int flags=0);<br>...<br>    </pre>
+    <p>Flags (several flags are combined via operator |, i.e., bitwise OR):</p>
     <ul>
       <li><b>LIBRAW_OPTIONS_NO_MEMERR_CALLBACK</b>: do not set the standard
 <a href="#callbacks">out-of-memory error handler</a> (standard handler outputs the error report in stderr);</li>
@@ -153,22 +143,21 @@
       <li><a href="#dcrawrite">File output functions emulating the dcraw behavior</a>.</li>
     </ul>
     <p>
-      The results of processing are placed in the imgdata field of type <a
-        href=API-datastruct.html>libraw_data_t</a>; the same data set contains fields that control the postprocessing
+      The results of processing are placed in the imgdata field of type <a href="API-datastruct.html">libraw_data_t</a>; the same data set contains fields that control the postprocessing
 and output.
     </p>
     <a name="return"></a>
     <h2>Returned Values</h2>
     <p>
       All LibRaw API functions return an integer number in accordance with the
-<a href=API-notes.html#errors>return code convention</a>. Please read the descriptions of 
-<a href=API-notes.html#errors>this convention</a> and <a href="#callbacks">LibRaw behavior
+<a href="API-notes.html#errors">return code convention</a>. Please read the descriptions of 
+<a href="API-notes.html#errors">this convention</a> and <a href="#callbacks">LibRaw behavior
 in cases of fatal errors</a>.
     </p>
 
     <a name="dataload"></a>
     <h2>Methods Loading Data from a File</h2>
-    <a name=open_datastream></a>
+    <a name="open_datastream"></a>
     <h3>int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)</h3>
     <p>Opens a datastream with RAW data, reads metadata (EXIF) from it, and fills the following structures:
     </p>
@@ -179,9 +168,9 @@ in cases of fatal errors</a>.
       <li>imgdata.other (<a href="API-datastruct.html#libraw_imgother_t">libraw_imgother_t</a>), and </li>
       <li>imgdata.thumbnail (<a href="API-datastruct.html#libraw_thumbnail_t">libraw_thumbnail_t</a>).</li>
     </ul>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">return
 code convention</a>: positive if any system call has returned an error, negative
-  (from the  <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
+  (from the  <a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error
 situation within LibRaw.
     </p>
     <p>Before file opening, <a href="#recycle">recycle()</a> is always called; hence, if several images
@@ -191,7 +180,7 @@ are processed in the batch mode, there is no need to call recycle() at the end o
       This object should be initialized and ready to read. This object should be destroyed in calling application
       after use.
     </p>
-    <a name=open_file></a>
+    <a name="open_file"></a>
     <h3>int LibRaw::open_file(const char *filename[,INT64 bigfile_size])</h3>
     <h3>Win32 only: int LibRaw::open_file(const wchar_t *filename[,INT64 bigfile_size])</h3>
     <p>
@@ -203,13 +192,13 @@ are processed in the batch mode, there is no need to call recycle() at the end o
     <p>
       Second optional parameter <b>bigfile_size</b> controls background I/O interface used for file operations. For
       files smaller than bigfile_size the <a href="#file_datastream">LibRaw_file_datastream</a> will be used and the <a href="#bigfile_datastream">LibRaw_bigfile_datastream</a> otherwise.
-    <p>The function returns an integer number in accordance with the 
-      <a href=API-notes.html#errors>return code convention</a>: positive if any system call has returned an error, negative
-      (from the  <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
+    </p><p>The function returns an integer number in accordance with the 
+      <a href="API-notes.html#errors">return code convention</a>: positive if any system call has returned an error, negative
+      (from the  <a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error
       situation within LibRaw.
     </p>
 
-    <a name=open_buffer></a>
+    <a name="open_buffer"></a>
     <h3>int LibRaw::open_buffer(void *buffer, size_t bufsize)</h3>
     <p>
       Created an <a href="#buffer_datastream">LibRaw_buffer_datastream</a> object, calls 
@@ -218,40 +207,38 @@ are processed in the batch mode, there is no need to call recycle() at the end o
       just created file_datastream destroyed immediately.
     </p>
     <p>The function returns an integer number in accordance with the 
-      <a href=API-notes.html#errors>return code convention</a>: positive if any system call has returned an error, negative
-      (from the  <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
+      <a href="API-notes.html#errors">return code convention</a>: positive if any system call has returned an error, negative
+      (from the  <a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error
       situation within LibRaw.
     </p>
 
     <a name="unpack"></a>
     <h3> int LibRaw::unpack(void)</h3>
     <p>
-      Unpacks the RAW files of the image, calculates the black level (not for all formats). The results are placed in imgdata.image.
-    </p>
+Unpacks the RAW files of the image, calculates the black level (not for
+all formats). The results are placed in imgdata.image. </p>
     <p>
- Data reading is sometimes (not frequently) affected by settings made in imgdata.params (<a
-        href="API-datastruct.html#libraw_output_params_t">libraw_output_params_t</a>); see <a
-        href=API-notes.html>API notes</a> for details.
+ Data reading is sometimes (not frequently) affected by settings made in imgdata.params (<a href="API-datastruct.html#libraw_output_params_t">libraw_output_params_t</a>); see <a href="API-notes.html">API notes</a> for details.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">return code
 convention</a>: positive if any system call has returned an error, negative (from the
-      <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error
+      <a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error
 situation within LibRaw.
     </p>
     
     <a name="unpack_thumb"></a>
     <h3>int LibRaw::unpack_thumb(void)</h3>
     <p>
- Reads (or unpacks) the image preview (thumbnail), placing the result into the imgdata.thumbnail.thumb buffer.<br/>
+ Reads (or unpacks) the image preview (thumbnail), placing the result into the imgdata.thumbnail.thumb buffer.<br>
  JPEG previews are placed into this buffer without any changes (with the header etc.). Other preview
-formats are placed into the buffer in the form of the unpacked bitmap image (three components, 8 bits per component).<br/>
+formats are placed into the buffer in the form of the unpacked bitmap image (three components, 8 bits per component).<br>
  The thumbnail format is written to the imgdata.thumbnail.tformat field; for the possible values, see
 <a href="API-datastruct.html#LibRaw_thumbnail_formats">description of constants and data structures</a>.
 
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">return code
 convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="utility"></a>
@@ -291,18 +278,18 @@ LibRaw.
     <h4>int LibRaw::set_rawspeed_camerafile(char *path_to_cameras_xml)</h4>
     <p>
      (Only if LibRaw was built with RawSpeed support).
-    <p>
+    </p><p>
     Loads XML file with RawSpeed camera description data (cameras.xml) specified by path_to_cameras_xml.
     Returns 0 on success, nonzero on error.
     <a name="get_decoder_info"></a>
-    <h4>int LibRaw::get_decoder_info(libraw_decoder_info_t *)</h4>
+    </p><h4>int LibRaw::get_decoder_info(libraw_decoder_info_t *)</h4>
     <p>
-      The function fills <a href=API-datastruct.html#libraw_decoder_info_t>libraw_decoder_info_t</a>
+      The function fills <a href="API-datastruct.html#libraw_decoder_info_t">libraw_decoder_info_t</a>
       structure by passed pointer with current raw decoder data.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">return code
         convention</a>: positive if any system call has returned an error, negative (from the
-      <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+      <a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error situation within
       LibRaw. 
     </p>
     <a name="unpack_function_name"></a>
@@ -331,18 +318,6 @@ LibRaw.
       This call returns pixel color (color component number) in bayer patter at row,col. The returned value
       is in 0..3 range  for 4-component Bayer (RGBG2, CMYG and so on) and in 0..2 range for 3-color data.
     </p>
-    <a name="camera_color_type"></a>
-    <h4>int LibRaw::camera_color_type()</h4>
-    <p>
-      This call returns color data type found in opened file:
-      <ul>
-	<li>LIBRAW_CMATRIX_NONE - no colordata embedded in file, built-in color matrix will be used;
-	<li>LIBRAW_CMATRIX_DNG - DNG color data;
-	<li>LIBRAW_CMATRIX_DIGBACK - digital back color data (Leaf/PhaseOne)
-	<li>LIBRAW_CMATRIX_OTHER - other color data (e.g. Olympus or Sony camera)
-      </ul>
-    </p>
-
     <a name="error_count"></a>
     <h4>int LibRaw::error_count()</h4>
     <p>
@@ -353,39 +328,34 @@ LibRaw.
     <p>
       This call will subtract black level values from RAW data (for suitable RAW data).
       <a href="API-datastruct.html#libraw_colordata_t">colordata.data_maximum</a> and
-      <b>colordata.maximum</b> and black level data (<a
-        href="API-datastruct.html#libraw_colordata_t">colordata.black</a> and colordata.cblack) will be adjusted
+      <b>colordata.maximum</b> and black level data (<a href="API-datastruct.html#libraw_colordata_t">colordata.black</a> and colordata.cblack) will be adjusted
       too.  
     </p>
     <p>
       This call should be used if you postprocess RAW data by your own code. LibRaw 
       <a href="#dcrawemu">postprocessing functions</a> will call <b>subtract_black()</b> by oneself.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">return code
         convention</a>: positive if any system call has returned an error, negative (from the
-      <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+      <a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error situation within
       LibRaw. 
     </p>
 
     <a name="ycc"></a>
     <h4>Support for YCC formats (Canon sRAW/mRAW and Nikon Small NEF)</h4>
-    <pre>
-       int LibRaw::is_sraw();
-       int LibRaw::is_nikon_sraw();
-       int LibRaw::sraw_midpoint()
-    </pre>
+    <pre>       int LibRaw::is_sraw();<br>       int LibRaw::is_nikon_sraw();<br>       int LibRaw::sraw_midpoint()<br>    </pre>
     <ul>
      <li>is_sraw() call returns nonzero if current image is YCC-based. 
-     <li>is_nikon_sraw() call returns nonzero for Nikon Small NEF files
-     <li>sraw_midpoint() call returns neutral (gray) point for color channels
-    </ul>
+     </li><li>is_nikon_sraw() call returns nonzero for Nikon Small NEF files
+     </li><li>sraw_midpoint() call returns neutral (gray) point for color channels
+    </li></ul>
     <a name="recycle_datastream"></a>
     <h4>void LibRaw::recycle_datastream(void)</h4>
     <p>
      This call closes input datastream with associated data buffer and unblocks opened file.
  
     <a name="recycle"></a>
-    <h3>void LibRaw::recycle(void)</h3>
+    </p><h3>void LibRaw::recycle(void)</h3>
     <p>Frees the allocated data of LibRaw instance, enabling one to process the next file using
 the same processor. Repeated calls of recycle() are quite possible and do not conflict with anything. 
     </p>
@@ -418,14 +388,11 @@ the same processor. Repeated calls of recycle() are quite possible and do not co
       <li>Data read error.</li>
     </ul>
     <p>
- An application may set its own callbacks that will be called in the cases mentioned above to notify the user (or the calling program).
-    </p>
+An application may set its own callbacks that will be called in the
+cases mentioned above to notify the user (or the calling program). </p>
     <a name="progress"></a>
     <h4>Progress indication/processing termination</h4>
-    <pre>
-        typedef int (*progress_callback)(void *callback_data,enum LibRaw_progress stage, int iteration, int expected);
-        void LibRaw::set_progress_handler(progress_callback func,void *callback_data);
-    </pre>
+    <pre>        typedef int (*progress_callback)(void *callback_data,enum LibRaw_progress stage, int iteration, int expected);<br>        void LibRaw::set_progress_handler(progress_callback func,void *callback_data);<br>    </pre>
     <p>
       LibRaw user can set own callback which will be called 10-50 times during RAW postprocessing
        by dcraw_process().
@@ -438,7 +405,7 @@ the same processor. Repeated calls of recycle() are quite possible and do not co
       </p>
     <p>
       Callback parameters:
-      <dl>
+      </p><dl>
       <dt>void *callback_data</dt>
       <dd>void*-pointer, passed as 2nd argument to set_progress_handler(). This pointer should be used to pass
         additional data to callback (i.e. thread local data and so on).
@@ -454,48 +421,31 @@ the same processor. Repeated calls of recycle() are quite possible and do not co
       <dd>Expected number of iterations on current stage.</dd>
       </dl>
     Callback should return value of: <b>0</b> for continue processing and <b>non-zero</b> for immediate cancel of processing.
-    </p>
+    <p></p>
     <p>
       If LibRaw compiled with OpenMP support, iteration parameter may not always increase within one stage. Out of
       order callback calls are possible.
     </p>
     <p>
       Callback code sample:
-<pre>
-int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int expected)
-{
-    char *passed_string = (char *data);
-    printf("Callback: %s  pass %d of %d, data passed: %s\n",libraw_strprogress(p),iteration,expected,passed_string);
-    if(timeout || key_pressed )
-        return 1; // cancel processing immediately
-    else
-        return 0; // can continue
-}
-
-</pre>
+</p><pre>int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int expected)<br>{<br>    char *passed_string = (char *data);<br>    printf("Callback: %s  pass %d of %d, data passed: %s\n",libraw_strprogress(p),iteration,expected,passed_string);<br>    if(timeout || key_pressed )<br>        return 1; // cancel processing immediately<br>    else<br>        return 0; // can continue<br>}<br><br></pre>
     <a name="exif"></a>
     <h4>User-specified exif tag parser callback</h4>
-    <pre>
-       typedef void (*exif_parser_callback) (void *context, int tag, int type, int len,unsigned int ord, void *ifp);
-       void    LibRaw::set_exifparser_handler( exif_parser_callback cb,void *context);
-    </pre>
+    <pre>       typedef void (*exif_parser_callback) (void *context, int tag, int type, int len,unsigned int ord, void *ifp);<br>       void    LibRaw::set_exifparser_handler( exif_parser_callback cb,void *context);<br>    </pre>
     <p>
 	Callback to be called on each parsed EXIF/Makernotes tag with parameters:
-	<ul>
+	</p><ul>
 	<li>context - pointer to context passed to set_exifparser_handler();
-	<li>tag - EXIF/Makernotes tag value
-	<li>type - TIFF(EXIF) tag type
-	<li>len - tag length
-	<li>ord - byte order (II or MM)
-	<li>void *ifp - pointer to LibRaw_abstract_datastream, positioned to tag data
-	</ul>
-     </p>
+	</li><li>tag - EXIF/Makernotes tag value
+	</li><li>type - TIFF(EXIF) tag type
+	</li><li>len - tag length
+	</li><li>ord - byte order (II or MM)
+	</li><li>void *ifp - pointer to LibRaw_abstract_datastream, positioned to tag data
+	</li></ul>
+     <p></p>
     <a name="memerror"></a>
     <h4>Out-of-Memory Notifier</h4>
-    <pre>
-        typedef void (* memory_callback)(void *callback_data,const char *file, const char *where);
-        void LibRaw::set_memerror_handler(memory_callback func,void *callback_data);
-    </pre>
+    <pre>        typedef void (* memory_callback)(void *callback_data,const char *file, const char *where);<br>        void LibRaw::set_memerror_handler(memory_callback func,void *callback_data);<br>    </pre>
     <p>The user may set his or her own function called in the case of memory shortage. It is a void function
 receiving two string parameters:
     </p>
@@ -518,20 +468,17 @@ flag in the contructor.
     <p>In the case of memory shortage, processing of the current file is terminated and a notifier is called; all
 allocated resources are freed, and <a href="#recycle">recycle()</a> is performed. The current call will return
 LIBRAW_UNSUFFICIENT_MEMORY. 
-      <br/>
+      <br>
 At an attempt to continue data processing, all subsequent calls will return LIBRAW_OUT_OF_ORDER_CALL. 
 Processing of a new file may be started in the usual way, by calling LibRaw::open_file().
     </p>
     <a name="dataerror"></a>
     <h4>File Read Error Notifier</h4>
-    <pre>
-        typedef void (*data_callback)(void *callback_data,const char *file, const int offset);
-        void LibRaw::set_dataerror_handler(data_callback func, void *callback_data); 
-    </pre>
+    <pre>        typedef void (*data_callback)(void *callback_data,const char *file, const int offset);<br>        void LibRaw::set_dataerror_handler(data_callback func, void *callback_data); <br>    </pre>
     <p>
-      The user can define his or her own function to be called in the case of error in the input data. It is a void function receiving
-two parameters:
-    </p>
+The user can define his or her own function to be called in the case of
+error in the input data. It is a void function receiving
+two parameters: </p>
     <ul>
       <li><b>void *callback_data</b> - void*-pointer, passed as 2nd argument to set_progress_handler(). This pointer
         should be used to pass         additional data to callback (i.e. thread local data and so on).</li>
@@ -551,7 +498,7 @@ flag in the contructor. </p>
     <p>In the case of error in the input data, processing of the current file is terminated and a notifier is called; all
 allocated resources are freed, and <a href="#recycle">recycle()</a> is performed. The current call will return
 LIBRAW_IO_ERROR. 
-      <br/>
+      <br>
 At an attempt to continue data processing, all subsequent calls will return LIBRAW_OUT_OF_ORDER_CALL. 
 Processing of a new file may be started in the usual way, by calling LibRaw::open_file().
     </p>
@@ -567,8 +514,7 @@ Processing of a new file may be started in the usual way, by calling LibRaw::ope
     <p>
       Virtually all parameters that can be set through the dcraw command line are specified by assigning values to 
       fields of the <b>LibRaw::imgdata.params</b> structure. The type of this structure is 
-      <b>libraw_output_params_t</b>; all fields are listed and described in sufficient detail in the <a
-        href="API-datastruct.html#libraw_output_params_t">description of data structures</a>.
+      <b>libraw_output_params_t</b>; all fields are listed and described in sufficient detail in the <a href="API-datastruct.html#libraw_output_params_t">description of data structures</a>.
     </p>
     <a name="raw2image"></a>
     <h3>int LibRaw::raw2image</h3>
@@ -580,9 +526,9 @@ Processing of a new file may be started in the usual way, by calling LibRaw::ope
       This function should be called only if your code do postprocessing stage. If you use LibRaw's postprocessing
       calls (see below) you don't need to call raw2image().
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>return code
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">return code
         convention</a>: positive if any system call has returned an error, negative (from the
-      <a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+      <a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error situation within
       LibRaw. 
     </p>
 
@@ -616,11 +562,10 @@ this change cannot be repeated again.
     <a name="dcraw_process"></a>
     <h3>int LibRaw::dcraw_process(void)</h3>
     <p>
-      The function emulates the postprocessing capabilities available in <b>dcraw</b>.<br/>
+      The function emulates the postprocessing capabilities available in <b>dcraw</b>.<br>
       Called after calling LibRaw::unpack();
     </p>
-    <p>The entire functionality of dcraw (set via the field values in <a
-        href="API-datastruct.html#libraw_output_params_t">imgdata.params</a>) is supported, except for
+    <p>The entire functionality of dcraw (set via the field values in <a href="API-datastruct.html#libraw_output_params_t">imgdata.params</a>) is supported, except for
       </p>
     <ul>
       <li>Dark frame subtraction</li>
@@ -629,9 +574,9 @@ this change cannot be repeated again.
     <p>The function is intended solely for demonstration and testing purposes; it is assumed that its source code
 will be used in most real applications as the reference material concerning the order of RAW data processing. 
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>error
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">error
 code convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="dcrawrite"></a>
@@ -647,9 +592,9 @@ files must be binary identical.
      The function outputs the postprocessing results to a file in the PPM/PGM or TIFF format (the format is set via 
       imgdata.params.output_tiff). The results are binary identical to those provided by dcraw.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>error
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">error
 code convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="dcraw_thumb_writer"></a>
@@ -657,16 +602,16 @@ LibRaw.
     <p>Writes the thumbnail to a file in the PPM format for bitmap thumbnails and in the JPEG format for JPEG thumbnails, i.e.,
 in the format completely identical to the results provided by dcraw.
     </p>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>error
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">error
 code convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="memwrite"></a>
     <h2>Copying unpacked data into memory buffer</h2>
     <p>
       There is several function calls for store unpacked data into memory buffer (after using dcraw_process() and so on):
-      <ul>
+      </p><ul>
       <li><b>get_mem_image_format</b> - get resulting bitmap size and bit depth.</li>
       <li><b>copy_mem_image</b> - copy postprocessed data into some memory buffer with different color order and
         line stride.
@@ -678,7 +623,7 @@ LibRaw.
       </li>
       </ul>
     For usage primer see samples/mem_image.c sample.
-    </p>
+    <p></p>
     <a name="get_mem_image_format"></a>
     <h3>void get_mem_image_format(int *widthp, int *heightp, int *colorsp, int *bpp) const - return processing bitmap
       size</h3>
@@ -704,9 +649,9 @@ LibRaw.
       or 16 or 32 bytes to make CPU more happy.</li>
       <li>int bgr - pixel copy order. RGB if bgr==0 and BGR overwise.</li>
     </ul>
-    <p>The function returns an integer number in accordance with the <a href=API-notes.html#errors>error
+    <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">error
 code convention</a>: positive if any system call has returned an error, negative (from the
-<a href=API-datastruct.html#LibRaw_errors>LibRaw error list</a>) if there has been an error situation within
+<a href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error situation within
 LibRaw.
     </p>
     <a name="dcraw_make_mem_image"></a>
@@ -726,8 +671,7 @@ LibRaw.
       will be set to error code according to <a href="API-notes.html#errors">error code convention</a>.
     </p>
     <p><b>NOTE!</b> Memory, allocated for return value will not be fried at destructor or <b>LibRaw::recycle</b>
-      calls. Caller of dcraw_make_mem_image should free this memory by call to <a
-        href="#dcraw_clear_mem">LibRaw::dcraw_clear_mem()</a>. 
+      calls. Caller of dcraw_make_mem_image should free this memory by call to <a href="#dcraw_clear_mem">LibRaw::dcraw_clear_mem()</a>. 
     </p>
 
     <a name="dcraw_make_mem_thumb"></a>
@@ -745,11 +689,10 @@ LibRaw.
     </p>
     <p>
       Returns NULL in case of an error. If caller has passed not-NULL value as errorcode parameter, than *errorcode
-      will be set to error code according to ñ <a href=API-notes.html#errors>error code convention</a>.
+      will be set to error code according to ñ <a href="API-notes.html#errors">error code convention</a>.
     </p>
     <p><b>NOTE!</b> Memory, allocated for return value will not be fried at destructor or <b>LibRaw::recycle</b>
-      calls. Caller of dcraw_make_mem_image should free this memory by call to <a
-        href="#dcraw_clear_mem">LibRaw::dcraw_clear_mem()</a>. 
+      calls. Caller of dcraw_make_mem_image should free this memory by call to <a href="#dcraw_clear_mem">LibRaw::dcraw_clear_mem()</a>. 
     </p>
 
     <h3>void LibRaw::dcraw_clear_mem(libraw_processed_image_t *)</h3>
@@ -821,14 +764,14 @@ LibRaw.
 	This object is used by libjpeg for JPEG data reading from datastream.
         <p>
         Retuens -1 on error and 0 on success.
-      </dd>
-      <dt><b>    virtual void *      make_jas_stream();</b></dt>
+      
+      </p></dd><dt><b>    virtual void *      make_jas_stream();</b></dt>
 	<dd>
 	Creates LibJasper input stream (for JPEG2000 decoding). 
 	<p>
 	returns NULL on error or data pointer on success.
-	</dd>
-    </dl>
+	
+    </p></dd></dl>
     <a name="datastream_methods_other"></a>
     <h5>Other methods</h5>
     <p>This group of methods includes several supplementary calls. These calls are used to temporary switch to another
@@ -842,18 +785,18 @@ LibRaw.
         <ul>
           <li>error notification callbacks;</li>
           <li>generation of filename of JPEG-file with metadata when needed (i.e. cameras with 'Diag RAW hack').
-        </ul>
+        </li></ul>
       </dd>
       <dt><b>virtual int         subfile_open(const char *fn)</b></dt>
       <dd>
-        This call temporary switches input to file <b>fn</b>. Returns 0 on success and error code on error.<br/>
+        This call temporary switches input to file <b>fn</b>. Returns 0 on success and error code on error.<br>
         The function used to read metadata from external JPEG file (on cameras with "Diag RAW hack").
-        <br/>
+        <br>
         This call is not implemented for <a href="#buffer_datastream">LibRaw_buffer_datastream</a>, so
         external JPEG processing is not possible when buffer datastream used.
-        <br/>
+        <br>
         This functon should be implemented in real input class, base class call always return error.
-        <br/>
+        <br>
         Working implementation sample can be found in 
         <a href="#file_datastream">LibRaw_file_datastream</a> implementation in <b>libraw/libraw_datastream.h</b> file.
       </dd>
@@ -864,16 +807,16 @@ LibRaw.
       <dt><b>    virtual int		tempbuffer_open(void  *buf, size_t size)</b></dt>
       <dd>
         This call temporary switches input to <a href="#buffer_datastream">LibRaw_buffer_datastream</a> object,
-        created from <b>buf</b>.<br/>
+        created from <b>buf</b>.<br>
         This method is needed for Sony encrypted metadata parser.
         <p>
           This call implemented in base class (<b>LibRaw_abstract_datastream</b>), there is no need to
-          reimplement in in derived classes.<br/>
+          reimplement in in derived classes.<br>
           Possible activity of temporary datastream requires very accurate programming when implementing
           datastreams derived from base <b>LibRaw_abstract_datastream</b>. See  <a href="#substream">below</a>
           for more details.
-      </dd>
-      <dt><b>    virtual void	tempbuffer_close()</b></dt>
+      
+      </p></dd><dt><b>    virtual void	tempbuffer_close()</b></dt>
       <dd>
         This call switch input back from temporary datastream to main stream. This call implemented
         in base <b>LibRaw_abstract_datastream</b> class.
@@ -904,13 +847,13 @@ LibRaw.
     <dl>
       <dt><b> LibRaw_file_datastream(const char *fname) </b></dt>
       <dd>
-        This constructor creates <b>LibRaw_file_datastream</b> object from file <b>fname</b>.<br/>
+        This constructor creates <b>LibRaw_file_datastream</b> object from file <b>fname</b>.<br>
         Unfortunately, C++ constructor cannot return an error. So if bad filename passed (e.g. nonexistent file)
         object is created as non-valid (valid() call returns zero).
       </dd>
     </dl>
     <p>
-      All other class methods are <a href="#datastream_methods">described above</a>.<br/>
+      All other class methods are <a href="#datastream_methods">described above</a>.<br>
       This class implements all possble methods, including fname() and subfile_open().
     </p>
     <a name="bigfile_datastream"></a>
@@ -922,7 +865,7 @@ LibRaw.
     <dl>
       <dt><b> LibRaw_bigfile_datastream(const char *fname) </b></dt>
       <dd>
-        This constructor creates <b>LibRaw_bigfile_datastream</b> object from file <b>fname</b>.<br/>
+        This constructor creates <b>LibRaw_bigfile_datastream</b> object from file <b>fname</b>.<br>
         Unfortunately, C++ constructor cannot return an error. So if bad filename passed (e.g. nonexistent file)
         object is created as non-valid (valid() call returns zero).
       </dd>
@@ -930,8 +873,8 @@ LibRaw.
     <p>The difference between <b>file</b> and <b>bigfile</b> datastreams are obvious from class name: bigfile one
       supports large files (more than 2Gb) on all supported systems. File one uses streambuf interface which is
       limited to 2Gb on many systems.
-    <p>
-      All other class methods are <a href="#datastream_methods">described above</a>.<br/>
+    </p><p>
+      All other class methods are <a href="#datastream_methods">described above</a>.<br>
       This class implements all possble methods, including fname() and subfile_open().
     </p>
     <a name="buffer_datastream"></a>
@@ -943,12 +886,12 @@ LibRaw.
     <dl>
       <dt><b>    LibRaw_buffer_datastream(void *buffer, size_t bsize)</b></dt>
       <dd>
-        This constructor creates datastream object from  <b>buffer</b> with size  <b>bsize</b>.<br/>
+        This constructor creates datastream object from  <b>buffer</b> with size  <b>bsize</b>.<br>
         It is not possibly to verify the pointer passed, so buffer address is checked against 0 and -1 only.
       </dd>
     </dl>
     <p>
-      All other class methods are <a href="#datastream_methods">described above</a>.<br/>
+      All other class methods are <a href="#datastream_methods">described above</a>.<br>
       This class does not implement fname() and subfile_open() calls, so external JPEG metadata parsing
       is not possible.
     </p>
@@ -956,7 +899,7 @@ LibRaw.
     <h3>Own datastream derived classes</h3>
     <p>
       To create own read interface LibRaw user should implement C++ class derived from 
-      <b>LibRaw_abstract_datastream</b> with all read methods.<br/>
+      <b>LibRaw_abstract_datastream</b> with all read methods.<br>
       LibRaw standard implementations may be used as reference. See <b>libraw/libraw_datastream.h</b> file for details
       (all standard LibRaw input classes are implemented using inline functions only).
     </p>
@@ -966,20 +909,11 @@ LibRaw.
       <b>substream</b> field, defined in base LibRaw_abstract_datastream class requires some additional notes.
       This field is used when input switched to temporary buffer (used for Sony metadata processing). Unfortunately,
       there is now ideal C++ way to hide this functionality into base class internals. So, any read call in
-      derived class should include 1-line statement like this:<br/>
+      derived class should include 1-line statement like this:<br>
       <b>int method(...args...){ if(substream) return substream-&gt;method(...args...)</b>. For example:
-<pre>
-    virtual int eof() 
-    { 
-        if(substream) return substream-&gt;eof();
-....
-    virtual int scanf_one(const char *fmt, void* val) 
-    { 
-        if(substream) return substream-&gt;scanf_one(fmt,val);
-</pre>
+</p><pre>    virtual int eof() <br>    { <br>        if(substream) return substream-&gt;eof();<br>....<br>    virtual int scanf_one(const char *fmt, void* val) <br>    { <br>        if(substream) return substream-&gt;scanf_one(fmt,val);<br></pre>
 
 
 
-    <a href=index.html>[back to Index]</a>
-  </body>
-</html>
+    <a href="index.html">[back to Index]</a>
+  </dl></body></html>

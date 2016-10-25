@@ -7,16 +7,13 @@
  *
 
 LibRaw is free software; you can redistribute it and/or modify
-it under the terms of the one of three licenses as you choose:
+it under the terms of the one of two licenses as you choose:
 
 1. GNU LESSER GENERAL PUBLIC LICENSE version 2.1
    (See file LICENSE.LGPL provided in LibRaw distribution archive for details).
 
 2. COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
    (See file LICENSE.CDDL provided in LibRaw distribution archive for details).
-
-3. LibRaw Software License 27032010
-   (See file LICENSE.LibRaw.pdf provided in LibRaw distribution archive for details).
 
 */
 
@@ -141,7 +138,6 @@ class DllDef LibRaw
     int                         unpack_thumb(void);
 	int							thumbOK(INT64 maxsz=-1);
     int                         adjust_sizes_info_only(void);
-    LibRaw_colormatrix_type	camera_color_type();
     int                         subtract_black();
     int                         subtract_black_internal();
     int                         raw2image();
