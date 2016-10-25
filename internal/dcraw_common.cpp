@@ -6396,7 +6396,7 @@ if (tag == 0x0001) Canon_CameraSettings();
             imgdata.makernotes.canon.BlackMaskBottomBorder = get2();
           }
 
-    if (tag == 0x4001 && len > 500)
+    else if (tag == 0x4001 && len > 500)
       {
         int c;
         long int save1 = ftell(ifp);
