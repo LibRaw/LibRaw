@@ -141,7 +141,6 @@ class DllDef LibRaw
     int                         unpack_thumb(void);
 	int							thumbOK(INT64 maxsz=-1);
     int                         adjust_sizes_info_only(void);
-    LibRaw_colormatrix_type	camera_color_type();
     int                         subtract_black();
     int                         subtract_black_internal();
     int                         raw2image();

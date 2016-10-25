@@ -58,14 +58,6 @@ LIBRAW_WBI_Sunset=64,
 LIBRAW_WBI_Other=255
 };
 
-enum LibRaw_colormatrix_type
-  {
-    LIBRAW_CMATRIX_NONE=0,
-    LIBRAW_CMATRIX_DNG=1,
-    LIBRAW_CMATRIX_DIGBACK=2,
-    LIBRAW_CMATRIX_OTHER=4
-  };
-
 enum LibRaw_dng_processing
 {
 	LIBRAW_DNG_NONE=0,
