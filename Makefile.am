@@ -18,7 +18,6 @@ nobase_include_HEADERS = 	libraw/libraw.h \
 doc_DATA =	COPYRIGHT \
 			LICENSE.CDDL \
 			LICENSE.LGPL \
-			LICENSE.LibRaw.pdf \
 			Changelog.txt
 
 # pkg-config .pc files
