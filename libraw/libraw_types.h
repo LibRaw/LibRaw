@@ -493,17 +493,13 @@ typedef struct
   int   wf_debanding;
   float wf_deband_treshold[4];
 	/* Raw speed */
-    int use_rawspeed;
+  int use_rawspeed;
 	/* DNG SDK */
-	int use_dngsdk;
+  int use_dngsdk;
   /* Disable Auto-scale */
   int no_auto_scale;
   /* Disable intepolation */
   int no_interpolation;
-  /* Disable sRAW YCC to RGB conversion */
-  int sraw_ycc;
-  /* Force use x3f data decoding either if demosaic pack GPL2 enabled */
-  int force_foveon_x3f;
   /*  int x3f_flags; */
   /* Sony ARW2 digging mode */
   /* int sony_arw2_options; */

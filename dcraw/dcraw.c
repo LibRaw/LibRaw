@@ -1208,7 +1208,7 @@ void CLASS canon_sraw_load_raw()
 	  rp = (short *) ljpeg_row (jrow++, &jh);
 	if (col >= width) continue;
 #ifdef LIBRAW_LIBRARY_BUILD
-        if(imgdata.params.sraw_ycc>=2)
+        if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE)
           {
             FORC (jh.clrs-2)
               {
@@ -1218,7 +1218,7 @@ void CLASS canon_sraw_load_raw()
             ip[col][1] = rp[jcol+jh.clrs-2] - 8192;
             ip[col][2] = rp[jcol+jh.clrs-1] - 8192;
           }
-        else if(imgdata.params.sraw_ycc)
+        else if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SRAW_NO_RGB)
           {
             FORC (jh.clrs-2)
                 ip[col + (c >> 1)*width + (c & 1)][0] = rp[jcol+c];
@@ -1244,7 +1244,7 @@ void CLASS canon_sraw_load_raw()
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
-  if(imgdata.params.sraw_ycc>=2)
+  if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE)
     {
       ljpeg_end (&jh);
       maximum = 0x3fff;
@@ -1289,7 +1289,7 @@ void CLASS canon_sraw_load_raw()
 	else ip[col][c] = (ip[col-1][c] + ip[col+1][c] + 1) >> 1;
   }
 #ifdef LIBRAW_LIBRARY_BUILD
-  if(!imgdata.params.sraw_ycc)
+  if(!(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SRAW_NO_RGB) )
 #endif
     for ( ; rp < ip[0]; rp+=4) {
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -15439,7 +15439,7 @@ void CLASS identify()
     {
 #ifdef LIBRAW_LIBRARY_BUILD
 #ifdef  LIBRAW_DEMOSAIC_PACK_GPL2
-      if(!imgdata.params.force_foveon_x3f)
+      if(!(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_FORCE_FOVEON_X3F))
         parse_foveon();
       else
 #endif
@@ -15703,7 +15703,7 @@ void CLASS identify()
     if (height   > width) pixel_aspect = 2;
     filters = 0;
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-    if(!imgdata.params.force_foveon_x3f)
+    if(!(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_FORCE_FOVEON_X3F))
       simple_coeff(0);
 #endif
   }

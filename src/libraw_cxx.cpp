@@ -435,8 +435,6 @@ LibRaw:: LibRaw(unsigned int flags)
   imgdata.params.use_dngsdk = LIBRAW_DNG_DEFAULT;
   imgdata.params.no_auto_scale = 0;
   imgdata.params.no_interpolation = 0;
-  imgdata.params.sraw_ycc = 0;
-  imgdata.params.force_foveon_x3f = 0;
   imgdata.params.raw_processing_options = LIBRAW_PROCESSING_DP2Q_INTERPOLATERG|LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF | LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT;
   imgdata.params.sony_arw2_posterization_thr = 0;
   imgdata.params.green_matching = 0;
@@ -2488,7 +2486,7 @@ int LibRaw::unpack(void)
 
 		// RawSpeed Supported,
 		if(O.use_rawspeed  && rawspeed_enabled
-			&& !(is_sraw() && O.sraw_ycc)
+			&& !(is_sraw() && (O.raw_processing_options & (LIBRAW_PROCESSING_SRAW_NO_RGB | LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE)))
 			&& (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
 		{
 			int rr = try_rawspeed();
@@ -2646,7 +2644,7 @@ void LibRaw::nikon_load_sraw()
   }
   free(rd);
   C.maximum = 0xfff; // 12 bit?
-  if(imgdata.params.sraw_ycc>=2)
+  if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE)
     {
       return; // no CbCr interpolation
     }
@@ -2666,7 +2664,7 @@ void LibRaw::nikon_load_sraw()
                                   +imgdata.image[row*imgdata.sizes.raw_width+col2][2])/2);
         }
     }
-  if(imgdata.params.sraw_ycc>0)
+  if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SRAW_NO_RGB)
     return;
 
   for(row = 0; row < imgdata.sizes.raw_height; row++)
@@ -4292,7 +4290,7 @@ int LibRaw::dcraw_process(void)
 
     if (
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-        (!P1.is_foveon || O.force_foveon_x3f) &&
+        (!P1.is_foveon || (O.raw_processing_options & LIBRAW_PROCESSING_FORCE_FOVEON_X3F)) &&
 #endif
         !O.no_auto_scale)
       {

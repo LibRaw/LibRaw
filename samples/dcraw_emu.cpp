@@ -349,15 +349,21 @@ int main(int argc, char *argv[])
                 else if(!strcmp(optstr,"-disars"))
                   OUT.use_rawspeed=0;
                 else if(!strcmp(optstr,"-disadcf"))
-                  OUT.force_foveon_x3f=1;
+                  OUT.raw_processing_options |=LIBRAW_PROCESSING_FORCE_FOVEON_X3F;
                 else if(!strcmp(optstr,"-disinterp"))
                   OUT.no_interpolation=1;
                 else if(!strcmp(optstr,"-dcbe"))
                   OUT.dcb_enhance_fl = 1;
                 else if(!strcmp(optstr,"-dsrawrgb1"))
-                  OUT.sraw_ycc = 1;
+		{
+                  OUT.raw_processing_options |= LIBRAW_PROCESSING_SRAW_NO_RGB;
+                  OUT.raw_processing_options &= ~LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE;
+		}
                 else if(!strcmp(optstr,"-dsrawrgb2"))
-                  OUT.sraw_ycc = 2;
+		{
+                  OUT.raw_processing_options &= ~LIBRAW_PROCESSING_SRAW_NO_RGB;
+                  OUT.raw_processing_options |= LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE;
+		}
                 else if(!strcmp(optstr,"-dbnd"))
                   {
                     for(c=0; c<4; c++)
