@@ -122,7 +122,7 @@ void usage(const char *prog)
 "-disinterp Do not run interpolation step\n"
 "-dsrawrgb1 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation enabled)\n"
 "-dsrawrgb2 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation disabled)\n"
-"-disadcf  Do not use dcraw Foveon code either if compiled with demosaic-pack-GPL2\n"
+"-disadcf  Do not use dcraw Foveon code even if compiled with demosaic-pack-GPL2\n"
 );
     exit(1);
 }

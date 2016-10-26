@@ -124,11 +124,13 @@ void trimSpaces(char *s)
 int main(int ac, char *av[])
 {
     int verbose = 0, ret,print_unpack=0,print_frame=0,print_wb=0;
+    int compact = 0;
     LibRaw MyCoolRawProcessor;
 
     for (int i=1;i<ac;i++) {
         if(av[i][0]=='-')
             {
+                if(av[i][1]=='c' && av[i][2]==0) compact++;
                 if(av[i][1]=='v' && av[i][2]==0) verbose++;
                 if(av[i][1]=='w' && av[i][2]==0) print_wb++;
                 if(av[i][1]=='u' && av[i][2]==0) print_unpack++;
@@ -527,8 +529,7 @@ int main(int ac, char *av[])
 						    	printf ("%6.5ff}},\n", C.WBCT_Coeffs[cnt][4]/C.WBCT_Coeffs[cnt][2]);
 					} else break;
 					printf ("\n");
-                } else
-                {
+                } else if (compact) {
 //                   printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
 //                   printf ("%s=%s=%d=%04.3f", P1.make, P1.model, (int)P2.iso_speed, C.baseline_exposure);
                    trimSpaces(P1.make); trimSpaces(P1.model);
@@ -563,7 +564,10 @@ int main(int ac, char *av[])
 //                    printf ("\n");
 
                 }
+	        else
+                   printf ("%s is a %s %s image.\n", av[i],P1.make, P1.model);
             }
+
         MyCoolRawProcessor.recycle();
     }// endfor
     return 0;
