@@ -1,3 +1,35 @@
+Camera support (+77):
+ Apple: iPad Pro, iPhone SE, iPhone 6s, iPhone 6 plus, iPhone 7, iPhone 7 plus
+ BlackMagic Micro Cinema Camera, URSA, URSA Mini
+ Canon PowerShot G5 X, PowerShot G7 X Mark II, PowerShot G9 X, IXUS 160 (CHDK hack), EOS 5D Mark IV, EOS 80D,
+       EOS 1300D, EOS M10, EOS-1D X Mark II,
+ Casio EX-ZR4000/5000
+ DXO One,
+ FujiFilm X-Pro2, X70, X-E2S, X-T2
+ Gione E7
+ GITUP GIT2
+ Google Pixel XL
+ Hasselblad True Zoom
+ HTC MyTouch 4G, One (A9), One (M9), 10
+ Huawei P9
+ Leica M (Typ 262), M-D (Typ 262), S (Typ 007), SL (Typ 601), X-U (Typ 113)
+ LG G3, G4
+ Meizy MX4
+ Nikon D5, D500, D3400
+ Olympus E-PL8, E-M10 Mark II, Pen F, SH-3
+ Panasonic DMC-G8/80/81/85, DMC-GX80/85, DMC-TZ80/81/85/ZS60, DMC-TZ100/101/ZS100
+ Pentax K-1, K-3 II, K-70
+ PhaseOne IQ3 100MP
+ RaspberryPi Camera, Camera V2
+ Ricoh GR II
+ Samsung Galaxy S7 (SM-G935F)
+ Sigma sd Quattro
+ Sony A7S II, ILCA-68 (A68),ILCE-6300,DSC-RX1R II,DSC-RX10III, DSC-RX100V, IMX214, IMX219, IMX230, IMX298-mipi 16mp, IMX219-mipi 8mp, Xperia L
+ PtGrey GRAS-50S5C
+ YUNEEC CGO4
+ Xiaomi MI3, RedMi Note3 Pro
+
+
 2016-04-21  Alex Tutubalin <lexa@lexa.ru>
 
  0.18-201604 intermediate
@@ -15,19 +47,6 @@
  * support for BW Jpeg previews
  * 8-bit DNG support via DNG SDK
  * better intepolation of low-sensitivity pixels on Sigma Quattro files
- * Camera support:
-    BlackMagic Micro Cinema Camera, URSA Mini
-    Canon 80D, 1300D, 1DX MkII
-    Fujifilm X-Pro2 (uncompressed RAW only), X70, X-E2S
-    HTC One A9 and M9
-    Leica M (Typ 262) and X-U (Typ 113)
-    Nikon D5
-    Olympus Pen F, SH-3
-    Panasonic DMC-GX80/85, DMC-TZ80/81/85/ZS60, DMC-TZ100/101/ZS100
-    PhaseOne IQ150, IQ180 IR, IQ3 (all models)
-    Samsung Galaxy S7 (SM-G935F)
-    Sony ILCA-68, ILCE-6300, RX1R II, RX10 III
-    YUNEEC CGO4
    
 2015-11-24  Alex Tutubalin <lexa@lexa.ru>
  * Camera stored white balance coefficients are extracted into:
@@ -93,14 +112,6 @@
    turns on 4 frame merge for Pentax K3-II 4-shot images
  * dcraw_emu: new -R <num> switch allows to set params.raw_processing_options
  * dcraw 9.26 completely imported, support for BlackMagic URSA '3:1 compressed' files
- * Camera support:
-   BlackMagic URSA
-   Canon G5 X, G9 X, EOS M10
-   DXO One
-   Leica S (Typ 007), SL (Typ 601)
-   Olympus E-M10 Mark II
-   Richoh GR II
-   Sony A7S II
 
 2015-08-15  Alex Tutubalin <lexa@lexa.ru>
 
