@@ -97,15 +97,6 @@
    or libjpeg 8+
  * Fixes in vng_intepolate to make modern compilers happy
    
-2015-11-24  Alex Tutubalin <lexa@lexa.ru>
-
-
-
- * new data field 
-
- * dcraw_emu: new -R <num> switch allows to set params.raw_processing_options
- * dcraw 9.26 completely imported, support for BlackMagic URSA '3:1 compressed' files
-
 2015-08-15  Alex Tutubalin <lexa@lexa.ru>
 
  * LibRaw 0.17 
