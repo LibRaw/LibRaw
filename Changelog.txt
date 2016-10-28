@@ -1,79 +1,66 @@
-Camera support (+77):
- Apple: iPad Pro, iPhone SE, iPhone 6s, iPhone 6 plus, iPhone 7, iPhone 7 plus
- BlackMagic Micro Cinema Camera, URSA, URSA Mini
- Canon PowerShot G5 X, PowerShot G7 X Mark II, PowerShot G9 X, IXUS 160 (CHDK hack), EOS 5D Mark IV, EOS 80D,
-       EOS 1300D, EOS M10, EOS-1D X Mark II,
- Casio EX-ZR4000/5000
- DXO One,
- FujiFilm X-Pro2, X70, X-E2S, X-T2
- Gione E7
- GITUP GIT2
- Google Pixel XL
- Hasselblad True Zoom
- HTC MyTouch 4G, One (A9), One (M9), 10
- Huawei P9
- Leica M (Typ 262), M-D (Typ 262), S (Typ 007), SL (Typ 601), X-U (Typ 113)
- LG G3, G4
- Meizy MX4
- Nikon D5, D500, D3400
- Olympus E-PL8, E-M10 Mark II, Pen F, SH-3
- Panasonic DMC-G8/80/81/85, DMC-GX80/85, DMC-TZ80/81/85/ZS60, DMC-TZ100/101/ZS100
- Pentax K-1, K-3 II, K-70
- PhaseOne IQ3 100MP
- RaspberryPi Camera, Camera V2
- Ricoh GR II
- Samsung Galaxy S7 (SM-G935F)
- Sigma sd Quattro
- Sony A7S II, ILCA-68 (A68),ILCE-6300,DSC-RX1R II,DSC-RX10III, DSC-RX100V, IMX214, IMX219, IMX230, IMX298-mipi 16mp, IMX219-mipi 8mp, Xperia L
- PtGrey GRAS-50S5C
- YUNEEC CGO4
- Xiaomi MI3, RedMi Note3 Pro
+ * Licensing changed:
+    - no 'LibRaw Software License 27032010' licensing anymore (and all signed 
+      agreements has ended)
+    - LibRaw is dual licensed now: LGPL 2.1 or CDDL 1.0
 
+ * Camera support (+78):
+     Apple: iPad Pro, iPhone SE, iPhone 6s, iPhone 6 plus, iPhone 7, iPhone 7 plus
+     BlackMagic Micro Cinema Camera, URSA, URSA Mini
+     Canon PowerShot G5 X, PowerShot G7 X Mark II, PowerShot G9 X, 
+       IXUS 160 (CHDK hack), EOS 5D Mark IV, EOS 80D, EOS 1300D, EOS M10, 
+       EOS-1D X Mark II
+     Casio EX-ZR4000/5000
+     DXO One,
+     FujiFilm X-Pro2, X70, X-E2S, X-T2
+     Gione E7
+     GITUP GIT2
+     Google Pixel XL
+     Hasselblad True Zoom
+     HTC MyTouch 4G, One (A9), One (M9), 10
+     Huawei P9
+     Leica M (Typ 262), M-D (Typ 262), S (Typ 007), SL (Typ 601), X-U (Typ 113)
+     LG G3, G4
+     Meizy MX4
+     Nikon D5, D500, D3400
+     Olympus E-PL8, E-M10 Mark II, Pen F, SH-3
+     Panasonic DMC-G8/80/81/85, DMC-GX80/85, DMC-TZ80/81/85/ZS60, DMC-TZ100/101/ZS100,DMC-LX9/10/15
+     Pentax K-1, K-3 II, K-70
+     PhaseOne IQ3 100MP
+     RaspberryPi Camera, Camera V2
+     Ricoh GR II
+     Samsung Galaxy S7 (SM-G935F)
+     Sigma sd Quattro
+     Sony A7S II, ILCA-68 (A68),ILCE-6300,DSC-RX1R II,DSC-RX10III, DSC-RX100V,
+          IMX214, IMX219, IMX230, IMX298-mipi 16mp, IMX219-mipi 8mp, Xperia L
+     PtGrey GRAS-50S5C
+     YUNEEC CGO4
+     Xiaomi MI3, RedMi Note3 Pro
 
-2016-04-21  Alex Tutubalin <lexa@lexa.ru>
+ * Floating point DNG support:
+    - new data fields:
+      imgdata.rawdata.float_image - bayer float data
+      imgdata.rawdata.float3_image - 3-component float data
+      imgdata.rawdata.float4_image - 4-component float data
+      imgdata.color.fmaximum - float data maximum (calculated from real data, 
+          rounded to 1.0 if below 1.0)
+   - new raw processing flag 
+      LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT - converts float data to 16-bit 
+        integer immediately after decoding with default parameters
+   - new API Calls:
+      int LibRaw::is_floating_point() returns non-zero if RAW file contains 
+          floating point data
+      int LibRaw::have_fpdata() returns non-zero if rawdata.float*_image is not
+        null (so FP data has unpacked but not converted to integrer, see below).
+      LibRaw::convertFloatToInt(float dmin=4096.f, float dmax=32767.f, float dtarget = 16383.f)
+        converts float/float3/float4_image to raw_image/color3/color4_image with or withou scaling:
+       - if both real data maximum and metadata maximum are within range ( >= dmin && <=dmax), float 
+         data are just converted to integer
+       - if data is out of range noted above, values are scaled so real data maximum becomes dtarget
+       - if data was rescaled (normalized), scale multiplier is stored in imgdata.color.fnorm
 
- 0.18-201604 intermediate
- 
- * zlib library is optional
-   Use -DUSE_ZLIB to compile with zlib (to provide deflate DNG support)
- * libjpeg version: jpeg_mem_src() is mandatory, so use libjpeg-turbo
-   or libjpeg 8+
- * Fixes in vng_intepolate to make modern compilers happy
- * More metadata:
-    - per channel DNG black/whitelevel
-    - DNG analog balance
-    - makernotes metadata reordered to vendor specific data fields
- * C-API: void libraw_set_user_mul(libraw_data_t *lr,int index, float val);
- * support for BW Jpeg previews
- * 8-bit DNG support via DNG SDK
- * better intepolation of low-sensitivity pixels on Sigma Quattro files
-   
-2015-11-24  Alex Tutubalin <lexa@lexa.ru>
- * Camera stored white balance coefficients are extracted into:
-   int imgdata.color.WBCoeffs[256][4] - array indexed by EXIF lightsource type
-    for example, WBCoeffs[21][..] contains coefficients for D65 lightsource
-   float imgdata.color.WBCT_Coeffs[64][5] contains white balance data specified
-   for given color temperature: WBCT_Coeffs[i][0] contains temperature value,
-   and [1]..[4] are WB coefficients.
+ * LibRaw can be built with Adobe DNG SDK support to decode exotic DNG formats (e.g. 8 bit).
+   See README.DNGSDK.txt for details
 
- * LibRaw can be built with Adobe DNG SDK support (you'll need to compile
-   this SDK yourself for your system).
-   To compile/build with DNG SDK specify USE_DNGSDK in compiler flags (you may also need to adjust include  path and linker settings).
-   On Runtime:
-     - create dng_host (or derived class) entity in your program;
-     - pass it to LibRaw:set_dng_host(dng_host *) call to enable DNG SDK use on runtime
-     - adjust imgdata.params.use_dngsdk parameter with one of this values
-       (ORed bitwise):
-       LIBRAW_DNG_NONE - do not use DNG SDK for DNG processing
-       LIBRAW_DNG_FLOAT - process floating point DNGs via Adobe DNG SDK
-       LIBRAW_DNG_LINEAR - process 'linear DNG' (i.e. demosaiced)
-       LIBRAW_DNG_DEFLATE - process DNGs compressed with deflate (gzip)
-       LIBRAW_DNG_XTRANS - process Fuji X-Trans DNGs (6x6 CFA)
-       LIBRAW_DNG_OTHER - process other files (so usual 2x2 bayer)
-     Default value for this field:
-       LIBRAW_DNG_DEFAULT=LIBRAW_DNG_FLOAT|LIBRAW_DNG_LINEAR|LIBRAW_DNG_DEFLATE
-     You also may use this macro to pass all supported DNGs to Adobe SDK:
-       LIBRAW_DNG_ALL = LIBRAW_DNG_FLOAT|LIBRAW_DNG_LINEAR|LIBRAW_DNG_XTRANS|LIBRAW_DNG_OTHER
  * New API calls
     unsigned LibRaw::capabilities and C-API libraw_capabilities()
     allows developers to determine LibRaw compile flags at runtime.
@@ -81,35 +68,41 @@ Camera support (+77):
     LIBRAW_CAPS_RAWSPEED - LibRaw was compiled with RawSpeed Support
     LIBRAW_CAPS_DNGSDK - LibRaw was compiled with Adobe DNG SDK
     LIBRAW_CAPS_DEMOSAICSGPL2, LIBRAW_CAPS_DEMOSAICSGPL3 - LibRaw was compiled with demosaic packs (GPL2/GPL3)
- * floating point support:
-   - new data fields:
-     imgdata.rawdata.float_image - bayer float data
-     imgdata.rawdata.float3_image - 3-component float data
-     imgdata.rawdata.float4_image - 4-component float data
-     imgdata.color.fmaximum - float data maximum (calculated from real data, rounded to 1.0 if below 1.0)
-  - new raw processing flag 
-     LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT - converts float data to 16-bit integer immediately after decoding with default parameters
-  - new API Calls:
-    int LibRaw::is_floating_point() returns non-zero if RAW file contains floating point data
-    int LibRaw::have_fpdata() returns non-zero if rawdata.float*_image is not null (so FP data has unpacked but not converted to integrer, see below).
-    LibRaw::convertFloatToInt(float dmin=4096.f, float dmax=32767.f, float dtarget = 16383.f) converts float/float3/float4_image to raw_image/color3/color4_image with or withou scaling:
-    - if both real data maximum and metadata maximum are within range ( >= dmin && <=dmax), float data are just converted to int
-    - if data is out of range noted above, values are scaled so real data maximum becomes dtarget
-    - if data was rescaled (normalized), scale multiplier is stored in imgdata.color.fnorm
 
- * new data field imgdata.color.dng_color.forwardmatrix, the name speaks for itself
- * Fix for DualISO Canon DNG files
- * Fix for Nikon P7000/7100 Firmware 1.2
- * Fix for Nikon 1 Series 12-bit uncompressed format
- * Fix for Sony A7 Series uncompressed format (incorrect BitsPerSample in metadata)
- * params.sony_arw2_options and params.x3f_flags are merged into one
-   bitfiled params.raw_processing_options
- * enums LibRaw_sonyarw2_options and LibRaw_dp2q_options are merged into one
-   LibRaw_processing_options
- * default value for params.raw_processing_options is 
-     LIBRAW_PROCESSING_DP2Q_INTERPOLATERG| LIBRAW_PROCESSING_DP2Q_INTERPOLATERG
- * new processing option LIBRAW_PROCESSING_PENTAXK32_ALLFRAMES
-   turns on 4 frame merge for Pentax K3-II 4-shot images
+ * More metadata parsed:
+    - Camera stored white balance coefficients are extracted into:
+     int imgdata.color.WBCoeffs[256][4] - array indexed by EXIF lightsource type
+        for example, WBCoeffs[21][..] contains coefficients for D65 lightsource
+     float imgdata.color.WBCT_Coeffs[64][5] contains white balance data specified
+       for given color temperature: WBCT_Coeffs[i][0] contains temperature value,
+       and [1]..[4] are WB coefficients.
+    - DNG analog balance, per-channel black/white level, and forward matrix
+    - vendor specific metadata stored in vendor-specific data structures
+
+ * new C-API calls: 
+    void libraw_set_user_mul(libraw_data_t *lr,int index, float val);
+    void libraw_set_ca_correction(libraw_data_t *lr,int ca_correc, float ca_red, float ca_blue);
+    void libraw_set_cfalinenoise(libraw_data_t *lr,int cfaline, float linenoise);
+    void libraw_set_wf_debanding(libraw_data_t *lr, int wf_debanding, float wfd0, float wfd1, float wfd2, float wfd3);
+    void libraw_set_interpolation_passes(libraw_data_t *lr,int passes);
+
+ * Existing API changes:
+    imgdata.params fields (all very specific purpose): sony_arw2_options, sraw_ycc, and params.x3f_flags
+    replaced with single bit-field raw_processing_options
+    See  LIBRAW_PROCESSING_* bits in documentation.
+
+ * zlib library is optional
+   Use -DUSE_ZLIB to compile with zlib (to provide deflate DNG support)
+ * libjpeg version: jpeg_mem_src() is mandatory, so use libjpeg-turbo
+   or libjpeg 8+
+ * Fixes in vng_intepolate to make modern compilers happy
+   
+2015-11-24  Alex Tutubalin <lexa@lexa.ru>
+
+
+
+ * new data field 
+
  * dcraw_emu: new -R <num> switch allows to set params.raw_processing_options
  * dcraw 9.26 completely imported, support for BlackMagic URSA '3:1 compressed' files
 

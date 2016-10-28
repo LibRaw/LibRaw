@@ -1,5 +1,6 @@
 # Additional compiler flags (OpenMP, SSEx, AVX, ...)
-COPT_OPT=/arch:SSE2 #/arch:AVX
+
+#COPT_OPT=/arch:SSE2 /arch:AVX
 
 # Compile with RawSpeed support
 #CFLAGS_RAWSPEED=/DUSE_RAWSPEED /I"..\\RawSpeed" /I"..\\RawSpeed\include" /I"..\\RawSpeed\include\libjpeg"
@@ -7,7 +8,8 @@ COPT_OPT=/arch:SSE2 #/arch:AVX
 
 # Compile with DNG SDK support
 #CFLAGS_DNG=/DUSE_DNGSDK /I"..\\dng_sdk\\source"
-#LDFLAGS_DNG=..\\dng_sdk\\source\dng.lib 
+#LDFLAGS_DNG=..\\dng_sdk\\release\\libdng.lib  ..\\dng_sdk\\release\\XMPCore.lib 
+# you may also need to specify zlib.lib and jpeg.lib in the line above
 
 # Demosaic Pack GPL2:
 #CFLAGS_DP2=/I"..\\LibRaw-demosaic-pack-GPL2"
@@ -44,7 +46,7 @@ LIB_OBJECTS=object\dcraw_common_st.obj object\dcraw_fileio_st.obj  object\libraw
 DLL_OBJECTS=object\dcraw_common.obj object\dcraw_fileio.obj  object\libraw_cxx.obj object\libraw_datastream.obj object\libraw_c_api.obj  object\demosaic_packs.obj
 
 CC=cl.exe
-COPT=/EHsc /MP /MT /I. /DWIN32 /O2 /W0 /nologo $(COPT_OPT) $(CFLAGSG2) $(CFLAGSG3) $(LCMS_DEF) $(JPEG_DEF) $(CFLAGS_RAWSPEED) $(CFLAGS_DNG)
+COPT=/EHsc /MP /MD /I. /DWIN32 /O2 /W0 /nologo $(COPT_OPT) $(CFLAGSG2) $(CFLAGSG3) $(LCMS_DEF) $(JPEG_DEF) $(CFLAGS_RAWSPEED) $(CFLAGS_DNG)
 
 LINKLIB=$(LIBDLL) $(LDFLAGS_RAWSPEED) $(LDFLAGS_DNG)
 

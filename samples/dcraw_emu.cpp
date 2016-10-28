@@ -45,6 +45,13 @@ it under the terms of the one of two licenses as you choose:
 #define O_BINARY 0
 #endif
 
+#ifdef USE_DNGSDK
+#include "dng_host.h"
+#include "dng_negative.h"
+#include "dng_simple_image.h"
+#include "dng_info.h"
+#endif
+
 
 void usage(const char *prog)
 {
@@ -123,6 +130,10 @@ void usage(const char *prog)
 "-dsrawrgb1 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation enabled)\n"
 "-dsrawrgb2 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation disabled)\n"
 "-disadcf  Do not use dcraw Foveon code even if compiled with demosaic-pack-GPL2\n"
+#ifdef USE_DNGSDK
+"-dngsdk   Use Adobe DNG SDK for DNG decode\n"
+"-dngflags N set DNG decoding options to value N\n"
+#endif
 );
     exit(1);
 }
@@ -186,6 +197,9 @@ int main(int argc, char *argv[])
     int i,arg,c,ret;
     char opm,opt,*cp,*sp;
     int use_bigfile=0, use_timing=0,use_mem=0;
+#ifdef USE_DNGSDK
+    dng_host *dnghost = NULL;
+#endif
 #ifndef WIN32
     int msize = 0,use_mmap=0;
     
@@ -370,6 +384,17 @@ int main(int argc, char *argv[])
                       OUT.wf_deband_treshold[c] = (float)atof(argv[arg++]);
                     OUT.wf_debanding = 1;
                   }
+#ifdef USE_DNGSDK
+                else if(!strcmp(optstr,"-dngsdk"))
+                  {
+			dnghost = new dng_host;
+                        RawProcessor.set_dng_host(dnghost);
+                  }
+                else if(!strcmp(optstr,"-dngflags"))
+                  {
+			OUT.use_dngsdk = atoi(argv[arg++]);
+                  }
+#endif
                 else
                   fprintf (stderr,"Unknown option \"%s\".\n",argv[arg-1]);
                 break;
@@ -552,5 +577,9 @@ int main(int argc, char *argv[])
             
       RawProcessor.recycle(); // just for show this call
     }
+#ifdef USE_DNGSDK
+   if(dnghost)
+     delete dnghost;
+#endif
   return 0;
 }
