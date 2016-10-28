@@ -46,6 +46,7 @@ struct xtrans_block {
 	unsigned	max_read_size;	 // Amount of data to be read
 	int         cur_buf_size;    // buffer size
 	uchar       *cur_buf;        // currently read block
+	bool		lastlast;
 	LibRaw_abstract_datastream *input;
 	struct int_pair grad_even[3][41];    // tables of gradients
 	struct int_pair grad_odd[3][41];
@@ -143,7 +144,7 @@ static inline void fuji_fill_buffer(struct xtrans_block *info)
 #ifndef LIBRAW_USE_OPENMP
 			info->input->unlock();
 #endif
-			if(info->cur_buf_size<1) // nothing read
+			if(info->cur_buf_size<1 && !info->lastlast) // nothing read
 				throw LIBRAW_EXCEPTION_IO_EOF;
 			info->max_read_size -= info->cur_buf_size;
 
@@ -158,6 +159,7 @@ void LibRaw::init_xtrans_block(struct xtrans_block* info, const struct xtrans_pa
 
 	INT64 fsize = libraw_internal_data.internal_data.input->size();
 	info->max_read_size = _min(unsigned(fsize-raw_offset),dsize+16); // Data size may be incorrect?
+	info->lastlast = false;
 
 	info->input = libraw_internal_data.internal_data.input;
 	info->linebuf[_R0] = info->linealloc;
@@ -668,6 +670,7 @@ void LibRaw::xtrans_decode_strip(const struct xtrans_params* info_common, int cu
 		ztable[3]= {{_R2,3},{_G2,6},{_B2,3}};
 	for  (cur_line = 0; cur_line < libraw_internal_data.unpacker_data.fuji_total_lines; cur_line++)
 	{
+		info.lastlast = (cur_block == libraw_internal_data.unpacker_data.fuji_total_blocks-1) && (cur_line ==libraw_internal_data.unpacker_data.fuji_total_lines-1);
 		xtrans_decode_block(&info, info_common, cur_line);
 
 		// copy data from line buffers and advance
