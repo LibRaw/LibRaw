@@ -206,7 +206,7 @@ if test x$dp3 = xtrue ; then
   fi 
 fi
 
-LIBS="$LIBS -lm -lstdc++"
+LIBS="$LIBS -lm"
 
 AC_SUBST([LIBRAW_SHLIB_VERSION],m4_esyscmd([./shlib-version.sh]))
 AC_SUBST([LIBRAW_RELEASE_VERSION],m4_esyscmd([./version.sh]))

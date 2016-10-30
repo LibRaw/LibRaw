@@ -224,7 +224,7 @@ void LibRaw::copy_line_to_xtrans(struct xtrans_block* info, int cur_line, int cu
 				break;
 			}
 
-			index = (((pixel_count*2/3) & 0x7FFFFFFE) | (pixel_count % 3) & 1) + ((pixel_count % 3) >> 1);
+			index = (((pixel_count*2/3) & 0x7FFFFFFE) | ((pixel_count % 3) & 1)) + ((pixel_count % 3) >> 1);
 			raw_block_data[pixel_count] = line_buf[index];
 
 			++pixel_count;

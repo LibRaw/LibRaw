@@ -1345,7 +1345,7 @@ void CLASS nikon_yuv_load_raw()
   int row, col, yuv[4], rgb[3], b, c;
   UINT64 bitbuf=0;
   float cmul[4];
-  FORC4 { cmul[c] == cam_mul[c]>0.001f?cam_mul[c]:1.f; }
+  FORC4 { cmul[c] = cam_mul[c]>0.001f?cam_mul[c]:1.f; }
   for (row=0; row < raw_height; row++)
   {
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -7637,8 +7637,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           }
         if (!SubDirOffsetValid &&
             ((len > 4) ||
-             ((type == 3) || (type == 8) && (len > 2))  ||
-             ((type == 4) || (type == 9) && (len > 1))  || (type == 5) || (type > 9)))
+             ( ((type == 3) || (type == 8)) && (len > 2))  ||
+             ( ((type == 4) || (type == 9)) && (len > 1))  || (type == 5) || (type > 9)))
         goto skip_Oly_broken_tags;
 
         switch (tag) {
@@ -9478,14 +9478,20 @@ void CLASS parse_makernote (int base, int uptag)
     }
     if ((tag == 0x1011 && len == 9) || tag == 0x20400200)
           for (i=0; i < 3; i++)
+	  {
 #ifdef LIBRAW_LIBRARY_BUILD
            if (!imgdata.makernotes.olympus.ColorSpace)
-#endif
+	   {
             FORC3 cmatrix[i][c] = ((short) get2()) / 256.0;
-#ifdef LIBRAW_LIBRARY_BUILD
+	   }
            else
+	   {
             FORC3 imgdata.color.ccm[i][c] = ((short) get2()) / 256.0;
+	   }
+#else
+            FORC3 cmatrix[i][c] = ((short) get2()) / 256.0;
 #endif
+          }
     if ((tag == 0x1012 || tag == 0x20400600) && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x1017 || tag == 0x20400100)
