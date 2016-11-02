@@ -660,10 +660,10 @@ struct xtrans_params
 #elif defined(__INTEL__)
 #define LibRawBigEndian 0
 
-#elif defined(_M_IX86)
+#elif defined(_M_IX86) || defined(__i386__)
 #define LibRawBigEndian 0
 
-#elif defined(_M_X64) || defined(__amd64__)
+#elif defined(_M_X64) || defined(__amd64__) || defined(__x86_64__)
 #define LibRawBigEndian 0
 
 #elif defined(__LITTLE_ENDIAN__)
@@ -673,6 +673,12 @@ struct xtrans_params
 #define LibRawBigEndian 1
 #elif defined(_ARM_)
 #define LibRawBigEndian 0
+
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define LibRawBigEndian 0
+
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define LibRawBigEndian 1
 #else
 #ifndef qXCodeRez
 #error Unable to figure out byte order.
