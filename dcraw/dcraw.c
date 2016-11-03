@@ -8495,8 +8495,8 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
      unsigned long b8d = SonySubstitution[buf[0x8d]];
      sprintf(imgdata.shootinginfo.InternalBodySerial, "%06lx",
      (b88<<40) + (b89<<32) + (b8a<<24) + (b8b<<16) + b8c<<8 + b8d);
-   } 
-   else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) && (id > 279) && (id != 282) && (id != 283)) 
+   }
+   else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) && (id > 279) && (id != 282) && (id != 283))
    {
      unsigned long bf0 = SonySubstitution[buf[0xf0]];
      unsigned long bf1 = SonySubstitution[buf[0xf1]];
@@ -9501,11 +9501,11 @@ void CLASS parse_makernote (int base, int uptag)
          for (int i = 0; i < nwords; i++) {
            mm[2] = dd[2] = 0;
            if (strlen(words[i]) < 18)
-              if (i == 0) 
-	         strncpy (imgdata.shootinginfo.InternalBodySerial, 
+              if (i == 0)
+	         strncpy (imgdata.shootinginfo.InternalBodySerial,
 		 	words[0],
 			sizeof(imgdata.shootinginfo.InternalBodySerial)-1);
-              else 
+              else
 	      {
 	       char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
 	       snprintf (tbuf, sizeof(tbuf), "%s %s",
@@ -9530,11 +9530,11 @@ void CLASS parse_makernote (int base, int uptag)
 
              if (i == 0) {
                if (nwords == 1)
-	         snprintf (imgdata.shootinginfo.InternalBodySerial, 
+	         snprintf (imgdata.shootinginfo.InternalBodySerial,
 		           sizeof(imgdata.shootinginfo.InternalBodySerial),
 			   "%s %s %d:%s:%s",
 			   words[0]+strlen(words[0])-12, ystr, year, mm, dd);
-               else 
+               else
 	          snprintf (imgdata.shootinginfo.InternalBodySerial,
 		            sizeof(imgdata.shootinginfo.InternalBodySerial),
 			    "%s %d:%s:%s %s",
@@ -9542,7 +9542,7 @@ void CLASS parse_makernote (int base, int uptag)
              } else {
 		char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
 	        snprintf (tbuf, sizeof(tbuf),
-		"%s %s %d:%s:%s %s", 
+		"%s %s %d:%s:%s %s",
 		imgdata.shootinginfo.InternalBodySerial, ystr, year, mm, dd,
 		 words[i]+strlen(words[i])-12);
 		 strncpy(imgdata.shootinginfo.InternalBodySerial,tbuf,
@@ -14469,6 +14469,10 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 11904,-4541,-1189,-2355,10899,1662,-296,1586,4289 } },
     { "Leica V-LUX 3", -15, 0xfff,
       { 11904,-4541,-1189,-2355,10899,1662,-296,1586,4289 } },
+    { "Panasonic DMC-FZ2000", -15, 0, /* markets: DMC-FZ2000, DMC-FZ2500 */
+      { 7830,-2696,-763,-3325,11667,1866,-641,1712,4824 } },
+    { "Panasonic DMC-FZ2500", -15, 0, /* markets: DMC-FZ2000, DMC-FZ2500 */
+      { 7830,-2696,-763,-3325,11667,1866,-641,1712,4824 } },
     { "Panasonic DMC-FZ200", -15, 0xfff,
       { 8112,-2563,-740,-3730,11784,2197,-941,2075,4933 } },
     { "Leica V-LUX 4", -15, 0xfff,
