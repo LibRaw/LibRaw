@@ -777,11 +777,7 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
   /* Traverse the directory */
   for (d=0; d<DS->num_directory_entries; d++) {
     x3f_directory_entry_t *DE = &DS->directory_entry[d];
-	if (!DE)
-		goto _err;
     x3f_directory_entry_header_t *DEH = &DE->header;
-	if (!DEH)
-		goto _err;
     uint32_t save_dir_pos;
 
     /* Read the directory entry info */
@@ -908,11 +904,7 @@ static void free_camf_entry(camf_entry_t *entry)
 
 	for (d=0; d<DS->num_directory_entries; d++) {
 		x3f_directory_entry_t *DE = &DS->directory_entry[d];
-		if (!DE)
-			continue;
 		x3f_directory_entry_header_t *DEH = &DE->header;
-		if (!DEH)
-			continue;
 		if (DEH->identifier == X3F_SECp) {
 			x3f_property_list_t *PL = &DEH->data_subsection.property_list;
 			if (PL)
@@ -1499,9 +1491,9 @@ static void simple_decode_row(x3f_info_t *I,
     mask = 0xfff;
     break;
   default:
+    mask = 0;
     /* TODO: Shouldn't this be treated as a fatal error? */
 	throw LIBRAW_EXCEPTION_IO_CORRUPT;
-    mask = 0;
     break;
   }
 
@@ -1805,7 +1797,7 @@ static void x3f_load_huffman(x3f_info_t *I,
 	case X3F_IMAGE_THUMB_HUFFMAN:
 		size = ID->columns * ID->rows * 3;
 		HUF->rgb8.columns = ID->columns;
-		HUF->rgb8.columns = ID->rows;
+		HUF->rgb8.rows = ID->rows;
 		HUF->rgb8.channels = 3;
 		HUF->rgb8.row_stride = ID->columns * 3;
 		HUF->rgb8.buf = malloc(sizeof(uint8_t)*size);

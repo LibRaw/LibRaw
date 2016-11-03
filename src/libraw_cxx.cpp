@@ -2518,7 +2518,7 @@ int LibRaw::unpack(void)
             S.raw_pitch = S.raw_width*8;
             // allocate image as temporary buffer, size
             imgdata.rawdata.raw_alloc = 0;
-            imgdata.image = (ushort (*)[4]) calloc(S.raw_width*S.raw_height,sizeof(*imgdata.image));
+            imgdata.image = (ushort (*)[4]) calloc(unsigned(S.raw_width)*unsigned(S.raw_height),sizeof(*imgdata.image));
 			if(!(decoder_info.decoder_flags &  LIBRAW_DECODER_ADOBECOPYPIXEL))
 			{
 				imgdata.rawdata.raw_image = (ushort*) imgdata.image ;

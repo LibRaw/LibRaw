@@ -217,6 +217,7 @@ void LibRaw::copy_line_to_xtrans(struct xtrans_block* info, int cur_line, int cu
 				line_buf = lineBufR[row_count >> 1];
 				break;
 			case 1:     // green
+			default: // to make static analyzer happy
 				line_buf = lineBufG[row_count];
 				break;
 			case 2:     // blue

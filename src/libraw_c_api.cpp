@@ -365,9 +365,9 @@ DllDef void libraw_set_wf_debanding(libraw_data_t *lr, int wf_debanding, float w
 		LibRaw *ip = (LibRaw*) lr->parent_class;
 		ip->imgdata.params.wf_debanding = wf_debanding;
 		ip->imgdata.params.wf_deband_treshold[0] = wfd0;
-		ip->imgdata.params.wf_deband_treshold[0] = wfd1;
-		ip->imgdata.params.wf_deband_treshold[0] = wfd2;
-		ip->imgdata.params.wf_deband_treshold[0] = wfd3;
+		ip->imgdata.params.wf_deband_treshold[1] = wfd1;
+		ip->imgdata.params.wf_deband_treshold[2] = wfd2;
+		ip->imgdata.params.wf_deband_treshold[3] = wfd3;
 	}
 
 DllDef void libraw_set_interpolation_passes(libraw_data_t *lr,int passes)

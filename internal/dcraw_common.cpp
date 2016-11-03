@@ -7122,7 +7122,7 @@ void CLASS parseSonyLensType2 (uchar a, uchar b) {
     }
   else
     imgdata.lens.makernotes.LensID = lid2;
-    if ((lid2 >= 50481) && (lid2 < 50500))
+  if ((lid2 >= 50481) && (lid2 < 50500))
     {
       strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
       imgdata.lens.makernotes.AdapterID = 0x4900;
@@ -7303,13 +7303,35 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
                            SonySubstitution[buf[0x117]]);
 
    if ((id==347) || (id==350) || (id==357))
-     sprintf(imgdata.shootinginfo.InternalBodySerial, "%06lx", ((long)SonySubstitution[buf[0x88]]<<40) + ((long)SonySubstitution[buf[0x89]]<<32) + (SonySubstitution[buf[0x8a]]<<24) + (SonySubstitution[buf[0x8b]]<<16) + (SonySubstitution[buf[0x8c]]<<8) +SonySubstitution[buf[0x8d]]);
-
-   else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) && (id > 279) && (id != 282) && (id != 283))
-     sprintf(imgdata.shootinginfo.InternalBodySerial, "%05lx", ((long)SonySubstitution[buf[0xf0]]<<32) + (SonySubstitution[buf[0xf1]]<<24) + (SonySubstitution[buf[0xf2]]<<16) + (SonySubstitution[buf[0xf3]]<<8) +SonySubstitution[buf[0xf4]]);
-
+   {
+     unsigned long b88 = SonySubstitution[buf[0x88]];
+     unsigned long b89 = SonySubstitution[buf[0x89]];
+     unsigned long b8a = SonySubstitution[buf[0x8a]];
+     unsigned long b8b = SonySubstitution[buf[0x8b]];
+     unsigned long b8c = SonySubstitution[buf[0x8c]];
+     unsigned long b8d = SonySubstitution[buf[0x8d]];
+     sprintf(imgdata.shootinginfo.InternalBodySerial, "%06lx",
+     (b88<<40) + (b89<<32) + (b8a<<24) + (b8b<<16) + b8c<<8 + b8d);
+   } 
+   else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) && (id > 279) && (id != 282) && (id != 283)) 
+   {
+     unsigned long bf0 = SonySubstitution[buf[0xf0]];
+     unsigned long bf1 = SonySubstitution[buf[0xf1]];
+     unsigned long bf2 = SonySubstitution[buf[0xf2]];
+     unsigned long bf3 = SonySubstitution[buf[0xf3]];
+     unsigned long bf4 = SonySubstitution[buf[0xf4]];
+     sprintf(imgdata.shootinginfo.InternalBodySerial, "%05lx",
+      (bf0<<32) + (bf1<<24) + (bf2<<16) + (bf3<<8) +bf4);
+   }
    else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E) && (id != 288) && (id != 289)  && (id != 290))
-     sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x", (SonySubstitution[buf[0x7c]]<<24) + (SonySubstitution[buf[0x7d]]<<16) + (SonySubstitution[buf[0x7e]]<<8) +SonySubstitution[buf[0x7f]]);
+   {
+     unsigned b7c = SonySubstitution[buf[0x7c]];
+     unsigned b7d = SonySubstitution[buf[0x7d]];
+     unsigned b7e = SonySubstitution[buf[0x7e]];
+     unsigned b7f = SonySubstitution[buf[0x7f]];
+     sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x",
+     (b7c<<24) + (b7d<<16) + (b7e<<8) + b7f);
+   }
 
   return;
 }
@@ -8296,8 +8318,18 @@ void CLASS parse_makernote (int base, int uptag)
          for (int i = 0; i < nwords; i++) {
            mm[2] = dd[2] = 0;
            if (strlen(words[i]) < 18)
-              if (i == 0) strcpy (imgdata.shootinginfo.InternalBodySerial, words[0]);
-              else snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s", imgdata.shootinginfo.InternalBodySerial, words[i]);
+              if (i == 0) 
+	         strncpy (imgdata.shootinginfo.InternalBodySerial, 
+		 	words[0],
+			sizeof(imgdata.shootinginfo.InternalBodySerial)-1);
+              else 
+	      {
+	       char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
+	       snprintf (tbuf, sizeof(tbuf), "%s %s",
+	            imgdata.shootinginfo.InternalBodySerial, words[i]);
+	       strncpy(imgdata.shootinginfo.InternalBodySerial,tbuf,
+	            sizeof(imgdata.shootinginfo.InternalBodySerial)-1);
+	       }
            else
            {
              strncpy (dd, words[i]+strlen(words[i])-14, 2);
@@ -8314,9 +8346,25 @@ void CLASS parse_makernote (int base, int uptag)
              strcpy (model2, ystr);
 
              if (i == 0) {
-               if (nwords == 1) snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s %d:%s:%s", words[0]+strlen(words[0])-12, ystr, year, mm, dd);
-               else snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %d:%s:%s %s", ystr, year, mm, dd, words[0]+strlen(words[0])-12);
-             } else snprintf (imgdata.shootinginfo.InternalBodySerial, sizeof(imgdata.shootinginfo.InternalBodySerial), "%s %s %d:%s:%s %s", imgdata.shootinginfo.InternalBodySerial, ystr, year, mm, dd, words[i]+strlen(words[i])-12);
+               if (nwords == 1)
+	         snprintf (imgdata.shootinginfo.InternalBodySerial, 
+		           sizeof(imgdata.shootinginfo.InternalBodySerial),
+			   "%s %s %d:%s:%s",
+			   words[0]+strlen(words[0])-12, ystr, year, mm, dd);
+               else 
+	          snprintf (imgdata.shootinginfo.InternalBodySerial,
+		            sizeof(imgdata.shootinginfo.InternalBodySerial),
+			    "%s %d:%s:%s %s",
+			    ystr, year, mm, dd, words[0]+strlen(words[0])-12);
+             } else {
+		char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
+	        snprintf (tbuf, sizeof(tbuf),
+		"%s %s %d:%s:%s %s", 
+		imgdata.shootinginfo.InternalBodySerial, ystr, year, mm, dd,
+		 words[i]+strlen(words[i])-12);
+		 strncpy(imgdata.shootinginfo.InternalBodySerial,tbuf,
+		 	sizeof(imgdata.shootinginfo.InternalBodySerial)-1);
+      	     }
            }
          }
       }
@@ -9748,7 +9796,7 @@ void CLASS parse_exif (int base)
        else
 #endif
         parse_makernote (base, 0);
-        break;
+       break;
       case 40962:  if (kodak) raw_width  = get4();	break;
       case 40963:  if (kodak) raw_height = get4();	break;
       case 41730:
@@ -11652,9 +11700,9 @@ void CLASS parse_ciff (int offset, int length, int depth)
       } else if (!cam_mul[0]) {
 	if (get2() == key[0])		/* Pro1, G6, S60, S70 */
 	  c = (strstr(model,"Pro1") ?
-	      "012346000000000000":"01345:000000006008")[wbi]-'0'+ 2;
+	      "012346000000000000":"01345:000000006008")[LIM(0,wbi,17)]-'0'+ 2;
 	else {				/* G3, G5, S45, S50 */
-	  c = "023457000000006000"[wbi]-'0';
+	  c = "023457000000006000"[LIM(0,wbi,17)]-'0';
 	  key[0] = key[1] = 0;
 	}
 	fseek (ifp, 78 + c*8, SEEK_CUR);
@@ -11663,11 +11711,11 @@ void CLASS parse_ciff (int offset, int length, int depth)
       }
     }
     if (type == 0x10a9) {		/* D60, 10D, 300D, and clones */
-      if (len > 66) wbi = "0134567028"[wbi]-'0';
+      if (len > 66) wbi = "0134567028"[LIM(0,wbi,9)]-'0';
       fseek (ifp, 2 + wbi*8, SEEK_CUR);
       FORC4 cam_mul[c ^ (c >> 1)] = get2();
     }
-    if (type == 0x1030 && (0x18040 >> wbi & 1))
+    if (type == 0x1030 && wbi>=0 && (0x18040 >> wbi & 1))
       ciff_block_1030();		/* all that don't have 0x10a9 */
     if (type == 0x1031) {
       raw_width = (get2(),get2());
