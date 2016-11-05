@@ -11355,6 +11355,10 @@ int CLASS parse_tiff_ifd (int base)
          !strncasecmp(model, "HV",2))))
   {
   	switch (tag) {
+	case 0x7300: // SR2 black level
+		for (int i = 0; i < 4 && i < len; i++)
+			cblack[i] = get2();
+		break;
 	case 0x7480:
 	case 0x7820:
 	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = get2();
@@ -15756,6 +15760,9 @@ void CLASS identify()
     top_margin = filters = 0;
     strcpy (model,"C603");
   }
+  if (!strcmp(make, "Sony") && raw_width > 3888 && !black && !cblack[0])
+    black = 128 << (tiff_bps - 12);
+
   if (is_foveon) {
     if (height*2 < width) pixel_aspect = 0.5;
     if (height   > width) pixel_aspect = 2;
