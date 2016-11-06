@@ -34,7 +34,7 @@ it under the terms of the one of two licenses as you choose:
 #include <fstream>
 #include <memory>
 
-#if defined (WIN32)
+#if defined WIN32 || defined (__MINGW32__)
 #include <winsock2.h>
 
 /* MSVS 2008 and above... */
@@ -45,7 +45,7 @@ it under the terms of the one of two licenses as you choose:
 
 #ifdef USE_DNGSDK
 
-#if defined(WIN32)
+#if defined WIN32 || defined (__MINGW32__)
 #define qWinOS 1
 #define qMacOS 0
 #elif defined(__APPLE__)
@@ -205,7 +205,7 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
     virtual void        subfile_close();
     virtual int         get_char()
     {
-#ifndef WIN32
+#if !defined(_WIN32) && !defined(__MINGW32__)
         return substream?substream->get_char():getc_unlocked(f);
 #else
         return substream?substream->get_char():fgetc(f);

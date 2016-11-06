@@ -23,7 +23,7 @@ it under the terms of the one of two licenses as you choose:
 #include <exception>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef WIN32
+#if !defined(_WIN32) && !defined(__MINGW32__)
 #include <netinet/in.h>
 #else
 #include <winsock2.h>
