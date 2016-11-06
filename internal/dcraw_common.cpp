@@ -15335,6 +15335,17 @@ notraw:
   if (flip == UINT_MAX) flip = tiff_flip;
   if (flip == UINT_MAX) flip = 0;
 
+  // Convert from degrees to bit-field if needed
+  if(flip > 89 || flip < -89)
+   {
+     switch ((flip+3600) % 360)
+     {
+       case 270:  flip = 5;  break;
+       case 180:  flip = 3;  break;
+       case  90:  flip = 6;  break;
+     }
+   }
+
 #ifdef LIBRAW_LIBRARY_BUILD
   RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY,1,2);
 #endif
