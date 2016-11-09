@@ -6998,7 +6998,8 @@ void CLASS setSonyBodyFeatures (unsigned id) {
            (id == 340) ||
            (id == 346) ||
            (id == 347) ||
-           (id == 350)
+           (id == 350) ||
+           (id == 360)
           )
     {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Sony_E;
@@ -13411,6 +13412,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 5271,-712,-347,-6153,13653,2763,-1601,2366,7242 } },
     { "Sony ILCE-6300", 0, 0,
       { 5973,-1695,-419,-3826,11797,2293,-639,1398,5789 } },
+    { "Sony ILCE-6500", 0, 0, /* temp */
+      { 5973,-1695,-419,-3826,11797,2293,-639,1398,5789 } },
     { "Sony ILCE", 0, 0,	/* 3000, 5000, 5100, 6000, and QX1 */
       { 5991,-1456,-455,-4764,12135,2980,-707,1425,6701 } },
     { "Sony NEX-5N", 0, 0,
@@ -13781,6 +13784,7 @@ void CLASS identify()
     { 0x163, "DSC-RX10M3" },
     { 0x164, "DSC-RX100M5"},
     { 0x165, "ILCE-6300" },
+    { 0x168, "ILCE-6500"},
   };
 
 #ifdef LIBRAW_LIBRARY_BUILD
