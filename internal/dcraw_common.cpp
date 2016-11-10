@@ -91,7 +91,17 @@ char *my_strcasestr (char *haystack, const char *needle)
 
 int my_strlen(const char *str)
 {
-	return (int)local_strnlen(str,0x7fffffff);
+	/* TODO: Previous value 0x7fffffff causes a random crash on some platforms (like arm), 
+	due to buffer overrun when you get a string length using strlen() method.
+	That is because memchr() returns NULL, even on null-terminated strings. In that case local_strnlen() will return 2147483647.
+	So, remove_trailing_spaces() method is also affected, because it tries to modify a memory out of the buffer.
+	Please consider to use lower memory sizes (like 4096 in my case) or rewrite this method. 
+	
+	See local_strnlen() method.
+	*/
+	
+	//return (int)local_strnlen(str,0x7fffffff);
+	return (int)local_strnlen(str,4096);
 }
 #define strlen(a) my_strlen((a))
 
