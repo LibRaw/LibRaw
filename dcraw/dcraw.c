@@ -304,11 +304,6 @@ int CLASS fcol (int row, int col)
   return FC(row,col);
 }
 
-static size_t local_strnlen(const char *s, size_t n)
-{
-  const char *p = (const char *)memchr(s, 0, n);
-  return(p ? p-s : n);
-}
 #ifdef LIBRAW_LIBRARY_BUILD
 static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
 {
@@ -341,11 +336,7 @@ char *my_strcasestr (char *haystack, const char *needle)
 #define strcasestr my_strcasestr
 #endif
 
-int my_strlen(const char *str)
-{
-	return (int)local_strnlen(str,0x7fffffff);
-}
-#define strlen(a) my_strlen((a))
+#define strbuflen(buf) strnlen(buf,sizeof(buf)-1)
 
 //@end COMMON
 
@@ -8313,7 +8304,7 @@ void CLASS parseSonyLensType2 (uchar a, uchar b) {
   return;
 }
 
-#define strnXcat(buf,string) strncat(buf,string,LIM(sizeof(buf)-strlen(buf)-1,0,sizeof(buf)))
+#define strnXcat(buf,string) strncat(buf,string,LIM(sizeof(buf)-strbuflen(buf)-1,0,sizeof(buf)))
 
 void CLASS parseSonyLensFeatures (uchar a, uchar b) {
 
@@ -8378,7 +8369,8 @@ void CLASS parseSonyLensFeatures (uchar a, uchar b) {
     strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " II");
 
   if (imgdata.lens.makernotes.LensFeatures_suf[0] == ' ')
-    memmove(imgdata.lens.makernotes.LensFeatures_suf, imgdata.lens.makernotes.LensFeatures_suf+1, strlen(imgdata.lens.makernotes.LensFeatures_suf));
+    memmove(imgdata.lens.makernotes.LensFeatures_suf, imgdata.lens.makernotes.LensFeatures_suf+1,
+	    strbuflen(imgdata.lens.makernotes.LensFeatures_suf)-1);
 
   return;
 }
@@ -8691,7 +8683,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           {
             if ((!custom_serial) && (!isdigit(c)))
             {
-              if ((strlen(model) == 3) && (!strcmp(model,"D50")))
+              if ((strbuflen(model) == 3) && (!strcmp(model,"D50")))
               {
                 custom_serial = 34;
               }
@@ -9500,7 +9492,7 @@ void CLASS parse_makernote (int base, int uptag)
          nwords = getwords(FujiSerial, words, 4,sizeof(imgdata.shootinginfo.InternalBodySerial));
          for (int i = 0; i < nwords; i++) {
            mm[2] = dd[2] = 0;
-           if (strlen(words[i]) < 18)
+           if (strnlen(words[i],sizeof(imgdata.shootinginfo.InternalBodySerial)-1) < 18)
               if (i == 0)
 	         strncpy (imgdata.shootinginfo.InternalBodySerial,
 		 	words[0],
@@ -9515,13 +9507,13 @@ void CLASS parse_makernote (int base, int uptag)
 	       }
            else
            {
-             strncpy (dd, words[i]+strlen(words[i])-14, 2);
-             strncpy (mm, words[i]+strlen(words[i])-16, 2);
-             strncpy (yy, words[i]+strlen(words[i])-18, 2);
+             strncpy (dd, words[i]+strnlen(words[i],sizeof(imgdata.shootinginfo.InternalBodySerial)-1)-14, 2);
+             strncpy (mm, words[i]+strnlen(words[i],sizeof(imgdata.shootinginfo.InternalBodySerial)-1)-16, 2);
+             strncpy (yy, words[i]+strnlen(words[i],sizeof(imgdata.shootinginfo.InternalBodySerial)-1)-18, 2);
              year = (yy[0]-'0')*10 + (yy[1]-'0');
              if (year <70) year += 2000; else year += 1900;
 
-             ynum_len = (int)strlen(words[i])-18;
+             ynum_len = (int)strnlen(words[i],sizeof(imgdata.shootinginfo.InternalBodySerial)-1)-18;
              strncpy(ynum, words[i], ynum_len);
              ynum[ynum_len] = 0;
              for ( int j = 0; ynum[j] && ynum[j+1] && sscanf(ynum+j, "%2x", &c); j += 2) ystr[j/2] = c;
@@ -9529,22 +9521,28 @@ void CLASS parse_makernote (int base, int uptag)
              strcpy (model2, ystr);
 
              if (i == 0) {
+	       char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
+
                if (nwords == 1)
-	         snprintf (imgdata.shootinginfo.InternalBodySerial,
-		           sizeof(imgdata.shootinginfo.InternalBodySerial),
+		   snprintf (tbuf,sizeof(tbuf),
 			   "%s %s %d:%s:%s",
-			   words[0]+strlen(words[0])-12, ystr, year, mm, dd);
+			   words[0]+strnlen(words[0],sizeof(imgdata.shootinginfo.InternalBodySerial)-1)-12,
+				ystr, year, mm, dd);
+		   
                else
-	          snprintf (imgdata.shootinginfo.InternalBodySerial,
-		            sizeof(imgdata.shootinginfo.InternalBodySerial),
+		 snprintf (tbuf,sizeof(tbuf),
 			    "%s %d:%s:%s %s",
-			    ystr, year, mm, dd, words[0]+strlen(words[0])-12);
+			    ystr, year, mm, dd,
+			    words[0]+strnlen(words[0],sizeof(imgdata.shootinginfo.InternalBodySerial)-1)-12);
+
+	       strncpy(imgdata.shootinginfo.InternalBodySerial,tbuf,
+	            sizeof(imgdata.shootinginfo.InternalBodySerial)-1);
              } else {
 		char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
 	        snprintf (tbuf, sizeof(tbuf),
 		"%s %s %d:%s:%s %s",
 		imgdata.shootinginfo.InternalBodySerial, ystr, year, mm, dd,
-		 words[i]+strlen(words[i])-12);
+		 words[i]+strnlen(words[i],sizeof(imgdata.shootinginfo.InternalBodySerial)-1)-12);
 		 strncpy(imgdata.shootinginfo.InternalBodySerial,tbuf,
 		 	sizeof(imgdata.shootinginfo.InternalBodySerial)-1);
       	     }
@@ -10536,7 +10534,7 @@ void CLASS parse_makernote (int base, int uptag)
       {
         if ((!custom_serial) && (!isdigit(c)))
         {
-          if ((strlen(model) == 3) && (!strcmp(model,"D50")))
+          if ((strbuflen(model) == 3) && (!strcmp(model,"D50")))
           {
             custom_serial = 34;
           }
@@ -12819,7 +12817,7 @@ void CLASS parse_ciff (int offset, int length, int depth)
       fread (artist, 64, 1, ifp);
     if (type == 0x080a) {
       fread (make, 64, 1, ifp);
-      fseek (ifp, strlen(make) - 63, SEEK_CUR);
+      fseek (ifp, strbuflen(make) - 63, SEEK_CUR);
       fread (model, 64, 1, ifp);
     }
     if (type == 0x1810) {
@@ -12964,7 +12962,7 @@ void CLASS parse_rollei()
     if ((val = strchr(line,'=')))
       *val++ = 0;
     else
-      val = line + strlen(line);
+      val = line + strbuflen(line);
     if (!strcmp(line,"DAT"))
       sscanf (val, "%d.%d.%d", &t.tm_mday, &t.tm_mon, &t.tm_year);
     if (!strcmp(line,"TIM"))
@@ -14901,7 +14899,7 @@ static void remove_trailing_spaces(char *string, size_t len)
   if(len<1) return; // not needed, b/c sizeof of make/model is 64
   string[len-1]=0;
   if(len<3) return; // also not needed
-  len = strlen(string);
+  len = strnlen(string,len-1);
   for(int i=len-1; i>=0; i--)
   {
     if(isspace(string[i]))
@@ -15638,7 +15636,7 @@ void CLASS identify()
   cp = model + strlen(model);
   while (*--cp == ' ') *cp = 0;
 #endif
-  i = strlen(make);			/* Remove make from model */
+  i = strbuflen(make);			/* Remove make from model */
   if (!strncasecmp (model, make, i) && model[i++] == ' ')
     memmove (model, model+i, 64-i);
   if (!strncmp (model,"FinePix ",8))
@@ -17043,7 +17041,7 @@ void CLASS tiff_set (struct tiff_hdr *th, ushort *ntag,
   if (type == 1 && count <= 4)
     FORC(4) tt->val.c[c] = val >> (c << 3);
   else if (type == 2) {
-    count = local_strnlen((char *)th + val, count-1) + 1;
+    count = strnlen((char *)th + val, count-1) + 1;
     if (count <= 4)
       FORC(4) tt->val.c[c] = ((char *)th)[val+c];
   } else if (type == 3 && count <= 2)
