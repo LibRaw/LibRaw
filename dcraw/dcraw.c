@@ -303,6 +303,13 @@ int CLASS fcol (int row, int col)
   if (filters == 9) return xtrans[(row+6) % 6][(col+6) % 6];
   return FC(row,col);
 }
+static size_t local_strnlen(const char *s, size_t n)
+{
+  const char *p = (const char *)memchr(s, 0, n);
+  return(p ? p-s : n);
+}
+/* add OS X version check here ?? */
+#define strnlen(a,b) local_strnlen(a,b)
 
 #ifdef LIBRAW_LIBRARY_BUILD
 static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
