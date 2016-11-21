@@ -3929,7 +3929,7 @@ mask_set:
 #endif
   } else if (zero < mblack[4] && mblack[5] && mblack[6] && mblack[7]) {
     FORC4 cblack[c] = mblack[c] / mblack[4+c];
-    cblack[4] = cblack[5] = cblack[6] = 0;
+    black = cblack[4] = cblack[5] = cblack[6] = 0;
   }
 }
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -6417,18 +6417,18 @@ if (tag == 0x0001) Canon_CameraSettings();
             break;
           case 796:
             imgdata.makernotes.canon.CanonColorDataVer = 3;	// 1DmkIIN / 5D / 30D / 400D
-			imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-			{
-			  fseek (ifp, save1+(0x4e<<1), SEEK_SET);
-              Canon_WBpresets(2,12);
-              fseek (ifp, save1+(0x85<<1), SEEK_SET);
-              Canon_WBCTpresets (0);	// BCAT
-              fseek (ifp, save1+(0x0c4<<1), SEEK_SET); // offset 196 short
-              int bls=0;
-              FORC4 bls+=get2();
-              imgdata.makernotes.canon.AverageBlackLevel = bls/4;
-			}
-			break;
+	    imgdata.makernotes.canon.CanonColorDataSubVer = get2();
+	    {
+	      fseek (ifp, save1+(0x4e<<1), SEEK_SET);
+	      Canon_WBpresets(2,12);
+	      fseek (ifp, save1+(0x85<<1), SEEK_SET);
+	      Canon_WBCTpresets (0);	// BCAT
+	      fseek (ifp, save1+(0x0c4<<1), SEEK_SET); // offset 196 short
+	      int bls=0;
+	      FORC4 bls+=get2();
+	      imgdata.makernotes.canon.AverageBlackLevel = bls/4;
+	    }
+	    break;
             // 1DmkIII / 1DSmkIII / 1DmkIV / 5DmkII
             // 7D / 40D / 50D / 60D / 450D / 500D
             // 550D / 1000D / 1100D
@@ -6437,10 +6437,10 @@ if (tag == 0x0001) Canon_CameraSettings();
             imgdata.makernotes.canon.CanonColorDataVer = 4;
             imgdata.makernotes.canon.CanonColorDataSubVer = get2();
             {
-            	fseek (ifp, save1+(0x53<<1), SEEK_SET);
-            	Canon_WBpresets(2,12);
-            	fseek (ifp, save1+(0xa8<<1), SEEK_SET);
-              	Canon_WBCTpresets (0);	// BCAT
+	      fseek (ifp, save1+(0x53<<1), SEEK_SET);
+	      Canon_WBpresets(2,12);
+	      fseek (ifp, save1+(0xa8<<1), SEEK_SET);
+	      Canon_WBCTpresets (0);	// BCAT
               fseek (ifp, save1+(0x0e7<<1), SEEK_SET); // offset 231 short
               int bls=0;
               FORC4 bls+=get2();
@@ -8374,8 +8374,9 @@ void CLASS parse_makernote (int base, int uptag)
            }
          }
       }
-     else parseFujiMakernotes (tag, type);
-      }
+      else
+	parseFujiMakernotes (tag, type);
+    }
 
     else if (!strncasecmp(make, "LEICA", 5))
       {
@@ -9480,7 +9481,7 @@ void CLASS parse_makernote (int base, int uptag)
       }
     if (tag == 0x200 && len == 3)
       shot_order = (get4(),get4());
-    if (tag == 0x200 && len == 4)
+    if (tag == 0x200 && len == 4 && !dng_version)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x201 && len == 4)
          FORC4 cam_mul[c ^ (c >> 1)] = get2();
@@ -9490,7 +9491,7 @@ void CLASS parse_makernote (int base, int uptag)
       FORC4 cblack[c ^ c >> 1] = get4();
 #ifdef LIBRAW_LIBRARY_BUILD
     // not corrected for file bitcount, to be patched in open_datastream
-    if (tag == 0x03d && strstr(make,"NIKON") && len == 4)
+    if (tag == 0x03d && strstr(make,"NIKON") && len == 4 && !dng_version)
       {
         FORC4 cblack[c ^ c >> 1] = get2();
         i = cblack[3];
@@ -9546,7 +9547,7 @@ void CLASS parse_makernote (int base, int uptag)
             FORC3 cmatrix[i][c] = ((short) get2()) / 256.0;
 #endif
           }
-    if ((tag == 0x1012 || tag == 0x20400600) && len == 4)
+    if ((tag == 0x1012 || tag == 0x20400600) && len == 4 && !dng_version)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x1017 || tag == 0x20400100)
       cam_mul[0] = get2() / 256.0;
@@ -9640,7 +9641,7 @@ get2_256:
             for (i=0; i < 3; i++)
               FORC3 cmatrix[i][c] = (float)((short)((get4() + SamsungKey[i*3+c])))/256.0;
 
-        if (tag == 0xa028)
+        if (tag == 0xa028 && !dng_version)
           FORC4 cblack[c ^ (c >> 1)] = get4() - SamsungKey[c];
       }
     else
@@ -10173,9 +10174,10 @@ int CLASS parse_tiff_ifd (int base)
   {
   	switch (tag) {
 	case 0x7300: // SR2 black level
-		for (int i = 0; i < 4 && i < len; i++)
-			cblack[i] = get2();
-		break;
+	  if(!dng_version)
+	    for (int i = 0; i < 4 && i < len; i++)
+	      cblack[i] = get2();
+	  break;
 	case 0x7480:
 	case 0x7820:
 	    FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = get2();
@@ -10314,8 +10316,11 @@ int CLASS parse_tiff_ifd (int base)
         else
 #endif
           {
-            cblack[tag-28] = get2();
-            cblack[3] = cblack[1];
+	    if(!dng_version)
+	      {
+		cblack[tag-28] = get2();
+		cblack[3] = cblack[1];
+	      }
           }
 	break;
       case 36: case 37: case 38:
@@ -10565,14 +10570,18 @@ int CLASS parse_tiff_ifd (int base)
       break;
 #endif
     case 29456: // Sony black level, Sony_SR2SubIFD_0x7310, no more needs to be divided by 4
-      FORC4 cblack[c ^ c >> 1] = get2();
-      i = cblack[3];
-      FORC3 if(i>cblack[c]) i = cblack[c];
-      FORC4 cblack[c]-=i;
-      black = i;
+      if(!dng_version)
+	{
+	  FORC4 cblack[c ^ c >> 1] = get2();
+	  i = cblack[3];
+	  FORC3 if(i>cblack[c]) i = cblack[c];
+	  FORC4 cblack[c]-=i;
+	  black = i;
+	  
 #ifdef DCRAW_VERBOSE
       if (verbose) fprintf (stderr, _("...Sony black: %u cblack: %u %u %u %u\n"),black, cblack[0],cblack[1],cblack[2], cblack[3]);
 #endif
+	}
       break;
       case 33405:			/* Model2 */
 	fgets (model2, 64, ifp);
@@ -10933,24 +10942,30 @@ guess_cfa_pc:
 	cblack[4] = cblack[5] = MIN(sqrt((double)len),64);
       case 50714:			/* BlackLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
-		if(tiff_ifd[ifd].samples > 1  && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
-		{
-			for(i=0; i < colors && i < 4 && i < len; i++)
-				cblack[i]=(imgdata.color.dng_color[0].dng_blacklevel[i]=getreal(type))+0.5;
-			black = 0;
-		}
-		else
+	if(tiff_ifd[ifd].samples > 1  && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
+	  {
+	    for(i=0; i < colors && i < 4 && i < len; i++)
+	      cblack[i]=(imgdata.color.dng_color[0].dng_blacklevel[i]=getreal(type))+0.5;
+	    black = 0;
+	  }
+	else
 #endif
-        if((cblack[4] * cblack[5] < 2) && len == 1)
-          {
-            black = getreal(type);
-          }
-        else if(cblack[4] * cblack[5] <= len)
-          {
-            FORC (cblack[4] * cblack[5])
-              cblack[6+c] = getreal(type);
-            black = 0;
-          }
+	  if((cblack[4] * cblack[5] < 2) && len == 1)
+	    {
+	      black = getreal(type);
+	    }
+	  else if(cblack[4] * cblack[5] <= 4 && cblack[4] * cblack[5] <= len && filters > 1000) // Bayer, 2x2 pattern
+	    {
+	      FORC (cblack[4] * cblack[5])
+		cblack[c] = getreal(type);
+	      black = 0;
+	    }
+	  else if(cblack[4] * cblack[5] <= len)
+	    {
+	      FORC (cblack[4] * cblack[5])
+		cblack[6+c] = getreal(type);
+	      black = 0;
+	    }
       break;
       case 50715:			/* BlackLevelDeltaH */
       case 50716:			/* BlackLevelDeltaV */
