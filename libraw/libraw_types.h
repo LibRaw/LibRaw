@@ -209,6 +209,7 @@ typedef struct
   int          CanonColorDataVer;
   int          CanonColorDataSubVer;
   int          SpecularWhiteLevel;
+  int          ChannelBlackLevel[4];
   int          AverageBlackLevel;
 /* metering */
   short        MeteringMode;
