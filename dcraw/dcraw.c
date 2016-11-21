@@ -7608,7 +7608,8 @@ if (tag == 0x0001) Canon_CameraSettings();
 	      Canon_WBCTpresets (0);	// BCAT
 	      fseek (ifp, save1+(0x0c4<<1), SEEK_SET); // offset 196 short
 	      int bls=0;
-	      FORC4 bls+=get2();
+	      FORC4
+		bls+= (imgdata.makernotes.canon.ChannelBlackLevel[c]=get2());
 	      imgdata.makernotes.canon.AverageBlackLevel = bls/4;
 	    }
 	    break;
@@ -7626,7 +7627,8 @@ if (tag == 0x0001) Canon_CameraSettings();
 	      Canon_WBCTpresets (0);	// BCAT
               fseek (ifp, save1+(0x0e7<<1), SEEK_SET); // offset 231 short
               int bls=0;
-              FORC4 bls+=get2();
+              FORC4
+		bls+= (imgdata.makernotes.canon.ChannelBlackLevel[c]=get2());
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
             if ((imgdata.makernotes.canon.CanonColorDataSubVer == 4)
@@ -7677,7 +7679,8 @@ if (tag == 0x0001) Canon_CameraSettings();
                 fseek (ifp, save1+(0x108<<1), SEEK_SET);  // offset 264 short
               }
               int bls=0;
-              FORC4 bls+=get2();
+              FORC4
+		bls+= (imgdata.makernotes.canon.ChannelBlackLevel[c]=get2());
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
             break;
@@ -7692,7 +7695,8 @@ if (tag == 0x0001) Canon_CameraSettings();
               Canon_WBCTpresets (0);	// BCAT
               fseek (ifp, save1+(0x0fb<<1), SEEK_SET);			// offset 251 short
               int bls=0;
-              FORC4 bls+=get2();
+              FORC4 
+		bls+= (imgdata.makernotes.canon.ChannelBlackLevel[c]=get2());
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
             fseek (ifp, save1+(0x1e4<<1), SEEK_SET);			// offset 484 shorts
@@ -7711,7 +7715,8 @@ if (tag == 0x0001) Canon_CameraSettings();
               Canon_WBCTpresets (0);	// BCAT
               fseek (ifp, save1+(0x114<<1), SEEK_SET);			// offset 276 shorts
               int bls=0;
-              FORC4 bls+=get2();
+              FORC4
+		bls+= (imgdata.makernotes.canon.ChannelBlackLevel[c]=get2());
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
             if (imgdata.makernotes.canon.CanonColorDataSubVer == 10)
@@ -7738,7 +7743,8 @@ if (tag == 0x0001) Canon_CameraSettings();
               Canon_WBCTpresets (0);	// BCAT
               fseek (ifp, save1+(0x146<<1), SEEK_SET);			// offset 326 shorts
               int bls=0;
-              FORC4 bls+=get2();
+              FORC4
+		bls+= (imgdata.makernotes.canon.ChannelBlackLevel[c]=get2());
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
               if (imgdata.makernotes.canon.CanonColorDataSubVer == 14)  // 1300D
