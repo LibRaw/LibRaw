@@ -10960,17 +10960,18 @@ guess_cfa_pc:
 	    {
 	      black = getreal(type);
 	    }
-	  else if(cblack[4] * cblack[5] <= 4 && cblack[4] * cblack[5] <= len && filters > 1000) // Bayer, 2x2 pattern
-	    {
-	      FORC (cblack[4] * cblack[5])
-		cblack[c] = getreal(type);
-	      black = 0;
-	    }
 	  else if(cblack[4] * cblack[5] <= len)
 	    {
 	      FORC (cblack[4] * cblack[5])
 		cblack[6+c] = getreal(type);
 	      black = 0;
+	      // Move it into [0..3] for bayer case
+	      if (filters > 1000 && (cblack[4]+1)/2 == 1 && (cblack[5]+1)/2 == 1)
+		{
+		  FORC4 cblack[FC(c/2,c%2)] +=
+		    cblack[6 + c/2 % cblack[4] * cblack[5] + c%2 % cblack[5]];
+		  cblack[4] = cblack[5] = 0;
+		}
 	    }
       break;
       case 50715:			/* BlackLevelDeltaH */
