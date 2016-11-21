@@ -8353,7 +8353,7 @@ void CLASS parse_makernote (int base, int uptag)
 			   "%s %s %d:%s:%s",
 			   words[0]+strnlen(words[0],sizeof(imgdata.shootinginfo.InternalBodySerial)-1)-12,
 				ystr, year, mm, dd);
-		   
+
                else
 		 snprintf (tbuf,sizeof(tbuf),
 			    "%s %d:%s:%s %s",
@@ -13418,6 +13418,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 6435,-1903,-536,-4722,12449,2550,-663,1363,6517 } },
     { "Sony ILCA-77M2", 0, 0,
       { 5991,-1732,-443,-4100,11989,2381,-704,1467,5992 } },
+    { "Sony ILCA-99M2", 0, 0,
+      { 6629,-1900,-483,-4618,12349,2550,-622,1381,6514 } },
     { "Sony ILCE-7M2", 0, 0,
       { 5271,-712,-347,-6153,13653,2763,-1601,2366,7242 } },
     { "Sony ILCE-7SM2", 0, 0,
