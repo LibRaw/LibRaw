@@ -4148,9 +4148,23 @@ void LibRaw::adjust_bl()
  // Add common part to cblack[] early
    if (imgdata.idata.filters > 1000 && (C.cblack[4]+1)/2 == 1 && (C.cblack[5]+1)/2 == 1)
    {
+	   int clrs[4];
+	   int lastg = -1, gcnt = 0;
+	   for(int c = 0; c < 4; c++)
+	   {
+			clrs[c] = FC(c/2,c%2);
+			if(clrs[c]==1)
+			{
+				gcnt++;
+				lastg = c;
+			}
+	   }
+	   if(gcnt>1 && lastg>=0)
+		   clrs[lastg] = 3;
 	   for(int c=0; c<4; c++)
-		   C.cblack[c] += C.cblack[6 + c/2 % C.cblack[4] * C.cblack[5] + c%2 % C.cblack[5]];
+		   C.cblack[clrs[c]] += C.cblack[6 + c/2 % C.cblack[4] * C.cblack[5] + c%2 % C.cblack[5]];
 	   C.cblack[4]=C.cblack[5]=0;
+	   //imgdata.idata.filters = sfilters;
    }
    else if(imgdata.idata.filters <= 1000 && C.cblack[4]==1 && C.cblack[5]==1) // Fuji RAF dng
    {
