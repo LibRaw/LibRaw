@@ -9487,17 +9487,17 @@ void CLASS parse_makernote (int base, int uptag)
       }
     if (tag == 0x200 && len == 3)
       shot_order = (get4(),get4());
-    if (tag == 0x200 && len == 4 && !dng_version)
+    if (tag == 0x200 && len == 4 && !(cblack[4]*cblack[5]) && !black)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x201 && len == 4)
          FORC4 cam_mul[c ^ (c >> 1)] = get2();
     if (tag == 0x220 && type == 7)
       meta_offset = ftell(ifp);
-    if (tag == 0x401 && type == 4 && len == 4)
+    if (tag == 0x401 && type == 4 && len == 4 && !(cblack[4]*cblack[5]) && !black)
       FORC4 cblack[c ^ c >> 1] = get4();
 #ifdef LIBRAW_LIBRARY_BUILD
     // not corrected for file bitcount, to be patched in open_datastream
-    if (tag == 0x03d && strstr(make,"NIKON") && len == 4 && !dng_version)
+    if (tag == 0x03d && strstr(make,"NIKON") && len == 4 && !(cblack[4]*cblack[5]) && !black)
       {
         FORC4 cblack[c ^ c >> 1] = get2();
         i = cblack[3];
@@ -9553,7 +9553,7 @@ void CLASS parse_makernote (int base, int uptag)
             FORC3 cmatrix[i][c] = ((short) get2()) / 256.0;
 #endif
           }
-    if ((tag == 0x1012 || tag == 0x20400600) && len == 4 && !dng_version)
+    if ((tag == 0x1012 || tag == 0x20400600) && len == 4 && !(cblack[4]*cblack[5]) && !black)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x1017 || tag == 0x20400100)
       cam_mul[0] = get2() / 256.0;
@@ -9647,7 +9647,7 @@ get2_256:
             for (i=0; i < 3; i++)
               FORC3 cmatrix[i][c] = (float)((short)((get4() + SamsungKey[i*3+c])))/256.0;
 
-        if (tag == 0xa028 && !dng_version)
+        if (tag == 0xa028 && !(cblack[4]*cblack[5]) && !black)
           FORC4 cblack[c ^ (c >> 1)] = get4() - SamsungKey[c];
       }
     else
@@ -10180,7 +10180,7 @@ int CLASS parse_tiff_ifd (int base)
   {
   	switch (tag) {
 	case 0x7300: // SR2 black level
-	  if(!dng_version)
+	  if(!(cblack[4]*cblack[5]) && !black)
 	    for (int i = 0; i < 4 && i < len; i++)
 	      cblack[i] = get2();
 	  break;
@@ -10322,7 +10322,7 @@ int CLASS parse_tiff_ifd (int base)
         else
 #endif
           {
-	    if(!dng_version)
+	    if(!(cblack[4]*cblack[5]) && !black)
 	      {
 		cblack[tag-28] = get2();
 		cblack[3] = cblack[1];
@@ -10576,7 +10576,7 @@ int CLASS parse_tiff_ifd (int base)
       break;
 #endif
     case 29456: // Sony black level, Sony_SR2SubIFD_0x7310, no more needs to be divided by 4
-      if(!dng_version)
+      if(!(cblack[4]*cblack[5]) && !black)
 	{
 	  FORC4 cblack[c ^ c >> 1] = get2();
 	  i = cblack[3];
@@ -10965,13 +10965,8 @@ guess_cfa_pc:
 	      FORC (cblack[4] * cblack[5])
 		cblack[6+c] = getreal(type);
 	      black = 0;
-	      // Move it into [0..3] for bayer case
-	      if (filters > 1000 && (cblack[4]+1)/2 == 1 && (cblack[5]+1)/2 == 1)
-		{
-		  FORC4 cblack[FC(c/2,c%2)] +=
-		    cblack[6 + c/2 % cblack[4] * cblack[5] + c%2 % cblack[5]];
-		  cblack[4] = cblack[5] = 0;
-		}
+	      FORC4
+		cblack[c] = 0;
 	    }
       break;
       case 50715:			/* BlackLevelDeltaH */
