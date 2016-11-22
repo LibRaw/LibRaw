@@ -15299,6 +15299,18 @@ dng_skip:
     if (raw_color) adobe_coeff ("Apple","Quicktake");
 
   if (fuji_width) {
+    	if (left_margin % 2)
+	{
+	   left_margin++;
+           width--;
+	   if (iwidth>width) iwidth--;
+	}
+	if (top_margin % 2)
+	{
+	   top_margin++;
+	   height--;
+	   if (iheight > height) iheight--;
+	}
     fuji_width = width >> !fuji_layout;
     filters = fuji_width & 1 ? 0x94949494 : 0x49494949;
     width = (height >> fuji_layout) + fuji_width;
