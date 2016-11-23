@@ -3524,16 +3524,24 @@ int LibRaw::dcraw_ppm_tiff_writer(const char *filename)
   }
 }
 
+#define THUMB_READ_BEYOND  16384
+
 void LibRaw::kodak_thumb_loader()
 {
-  // some kodak cameras
+	INT64 est_datasize = T.theight * T.twidth / 3; // is 0.3 bytes per pixel good estimate?
+	if (ID.toffset < 0)
+		throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+	if (ID.toffset + est_datasize > ID.input->size() + THUMB_READ_BEYOND)
+		throw LIBRAW_EXCEPTION_IO_EOF;
+
+	// some kodak cameras
   ushort s_height = S.height, s_width = S.width,s_iwidth = S.iwidth,s_iheight=S.iheight;
   ushort s_flags = libraw_internal_data.unpacker_data.load_flags;
   libraw_internal_data.unpacker_data.load_flags = 12;
   int s_colors = P1.colors;
   unsigned s_filters = P1.filters;
   ushort (*s_image)[4] = imgdata.image;
-
 
   S.height = T.theight;
   S.width  = T.twidth;
@@ -3677,27 +3685,27 @@ void LibRaw::kodak_thumb_loader()
   merror (T.thumb, "LibRaw::kodak_thumb_loader()");
   T.tlength = S.width * S.height * P1.colors;
 
-  // from write_tiff_ppm
+// from write_tiff_ppm
   {
-    int soff  = flip_index (0, 0);
-    int cstep = flip_index (0, 1) - soff;
-    int rstep = flip_index (1, 0) - flip_index (0, S.width);
+	  int soff = flip_index(0, 0);
+	  int cstep = flip_index(0, 1) - soff;
+	  int rstep = flip_index(1, 0) - flip_index(0, S.width);
 
-    for (int row=0; row < S.height; row++, soff += rstep)
-      {
-        char *ppm = T.thumb + row*S.width*P1.colors;
-        for (int col=0; col < S.width; col++, soff += cstep)
-          for(int c = 0; c < P1.colors; c++)
-            ppm [col*P1.colors+c] = imgdata.color.curve[imgdata.image[soff][c]]>>8;
-      }
+	  for (int row = 0; row < S.height; row++, soff += rstep)
+	  {
+		  char *ppm = T.thumb + row*S.width*P1.colors;
+		  for (int col = 0; col < S.width; col++, soff += cstep)
+			  for (int c = 0; c < P1.colors; c++)
+				  ppm[col*P1.colors + c] = imgdata.color.curve[imgdata.image[soff][c]] >> 8;
+	  }
   }
 
-  memmove(C.curve,t_curve,sizeof(C.curve));
+  memmove(C.curve, t_curve, sizeof(C.curve));
   free(t_curve);
 
   // restore variables
   free(imgdata.image);
-  imgdata.image  = s_image;
+  imgdata.image = s_image;
 
   T.twidth = S.width;
   S.width = s_width;
@@ -3749,33 +3757,51 @@ int LibRaw::thumbOK(INT64 maxsz)
 		return 0;
 	if (maxsz > 0 && tsize > maxsz)
 		return 0;
-	return (tsize + ID.toffset <= fsize)?1:0;
+	return (tsize + ID.toffset <= fsize) ? 1 : 0;
 }
 
 int LibRaw::unpack_thumb(void)
 {
-  CHECK_ORDER_LOW(LIBRAW_PROGRESS_IDENTIFY);
-  CHECK_ORDER_BIT(LIBRAW_PROGRESS_THUMB_LOAD);
+	CHECK_ORDER_LOW(LIBRAW_PROGRESS_IDENTIFY);
+	CHECK_ORDER_BIT(LIBRAW_PROGRESS_THUMB_LOAD);
 
-  try {
-    if(!libraw_internal_data.internal_data.input)
-      return LIBRAW_INPUT_CLOSED;
+	try {
+		if (!libraw_internal_data.internal_data.input)
+			return LIBRAW_INPUT_CLOSED;
 
-    if ( !ID.toffset && 
-		!(imgdata.thumbnail.tlength>0 && load_raw == &LibRaw::broadcom_load_raw) // RPi
-		)
-      {
-        return LIBRAW_NO_THUMBNAIL;
-      }
-    else if (thumb_load_raw)
-      {
-        kodak_thumb_loader();
-        T.tformat = LIBRAW_THUMBNAIL_BITMAP;
-        SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
-        return 0;
-      }
-    else
-      {
+		if (!ID.toffset &&
+			!(imgdata.thumbnail.tlength > 0 && load_raw == &LibRaw::broadcom_load_raw) // RPi
+			)
+		{
+			return LIBRAW_NO_THUMBNAIL;
+		}
+		else if (thumb_load_raw)
+		{
+			kodak_thumb_loader();
+			T.tformat = LIBRAW_THUMBNAIL_BITMAP;
+			SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
+			return 0;
+		}
+		else
+		{
+			if (write_thumb == &LibRaw::x3f_thumb_loader)
+			{
+				INT64 tsize = x3f_thumb_size();
+				if (tsize < 2048 ||INT64(ID.toffset) + tsize < 1)
+					throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+				if (INT64(ID.toffset) + tsize > ID.input->size() + THUMB_READ_BEYOND)
+					throw LIBRAW_EXCEPTION_IO_EOF;
+			}
+			else
+			{
+				if (INT64(ID.toffset) + INT64(T.tlength) < 1)
+					throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+				if (INT64(ID.toffset) + INT64(T.tlength) > ID.input->size() + THUMB_READ_BEYOND)
+					throw LIBRAW_EXCEPTION_IO_EOF;
+			}
+
         ID.input->seek(ID.toffset, SEEK_SET);
         if ( write_thumb == &LibRaw::jpeg_thumb)
           {
