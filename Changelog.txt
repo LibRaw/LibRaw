@@ -1,3 +1,20 @@
+2016-12-05  Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.18 Beta2
+ * X-Trans compressed/OpenMP patch
+ * Camera support:
+     Olympus E-M1-II
+     Panasonic FZ2000/FZ2500
+     Sony ILCA-99M2 (A99-II), a6500
+ * Fixed bug in Sony SR2 files black level
+ * DNG files with BlackLevel both in vendor makernotes and BlackLevel:
+    BlackLevel tag always takes precedence
+ * strlen replaced with strnlen in most cases, added local version of strnlen
+ * ChannelBlackLevel added to canon makernotes
+ * unpack_thumb() data size/offset check against file size
+ * Fixed Windows/MinGW compilation issues
+ 
+2016-10-30  Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.18 Beta1
  * Licensing changes:
     - there is no 'LibRaw Software License 27032010' licensing anymore (and all signed
       agreements have expired)
@@ -162,7 +179,6 @@
   Sony A7 II, A7S, ILCA-77M2 (A77-II), ILCE-3000, ILCE-5000, ILCE-5100, ILCE-6000, ILCE-QX1, DSC-RX100III, DSLR-A560, NEX-VG20, NEX-VG30, NEX-VG900, IMX135-mipi 13mp, IMX135-QCOM, IMX072-mipi, RX100-IV, A7R-II, RX10-II
 
  * Fujifilm F700/S20Pro second frame support
-
 
 2014-02-01  Alex Tutubalin <lexa@lexa.ru>
    * Updated Oly E-M10 & Panasonic TZ60/61 color data
