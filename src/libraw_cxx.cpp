@@ -4779,6 +4779,7 @@ static const char  *static_camera_list[] =
 "Hasselblad Stellar",
 "Hasselblad Stellar II",
 "Hasselblad HV",
+"Hasselblad X1D",
 "HTC UltraPixel",
 "HTC MyTouch 4G",
 "HTC One (A9)",

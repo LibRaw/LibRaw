@@ -12662,6 +12662,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 4932, -835, 141, -4878, 11868, 3437, -1138, 1961, 7067 } },
     { "Hasselblad H5D-50",0, 0, /* Adobe */
       { 5656, -659, -346, -3923, 12306, 1791, -1602, 3509, 5442 } },
+    { "Hasselblad X1D",0, 0, /* Adobe */
+      {932, -835, 141, -4878, 11868, 3437, -1138, 1961, 7067 }},
     { "HTC One A9", 64, 1023, /* this is CM1 transposed */
       { 101, -20, -2, -11, 145, 41, -24, 1, 56 } },
     { "Imacon Ixpress", 0, 0,		/* DJC */
@@ -14865,7 +14867,16 @@ konica_400z:
       filters = 0x61616161;
       adobe_coeff("Hasselblad","H4D-40");
       strcpy(model,"H4D-40");
-    } else if (raw_width == 9044) {
+    }
+    else if( raw_width == 8384) // X1D
+    {
+     top_margin  = 96;
+     height -= 96;
+     left_margin = 48;
+     width  -= 106;
+     adobe_coeff("Hasselblad","X1D");
+    }
+    else if (raw_width == 9044) {
       if(black > 500)
         {
           top_margin = 12;
