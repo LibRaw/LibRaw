@@ -5285,6 +5285,8 @@ static const char  *static_camera_list[] =
 "Samsung S85 (hacked)",
 "Samsung S850 (hacked)",
 "Samsung Galaxy S3",
+"Samsung Galaxy S7",
+"Samsung Galaxy S7 Edge",
 "Samsung Galaxy Nexus",
 "Sarnoff 4096x5440",
 "Seitz 6x17",
