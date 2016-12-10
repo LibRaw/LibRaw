@@ -6501,7 +6501,6 @@ if (tag == 0x0001) Canon_CameraSettings();
               FORC4
 		bls+= (imgdata.makernotes.canon.ChannelBlackLevel[c]=get2());
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
-              FORC4 printf ("debug black %d: %d\n", c, imgdata.makernotes.canon.ChannelBlackLevel[c]);
             }
             break;
 
