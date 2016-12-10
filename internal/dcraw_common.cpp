@@ -6140,6 +6140,7 @@ void CLASS Canon_WBCTpresets (short WBCTversion)
 	else if ((WBCTversion == 2) &&
 		((unique_id == 0x80000374) ||	// M3
 		 (unique_id == 0x80000384) ||	// M10
+		 (unique_id == 0x80000394) ||	// M5
 		 (unique_id == 0x03970000)))	// G7 X Mark II
 	  for (int i=0; i<15; i++)	// tint, offset, as shot R, as shot B, CСT
 	    {
@@ -6471,10 +6472,11 @@ if (tag == 0x0001) Canon_CameraSettings();
             break;
 
           case 5120:
-            imgdata.makernotes.canon.CanonColorDataVer = 5;	// PowerSot G10, G12, G5 X, EOS M3
+            imgdata.makernotes.canon.CanonColorDataVer = 5;	// PowerSot G10, G12, G5 X, EOS M3, EOS M5
             {
               fseek (ifp, save1+(0x56<<1), SEEK_SET);
-              if (unique_id == 0x03970000)  // G7 X Mark II
+              if ((unique_id == 0x03970000) || // G7 X Mark II
+                  (unique_id == 0x80000394))   // EOS M5
               {
                 fseek(ifp, 18, SEEK_CUR);
                 FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
@@ -6499,6 +6501,7 @@ if (tag == 0x0001) Canon_CameraSettings();
               FORC4
 		bls+= (imgdata.makernotes.canon.ChannelBlackLevel[c]=get2());
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
+              FORC4 printf ("debug black %d: %d\n", c, imgdata.makernotes.canon.ChannelBlackLevel[c]);
             }
             break;
 
@@ -6512,7 +6515,7 @@ if (tag == 0x0001) Canon_CameraSettings();
               Canon_WBCTpresets (0);	// BCAT
               fseek (ifp, save1+(0x0fb<<1), SEEK_SET);			// offset 251 short
               int bls=0;
-              FORC4 
+              FORC4
 		bls+= (imgdata.makernotes.canon.ChannelBlackLevel[c]=get2());
               imgdata.makernotes.canon.AverageBlackLevel = bls/4;
             }
@@ -10583,7 +10586,7 @@ int CLASS parse_tiff_ifd (int base)
 	  FORC3 if(i>cblack[c]) i = cblack[c];
 	  FORC4 cblack[c]-=i;
 	  black = i;
-	  
+
 #ifdef DCRAW_VERBOSE
       if (verbose) fprintf (stderr, _("...Sony black: %u cblack: %u %u %u %u\n"),black, cblack[0],cblack[1],cblack[2], cblack[3]);
 #endif
@@ -13172,9 +13175,9 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 11904,-4541,-1189,-2355,10899,1662,-296,1586,4289 } },
     { "Panasonic DMC-FZ2000", -15, 0, /* markets: DMC-FZ2000,DMC-FZ2500,FZH1 */
       { 7386, -2443, -743, -3437, 11864, 1757, -608, 1660, 4766 }},
-    { "Panasonic DMC-FZ2500", -15, 0, 
+    { "Panasonic DMC-FZ2500", -15, 0,
       { 7386, -2443, -743, -3437, 11864, 1757, -608, 1660, 4766 }},
-    { "Panasonic DMC-FZH1", -15, 0, 
+    { "Panasonic DMC-FZH1", -15, 0,
       { 7386, -2443, -743, -3437, 11864, 1757, -608, 1660, 4766 }},
     { "Panasonic DMC-FZ200", -15, 0xfff,
       { 8112,-2563,-740,-3730,11784,2197,-941,2075,4933 } },
