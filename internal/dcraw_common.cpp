@@ -10950,10 +10950,6 @@ guess_cfa_pc:
 #endif
 
       case 61450:
-#ifdef LIBRAW_LIBRARY_BUILD
-	imgdata.color.dng_levels.dng_cblack[4]=
-	imgdata.color.dng_levels.dng_cblack[5]= 
-#endif
 	cblack[4] = cblack[5] = MIN(sqrt((double)len),64);
       case 50714:			/* BlackLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -10979,21 +10975,21 @@ guess_cfa_pc:
 	  else if(cblack[4] * cblack[5] <= len)
 	    {
 	      FORC (cblack[4] * cblack[5])
-#ifdef LIBRAW_LIBRARY_BUILD
-	      imgdata.color.dng_levels.dng_cblack[6+c]= 
-#endif
-		cblack[6+c] =
-		  getreal(type);
+		cblack[6+c] = getreal(type);
+	      black = 0;
+	      FORC4
+		cblack[c] = 0;
 
 #ifdef LIBRAW_LIBRARY_BUILD
-	      imgdata.color.dng_levels.dng_black= 
+              if(tag == 50714)
+	      {
+	        FORC (cblack[4] * cblack[5])
+	          imgdata.color.dng_levels.dng_cblack[6+c]= cblack[6+c];
+	        imgdata.color.dng_levels.dng_black=0;
+	        FORC4
+	          imgdata.color.dng_levels.dng_cblack[c]= 0;
+	      }
 #endif
-	        black = 0;
-	      FORC4
-#ifdef LIBRAW_LIBRARY_BUILD
-	       imgdata.color.dng_levels.dng_cblack[c]= 
-#endif
-		cblack[c] = 0;
 	    }
       break;
       case 50715:			/* BlackLevelDeltaH */
