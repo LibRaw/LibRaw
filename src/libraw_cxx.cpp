@@ -570,8 +570,8 @@ void LibRaw:: recycle()
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
 
   for(int i = 0; i < 4; i++)
-   imgdata.color.dng_color[0].analogbalance[i]=
-   imgdata.color.dng_color[1].analogbalance[i]=1.0f;
+   imgdata.color.dng_levels.analogbalance[i]=
+   imgdata.color.dng_levels.analogbalance[i]=1.0f;
 
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);
@@ -1802,7 +1802,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       {
 	float delta[4]={0.f,0.f,0.f,0.f};
 	for(int c = 0; c < imgdata.idata.colors ; c++ )
-	  delta[c] = imgdata.color.dng_color[0].dng_whitelevel[c] - imgdata.color.dng_color[0].dng_blacklevel[c];
+	  delta[c] = imgdata.color.dng_levels.dng_whitelevel[c] - imgdata.color.dng_levels.dng_blacklevel[c];
 	float mindelta = delta[0],maxdelta = delta[0];
 	for(int c = 1; c < imgdata.idata.colors; c++)
 	  {

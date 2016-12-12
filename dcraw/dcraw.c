@@ -10672,17 +10672,17 @@ void CLASS parse_makernote (int base, int uptag)
       }
     if (tag == 0x200 && len == 3)
       shot_order = (get4(),get4());
-    if (tag == 0x200 && len == 4 && !(cblack[4]*cblack[5]) && !black)
+    if (tag == 0x200 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x201 && len == 4)
          FORC4 cam_mul[c ^ (c >> 1)] = get2();
     if (tag == 0x220 && type == 7)
       meta_offset = ftell(ifp);
-    if (tag == 0x401 && type == 4 && len == 4 && !(cblack[4]*cblack[5]) && !black)
+    if (tag == 0x401 && type == 4 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get4();
 #ifdef LIBRAW_LIBRARY_BUILD
     // not corrected for file bitcount, to be patched in open_datastream
-    if (tag == 0x03d && strstr(make,"NIKON") && len == 4 && !(cblack[4]*cblack[5]) && !black)
+    if (tag == 0x03d && strstr(make,"NIKON") && len == 4)
       {
         FORC4 cblack[c ^ c >> 1] = get2();
         i = cblack[3];
@@ -10738,7 +10738,7 @@ void CLASS parse_makernote (int base, int uptag)
             FORC3 cmatrix[i][c] = ((short) get2()) / 256.0;
 #endif
           }
-    if ((tag == 0x1012 || tag == 0x20400600) && len == 4 && !(cblack[4]*cblack[5]) && !black)
+    if ((tag == 0x1012 || tag == 0x20400600) && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x1017 || tag == 0x20400100)
       cam_mul[0] = get2() / 256.0;
@@ -10832,7 +10832,7 @@ get2_256:
             for (i=0; i < 3; i++)
               FORC3 cmatrix[i][c] = (float)((short)((get4() + SamsungKey[i*3+c])))/256.0;
 
-        if (tag == 0xa028 && !(cblack[4]*cblack[5]) && !black)
+        if (tag == 0xa028)
           FORC4 cblack[c ^ (c >> 1)] = get4() - SamsungKey[c];
       }
     else
@@ -11371,7 +11371,6 @@ int CLASS parse_tiff_ifd (int base)
   {
   	switch (tag) {
 	case 0x7300: // SR2 black level
-	  if(!(cblack[4]*cblack[5]) && !black)
 	    for (int i = 0; i < 4 && i < len; i++)
 	      cblack[i] = get2();
 	  break;
@@ -11513,11 +11512,8 @@ int CLASS parse_tiff_ifd (int base)
         else
 #endif
           {
-	    if(!(cblack[4]*cblack[5]) && !black)
-	      {
-		cblack[tag-28] = get2();
-		cblack[3] = cblack[1];
-	      }
+	     cblack[tag-28] = get2();
+	     cblack[3] = cblack[1];
           }
 	break;
       case 36: case 37: case 38:
@@ -11767,8 +11763,6 @@ int CLASS parse_tiff_ifd (int base)
       break;
 #endif
     case 29456: // Sony black level, Sony_SR2SubIFD_0x7310, no more needs to be divided by 4
-      if(!(cblack[4]*cblack[5]) && !black)
-	{
 	  FORC4 cblack[c ^ c >> 1] = get2();
 	  i = cblack[3];
 	  FORC3 if(i>cblack[c]) i = cblack[c];
@@ -11778,7 +11772,6 @@ int CLASS parse_tiff_ifd (int base)
 #ifdef DCRAW_VERBOSE
       if (verbose) fprintf (stderr, _("...Sony black: %u cblack: %u %u %u %u\n"),black, cblack[0],cblack[1],cblack[2], cblack[3]);
 #endif
-	}
       break;
       case 33405:			/* Model2 */
 	fgets (model2, 64, ifp);
@@ -12040,9 +12033,19 @@ guess_cfa_pc:
 	linear_table (len);
 	break;
       case 50713:			/* BlackLevelRepeatDim */
+#ifdef LIBRAW_LIBRARY_BUILD
+        imgdata.color.dng_levels.dng_cblack[4] = 
+#endif
 	cblack[4] = get2();
+#ifdef LIBRAW_LIBRARY_BUILD
+        imgdata.color.dng_levels.dng_cblack[5] = 
+#endif
 	cblack[5] = get2();
 	if (cblack[4] * cblack[5] > (sizeof(cblack) / sizeof (cblack[0]) - 6))
+#ifdef LIBRAW_LIBRARY_BUILD
+            imgdata.color.dng_levels.dng_cblack[4]=
+	    imgdata.color.dng_levels.dng_cblack[5]= 
+#endif
 	    cblack[4] = cblack[5] = 1;
 	break;
 
@@ -12136,27 +12139,49 @@ guess_cfa_pc:
 #endif
 
       case 61450:
+#ifdef LIBRAW_LIBRARY_BUILD
+	imgdata.color.dng_levels.dng_cblack[4]=
+	imgdata.color.dng_levels.dng_cblack[5]= 
+#endif
 	cblack[4] = cblack[5] = MIN(sqrt((double)len),64);
       case 50714:			/* BlackLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
 	if(tiff_ifd[ifd].samples > 1  && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
 	  {
 	    for(i=0; i < colors && i < 4 && i < len; i++)
-	      cblack[i]=(imgdata.color.dng_color[0].dng_blacklevel[i]=getreal(type))+0.5;
-	    black = 0;
+	      imgdata.color.dng_levels.dng_cblack[i]=
+	        cblack[i]=
+		  getreal(type)+0.5;
+
+	    imgdata.color.dng_levels.dng_black= black = 0;
 	  }
 	else
 #endif
 	  if((cblack[4] * cblack[5] < 2) && len == 1)
 	    {
-	      black = getreal(type);
+#ifdef LIBRAW_LIBRARY_BUILD
+	      imgdata.color.dng_levels.dng_black= 
+#endif
+	        black =
+		  getreal(type);
 	    }
 	  else if(cblack[4] * cblack[5] <= len)
 	    {
 	      FORC (cblack[4] * cblack[5])
-		cblack[6+c] = getreal(type);
-	      black = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+	      imgdata.color.dng_levels.dng_cblack[6+c]= 
+#endif
+		cblack[6+c] =
+		  getreal(type);
+
+#ifdef LIBRAW_LIBRARY_BUILD
+	      imgdata.color.dng_levels.dng_black= 
+#endif
+	        black = 0;
 	      FORC4
+#ifdef LIBRAW_LIBRARY_BUILD
+	       imgdata.color.dng_levels.dng_cblack[c]= 
+#endif
 		cblack[c] = 0;
 	    }
       break;
@@ -12165,16 +12190,19 @@ guess_cfa_pc:
 	for (num=i=0; i < len && i < 65536; i++)
 	  num += getreal(type);
 	black += num/len + 0.5;
+#ifdef LIBRAW_LIBRARY_BUILD
+	imgdata.color.dng_levels.dng_black += num/len + 0.5;
+#endif
 	break;
       case 50717:			/* WhiteLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
-	imgdata.color.dng_color[0].dng_whitelevel[0]=
+	imgdata.color.dng_levels.dng_whitelevel[0]=
 #endif
 	maximum = getint(type);
 #ifdef LIBRAW_LIBRARY_BUILD
 	if(tiff_ifd[ifd].samples > 1 ) // Linear DNG case
 		for(i=1; i < colors && i < 4 && i < len; i++)
-			imgdata.color.dng_color[0].dng_whitelevel[i]=getint(type);
+			imgdata.color.dng_levels.dng_whitelevel[i]=getint(type);
 #endif
 	break;
       case 50718:			/* DefaultScale */
@@ -12238,7 +12266,7 @@ guess_cfa_pc:
       case 50727:			/* AnalogBalance */
 	FORCC{
 #ifdef LIBRAW_LIBRARY_BUILD
-              imgdata.color.dng_color[0].analogbalance[c]=
+              imgdata.color.dng_levels.analogbalance[c]=
 #endif
 	      ab[c] = getreal(type);
 	}
@@ -16613,6 +16641,17 @@ bw:   colors = 1;
   }
 
 dng_skip:
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(dng_version) /* Override black level by DNG tags */
+  {
+    black = imgdata.color.dng_levels.dng_black;
+    int ll = LIM(0,
+    (sizeof(cblack)/sizeof(cblack[0])),
+    (sizeof(imgdata.color.dng_levels.dng_cblack)/sizeof(imgdata.color.dng_levels.dng_cblack[0])));
+    for(int i=0; i < ll; i++)
+      cblack[i] = imgdata.color.dng_levels.dng_cblack[i];
+  }
+#endif
   /* Early reject for damaged images */
   if (!load_raw || height < 22 || width < 22 ||
 #ifdef LIBRAW_LIBRARY_BUILD
