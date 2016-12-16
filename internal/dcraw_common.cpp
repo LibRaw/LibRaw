@@ -7319,7 +7319,7 @@ void CLASS process_Sony_0x9050 (uchar * buf, unsigned id)
      unsigned long b8c = SonySubstitution[buf[0x8c]];
      unsigned long b8d = SonySubstitution[buf[0x8d]];
      sprintf(imgdata.shootinginfo.InternalBodySerial, "%06lx",
-     (b88<<40) + (b89<<32) + (b8a<<24) + (b8b<<16) + b8c<<8 + b8d);
+     (b88<<40) + (b89<<32) + (b8a<<24) + (b8b<<16) + (b8c<<8) + b8d);
    }
    else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) && (id > 279) && (id != 282) && (id != 283))
    {
