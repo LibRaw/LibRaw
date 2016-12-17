@@ -14019,7 +14019,7 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
     { "Hasselblad H5D-50",0, 0, /* Adobe */
       { 5656, -659, -346, -3923, 12306, 1791, -1602, 3509, 5442 } },
     { "Hasselblad X1D",0, 0, /* Adobe */
-      {932, -835, 141, -4878, 11868, 3437, -1138, 1961, 7067 }},
+      {4932, -835, 141, -4878, 11868, 3437, -1138, 1961, 7067 }},
     { "HTC One A9", 64, 1023, /* this is CM1 transposed */
       { 101, -20, -2, -11, 145, 41, -24, 1, 56 } },
     { "Imacon Ixpress", 0, 0,		/* DJC */
