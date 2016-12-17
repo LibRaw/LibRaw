@@ -1772,6 +1772,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 			imgdata.sizes.iheight = imgdata.sizes.height = imgdata.sizes.raw_height - imgdata.sizes.top_margin;
 			libraw_internal_data.unpacker_data.load_flags |= 256;
 		}
+		else
+		{
+			imgdata.sizes.raw_width = imgdata.sizes.width;
+			imgdata.sizes.raw_height = imgdata.sizes.height;
+			imgdata.sizes.top_margin = imgdata.sizes.left_margin = 0;
+		}
 	}
 
 	// XTrans Compressed?
