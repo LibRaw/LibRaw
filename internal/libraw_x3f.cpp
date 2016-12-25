@@ -88,6 +88,8 @@ BSD-style License
 #define X3F_IMAGE_RAW_MERRILL       (uint32_t)(0x0001001e)
 #define X3F_IMAGE_RAW_QUATTRO       (uint32_t)(0x00010023)
 #define X3F_IMAGE_RAW_SDQ           (uint32_t)(0x00010025)
+#define X3F_IMAGE_RAW_SDQH           (uint32_t)(0x00010027)
+#define X3F_IMAGE_RAW_SDQH2           (uint32_t)(0x00010029)
 
 #define X3F_IMAGE_HEADER_SIZE 28
 #define X3F_CAMF_HEADER_SIZE 28
@@ -1017,6 +1019,11 @@ static x3f_directory_entry_t *x3f_get(x3f_t *x3f,
 	if ((DE = x3f_get(x3f, X3F_SECi, X3F_IMAGE_RAW_SDQ)) != NULL)
 		return DE;
 
+	if ((DE = x3f_get(x3f, X3F_SECi, X3F_IMAGE_RAW_SDQH)) != NULL)
+		return DE;
+	if ((DE = x3f_get(x3f, X3F_SECi, X3F_IMAGE_RAW_SDQH2)) != NULL)
+		return DE;
+
 	return NULL;
 }
 
@@ -1303,8 +1310,11 @@ static void true_decode_one_color(x3f_image_data_t *ID, int color)
   row_start_acc[1][0] = seed;
   row_start_acc[1][1] = seed;
 
-  if (ID->type_format == X3F_IMAGE_RAW_QUATTRO ||
-      ID->type_format == X3F_IMAGE_RAW_SDQ) {
+  if (ID->type_format == X3F_IMAGE_RAW_QUATTRO 
+	  || ID->type_format == X3F_IMAGE_RAW_SDQ
+	  || ID->type_format == X3F_IMAGE_RAW_SDQH 
+	  || ID->type_format == X3F_IMAGE_RAW_SDQH2 
+	  ) {
     rows = Q->plane[color].rows;
     cols = Q->plane[color].columns;
 
@@ -1635,8 +1645,11 @@ static void x3f_load_true(x3f_info_t *I,
 	x3f_quattro_t *Q = NULL;
 	int i;
 
-	if (ID->type_format == X3F_IMAGE_RAW_QUATTRO ||
-		ID->type_format == X3F_IMAGE_RAW_SDQ) {
+	if (ID->type_format == X3F_IMAGE_RAW_QUATTRO 
+		||	ID->type_format == X3F_IMAGE_RAW_SDQ
+		||	ID->type_format == X3F_IMAGE_RAW_SDQH
+		||	ID->type_format == X3F_IMAGE_RAW_SDQH2
+		) {
 			Q = new_quattro(&ID->quattro);
 
 			for (i=0; i<TRUE_PLANES; i++) {
@@ -1660,8 +1673,11 @@ static void x3f_load_true(x3f_info_t *I,
 	GET2(TRU->unknown);
 	GET_TRUE_HUFF_TABLE(TRU->table);
 
-	if (ID->type_format == X3F_IMAGE_RAW_QUATTRO ||
-		ID->type_format == X3F_IMAGE_RAW_SDQ) {
+	if (ID->type_format == X3F_IMAGE_RAW_QUATTRO 
+		||ID->type_format == X3F_IMAGE_RAW_SDQ
+		||ID->type_format == X3F_IMAGE_RAW_SDQH
+		||ID->type_format == X3F_IMAGE_RAW_SDQH2
+		) {
 			GET4(Q->unknown);
 	}
 
@@ -1686,8 +1702,11 @@ static void x3f_load_true(x3f_info_t *I,
 		TRU->plane_address[i-1] +
 		(((TRU->plane_size.element[i-1] + 15) / 16) * 16);
 
-	if ( (ID->type_format == X3F_IMAGE_RAW_QUATTRO ||
-		ID->type_format == X3F_IMAGE_RAW_SDQ ) &&
+	if ( (ID->type_format == X3F_IMAGE_RAW_QUATTRO 
+		|| ID->type_format == X3F_IMAGE_RAW_SDQ 
+		|| ID->type_format == X3F_IMAGE_RAW_SDQH 
+		|| ID->type_format == X3F_IMAGE_RAW_SDQH2 
+		) &&
 		Q->quattro_layout) {
 			uint32_t columns = Q->plane[0].columns;
 			uint32_t rows = Q->plane[0].rows;
@@ -1847,6 +1866,8 @@ static void x3f_load_image(x3f_info_t *I, x3f_directory_entry_t *DE)
 	case X3F_IMAGE_RAW_MERRILL:
 	case X3F_IMAGE_RAW_QUATTRO:
 	case X3F_IMAGE_RAW_SDQ:
+	case X3F_IMAGE_RAW_SDQH:
+	case X3F_IMAGE_RAW_SDQH2:
 		x3f_load_true(I, DE);
 		break;
 	case X3F_IMAGE_RAW_HUFFMAN_X530:
