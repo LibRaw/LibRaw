@@ -1,53 +1,37 @@
-2016-12-05  Alex Tutubalin <lexa@lexa.ru>
- * LibRaw 0.18 Beta2
- * X-Trans compressed/OpenMP patch
- * Camera support:
-     Olympus E-M1-II
-     Panasonic FZ2000/FZ2500
-     Sony ILCA-99M2 (A99-II), a6500
- * Fixed bug in Sony SR2 files black level
- * DNG files with BlackLevel both in vendor makernotes and BlackLevel:
-    BlackLevel tag always takes precedence
- * strlen replaced with strnlen in most cases, added local version of strnlen
- * ChannelBlackLevel added to canon makernotes
- * unpack_thumb() data size/offset check against file size
- * Fixed Windows/MinGW compilation issues
- 
-2016-10-30  Alex Tutubalin <lexa@lexa.ru>
- * LibRaw 0.18 Beta1
+2016-12-27  Alex Tutubalin <lexa@lexa.ru>
  * Licensing changes:
     - there is no 'LibRaw Software License 27032010' licensing anymore (and all signed
       agreements have expired)
     - LibRaw is now dual-licensed: LGPL 2.1 or CDDL 1.0
 
- * Camera support (+78):
+ * Camera support (+87):
      Apple: iPad Pro, iPhone SE, iPhone 6s, iPhone 6 plus, iPhone 7, iPhone 7 plus
      BlackMagic Micro Cinema Camera, URSA, URSA Mini
      Canon PowerShot G5 X, PowerShot G7 X Mark II, PowerShot G9 X,
-       IXUS 160 (CHDK hack), EOS 5D Mark IV, EOS 80D, EOS 1300D, EOS M10,
+       IXUS 160 (CHDK hack), EOS 5D Mark IV, EOS 80D, EOS 1300D, EOS M10, EOS M5,
        EOS-1D X Mark II
      Casio EX-ZR4000/5000
      DXO One,
      FujiFilm X-Pro2, X70, X-E2S, X-T2
      Gione E7
      GITUP GIT2
-     Google Pixel XL
-     Hasselblad True Zoom
+     Google Pixel,Pixel XL
+     Hasselblad X1D, True Zoom
      HTC MyTouch 4G, One (A9), One (M9), 10
      Huawei P9
-     Leica M (Typ 262), M-D (Typ 262), S (Typ 007), SL (Typ 601), X-U (Typ 113)
+     Leica M (Typ 262), M-D (Typ 262), S (Typ 007), SL (Typ 601), X-U (Typ 113), TL
      LG G3, G4
      Meizy MX4
      Nikon D5, D500, D3400
-     Olympus E-PL8, E-M10 Mark II, Pen F, SH-3
-     Panasonic DMC-G8/80/81/85, DMC-GX80/85, DMC-TZ80/81/85/ZS60, DMC-TZ100/101/ZS100,DMC-LX9/10/15
+     Olympus E-PL8, E-M10 Mark II, Pen F, SH-3, E-M1-II
+     Panasonic DMC-G8/80/81/85, DMC-GX80/85, DMC-TZ80/81/85/ZS60, DMC-TZ100/101/ZS100,DMC-LX9/10/15, FZ2000/FZ2500
      Pentax K-1, K-3 II, K-70
      PhaseOne IQ3 100MP
      RaspberryPi Camera, Camera V2
      Ricoh GR II
-     Samsung Galaxy S7 (SM-G935F)
+     Samsung Galaxy S7, S7 Edge
      Sigma sd Quattro
-     Sony A7S II, ILCA-68 (A68),ILCE-6300,DSC-RX1R II,DSC-RX10III, DSC-RX100V,
+     Sony A7S II, ILCA-68 (A68),ILCE-6300,DSC-RX1R II,DSC-RX10III, DSC-RX100V,ILCA-99M2 (A99-II), a6500
           IMX214, IMX219, IMX230, IMX298-mipi 16mp, IMX219-mipi 8mp, Xperia L
      PtGrey GRAS-50S5C
      YUNEEC CGO4
@@ -113,6 +97,12 @@
  * libjpeg version: jpeg_mem_src() is mandatory, so use libjpeg-turbo
    or libjpeg 8+
  * Fixes in vng_intepolate to make modern compilers happy
+ * Fixed bug in Sony SR2 files black level
+ * DNG files with BlackLevel both in vendor makernotes and BlackLevel:
+    BlackLevel tag always takes precedence
+ * strlen replaced with strnlen in most cases, added local version of strnlen
+ * ChannelBlackLevel added to canon makernotes
+ * unpack_thumb() data size/offset check against file size
 
 2015-08-15  Alex Tutubalin <lexa@lexa.ru>
 
