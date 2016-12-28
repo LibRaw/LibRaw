@@ -368,6 +368,11 @@ int main(int ac, char *av[])
                     for (int i=0; i < 16; i++)
                         putchar (P1.cdesc[MyCoolRawProcessor.fcol(i >> 1,i & 1)]);
                 }
+	    if(C.rgb_cam[0][0] > 0.0001 && P1.colors>1)
+	      {
+		printf("\nCamera2RGB matrix: ");
+		for(int c=0; c<9; c++) printf(" %5.3f",C.rgb_cam[0][c]);
+	      }
             if (C.linear_max[0] != 0)
                 {
                     printf ("\nHighlight linearity limits:");
