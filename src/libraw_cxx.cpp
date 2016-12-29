@@ -5872,14 +5872,17 @@ void LibRaw::x3f_dpq_interpolate_af_sd(int xstart,int ystart, int xend, int yend
 		{
 			uint16_t* pixel00 = &row0[x*3]; // Current pixel
 			float sumR = 0.f,sumG=0.f;
+			float cnt = 0.f;
 			for(int xx = -scale; xx <= scale; xx+= scale)
 			{
 				sumR += row_minus[(x+xx)*3];
 				sumR += row_plus[(x+xx)*3];
 				sumG += row_minus[(x+xx)*3+1];
 				sumG += row_plus[(x+xx)*3+1];
+				cnt +=1.f;
 				if(xx)
 				{
+					cnt +=1.f;
 					sumR += row0[(x+xx)*3];
 					sumG += row0[(x+xx)*3+1];
 				}
@@ -5887,23 +5890,26 @@ void LibRaw::x3f_dpq_interpolate_af_sd(int xstart,int ystart, int xend, int yend
 			pixel00[0] = sumR/8.f;
 			pixel00[1] = sumG/8.f;
 
-			uint16_t* pixel0G = &row0[x*3+3]; // right pixel
 			if(scale == 2)
 			{
-				uint16_t* pixel1G = &row1[x*3+3]; // right pixel
+				uint16_t* pixel0B = &row0[x*3+3]; // right pixel
+				uint16_t* pixel1B = &row1[x*3+3]; // right pixel
 				float sumG0 = 0, sumG1 = 0.f;
+				float cnt = 0.f;
 				for(int xx = -scale; xx <= scale; xx+= scale)
 				{
 					sumG0 += row_minus1[(x+xx)*3+2];
-					sumG0 += row_plus[(x+xx)*3+2];
+					sumG1 += row_plus[(x+xx)*3+2];
+					cnt +=1.f;
 					if(xx)
 					{
 						sumG0 += row0[(x+xx)*3+2];
 						sumG1 += row1[(x+xx)*3+2];
+						cnt +=1.f;
 					}
 				}
-				pixel0G[2] = sumG0/5.f;
-				pixel1G[2] = sumG1/5.f;
+				pixel0B[2] = sumG0/cnt;
+				pixel1B[2] = sumG1/cnt;
 			}
 
 			//			uint16_t* pixel10 = &row1[x*3]; // Pixel below current
@@ -5988,11 +5994,23 @@ void LibRaw::x3f_load_raw()
 		  }
 		  else if(imgdata.sizes.raw_width == 5888 && imgdata.sizes.raw_height == 3776) // sd Quattro normal raw
 		  {
-			  x3f_dpq_interpolate_af_sd(216,464,imgdata.sizes.width+464,3312,16,32,2);
+			  x3f_dpq_interpolate_af_sd(216,464,imgdata.sizes.raw_width-1,3312,16,32,2);
 		  }
 		  else if(imgdata.sizes.raw_width == 6656 && imgdata.sizes.raw_height == 4480) // sd Quattro H normal raw
 		  {
-			  //x3f_dpq_interpolate_af_sd(232,592,imgdata.sizes.width+592,3888,16,32,2); // need another one!
+			  x3f_dpq_interpolate_af_sd(232,592,imgdata.sizes.raw_width-1,3888,16,32,2); 
+		  }
+		  else if(imgdata.sizes.raw_width == 3328 && imgdata.sizes.raw_height == 2240) // sd Quattro H half size
+		  {
+			  x3f_dpq_interpolate_af_sd(116,296,imgdata.sizes.raw_width-1,2200,8,16,1); 
+		  }
+		  else if(imgdata.sizes.raw_width == 5504 && imgdata.sizes.raw_height == 3680) // sd Quattro H APS-C raw
+		  {
+			  x3f_dpq_interpolate_af_sd(8,192,imgdata.sizes.raw_width-1,3185,16,32,2); 
+		  }
+		  else if(imgdata.sizes.raw_width == 2752 && imgdata.sizes.raw_height == 1840) // sd Quattro H APS-C half size
+		  {
+			  x3f_dpq_interpolate_af_sd(4, 96,imgdata.sizes.raw_width-1,1800,8,16,1); 
 		  }
 		  else if(imgdata.sizes.raw_width == 2944 && imgdata.sizes.raw_height == 1836) // dpN Quattro small raw
 		  {
@@ -6000,7 +6018,7 @@ void LibRaw::x3f_load_raw()
 		  }
 		  else if(imgdata.sizes.raw_width == 2944 && imgdata.sizes.raw_height == 1888) // sd Quattro small
 		  {
-			  x3f_dpq_interpolate_af_sd(108,232,imgdata.sizes.width+232,1656,8,16,1);
+			  x3f_dpq_interpolate_af_sd(108,232,imgdata.sizes.raw_width-1,1656,8,16,1);
 		  }
 	  }
 #endif
