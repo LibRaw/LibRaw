@@ -1729,6 +1729,11 @@ struct foveon_data_t
   // Sigma sd Quattro
   {"Sigma","sd Quattro",5888,3776,16383,204,76,5446,3624}, // full size
   {"Sigma","sd Quattro",2944,1888,16383,102,38,2723,1812}, // half size
+  // Sd Quattro H
+  {"Sigma","sd Quattro H",6656,4480,16383,224,160,6208,4160}, // full size
+  {"Sigma","sd Quattro H",3328,2240,16383,112,80,3104,2080}, // half size
+  {"Sigma","sd Quattro H",5504,3680,16383,0,4,5496,3668}, // full size
+  {"Sigma","sd Quattro H",2752,1840,16383,0,2,2748,1834}, // half size
 };
 const int foveon_count = sizeof(foveon_data)/sizeof(foveon_data[0]);
 
@@ -5628,7 +5633,10 @@ void LibRaw::parse_x3f()
   else
   {
 	  // No property list
-	  if(imgdata.sizes.raw_width == 5888 ||imgdata.sizes.raw_width == 2944 ) // dp2Q
+	  if(imgdata.sizes.raw_width == 5888 ||imgdata.sizes.raw_width == 2944 
+		  || imgdata.sizes.raw_width == 6656 ||imgdata.sizes.raw_width == 3328 	  
+		  || imgdata.sizes.raw_width == 5504 ||imgdata.sizes.raw_width == 2752 	  
+		  ) // Quattro
 	  {
 		  imgdata.idata.raw_count=1;
 		  load_raw = &LibRaw::x3f_load_raw;
@@ -5653,12 +5661,16 @@ void LibRaw::parse_x3f()
 		  }
 		  else if(fndsd)
 		  {
-			  snprintf(imgdata.idata.model,64,"sd Quattro");
+			  snprintf(imgdata.idata.model,64,"%s",fndsd);
 		  }
 		  else
 #endif
+		  if(imgdata.sizes.raw_width == 6656 ||imgdata.sizes.raw_width == 3328 )
+			strcpy (imgdata.idata.model, "sd Quattro H");
+		  else
 			strcpy (imgdata.idata.model, "dp2 Quattro");
 	  }
+	  //else
   }
   // Try to get thumbnail data
   LibRaw_thumbnail_formats format = LIBRAW_THUMBNAIL_UNKNOWN;
@@ -5977,6 +5989,10 @@ void LibRaw::x3f_load_raw()
 		  else if(imgdata.sizes.raw_width == 5888 && imgdata.sizes.raw_height == 3776) // sd Quattro normal raw
 		  {
 			  x3f_dpq_interpolate_af_sd(216,464,imgdata.sizes.width+464,3312,16,32,2);
+		  }
+		  else if(imgdata.sizes.raw_width == 6656 && imgdata.sizes.raw_height == 4480) // sd Quattro H normal raw
+		  {
+			  //x3f_dpq_interpolate_af_sd(232,592,imgdata.sizes.width+592,3888,16,32,2); // need another one!
 		  }
 		  else if(imgdata.sizes.raw_width == 2944 && imgdata.sizes.raw_height == 1836) // dpN Quattro small raw
 		  {
