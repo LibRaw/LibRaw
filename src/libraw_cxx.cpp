@@ -884,7 +884,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t* d_info)
   else if (load_raw == &LibRaw::x3f_load_raw )
     {
       d_info->decoder_name = "x3f_load_raw()";
-      d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC|LIBRAW_DECODER_FIXEDMAXC;
+      d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC|LIBRAW_DECODER_FIXEDMAXC | LIBRAW_DECODER_LEGACY_WITH_MARGINS ;
     }
   else if (load_raw == &LibRaw::pentax_4shot_load_raw )
   {
@@ -1756,7 +1756,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	if (!strcasecmp(imgdata.idata.make, "Canon")  && (load_raw == &LibRaw::canon_sraw_load_raw) && imgdata.sizes.raw_width>0)
 	{
 		float ratio = float(imgdata.sizes.raw_height) / float(imgdata.sizes.raw_width);
-
 		if((ratio < 0.57 || ratio > 0.75) && imgdata.makernotes.canon.SensorHeight>1 && imgdata.makernotes.canon.SensorWidth > 1)
 		{
 			imgdata.sizes.raw_width = imgdata.makernotes.canon.SensorWidth;
@@ -1776,12 +1775,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 			imgdata.sizes.top_margin = 8;
 			imgdata.sizes.iheight = imgdata.sizes.height = imgdata.sizes.raw_height - imgdata.sizes.top_margin;
 			libraw_internal_data.unpacker_data.load_flags |= 256;
-		}
-		else
-		{
-			imgdata.sizes.raw_width = imgdata.sizes.width;
-			imgdata.sizes.raw_height = imgdata.sizes.height;
-			imgdata.sizes.top_margin = imgdata.sizes.left_margin = 0;
 		}
 	}
 
@@ -2526,7 +2519,7 @@ int LibRaw::unpack(void)
             S.iwidth = S.width;
             S.iheight= S.height;
             IO.shrink = 0;
-            S.raw_pitch = S.raw_width*8;
+			S.raw_pitch =  (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY_WITH_MARGINS) ? S.raw_width*8 : S.width*8;
             // allocate image as temporary buffer, size
             imgdata.rawdata.raw_alloc = 0;
             imgdata.image = (ushort (*)[4]) calloc(unsigned(S.raw_width)*unsigned(S.raw_height),sizeof(*imgdata.image));
