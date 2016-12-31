@@ -1765,6 +1765,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 			imgdata.sizes.top_margin = imgdata.makernotes.canon.SensorTopBorder;
 			imgdata.sizes.iheight = imgdata.sizes.height = imgdata.makernotes.canon.SensorBottomBorder - imgdata.makernotes.canon.SensorTopBorder+1;
 			libraw_internal_data.unpacker_data.load_flags |= 256; // reset width/height in canon_sraw_load_raw()
+			imgdata.sizes.raw_pitch = 8*imgdata.sizes.raw_width;
 		}
 		else if(imgdata.sizes.raw_width == 4032 && imgdata.sizes.raw_height == 3402 && !strcasecmp(imgdata.idata.model, "EOS 80D")) // 80D hardcoded
 		{
@@ -1775,6 +1776,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 			imgdata.sizes.top_margin = 8;
 			imgdata.sizes.iheight = imgdata.sizes.height = imgdata.sizes.raw_height - imgdata.sizes.top_margin;
 			libraw_internal_data.unpacker_data.load_flags |= 256;
+			imgdata.sizes.raw_pitch = 8*imgdata.sizes.raw_width;
 		}
 	}
 
@@ -2519,7 +2521,8 @@ int LibRaw::unpack(void)
             S.iwidth = S.width;
             S.iheight= S.height;
             IO.shrink = 0;
-			S.raw_pitch =  (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY_WITH_MARGINS) ? S.raw_width*8 : S.width*8;
+			if(!S.raw_pitch)
+				S.raw_pitch = (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY_WITH_MARGINS) ? S.raw_width*8 : S.width*8;
             // allocate image as temporary buffer, size
             imgdata.rawdata.raw_alloc = 0;
             imgdata.image = (ushort (*)[4]) calloc(unsigned(S.raw_width)*unsigned(S.raw_height),sizeof(*imgdata.image));
