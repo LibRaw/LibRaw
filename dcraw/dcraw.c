@@ -13237,6 +13237,10 @@ int CLASS parse_tiff_ifd(int base)
       break;
     case 291:
     case 50712: /* LinearizationTable */
+#ifdef LIBRAW_LIBRARY_BUILD
+      tiff_ifd[ifd].lineartable_offset = ftell(ifp);
+      tiff_ifd[ifd].lineartable_len = len;
+#endif	
       linear_table(len);
       break;
     case 50713: /* BlackLevelRepeatDim */
@@ -18236,6 +18240,13 @@ dng_skip:
       memmove(&imgdata.color.dng_color[1], &tiff_ifd[iifd].dng_color[1], sizeof(tiff_ifd[iifd].dng_color[1]));
       memmove(&imgdata.color.dng_levels, &tiff_ifd[iifd].dng_levels, sizeof(tiff_ifd[iifd].dng_levels));
       meta_offset = tiff_ifd[iifd].opcode2_offset;
+      if(tiff_ifd[iifd].lineartable_offset && tiff_ifd[iifd].lineartable_len)
+	{
+	  INT64 pos = ftell(ifp);
+	  fseek(ifp,tiff_ifd[iifd].lineartable_offset,SEEK_SET);
+	  linear_table(tiff_ifd[iifd].lineartable_len);
+	  fseek(ifp,pos,SEEK_SET);
+	}
       // Need to add curve too
     }
     /* Copy DNG black level to  */

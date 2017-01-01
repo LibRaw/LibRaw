@@ -164,6 +164,8 @@ struct tiff_ifd_t
   float t_shutter;
   /* Per-IFD DNG fields */
   INT64 opcode2_offset;
+  INT64 lineartable_offset;
+  int lineartable_len;
   libraw_dng_color_t dng_color[2];
   libraw_dng_levels_t dng_levels;
 };
