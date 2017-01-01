@@ -4888,10 +4888,10 @@ void CLASS wavelet_denoise()
     }
     free(temp);
   } /* end omp parallel */
-    /* the following loops are hard to parallize, no idea yes,
-     * problem is wlast which is carrying dependency
-     * second part should be easyer, but did not yet get it right.
-     */
+  /* the following loops are hard to parallize, no idea yes,
+   * problem is wlast which is carrying dependency
+   * second part should be easyer, but did not yet get it right.
+   */
   if (filters && colors == 3)
   { /* pull G1 and G3 closer together */
     for (row = 0; row < 2; row++)
@@ -8905,7 +8905,7 @@ quit:
 }
 
 #else
-void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer) { /*placeholder */ }
+void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer) { /*placeholder */}
 #endif
 
 void CLASS parse_makernote(int base, int uptag)
@@ -11913,16 +11913,16 @@ int CLASS parse_tiff_ifd(int base)
       break;
     case 50713: /* BlackLevelRepeatDim */
 #ifdef LIBRAW_LIBRARY_BUILD
-      imgdata.color.dng_levels.dng_cblack[4] =
+      tiff_ifd[ifd].dng_levels.dng_cblack[4] =
 #endif
           cblack[4] = get2();
 #ifdef LIBRAW_LIBRARY_BUILD
-      imgdata.color.dng_levels.dng_cblack[5] =
+      tiff_ifd[ifd].dng_levels.dng_cblack[5] =
 #endif
           cblack[5] = get2();
       if (cblack[4] * cblack[5] > (sizeof(cblack) / sizeof(cblack[0]) - 6))
 #ifdef LIBRAW_LIBRARY_BUILD
-        imgdata.color.dng_levels.dng_cblack[4] = imgdata.color.dng_levels.dng_cblack[5] =
+        tiff_ifd[ifd].dng_levels.dng_cblack[4] = tiff_ifd[ifd].dng_levels.dng_cblack[5] =
 #endif
             cblack[4] = cblack[5] = 1;
       break;
@@ -12034,16 +12034,16 @@ int CLASS parse_tiff_ifd(int base)
       if (tiff_ifd[ifd].samples > 1 && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
       {
         for (i = 0; i < colors && i < 4 && i < len; i++)
-          imgdata.color.dng_levels.dng_cblack[i] = cblack[i] = getreal(type) + 0.5;
+          tiff_ifd[ifd].dng_levels.dng_cblack[i] = cblack[i] = getreal(type) + 0.5;
 
-        imgdata.color.dng_levels.dng_black = black = 0;
+        tiff_ifd[ifd].dng_levels.dng_black = black = 0;
       }
       else
 #endif
           if ((cblack[4] * cblack[5] < 2) && len == 1)
       {
 #ifdef LIBRAW_LIBRARY_BUILD
-        imgdata.color.dng_levels.dng_black =
+        tiff_ifd[ifd].dng_levels.dng_black =
 #endif
             black = getreal(type);
       }
@@ -12059,10 +12059,10 @@ int CLASS parse_tiff_ifd(int base)
         if (tag == 50714)
         {
           FORC(cblack[4] * cblack[5])
-          imgdata.color.dng_levels.dng_cblack[6 + c] = cblack[6 + c];
-          imgdata.color.dng_levels.dng_black = 0;
+          tiff_ifd[ifd].dng_levels.dng_cblack[6 + c] = cblack[6 + c];
+          tiff_ifd[ifd].dng_levels.dng_black = 0;
           FORC4
-          imgdata.color.dng_levels.dng_cblack[c] = 0;
+          tiff_ifd[ifd].dng_levels.dng_cblack[c] = 0;
         }
 #endif
       }
@@ -12073,18 +12073,18 @@ int CLASS parse_tiff_ifd(int base)
         num += getreal(type);
       black += num / len + 0.5;
 #ifdef LIBRAW_LIBRARY_BUILD
-      imgdata.color.dng_levels.dng_black += num / len + 0.5;
+      tiff_ifd[ifd].dng_levels.dng_black += num / len + 0.5;
 #endif
       break;
     case 50717: /* WhiteLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
-      imgdata.color.dng_levels.dng_whitelevel[0] =
+      tiff_ifd[ifd].dng_levels.dng_whitelevel[0] =
 #endif
           maximum = getint(type);
 #ifdef LIBRAW_LIBRARY_BUILD
       if (tiff_ifd[ifd].samples > 1) // Linear DNG case
         for (i = 1; i < colors && i < 4 && i < len; i++)
-          imgdata.color.dng_levels.dng_whitelevel[i] = getint(type);
+          tiff_ifd[ifd].dng_levels.dng_whitelevel[i] = getint(type);
 #endif
       break;
     case 50718: /* DefaultScale */
@@ -12095,10 +12095,10 @@ int CLASS parse_tiff_ifd(int base)
       break;
 #ifdef LIBRAW_LIBRARY_BUILD
     case 50778:
-      imgdata.color.dng_color[0].illuminant = get2();
+      tiff_ifd[ifd].dng_color[0].illuminant = get2();
       break;
     case 50779:
-      imgdata.color.dng_color[1].illuminant = get2();
+      tiff_ifd[ifd].dng_color[1].illuminant = get2();
       break;
 #endif
     case 50721: /* ColorMatrix1 */
@@ -12109,7 +12109,7 @@ int CLASS parse_tiff_ifd(int base)
       FORCC for (j = 0; j < 3; j++)
       {
 #ifdef LIBRAW_LIBRARY_BUILD
-        imgdata.color.dng_color[i].colormatrix[c][j] =
+        tiff_ifd[ifd].dng_color[i].colormatrix[c][j] =
 #endif
             cm[c][j] = getreal(type);
       }
@@ -12125,7 +12125,7 @@ int CLASS parse_tiff_ifd(int base)
         FORCC
         {
 #ifdef LIBRAW_LIBRARY_BUILD
-          imgdata.color.dng_color[i].forwardmatrix[j][c] =
+          tiff_ifd[ifd].dng_color[i].forwardmatrix[j][c] =
 #endif
               fm[j][c] = getreal(type);
         }
@@ -12140,7 +12140,7 @@ int CLASS parse_tiff_ifd(int base)
         FORCC
         {
 #ifdef LIBRAW_LIBRARY_BUILD
-          imgdata.color.dng_color[j].calibration[i][c] =
+          tiff_ifd[ifd].dng_color[j].calibration[i][c] =
 #endif
               cc[i][c] = getreal(type);
         }
@@ -12149,7 +12149,7 @@ int CLASS parse_tiff_ifd(int base)
       FORCC
       {
 #ifdef LIBRAW_LIBRARY_BUILD
-        imgdata.color.dng_levels.analogbalance[c] =
+        tiff_ifd[ifd].dng_levels.analogbalance[c] =
 #endif
             ab[c] = getreal(type);
       }
@@ -12237,6 +12237,9 @@ int CLASS parse_tiff_ifd(int base)
       black = 0;
       break;
     case 51009: /* OpcodeList2 */
+#ifdef LIBRAW_LIBRARY_BUILD
+      tiff_ifd[ifd].opcode2_offset =
+#endif	
       meta_offset = ftell(ifp);
       break;
     case 64772: /* Kodak P-series */
@@ -15029,6 +15032,10 @@ void CLASS identify()
   iso_speed = shutter = aperture = focal_len = unique_id = 0;
   tiff_nifds = 0;
   memset(tiff_ifd, 0, sizeof tiff_ifd);
+#ifdef LIBRAW_LIBRARY_BUILD
+  for(i = 0; i < LIBRAW_IFD_MAXCOUNT; i++)
+    tiff_ifd[i].dng_color[0].illuminant = tiff_ifd[i].dng_color[1].illuminant = 0xffff;
+#endif
   memset(gpsdata, 0, sizeof gpsdata);
   memset(cblack, 0, sizeof cblack);
   memset(white, 0, sizeof white);
@@ -16732,11 +16739,27 @@ dng_skip:
 #ifdef LIBRAW_LIBRARY_BUILD
   if (dng_version) /* Override black level by DNG tags */
   {
-    black = imgdata.color.dng_levels.dng_black;
-    int ll = LIM(0, (sizeof(cblack) / sizeof(cblack[0])),
-                 (sizeof(imgdata.color.dng_levels.dng_cblack) / sizeof(imgdata.color.dng_levels.dng_cblack[0])));
-    for (int i = 0; i < ll; i++)
-      cblack[i] = imgdata.color.dng_levels.dng_cblack[i];
+    /* copy DNG data from per-IFD field to color.dng */
+    int iifd = 0;
+    for (; iifd < tiff_nifds; iifd++)
+      if( tiff_ifd[iifd].offset == data_offset) // found
+    	break;
+
+    if(iifd < tiff_nifds)
+      {
+	memmove(&imgdata.color.dng_color[0],&tiff_ifd[iifd].dng_color[0],sizeof(tiff_ifd[iifd].dng_color[0]));
+	memmove(&imgdata.color.dng_color[1],&tiff_ifd[iifd].dng_color[1],sizeof(tiff_ifd[iifd].dng_color[1]));
+	memmove(&imgdata.color.dng_levels,&tiff_ifd[iifd].dng_levels,sizeof(tiff_ifd[iifd].dng_levels));
+	meta_offset = tiff_ifd[iifd].opcode2_offset;
+	// Need to add curve too
+      }
+	  /* Copy DNG black level to  */
+	maximum = imgdata.color.dng_levels.dng_whitelevel[0];
+	black = imgdata.color.dng_levels.dng_black;
+	int ll = LIM(0, (sizeof(cblack) / sizeof(cblack[0])),
+		     (sizeof(imgdata.color.dng_levels.dng_cblack) / sizeof(imgdata.color.dng_levels.dng_cblack[0])));
+	for (int i = 0; i < ll; i++)
+	  cblack[i] = imgdata.color.dng_levels.dng_cblack[i];
   }
 #endif
   /* Early reject for damaged images */

@@ -627,7 +627,7 @@ void LibRaw::recycle()
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
 
   for (int i = 0; i < 4; i++)
-    imgdata.color.dng_levels.analogbalance[i] = imgdata.color.dng_levels.analogbalance[i] = 1.0f;
+    imgdata.color.dng_levels.analogbalance[i] = 1.0f;
 
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);

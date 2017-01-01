@@ -162,6 +162,10 @@ struct tiff_ifd_t
   int *strip_offsets, strip_offsets_count;
   int *strip_byte_counts, strip_byte_counts_count;
   float t_shutter;
+  /* Per-IFD DNG fields */
+  INT64  opcode2_offset;
+  libraw_dng_color_t dng_color[2];
+  libraw_dng_levels_t dng_levels;
 };
 
 struct jhead

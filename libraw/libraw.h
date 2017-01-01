@@ -272,7 +272,7 @@ protected:
   LibRaw_TLS *tls;
   libraw_internal_data_t libraw_internal_data;
   decode first_decode[2048], *second_decode, *free_decode;
-  tiff_ifd_t tiff_ifd[10];
+  tiff_ifd_t tiff_ifd[LIBRAW_IFD_MAXCOUNT];
   libraw_memmgr memmgr;
   libraw_callbacks_t callbacks;
 

@@ -20,6 +20,8 @@ it under the terms of the one of two licenses as you choose:
 #define LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD 0.75
 #define LIBRAW_DEFAULT_AUTO_BRIGHTNESS_THRESHOLD 0.01
 
+#define LIBRAW_IFD_MAXCOUNT 10
+
 enum LibRaw_whitebalance_code
 {
   /*
