@@ -13567,8 +13567,8 @@ int CLASS parse_tiff_ifd(int base)
     case 51009: /* OpcodeList2 */
 #ifdef LIBRAW_LIBRARY_BUILD
       tiff_ifd[ifd].opcode2_offset =
-#endif	
-      meta_offset = ftell(ifp);
+#endif
+          meta_offset = ftell(ifp);
       break;
     case 64772: /* Kodak P-series */
       if (len < 13)
@@ -16518,7 +16518,7 @@ void CLASS identify()
   tiff_nifds = 0;
   memset(tiff_ifd, 0, sizeof tiff_ifd);
 #ifdef LIBRAW_LIBRARY_BUILD
-  for(i = 0; i < LIBRAW_IFD_MAXCOUNT; i++)
+  for (i = 0; i < LIBRAW_IFD_MAXCOUNT; i++)
     tiff_ifd[i].dng_color[0].illuminant = tiff_ifd[i].dng_color[1].illuminant = 0xffff;
 #endif
   memset(gpsdata, 0, sizeof gpsdata);
@@ -18227,24 +18227,24 @@ dng_skip:
     /* copy DNG data from per-IFD field to color.dng */
     int iifd = 0;
     for (; iifd < tiff_nifds; iifd++)
-      if( tiff_ifd[iifd].offset == data_offset) // found
-    	break;
+      if (tiff_ifd[iifd].offset == data_offset) // found
+        break;
 
-    if(iifd < tiff_nifds)
-      {
-	memmove(&imgdata.color.dng_color[0],&tiff_ifd[iifd].dng_color[0],sizeof(tiff_ifd[iifd].dng_color[0]));
-	memmove(&imgdata.color.dng_color[1],&tiff_ifd[iifd].dng_color[1],sizeof(tiff_ifd[iifd].dng_color[1]));
-	memmove(&imgdata.color.dng_levels,&tiff_ifd[iifd].dng_levels,sizeof(tiff_ifd[iifd].dng_levels));
-	meta_offset = tiff_ifd[iifd].opcode2_offset;
-	// Need to add curve too
-      }
-	  /* Copy DNG black level to  */
-	maximum = imgdata.color.dng_levels.dng_whitelevel[0];
-	black = imgdata.color.dng_levels.dng_black;
-	int ll = LIM(0, (sizeof(cblack) / sizeof(cblack[0])),
-		     (sizeof(imgdata.color.dng_levels.dng_cblack) / sizeof(imgdata.color.dng_levels.dng_cblack[0])));
-	for (int i = 0; i < ll; i++)
-	  cblack[i] = imgdata.color.dng_levels.dng_cblack[i];
+    if (iifd < tiff_nifds)
+    {
+      memmove(&imgdata.color.dng_color[0], &tiff_ifd[iifd].dng_color[0], sizeof(tiff_ifd[iifd].dng_color[0]));
+      memmove(&imgdata.color.dng_color[1], &tiff_ifd[iifd].dng_color[1], sizeof(tiff_ifd[iifd].dng_color[1]));
+      memmove(&imgdata.color.dng_levels, &tiff_ifd[iifd].dng_levels, sizeof(tiff_ifd[iifd].dng_levels));
+      meta_offset = tiff_ifd[iifd].opcode2_offset;
+      // Need to add curve too
+    }
+    /* Copy DNG black level to  */
+    maximum = imgdata.color.dng_levels.dng_whitelevel[0];
+    black = imgdata.color.dng_levels.dng_black;
+    int ll = LIM(0, (sizeof(cblack) / sizeof(cblack[0])),
+                 (sizeof(imgdata.color.dng_levels.dng_cblack) / sizeof(imgdata.color.dng_levels.dng_cblack[0])));
+    for (int i = 0; i < ll; i++)
+      cblack[i] = imgdata.color.dng_levels.dng_cblack[i];
   }
 #endif
   /* Early reject for damaged images */
