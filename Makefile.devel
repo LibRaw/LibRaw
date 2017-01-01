@@ -64,7 +64,7 @@ sources: ${DCRAW_GEN} Makefile.devel ${PP}
 library: lib/libraw.a lib/libraw_r.a
 
 format:  dcraw/dcraw.c ${LR_INCLUDES} src/libraw_cxx.cpp
-	clang-format-devel -i -style=file src/*.cpp dcraw/dcraw.c libraw/*.h
+	clang-format-devel -i -style=file src/*.cpp dcraw/dcraw.c libraw/*.h samples/*.cpp samples/*.c
 
 all_samples: bin/raw-identify bin/simple_dcraw  bin/dcraw_emu bin/dcraw_half bin/half_mt bin/mem_image \
         bin/unprocessed_raw bin/4channels bin/multirender_test bin/postprocessing_benchmark
