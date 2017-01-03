@@ -14703,6 +14703,8 @@ void CLASS adobe_coeff (const char *t_make, const char *t_model
       { 13801,-3390,-1016,5535,3802,877,1848,4245,3730 } },
     { "Sigma dp3 Quattro", 2047, 0,
       { 13801,-3390,-1016,5535,3802,877,1848,4245,3730 } },
+    { "Sigma sd Quattro H", 256, 0, 
+      {1295,108,-311, 256,828,-65,-28,750,254}}, /* temp, same as sd Quattro */
     { "Sigma sd Quattro", 2047, 0,
       {1295,108,-311, 256,828,-65,-28,750,254}}, /* temp */
     { "Sigma SD9", 15, 4095,			/* LibRaw */
@@ -15820,7 +15822,9 @@ void CLASS identify()
     top_margin = filters = 0;
     strcpy (model,"C603");
   }
-  if (!strcmp(make, "Sony") && raw_width > 3888 && !black && !cblack[0])
+  /* No BL fallback for Sony A350 */
+  if (!strcmp(make, "Sony") && strcmp(model,"DSLR-A350")
+      && raw_width > 3888 && !black && !cblack[0])
     black = 128 << (tiff_bps - 12);
 
   if (is_foveon) {
