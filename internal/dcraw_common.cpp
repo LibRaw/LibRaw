@@ -14492,9 +14492,8 @@ void CLASS identify()
     top_margin = filters = 0;
     strcpy (model,"C603");
   }
-  /* No BL fallback for Sony A350 */
-  if (!strcmp(make, "Sony") && strcmp(model,"DSLR-A350")
-      && raw_width > 3888 && !black && !cblack[0])
+
+  if (!strcmp(make, "Sony") && raw_width > 3888 && !black && !cblack[0])
     black = 128 << (tiff_bps - 12);
 
   if (is_foveon) {
@@ -15099,6 +15098,10 @@ konica_400z:
     order = 0x4d4d;
   } else if (!strncmp(make,"Sony",4) && raw_width == 4288) {
     width -= 32;
+  }  else if (!strcmp(make, "Sony") && raw_width == 4600) {
+    if (!strcmp(model, "DSLR-A350"))
+      height -= 4;
+    black = 0;
   } else if (!strncmp(make,"Sony",4) && raw_width == 4928) {
     if (height < 3280) width -= 8;
   } else if (!strncmp(make,"Sony",4) && raw_width == 5504) { // ILCE-3000//5000
@@ -15111,6 +15114,10 @@ konica_400z:
     width -= 30;
   } else if (!strncmp(make,"Sony",4) && raw_width == 8000) {
     width -= 32;
+    if (!strncmp(model, "DSC", 3)) {
+      tiff_bps = 14;
+      load_raw = &CLASS unpacked_load_raw;
+    }
   } else if (!strcmp(model,"DSLR-A100")) {
     if (width == 3880) {
       height--;
@@ -15122,8 +15129,6 @@ konica_400z:
       load_flags = 2;
     }
     filters = 0x61616161;
-  } else if (!strcmp(model,"DSLR-A350")) {
-    height -= 4;
   } else if (!strcmp(model,"PIXL")) {
     height -= top_margin = 4;
     width -= left_margin = 32;
