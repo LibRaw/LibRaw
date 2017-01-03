@@ -18268,11 +18268,6 @@ void CLASS identify()
   else if (!strncmp(make, "Sony", 4) && raw_width == 8000)
   {
     width -= 32;
-    if (!strncmp(model, "DSC", 3))
-    {
-      tiff_bps = 14;
-      load_raw = &CLASS unpacked_load_raw;
-    }
   }
   else if (!strcmp(model, "DSLR-A100"))
   {
