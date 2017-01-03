@@ -11912,7 +11912,7 @@ int CLASS parse_tiff_ifd(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
       tiff_ifd[ifd].lineartable_offset = ftell(ifp);
       tiff_ifd[ifd].lineartable_len = len;
-#endif	
+#endif
       linear_table(len);
       break;
     case 50713: /* BlackLevelRepeatDim */
@@ -13668,7 +13668,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
 #endif
                        )
 {
-// clang-format off
+  // clang-format off
   static const struct
   {
     const char *prefix;
@@ -14867,7 +14867,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Sony SLT-A99", 0, 0,
       { 6344,-1612,-462,-4863,12477,2681,-865,1786,6899 } },
   };
-// clang-format on
+  // clang-format on
 
   double cam_xyz[4][3];
   char name[130];
@@ -15933,8 +15933,7 @@ void CLASS identify()
     top_margin = filters = 0;
     strcpy(model, "C603");
   }
-  if (!strcmp(make, "Sony") && strcmp(model, "DSLR-A350")
-      && raw_width > 3888 && !black && !cblack[0])
+  if (!strcmp(make, "Sony") && raw_width > 3888 && !black && !cblack[0])
     black = 128 << (tiff_bps - 12);
 
   if (is_foveon)
@@ -16756,6 +16755,12 @@ void CLASS identify()
   {
     width -= 32;
   }
+  else if (!strcmp(make, "Sony") && raw_width == 4600)
+  {
+    if (!strcmp(model, "DSLR-A350"))
+      height -= 4;
+    black = 0;
+  }
   else if (!strncmp(make, "Sony", 4) && raw_width == 4928)
   {
     if (height < 3280)
@@ -16778,6 +16783,11 @@ void CLASS identify()
   else if (!strncmp(make, "Sony", 4) && raw_width == 8000)
   {
     width -= 32;
+    if (!strncmp(model, "DSC", 3))
+    {
+      tiff_bps = 14;
+      load_raw = &CLASS unpacked_load_raw;
+    }
   }
   else if (!strcmp(model, "DSLR-A100"))
   {
@@ -16794,10 +16804,6 @@ void CLASS identify()
       load_flags = 2;
     }
     filters = 0x61616161;
-  }
-  else if (!strcmp(model, "DSLR-A350"))
-  {
-    height -= 4;
   }
   else if (!strcmp(model, "PIXL"))
   {
@@ -17051,13 +17057,13 @@ dng_skip:
       memmove(&imgdata.color.dng_color[1], &tiff_ifd[iifd].dng_color[1], sizeof(tiff_ifd[iifd].dng_color[1]));
       memmove(&imgdata.color.dng_levels, &tiff_ifd[iifd].dng_levels, sizeof(tiff_ifd[iifd].dng_levels));
       meta_offset = tiff_ifd[iifd].opcode2_offset;
-      if(tiff_ifd[iifd].lineartable_offset && tiff_ifd[iifd].lineartable_len)
-	{
-	  INT64 pos = ftell(ifp);
-	  fseek(ifp,tiff_ifd[iifd].lineartable_offset,SEEK_SET);
-	  linear_table(tiff_ifd[iifd].lineartable_len);
-	  fseek(ifp,pos,SEEK_SET);
-	}
+      if (tiff_ifd[iifd].lineartable_offset && tiff_ifd[iifd].lineartable_len)
+      {
+        INT64 pos = ftell(ifp);
+        fseek(ifp, tiff_ifd[iifd].lineartable_offset, SEEK_SET);
+        linear_table(tiff_ifd[iifd].lineartable_len);
+        fseek(ifp, pos, SEEK_SET);
+      }
       // Need to add curve too
     }
     /* Copy DNG black level to  */
