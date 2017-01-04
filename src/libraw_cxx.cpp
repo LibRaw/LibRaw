@@ -2553,7 +2553,7 @@ int LibRaw::unpack(void)
     imgdata.rawdata.float3_image = 0;
 
 #ifdef USE_DNGSDK
-    if (imgdata.idata.dng_version && dnghost && valid_for_dngsdk() && load_raw != &LibRaw::pentax_4shot_load_raw)
+    if (imgdata.idata.dng_version && dnghost && imgdata.idata.raw_count == 1 && valid_for_dngsdk() && load_raw != &LibRaw::pentax_4shot_load_raw)
     {
       int rr = try_dngsdk();
     }
@@ -2569,7 +2569,8 @@ int LibRaw::unpack(void)
 
       if (imgdata.idata.raw_count > 1)
         rawspeed_enabled = 0;
-
+	  if(!strncasecmp(imgdata.idata.software,"Magic",5))
+		  rawspeed_enabled = 0;
       // Disable rawspeed for double-sized Oly files
       if (!strncasecmp(imgdata.idata.make, "Olympus", 7) &&
           ((imgdata.sizes.raw_width > 6000) || !strncasecmp(imgdata.idata.model, "SH-2", 4) ||
