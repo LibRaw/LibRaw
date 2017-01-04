@@ -1,6 +1,7 @@
 all: library all_samples
 
-CFLAGS=-arch i386 -arch x86_64 -O3  -I. -w
+#CFLAGS=-arch i386 -arch x86_64 -O3  -I. -w
+CFLAGS=-O3  -I. -w
 CC=gcc
 CXX=g++
 

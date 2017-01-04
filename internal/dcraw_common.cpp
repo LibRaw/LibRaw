@@ -6901,7 +6901,8 @@ void CLASS Canon_WBCTpresets(short WBCTversion)
   else if ((WBCTversion == 2) && ((unique_id == 0x80000374) || // M3
                                   (unique_id == 0x80000384) || // M10
                                   (unique_id == 0x80000394) || // M5
-                                  (unique_id == 0x03970000)))  // G7 X Mark II
+                                  (unique_id == 0x03970000) || // G7 X Mark II
+                                  (unique_id == 0x04100000)))  // G9 X Mark II
     for (int i = 0; i < 15; i++)                               // tint, offset, as shot R, as shot B, CСT
     {
       fseek(ifp, 2, SEEK_CUR);
@@ -7240,6 +7241,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       {
         fseek(ifp, save1 + (0x56 << 1), SEEK_SET);
         if ((unique_id == 0x03970000) || // G7 X Mark II
+            (unique_id == 0x04100000) || // G9 X Mark II
             (unique_id == 0x80000394))   // EOS M5
         {
           fseek(ifp, 18, SEEK_CUR);
@@ -13825,6 +13827,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Canon PowerShot G7 X Mark II", 0, 0,
       { 9602,-3823,-937,-2984,11495,1675,-407,1415,5049 } },
     { "Canon PowerShot G7 X", 0, 0,
+      { 9602,-3823,-937,-2984,11495,1675,-407,1415,5049 } },
+    { "Canon PowerShot G9 X Mark II", 0, 0, /* temp */
       { 9602,-3823,-937,-2984,11495,1675,-407,1415,5049 } },
     { "Canon PowerShot G9 X",0, 0,
       { 9602,-3823,-937,-2984,11495,1675,-407,1415,5049 } },
