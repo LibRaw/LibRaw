@@ -14616,6 +14616,16 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8238,-3244,-679,-3921,11814,2384,-836,2022,5852 } },
     { "Panasonic DMC-GX1", -15, 0,
       { 6763,-1919,-863,-3868,11515,2684,-1216,2387,5879 } },
+
+    { "Panasonic DMC-GX850", -15, 0,  /* temp markets: GX850 GX800 GF9 */
+      { 7771,-3020,-629,4029,11950,2345,-821,1977,6119 } },
+    { "Panasonic DMC-GX800", -15, 0,  /* temp markets: GX850 GX800 GF9 */
+      { 7771,-3020,-629,4029,11950,2345,-821,1977,6119 } },
+    { "Panasonic DC-GX800", -15, 0,  /* temp markets: GX850 GX800 GF9 */
+      { 7771,-3020,-629,4029,11950,2345,-821,1977,6119 } },
+    { "Panasonic DMC-GF9", -15, 0,  /* temp markets: GX850 GX800 GF9 */
+      { 7771,-3020,-629,4029,11950,2345,-821,1977,6119 } },
+
     { "Panasonic DMC-GX85", -15, 0,  /* markets: GX85 GX80 GX7MK2 */
       { 7771,-3020,-629,4029,11950,2345,-821,1977,6119 } },
     { "Panasonic DMC-GX80", -15, 0,  /* markets: GX85 GX80 GX7MK2 */
