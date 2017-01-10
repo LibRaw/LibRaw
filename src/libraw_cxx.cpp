@@ -2553,7 +2553,8 @@ int LibRaw::unpack(void)
     imgdata.rawdata.float3_image = 0;
 
 #ifdef USE_DNGSDK
-    if (imgdata.idata.dng_version && dnghost && imgdata.idata.raw_count == 1 && valid_for_dngsdk() && load_raw != &LibRaw::pentax_4shot_load_raw)
+    if (imgdata.idata.dng_version && dnghost && imgdata.idata.raw_count == 1 && valid_for_dngsdk() &&
+        load_raw != &LibRaw::pentax_4shot_load_raw)
     {
       int rr = try_dngsdk();
     }
@@ -2569,8 +2570,8 @@ int LibRaw::unpack(void)
 
       if (imgdata.idata.raw_count > 1)
         rawspeed_enabled = 0;
-	  if(!strncasecmp(imgdata.idata.software,"Magic",5))
-		  rawspeed_enabled = 0;
+      if (!strncasecmp(imgdata.idata.software, "Magic", 5))
+        rawspeed_enabled = 0;
       // Disable rawspeed for double-sized Oly files
       if (!strncasecmp(imgdata.idata.make, "Olympus", 7) &&
           ((imgdata.sizes.raw_width > 6000) || !strncasecmp(imgdata.idata.model, "SH-2", 4) ||
@@ -5209,6 +5210,7 @@ static const char *static_camera_list[] = {
 	"Nikon D5200",
 	"Nikon D5300",
 	"Nikon D5500",
+	"Nikon D5600",
 	"Nikon D7000",
 	"Nikon D7100",
 	"Nikon D7200",
@@ -5372,6 +5374,7 @@ static const char *static_camera_list[] = {
 	"Panasonic DMC-GX7",
 	"Panasonic DMC-GX8",
 	"Panasonic DMC-GX80/85",
+	"Panasonic DMC-GX800/850/GF9",
 	"Panasonic DMC-L1",
 	"Panasonic DMC-L10",
 	"Panasonic DMC-LC1",
