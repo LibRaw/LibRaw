@@ -15953,8 +15953,14 @@ void CLASS identify()
     top_margin = filters = 0;
     strcpy(model, "C603");
   }
+#ifndef LIBRAW_LIBRARY_BUILD
   if (!strcmp(make, "Sony") && raw_width > 3888 && !black && !cblack[0])
     black = 128 << (tiff_bps - 12);
+#else
+  /* Always 512 for arw2_load_raw */
+  if (!strcmp(make, "Sony") && raw_width > 3888 && !black && !cblack[0])
+    black = 128 << (load_raw == &LibRaw::sony_arw2_load_raw) ? 4 : (tiff_bps - 12);
+#endif
 
   if (is_foveon)
   {

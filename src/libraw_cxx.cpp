@@ -1870,8 +1870,9 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           imgdata.sizes.top_margin = newtm;
           imgdata.sizes.width -= (newlm - imgdata.sizes.left_margin);
           imgdata.sizes.left_margin = newlm;
-          for (int c = 0; c < 36; c++)
-            imgdata.idata.xtrans[0][c] = imgdata.idata.xtrans_abs[0][c];
+          for (int c1 = 0; c1 < 6; c1++)
+            for (int c2 = 0; c2 < 6; c2++)
+              imgdata.idata.xtrans[c1][c2] = imgdata.idata.xtrans_abs[c1][c2];
         }
       }
     }
