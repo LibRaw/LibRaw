@@ -10974,6 +10974,7 @@ void CLASS parse_kodak_ifd(int base)
   int i, c, wbi = -2;
   float mul[3] = {1, 1, 1}, num;
   static const int wbtag[] = {64037, 64040, 64039, 64041, -1, -1, 64042};
+//  int a_blck = 0;
 
   entries = get2();
   if (entries > 1024)
@@ -11000,6 +11001,9 @@ void CLASS parse_kodak_ifd(int base)
       FORC3 cam_mul[c] = 2048.0 / fMAX(1.0f, get2());
       wbi = -2;
     }
+
+    if ((tag == 0x03ef) && (!strcmp(model, "EOS D2000C"))) black = get2();
+    if ((tag == 0x03f0) && (!strcmp(model, "EOS D2000C"))) black = (black + get2()) / 2;
 
     if (tag == 0x0848)
       Kodak_WB_0x08tags(LIBRAW_WBI_Daylight, type);
@@ -16093,7 +16097,6 @@ void CLASS identify()
   else if (!strcmp(model, "EOS D2000C"))
   {
     filters = 0x61616161;
-    black = curve[200];
   }
   else if (!strcmp(model, "D1"))
   {
