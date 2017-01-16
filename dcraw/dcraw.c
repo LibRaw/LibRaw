@@ -17454,7 +17454,7 @@ void CLASS identify()
 #else
   /* Always 512 for arw2_load_raw */
   if (!strcmp(make, "Sony") && raw_width > 3888 && !black && !cblack[0])
-    black = 128 << ((load_raw == &LibRaw::sony_arw2_load_raw) ? 4 : (tiff_bps - 12)i);
+   black = (load_raw == &LibRaw::sony_arw2_load_raw) ? 512 :( 128 << (tiff_bps - 12));
 #endif
 
   if (is_foveon)
