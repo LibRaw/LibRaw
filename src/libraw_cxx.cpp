@@ -3837,6 +3837,10 @@ void LibRaw::kodak_thumb_loader()
 
   // from write_ppm_tiff - copy pixels into bitmap
 
+  int s_flip = imgdata.sizes.flip;
+  if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_NO_ROTATE_FOR_KODAK_THUMBNAILS)
+	imgdata.sizes.flip = 0;
+
   S.iheight = S.height;
   S.iwidth = S.width;
   if (S.flip & 4)
@@ -3869,6 +3873,9 @@ void LibRaw::kodak_thumb_loader()
   // restore variables
   free(imgdata.image);
   imgdata.image = s_image;
+
+  if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_NO_ROTATE_FOR_KODAK_THUMBNAILS)
+	  imgdata.sizes.flip = s_flip;
 
   T.twidth = S.width;
   S.width = s_width;
