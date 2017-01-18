@@ -9956,11 +9956,13 @@ void CLASS parse_makernote(int base, int uptag)
       FORC3 cam_mul[(c << 1 | c >> 1) & 3] = getreal(type);
     if (tag == 0xd && type == 7 && get2() == 0xaaaa)
     {
+#if 0 /* Canon rotation data is handled by EXIF.Orientation */
       for (c = i = 2; (ushort)c != 0xbbbb && i < len; i++)
         c = c << 8 | fgetc(ifp);
       while ((i += 4) < len - 5)
         if (get4() == 257 && (i = len) && (c = (get4(), fgetc(ifp))) < 3)
           flip = "065"[c] - '0';
+#endif
     }
 
 #ifndef LIBRAW_LIBRARY_BUILD
@@ -15969,7 +15971,7 @@ void CLASS identify()
 #else
   /* Always 512 for arw2_load_raw */
   if (!strcmp(make, "Sony") && raw_width > 3888 && !black && !cblack[0])
-   black = (load_raw == &LibRaw::sony_arw2_load_raw) ? 512 :( 128 << (tiff_bps - 12));
+    black = (load_raw == &LibRaw::sony_arw2_load_raw) ? 512 : (128 << (tiff_bps - 12));
 #endif
 
   if (is_foveon)
