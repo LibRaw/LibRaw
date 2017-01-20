@@ -17805,6 +17805,11 @@ void CLASS identify()
       left_margin = 0;
       filters = 0x16161616;
     }
+    if (!strcmp(model, "GFX 50S"))
+    {
+      left_margin = 0;
+      top_margin = 0;
+    }
     if (!strcmp(model, "S5500"))
     {
       height -= (top_margin = 6);
