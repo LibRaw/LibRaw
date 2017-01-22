@@ -12076,8 +12076,11 @@ void CLASS parse_fuji (int offset)
 
 // IB start
 #ifdef LIBRAW_LIBRARY_BUILD
-    } else if (tag == 0x9650) {
-      imgdata.makernotes.fuji.FujiExpoMidPointShift = ((short)get2()) / fMAX(1.0f,get2());
+    else if (tag == 0x9650)
+    {
+      short a = (short)get2();
+      float b =fMAX(1.0f, get2());
+      imgdata.makernotes.fuji.FujiExpoMidPointShift = a / b;
     } else if (tag == 0x2100) {
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c ^ 1] = get2();
     } else if (tag == 0x2200) {
