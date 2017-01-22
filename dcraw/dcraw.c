@@ -14716,7 +14716,9 @@ void CLASS parse_fuji(int offset)
     }
     else if (tag == 0x9650)
     {
-      imgdata.makernotes.fuji.FujiExpoMidPointShift = ((short)get2()) / fMAX(1.0f, get2());
+      short a = (short)get2();
+      float b =fMAX(1.0f, get2());
+      imgdata.makernotes.fuji.FujiExpoMidPointShift = a / b;
     }
     else if (tag == 0x2100)
     {
