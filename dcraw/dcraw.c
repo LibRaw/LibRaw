@@ -13262,7 +13262,7 @@ void CLASS parse_fuji (int offset)
       FORC(36) xtrans_abs[0][35-c] = fgetc(ifp) & 3;
     } else if (tag == 0x2ff0) {
       FORC4 cam_mul[c ^ 1] = get2();
-
+    }
 // IB start
 #ifdef LIBRAW_LIBRARY_BUILD
     else if (tag == 0x9650)
@@ -13284,10 +13284,10 @@ void CLASS parse_fuji (int offset)
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][c ^ 1] = get2();
     } else if (tag == 0x2400) {
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c ^ 1] = get2();
+    }
 #endif
 // IB end
-
-    } else if (tag == 0xc000) {
+    else if (tag == 0xc000) {
       c = order;
       order = 0x4949;
       if ((tag = get4()) > 10000) tag = get4();
