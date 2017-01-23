@@ -14717,7 +14717,7 @@ void CLASS parse_fuji(int offset)
     else if (tag == 0x9650)
     {
       short a = (short)get2();
-      float b =fMAX(1.0f, get2());
+      float b = fMAX(1.0f, get2());
       imgdata.makernotes.fuji.FujiExpoMidPointShift = a / b;
     }
     else if (tag == 0x2100)
@@ -16858,7 +16858,11 @@ void CLASS identify()
   memset(tiff_ifd, 0, sizeof tiff_ifd);
 #ifdef LIBRAW_LIBRARY_BUILD
   for (i = 0; i < LIBRAW_IFD_MAXCOUNT; i++)
+  {
     tiff_ifd[i].dng_color[0].illuminant = tiff_ifd[i].dng_color[1].illuminant = 0xffff;
+    for (int c = 0; c < 4; c++)
+      tiff_ifd[i].dng_levels.analogbalance[c] = 1.0f;
+  }
 #endif
   memset(gpsdata, 0, sizeof gpsdata);
   memset(cblack, 0, sizeof cblack);
