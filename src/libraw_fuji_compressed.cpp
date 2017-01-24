@@ -191,7 +191,7 @@ void LibRaw::init_fuji_block(struct fuji_compressed_block *info, const struct fu
   merror(info->linealloc, "init_fuji_block()");
 
   INT64 fsize = libraw_internal_data.internal_data.input->size();
-  info->max_read_size = _min(unsigned(fsize - raw_offset), dsize + 16); // Data size may be incorrect?
+  info->max_read_size = _min(unsigned(fsize - raw_offset), dsize); // Data size may be incorrect?
   info->fillbytes = 1;
 
   info->input = libraw_internal_data.internal_data.input;
