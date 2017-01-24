@@ -262,13 +262,14 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void ahd_interpolate_combine_homogeneous_pixels(int top, int left, ushort (*rgb)[TS][TS][3], char (*homogeneity_map)[TS][2]);
 
 #undef TS
-
-	void parse_xtrans_header();
-	void xtrans_compressed_load_raw();
-	void init_xtrans(struct xtrans_params* info);
-	void init_xtrans_block(struct xtrans_block* info, const struct xtrans_params *params, INT64 raw_offset, unsigned dsize);
-	void copy_line_to_xtrans(struct xtrans_block* info, int cur_line, int cur_block, int cur_block_width);
-	void xtrans_decode_block(struct xtrans_block* info, const struct xtrans_params * params, int cur_line);
+	void init_fuji_compr(struct fuji_compressed_params* info);
+	void init_fuji_block(struct fuji_compressed_block* info, const struct fuji_compressed_params *params, INT64 raw_offset, unsigned dsize);
+	void copy_line_to_xtrans(struct fuji_compressed_block* info, int cur_line, int cur_block, int cur_block_width);
+	void copy_line_to_bayer(struct fuji_compressed_block* info, int cur_line, int cur_block, int cur_block_width);
+	void xtrans_decode_block(struct fuji_compressed_block* info, const struct fuji_compressed_params *params, int cur_line);
+	void fuji_bayer_decode_block(struct fuji_compressed_block* info, const struct fuji_compressed_params *params, int cur_line);
+	void fuji_compressed_load_raw();
+	void parse_fuji_compressed_header();
 
 // LibRaw demosaic packs  functions
 // AMaZe

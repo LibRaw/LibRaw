@@ -242,8 +242,8 @@ protected:
   virtual void scale_colors_loop(float scale_mul[4]);
 
   /* Fujifilm compressed decoder public interface (to make parallel decoder) */
-  virtual void xtrans_decode_loop(const struct xtrans_params *common_info, int count, INT64 *offsets, unsigned *sizes);
-  void xtrans_decode_strip(const struct xtrans_params *info_common, int cur_block, INT64 raw_offset, unsigned size);
+  virtual void fuji_decode_loop(const struct fuji_compressed_params* common_info, int count, INT64* offsets, unsigned *sizes);
+  void fuji_decode_strip(const struct fuji_compressed_params* info_common, int cur_block, INT64 raw_offset, unsigned size);
 
   int FCF(int row, int col)
   {

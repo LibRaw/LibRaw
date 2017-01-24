@@ -631,7 +631,7 @@ typedef struct
   void *parent_class;
 } libraw_data_t;
 
-struct xtrans_params
+struct fuji_compressed_params
 {
   char *q_table;  /* quantization table */
   int q_point[5]; /* quantization points */

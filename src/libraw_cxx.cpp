@@ -70,7 +70,7 @@ typedef unsigned __int64 uint64_t;
 #include "dng_info.h"
 #endif
 
-#include "libraw_xtrans_compressed.cpp"
+#include "libraw_fuji_compressed.cpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -699,9 +699,9 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
     d_info->decoder_name = "canon_600_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC;
   }
-  else if (load_raw == &LibRaw::xtrans_compressed_load_raw)
+  else if (load_raw == &LibRaw::fuji_compressed_load_raw)
   {
-    d_info->decoder_name = "xtrans_compressed_load_raw()";
+    d_info->decoder_name = "fuji_compressed_load_raw()";
   }
   else if (load_raw == &LibRaw::canon_load_raw)
   {
@@ -1857,8 +1857,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         (load_raw == &LibRaw::unpacked_load_raw))
     {
       if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 2 != libraw_internal_data.unpacker_data.data_size)
-        parse_xtrans_header();
-
+        parse_fuji_compressed_header();
       if (imgdata.idata.filters == 9)
       {
         // Adjust top/left margins for X-Trans
