@@ -17702,6 +17702,11 @@ void CLASS identify()
     if (model[9] == '7' && (iso_speed >= 400 || iso_speed == 0) && !strstr(software, "V1.2"))
       black = 255;
   }
+  else if (!strncmp(model, "COOLPIX B700", 12))
+  {
+    load_flags = 24;
+    black = 200;
+  }
   else if (!strncmp(model, "1 ", 2))
   {
     height -= 2;
