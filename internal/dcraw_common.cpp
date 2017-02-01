@@ -7395,6 +7395,7 @@ void CLASS setPentaxBodyFeatures(unsigned id)
   case 0x13024:
   case 0x1309c:
   case 0x13222:
+  case 0x1322c:
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Pentax_K;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Pentax_K;
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -13993,7 +13994,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Fujifilm X100S", 0, 0,
       { 10592,-4262,-1008,-3514,11355,2465,-870,2025,6386 } },
     { "Fujifilm X100F", 0, 0,
-      {11434,-4948,-1210,-3746,12042,1903,-666,1479,5235}}, 
+      {11434,-4948,-1210,-3746,12042,1903,-666,1479,5235}},
     { "Fujifilm X100T", 0, 0,
       { 10592,-4262,-1008,-3514,11355,2465,-870,2025,6386 } },
     { "Fujifilm X100", 0, 0,
@@ -14480,6 +14481,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       {8766, -3149, -747, -3976, 11943, 2292, -517, 1259, 5552 }},
     { "Pentax K-7", 0, 0,
       { 9142,-2947,-678,-8648,16967,1663,-2224,2898,8615 } },
+    { "Pentax KP", 0, 0,  /* temp */
+      { 8626,-2607,-1155,-3995,12301,1881,-1039,1822,6925 } },
     { "Pentax K-S1", 0, 0,
       { 8512,-3211,-787,-4167,11966,2487,-638,1288,6054 } },
     { "Pentax K-S2", 0, 0,
