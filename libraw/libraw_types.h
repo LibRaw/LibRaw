@@ -28,24 +28,24 @@ it under the terms of the one of two licenses as you choose:
 #include <stdio.h>
 
 #if defined(_WIN32)
-#if defined (_MSC_VER)  && (_MSC_VER <=1500)
-typedef   signed __int8   int8_t;
-typedef unsigned __int8   uint8_t;
-typedef   signed __int16  int16_t;
-typedef unsigned __int16  uint16_t;
-typedef   signed __int32  int32_t;
-typedef unsigned __int32  uint32_t;
-typedef   signed __int64  int64_t;
-typedef unsigned __int64  uint64_t;
+#if defined(_MSC_VER) && (_MSC_VER <= 1500)
+typedef signed __int8 int8_t;
+typedef unsigned __int8 uint8_t;
+typedef signed __int16 int16_t;
+typedef unsigned __int16 uint16_t;
+typedef signed __int32 int32_t;
+typedef unsigned __int32 uint32_t;
+typedef signed __int64 int64_t;
+typedef unsigned __int64 uint64_t;
 #else
 #include <stdint.h>
-#endif // _WIN32
+#endif /* _WIN32 */
 #include <sys/types.h>
 #else
 #include <inttypes.h>
 #endif
 
-#if defined (_OPENMP)
+#if defined(_OPENMP)
 
 #if defined(WIN32)
 #if defined(_MSC_VER) && (_MSC_VER >= 1600 || (_MSC_VER == 1500 && _MSC_FULL_VER >= 150030729))
