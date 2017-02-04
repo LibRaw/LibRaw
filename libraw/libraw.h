@@ -33,10 +33,6 @@ it under the terms of the one of two licenses as you choose:
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined(_WIN32) && defined(__MINGW32__)
-#include <stdint.h>
-#endif
-
 #include "libraw_datastream.h"
 #include "libraw_types.h"
 #include "libraw_const.h"
