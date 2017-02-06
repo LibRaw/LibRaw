@@ -13665,7 +13665,8 @@ int CLASS parse_tiff(int base)
 
 void CLASS apply_tiff()
 {
-  int max_samp = 0, ties = 0, os, ns, raw = -1, thm = -1, i;
+  int max_samp = 0, ties = 0, raw = -1, thm = -1, i;
+  unsigned long long ns,os;
   struct jhead jh;
 
   thumb_misc = 16;
