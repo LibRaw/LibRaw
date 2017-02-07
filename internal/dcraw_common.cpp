@@ -2402,16 +2402,17 @@ void CLASS unpacked_load_raw()
   while (1 << ++bits < maximum)
     ;
   read_shorts(raw_image, raw_width * raw_height);
-  for (row = 0; row < raw_height; row++)
-  {
+  if (maximum < 0xffff)
+    for (row = 0; row < raw_height; row++)
+    {
 #ifdef LIBRAW_LIBRARY_BUILD
-    checkCancel();
+      checkCancel();
 #endif
-    for (col = 0; col < raw_width; col++)
-      if ((RAW(row, col) >>= load_flags) >> bits && (unsigned)(row - top_margin) < height &&
-          (unsigned)(col - left_margin) < width)
-        derror();
-  }
+      for (col = 0; col < raw_width; col++)
+        if ((RAW(row, col) >>= load_flags) >> bits && (unsigned)(row - top_margin) < height &&
+            (unsigned)(col - left_margin) < width)
+          derror();
+    }
 }
 
 void CLASS unpacked_load_raw_reversed()
@@ -12338,7 +12339,7 @@ int CLASS parse_tiff(int base)
 void CLASS apply_tiff()
 {
   int max_samp = 0, ties = 0, raw = -1, thm = -1, i;
-  unsigned long long ns,os;
+  unsigned long long ns, os;
   struct jhead jh;
 
   thumb_misc = 16;
@@ -16556,6 +16557,8 @@ void CLASS identify()
       left_margin = 48;
       width -= 106;
       adobe_coeff("Hasselblad", "X1D");
+      maximum = 0xffff;
+      tiff_bps = 16;
     }
     else if (raw_width == 9044)
     {
