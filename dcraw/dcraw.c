@@ -18464,8 +18464,8 @@ void CLASS identify()
     else if (strstr(model, "DC120"))
     {
       strcpy(model, "DC120");
-      height = 976;
-      width = 848;
+      raw_height = height = 976;
+      raw_width = width = 848;
       iso_speed = 160;
       pixel_aspect = height / 0.75 / width;
       load_raw = tiff_compress == 7 ? &CLASS kodak_jpeg_load_raw : &CLASS kodak_dc120_load_raw;
