@@ -32,7 +32,7 @@
 #JPEG_LIB=..\jpeg-8d\Release\jpeg.lib
 
 
-SAMPLES=bin\raw-identify.exe bin\simple_dcraw.exe  bin\dcraw_emu.exe bin\dcraw_half.exe bin\half_mt.exe bin\mem_image.exe bin\unprocessed_raw.exe bin\4channels.exe bin\multirender_test.exe bin\postprocessing_benchmark.exe
+SAMPLES=bin\raw-identify.exe bin\simple_dcraw.exe  bin\dcraw_emu.exe bin\dcraw_half.exe bin\half_mt.exe bin\mem_image.exe bin\unprocessed_raw.exe bin\4channels.exe bin\multirender_test.exe bin\postprocessing_benchmark.exe bin\openbayer_sample.exe
 
 LIBSTATIC=lib\libraw_static.lib
 DLL=bin\libraw.dll
@@ -72,6 +72,8 @@ bin\postprocessing_benchmark.exe: $(LINKLIB) samples\postprocessing_benchmark.cp
 bin\multirender_test.exe: $(LINKLIB) samples\multirender_test.cpp
 	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\multirender_test.exe" /Fo"object\\" samples\multirender_test.cpp $(LINKLIB)
 
+bin\openbayer_sample.exe: $(LINKLIB) samples\openbayer_sample.cpp
+	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\openbayer_sample.exe" /Fo"object\\" samples\openbayer_sample.cpp $(LINKLIB)
 
 bin\mem_image.exe: $(LINKLIB) samples\mem_image.cpp
 	$(CC) $(COPT) $(CFLAGS2) /Fe"bin\\mem_image.exe" /Fo"object\\" samples\mem_image.cpp $(LINKLIB)

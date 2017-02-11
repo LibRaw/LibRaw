@@ -70,6 +70,24 @@ int libraw_open_file(libraw_data_t *lr, const char *file)
   return ip->open_file(file);
 }
 
+libraw_iparams_t * libraw_get_iparams(libraw_data_t *lr)
+{
+	if(!lr) return NULL;
+	return &(lr->idata);
+}
+
+libraw_lensinfo_t * libraw_get_lensinfo(libraw_data_t *lr)
+{
+	if(!lr) return NULL;
+	return &(lr->lens);
+}
+
+libraw_imgother_t * libraw_get_imgother(libraw_data_t *lr)
+{
+	if(!lr) return NULL;
+	return &(lr->other);
+}
+
 int libraw_open_file_ex(libraw_data_t *lr, const char *file, INT64 sz)
 {
   if (!lr)
