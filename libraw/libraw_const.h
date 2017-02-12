@@ -24,10 +24,10 @@ it under the terms of the one of two licenses as you choose:
 
 enum LibRaw_openbayer_patterns
 {
-	LIBRAW_OPENBAYER_RGGB=0x94,
-	LIBRAW_OPENBAYER_BGGR=0x16,
-	LIBRAW_OPENBAYER_GRBG=0x61,
-	LIBRAW_OPENBAYER_GBRG=0x49
+  LIBRAW_OPENBAYER_RGGB = 0x94,
+  LIBRAW_OPENBAYER_BGGR = 0x16,
+  LIBRAW_OPENBAYER_GRBG = 0x61,
+  LIBRAW_OPENBAYER_GBRG = 0x49
 };
 
 enum LibRaw_whitebalance_code

@@ -15502,6 +15502,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 11086,-4555,-839,-3512,11310,2517,-815,1341,5940 } },
     { "Fujifilm X-A2", 0, 0,
       { 10763,-4560,-917,-3346,11311,2322,-475,1135,5843 } },
+    { "Fujifilm X-A3", 0, 0,
+      { 12407,-5222,-1086,-2971,11116,2120,-294,1029,5284 } },
     { "Fujifilm X-E1", 0, 0,
       { 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
     { "Fujifilm X-E2S", 0, 0,
@@ -17835,6 +17837,13 @@ void CLASS identify()
   }
   else if (!strncmp(make, "Fujifilm", 8))
   {
+    if (!strcmp(model, "X-A3"))
+    {
+      left_margin = 0;
+      top_margin = 0;
+      width = raw_width;
+      height = raw_height;
+    }
     if (!strcmp(model + 7, "S2Pro"))
     {
       strcpy(model, "S2Pro");

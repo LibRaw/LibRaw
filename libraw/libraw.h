@@ -109,9 +109,9 @@ DllDef void libraw_set_wf_debanding(libraw_data_t *lr, int wf_debanding, float w
                                     float wfd3);
 DllDef void libraw_set_interpolation_passes(libraw_data_t *lr, int passes);
 
-DllDef libraw_iparams_t * libraw_get_iparams(libraw_data_t *lr);
-DllDef libraw_lensinfo_t * libraw_get_lensinfo(libraw_data_t *lr);
-DllDef libraw_imgother_t * libraw_get_imgother(libraw_data_t *lr);
+DllDef libraw_iparams_t *libraw_get_iparams(libraw_data_t *lr);
+DllDef libraw_lensinfo_t *libraw_get_lensinfo(libraw_data_t *lr);
+DllDef libraw_imgother_t *libraw_get_imgother(libraw_data_t *lr);
 
 #ifdef __cplusplus
 }
@@ -133,9 +133,10 @@ public:
 #endif
   int open_buffer(void *buffer, size_t size);
   virtual int open_datastream(LibRaw_abstract_datastream *);
-  virtual int open_bayer(unsigned char *data, unsigned datalen,
-	  ushort _raw_width, ushort _raw_height, ushort _left_margin, ushort _top_margin, ushort _right_margin, ushort _bottom_margin,
-	  unsigned char procflags, unsigned char bayer_pattern, unsigned unused_bits, unsigned otherflags, unsigned black_level);
+  virtual int open_bayer(unsigned char *data, unsigned datalen, ushort _raw_width, ushort _raw_height,
+                         ushort _left_margin, ushort _top_margin, ushort _right_margin, ushort _bottom_margin,
+                         unsigned char procflags, unsigned char bayer_pattern, unsigned unused_bits,
+                         unsigned otherflags, unsigned black_level);
   int error_count() { return libraw_internal_data.unpacker_data.data_error; }
   void recycle_datastream();
   int unpack(void);
