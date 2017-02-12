@@ -269,6 +269,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 	void xtrans_decode_block(struct fuji_compressed_block* info, const struct fuji_compressed_params *params, int cur_line);
 	void fuji_bayer_decode_block(struct fuji_compressed_block* info, const struct fuji_compressed_params *params, int cur_line);
 	void fuji_compressed_load_raw();
+	void fuji_14bit_load_raw();
 	void parse_fuji_compressed_header();
 
 // LibRaw demosaic packs  functions
