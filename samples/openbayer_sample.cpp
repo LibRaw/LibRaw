@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: postprocessing_benchmark.cpp
- * Copyright 2008-2016 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2017 LibRaw LLC (info@libraw.org)
  * Created: Feb 11, 2017
  *
  * LibRaw simple C++ API:  opens bayer data (Kodak KAI-0340 sensor) from buffer, dump as 8-bit tiff
