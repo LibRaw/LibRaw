@@ -11,8 +11,10 @@
  * Source completely reformatted using clang-format
  * New LibRaw::open_bayer call allows to pass sensor dump w/o metadata directly to LibRaw:
      virtual int open_bayer(unsigned char *data, unsigned datalen,
-	  ushort _raw_width, ushort _raw_height, ushort _left_margin, ushort _top_margin, ushort _right_margin, ushort _bottom_margin,
-	  unsigned char procflags, unsigned char bayer_pattern, unsigned unused_bits, unsigned otherflags, unsigned black_level);
+	  ushort _raw_width, ushort _raw_height, ushort _left_margin, ushort _top_margin,
+	  ushort _right_margin, ushort _bottom_margin,
+	  unsigned char procflags, unsigned char bayer_pattern, unsigned unused_bits, unsigned otherflags,
+	  unsigned black_level);
     Parameters:
      data, datalen - buffer passed
      width/height/margins - speaks for itself
@@ -22,15 +24,16 @@
       0: "6 pixels in 8 bytes" packing is used
      for 16-bit format:
       1: Big-endian data
-    bayer_pattern: one of LIBRAW_OPENBAYER_RGGB,LIBRAW_OPENBAYER_BGGR,LIBRAW_OPENBAYER_GRBG,LIBRAW_OPENBAYER_GBRG
+    bayer_pattern: one of LIBRAW_OPENBAYER_RGGB,LIBRAW_OPENBAYER_BGGR,
+                          LIBRAW_OPENBAYER_GRBG,LIBRAW_OPENBAYER_GBRG
     unused_bits: count of upper zero bits
     otherflags:
-      Bit 1 – filter (average neighbors) for pixels with values of zero
-      Bits 2-4 – the orientation of the image (0=do not rotate, 3=180, 5=90CCW, 6=90CW)
+      Bit 1 - filter (average neighbors) for pixels with values of zero
+      Bits 2-4 - the orientation of the image (0=do not rotate, 3=180, 5=90CCW, 6=90CW)
     black_level: file black level (it also may be specified via imgdata.params)
 
-    see samples/openbayer_sample.cpp for usage sample (note, this sample is 'sample only' you'll need change open_bayer() params for your data)
-
+    see samples/openbayer_sample.cpp for usage sample (note, this sample is 'sample only', suited for
+    Kodak KAI-0340 sensor, you'll need change open_bayer() params for your data).
 
 2016-12-27  Alex Tutubalin <lexa@lexa.ru>
  * Licensing changes:
