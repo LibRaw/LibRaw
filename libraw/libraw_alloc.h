@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_alloc.h
- * Copyright 2008-2016 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2017 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  22, 2008 
  *
  * LibRaw C++ interface

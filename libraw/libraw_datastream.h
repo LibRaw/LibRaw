@@ -1,6 +1,6 @@
 /* -*- C -*-
  * File: libraw_datastream.h
- * Copyright 2008-2016 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2017 LibRaw LLC (info@libraw.org)
  * Created: Sun Jan 18 13:07:35 2009
  *
  * LibRaw Data stream interface
