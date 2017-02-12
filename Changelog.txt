@@ -1,12 +1,19 @@
 2017-02-12  Alex Tutubalin <lexa@lexa.ru>
+ * 0.19-Snapshot-20170212
  * Fuji compressed decoder updated to handle Bayer compressed data (GFX 50s)
+ * Camera support:
+   Fujifilm: GFX50s, X100f, X-T20
+   Leica M10
+   Nikon D5600, B700
+   Panasonic FZ80/82, GX800/850
+   
  * Added several C-API calls to access parts of libraw public structures
  * Source completely reformatted using clang-format
  * New LibRaw::open_bayer call allows to pass sensor dump w/o metadata directly to LibRaw:
      virtual int open_bayer(unsigned char *data, unsigned datalen,
 	  ushort _raw_width, ushort _raw_height, ushort _left_margin, ushort _top_margin, ushort _right_margin, ushort _bottom_margin,
 	  unsigned char procflags, unsigned char bayer_pattern, unsigned unused_bits, unsigned otherflags, unsigned black_level);
-
+    Parameters:
      data, datalen - buffer passed
      width/height/margins - speaks for itself
      procflags:
@@ -15,8 +22,8 @@
       0: "6 pixels in 8 bytes" packing is used
      for 16-bit format:
       1: Big-endian data
-    bayer_pattern: 	LIBRAW_OPENBAYER_RGGB,LIBRAW_OPENBAYER_BGGR,LIBRAW_OPENBAYER_GRBG,LIBRAW_OPENBAYER_GBRG
-    unused_bits: count of zero bits
+    bayer_pattern: one of LIBRAW_OPENBAYER_RGGB,LIBRAW_OPENBAYER_BGGR,LIBRAW_OPENBAYER_GRBG,LIBRAW_OPENBAYER_GBRG
+    unused_bits: count of upper zero bits
     otherflags:
       Bit 1 – filter (average neighbors) for pixels with values of zero
       Bits 2-4 – the orientation of the image (0=do not rotate, 3=180, 5=90CCW, 6=90CW)
