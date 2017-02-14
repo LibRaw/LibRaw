@@ -687,7 +687,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   }
   else if (load_raw == &LibRaw::fuji_14bit_load_raw)
   {
-	  d_info->decoder_name = "fuji_14bit_load_raw()";
+    d_info->decoder_name = "fuji_14bit_load_raw()";
   }
   else if (load_raw == &LibRaw::canon_load_raw)
   {
@@ -1756,64 +1756,67 @@ void LibRaw::hasselblad_full_load_raw()
 
 static inline void unpack7bytesto4x16(unsigned char *src, unsigned short *dest)
 {
-	dest[0] = (src[0] << 6) | (src[1] >> 2);
-	dest[1] = ((src[1] & 0x3) << 12) | (src[2] << 4) | (src[3] >> 4);
-	dest[2] = (src[3] & 0xf) << 10 | (src[4] << 2) | (src[5] >> 6);
-	dest[3] = ((src[5] & 0x3f) << 8) | src[6];
+  dest[0] = (src[0] << 6) | (src[1] >> 2);
+  dest[1] = ((src[1] & 0x3) << 12) | (src[2] << 4) | (src[3] >> 4);
+  dest[2] = (src[3] & 0xf) << 10 | (src[4] << 2) | (src[5] >> 6);
+  dest[3] = ((src[5] & 0x3f) << 8) | src[6];
 }
 
 static inline void unpack28bytesto16x16ns(unsigned char *src, unsigned short *dest)
 {
-	dest[0] = (src[3] << 6) | (src[2] >> 2);
-	dest[1] = ((src[2] & 0x3) << 12) | (src[1] << 4) | (src[0] >> 4);
-	dest[2] = (src[0] & 0xf) << 10 | (src[7] << 2) | (src[6] >> 6);
-	dest[3] = ((src[6] & 0x3f) << 8) | src[5];
-	dest[4] = (src[4] << 6) | (src[11] >> 2);
-	dest[5] = ((src[11] & 0x3) << 12) | (src[10] << 4) | (src[9] >> 4);
-	dest[6] = (src[9] & 0xf) << 10 | (src[8] << 2) | (src[15] >> 6);
-	dest[7] = ((src[15] & 0x3f) << 8) | src[14];
-	dest[8] = (src[13] << 6) | (src[12] >> 2);
-	dest[9] = ((src[12] & 0x3) << 12) | (src[19] << 4) | (src[18] >> 4);
-	dest[10] = (src[18] & 0xf) << 10 | (src[17] << 2) | (src[16] >> 6);
-	dest[11] = ((src[16] & 0x3f) << 8) | src[23];
-	dest[12] = (src[22] << 6) | (src[21] >> 2);
-	dest[13] = ((src[21] & 0x3) << 12) | (src[20] << 4) | (src[27] >> 4);
-	dest[14] = (src[27] & 0xf) << 10 | (src[26] << 2) | (src[25] >> 6);
-	dest[15] = ((src[25] & 0x3f) << 8) | src[24];
+  dest[0] = (src[3] << 6) | (src[2] >> 2);
+  dest[1] = ((src[2] & 0x3) << 12) | (src[1] << 4) | (src[0] >> 4);
+  dest[2] = (src[0] & 0xf) << 10 | (src[7] << 2) | (src[6] >> 6);
+  dest[3] = ((src[6] & 0x3f) << 8) | src[5];
+  dest[4] = (src[4] << 6) | (src[11] >> 2);
+  dest[5] = ((src[11] & 0x3) << 12) | (src[10] << 4) | (src[9] >> 4);
+  dest[6] = (src[9] & 0xf) << 10 | (src[8] << 2) | (src[15] >> 6);
+  dest[7] = ((src[15] & 0x3f) << 8) | src[14];
+  dest[8] = (src[13] << 6) | (src[12] >> 2);
+  dest[9] = ((src[12] & 0x3) << 12) | (src[19] << 4) | (src[18] >> 4);
+  dest[10] = (src[18] & 0xf) << 10 | (src[17] << 2) | (src[16] >> 6);
+  dest[11] = ((src[16] & 0x3f) << 8) | src[23];
+  dest[12] = (src[22] << 6) | (src[21] >> 2);
+  dest[13] = ((src[21] & 0x3) << 12) | (src[20] << 4) | (src[27] >> 4);
+  dest[14] = (src[27] & 0xf) << 10 | (src[26] << 2) | (src[25] >> 6);
+  dest[15] = ((src[25] & 0x3f) << 8) | src[24];
 }
 
+#define swab32(x)                                                                                                      \
+  ((unsigned int)((((unsigned int)(x) & (unsigned int)0x000000ffUL) << 24) |                                           \
+                  (((unsigned int)(x) & (unsigned int)0x0000ff00UL) << 8) |                                            \
+                  (((unsigned int)(x) & (unsigned int)0x00ff0000UL) >> 8) |                                            \
+                  (((unsigned int)(x) & (unsigned int)0xff000000UL) >> 24)))
 
-#define swab32(x) ((unsigned int)((((unsigned int)(x) & (unsigned int)0x000000ffUL) << 24) | (((unsigned int)(x) & (unsigned int)0x0000ff00UL) <<  8) | (((unsigned int)(x) & (unsigned int)0x00ff0000UL) >>  8) | (((unsigned int)(x) & (unsigned int)0xff000000UL) >> 24) ))
-
-static inline void swab32arr(unsigned *arr,unsigned len)
+static inline void swab32arr(unsigned *arr, unsigned len)
 {
-	for(unsigned i = 0; i < len; i++)
-		arr[i] = swab32(arr[i]);
+  for (unsigned i = 0; i < len; i++)
+    arr[i] = swab32(arr[i]);
 }
 #undef swab32
 
 void LibRaw::fuji_14bit_load_raw()
 {
-	const unsigned linelen = S.raw_width * 7 / 4;
-	const unsigned pitch = S.raw_pitch?S.raw_pitch/2:S.raw_width;
-	unsigned char *buf = (unsigned char*)malloc(linelen);
-	merror(buf, "fuji_14bit_load_raw()");
+  const unsigned linelen = S.raw_width * 7 / 4;
+  const unsigned pitch = S.raw_pitch ? S.raw_pitch / 2 : S.raw_width;
+  unsigned char *buf = (unsigned char *)malloc(linelen);
+  merror(buf, "fuji_14bit_load_raw()");
 
-	for(int row = 0; row < S.raw_height; row++)
-	{
-		unsigned bytesread = libraw_internal_data.internal_data.input->read(buf,1,linelen);
-		unsigned short *dest = &imgdata.rawdata.raw_image[pitch*row];
-		if(bytesread%28)
-		{
-			swab32arr((unsigned*)buf,bytesread/4);
-			for (int sp = 0, dp = 0; dp < pitch - 3 && sp < linelen - 6 && sp < bytesread-6; sp += 7, dp += 4)
-				unpack7bytesto4x16(buf + sp, dest + dp);
-		}
-		else
-			for (int sp = 0, dp = 0; dp < pitch - 15 && sp < linelen - 27 && sp < bytesread-27; sp += 28, dp += 16)
-				unpack28bytesto16x16ns(buf + sp, dest + dp);
-	}
-	free(buf);
+  for (int row = 0; row < S.raw_height; row++)
+  {
+    unsigned bytesread = libraw_internal_data.internal_data.input->read(buf, 1, linelen);
+    unsigned short *dest = &imgdata.rawdata.raw_image[pitch * row];
+    if (bytesread % 28)
+    {
+      swab32arr((unsigned *)buf, bytesread / 4);
+      for (int sp = 0, dp = 0; dp < pitch - 3 && sp < linelen - 6 && sp < bytesread - 6; sp += 7, dp += 4)
+        unpack7bytesto4x16(buf + sp, dest + dp);
+    }
+    else
+      for (int sp = 0, dp = 0; dp < pitch - 15 && sp < linelen - 27 && sp < bytesread - 27; sp += 28, dp += 16)
+        unpack28bytesto16x16ns(buf + sp, dest + dp);
+  }
+  free(buf);
 }
 
 void LibRaw::nikon_load_striped_packed_raw()
@@ -1992,12 +1995,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         (load_raw == &LibRaw::unpacked_load_raw))
     {
       if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 2 != libraw_internal_data.unpacker_data.data_size)
-	  {
-		  if(imgdata.sizes.raw_width * imgdata.sizes.raw_height * 7 / 4 == libraw_internal_data.unpacker_data.data_size)
-			  load_raw = &LibRaw::fuji_14bit_load_raw;
-		  else
-			parse_fuji_compressed_header();
-	  }
+      {
+        if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 7 / 4 == libraw_internal_data.unpacker_data.data_size)
+          load_raw = &LibRaw::fuji_14bit_load_raw;
+        else
+          parse_fuji_compressed_header();
+      }
       if (imgdata.idata.filters == 9)
       {
         // Adjust top/left margins for X-Trans
@@ -2021,8 +2024,11 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         imgdata.idata.colors < 5)
     {
       float delta[4] = {0.f, 0.f, 0.f, 0.f};
+      int black[4];
+      for (int c = 0; c < 4; c++)
+        black[c] = imgdata.color.dng_levels.dng_black + imgdata.color.dng_levels.dng_cblack[c];
       for (int c = 0; c < imgdata.idata.colors; c++)
-        delta[c] = imgdata.color.dng_levels.dng_whitelevel[c] - imgdata.color.dng_levels.dng_blacklevel[c];
+        delta[c] = imgdata.color.dng_levels.dng_whitelevel[c] - black[c];
       float mindelta = delta[0], maxdelta = delta[0];
       for (int c = 1; c < imgdata.idata.colors; c++)
       {

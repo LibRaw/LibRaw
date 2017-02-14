@@ -196,6 +196,7 @@ struct ph1_t
 
 typedef struct
 {
+  unsigned parsedfields;
   ushort illuminant;
   float calibration[4][4];
   float colormatrix[4][3];
@@ -204,11 +205,10 @@ typedef struct
 
 typedef struct
 {
-
+  unsigned parsedfields;
   unsigned dng_cblack[4102];
   unsigned dng_black;
   unsigned dng_whitelevel[4];
-  float dng_blacklevel[4];
   float analogbalance[4];
 } libraw_dng_levels_t;
 

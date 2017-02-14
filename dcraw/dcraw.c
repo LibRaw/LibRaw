@@ -8751,18 +8751,16 @@ void CLASS setPentaxBodyFeatures(unsigned id)
 
 void CLASS PentaxISO(ushort c)
 {
-  int code[] = {3,   4,   5,   6,   7,   8,   9,   10,  11,   12,   13,  14,  15,  16,  17,  18,  19,
-                20,  21,  22,  23,  24,  25,  26,  27,  28,   29,   30,  31,  32,  33,  34,  35,  36,
-                37,  38,  39,  40, 41, 42, 43, 44, 45,
-                50,  100, 200, 400, 800, 1600, 3200,
-                258, 259, 260, 261, 262, 263, 264,
-                265, 266, 267, 268, 269, 270, 271, 272, 273,  274,  275, 276, 277, 278};
-  double value[] = {50, 64, 80, 100, 125, 160, 200, 250, 320, 400, 500, 640, 800,
-                    1000, 1250, 1600, 2000, 2500, 3200, 4000, 5000, 6400, 8000, 10000, 12800, 16000,
-                    20000, 25600, 32000, 40000, 51200, 64000, 80000, 102400, 128000, 160000, 204800,
-                    258000, 325000, 409600, 516000, 650000, 819200,
-                    50, 100, 200, 400, 800, 1600, 3200,
-                    50, 70, 100, 140, 200, 280, 400, 560, 800, 1100, 1600, 2200, 3200, 4500, 6400, 9000, 12800, 18000, 25600, 36000, 51200};
+  int code[] = {3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,  15,   16,   17,  18,  19,  20,
+                21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32,  33,   34,   35,  36,  37,  38,
+                39,  40,  41,  42,  43,  44,  45,  50,  100, 200, 400, 800, 1600, 3200, 258, 259, 260, 261,
+                262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274,  275,  276, 277, 278};
+  double value[] = {50,     64,     80,     100,    125,    160,    200,    250,   320,   400,    500,    640,
+                    800,    1000,   1250,   1600,   2000,   2500,   3200,   4000,  5000,  6400,   8000,   10000,
+                    12800,  16000,  20000,  25600,  32000,  40000,  51200,  64000, 80000, 102400, 128000, 160000,
+                    204800, 258000, 325000, 409600, 516000, 650000, 819200, 50,    100,   200,    400,    800,
+                    1600,   3200,   50,     70,     100,    140,    200,    280,   400,   560,    800,    1100,
+                    1600,   2200,   3200,   4500,   6400,   9000,   12800,  18000, 25600, 36000,  51200};
 #define numel (sizeof(code) / sizeof(code[0]))
   int i;
   for (i = 0; i < numel; i++)
@@ -9569,6 +9567,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         int ind = tag == 0x035e ? 0 : 1;
         for (int j = 0; j < 3; j++)
           FORCC imgdata.color.dng_color[ind].forwardmatrix[j][c] = getreal(type);
+        imgdata.color.dng_color[ind].parsedfields |= LIBRAW_DNGFM_FORWARDMATRIX;
       }
       if ((tag == 0x0303) && (type != 4))
       {
@@ -10499,6 +10498,7 @@ void CLASS parse_makernote(int base, int uptag)
         int ind = tag == 0x035e ? 0 : 1;
         for (int j = 0; j < 3; j++)
           FORCC imgdata.color.dng_color[ind].forwardmatrix[j][c] = getreal(type);
+        imgdata.color.dng_color[ind].parsedfields |= LIBRAW_DNGFM_FORWARDMATRIX;
       }
 
       if ((tag == 0x0303) && (type != 4))
@@ -13257,6 +13257,7 @@ int CLASS parse_tiff_ifd(int base)
     case 291:
     case 50712: /* LinearizationTable */
 #ifdef LIBRAW_LIBRARY_BUILD
+      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_LINTABLE;
       tiff_ifd[ifd].lineartable_offset = ftell(ifp);
       tiff_ifd[ifd].lineartable_len = len;
 #endif
@@ -13264,6 +13265,7 @@ int CLASS parse_tiff_ifd(int base)
       break;
     case 50713: /* BlackLevelRepeatDim */
 #ifdef LIBRAW_LIBRARY_BUILD
+      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
       tiff_ifd[ifd].dng_levels.dng_cblack[4] =
 #endif
           cblack[4] = get2();
@@ -13384,6 +13386,7 @@ int CLASS parse_tiff_ifd(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
       if (tiff_ifd[ifd].samples > 1 && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
       {
+        tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
         for (i = 0; i < colors && i < 4 && i < len; i++)
           tiff_ifd[ifd].dng_levels.dng_cblack[i] = cblack[i] = getreal(type) + 0.5;
 
@@ -13425,10 +13428,12 @@ int CLASS parse_tiff_ifd(int base)
       black += num / len + 0.5;
 #ifdef LIBRAW_LIBRARY_BUILD
       tiff_ifd[ifd].dng_levels.dng_black += num / len + 0.5;
+      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
 #endif
       break;
     case 50717: /* WhiteLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
+      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_WHITE;
       tiff_ifd[ifd].dng_levels.dng_whitelevel[0] =
 #endif
           maximum = getint(type);
@@ -13447,15 +13452,18 @@ int CLASS parse_tiff_ifd(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
     case 50778:
       tiff_ifd[ifd].dng_color[0].illuminant = get2();
+      tiff_ifd[ifd].dng_color[0].parsedfields |= LIBRAW_DNGFM_ILLUMINANT;
       break;
     case 50779:
       tiff_ifd[ifd].dng_color[1].illuminant = get2();
+      tiff_ifd[ifd].dng_color[1].parsedfields |= LIBRAW_DNGFM_ILLUMINANT;
       break;
 #endif
     case 50721: /* ColorMatrix1 */
     case 50722: /* ColorMatrix2 */
 #ifdef LIBRAW_LIBRARY_BUILD
       i = tag == 50721 ? 0 : 1;
+      tiff_ifd[ifd].dng_color[i].parsedfields |= LIBRAW_DNGFM_COLORMATRIX;
 #endif
       FORCC for (j = 0; j < 3; j++)
       {
@@ -13471,6 +13479,7 @@ int CLASS parse_tiff_ifd(int base)
     case 0xc715: /* ForwardMatrix2 */
 #ifdef LIBRAW_LIBRARY_BUILD
       i = tag == 0xc714 ? 0 : 1;
+      tiff_ifd[ifd].dng_color[i].parsedfields |= LIBRAW_DNGFM_FORWARDMATRIX;
 #endif
       for (j = 0; j < 3; j++)
         FORCC
@@ -13486,6 +13495,7 @@ int CLASS parse_tiff_ifd(int base)
     case 50724: /* CameraCalibration2 */
 #ifdef LIBRAW_LIBRARY_BUILD
       j = tag == 50723 ? 0 : 1;
+      tiff_ifd[ifd].dng_color[j].parsedfields |= LIBRAW_DNGFM_CALIBRATION;
 #endif
       for (i = 0; i < colors; i++)
         FORCC
@@ -13497,6 +13507,9 @@ int CLASS parse_tiff_ifd(int base)
         }
       break;
     case 50727: /* AnalogBalance */
+#ifdef LIBRAW_LIBRARY_BUILD
+      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_ANALOGBALANCE;
+#endif
       FORCC
       {
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -13589,6 +13602,7 @@ int CLASS parse_tiff_ifd(int base)
       break;
     case 51009: /* OpcodeList2 */
 #ifdef LIBRAW_LIBRARY_BUILD
+      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_OPCODE2;
       tiff_ifd[ifd].opcode2_offset =
 #endif
           meta_offset = ftell(ifp);
@@ -18641,27 +18655,87 @@ dng_skip:
   if (dng_version) /* Override black level by DNG tags */
   {
     /* copy DNG data from per-IFD field to color.dng */
-    int iifd = 0;
+    int iifd = 0; // Active IFD we'll show to user.
     for (; iifd < tiff_nifds; iifd++)
       if (tiff_ifd[iifd].offset == data_offset) // found
         break;
 
+#define IFDCOLORINDEX(ifd, subset, bit)                                                                                \
+  (tiff_ifd[ifd].dng_color[subset].parsedfields & bit) ? ifd                                                           \
+                                                       : ((tiff_ifd[0].dng_color[subset].parsedfields & bit) ? 0 : -1)
+
+#define IFDLEVELINDEX(ifd, bit)                                                                                        \
+  (tiff_ifd[ifd].dng_levels.parsedfields & bit) ? ifd : ((tiff_ifd[0].dng_levels.parsedfields & bit) ? 0 : -1)
+
+#define COPYARR(to, from) memmove(&to, &from, sizeof(from))
+
     if (iifd < tiff_nifds)
     {
-      memmove(&imgdata.color.dng_color[0], &tiff_ifd[iifd].dng_color[0], sizeof(tiff_ifd[iifd].dng_color[0]));
-      memmove(&imgdata.color.dng_color[1], &tiff_ifd[iifd].dng_color[1], sizeof(tiff_ifd[iifd].dng_color[1]));
-      memmove(&imgdata.color.dng_levels, &tiff_ifd[iifd].dng_levels, sizeof(tiff_ifd[iifd].dng_levels));
-      meta_offset = tiff_ifd[iifd].opcode2_offset;
-      if (tiff_ifd[iifd].lineartable_offset && tiff_ifd[iifd].lineartable_len)
+      int sidx;
+      // Per field, not per structure
+      if (!(imgdata.color.dng_color[0].parsedfields & LIBRAW_DNGFM_FORWARDMATRIX)) // Not set already (Leica makernotes)
+      {
+        sidx = IFDCOLORINDEX(iifd, 0, LIBRAW_DNGFM_FORWARDMATRIX);
+        if (sidx >= 0)
+          COPYARR(imgdata.color.dng_color[0].forwardmatrix, tiff_ifd[sidx].dng_color[0].forwardmatrix);
+      }
+      if (!(imgdata.color.dng_color[1].parsedfields & LIBRAW_DNGFM_FORWARDMATRIX)) // Not set already (Leica makernotes)
+      {
+        sidx = IFDCOLORINDEX(iifd, 1, LIBRAW_DNGFM_FORWARDMATRIX);
+        if (sidx >= 0)
+          COPYARR(imgdata.color.dng_color[1].forwardmatrix, tiff_ifd[sidx].dng_color[1].forwardmatrix);
+      }
+      for (int ss = 0; ss < 2; ss++)
+      {
+        sidx = IFDCOLORINDEX(iifd, ss, LIBRAW_DNGFM_COLORMATRIX);
+        if (sidx >= 0)
+          COPYARR(imgdata.color.dng_color[ss].colormatrix, tiff_ifd[sidx].dng_color[ss].colormatrix);
+
+        sidx = IFDCOLORINDEX(iifd, ss, LIBRAW_DNGFM_CALIBRATION);
+        if (sidx >= 0)
+          COPYARR(imgdata.color.dng_color[ss].calibration, tiff_ifd[sidx].dng_color[ss].calibration);
+
+        sidx = IFDCOLORINDEX(iifd, ss, LIBRAW_DNGFM_ILLUMINANT);
+        if (sidx >= 0)
+          imgdata.color.dng_color[ss].illuminant = tiff_ifd[sidx].dng_color[ss].illuminant;
+      }
+      // Levels
+      sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_ANALOGBALANCE);
+      if (sidx >= 0)
+        COPYARR(imgdata.color.dng_levels.analogbalance, tiff_ifd[sidx].dng_levels.analogbalance);
+      sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_WHITE);
+      if (sidx >= 0)
+        COPYARR(imgdata.color.dng_levels.dng_whitelevel, tiff_ifd[sidx].dng_levels.dng_whitelevel);
+      sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_BLACK);
+      if (sidx >= 0)
+      {
+        imgdata.color.dng_levels.dng_black = tiff_ifd[sidx].dng_levels.dng_black;
+        COPYARR(imgdata.color.dng_levels.dng_cblack, tiff_ifd[sidx].dng_levels.dng_cblack);
+      }
+
+      sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_OPCODE2);
+      if (sidx >= 0)
+        meta_offset = tiff_ifd[sidx].opcode2_offset;
+
+      sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_LINTABLE);
+      INT64 linoff = -1;
+      int linlen = 0;
+      if (sidx >= 0)
+      {
+        linoff = tiff_ifd[sidx].lineartable_offset;
+        linlen = tiff_ifd[sidx].lineartable_len;
+      }
+
+      if (linoff >= 0 && linlen > 0)
       {
         INT64 pos = ftell(ifp);
-        fseek(ifp, tiff_ifd[iifd].lineartable_offset, SEEK_SET);
-        linear_table(tiff_ifd[iifd].lineartable_len);
+        fseek(ifp, linoff, SEEK_SET);
+        linear_table(linlen);
         fseek(ifp, pos, SEEK_SET);
       }
       // Need to add curve too
     }
-    /* Copy DNG black level to  */
+    /* Copy DNG black level to LibRaw's */
     maximum = imgdata.color.dng_levels.dng_whitelevel[0];
     black = imgdata.color.dng_levels.dng_black;
     int ll = LIM(0, (sizeof(cblack) / sizeof(cblack[0])),
