@@ -15967,6 +15967,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 11057,-3604,-1155,-5152,13046,2329,-282,375,8104 } },
     { "Pentax K-m", 0, 0,
       { 11057,-3604,-1155,-5152,13046,2329,-282,375,8104 } },
+    { "Pentax KP", 0, 0,
+      { 7825,-2160,-1403,-4841,13555,1349,-1559,2449,5814 }},
     { "Pentax K-x", 0, 0,
       { 8843,-2837,-625,-5025,12644,2668,-411,1234,7410 } },
     { "Pentax K-r", 0, 0,
@@ -17401,6 +17403,14 @@ void CLASS identify()
   {
     left_margin = 4;
     width = 6040;
+  }
+  if (width == 6112 && !strcmp(model, "KP"))
+  {
+    /* From DNG, maybe too strict */
+    left_margin = 54;
+    top_margin = 28;
+    width = 6082;
+    height = 4060;
   }
   if (width == 6080 && !strcmp(model, "K-3"))
   {

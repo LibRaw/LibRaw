@@ -5576,6 +5576,7 @@ static const char *static_camera_list[] = {
 	"Pentax K110D",
 	"Pentax K200D",
 	"Pentax K2000/K-m",
+	"Pentax KP",
 	"Pentax K-x",
 	"Pentax K-r",
 	"Pentax K-01",
