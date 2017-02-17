@@ -7898,7 +7898,8 @@ void CLASS setCanonBodyFeatures(unsigned id)
            (id == 0x80000355) || // M2
            (id == 0x80000374) || // M3
            (id == 0x80000384) || // M10
-           (id == 0x80000394)    // M5
+           (id == 0x80000394) || // M5
+           (id == 0x80000407)    // M6
            )
   {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -9543,6 +9544,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           unique_id = 0x80000384; // M10
         if (unique_id == 0x03940000)
           unique_id = 0x80000394; // M5
+        if (unique_id == 0x04070000)
+          unique_id = 0x80000407; // M6
         setCanonBodyFeatures(unique_id);
         if (lenCanonCameraInfo)
         {
@@ -16713,6 +16716,9 @@ void CLASS identify()
           {0x393, "EOS 750D"},
           {0x401, "EOS 5DS R"},
           {0x404, "EOS 1300D"},
+          {0x405, "EOS 800D"},
+          {0x407, "EOS M6"},
+          {0x408, "EOS 77D"},
       },
     sonique[] = {
         {0x002, "DSC-R1"},      {0x100, "DSLR-A100"},   {0x101, "DSLR-A900"},  {0x102, "DSLR-A700"},
