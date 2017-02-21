@@ -14090,6 +14090,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 4932, -835, 141, -4878, 11868, 3437, -1138, 1961, 7067 } },
     { "Hasselblad H5D-50",0, 0, /* Adobe */
       { 5656, -659, -346, -3923, 12306, 1791, -1602, 3509, 5442 } },
+    { "Hasselblad H6D-100c",0, 0, /* Adobe */
+      {5110, -1357, -308, -5573, 12835, 3077, -1279, 2025, 7010 }},
     { "Hasselblad X1D",0, 0, /* Adobe */
       {4932, -835, 141, -4878, 11868, 3437, -1138, 1961, 7067 }},
     { "HTC One A9", 64, 1023, /* this is CM1 transposed */
@@ -16609,6 +16611,13 @@ void CLASS identify()
         adobe_coeff("Hasselblad", "H3DII-39");
         strcpy(model, "H3DII-39");
       }
+    }
+    else if (raw_width == 12000) // H6D 100c
+    {
+      left_margin = 64;
+      width = 11608;
+      top_margin = 108;
+      height = raw_height - top_margin;
     }
     else if (raw_width == 7410 || raw_width == 8282)
     {
