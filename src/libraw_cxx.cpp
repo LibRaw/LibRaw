@@ -112,9 +112,9 @@ const char *libraw_strerror(int e)
 #define Sigma_X3F 22
 
 const double LibRaw_constants::xyz_rgb[3][3] = {
-    {0.412453, 0.357580, 0.180423}, {0.212671, 0.715160, 0.072169}, {0.019334, 0.119193, 0.950227}};
+    {0.4124564, 0.3575761, 0.1804375}, {0.2126729, 0.7151522, 0.0721750}, {0.0193339, 0.1191920, 0.9503041}};
 
-const float LibRaw_constants::d65_white[3] = {0.950456f, 1.0f, 1.088754f};
+const float LibRaw_constants::d65_white[3] = {0.95047f, 1.0f, 1.08883f};
 
 #define P1 imgdata.idata
 #define S imgdata.sizes
