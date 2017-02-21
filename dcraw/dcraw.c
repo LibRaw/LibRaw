@@ -18103,6 +18103,7 @@ void CLASS identify()
       width = 11608;
       top_margin = 108;
       height = raw_height - top_margin;
+      adobe_coeff("Hasselblad", "H6D-100c");
     }
     else if (raw_width == 7410 || raw_width == 8282)
     {
