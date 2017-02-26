@@ -1788,7 +1788,11 @@ int CLASS phase_one_correct()
   ushort *xval[2];
   int qmult_applied = 0, qlin_applied = 0;
 
+#ifdef LIBRAW_LIBRARY_BUILD
+  if (!meta_length)
+#else
   if (half_size || !meta_length)
+#endif
     return 0;
 #ifdef DCRAW_VERBOSE
   if (verbose)
