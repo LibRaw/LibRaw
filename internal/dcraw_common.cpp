@@ -16247,6 +16247,10 @@ void CLASS identify()
     width -= 52;
     left_margin = 2;
   }
+  else if(!strcmp(model,"D500")
+  {
+    // Empty - to avoid width-1 below
+  }
   else if (!strncmp(model, "D40", 3) || !strncmp(model, "D50", 3) || !strncmp(model, "D70", 3))
   {
     width--;
