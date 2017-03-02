@@ -106,7 +106,7 @@ void trimSpaces(char *s)
 
 int main(int ac, char *av[])
 {
-  int verbose = 0, ret, print_unpack = 0, print_frame = 0, print_wb = 0;
+  int verbose = 0, ret, print_sz = 0, print_unpack = 0, print_frame = 0, print_wb = 0;
   int compact = 0;
   LibRaw MyCoolRawProcessor;
 
@@ -122,6 +122,10 @@ int main(int ac, char *av[])
         print_wb++;
       if (av[i][1] == 'u' && av[i][2] == 0)
         print_unpack++;
+      if (av[i][1] == 's' && av[i][2] == 0)
+        print_sz++;
+      if (av[i][1] == 'h' && av[i][2] == 0)
+        O.half_size = 1;
       if (av[i][1] == 'f' && av[i][2] == 0)
         print_frame++;
       if (av[i][1] == 'x' && av[i][2] == 0)
@@ -133,7 +137,11 @@ int main(int ac, char *av[])
       printf("Cannot decode %s: %s\n", av[i], libraw_strerror(ret));
       continue; // no recycle, open_file will recycle
     }
-    if (verbose)
+    if (print_sz)
+    {
+      printf("%s\t%s\t%s\t%d\t%d\n", av[i], P1.make, P1.model, S.width, S.height);
+    }
+    else if (verbose)
     {
       if ((ret = MyCoolRawProcessor.adjust_sizes_info_only()))
       {

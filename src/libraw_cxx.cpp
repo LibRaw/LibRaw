@@ -2300,6 +2300,11 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
   }
 
   IO.shrink = P1.filters && (O.half_size || ((O.threshold || O.aber[0] != 1 || O.aber[2] != 1)));
+  if (IO.shrink && P1.filters >= 1000)
+  {
+    S.width &= 65534;
+    S.height &= 65534;
+  }
 
   S.iheight = (S.height + IO.shrink) >> IO.shrink;
   S.iwidth = (S.width + IO.shrink) >> IO.shrink;
