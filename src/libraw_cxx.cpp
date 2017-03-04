@@ -4927,6 +4927,7 @@ static const char *static_camera_list[] = {
 	"Canon PowerShot G7 X Mark II",
 	"Canon PowerShot G9",
 	"Canon PowerShot G9 X",
+	"Canon PowerShot G9 X Mark II",
 	"Canon PowerShot G10",
 	"Canon PowerShot G11",
 	"Canon PowerShot G12",
