@@ -12361,6 +12361,10 @@ void CLASS parse_kodak_ifd(int base)
       Kodak_WB_0x08tags(LIBRAW_WBI_Fluorescent, type);
     if (tag == 0x084b)
       Kodak_WB_0x08tags(LIBRAW_WBI_Flash, type);
+    if (tag == 0x084c)
+      Kodak_WB_0x08tags(LIBRAW_WBI_Custom, type);
+    if (tag == 0x084d)
+      Kodak_WB_0x08tags(LIBRAW_WBI_Auto, type);
     if (tag == 0x0e93)
       imgdata.color.linear_max[0] = imgdata.color.linear_max[1] = imgdata.color.linear_max[2] =
           imgdata.color.linear_max[3] = get2();
@@ -12889,7 +12893,7 @@ int CLASS parse_tiff_ifd(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
 	if (ifd >= sizeof tiff_ifd / sizeof tiff_ifd[0])
 	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
-#endif    
+#endif
         break;
       }
 #ifdef LIBRAW_LIBRARY_BUILD
