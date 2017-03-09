@@ -11047,6 +11047,7 @@ void CLASS parse_kodak_ifd(int base)
       else
         black = get2();
     }
+    INT64 _pos2 = ftell(ifp);
     if (tag == 0x0848)
       Kodak_WB_0x08tags(LIBRAW_WBI_Daylight, type);
     if (tag == 0x0849)
@@ -11086,6 +11087,8 @@ void CLASS parse_kodak_ifd(int base)
       FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c] = get4();
       imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1];
     }
+
+    fseek(ifp,_pos2,SEEK_SET);
 
     if (tag == 2120 + wbi || (wbi < 0 && tag == 2125)) /* use Auto WB if illuminant index is not set */
     {
