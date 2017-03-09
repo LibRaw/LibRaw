@@ -543,6 +543,12 @@ int main(int ac, char *av[])
         for (int c = 0; c < 4; c++)
           printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Auto][c]);
       }
+      if (C.WB_Coeffs[LIBRAW_WBI_Measured][0] > 0)
+      {
+        printf("\nMakernotes 'Camera Measured' WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Measured][c]);
+      }
 
       if (C.WB_Coeffs[LIBRAW_WBI_Custom][0] > 0)
       {

@@ -8494,6 +8494,13 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 582:
       imgdata.makernotes.canon.CanonColorDataVer = 1; // 20D / 350D
       {
+        fseek(ifp, save1 + (0x1e << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x41 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x46 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
+
         fseek(ifp, save1 + (0x23 << 1), SEEK_SET);
         Canon_WBpresets(2, 2);
         fseek(ifp, save1 + (0x4b << 1), SEEK_SET);
@@ -8503,6 +8510,15 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 653:
       imgdata.makernotes.canon.CanonColorDataVer = 2; // 1Dmk2 / 1DsMK2
       {
+        fseek(ifp, save1 + (0x18 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x90 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x95 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x9a << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom3][c ^ (c >> 1)] = get2();
+
         fseek(ifp, save1 + (0x27 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
         fseek(ifp, save1 + (0xa4 << 1), SEEK_SET);
@@ -8513,6 +8529,19 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.CanonColorDataVer = 3; // 1DmkIIN / 5D / 30D / 400D
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
+        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x71 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x76 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x7b << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom3][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x80 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom][c ^ (c >> 1)] = get2();
+
         fseek(ifp, save1 + (0x4e << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
         fseek(ifp, save1 + (0x85 << 1), SEEK_SET);
@@ -8539,6 +8568,11 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.CanonColorDataVer = 4;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
+        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+
         fseek(ifp, save1 + (0x53 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
         fseek(ifp, save1 + (0xa8 << 1), SEEK_SET);
@@ -8573,12 +8607,13 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 5120:
       imgdata.makernotes.canon.CanonColorDataVer = 5; // PowerSot G10, G12, G5 X, EOS M3, EOS M5
       {
-        fseek(ifp, save1 + (0x56 << 1), SEEK_SET);
+        // fseek(ifp, save1 + (0x56 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x4c << 1), SEEK_SET);
         if ((unique_id == 0x03970000) || // G7 X Mark II
             (unique_id == 0x04100000) || // G9 X Mark II
             (unique_id == 0x80000394))   // EOS M5
         {
-          fseek(ifp, 18, SEEK_CUR);
+          fseek(ifp, 28, SEEK_CUR);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
           fseek(ifp, 8, SEEK_CUR);
           Canon_WBpresets(8, 24);
@@ -8590,6 +8625,10 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
         }
         else
         {
+          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+          get2();
+          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+          get2();
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
           get2();
           Canon_WBpresets(2, 12);
@@ -8609,6 +8648,11 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.CanonColorDataVer = 6; // 600D / 1200D
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
+        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+
         fseek(ifp, save1 + (0x67 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
         fseek(ifp, save1 + (0xbc << 1), SEEK_SET);
@@ -8632,6 +8676,11 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.CanonColorDataVer = 7;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
+        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+
         fseek(ifp, save1 + (0x80 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
         fseek(ifp, save1 + (0xd5 << 1), SEEK_SET);
@@ -8663,6 +8712,11 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.CanonColorDataVer = 8;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
+        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+
         fseek(ifp, save1 + (0x85 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
         fseek(ifp, save1 + (0x107 << 1), SEEK_SET);
