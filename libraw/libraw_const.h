@@ -77,6 +77,16 @@ enum LibRaw_whitebalance_code
   LIBRAW_WBI_Sunset = 64,
   LIBRAW_WBI_Auto   = 82,
   LIBRAW_WBI_Custom = 83,
+  LIBRAW_WBI_Auto1   = 85,
+  LIBRAW_WBI_Auto2   = 86,
+  LIBRAW_WBI_Auto3   = 87,
+  LIBRAW_WBI_Auto4   = 88,
+  LIBRAW_WBI_Custom1 = 90,
+  LIBRAW_WBI_Custom2 = 91,
+  LIBRAW_WBI_Custom3 = 93,
+  LIBRAW_WBI_Custom4 = 93,
+  LIBRAW_WBI_Custom5 = 94,
+  LIBRAW_WBI_Custom6 = 95,
   LIBRAW_WBI_Other = 255
 };
 

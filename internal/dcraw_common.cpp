@@ -9996,6 +9996,22 @@ void CLASS parse_makernote(int base, int uptag)
       if ((tag == 0x20300108) || (tag == 0x20310109))
         imgdata.makernotes.olympus.ColorSpace = get2();
 
+      if ((tag == 0x20400101) && (len == 4)) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(c >> 1) | ((c & 1) << 1)] = get2();
+      }
+      if ((tag == 0x2040010e) && (len == 4)) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][(c >> 1) | ((c & 1) << 1)] = get2();
+      }
+      if ((tag == 0x2040010f) && (len == 4)) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][(c >> 1) | ((c & 1) << 1)] = get2();
+      }
+      if ((tag == 0x20400110) && (len == 4)) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom3][(c >> 1) | ((c & 1) << 1)] = get2();
+      }
+      if ((tag == 0x20400111) && (len == 4)) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom4][(c >> 1) | ((c & 1) << 1)] = get2();
+      }
+
       if ((tag == 0x20400102) && (len == 2) && (!strncasecmp(model, "E-410", 5) || !strncasecmp(model, "E-510", 5)))
       {
         int i;

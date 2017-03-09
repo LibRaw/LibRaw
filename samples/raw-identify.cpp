@@ -550,6 +550,31 @@ int main(int ac, char *av[])
         for (int c = 0; c < 4; c++)
           printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom][c]);
       }
+      if (C.WB_Coeffs[LIBRAW_WBI_Custom1][0] > 0)
+      {
+        printf("\nMakernotes 'Custom1' WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom1][c]);
+      }
+      if (C.WB_Coeffs[LIBRAW_WBI_Custom2][0] > 0)
+      {
+        printf("\nMakernotes 'Custom2' WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom2][c]);
+      }
+      if (C.WB_Coeffs[LIBRAW_WBI_Custom3][0] > 0)
+      {
+        printf("\nMakernotes 'Custom3' WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom3][c]);
+      }
+      if (C.WB_Coeffs[LIBRAW_WBI_Custom4][0] > 0)
+      {
+        printf("\nMakernotes 'Custom4' WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom4][c]);
+      }
+
       if (C.rgb_cam[0][0] > 0.0001 && P1.colors > 1)
       {
         printf("\nCamera2RGB matrix:\n");
