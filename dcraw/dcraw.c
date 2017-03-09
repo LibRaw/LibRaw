@@ -8607,13 +8607,15 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 5120:
       imgdata.makernotes.canon.CanonColorDataVer = 5; // PowerSot G10, G12, G5 X, EOS M3, EOS M5
       {
-        // fseek(ifp, save1 + (0x56 << 1), SEEK_SET);
-        fseek(ifp, save1 + (0x4c << 1), SEEK_SET);
         if ((unique_id == 0x03970000) || // G7 X Mark II
             (unique_id == 0x04100000) || // G9 X Mark II
             (unique_id == 0x80000394))   // EOS M5
         {
-          fseek(ifp, 28, SEEK_CUR);
+          fseek(ifp, save1 + (0x4f << 1), SEEK_SET);
+          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+          fseek(ifp, 8, SEEK_CUR);
+          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+          fseek(ifp, 8, SEEK_CUR);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
           fseek(ifp, 8, SEEK_CUR);
           Canon_WBpresets(8, 24);
@@ -8625,6 +8627,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
         }
         else
         {
+          fseek(ifp, save1 + (0x4c << 1), SEEK_SET);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
           get2();
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
