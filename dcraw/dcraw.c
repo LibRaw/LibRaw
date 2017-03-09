@@ -12524,6 +12524,18 @@ int CLASS parse_tiff_ifd(int base)
         for (int i = 0; i < 4 && i < len; i++)
           cblack[i] = get2();
         break;
+      case 0x7302:
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c < 2)] = get2();
+        break;
+      case 0x7312:
+      {
+        int i, lc[4];
+        FORC4 lc[c] = get2();
+        i = (lc[1] == 1024 && lc[2] == 1024) << 1;
+        SWAP(lc[i], lc[i + 1]);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c] = lc[c];
+      }
+      break;
       case 0x7480:
       case 0x7820:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = get2();
@@ -14018,17 +14030,17 @@ void CLASS parse_minolta(int base)
         imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][0] = get2();
         imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][2] = get2();
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] =
-            imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] =
-                imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] =
-                    imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] =
-                        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] =
-                            imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][3] =
-                                imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][1] =
-                                    imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][3] =
-                                        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][1] =
-                                            imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][3] =
-                                                imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][1] =
-                                                    imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][3] = 0x100;
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][3] = 0x100;
       }
       break;
 #endif

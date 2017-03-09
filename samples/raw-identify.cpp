@@ -515,7 +515,7 @@ int main(int ac, char *av[])
       }
       if (C.cam_mul[0] > 0)
       {
-        printf("\nMakernotes 'As shot' multipliers:");
+        printf("\nMakernotes 'As shot' WB multipliers:");
         for (int c = 0; c < 4; c++)
           printf(" %f", C.cam_mul[c]);
       }
@@ -524,16 +524,31 @@ int main(int ac, char *av[])
       {
         if (C.WB_Coeffs[cnt][0] > 0)
         {
-          printf("\nMakernotes '%s' multipliers:", EXIF_LightSources[cnt]);
+          printf("\nMakernotes '%s' WB multipliers:", EXIF_LightSources[cnt]);
           for (int c = 0; c < 4; c++)
             printf(" %d", C.WB_Coeffs[cnt][c]);
         }
       }
+
       if (C.WB_Coeffs[LIBRAW_WBI_Other][0] > 0)
       {
         printf("\nMakernotes 'Other' multipliers:");
         for (int c = 0; c < 4; c++)
           printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Other][c]);
+      }
+
+      if (C.WB_Coeffs[LIBRAW_WBI_Auto][0] > 0)
+      {
+        printf("\nMakernotes 'Camera Auto' WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Auto][c]);
+      }
+
+      if (C.WB_Coeffs[LIBRAW_WBI_Custom][0] > 0)
+      {
+        printf("\nMakernotes 'Custom' WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom][c]);
       }
       if (C.rgb_cam[0][0] > 0.0001 && P1.colors > 1)
       {
