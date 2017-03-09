@@ -13047,7 +13047,8 @@ void CLASS parse_ciff(int offset, int length, int depth)
     if (type == 0x10a9)
     {
       INT64 o = ftell(ifp);
-      fseek(ifp, (0x5 << 1), SEEK_CUR);
+      fseek(ifp, (0x1 << 1), SEEK_CUR);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
       Canon_WBpresets(0, 0);
       fseek(ifp, o, SEEK_SET);
     }
