@@ -11374,7 +11374,7 @@ void CLASS parse_makernote(int base, int uptag)
       short nWB, tWB;
       if ((tag == 0x20300108) || (tag == 0x20310109))
         imgdata.makernotes.olympus.ColorSpace = get2();
-
+/*
       if ((tag == 0x20400101) && (len == 4)) {
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(c >> 1) | ((c & 1) << 1)] = get2();
       }
@@ -11390,8 +11390,8 @@ void CLASS parse_makernote(int base, int uptag)
       if ((tag == 0x20400111) && (len == 4)) {
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom4][(c >> 1) | ((c & 1) << 1)] = get2();
       }
-
-      if ((tag == 0x20400102) && (len == 2) && (!strncasecmp(model, "E-410", 5) || !strncasecmp(model, "E-510", 5)))
+*/
+      if ((tag == 0x20400101) && (len == 2) && (!strncasecmp(model, "E-410", 5) || !strncasecmp(model, "E-510", 5)))
       {
         int i;
         for (i = 0; i < 64; i++)
@@ -11400,110 +11400,134 @@ void CLASS parse_makernote(int base, int uptag)
         for (i = 64; i < 256; i++)
           imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
       }
-      if ((tag >= 0x20400102) && (tag <= 0x2040010d))
+      if ((tag >= 0x20400101) && (tag <= 0x20400111))
       {
-        ushort CT;
-        nWB = tag - 0x20400102;
+        ushort CT = 0;
+        tWB = 0x100;
+        nWB = tag - 0x20400101;
         switch (nWB)
         {
         case 0:
+          tWB = LIBRAW_WBI_Auto;
+          break;
+        case 1:
           CT = 3000;
           tWB = LIBRAW_WBI_Tungsten;
           break;
-        case 1:
-          CT = 3300;
-          tWB = 0x100;
-          break;
         case 2:
-          CT = 3600;
-          tWB = 0x100;
+          CT = 3300;
           break;
         case 3:
-          CT = 3900;
-          tWB = 0x100;
+          CT = 3600;
           break;
         case 4:
+          CT = 3900;
+          break;
+        case 5:
           CT = 4000;
           tWB = LIBRAW_WBI_FL_W;
           break;
-        case 5:
-          CT = 4300;
-          tWB = 0x100;
-          break;
         case 6:
+          CT = 4300;
+          break;
+        case 7:
           CT = 4500;
           tWB = LIBRAW_WBI_FL_D;
           break;
-        case 7:
-          CT = 4800;
-          tWB = 0x100;
-          break;
         case 8:
+          CT = 4800;
+          break;
+        case 9:
           CT = 5300;
           tWB = LIBRAW_WBI_FineWeather;
           break;
-        case 9:
+        case 10:
           CT = 6000;
           tWB = LIBRAW_WBI_Cloudy;
           break;
-        case 10:
+        case 11:
           CT = 6600;
           tWB = LIBRAW_WBI_FL_N;
           break;
-        case 11:
+        case 12:
           CT = 7500;
           tWB = LIBRAW_WBI_Shade;
           break;
-        default:
-          CT = 0;
-          tWB = 0x100;
+        case 13:
+          tWB = LIBRAW_WBI_Custom1;
+          break;
+        case 14:
+          tWB = LIBRAW_WBI_Custom2;
+          break;
+        case 15:
+          tWB = LIBRAW_WBI_Custom3;
+          break;
+        case 16:
+          tWB = LIBRAW_WBI_Custom4;
+          break;
         }
-        if (CT)
-        {
-          imgdata.color.WBCT_Coeffs[nWB][0] = CT;
-          imgdata.color.WBCT_Coeffs[nWB][1] = get2();
-          imgdata.color.WBCT_Coeffs[nWB][3] = get2();
-          if (len == 4)
-          {
-            imgdata.color.WBCT_Coeffs[nWB][2] = get2();
-            imgdata.color.WBCT_Coeffs[nWB][4] = get2();
+
+        int wb[4];
+        wb[0] = get2(); wb[2] = get2();
+        if (tWB != 0x100) {
+          imgdata.color.WB_Coeffs[tWB][0] = wb[0];
+          imgdata.color.WB_Coeffs[tWB][2] = wb[2];
+        }
+        if (CT) {
+          imgdata.color.WBCT_Coeffs[nWB-1][0] = CT;
+          imgdata.color.WBCT_Coeffs[nWB-1][1] = wb[0];
+          imgdata.color.WBCT_Coeffs[nWB-1][3] = wb[2];
+        }
+        if (len == 4) {
+          wb[1] = get2(); wb[3] = get2();
+          if (tWB != 0x100) {
+            imgdata.color.WB_Coeffs[tWB][1] = wb[1];
+            imgdata.color.WB_Coeffs[tWB][3] = wb[3];
+          }
+          if (CT) {
+            imgdata.color.WBCT_Coeffs[nWB-1][2] = wb[1];
+            imgdata.color.WBCT_Coeffs[nWB-1][4] = wb[3];
           }
         }
-        if (tWB != 0x100)
-          FORC4 imgdata.color.WB_Coeffs[tWB][c] = imgdata.color.WBCT_Coeffs[nWB][c + 1];
+
       }
-      if ((tag >= 0x20400113) && (tag <= 0x2040011e))
+      if ((tag >= 0x20400112) && (tag <= 0x2040011e))
       {
-        nWB = tag - 0x20400113;
-        imgdata.color.WBCT_Coeffs[nWB][2] = imgdata.color.WBCT_Coeffs[nWB][4] = get2();
+        nWB = tag - 0x20400112;
+        int wbG = get2();
+//        imgdata.color.WBCT_Coeffs[nWB][2] = imgdata.color.WBCT_Coeffs[nWB][4] = get2();
         switch (nWB)
         {
         case 0:
+          tWB = LIBRAW_WBI_Auto;
+          break;
+        case 1:
           tWB = LIBRAW_WBI_Tungsten;
           break;
-        case 4:
+        case 5:
           tWB = LIBRAW_WBI_FL_W;
           break;
-        case 6:
+        case 7:
           tWB = LIBRAW_WBI_FL_D;
           break;
-        case 8:
+        case 9:
           tWB = LIBRAW_WBI_FineWeather;
           break;
-        case 9:
+        case 10:
           tWB = LIBRAW_WBI_Cloudy;
           break;
-        case 10:
+        case 11:
           tWB = LIBRAW_WBI_FL_N;
           break;
-        case 11:
+        case 12:
           tWB = LIBRAW_WBI_Shade;
           break;
         default:
           tWB = 0x100;
         }
+        if (nWB) imgdata.color.WBCT_Coeffs[nWB-1][2] = imgdata.color.WBCT_Coeffs[nWB-1][4] = wbG;
         if (tWB != 0x100)
-          imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = imgdata.color.WBCT_Coeffs[nWB][2];
+          imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = wbG;
       }
 
       if (tag == 0x20400121)
@@ -11520,15 +11544,20 @@ void CLASS parse_makernote(int base, int uptag)
       {
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = get2();
       }
-      if (tag == 0x30000120)
+      if (tag == 0x30000110)
       {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][2] = get2();
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] = get2();
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][2] = get2();
         if (len == 2)
         {
           for (int i = 0; i < 256; i++)
             imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
         }
+      }
+      if (tag == 0x30000120)
+      {
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][0] = get2();
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][2] = get2();
       }
       if (tag == 0x30000121)
       {
