@@ -9515,14 +9515,14 @@ void CLASS process_Sony_0x9050(uchar *buf, unsigned id)
   return;
 }
 
-void CLASS parseSonyMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
+void CLASS parseSonyMakernotes
+    (unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
+     uchar *table_buf,
+     uchar *&table_buf_0x9050,
+     ushort &table_buf_0x9050_present,
+     uchar *&table_buf_0x940c,
+     ushort &table_buf_0x940c_present)
 {
-
-  uchar *table_buf;
-  uchar *table_buf_0x9050;
-  ushort table_buf_0x9050_present = 0;
-  uchar *table_buf_0x940c;
-  ushort table_buf_0x940c_present = 0;
 
       ushort lid;
 
@@ -9739,6 +9739,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   unsigned lenCanonCameraInfo = 0;
 
   uchar *table_buf;
+  uchar *table_buf_0x9050;
+  ushort table_buf_0x9050_present = 0;
+  uchar *table_buf_0x940c;
+  ushort table_buf_0x940c_present = 0;
 
   short morder, sorder = order;
   char buf[10];
@@ -10312,7 +10316,12 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               (!strncasecmp(model, "Stellar", 7) || !strncasecmp(model, "Lunar", 5) ||
                !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
     {
-      parseSonyMakernotes (tag, type, len, AdobeDNG);
+      parseSonyMakernotes (tag, type, len, AdobeDNG,
+                           table_buf,
+                           table_buf_0x9050,
+                           table_buf_0x9050_present,
+                           table_buf_0x940c,
+                           table_buf_0x940c_present);
     }
   next:
     fseek(ifp, save, SEEK_SET);
@@ -10346,6 +10355,10 @@ void CLASS parse_makernote(int base, int uptag)
   unsigned lenCanonCameraInfo = 0;
 
   uchar *table_buf;
+  uchar *table_buf_0x9050;
+  ushort table_buf_0x9050_present = 0;
+  uchar *table_buf_0x940c;
+  ushort table_buf_0x940c_present = 0;
 
   INT64 fsize = ifp->size();
 #endif
@@ -11127,7 +11140,12 @@ void CLASS parse_makernote(int base, int uptag)
               (!strncasecmp(model, "Stellar", 7) || !strncasecmp(model, "Lunar", 5) ||
                !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
     {
-      parseSonyMakernotes (tag, type, len, nonDNG);
+      parseSonyMakernotes (tag, type, len, nonDNG,
+                           table_buf,
+                           table_buf_0x9050,
+                           table_buf_0x9050_present,
+                           table_buf_0x940c,
+                           table_buf_0x940c_present);
     }
 
     fseek(ifp, _pos, SEEK_SET);
