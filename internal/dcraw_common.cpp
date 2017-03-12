@@ -7144,7 +7144,9 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
   else if (tag == 0x00a9)
   {
     long int save1 = ftell(ifp);
-    fseek(ifp, save1 + (0x5 << 1), SEEK_SET);
+    int c;
+    fseek(ifp, (0x1 << 1), SEEK_CUR);
+    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
     Canon_WBpresets(0, 0);
     fseek(ifp, save1, SEEK_SET);
   }
