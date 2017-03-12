@@ -8193,15 +8193,6 @@ void CLASS process_Sony_0x9050(uchar *buf, unsigned id)
   return;
 }
 
-/*
-void CLASS process_Sony_makernote (unsigned tag, unsigned type, unsigned len,
-                                   unsigned dng_writer,
-                                   uchar *table_buf,
-                                   ushort &table_buf_0x940c_present,
-                                   uchar *table_buf_0x940c,
-                                   ushort &table_buf_0x9050_present,
-                                   uchar *table_buf_0x9050)
-*/
 void CLASS parseSonyMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
 {
 
