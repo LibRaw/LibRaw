@@ -9517,7 +9517,6 @@ void CLASS process_Sony_0x9050(uchar *buf, unsigned id)
 
 void CLASS parseSonyMakernotes
     (unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
-     uchar *table_buf,
      uchar *&table_buf_0x9050,
      ushort &table_buf_0x9050_present,
      uchar *&table_buf_0x940c,
@@ -9525,6 +9524,7 @@ void CLASS parseSonyMakernotes
 {
 
       ushort lid;
+      uchar *table_buf;
 
       if (tag == 0xb001) // Sony ModelID
       {
@@ -10317,7 +10317,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
     {
       parseSonyMakernotes (tag, type, len, AdobeDNG,
-                           table_buf,
                            table_buf_0x9050,
                            table_buf_0x9050_present,
                            table_buf_0x940c,
@@ -11141,7 +11140,6 @@ void CLASS parse_makernote(int base, int uptag)
                !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
     {
       parseSonyMakernotes (tag, type, len, nonDNG,
-                           table_buf,
                            table_buf_0x9050,
                            table_buf_0x9050_present,
                            table_buf_0x940c,
