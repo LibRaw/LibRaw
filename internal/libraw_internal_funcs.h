@@ -47,15 +47,6 @@ it under the terms of the one of two licenses as you choose:
     void 	parseSonyLensFeatures (uchar a, uchar b);
     void	process_Sony_0x9050 (uchar * buf, unsigned id);
     void	process_Sony_0x940c (uchar * buf);
-/*
-		void	process_Sony_makernote (unsigned tag, unsigned type, unsigned len,
-                                   unsigned dng_writer,
-                                   uchar *table_buf,
-                                   ushort &table_buf_0x940c_present,
-                                   uchar *table_buf_0x940c,
-                                   ushort &table_buf_0x9050_present,
-                                   uchar *table_buf_0x9050);
-*/
     void	parseSonyMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseFujiMakernotes (unsigned tag, unsigned type);
 
