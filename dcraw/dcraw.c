@@ -17407,8 +17407,8 @@ void CLASS identify()
     /* From DNG, maybe too strict */
     left_margin = 54;
     top_margin = 28;
-    width = 6082;
-    height = 4060;
+    width = 6028;
+    height = raw_height - top_margin;
   }
   if (width == 6080 && !strcmp(model, "K-3"))
   {
