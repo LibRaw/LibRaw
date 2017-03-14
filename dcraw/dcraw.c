@@ -11902,6 +11902,16 @@ void CLASS parse_makernote(int base, int uptag)
       if (tag == 0xa021) // get and decode Samsung cam_mul array
         FORC4 cam_mul[c ^ (c >> 1)] = get4() - SamsungKey[c];
 #ifdef LIBRAW_LIBRARY_BUILD
+      if (tag == 0xa022)
+      {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get4() - SamsungKey[c+4];
+        if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] >> 1))
+        {
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] >> 4;
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] >> 4;
+        }
+      }
+
       if (tag == 0xa023)
       {
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] = get4() - SamsungKey[8];
@@ -11923,9 +11933,12 @@ void CLASS parse_makernote(int base, int uptag)
           imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] >> 4;
         }
       }
-      if (tag == 0xa025)
+/*
+      if (tag == 0xa025) {
+        i = get4();
         imgdata.color.linear_max[0] = imgdata.color.linear_max[1] = imgdata.color.linear_max[2] =
-            imgdata.color.linear_max[3] = get4() - SamsungKey[0];
+            imgdata.color.linear_max[3] = i - SamsungKey[0]; printf ("Samsung 0xa025 %d\n", i); }
+*/
       if (tag == 0xa030 && len == 9)
         for (i = 0; i < 3; i++)
           FORC3 imgdata.color.ccm[i][c] = (float)((short)((get4() + SamsungKey[i * 3 + c]))) / 256.0;
