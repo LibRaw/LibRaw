@@ -8905,12 +8905,12 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                          LIBRAW_WBI_Flash,
                          LIBRAW_WBI_FL_L};
         int n_wbs = sizeof(wb_list)/sizeof(int);
-        int wb_pos;
+        int wb_ind;
         getc(ifp);
         for (int wb_cnt=0; wb_cnt<n_wbs; wb_cnt++) {
-          wb_pos = getc(ifp);
-          if (wb_pos < n_wbs)
-            FORC4 imgdata.color.WB_Coeffs[wb_list[wb_pos]][c ^ (c >> 1)] = get2();
+          wb_ind = getc(ifp);
+          if (wb_ind < n_wbs)
+            FORC4 imgdata.color.WB_Coeffs[wb_list[wb_ind]][c ^ (c >> 1)] = get2();
         }
       }
       else if (tag == 0x0239) // Q-series lens info (LensInfoQ)
@@ -9703,12 +9703,12 @@ void CLASS parse_makernote(int base, int uptag)
                          LIBRAW_WBI_Flash,
                          LIBRAW_WBI_FL_L};
         int n_wbs = sizeof(wb_list)/sizeof(int);
-        int wb_pos;
+        int wb_ind;
         getc(ifp);
         for (int wb_cnt=0; wb_cnt<n_wbs; wb_cnt++) {
-          wb_pos = getc(ifp);
-          if (wb_pos < n_wbs)
-            FORC4 imgdata.color.WB_Coeffs[wb_list[wb_pos]][c ^ (c >> 1)] = get2();
+          wb_ind = getc(ifp);
+          if (wb_ind < n_wbs)
+            FORC4 imgdata.color.WB_Coeffs[wb_list[wb_ind]][c ^ (c >> 1)] = get2();
         }
       }
       else if (tag == 0x0239) // Q-series lens info (LensInfoQ)
@@ -9867,71 +9867,27 @@ void CLASS parse_makernote(int base, int uptag)
       }
       if ((tag >= 0x20400101) && (tag <= 0x20400111))
       {
-        ushort CT = 0;
-        tWB = 0x100;
         nWB = tag - 0x20400101;
-        switch (nWB)
-        {
-        case 0:
-          tWB = LIBRAW_WBI_Auto;
-          break;
-        case 1:
-          CT = 3000;
-          tWB = LIBRAW_WBI_Tungsten;
-          break;
-        case 2:
-          CT = 3300;
-          break;
-        case 3:
-          CT = 3600;
-          break;
-        case 4:
-          CT = 3900;
-          break;
-        case 5:
-          CT = 4000;
-          tWB = LIBRAW_WBI_FL_W;
-          break;
-        case 6:
-          CT = 4300;
-          break;
-        case 7:
-          CT = 4500;
-          tWB = LIBRAW_WBI_FL_D;
-          break;
-        case 8:
-          CT = 4800;
-          break;
-        case 9:
-          CT = 5300;
-          tWB = LIBRAW_WBI_FineWeather;
-          break;
-        case 10:
-          CT = 6000;
-          tWB = LIBRAW_WBI_Cloudy;
-          break;
-        case 11:
-          CT = 6600;
-          tWB = LIBRAW_WBI_FL_N;
-          break;
-        case 12:
-          CT = 7500;
-          tWB = LIBRAW_WBI_Shade;
-          break;
-        case 13:
-          tWB = LIBRAW_WBI_Custom1;
-          break;
-        case 14:
-          tWB = LIBRAW_WBI_Custom2;
-          break;
-        case 15:
-          tWB = LIBRAW_WBI_Custom3;
-          break;
-        case 16:
-          tWB = LIBRAW_WBI_Custom4;
-          break;
-        }
+        int wb_list[] = {LIBRAW_WBI_Auto,        0,
+                         LIBRAW_WBI_Tungsten,    3000,
+                         0x100,                  3300,
+                         0x100,                  3600,
+                         0x100,                  3900,
+                         LIBRAW_WBI_FL_W,        4000,
+                         0x100,                  4300,
+                         LIBRAW_WBI_FL_D,        4500,
+                         0x100,                  4800,
+                         LIBRAW_WBI_FineWeather, 5300,
+                         LIBRAW_WBI_Cloudy,      6000,
+                         LIBRAW_WBI_FL_N,        6600,
+                         LIBRAW_WBI_Shade,       7500,
+                         LIBRAW_WBI_Custom1,     0,
+                         LIBRAW_WBI_Custom2,     0,
+                         LIBRAW_WBI_Custom3,     0,
+                         LIBRAW_WBI_Custom4,     0};
 
+        tWB = wb_list[nWB<<1];
+        ushort CT = wb_list[(nWB<<1)|1];
         int wb[4];
         wb[0] = get2(); wb[2] = get2();
         if (tWB != 0x100) {
@@ -9958,37 +9914,23 @@ void CLASS parse_makernote(int base, int uptag)
       }
       if ((tag >= 0x20400112) && (tag <= 0x2040011e))
       {
+        int wb_list[] = {LIBRAW_WBI_Auto,
+                         LIBRAW_WBI_Tungsten,
+                         0x100,
+                         0x100,
+                         0x100,
+                         LIBRAW_WBI_FL_W,
+                         0x100,
+                         LIBRAW_WBI_FL_D,
+                         0x100,
+                         LIBRAW_WBI_FineWeather,
+                         LIBRAW_WBI_Cloudy,
+                         LIBRAW_WBI_FL_N,
+                         LIBRAW_WBI_Shade};
+
         nWB = tag - 0x20400112;
         int wbG = get2();
-        switch (nWB)
-        {
-        case 0:
-          tWB = LIBRAW_WBI_Auto;
-          break;
-        case 1:
-          tWB = LIBRAW_WBI_Tungsten;
-          break;
-        case 5:
-          tWB = LIBRAW_WBI_FL_W;
-          break;
-        case 7:
-          tWB = LIBRAW_WBI_FL_D;
-          break;
-        case 9:
-          tWB = LIBRAW_WBI_FineWeather;
-          break;
-        case 10:
-          tWB = LIBRAW_WBI_Cloudy;
-          break;
-        case 11:
-          tWB = LIBRAW_WBI_FL_N;
-          break;
-        case 12:
-          tWB = LIBRAW_WBI_Shade;
-          break;
-        default:
-          tWB = 0x100;
-        }
+        tWB = wb_list[nWB];
         if (nWB) imgdata.color.WBCT_Coeffs[nWB-1][2] = imgdata.color.WBCT_Coeffs[nWB-1][4] = wbG;
         if (tWB != 0x100)
           imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = wbG;
@@ -10018,50 +9960,23 @@ void CLASS parse_makernote(int base, int uptag)
             imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
         }
       }
-      if (tag == 0x30000120)
+      if (((tag >= 0x30000120) && (tag <= 0x30000124)) ||
+          ((tag >= 0x30000130) && (tag <= 0x30000133)))
       {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][2] = get2();
-      }
-      if (tag == 0x30000121)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][2] = get2();
-      }
-      if (tag == 0x30000122)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FineWeather][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FineWeather][2] = get2();
-      }
-      if (tag == 0x30000123)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][2] = get2();
-      }
-      if (tag == 0x30000124)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Sunset][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Sunset][2] = get2();
-      }
-      if (tag == 0x30000130)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][2] = get2();
-      }
-      if (tag == 0x30000131)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][2] = get2();
-      }
-      if (tag == 0x30000132)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][2] = get2();
-      }
-      if (tag == 0x30000133)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][2] = get2();
+        int wb_list[] = {LIBRAW_WBI_Shade,
+                         LIBRAW_WBI_Cloudy,
+                         LIBRAW_WBI_FineWeather,
+                         LIBRAW_WBI_Tungsten,
+                         LIBRAW_WBI_Sunset,
+                         LIBRAW_WBI_FL_D,
+                         LIBRAW_WBI_FL_N,
+                         LIBRAW_WBI_FL_W,
+                         LIBRAW_WBI_FL_WW};
+        int wb_ind;
+        if (tag <= 0x30000124) wb_ind = tag - 0x30000120;
+        else wb_ind = tag - 0x30000130 + 5;
+        imgdata.color.WB_Coeffs[wb_list[wb_ind]][0] = get2();
+        imgdata.color.WB_Coeffs[wb_list[wb_ind]][2] = get2();
       }
 
       if ((tag == 0x20400805) && (len == 2))
