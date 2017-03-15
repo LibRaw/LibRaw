@@ -9972,37 +9972,17 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         if (len < 65535) // Safety belt
           PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
       }
-      else if (tag == 0x020d)
+      else if ((tag >= 0x020d) && (tag <= 0x0214))
       {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x020e)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x020f)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0210)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0211)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0212)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0213)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0214)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c ^ (c >> 1)] = get2();
+        int wb_list[] = {LIBRAW_WBI_Daylight,
+                         LIBRAW_WBI_Shade,
+                         LIBRAW_WBI_Cloudy,
+                         LIBRAW_WBI_Tungsten,
+                         LIBRAW_WBI_FL_D,
+                         LIBRAW_WBI_FL_N,
+                         LIBRAW_WBI_FL_W,
+                         LIBRAW_WBI_Flash};
+        FORC4 imgdata.color.WB_Coeffs[wb_list[tag - 0x020d]][c ^ (c >> 1)] = get2();
       }
       else if (tag == 0x0221)
       {
@@ -10028,24 +10008,23 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       }
       else if (tag == 0x022d)
       {
-        fseek(ifp, 2, SEEK_CUR);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c ^ (c >> 1)] = get2();
+        int wb_list[] = {LIBRAW_WBI_Daylight,
+                         LIBRAW_WBI_Shade,
+                         LIBRAW_WBI_Cloudy,
+                         LIBRAW_WBI_Tungsten,
+                         LIBRAW_WBI_FL_D,
+                         LIBRAW_WBI_FL_N,
+                         LIBRAW_WBI_FL_W,
+                         LIBRAW_WBI_Flash,
+                         LIBRAW_WBI_FL_L};
+        int n_wbs = sizeof(wb_list)/sizeof(int);
+        int wb_pos;
         getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][c ^ (c >> 1)] = get2();
+        for (int wb_cnt=0; wb_cnt<n_wbs; wb_cnt++) {
+          wb_pos = getc(ifp);
+          if (wb_pos < n_wbs)
+            FORC4 imgdata.color.WB_Coeffs[wb_list[wb_pos]][c ^ (c >> 1)] = get2();
+        }
       }
       else if (tag == 0x0239) // Q-series lens info (LensInfoQ)
       {
@@ -10658,7 +10637,7 @@ void CLASS parse_makernote(int base, int uptag)
           imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops / 12.0f;
         }
       }
-      else if (tag == 0x0093)
+      else if (tag == 0x0093)  // Nikon compression
       {
         i = get2();
         if ((i == 7) || (i == 9))
@@ -10976,37 +10955,17 @@ void CLASS parse_makernote(int base, int uptag)
         if (len < 65535) // Safety belt
           PentaxLensInfo(imgdata.lens.makernotes.CamID, len);
       }
-      else if (tag == 0x020d)
+      else if ((tag >= 0x020d) && (tag <= 0x0214))
       {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x020e)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x020f)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0210)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0211)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0212)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0213)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][c ^ (c >> 1)] = get2();
-      }
-      else if (tag == 0x0214)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c ^ (c >> 1)] = get2();
+        int wb_list[] = {LIBRAW_WBI_Daylight,
+                         LIBRAW_WBI_Shade,
+                         LIBRAW_WBI_Cloudy,
+                         LIBRAW_WBI_Tungsten,
+                         LIBRAW_WBI_FL_D,
+                         LIBRAW_WBI_FL_N,
+                         LIBRAW_WBI_FL_W,
+                         LIBRAW_WBI_Flash};
+        FORC4 imgdata.color.WB_Coeffs[wb_list[tag - 0x020d]][c ^ (c >> 1)] = get2();
       }
       else if (tag == 0x0221)
       {
@@ -11032,24 +10991,23 @@ void CLASS parse_makernote(int base, int uptag)
       }
       else if (tag == 0x022d)
       {
-        fseek(ifp, 2, SEEK_CUR);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c ^ (c >> 1)] = get2();
+        int wb_list[] = {LIBRAW_WBI_Daylight,
+                         LIBRAW_WBI_Shade,
+                         LIBRAW_WBI_Cloudy,
+                         LIBRAW_WBI_Tungsten,
+                         LIBRAW_WBI_FL_D,
+                         LIBRAW_WBI_FL_N,
+                         LIBRAW_WBI_FL_W,
+                         LIBRAW_WBI_Flash,
+                         LIBRAW_WBI_FL_L};
+        int n_wbs = sizeof(wb_list)/sizeof(int);
+        int wb_pos;
         getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c ^ (c >> 1)] = get2();
-        getc(ifp);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][c ^ (c >> 1)] = get2();
+        for (int wb_cnt=0; wb_cnt<n_wbs; wb_cnt++) {
+          wb_pos = getc(ifp);
+          if (wb_pos < n_wbs)
+            FORC4 imgdata.color.WB_Coeffs[wb_list[wb_pos]][c ^ (c >> 1)] = get2();
+        }
       }
       else if (tag == 0x0239) // Q-series lens info (LensInfoQ)
       {
@@ -11708,7 +11666,7 @@ void CLASS parse_makernote(int base, int uptag)
         fread(buf97, 324, 1, ifp);
       }
     }
-    if (tag == 0xa1 && type == 7)
+    if ((tag == 0xa1) && (type == 7) && strncasecmp(make, "Samsung", 7))
     {
       order = 0x4949;
       fseek(ifp, 140, SEEK_CUR);
@@ -11766,9 +11724,9 @@ void CLASS parse_makernote(int base, int uptag)
     }
     if (tag == 0x200 && len == 3)
       shot_order = (get4(), get4());
-    if (tag == 0x200 && len == 4)
+    if (tag == 0x200 && len == 4)  // Pentax black level
       FORC4 cblack[c ^ c >> 1] = get2();
-    if (tag == 0x201 && len == 4)
+    if (tag == 0x201 && len == 4)  // Pentax As Shot WB
       FORC4 cam_mul[c ^ (c >> 1)] = get2();
     if (tag == 0x220 && type == 7)
       meta_offset = ftell(ifp);
@@ -11855,7 +11813,7 @@ void CLASS parse_makernote(int base, int uptag)
     if ((tag | 0x70) == 0x2070 && (type == 4 || type == 13))
       fseek(ifp, get4() + base, SEEK_SET);
 #ifdef LIBRAW_LIBRARY_BUILD
-    // IB start
+// IB start
     if (tag == 0x2010)
     {
       INT64 _pos3 = ftell(ifp);
