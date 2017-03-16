@@ -54,6 +54,54 @@ static size_t local_strnlen(const char *s, size_t n)
 #define strnlen(a, b) local_strnlen(a, b)
 
 #ifdef LIBRAW_LIBRARY_BUILD
+static int Oly_wb_list1[] = {LIBRAW_WBI_Shade,
+                            LIBRAW_WBI_Cloudy,
+                            LIBRAW_WBI_FineWeather,
+                            LIBRAW_WBI_Tungsten,
+                            LIBRAW_WBI_Sunset,
+                            LIBRAW_WBI_FL_D,
+                            LIBRAW_WBI_FL_N,
+                            LIBRAW_WBI_FL_W,
+                            LIBRAW_WBI_FL_WW};
+
+static int Oly_wb_list2[] = {LIBRAW_WBI_Auto,        0,
+                            LIBRAW_WBI_Tungsten,    3000,
+                            0x100,                  3300,
+                            0x100,                  3600,
+                            0x100,                  3900,
+                            LIBRAW_WBI_FL_W,        4000,
+                            0x100,                  4300,
+                            LIBRAW_WBI_FL_D,        4500,
+                            0x100,                  4800,
+                            LIBRAW_WBI_FineWeather, 5300,
+                            LIBRAW_WBI_Cloudy,      6000,
+                            LIBRAW_WBI_FL_N,        6600,
+                            LIBRAW_WBI_Shade,       7500,
+                            LIBRAW_WBI_Custom1,     0,
+                            LIBRAW_WBI_Custom2,     0,
+                            LIBRAW_WBI_Custom3,     0,
+                            LIBRAW_WBI_Custom4,     0};
+
+static int Pentax_wb_list1[] = {LIBRAW_WBI_Daylight,
+                                LIBRAW_WBI_Shade,
+                                LIBRAW_WBI_Cloudy,
+                                LIBRAW_WBI_Tungsten,
+                                LIBRAW_WBI_FL_D,
+                                LIBRAW_WBI_FL_N,
+                                LIBRAW_WBI_FL_W,
+                                LIBRAW_WBI_Flash};
+
+static int Pentax_wb_list2[] = {LIBRAW_WBI_Daylight,
+                                LIBRAW_WBI_Shade,
+                                LIBRAW_WBI_Cloudy,
+                                LIBRAW_WBI_Tungsten,
+                                LIBRAW_WBI_FL_D,
+                                LIBRAW_WBI_FL_N,
+                                LIBRAW_WBI_FL_W,
+                                LIBRAW_WBI_Flash,
+                                LIBRAW_WBI_FL_L};
+static int nPentax_wb_list2 = sizeof(Pentax_wb_list2)/sizeof(int);
+
 static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
 {
   int r = fp->read(buf, len, 1);
@@ -8652,15 +8700,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       }
       else if ((tag >= 0x020d) && (tag <= 0x0214))
       {
-        int wb_list[] = {LIBRAW_WBI_Daylight,
-                         LIBRAW_WBI_Shade,
-                         LIBRAW_WBI_Cloudy,
-                         LIBRAW_WBI_Tungsten,
-                         LIBRAW_WBI_FL_D,
-                         LIBRAW_WBI_FL_N,
-                         LIBRAW_WBI_FL_W,
-                         LIBRAW_WBI_Flash};
-        FORC4 imgdata.color.WB_Coeffs[wb_list[tag - 0x020d]][c ^ (c >> 1)] = get2();
+        FORC4 imgdata.color.WB_Coeffs[Pentax_wb_list1[tag - 0x020d]][c ^ (c >> 1)] = get2();
       }
       else if (tag == 0x0221)
       {
@@ -8686,22 +8726,12 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       }
       else if (tag == 0x022d)
       {
-        int wb_list[] = {LIBRAW_WBI_Daylight,
-                         LIBRAW_WBI_Shade,
-                         LIBRAW_WBI_Cloudy,
-                         LIBRAW_WBI_Tungsten,
-                         LIBRAW_WBI_FL_D,
-                         LIBRAW_WBI_FL_N,
-                         LIBRAW_WBI_FL_W,
-                         LIBRAW_WBI_Flash,
-                         LIBRAW_WBI_FL_L};
-        int n_wbs = sizeof(wb_list)/sizeof(int);
         int wb_ind;
         getc(ifp);
-        for (int wb_cnt=0; wb_cnt<n_wbs; wb_cnt++) {
+        for (int wb_cnt=0; wb_cnt<nPentax_wb_list2; wb_cnt++) {
           wb_ind = getc(ifp);
-          if (wb_ind < n_wbs)
-            FORC4 imgdata.color.WB_Coeffs[wb_list[wb_ind]][c ^ (c >> 1)] = get2();
+          if (wb_ind < nPentax_wb_list2)
+            FORC4 imgdata.color.WB_Coeffs[Pentax_wb_list2[wb_ind]][c ^ (c >> 1)] = get2();
         }
       }
       else if (tag == 0x0239) // Q-series lens info (LensInfoQ)
@@ -9635,15 +9665,7 @@ void CLASS parse_makernote(int base, int uptag)
       }
       else if ((tag >= 0x020d) && (tag <= 0x0214))
       {
-        int wb_list[] = {LIBRAW_WBI_Daylight,
-                         LIBRAW_WBI_Shade,
-                         LIBRAW_WBI_Cloudy,
-                         LIBRAW_WBI_Tungsten,
-                         LIBRAW_WBI_FL_D,
-                         LIBRAW_WBI_FL_N,
-                         LIBRAW_WBI_FL_W,
-                         LIBRAW_WBI_Flash};
-        FORC4 imgdata.color.WB_Coeffs[wb_list[tag - 0x020d]][c ^ (c >> 1)] = get2();
+        FORC4 imgdata.color.WB_Coeffs[Pentax_wb_list1[tag - 0x020d]][c ^ (c >> 1)] = get2();
       }
       else if (tag == 0x0221)
       {
@@ -9669,22 +9691,12 @@ void CLASS parse_makernote(int base, int uptag)
       }
       else if (tag == 0x022d)
       {
-        int wb_list[] = {LIBRAW_WBI_Daylight,
-                         LIBRAW_WBI_Shade,
-                         LIBRAW_WBI_Cloudy,
-                         LIBRAW_WBI_Tungsten,
-                         LIBRAW_WBI_FL_D,
-                         LIBRAW_WBI_FL_N,
-                         LIBRAW_WBI_FL_W,
-                         LIBRAW_WBI_Flash,
-                         LIBRAW_WBI_FL_L};
-        int n_wbs = sizeof(wb_list)/sizeof(int);
         int wb_ind;
         getc(ifp);
-        for (int wb_cnt=0; wb_cnt<n_wbs; wb_cnt++) {
+        for (int wb_cnt=0; wb_cnt<nPentax_wb_list2; wb_cnt++) {
           wb_ind = getc(ifp);
-          if (wb_ind < n_wbs)
-            FORC4 imgdata.color.WB_Coeffs[wb_list[wb_ind]][c ^ (c >> 1)] = get2();
+          if (wb_ind < nPentax_wb_list2)
+            FORC4 imgdata.color.WB_Coeffs[Pentax_wb_list2[wb_ind]][c ^ (c >> 1)] = get2();
         }
       }
       else if (tag == 0x0239) // Q-series lens info (LensInfoQ)
@@ -10026,26 +10038,8 @@ void CLASS parse_makernote(int base, int uptag)
       if ((tag >= 0x20400101) && (tag <= 0x20400111))
       {
         nWB = tag - 0x20400101;
-        int wb_list[] = {LIBRAW_WBI_Auto,        0,
-                         LIBRAW_WBI_Tungsten,    3000,
-                         0x100,                  3300,
-                         0x100,                  3600,
-                         0x100,                  3900,
-                         LIBRAW_WBI_FL_W,        4000,
-                         0x100,                  4300,
-                         LIBRAW_WBI_FL_D,        4500,
-                         0x100,                  4800,
-                         LIBRAW_WBI_FineWeather, 5300,
-                         LIBRAW_WBI_Cloudy,      6000,
-                         LIBRAW_WBI_FL_N,        6600,
-                         LIBRAW_WBI_Shade,       7500,
-                         LIBRAW_WBI_Custom1,     0,
-                         LIBRAW_WBI_Custom2,     0,
-                         LIBRAW_WBI_Custom3,     0,
-                         LIBRAW_WBI_Custom4,     0};
-
-        tWB = wb_list[nWB<<1];
-        ushort CT = wb_list[(nWB<<1)|1];
+        tWB = Oly_wb_list2[nWB<<1];
+        ushort CT = Oly_wb_list2[(nWB<<1)|1];
         int wb[4];
         wb[0] = get2(); wb[2] = get2();
         if (tWB != 0x100) {
@@ -10072,24 +10066,11 @@ void CLASS parse_makernote(int base, int uptag)
       }
       if ((tag >= 0x20400112) && (tag <= 0x2040011e))
       {
-        int wb_list[] = {LIBRAW_WBI_Auto,
-                         LIBRAW_WBI_Tungsten,
-                         0x100,
-                         0x100,
-                         0x100,
-                         LIBRAW_WBI_FL_W,
-                         0x100,
-                         LIBRAW_WBI_FL_D,
-                         0x100,
-                         LIBRAW_WBI_FineWeather,
-                         LIBRAW_WBI_Cloudy,
-                         LIBRAW_WBI_FL_N,
-                         LIBRAW_WBI_Shade};
-
         nWB = tag - 0x20400112;
         int wbG = get2();
-        tWB = wb_list[nWB];
-        if (nWB) imgdata.color.WBCT_Coeffs[nWB-1][2] = imgdata.color.WBCT_Coeffs[nWB-1][4] = wbG;
+        tWB = Oly_wb_list2[nWB<<1];
+        if (nWB)
+          imgdata.color.WBCT_Coeffs[nWB-1][2] = imgdata.color.WBCT_Coeffs[nWB-1][4] = wbG;
         if (tWB != 0x100)
           imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = wbG;
       }
@@ -10106,7 +10087,11 @@ void CLASS parse_makernote(int base, int uptag)
       }
       if (tag == 0x2040011f)
       {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = get2();
+        int wbG = get2();
+        if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0])
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = wbG;
+        FORC4 if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1+c][0])
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1+c][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1+c][3] = wbG;
       }
       if (tag == 0x30000110)
       {
@@ -10121,20 +10106,13 @@ void CLASS parse_makernote(int base, int uptag)
       if (((tag >= 0x30000120) && (tag <= 0x30000124)) ||
           ((tag >= 0x30000130) && (tag <= 0x30000133)))
       {
-        int wb_list[] = {LIBRAW_WBI_Shade,
-                         LIBRAW_WBI_Cloudy,
-                         LIBRAW_WBI_FineWeather,
-                         LIBRAW_WBI_Tungsten,
-                         LIBRAW_WBI_Sunset,
-                         LIBRAW_WBI_FL_D,
-                         LIBRAW_WBI_FL_N,
-                         LIBRAW_WBI_FL_W,
-                         LIBRAW_WBI_FL_WW};
         int wb_ind;
-        if (tag <= 0x30000124) wb_ind = tag - 0x30000120;
-        else wb_ind = tag - 0x30000130 + 5;
-        imgdata.color.WB_Coeffs[wb_list[wb_ind]][0] = get2();
-        imgdata.color.WB_Coeffs[wb_list[wb_ind]][2] = get2();
+        if (tag <= 0x30000124)
+          wb_ind = tag - 0x30000120;
+        else
+          wb_ind = tag - 0x30000130 + 5;
+        imgdata.color.WB_Coeffs[Oly_wb_list1[wb_ind]][0] = get2();
+        imgdata.color.WB_Coeffs[Oly_wb_list1[wb_ind]][2] = get2();
       }
 
       if ((tag == 0x20400805) && (len == 2))
