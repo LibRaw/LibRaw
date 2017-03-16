@@ -10093,7 +10093,7 @@ void CLASS parse_makernote(int base, int uptag)
         FORC4 if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1+c][0])
           imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1+c][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1+c][3] = wbG;
       }
-      if (tag == 0x30000110)
+      if ((tag == 0x30000110) && strcmp (software, "v757-71"))
       {
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] = get2();
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][2] = get2();
@@ -10103,8 +10103,9 @@ void CLASS parse_makernote(int base, int uptag)
             imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
         }
       }
-      if (((tag >= 0x30000120) && (tag <= 0x30000124)) ||
-          ((tag >= 0x30000130) && (tag <= 0x30000133)))
+      if ((((tag >= 0x30000120) && (tag <= 0x30000124)) ||
+          ((tag >= 0x30000130) && (tag <= 0x30000133))) &&
+           strcmp (software, "v757-71"))
       {
         int wb_ind;
         if (tag <= 0x30000124)
@@ -10352,7 +10353,7 @@ void CLASS parse_makernote(int base, int uptag)
         goto next;
       goto get2_256;
     }
-    if ((tag == 0x1011 && len == 9) || tag == 0x20400200)
+    if (((tag == 0x1011 && len == 9) || tag == 0x20400200) && strcmp (software, "v757-71"))
       for (i = 0; i < 3; i++)
       {
 #ifdef LIBRAW_LIBRARY_BUILD
