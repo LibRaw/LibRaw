@@ -529,6 +529,12 @@ int main(int ac, char *av[])
             printf(" %d", C.WB_Coeffs[cnt][c]);
         }
       }
+      if (C.WB_Coeffs[LIBRAW_WBI_Sunset][0] > 0)
+      {
+        printf("\nMakernotes 'Sunset' multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Sunset][c]);
+      }
 
       if (C.WB_Coeffs[LIBRAW_WBI_Other][0] > 0)
       {
@@ -716,6 +722,16 @@ int main(int ac, char *av[])
             else
               printf("%6.5ff}},\n", C.WB_Coeffs[cnt][3] / (float)C.WB_Coeffs[cnt][1]);
           }
+        if (C.WB_Coeffs[LIBRAW_WBI_Sunset][0])
+        {
+          printf("{\"%s\", \"%s\", %d, {%6.5ff, 1.0f, %6.5ff, ", P1.make, P1.model, LIBRAW_WBI_Sunset,
+                 C.WB_Coeffs[LIBRAW_WBI_Sunset][0] / (float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1], C.WB_Coeffs[LIBRAW_WBI_Sunset][2] / (float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1]);
+          if (C.WB_Coeffs[LIBRAW_WBI_Sunset][1] == C.WB_Coeffs[LIBRAW_WBI_Sunset][3])
+            printf("1.0f}},\n");
+          else
+            printf("%6.5ff}},\n", C.WB_Coeffs[LIBRAW_WBI_Sunset][3] / (float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1]);
+        }
+
         for (int cnt = 0; cnt < 64; cnt++)
           if (C.WBCT_Coeffs[cnt][0])
           {
