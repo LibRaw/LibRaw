@@ -586,6 +586,18 @@ int main(int ac, char *av[])
         for (int c = 0; c < 4; c++)
           printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom4][c]);
       }
+      if (C.WB_Coeffs[LIBRAW_WBI_Custom5][0] > 0)
+      {
+        printf("\nMakernotes 'Custom5' WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom5][c]);
+      }
+      if (C.WB_Coeffs[LIBRAW_WBI_Custom6][0] > 0)
+      {
+        printf("\nMakernotes 'Custom6' WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom6][c]);
+      }
 
       if (C.rgb_cam[0][0] > 0.0001 && P1.colors > 1)
       {

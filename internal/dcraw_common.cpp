@@ -54,6 +54,17 @@ static size_t local_strnlen(const char *s, size_t n)
 #define strnlen(a, b) local_strnlen(a, b)
 
 #ifdef LIBRAW_LIBRARY_BUILD
+static int Fuji_wb_list[] = {LIBRAW_WBI_FineWeather,
+                            LIBRAW_WBI_Shade,
+                            LIBRAW_WBI_FL_D,
+                            LIBRAW_WBI_FL_L,
+                            LIBRAW_WBI_FL_W,
+                            LIBRAW_WBI_Tungsten};
+static int nFuji_wb_list = sizeof(Fuji_wb_list)/sizeof(int);
+static int FujiCCT_K[31] = {2500, 2550, 2650, 2700, 2800, 2850, 2950, 3000, 3100, 3200, 3300,
+                            3400, 3600, 3700, 3800, 4000, 4200, 4300, 4500, 4800, 5000, 5300,
+                            5600, 5900, 6300, 6700, 7100, 7700, 8300, 9100, 10000};
+
 static int Oly_wb_list1[] = {LIBRAW_WBI_Shade,
                             LIBRAW_WBI_Cloudy,
                             LIBRAW_WBI_FineWeather,
@@ -11328,7 +11339,7 @@ int CLASS parse_tiff_ifd(int base)
     case 61448:
       tiff_ifd[ifd].bytes = get4();
       break;
-    case 61454:
+    case 61454:  // FujiFilm "As Shot"
       FORC3 cam_mul[(4 - c) % 3] = getint(type);
       break;
     case 305:
@@ -11784,6 +11795,10 @@ int CLASS parse_tiff_ifd(int base)
       break;
 
 #ifdef LIBRAW_LIBRARY_BUILD
+    case 0xf00d:
+      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
+      imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
+      break;
     case 0xf00c:
     {
       unsigned fwb[4];
@@ -11808,38 +11823,15 @@ int CLASS parse_tiff_ifd(int base)
             {
               if (rafdata[fi - 15] != fwb[0])
                 continue;
-              fi = fi - 15;
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FineWeather][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FineWeather][3] =
-                  rafdata[fi];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FineWeather][0] = rafdata[fi + 1];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FineWeather][2] = rafdata[fi + 2];
 
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] =
-                  rafdata[fi + 3];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][0] = rafdata[fi + 4];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][2] = rafdata[fi + 5];
-
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][3] =
-                  rafdata[fi + 6];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][0] = rafdata[fi + 7];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][2] = rafdata[fi + 8];
-
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][3] =
-                  rafdata[fi + 9];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][0] = rafdata[fi + 10];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][2] = rafdata[fi + 11];
-
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][3] =
-                  rafdata[fi + 12];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][0] = rafdata[fi + 13];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][2] = rafdata[fi + 14];
-
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] =
-                  rafdata[fi + 15];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][0] = rafdata[fi + 16];
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][2] = rafdata[fi + 17];
-
-              fi += 111;
+              for (int wb_ind=0, ofst=fi-15; wb_ind<nFuji_wb_list; wb_ind++, ofst+=3) {
+                imgdata.color.WB_Coeffs[Fuji_wb_list[wb_ind]][1] =
+                imgdata.color.WB_Coeffs[Fuji_wb_list[wb_ind]][3] =
+                  rafdata[ofst];
+                imgdata.color.WB_Coeffs[Fuji_wb_list[wb_ind]][0] = rafdata[ofst + 1];
+                imgdata.color.WB_Coeffs[Fuji_wb_list[wb_ind]][2] = rafdata[ofst + 2];
+              }
+              fi += 0x60;
               for (fj = fi; fj < (fi + 15); fj += 3)
                 if (rafdata[fj] != rafdata[fi])
                 {
@@ -11848,9 +11840,6 @@ int CLASS parse_tiff_ifd(int base)
                 }
               if (found)
               {
-                int FujiCCT_K[31] = {2500, 2550, 2650, 2700, 2800, 2850, 2950, 3000, 3100, 3200, 3300,
-                                     3400, 3600, 3700, 3800, 4000, 4200, 4300, 4500, 4800, 5000, 5300,
-                                     5600, 5900, 6300, 6700, 7100, 7700, 8300, 9100, 10000};
                 fj = fj - 93;
                 for (int iCCT = 0; iCCT < 31; iCCT++)
                 {
@@ -13244,13 +13233,28 @@ void CLASS parse_fuji(int offset)
       float b = fMAX(1.0f, get2());
       imgdata.makernotes.fuji.FujiExpoMidPointShift = a / b;
     }
+
+    else if (tag == 0x2f00)
+    {
+      int nWBs = get4();
+      nWBs = MIN(nWBs, 6);
+      for (int wb_ind=0; wb_ind<nWBs; wb_ind++) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1+wb_ind][c ^ 1] = get2();
+        fseek (ifp, 8, SEEK_CUR);
+      }
+    }
+
+    else if (tag == 0x2000)
+    {
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ 1] = get2();
+    }
     else if (tag == 0x2100)
     {
-      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c ^ 1] = get2();
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FineWeather][c ^ 1] = get2();
     }
     else if (tag == 0x2200)
     {
-      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c ^ 1] = get2();
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c ^ 1] = get2();
     }
     else if (tag == 0x2300)
     {
@@ -13271,6 +13275,10 @@ void CLASS parse_fuji(int offset)
     else if (tag == 0x2400)
     {
       FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c ^ 1] = get2();
+    }
+    else if (tag == 0x2410)
+    {
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c ^ 1] = get2();
 #endif
       // IB end
     }
