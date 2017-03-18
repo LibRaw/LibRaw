@@ -14636,10 +14636,10 @@ void CLASS parse_fuji(int offset)
           tag = get4();
         width = tag;
         height = get4();
-      } else {
-        fseek(ifp, save+0x60, SEEK_SET);
-        width = get4();
-        height = get4();
+//      } else {
+//        fseek(ifp, save+0x60, SEEK_SET);
+//        width = get4();
+//        height = get4();
       }
 #ifdef LIBRAW_LIBRARY_BUILD
       if (!strcmp(model, "X-A3")) {
@@ -17784,8 +17784,8 @@ void CLASS identify()
     {
       left_margin = 0;
       top_margin = 0;
-//      width = raw_width;
-//      height = raw_height;
+      width = raw_width;
+      height = raw_height;
     }
     if (!strcmp(model + 7, "S2Pro"))
     {
