@@ -54,16 +54,28 @@ static size_t local_strnlen(const char *s, size_t n)
 #define strnlen(a, b) local_strnlen(a, b)
 
 #ifdef LIBRAW_LIBRARY_BUILD
-static int Fuji_wb_list[] = {LIBRAW_WBI_FineWeather,
-                            LIBRAW_WBI_Shade,
-                            LIBRAW_WBI_FL_D,
-                            LIBRAW_WBI_FL_L,
-                            LIBRAW_WBI_FL_W,
-                            LIBRAW_WBI_Tungsten};
-static int nFuji_wb_list = sizeof(Fuji_wb_list)/sizeof(int);
+static int Fuji_wb_list1[] = {LIBRAW_WBI_FineWeather,
+                              LIBRAW_WBI_Shade,
+                              LIBRAW_WBI_FL_D,
+                              LIBRAW_WBI_FL_L,
+                              LIBRAW_WBI_FL_W,
+                              LIBRAW_WBI_Tungsten};
+static int nFuji_wb_list1 = sizeof(Fuji_wb_list1)/sizeof(int);
 static int FujiCCT_K[31] = {2500, 2550, 2650, 2700, 2800, 2850, 2950, 3000, 3100, 3200, 3300,
                             3400, 3600, 3700, 3800, 4000, 4200, 4300, 4500, 4800, 5000, 5300,
                             5600, 5900, 6300, 6700, 7100, 7700, 8300, 9100, 10000};
+static int Fuji_wb_list2[] = {LIBRAW_WBI_Auto,         0,
+                              LIBRAW_WBI_Custom,       6,
+                              LIBRAW_WBI_FineWeather,  1,
+                              LIBRAW_WBI_Shade,        8,
+                              LIBRAW_WBI_FL_D,        10,
+                              LIBRAW_WBI_FL_L,        11,
+                              LIBRAW_WBI_FL_W,        12,
+                              LIBRAW_WBI_Tungsten,     2,
+                              LIBRAW_WBI_Underwater,  35,
+                              LIBRAW_WBI_Ill_A,       82,
+                              LIBRAW_WBI_D65,         83};
+static int nFuji_wb_list2 = sizeof(Fuji_wb_list2)/sizeof(int);
 
 static int Oly_wb_list1[] = {LIBRAW_WBI_Shade,
                             LIBRAW_WBI_Cloudy,
@@ -11796,10 +11808,14 @@ int CLASS parse_tiff_ifd(int base)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     case 0xf00d:
-      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
+      if (strcmp(model, "X-A3"))
+      {
+        FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
+      }
       break;
     case 0xf00c:
+    if (strcmp(model, "X-A3"))
     {
       unsigned fwb[4];
       FORC4 fwb[c] = get4();
@@ -11808,51 +11824,50 @@ int CLASS parse_tiff_ifd(int base)
         imgdata.color.WB_Coeffs[fwb[3]][0] = fwb[1];
         imgdata.color.WB_Coeffs[fwb[3]][1] = imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
         imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
-        if ((fwb[3] == 17) && libraw_internal_data.unpacker_data.lenRAFData > 3 &&
-            libraw_internal_data.unpacker_data.lenRAFData < 10240000)
+        if ((fwb[3] == 17) && (libraw_internal_data.unpacker_data.lenRAFData > 3) &&
+            (libraw_internal_data.unpacker_data.lenRAFData < 10240000))
         {
-          long long f_save = ftell(ifp);
-          int fj, found = 0;
-          ushort *rafdata = (ushort *)malloc(sizeof(ushort) * libraw_internal_data.unpacker_data.lenRAFData);
-          fseek(ifp, libraw_internal_data.unpacker_data.posRAFData, SEEK_SET);
-          fread(rafdata, sizeof(ushort), libraw_internal_data.unpacker_data.lenRAFData, ifp);
-          fseek(ifp, f_save, SEEK_SET);
-          for (int fi = 0; fi < (libraw_internal_data.unpacker_data.lenRAFData - 3); fi++)
-          {
-            if ((fwb[0] == rafdata[fi]) && (fwb[1] == rafdata[fi + 1]) && (fwb[2] == rafdata[fi + 2]))
+          INT64 f_save = ftell(ifp);
+            ushort *rafdata = (ushort *)malloc(sizeof(ushort) * libraw_internal_data.unpacker_data.lenRAFData);
+            fseek(ifp, libraw_internal_data.unpacker_data.posRAFData, SEEK_SET);
+            fread(rafdata, sizeof(ushort), libraw_internal_data.unpacker_data.lenRAFData, ifp);
+            fseek(ifp, f_save, SEEK_SET);int fj, found = 0;
+            for (int fi = 0; fi < (libraw_internal_data.unpacker_data.lenRAFData - 3); fi++)
             {
-              if (rafdata[fi - 15] != fwb[0])
-                continue;
-
-              for (int wb_ind=0, ofst=fi-15; wb_ind<nFuji_wb_list; wb_ind++, ofst+=3) {
-                imgdata.color.WB_Coeffs[Fuji_wb_list[wb_ind]][1] =
-                imgdata.color.WB_Coeffs[Fuji_wb_list[wb_ind]][3] =
-                  rafdata[ofst];
-                imgdata.color.WB_Coeffs[Fuji_wb_list[wb_ind]][0] = rafdata[ofst + 1];
-                imgdata.color.WB_Coeffs[Fuji_wb_list[wb_ind]][2] = rafdata[ofst + 2];
-              }
-              fi += 0x60;
-              for (fj = fi; fj < (fi + 15); fj += 3)
-                if (rafdata[fj] != rafdata[fi])
-                {
-                  found = 1;
-                  break;
-                }
-              if (found)
+              if ((fwb[0] == rafdata[fi]) && (fwb[1] == rafdata[fi + 1]) && (fwb[2] == rafdata[fi + 2]))
               {
-                fj = fj - 93;
-                for (int iCCT = 0; iCCT < 31; iCCT++)
-                {
-                  imgdata.color.WBCT_Coeffs[iCCT][0] = FujiCCT_K[iCCT];
-                  imgdata.color.WBCT_Coeffs[iCCT][1] = rafdata[iCCT * 3 + 1 + fj];
-                  imgdata.color.WBCT_Coeffs[iCCT][2] = imgdata.color.WBCT_Coeffs[iCCT][4] = rafdata[iCCT * 3 + fj];
-                  imgdata.color.WBCT_Coeffs[iCCT][3] = rafdata[iCCT * 3 + 2 + fj];
+                if (rafdata[fi - 15] != fwb[0])
+                  continue;
+
+                for (int wb_ind=0, ofst=fi-15; wb_ind<nFuji_wb_list1; wb_ind++, ofst+=3) {
+                  imgdata.color.WB_Coeffs[Fuji_wb_list1[wb_ind]][1] =
+                  imgdata.color.WB_Coeffs[Fuji_wb_list1[wb_ind]][3] =
+                    rafdata[ofst];
+                  imgdata.color.WB_Coeffs[Fuji_wb_list1[wb_ind]][0] = rafdata[ofst + 1];
+                  imgdata.color.WB_Coeffs[Fuji_wb_list1[wb_ind]][2] = rafdata[ofst + 2];
                 }
+                fi += 0x60;
+                for (fj = fi; fj < (fi + 15); fj += 3)
+                  if (rafdata[fj] != rafdata[fi])
+                  {
+                    found = 1;
+                    break;
+                  }
+                if (found)
+                {
+                  fj = fj - 93;
+                  for (int iCCT = 0; iCCT < 31; iCCT++)
+                  {
+                    imgdata.color.WBCT_Coeffs[iCCT][0] = FujiCCT_K[iCCT];
+                    imgdata.color.WBCT_Coeffs[iCCT][1] = rafdata[iCCT * 3 + 1 + fj];
+                    imgdata.color.WBCT_Coeffs[iCCT][2] = imgdata.color.WBCT_Coeffs[iCCT][4] = rafdata[iCCT * 3 + fj];
+                    imgdata.color.WBCT_Coeffs[iCCT][3] = rafdata[iCCT * 3 + 2 + fj];
+                  }
+                }
+                free(rafdata);
+                break;
               }
-              free(rafdata);
-              break;
             }
-          }
         }
       }
       FORC4 fwb[c] = get4();
@@ -13293,8 +13308,37 @@ void CLASS parse_fuji(int offset)
       width = tag;
       height = get4();
 #ifdef LIBRAW_LIBRARY_BUILD
-      libraw_internal_data.unpacker_data.posRAFData = save;
-      libraw_internal_data.unpacker_data.lenRAFData = (len >> 1);
+      if (!strcmp(model, "X-A3")) {
+        int wb[4];
+        int nWB, tWB, pWB;
+        int iCCT = 0;
+        int cnt;
+        fseek(ifp, save+0x200, SEEK_SET);
+        for (int wb_ind=0; wb_ind<42; wb_ind++) {
+          nWB = get4();
+          tWB = get4();
+          wb[0] = get4() << 1;
+          wb[1] = get4();
+          wb[3] = get4();
+          wb[2] = get4() << 1;
+          if (tWB && (iCCT < 255)) {
+            imgdata.color.WBCT_Coeffs[iCCT][0] = tWB;
+            for (cnt=0;cnt<4;cnt++) imgdata.color.WBCT_Coeffs[iCCT][cnt+1] = wb[cnt];
+            iCCT++;
+          }
+          if (nWB != 70) {
+            for (pWB=1; pWB<nFuji_wb_list2; pWB+=2) {
+              if (Fuji_wb_list2[pWB] == nWB) {
+                for (cnt=0;cnt<4;cnt++) imgdata.color.WB_Coeffs[Fuji_wb_list2[pWB-1]][cnt] = wb[cnt];
+                break;
+              }
+            }
+          }
+        }
+      } else {
+        libraw_internal_data.unpacker_data.posRAFData = save;
+        libraw_internal_data.unpacker_data.lenRAFData = (len >> 1);
+      }
 #endif
       order = c;
     }
