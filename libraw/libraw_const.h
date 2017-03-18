@@ -88,6 +88,7 @@ enum LibRaw_whitebalance_code
   LIBRAW_WBI_Custom5 = 94,
   LIBRAW_WBI_Custom6 = 95,
   LIBRAW_WBI_Measured = 100,
+  LIBRAW_WBI_Underwater = 120,
   LIBRAW_WBI_Other = 255
 };
 
