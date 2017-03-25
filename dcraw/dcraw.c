@@ -13159,7 +13159,8 @@ int CLASS parse_tiff_ifd(int base)
             ushort *rafdata = (ushort *)malloc(sizeof(ushort) * libraw_internal_data.unpacker_data.lenRAFData);
             fseek(ifp, libraw_internal_data.unpacker_data.posRAFData, SEEK_SET);
             fread(rafdata, sizeof(ushort), libraw_internal_data.unpacker_data.lenRAFData, ifp);
-            fseek(ifp, f_save, SEEK_SET);int fj, found = 0;
+            fseek(ifp, f_save, SEEK_SET);
+            int fj, found = 0;
             for (int fi = 0; fi < (libraw_internal_data.unpacker_data.lenRAFData - 3); fi++)
             {
               if ((fwb[0] == rafdata[fi]) && (fwb[1] == rafdata[fi + 1]) && (fwb[2] == rafdata[fi + 2]))
@@ -14626,6 +14627,27 @@ void CLASS parse_fuji(int offset)
       // IB end
     }
     else if (tag == 0xc000)
+/* 0xc000 tag versions, second ushort; valid if the first ushort is 0
+X100F	0x0259
+X100T	0x0153
+X-E2	0x014f	0x024f depends on firmware
+X-A1	0x014e
+XQ2		0x0150
+XQ1		0x0150
+X100S	0x0149	0x0249 depends on firmware
+X30		0x0152
+X20		0x0146
+X-T10	0x0154
+X-T2	0x0258
+X-M1	0x014d
+X-E2s	0x0355
+X-A2	0x014e
+X-T20	0x025b
+GFX 50S	0x025a
+X-T1	0x0151	0x0251 0x0351 depends on firmware
+X70		0x0155
+X-Pro2	0x0255
+*/
     {
       c = order;
       order = 0x4949;
