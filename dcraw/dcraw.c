@@ -8679,11 +8679,12 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       break;
 
     case 5120:
-      imgdata.makernotes.canon.CanonColorDataVer = 5; // PowerSot G10, G12, G5 X, EOS M3, EOS M5
+      imgdata.makernotes.canon.CanonColorDataVer = 5; // PowerSot G10, G12, G5 X, G7 X, G9 X, EOS M3, EOS M5, EOS M6
       {
         if ((unique_id == 0x03970000) || // G7 X Mark II
             (unique_id == 0x04100000) || // G9 X Mark II
-            (unique_id == 0x80000394))   // EOS M5
+            (unique_id == 0x80000394) || // EOS M5
+            (unique_id == 0x80000407))   // EOS M6
         {
           fseek(ifp, save1 + (0x4f << 1), SEEK_SET);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
@@ -8714,8 +8715,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
           fseek(ifp, save1 + (0x108 << 1), SEEK_SET); // offset 264 short
         }
         int bls = 0;
-        FORC4
-        bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
+        FORC4 bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
         imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
       }
       break;
@@ -9888,14 +9888,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       else if (tag == 0x10) // Canon ModelID
       {
         unique_id = get4();
-        if (unique_id == 0x03740000)
-          unique_id = 0x80000374; // M3
-        if (unique_id == 0x03840000)
-          unique_id = 0x80000384; // M10
-        if (unique_id == 0x03940000)
-          unique_id = 0x80000394; // M5
-        if (unique_id == 0x04070000)
-          unique_id = 0x80000407; // M6
+        if (unique_id == 0x03740000)       // EOS M3
+          unique_id = 0x80000374;
+        else if (unique_id == 0x03840000)  // EOS M10
+          unique_id = 0x80000384;
+        else if (unique_id == 0x03940000)  // EOS M5
+          unique_id = 0x80000394;
+        else if (unique_id == 0x04070000)  // EOS M6
+          unique_id = 0x80000407;
         setCanonBodyFeatures(unique_id);
         if (lenCanonCameraInfo)
         {
@@ -10525,12 +10525,14 @@ void CLASS parse_makernote(int base, int uptag)
       else if (tag == 0x10) // Canon ModelID
       {
         unique_id = get4();
-        if (unique_id == 0x03740000)
-          unique_id = 0x80000374; // M3
-        if (unique_id == 0x03840000)
-          unique_id = 0x80000384; // M10
-        if (unique_id == 0x03940000)
-          unique_id = 0x80000394; // M5
+        if (unique_id == 0x03740000)       // EOS M3
+          unique_id = 0x80000374;
+        else if (unique_id == 0x03840000)  // EOS M10
+          unique_id = 0x80000384;
+        else if (unique_id == 0x03940000)  // EOS M5
+          unique_id = 0x80000394;
+        else if (unique_id == 0x04070000)  // EOS M6
+          unique_id = 0x80000407;
         setCanonBodyFeatures(unique_id);
         if (lenCanonCameraInfo)
         {
@@ -15197,6 +15199,10 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 6939, -1016, -866, -4428, 12473, 2177, -1175, 2178, 6162 } },
     { "Canon EOS M3", 0, 0,
       { 6362,-823,-847,-4426,12109,2616,-743,1857,5635 } },
+
+    { "Canon EOS M6", 0, 0,  /* temp */
+      { 8532, -701, -1167, -4095, 11879, 2508, -797, 2424, 7010 }},
+
     { "Canon EOS M5", 0, 0,  /* Adobe */
       { 8532, -701, -1167, -4095, 11879, 2508, -797, 2424, 7010 }},
     { "Canon EOS M10", 0, 0,
