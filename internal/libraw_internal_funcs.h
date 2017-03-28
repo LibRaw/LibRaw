@@ -35,7 +35,7 @@ it under the terms of the one of two licenses as you choose:
     void	Canon_CameraSettings();
     void	Canon_WBpresets (int skip1, int skip2);
     void	Canon_WBCTpresets (short WBCTversion);
-    void      parseCanonMakernotes (unsigned tag, unsigned type, unsigned len);
+    void	parseCanonMakernotes (unsigned tag, unsigned type, unsigned len);
     void	processNikonLensData (uchar *LensData, unsigned len);
     void	setOlympusBodyFeatures (unsigned long long id);
     void	setPhaseOneFeatures (unsigned id);
@@ -47,7 +47,12 @@ it under the terms of the one of two licenses as you choose:
     void 	parseSonyLensFeatures (uchar a, uchar b);
     void	process_Sony_0x9050 (uchar * buf, unsigned id);
     void	process_Sony_0x940c (uchar * buf);
-    void      parseFujiMakernotes (unsigned tag, unsigned type);
+    void	parseSonyMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
+                               uchar *&table_buf_0x9050,
+                               ushort &table_buf_0x9050_present,
+                               uchar *&table_buf_0x940c,
+                               ushort &table_buf_0x940c_present);
+    void	parseFujiMakernotes (unsigned tag, unsigned type);
 
     ushort      get2();
     unsigned    sget4 (uchar *s);
@@ -231,7 +236,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 		void        parse_makernote_0xc634(int base, int uptag, unsigned dng_writer);
     void        parse_exif (int base);
     void        linear_table (unsigned len);
-    void		Kodak_WB_0x08tags(int wb, unsigned type);
+    void        Kodak_WB_0x08tags(int wb, unsigned type);
     void        parse_kodak_ifd (int base);
     int         parse_tiff_ifd (int base);
     int         parse_tiff (int base);

@@ -489,6 +489,12 @@ int main(int ac, char *av[])
         printf("BlackMaskRightBorder = %d\n", Canon.BlackMaskRightBorder);
       if (Canon.BlackMaskBottomBorder)
         printf("BlackMaskBottomBorder= %d\n", Canon.BlackMaskBottomBorder);
+      if (Canon.ChannelBlackLevel[0])
+        printf("ChannelBlackLevel (from makernotes): %d %d %d %d\n",
+                Canon.ChannelBlackLevel[0],
+                Canon.ChannelBlackLevel[1],
+                Canon.ChannelBlackLevel[2],
+                Canon.ChannelBlackLevel[3]);
 
       if (Oly.OlympusCropID != -1)
       {
