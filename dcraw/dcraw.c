@@ -14651,27 +14651,12 @@ X-Pro2	0x0255
     {
       c = order;
       order = 0x4949;
-<<<<<<< HEAD
       if ((tag = get4()) > 10000)
         tag = get4();
       if (tag > 10000)
         tag = get4();
       width = tag;
       height = get4();
-=======
-      if (strcmp(model, "X-A3")) {
-        if ((tag = get4()) > 10000)
-          tag = get4();
-        if (tag > 10000)
-          tag = get4();
-        width = tag;
-        height = get4();
-//      } else {
-//        fseek(ifp, save+0x60, SEEK_SET);
-//        width = get4();
-//        height = get4();
-      }
->>>>>>> lens
 #ifdef LIBRAW_LIBRARY_BUILD
       if (!strcmp(model, "X-A3")) {
         int wb[4];
