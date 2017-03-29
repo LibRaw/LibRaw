@@ -11907,6 +11907,7 @@ int CLASS parse_tiff_ifd(int base)
           if ((cblack[4] * cblack[5] < 2) && len == 1)
       {
 #ifdef LIBRAW_LIBRARY_BUILD
+        tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
         tiff_ifd[ifd].dng_levels.dng_black =
 #endif
             black = getreal(type);
@@ -11922,6 +11923,7 @@ int CLASS parse_tiff_ifd(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
         if (tag == 50714)
         {
+          tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
           FORC(cblack[4] * cblack[5])
           tiff_ifd[ifd].dng_levels.dng_cblack[6 + c] = cblack[6 + c];
           tiff_ifd[ifd].dng_levels.dng_black = 0;
