@@ -15329,6 +15329,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 9427,-3036,-959,-2581,10671,1911,-1039,1982,4430 } },
     { "Canon PowerShot A720", 0, 0,	/* DJC */
       { 14573,-5482,-1546,-1266,9799,1468,-1040,1912,3810 } },
+    { "Canon PowerShot D10", 127, 0,	/* DJC */
+	{ 14052,-5229,-1156,-1325,9420,2252,-498,1957,4116 } },
     { "Canon PowerShot S3 IS", 0, 0,	/* DJC */
       { 14062,-5199,-1446,-4712,12470,2243,-1286,2028,4836 } },
     { "Canon PowerShot SX110 IS", 0, 0,	/* DJC */
@@ -16747,6 +16749,7 @@ void CLASS identify()
           {15467760, 3720, 2772, 6, 12, 30, 0, 40, 0x94, 0, 2, "Canon", "PowerShot SX110 IS"},
           {15534576, 3728, 2778, 12, 9, 44, 9, 40, 0x94, 0, 2, "Canon", "PowerShot SX120 IS"},
           {18653760, 4080, 3048, 24, 12, 24, 12, 40, 0x94, 0, 2, "Canon", "PowerShot SX20 IS"},
+ 	  {18763488, 4104, 3048, 10, 22, 82, 22, 8, 0x49, 0,0, "Canon", "PowerShot D10"},
           {19131120, 4168, 3060, 92, 16, 4, 1, 40, 0x94, 0, 2, "Canon", "PowerShot SX220 HS"},
           {21936096, 4464, 3276, 25, 10, 73, 12, 40, 0x16, 0, 2, "Canon", "PowerShot SX30 IS"},
           {24724224, 4704, 3504, 8, 16, 56, 8, 40, 0x49, 0, 2, "Canon", "PowerShot A3300 IS"},
@@ -17924,10 +17927,10 @@ void CLASS identify()
   }
   else if (!strncmp(make, "Samsung", 7) && !strcmp(model, "NX3000"))
   {
-    top_margin = 24;
-    left_margin = 64;
-    width = 5472;
-    height = 3648;
+    top_margin = 38;
+    left_margin = 92;
+    width = 5456;
+    height = 3634;
     filters = 0x61616161;
     colors = 3;
   }
