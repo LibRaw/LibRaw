@@ -10622,6 +10622,17 @@ void CLASS parse_makernote(int base, int uptag)
         parseFujiMakernotes(tag, type);
     }
 
+    else if (!strncasecmp (model, "Hasselblad X1D", 14) ||
+             !strncasecmp (model, "Hasselblad H6D", 14))
+    {
+      if (tag == 0x0045) {
+        imgdata.makernotes.hasselblad.BaseISO = get4();
+      }
+      else if (tag == 0x0046) {
+        imgdata.makernotes.hasselblad.Gain = getreal(type);
+      }
+    }
+
     else if (!strncasecmp(make, "LEICA", 5))
     {
       if (((tag == 0x035e) || (tag == 0x035f)) && (type == 10) && (len == 9))
