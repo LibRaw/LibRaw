@@ -24,31 +24,38 @@ it under the terms of the one of two licenses as you choose:
 
 #ifdef __cplusplus
 
-#define LIBRAW_MSIZE 64
+#define LIBRAW_MSIZE 512
 
 class DllDef libraw_memmgr
 {
 public:
-  libraw_memmgr()
+  libraw_memmgr(unsigned ee): extra_bytes(ee)
   {
-    memset(mems, 0, sizeof(mems));
-    calloc_cnt = 0;
+	  size_t alloc_sz = LIBRAW_MSIZE*sizeof(void*);
+	  mems = (void**) ::malloc(alloc_sz);
+	  memset(mems, 0, alloc_sz);
+	  alloc_cnt = 0;
+  }
+  ~libraw_memmgr()
+  {
+	  cleanup();
+	  ::free(mems);
   }
   void *malloc(size_t sz)
   {
-    void *ptr = ::malloc(sz);
+    void *ptr = ::malloc(sz + extra_bytes);
     mem_ptr(ptr);
     return ptr;
   }
   void *calloc(size_t n, size_t sz)
   {
-    void *ptr = ::calloc(n, sz);
+    void *ptr = ::calloc(n + (extra_bytes+sz-1)/(sz?sz:1), sz);
     mem_ptr(ptr);
     return ptr;
   }
   void *realloc(void *ptr, size_t newsz)
   {
-    void *ret = ::realloc(ptr, newsz);
+    void *ret = ::realloc(ptr, newsz+extra_bytes);
     forget_ptr(ptr);
     mem_ptr(ret);
     return ret;
@@ -63,14 +70,16 @@ public:
     for (int i = 0; i < LIBRAW_MSIZE; i++)
       if (mems[i])
       {
-        free(mems[i]);
-        mems[i] = NULL;
+			::free(mems[i]);
+			alloc_cnt--;
+			mems[i] = NULL;
       }
   }
 
 private:
-  void *mems[LIBRAW_MSIZE];
-  int calloc_cnt;
+  void **mems;//, **mems2;
+  unsigned alloc_cnt;
+  unsigned extra_bytes;
   void mem_ptr(void *ptr)
   {
     if (ptr)
@@ -78,6 +87,7 @@ private:
         if (!mems[i])
         {
           mems[i] = ptr;
+		  alloc_cnt++;
           break;
         }
   }
@@ -86,7 +96,11 @@ private:
     if (ptr)
       for (int i = 0; i < LIBRAW_MSIZE; i++)
         if (mems[i] == ptr)
+		{
           mems[i] = NULL;
+		  alloc_cnt--;
+		  break;
+		}
   }
 };
 

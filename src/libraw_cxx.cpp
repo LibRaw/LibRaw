@@ -418,7 +418,7 @@ static void cleargps(libraw_gps_info_t *q)
   q->altref = q->latref = q->longref = q->gpsstatus = q->gpsparsed = 0;
 }
 
-LibRaw::LibRaw(unsigned int flags)
+LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
 {
   double aber[4] = {1, 1, 1, 1};
   double gamm[6] = {0.45, 4.5, 0, 0, 0, 0};
@@ -572,6 +572,7 @@ void LibRaw::recycle()
   } while (0)
 
   FREE(imgdata.image);
+
   FREE(imgdata.thumbnail.thumb);
   FREE(libraw_internal_data.internal_data.meta_data);
   FREE(libraw_internal_data.output_data.histogram);
@@ -581,7 +582,9 @@ void LibRaw::recycle()
   FREE(imgdata.rawdata.ph1_rblack);
   FREE(imgdata.rawdata.raw_alloc);
   FREE(imgdata.idata.xmpdata);
+
 #undef FREE
+
   ZERO(imgdata.sizes);
   ZERO(imgdata.idata);
   ZERO(imgdata.makernotes);
@@ -635,11 +638,12 @@ void LibRaw::recycle()
 
   if (_x3f_data)
   {
-    x3f_clear(_x3f_data);
-    _x3f_data = 0;
+	  x3f_clear(_x3f_data);
+	  _x3f_data = 0;
   }
 
   memmgr.cleanup();
+
   imgdata.thumbnail.tformat = LIBRAW_THUMBNAIL_UNKNOWN;
   imgdata.progress_flags = 0;
 
