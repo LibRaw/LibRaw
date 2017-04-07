@@ -44,6 +44,7 @@ it under the terms of the one of two licenses as you choose:
 #define T MyCoolRawProcessor.imgdata.thumbnail
 
 #define Canon MyCoolRawProcessor.imgdata.makernotes.canon
+#define Hasselblad MyCoolRawProcessor.imgdata.makernotes.hasselblad
 #define Fuji MyCoolRawProcessor.imgdata.makernotes.fuji
 #define Oly MyCoolRawProcessor.imgdata.makernotes.olympus
 
@@ -495,6 +496,9 @@ int main(int ac, char *av[])
                 Canon.ChannelBlackLevel[1],
                 Canon.ChannelBlackLevel[2],
                 Canon.ChannelBlackLevel[3]);
+
+      if (Hasselblad.BaseISO) printf ("Hasselblad base ISO: %d\n", Hasselblad.BaseISO);
+      if (Hasselblad.Gain) printf ("Hasselblad gain: %g\n", Hasselblad.Gain);
 
       if (Oly.OlympusCropID != -1)
       {

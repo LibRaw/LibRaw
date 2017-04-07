@@ -279,6 +279,12 @@ typedef struct
 
 typedef struct
 {
+  int BaseISO;
+  double Gain;
+} libraw_hasselblad_makernotes_t;
+
+typedef struct
+{
   float FujiExpoMidPointShift;
   ushort FujiDynamicRange;
   ushort FujiFilmMode;
@@ -606,6 +612,7 @@ typedef struct
 typedef struct
 {
   libraw_canon_makernotes_t canon;
+  libraw_hasselblad_makernotes_t hasselblad;
   libraw_fuji_info_t fuji;
   libraw_olympus_makernotes_t olympus;
   libraw_sony_info_t sony;
