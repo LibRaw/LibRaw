@@ -77,7 +77,7 @@ public:
   }
 
 private:
-  void **mems;//, **mems2;
+  void **mems;
   unsigned alloc_cnt;
   unsigned extra_bytes;
   void mem_ptr(void *ptr)
