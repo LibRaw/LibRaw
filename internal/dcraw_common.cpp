@@ -17170,6 +17170,9 @@ dng_skip:
       if (tiff_ifd[iifd].offset == data_offset) // found
         break;
 
+#define CFAROUND(value,filters) filters? \
+	(filters>=1000?((value+1)/2)*2:((value+5)/6)*6): value
+
 #define IFDCOLORINDEX(ifd, subset, bit)                                                                                \
   (tiff_ifd[ifd].dng_color[subset].parsedfields & bit) ? ifd                                                           \
                                                        : ((tiff_ifd[0].dng_color[subset].parsedfields & bit) ? 0 : -1)
@@ -17191,13 +17194,17 @@ dng_skip:
 	if(sidx >= 0 && sidx == sidx2)
 	{
 	  int lm = tiff_ifd[sidx].dng_levels.default_crop[0];
+	  int lmm = CFAROUND(lm,imgdata.idata.filters);
 	  int tm = tiff_ifd[sidx].dng_levels.default_crop[1];
+	  int tmm = CFAROUND(tm,imgdata.idata.filters);
 	  int ww = tiff_ifd[sidx].dng_levels.default_crop[2];
+	  if(lmm>lm) ww-=(lmm-lm);
+	  if(tmm>tm) hh-=(tmm-tm);
 	  int hh = tiff_ifd[sidx].dng_levels.default_crop[3];
 	  if(left_margin+lm+ww <= raw_width && top_margin+tm+hh <= raw_height)
 	  {
-	  	left_margin += lm;
-		top_margin += tm;
+	  	left_margin += lmm;
+		top_margin += tmm;
 		width = ww;
 		height= hh;
 	  }
