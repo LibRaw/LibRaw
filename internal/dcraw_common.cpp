@@ -1262,9 +1262,9 @@ void CLASS adobe_copy_pixel(unsigned row, unsigned col, ushort **rp)
   else
   {
 #ifdef LIBRAW_LIBRARY_BUILD
-	  FORC(tiff_samples)
-		  image[row * raw_width + col][c] = curve[(*rp)[c]];
-	  *rp += tiff_samples;
+      FORC(tiff_samples)
+       image[row * raw_width + col][c] = curve[(*rp)[c]];
+    *rp += tiff_samples;
 #else
     if (row < height && col < width)
       FORC(tiff_samples)
