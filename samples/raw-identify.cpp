@@ -491,14 +491,13 @@ int main(int ac, char *av[])
       if (Canon.BlackMaskBottomBorder)
         printf("BlackMaskBottomBorder= %d\n", Canon.BlackMaskBottomBorder);
       if (Canon.ChannelBlackLevel[0])
-        printf("ChannelBlackLevel (from makernotes): %d %d %d %d\n",
-                Canon.ChannelBlackLevel[0],
-                Canon.ChannelBlackLevel[1],
-                Canon.ChannelBlackLevel[2],
-                Canon.ChannelBlackLevel[3]);
+        printf("ChannelBlackLevel (from makernotes): %d %d %d %d\n", Canon.ChannelBlackLevel[0],
+               Canon.ChannelBlackLevel[1], Canon.ChannelBlackLevel[2], Canon.ChannelBlackLevel[3]);
 
-      if (Hasselblad.BaseISO) printf ("Hasselblad base ISO: %d\n", Hasselblad.BaseISO);
-      if (Hasselblad.Gain) printf ("Hasselblad gain: %g\n", Hasselblad.Gain);
+      if (Hasselblad.BaseISO)
+        printf("Hasselblad base ISO: %d\n", Hasselblad.BaseISO);
+      if (Hasselblad.Gain)
+        printf("Hasselblad gain: %g\n", Hasselblad.Gain);
 
       if (Oly.OlympusCropID != -1)
       {
@@ -747,7 +746,8 @@ int main(int ac, char *av[])
         if (C.WB_Coeffs[LIBRAW_WBI_Sunset][0])
         {
           printf("{\"%s\", \"%s\", %d, {%6.5ff, 1.0f, %6.5ff, ", P1.make, P1.model, LIBRAW_WBI_Sunset,
-                 C.WB_Coeffs[LIBRAW_WBI_Sunset][0] / (float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1], C.WB_Coeffs[LIBRAW_WBI_Sunset][2] / (float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1]);
+                 C.WB_Coeffs[LIBRAW_WBI_Sunset][0] / (float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1],
+                 C.WB_Coeffs[LIBRAW_WBI_Sunset][2] / (float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1]);
           if (C.WB_Coeffs[LIBRAW_WBI_Sunset][1] == C.WB_Coeffs[LIBRAW_WBI_Sunset][3])
             printf("1.0f}},\n");
           else

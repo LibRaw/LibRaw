@@ -638,8 +638,8 @@ void LibRaw::recycle()
 
   if (_x3f_data)
   {
-	  x3f_clear(_x3f_data);
-	  _x3f_data = 0;
+    x3f_clear(_x3f_data);
+    _x3f_data = 0;
   }
 
   memmgr.cleanup();
@@ -2165,7 +2165,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     }
     // Adjust BL for Nikon 12bit
     if ((load_raw == &LibRaw::nikon_load_raw || load_raw == &LibRaw::packed_load_raw) &&
-        !strcasecmp(imgdata.idata.make, "Nikon") && strncmp(imgdata.idata.model, "COOLPIX", 7)
+        !strcasecmp(imgdata.idata.make, "Nikon") &&
+        strncmp(imgdata.idata.model, "COOLPIX", 7)
         //	   && strncmp(imgdata.idata.model,"1 ",2)
         && libraw_internal_data.unpacker_data.tiff_bps == 12)
     {
@@ -3937,10 +3938,9 @@ void LibRaw::kodak_thumb_loader()
   int(*t_hist)[LIBRAW_HISTOGRAM_SIZE] = (int(*)[LIBRAW_HISTOGRAM_SIZE])calloc(sizeof(*t_hist), 4);
   merror(t_hist, "LibRaw::kodak_thumb_loader()");
 
-  float out[3],
-      out_cam[3][4] = {{2.81761312, -1.98369181, 0.166078627, 0},
-                       {-0.111855984, 1.73688626, -0.625030339, 0},
-                       {-0.0379119813, -0.891268849, 1.92918086, 0}};
+  float out[3], out_cam[3][4] = {{2.81761312, -1.98369181, 0.166078627, 0},
+                                 {-0.111855984, 1.73688626, -0.625030339, 0},
+                                 {-0.0379119813, -0.891268849, 1.92918086, 0}};
 
   for (img = imgdata.image[0], row = 0; row < S.height; row++)
     for (col = 0; col < S.width; col++, img += 4)
