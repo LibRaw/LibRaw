@@ -18679,13 +18679,13 @@ dng_skip:
 	if(sidx >= 0 && sidx == sidx2)
 	{
 	  int lm = tiff_ifd[sidx].dng_levels.default_crop[0];
-	  int lmm = CFAROUND(lm,imgdata.idata.filters);
+	  int lmm = CFAROUND(lm,filters);
 	  int tm = tiff_ifd[sidx].dng_levels.default_crop[1];
-	  int tmm = CFAROUND(tm,imgdata.idata.filters);
+	  int tmm = CFAROUND(tm,filters);
 	  int ww = tiff_ifd[sidx].dng_levels.default_crop[2];
+	  int hh = tiff_ifd[sidx].dng_levels.default_crop[3];
 	  if(lmm>lm) ww-=(lmm-lm);
 	  if(tmm>tm) hh-=(tmm-tm);
-	  int hh = tiff_ifd[sidx].dng_levels.default_crop[3];
 	  if(left_margin+lm+ww <= raw_width && top_margin+tm+hh <= raw_height)
 	  {
 	  	left_margin += lmm;
