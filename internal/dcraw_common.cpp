@@ -17194,10 +17194,10 @@ dng_skip:
 	  int tm = tiff_ifd[sidx].dng_levels.default_crop[1];
 	  int ww = tiff_ifd[sidx].dng_levels.default_crop[2];
 	  int hh = tiff_ifd[sidx].dng_levels.default_crop[3];
-	  if(lm+ww <= raw_width && tm+hh <= raw_height)
+	  if(left_margin+lm+ww <= raw_width && top_margin+tm+hh <= raw_height)
 	  {
-	  	left_margin = lm;
-		top_margin = tm;
+	  	left_margin += lm;
+		top_margin += tm;
 		width = ww;
 		height= hh;
 	  }
