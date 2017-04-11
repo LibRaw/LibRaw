@@ -6980,6 +6980,7 @@ void CLASS Canon_WBCTpresets(short WBCTversion)
   else if ((WBCTversion == 2) && ((unique_id == 0x80000374) || // M3
                                   (unique_id == 0x80000384) || // M10
                                   (unique_id == 0x80000394) || // M5
+                                  (unique_id == 0x80000407) || // M6
                                   (unique_id == 0x03970000) || // G7 X Mark II
                                   (unique_id == 0x04100000)))  // G9 X Mark II
     for (int i = 0; i < 15; i++)                               // tint, offset, as shot R, as shot B, CСT
