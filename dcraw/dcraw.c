@@ -11793,6 +11793,10 @@ void CLASS parse_exif(int base)
     case 34855:
       iso_speed = get2();
       break;
+    case 34865:
+      if (iso_speed == 0xffff && !strncasecmp(make, "FUJI", 4))
+        iso_speed = getreal(type);
+      break;
     case 34866:
       if (iso_speed == 0xffff && (!strncasecmp(make, "SONY", 4) || !strncasecmp(make, "CANON", 5)))
         iso_speed = getreal(type);
