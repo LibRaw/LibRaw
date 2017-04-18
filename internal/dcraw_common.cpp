@@ -1262,8 +1262,8 @@ void CLASS adobe_copy_pixel(unsigned row, unsigned col, ushort **rp)
   else
   {
 #ifdef LIBRAW_LIBRARY_BUILD
-      FORC(tiff_samples)
-       image[row * raw_width + col][c] = curve[(*rp)[c]];
+    FORC(tiff_samples)
+    image[row * raw_width + col][c] = curve[(*rp)[c]];
     *rp += tiff_samples;
 #else
     if (row < height && col < width)
@@ -11980,16 +11980,16 @@ int CLASS parse_tiff_ifd(int base)
       if (len == 2)
       {
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_CROPORIGIN;
-        tiff_ifd[ifd].dng_levels.default_crop[0] = getreal(type);
-        tiff_ifd[ifd].dng_levels.default_crop[1] = getreal(type);
+        tiff_ifd[ifd].dng_levels.default_crop[0] = getint(type);
+        tiff_ifd[ifd].dng_levels.default_crop[1] = getint(type);
       }
       break;
     case 50720: /* DefaultCropSize */
       if (len == 2)
       {
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_CROPSIZE;
-        tiff_ifd[ifd].dng_levels.default_crop[2] = getreal(type);
-        tiff_ifd[ifd].dng_levels.default_crop[3] = getreal(type);
+        tiff_ifd[ifd].dng_levels.default_crop[2] = getint(type);
+        tiff_ifd[ifd].dng_levels.default_crop[3] = getint(type);
       }
       break;
 #endif
@@ -12144,6 +12144,12 @@ int CLASS parse_tiff_ifd(int base)
         ((int *)mask)[i] = getint(type);
       black = 0;
       break;
+#ifdef LIBRAW_LIBRARY_BUILD
+    case 50970: /* PreviewColorSpace */
+      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_PREVIEWCS;
+      tiff_ifd[ifd].dng_levels.preview_colorspace = getint(type);
+      break;
+#endif
     case 51009: /* OpcodeList2 */
 #ifdef LIBRAW_LIBRARY_BUILD
       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_OPCODE2;
@@ -17176,9 +17182,15 @@ dng_skip:
     for (; iifd < tiff_nifds; iifd++)
       if (tiff_ifd[iifd].offset == data_offset) // found
         break;
+    int pifd = -1;
+    for (int ii = 0; ii < tiff_nifds; ii++)
+      if (tiff_ifd[ii].offset == thumb_offset) // found
+      {
+        pifd = ii;
+        break;
+      }
 
-#define CFAROUND(value,filters) filters? \
-	(filters>=1000?((value+1)/2)*2:((value+5)/6)*6): value
+#define CFAROUND(value, filters) filters ? (filters >= 1000 ? ((value + 1) / 2) * 2 : ((value + 5) / 6) * 6) : value
 
 #define IFDCOLORINDEX(ifd, subset, bit)                                                                                \
   (tiff_ifd[ifd].dng_color[subset].parsedfields & bit) ? ifd                                                           \
@@ -17194,30 +17206,31 @@ dng_skip:
       int sidx;
       // Per field, not per structure
 
-       if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP)
-       {
+      if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP)
+      {
         sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_CROPORIGIN);
         int sidx2 = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_CROPSIZE);
-	if(sidx >= 0 && sidx == sidx2)
-	{
-	  int lm = tiff_ifd[sidx].dng_levels.default_crop[0];
-	  int lmm = CFAROUND(lm,filters);
-	  int tm = tiff_ifd[sidx].dng_levels.default_crop[1];
-	  int tmm = CFAROUND(tm,filters);
-	  int ww = tiff_ifd[sidx].dng_levels.default_crop[2];
-	  int hh = tiff_ifd[sidx].dng_levels.default_crop[3];
-	  if(lmm>lm) ww-=(lmm-lm);
-	  if(tmm>tm) hh-=(tmm-tm);
-	  if(left_margin+lm+ww <= raw_width && top_margin+tm+hh <= raw_height)
-	  {
-	  	left_margin += lmm;
-		top_margin += tmm;
-		width = ww;
-		height= hh;
-	  }
-	}
-
-       }
+        if (sidx >= 0 && sidx == sidx2)
+        {
+          int lm = tiff_ifd[sidx].dng_levels.default_crop[0];
+          int lmm = CFAROUND(lm, filters);
+          int tm = tiff_ifd[sidx].dng_levels.default_crop[1];
+          int tmm = CFAROUND(tm, filters);
+          int ww = tiff_ifd[sidx].dng_levels.default_crop[2];
+          int hh = tiff_ifd[sidx].dng_levels.default_crop[3];
+          if (lmm > lm)
+            ww -= (lmm - lm);
+          if (tmm > tm)
+            hh -= (tmm - tm);
+          if (left_margin + lm + ww <= raw_width && top_margin + tm + hh <= raw_height)
+          {
+            left_margin += lmm;
+            top_margin += tmm;
+            width = ww;
+            height = hh;
+          }
+        }
+      }
       if (!(imgdata.color.dng_color[0].parsedfields & LIBRAW_DNGFM_FORWARDMATRIX)) // Not set already (Leica makernotes)
       {
         sidx = IFDCOLORINDEX(iifd, 0, LIBRAW_DNGFM_FORWARDMATRIX);
@@ -17257,7 +17270,12 @@ dng_skip:
         imgdata.color.dng_levels.dng_black = tiff_ifd[sidx].dng_levels.dng_black;
         COPYARR(imgdata.color.dng_levels.dng_cblack, tiff_ifd[sidx].dng_levels.dng_cblack);
       }
-
+      if (pifd >= 0)
+      {
+        sidx = IFDLEVELINDEX(pifd, LIBRAW_DNGFM_PREVIEWCS);
+        if (sidx >= 0)
+          imgdata.color.dng_levels.preview_colorspace = tiff_ifd[sidx].dng_levels.preview_colorspace;
+      }
       sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_OPCODE2);
       if (sidx >= 0)
         meta_offset = tiff_ifd[sidx].opcode2_offset;

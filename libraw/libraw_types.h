@@ -210,6 +210,7 @@ typedef struct
   unsigned dng_black;
   unsigned dng_whitelevel[4];
   unsigned default_crop[4]; /* Origin and size */
+  unsigned preview_colorspace;
   float analogbalance[4];
 } libraw_dng_levels_t;
 

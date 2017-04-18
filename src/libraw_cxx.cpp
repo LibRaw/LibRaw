@@ -2770,20 +2770,20 @@ int LibRaw::unpack(void)
       }
       else // NO LEGACY FLAG if (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY)
       {
-		  if (decoder_info.decoder_flags & LIBRAW_DECODER_ADOBECOPYPIXEL)
-		  {
-			  S.raw_pitch =S.raw_width * 8;
-		  }
-		  else
-		  {
-			  S.iwidth = S.width;
-			  S.iheight = S.height;
-			  IO.shrink = 0;
-			  if (!S.raw_pitch)
-				  S.raw_pitch =
-				  (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY_WITH_MARGINS) ? S.raw_width * 8 : S.width * 8;
-		  }
-		  // sRAW and old Foveon decoders only, so extra buffer size is just 1/4
+        if (decoder_info.decoder_flags & LIBRAW_DECODER_ADOBECOPYPIXEL)
+        {
+          S.raw_pitch = S.raw_width * 8;
+        }
+        else
+        {
+          S.iwidth = S.width;
+          S.iheight = S.height;
+          IO.shrink = 0;
+          if (!S.raw_pitch)
+            S.raw_pitch =
+                (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY_WITH_MARGINS) ? S.raw_width * 8 : S.width * 8;
+        }
+        // sRAW and old Foveon decoders only, so extra buffer size is just 1/4
         // allocate image as temporary buffer, size
         imgdata.rawdata.raw_alloc = 0;
         imgdata.image = (ushort(*)[4])calloc(unsigned(S.raw_width) * unsigned(S.raw_height), sizeof(*imgdata.image));
@@ -2815,9 +2815,8 @@ int LibRaw::unpack(void)
         imgdata.image = 0;
         // Restore saved values. Note: Foveon have masked frame
         // Other 4-color legacy data: no borders
-        if (!(libraw_internal_data.unpacker_data.load_flags & 256)
-			&& !(decoder_info.decoder_flags & LIBRAW_DECODER_ADOBECOPYPIXEL)
-			)
+        if (!(libraw_internal_data.unpacker_data.load_flags & 256) &&
+            !(decoder_info.decoder_flags & LIBRAW_DECODER_ADOBECOPYPIXEL))
         {
           S.raw_width = S.width;
           S.left_margin = 0;
