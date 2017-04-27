@@ -5767,6 +5767,7 @@ static const char *static_camera_list[] = {
 	"Sony A7R II",
 	"Sony A7S",
 	"Sony A7S II",
+	"Sony A9",
 	"Sony ILCA-68 (A68)",
 	"Sony ILCA-77M2 (A77-II)",
 	"Sony ILCA-99M2 (A99-II)",
