@@ -16059,10 +16059,8 @@ void CLASS identify()
       simple_coeff(0);
 #endif
   }
-  else if (!strncmp(make, "Pentax", 6))
+  else if (!strncmp(make, "Pentax", 6) && !strncmp(model, "K-1", 3))
   {
-    if (!strncmp(model, "K-1", 3))
-    {
       top_margin = 18;
       height = raw_height - top_margin;
       if (raw_width == 7392)
@@ -16070,7 +16068,6 @@ void CLASS identify()
         left_margin = 6;
         width = 7376;
       }
-    }
   }
   else if (!strncmp(make, "Canon", 5) && tiff_bps == 15)
   {
