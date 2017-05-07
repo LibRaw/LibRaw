@@ -16165,6 +16165,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8607,-2822,-808,-3755,11930,2049,-820,2060,5224 } },
     { "Panasonic DMC-TZ8", -15, 0,  /* markets: ZS60 TZ80 TZ81 TZ82 TZ85 */
       { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
+    { "Panasonic DC-TZ90", -15, 0,  /* temp markets: ZS70  TZ90 */
+      { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
     { "Panasonic DMC-ZS4", -15, 0,  /* markets: ZS40 TZ60 TZ61 */
       { 8607,-2822,-808,-3755,11930,2049,-820,2060,5224 } },
     { "Panasonic DMC-TZ7", -15, 0,  /* markets: ZS50 TZ70 TZ71 */
@@ -16172,6 +16174,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Panasonic DMC-ZS5", -15, 0,  /* markets: ZS50 TZ70 TZ71 */
       { 8802,-3135,-789,-3151,11468,1904,-550,1745,4810 } },
     { "Panasonic DMC-ZS6", -15, 0,  /* markets: ZS60 TZ80 TZ81 TZ85 */
+      { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
+    { "Panasonic DC-ZS70", -15, 0,  /* temp markets: ZS70  TZ90 */
       { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
     { "Panasonic DMC-ZS100", -15, 0,  /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
