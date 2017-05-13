@@ -13788,7 +13788,7 @@ void CLASS apply_tiff()
     }
   if (!dng_version)
     if (((tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 && (tiff_compress & -16) != 32768) ||
-         (tiff_bps == 8 && strncmp(make, "Phase", 5) && !strcasestr(make, "Kodak") && !strstr(model2, "DEBUG RAW"))) &&
+         (tiff_bps == 8 && strncmp(make, "Phase", 5) && strncmp(make,"Leaf",4) && !strcasestr(make, "Kodak") && !strstr(model2, "DEBUG RAW"))) &&
         strncmp(software, "Nikon Scan", 10))
       is_raw = 0;
   for (i = 0; i < tiff_nifds; i++)
