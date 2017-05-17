@@ -14432,6 +14432,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 11976,-5518,-545,-1419,10472,846,-475,1766,4524 } },
     { "Olympus TG-4", 0, 0,
      { 11426,-4159,-1126,-2066,10678,1593,-120,1327,4998 } },
+    { "Olympus TG-5", 0, 0,
+     { 11426,-4159,-1126,-2066,10678,1593,-120,1327,4998 } },
     { "Olympus XZ-10", 0, 0,
       { 9777,-3483,-925,-2886,11297,1800,-602,1663,5134 } },
     { "Olympus XZ-1", 0, 0,
@@ -16861,6 +16863,10 @@ void CLASS identify()
     else if (!strcmp(model, "TG-4"))
     {
       width -= 16;
+    }
+    else if (!strcmp(model, "TG-5"))
+    {
+      width -= 26;
     }
   }
   else if (!strcmp(model, "N Digital"))
