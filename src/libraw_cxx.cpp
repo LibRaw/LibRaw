@@ -5597,6 +5597,7 @@ static const char *static_camera_list[] = {
 	"Panasonic DMC-TZ70/71/ZS50",
 	"Panasonic DMC-TZ80/81/85/ZS60",
 	"Panasonic DC-TZ90/ZS70",
+	"Panasonic DC-ZS70 (DC-TZ90/91/92, DC-T93)",
 	"Panasonic DMC-TZ100/101/ZS100",
 	"PARROT Bebop 2",
 	"PARROT Bebop Drone",
