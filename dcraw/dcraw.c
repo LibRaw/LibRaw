@@ -13153,14 +13153,14 @@ int CLASS parse_tiff_ifd(int base)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     case 0xf00d:
-      if (strcmp(model, "X-A3"))
+      if (strcmp(model, "X-A3") && strcmp(model, "X-A10"))
       {
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
       }
       break;
     case 0xf00c:
-      if (strcmp(model, "X-A3"))
+      if (strcmp(model, "X-A3") && strcmp(model, "X-A10"))
       {
         unsigned fwb[4];
         FORC4 fwb[c] = get4();
@@ -14702,7 +14702,7 @@ void CLASS parse_fuji(int offset)
       width = tag;
       height = get4();
 #ifdef LIBRAW_LIBRARY_BUILD
-      if (!strcmp(model, "X-A3"))
+      if (!strcmp(model, "X-A3") || !strcmp(model, "X-A10"))
       {
         int wb[4];
         int nWB, tWB, pWB;
