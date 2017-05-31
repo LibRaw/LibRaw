@@ -17866,7 +17866,7 @@ void CLASS identify()
   }
   else if (!strncmp(make, "Fujifilm", 8))
   {
-    if (!strcmp(model, "X-A3"))
+    if (!strcmp(model, "X-A3") || !strcmp(model, "X-A10"))
     {
       left_margin = 0;
       top_margin = 0;
