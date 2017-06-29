@@ -7456,7 +7456,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       }
       break;
 
-    // 5DS / 5DS R / 80D / 1300D / 5D4 / 800D / 77D
+    // 5DS / 5DS R / 80D / 1300D / 5D4 / 800D / 77D / 6D II / 200D
     case 1560:
     case 1592:
     case 1353:
@@ -15223,8 +15223,10 @@ void CLASS identify()
           {0x401, "EOS 5DS R"},
           {0x404, "EOS 1300D"},
           {0x405, "EOS 800D"},
+          {0x406, "EOS 6D Mark II"},
           {0x407, "EOS M6"},
           {0x408, "EOS 77D"},
+          {0x417, "EOS 200D"},
       },
     sonique[] = {
         {0x002, "DSC-R1"},      {0x100, "DSLR-A100"},   {0x101, "DSLR-A900"},  {0x102, "DSLR-A700"},
