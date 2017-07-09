@@ -132,7 +132,7 @@ void usage(const char *prog)
          "-dngsdk   Use Adobe DNG SDK for DNG decode\n"
          "-dngflags N set DNG decoding options to value N\n"
 #endif
-         );
+  );
   exit(1);
 }
 

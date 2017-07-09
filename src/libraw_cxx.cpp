@@ -2731,9 +2731,11 @@ int LibRaw::unpack(void)
       // Disable rawspeed for double-sized Oly files
       if (!strncasecmp(imgdata.idata.make, "Olympus", 7) &&
           ((imgdata.sizes.raw_width > 6000) || !strncasecmp(imgdata.idata.model, "SH-2", 4) ||
-           !strncasecmp(imgdata.idata.model, "SH-3", 4) ||
-           !strncasecmp(imgdata.idata.model, "TG-4", 4) ||
+           !strncasecmp(imgdata.idata.model, "SH-3", 4) || !strncasecmp(imgdata.idata.model, "TG-4", 4) ||
            !strncasecmp(imgdata.idata.model, "TG-5", 4)))
+        rawspeed_enabled = 0;
+
+      if (!strncasecmp(imgdata.idata.make, "Canon", 5) && !strcasecmp(imgdata.idata.model, "EOS 6D Mark II"))
         rawspeed_enabled = 0;
 
       if (imgdata.idata.dng_version && imgdata.idata.filters == 0 &&
@@ -3353,7 +3355,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
         && load_raw != &LibRaw::foveon_sd_load_raw
 #endif
-        ) // Foveon SD to be cropped later
+    ) // Foveon SD to be cropped later
     {
       int crop[4], c, filt;
       for (int c = 0; c < 4; c++)
@@ -3577,7 +3579,7 @@ libraw_processed_image_t *LibRaw::dcraw_make_mem_thumb(int *errcode)
   if (!T.thumb)
   {
     if (!ID.toffset && !(imgdata.thumbnail.tlength > 0 && load_raw == &LibRaw::broadcom_load_raw) // RPi
-        )
+    )
     {
       if (errcode)
         *errcode = LIBRAW_NO_THUMBNAIL;
@@ -4069,7 +4071,7 @@ int LibRaw::thumbOK(INT64 maxsz)
   if (!ID.input)
     return 0;
   if (!ID.toffset && !(imgdata.thumbnail.tlength > 0 && load_raw == &LibRaw::broadcom_load_raw) // RPi
-      )
+  )
     return 0;
   INT64 fsize = ID.input->size();
   if (fsize > 0x7fffffffU)
@@ -4106,7 +4108,7 @@ int LibRaw::unpack_thumb(void)
       return LIBRAW_INPUT_CLOSED;
 
     if (!ID.toffset && !(imgdata.thumbnail.tlength > 0 && load_raw == &LibRaw::broadcom_load_raw) // RPi
-        )
+    )
     {
       return LIBRAW_NO_THUMBNAIL;
     }
