@@ -7942,7 +7942,7 @@ void CLASS setCanonBodyFeatures(unsigned id)
       (id == 0x80000232) || // 1D2N
       (id == 0x80000169) || // 1D3
       (id == 0x80000281)    // 1D4
-      )
+  )
   {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSH;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF;
@@ -7960,7 +7960,7 @@ void CLASS setCanonBodyFeatures(unsigned id)
            (id == 0x80000382) || // 5DS
            (id == 0x80000401) || // 5DS R
            (id == 0x80000302)    // 6D
-           )
+  )
   {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF;
@@ -7971,7 +7971,7 @@ void CLASS setCanonBodyFeatures(unsigned id)
            (id == 0x80000384) || // M10
            (id == 0x80000394) || // M5
            (id == 0x80000407)    // M6
-           )
+  )
   {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF_M;
@@ -9263,7 +9263,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
       (id == 354) || // ILCA-99M2
       (id == 358) || // ILCE-9
       (id == 294)    // SLT-99, Hasselblad HV
-      )
+  )
   {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
   }
@@ -9275,7 +9275,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
            (id == 342) || // DSC-RX10M2
            (id == 355) || // DSC-RX10M3
            (id == 356)    // DSC-RX100M5
-           )
+  )
   {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_1INCH;
   }
@@ -9335,7 +9335,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
       (id == 342) || // DSC-RX10M2
       (id == 355) || // DSC-RX10M3
       (id == 356)    // DSC-RX100M5
-      )
+  )
   {
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
@@ -13788,7 +13788,8 @@ void CLASS apply_tiff()
     }
   if (!dng_version)
     if (((tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 && (tiff_compress & -16) != 32768) ||
-         (tiff_bps == 8 && strncmp(make, "Phase", 5) && strncmp(make,"Leaf",4) && !strcasestr(make, "Kodak") && !strstr(model2, "DEBUG RAW"))) &&
+         (tiff_bps == 8 && strncmp(make, "Phase", 5) && strncmp(make, "Leaf", 4) && !strcasestr(make, "Kodak") &&
+          !strstr(model2, "DEBUG RAW"))) &&
         strncmp(software, "Nikon Scan", 10))
       is_raw = 0;
   for (i = 0; i < tiff_nifds; i++)
@@ -14776,7 +14777,7 @@ int CLASS parse_jpeg(int offset)
 #ifdef LIBRAW_LIBRARY_BUILD
         && (save + hlen) >= 0 && (save + hlen) <= ifp->size()
 #endif
-            ) /* "HEAP" */
+    ) /* "HEAP" */
     {
 #ifdef LIBRAW_LIBRARY_BUILD
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
@@ -15151,7 +15152,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
                        ,
                        int internal_only
 #endif
-                       )
+)
 {
   // clang-format off
   static const struct
@@ -16651,6 +16652,7 @@ void CLASS identify()
       {5920, 3950, 122, 80, 2, 0},
       {6096, 4056, 72, 34, 0, 0},  /* EOS M3 */
       {6288, 4056, 266, 36, 0, 0}, /* EOS 80D */
+      {6384, 4224, 120, 44, 0, 0}, /* 6D II */
       {6880, 4544, 136, 42, 0, 0}, /* EOS 5D4 */
       {8896, 5920, 160, 64, 0, 0},
   };
@@ -17559,13 +17561,13 @@ void CLASS identify()
   }
   else if (!strncmp(make, "Pentax", 6) && !strncmp(model, "K-1", 3))
   {
-      top_margin = 18;
-      height = raw_height - top_margin;
-      if (raw_width == 7392)
-      {
-        left_margin = 6;
-        width = 7376;
-      }
+    top_margin = 18;
+    height = raw_height - top_margin;
+    if (raw_width == 7392)
+    {
+      left_margin = 6;
+      width = 7376;
+    }
   }
   else if (!strncmp(make, "Canon", 5) && tiff_bps == 15)
   {
@@ -17884,7 +17886,7 @@ void CLASS identify()
       width = 2880;
       flip = 6;
     }
-    else if (load_raw != &CLASS packed_load_raw)
+    else if (load_raw != &CLASS packed_load_raw && strncmp(model, "X-", 2))
       maximum = (is_raw == 2 && shot_select) ? 0x2f00 : 0x3e00;
     top_margin = (raw_height - height) >> 2 << 1;
     left_margin = (raw_width - width) >> 2 << 1;
