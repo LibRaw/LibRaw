@@ -15092,6 +15092,8 @@ void CLASS initdata()
     for (int c = 0; c < 4; c++)
       tiff_ifd[i].dng_levels.analogbalance[c] = 1.0f;
   }
+  for (int i = 0; i < 0x10000; i++)
+    curve[i] = i;
   memset(gpsdata, 0, sizeof gpsdata);
   memset(cblack, 0, sizeof cblack);
   memset(white, 0, sizeof white);
