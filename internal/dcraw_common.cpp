@@ -14041,6 +14041,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 9252,-2704,-1064,-5893,14265,1717,-1101,2341,4349 } },
     { "Fujifilm GFX 50S", 0, 0,
       { 11756,-4754,-874,-3056,11045,2305,-381,1457,6006 } },
+    { "GITUP GIT2P", 4160, 0,
+	{ 8489, -2583,-1036,-8051,15583,2643,-1307,1407,7354 } },
     { "GITUP GIT2", 3200, 0,
       { 8489, -2583,-1036,-8051,15583,2643,-1307,1407,7354 } },
     { "Hasselblad Lunar", 0, 0,
@@ -15280,6 +15282,7 @@ void CLASS identify()
           {9631728, 2532, 1902, 0, 0, 0, 0, 96, 0x61, 0, 0, "Alcatel", "5035D"},
           {31850496, 4608, 3456, 0, 0, 0, 0, 0, 0x94, 0, 0, "GITUP", "GIT2 4:3"},
           {23887872, 4608, 2592, 0, 0, 0, 0, 0, 0x94, 0, 0, "GITUP", "GIT2 16:9"},
+          {32257024, 4624, 3488, 8, 2, 16, 2, 0, 0x94, 0, 0, "GITUP", "GIT2P 4:3"},
           //   Android Raw dumps id start
           //   File Size in bytes Horizontal Res Vertical Flag then bayer order eg 0x16 bbgr 0x94 rggb
           {1540857, 2688, 1520, 0, 0, 0, 0, 1, 0x61, 0, 0, "Samsung", "S3"},

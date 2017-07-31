@@ -1202,7 +1202,7 @@ int LibRaw::open_bayer(unsigned char *buffer, unsigned datalen, ushort _raw_widt
   for (int i = 0; i < 4; i++)
     imgdata.color.pre_mul[i] = 1.0;
 
-  strcpy(imgdata.idata.cdesc,"RGBG");
+  strcpy(imgdata.idata.cdesc, "RGBG");
 
   ID.input_internal = 1;
   SET_PROC_FLAG(LIBRAW_PROGRESS_IDENTIFY);
@@ -5176,6 +5176,7 @@ static const char *static_camera_list[] = {
 	"FujiFilm IS-1",
 	"Gione E7",
 	"GITUP GIT2",
+	"GITUP GIT2P",
 	"Google Pixel",
 	"Google Pixel XL",
 	"Hasselblad H2D-22",
