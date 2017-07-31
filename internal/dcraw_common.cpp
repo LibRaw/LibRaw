@@ -11981,16 +11981,16 @@ int CLASS parse_tiff_ifd(int base)
       if (len == 2)
       {
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_CROPORIGIN;
-        tiff_ifd[ifd].dng_levels.default_crop[0] = getint(type);
-        tiff_ifd[ifd].dng_levels.default_crop[1] = getint(type);
+        tiff_ifd[ifd].dng_levels.default_crop[0] = getreal(type);
+        tiff_ifd[ifd].dng_levels.default_crop[1] = getreal(type);
       }
       break;
     case 50720: /* DefaultCropSize */
       if (len == 2)
       {
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_CROPSIZE;
-        tiff_ifd[ifd].dng_levels.default_crop[2] = getint(type);
-        tiff_ifd[ifd].dng_levels.default_crop[3] = getint(type);
+        tiff_ifd[ifd].dng_levels.default_crop[2] = getreal(type);
+        tiff_ifd[ifd].dng_levels.default_crop[3] = getreal(type);
       }
       break;
 #endif
