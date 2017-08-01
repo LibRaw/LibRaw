@@ -10367,12 +10367,16 @@ void CLASS parse_makernote(int base, int uptag)
         FORC4 cam_mul[c ^ (c >> 1)] -= get4();
     }
 #ifdef LIBRAW_LIBRARY_BUILD
-    if (tag == 0x4021 && (imgdata.makernotes.canon.multishot[0]=get4())
-     && (imgdata.makernotes.canon.multishot[1] = get4()))
-     {
-      imgdata.makernotes.canon.multishot[2] = get4();
+    if (tag == 0x4021 && (imgdata.makernotes.canon.multishot[0] = get4()) &&
+        (imgdata.makernotes.canon.multishot[1] = get4()))
+    {
+      if (len >= 4)
+      {
+        imgdata.makernotes.canon.multishot[2] = get4();
+        imgdata.makernotes.canon.multishot[3] = get4();
+      }
       FORC4 cam_mul[c] = 1024;
-     }
+    }
 #else
     if (tag == 0x4021 && get4() && get4())
       FORC4 cam_mul[c] = 1024;
