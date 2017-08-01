@@ -226,6 +226,8 @@ typedef struct
   int SpecularWhiteLevel;
   int ChannelBlackLevel[4];
   int AverageBlackLevel;
+  /* multishot */
+  unsigned int multishot[3];
   /* metering */
   short MeteringMode;
   short SpotMeteringMode;
