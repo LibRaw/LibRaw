@@ -5864,6 +5864,8 @@ static const char *static_camera_list[] = {
 	"JaiPulnix BB-500CL",
 	"JaiPulnix BB-500GE",
 	"SVS SVS625CL",
+	"YUNEEC CGO3",
+	"YUNEEC CGO3P",
 	"YUNEEC CGO4",
 	"Xiaomi MI3",
 	"Xiaomi RedMi Note3 Pro",
