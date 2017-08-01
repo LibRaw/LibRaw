@@ -227,7 +227,7 @@ typedef struct
   int ChannelBlackLevel[4];
   int AverageBlackLevel;
   /* multishot */
-  unsigned int multishot[3];
+  unsigned int multishot[4];
   /* metering */
   short MeteringMode;
   short SpotMeteringMode;

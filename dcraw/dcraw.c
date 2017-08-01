@@ -11693,6 +11693,7 @@ void CLASS parse_makernote(int base, int uptag)
      && (imgdata.makernotes.canon.multishot[1] = get4()))
      {
       imgdata.makernotes.canon.multishot[2] = get4();
+      imgdata.makernotes.canon.multishot[3] = get4();
       FORC4 cam_mul[c] = 1024;
      }
 #else
