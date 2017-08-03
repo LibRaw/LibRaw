@@ -45,6 +45,7 @@ int CLASS fcol(int row, int col)
     return xtrans[(row + 6) % 6][(col + 6) % 6];
   return FC(row, col);
 }
+#if !defined(__FreeBSD__)
 static size_t local_strnlen(const char *s, size_t n)
 {
   const char *p = (const char *)memchr(s, 0, n);
@@ -52,6 +53,7 @@ static size_t local_strnlen(const char *s, size_t n)
 }
 /* add OS X version check here ?? */
 #define strnlen(a, b) local_strnlen(a, b)
+#endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
 static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
@@ -63,7 +65,7 @@ static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
 #define stmread(buf, maxlen, fp) stread(buf, MIN(maxlen, sizeof(buf)), fp)
 #endif
 
-#ifndef __GLIBC__
+#if !defined(__GLIBC__) && !defined(__FreeBSD__)
 char *my_memmem(char *haystack, size_t haystacklen, char *needle, size_t needlelen)
 {
   char *c;
