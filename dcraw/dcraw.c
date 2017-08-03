@@ -2768,7 +2768,7 @@ void CLASS unpacked_load_raw()
   while (1 << ++bits < maximum)
     ;
   read_shorts(raw_image, raw_width * raw_height);
-  if (maximum < 0xffff)
+  if (maximum < 0xffff || load_flags)
     for (row = 0; row < raw_height; row++)
     {
 #ifdef LIBRAW_LIBRARY_BUILD
