@@ -356,6 +356,7 @@ typedef struct
   uchar FlashGroupControlMode[4];
   uchar FlashGroupOutputAndCompensation[4];
   uchar FlashColorFilter;
+  ushort NEFCompression;
 } libraw_nikon_makernotes_t;
 
 typedef struct
@@ -616,6 +617,7 @@ typedef struct
 typedef struct
 {
   libraw_canon_makernotes_t canon;
+  libraw_nikon_makernotes_t nikon;
   libraw_hasselblad_makernotes_t hasselblad;
   libraw_fuji_info_t fuji;
   libraw_olympus_makernotes_t olympus;

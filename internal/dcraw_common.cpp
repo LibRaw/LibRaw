@@ -8690,7 +8690,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       }
       else if (tag == 0x0093)
       {
-        i = get2();
+        imgdata.makernotes.nikon.NEFCompression = i = get2();
         if ((i == 7) || (i == 9))
         {
           imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
@@ -9403,7 +9403,7 @@ void CLASS parse_makernote(int base, int uptag)
       }
       else if (tag == 0x0093) // Nikon compression
       {
-        i = get2();
+        imgdata.makernotes.nikon.NEFCompression = i = get2();
         if ((i == 7) || (i == 9))
         {
           imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
