@@ -1,3 +1,35 @@
+2017-08-12  Alex Tutubalin <lexa@lexa.ru>
+ * 0.19-Snapshot-20170812
+ * Camera support (981 total):
+    BlackMagic URSA Mini 4k,URSA Mini 4.6k, URSA Mini Pro 4.6k
+    Canon PowerShot G9 X Mark II, EOS 6D Mark II, 77D, 200D, 800D, EOS M6
+    FujiFilm X-A3,X-A10
+    GITUP GIT2P
+    Leica TL2
+    Nikon D7500
+    Olympus TG-5
+    Panasonic DC-GH5, DC-ZS70 (DC-TZ90/91/92, DC-T93)
+    PARROT Bebop 2, Bebop Drone
+    Pentax KP
+    Sony A9
+    YUNEEC CGO3, CGO3P
+    Several mobile phones cameras (DNG format)
+ * Fuji 14-bit uncompressed decoder (X-A3)
+ * Better DNG parser:
+    - support for DefaultCrop Origin/Size tags (add LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP to raw_processing_options to enable)
+    - better parsing for nested DNG tags (use tag from RAW IFD, fallback to IFD0 if no tag in current IFD)
+    - DNG PreviewColorspace extracted into dng_levels.preview_colorspace
+ * Metadata extraction:
+  - Better extraction of camera measured balance (LIBRAW_WBI_Auto and WBI_Measured), this not the same as 'as shot' if some preset/manual tune is used.
+  - Extraction of camera custom balances (LIBRAW_WBI_CustomN)
+  - Nikon data compression tag extracted into  makernotes.nikon.NEFCompression 
+  - Hasselblad BaseISO and Gain extracted into makernotes.hasselblad
+  - Canon multishot params extracted into makernotes.canon.multishot
+
+ * Color data added/updated/fixed for many cameras
+ * Correct data maximum for Fuji X-* cameras
+
+
 2017-02-12  Alex Tutubalin <lexa@lexa.ru>
  * 0.19-Snapshot-20170212
  * Fuji compressed decoder updated to handle Bayer compressed data (GFX 50s)
