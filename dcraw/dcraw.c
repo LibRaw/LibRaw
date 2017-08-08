@@ -2719,7 +2719,7 @@ void CLASS leaf_hdr_load_raw()
   ushort *pixel = 0;
   unsigned tile = 0, r, c, row, col;
 
-  if (!filters)
+  if (!filters || !raw_image)
   {
     pixel = (ushort *)calloc(raw_width, sizeof *pixel);
     merror(pixel, "leaf_hdr_load_raw()");
@@ -2741,10 +2741,10 @@ void CLASS leaf_hdr_load_raw()
       }
       if (filters && c != shot_select)
         continue;
-      if (filters)
+      if (filters && raw_image)
         pixel = raw_image + r * raw_width;
       read_shorts(pixel, raw_width);
-      if (!filters && (row = r - top_margin) < height)
+      if (!filters && image && (row = r - top_margin) < height)
         for (col = 0; col < width; col++)
           image[row * width + col][c] = pixel[col + left_margin];
     }

@@ -29,7 +29,6 @@
  * Color data added/updated/fixed for many cameras
  * Correct data maximum for Fuji X-* cameras
 
-
 2017-02-12  Alex Tutubalin <lexa@lexa.ru>
  * 0.19-Snapshot-20170212
  * Fuji compressed decoder updated to handle Bayer compressed data (GFX 50s)
