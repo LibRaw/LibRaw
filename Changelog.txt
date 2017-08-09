@@ -1,9 +1,9 @@
 2017-08-12  Alex Tutubalin <lexa@lexa.ru>
  * 0.19-Snapshot-20170812
  * Camera support (981 total):
-    BlackMagic URSA Mini 4k,URSA Mini 4.6k, URSA Mini Pro 4.6k
+    BlackMagic URSA Mini 4k, URSA Mini 4.6k, URSA Mini Pro 4.6k
     Canon PowerShot G9 X Mark II, EOS 6D Mark II, 77D, 200D, 800D, EOS M6
-    FujiFilm X-A3,X-A10
+    FujiFilm X-A3, X-A10
     GITUP GIT2P
     Leica TL2
     Nikon D7500
@@ -13,12 +13,15 @@
     Pentax KP
     Sony A9
     YUNEEC CGO3, CGO3P
-    Several mobile phones cameras (DNG format)
+    Several mobile phones cameras (DNG format, only really tested cameras added to camera list)
+
  * Fuji 14-bit uncompressed decoder (X-A3)
+
  * Better DNG parser:
     - support for DefaultCrop Origin/Size tags (add LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP to raw_processing_options to enable)
     - better parsing for nested DNG tags (use tag from RAW IFD, fallback to IFD0 if no tag in current IFD)
     - DNG PreviewColorspace extracted into dng_levels.preview_colorspace
+
  * Metadata extraction:
   - Better extraction of camera measured balance (LIBRAW_WBI_Auto and WBI_Measured), this not the same as 'as shot' if some preset/manual tune is used.
   - Extraction of camera custom balances (LIBRAW_WBI_CustomN)
@@ -28,6 +31,12 @@
 
  * Color data added/updated/fixed for many cameras
  * Correct data maximum for Fuji X-* cameras
+ * Thumbnail processing:
+   - JPEG thumbnails: if compiled with libjpeg, color count is extracted into imgdata.thumbnail.tcolors
+   - PPM (bitmap) thumbnails: color count is set according to thumbnail IFD tag
+   - PPM16 thumbnails: if LIBRAW_PROCESSING_USE_PPM16_THUMBS set in raw_processing_options, than thumbnail will be extracted
+     as is, not converted to 8 bit. thumbnail.tformat is set to LIBRAW_THUMBNAIL_BITMAP16 in this case.
+     Untested, because it is hard to find RAWs with 16-bit bitmaps.
 
 2017-02-12  Alex Tutubalin <lexa@lexa.ru>
  * 0.19-Snapshot-20170212
