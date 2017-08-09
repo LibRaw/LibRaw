@@ -4085,7 +4085,8 @@ int LibRaw::thumbOK(INT64 maxsz)
   else if (write_thumb == &LibRaw::ppm_thumb)
     tsize = tcol * T.twidth * T.theight;
   else if (write_thumb == &LibRaw::ppm16_thumb)
-    tsize = tcol * T.twidth * T.theight * ((imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_PPM16_THUMBS)?2:1);
+    tsize = tcol * T.twidth * T.theight *
+            ((imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_PPM16_THUMBS) ? 2 : 1);
   else if (write_thumb == &LibRaw::x3f_thumb_loader)
   {
     tsize = x3f_thumb_size();
@@ -4099,15 +4100,16 @@ int LibRaw::thumbOK(INT64 maxsz)
   return (tsize + ID.toffset <= fsize) ? 1 : 0;
 }
 
-struct jpegErrorManager {
-	struct jpeg_error_mgr pub;
-	jmp_buf setjmp_buffer;
+struct jpegErrorManager
+{
+  struct jpeg_error_mgr pub;
+  jmp_buf setjmp_buffer;
 };
 
 static void jpegErrorExit(j_common_ptr cinfo)
 {
-	jpegErrorManager* myerr = (jpegErrorManager*)cinfo->err;
-	longjmp(myerr->setjmp_buffer, 1);
+  jpegErrorManager *myerr = (jpegErrorManager *)cinfo->err;
+  longjmp(myerr->setjmp_buffer, 1);
 }
 
 int LibRaw::unpack_thumb(void)
@@ -4120,8 +4122,8 @@ int LibRaw::unpack_thumb(void)
     if (!libraw_internal_data.internal_data.input)
       return LIBRAW_INPUT_CLOSED;
 
-	int t_colors = libraw_internal_data.unpacker_data.thumb_misc >> 5 & 7;
-	int t_bytesps = (libraw_internal_data.unpacker_data.thumb_misc & 31)/8;
+    int t_colors = libraw_internal_data.unpacker_data.thumb_misc >> 5 & 7;
+    int t_bytesps = (libraw_internal_data.unpacker_data.thumb_misc & 31) / 8;
 
     if (!ID.toffset && !(imgdata.thumbnail.tlength > 0 && load_raw == &LibRaw::broadcom_load_raw) // RPi
     )
@@ -4168,24 +4170,25 @@ int LibRaw::unpack_thumb(void)
 #ifdef NO_JPEG
         T.tcolors = 3;
 #else
-		{
-			jpegErrorManager jerr;
-			struct jpeg_decompress_struct cinfo;
-			cinfo.err = jpeg_std_error(&jerr.pub);
-			jerr.pub.error_exit = jpegErrorExit;
-			if (setjmp(jerr.setjmp_buffer))
-			{
-err2:
-				jpeg_destroy_decompress(&cinfo);
-				T.tcolors = 3;
-			}
-			jpeg_create_decompress(&cinfo);
-			jpeg_mem_src(&cinfo, (unsigned char*)T.thumb, T.tlength);
-			int rc = jpeg_read_header(&cinfo, TRUE);
-			if (rc != 1) goto err2;
-			T.tcolors = (cinfo.num_components >0 && cinfo.num_components <=3)?cinfo.num_components:3;
-			jpeg_destroy_decompress(&cinfo);
-		}
+        {
+          jpegErrorManager jerr;
+          struct jpeg_decompress_struct cinfo;
+          cinfo.err = jpeg_std_error(&jerr.pub);
+          jerr.pub.error_exit = jpegErrorExit;
+          if (setjmp(jerr.setjmp_buffer))
+          {
+          err2:
+            jpeg_destroy_decompress(&cinfo);
+            T.tcolors = 3;
+          }
+          jpeg_create_decompress(&cinfo);
+          jpeg_mem_src(&cinfo, (unsigned char *)T.thumb, T.tlength);
+          int rc = jpeg_read_header(&cinfo, TRUE);
+          if (rc != 1)
+            goto err2;
+          T.tcolors = (cinfo.num_components > 0 && cinfo.num_components <= 3) ? cinfo.num_components : 3;
+          jpeg_destroy_decompress(&cinfo);
+        }
 #endif
         T.tformat = LIBRAW_THUMBNAIL_JPEG;
         SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
@@ -4193,17 +4196,17 @@ err2:
       }
       else if (write_thumb == &LibRaw::ppm_thumb)
       {
-		if(t_bytesps>1)
-			throw LIBRAW_EXCEPTION_IO_CORRUPT; // 8-bit thumb, but parsed for more bits
+        if (t_bytesps > 1)
+          throw LIBRAW_EXCEPTION_IO_CORRUPT; // 8-bit thumb, but parsed for more bits
         int t_length = T.twidth * T.theight * t_colors;
-		if(!T.tlength)
-			T.tlength = t_length;
+        if (!T.tlength)
+          T.tlength = t_length;
         if (T.thumb)
           free(T.thumb);
 
         T.thumb = (char *)malloc(T.tlength);
-		if(!T.tcolors)
-			T.tcolors = t_colors;
+        if (!T.tcolors)
+          T.tcolors = t_colors;
         merror(T.thumb, "ppm_thumb()");
 
         ID.input->read(T.thumb, 1, T.tlength);
@@ -4214,34 +4217,34 @@ err2:
       }
       else if (write_thumb == &LibRaw::ppm16_thumb)
       {
-		if(t_bytesps>2)
-			throw LIBRAW_EXCEPTION_IO_CORRUPT; // 16-bit thumb, but parsed for more bits
-		int o_bps = (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_PPM16_THUMBS)?2:1;
-	    int o_length = T.twidth * T.theight * t_colors * o_bps;
-		int i_length = T.twidth * T.theight * t_colors * 2;
-		if(!T.tlength)
-			T.tlength = o_length;
-        ushort *t_thumb = (ushort *)calloc(o_length, 1); 
+        if (t_bytesps > 2)
+          throw LIBRAW_EXCEPTION_IO_CORRUPT; // 16-bit thumb, but parsed for more bits
+        int o_bps = (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_PPM16_THUMBS) ? 2 : 1;
+        int o_length = T.twidth * T.theight * t_colors * o_bps;
+        int i_length = T.twidth * T.theight * t_colors * 2;
+        if (!T.tlength)
+          T.tlength = o_length;
+        ushort *t_thumb = (ushort *)calloc(o_length, 1);
         ID.input->read(t_thumb, 1, i_length);
         if ((libraw_internal_data.unpacker_data.order == 0x4949) == (ntohs(0x1234) == 0x1234))
           swab((char *)t_thumb, (char *)t_thumb, i_length);
 
         if (T.thumb)
           free(T.thumb);
-		if((imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_PPM16_THUMBS))
-		{
-			T.thumb = (char*)t_thumb;
-			T.tformat = LIBRAW_THUMBNAIL_BITMAP16;
-		}
-		else
-		{
-			T.thumb = (char *)malloc(o_length);
-			merror(T.thumb, "ppm_thumb()");
-			for (int i = 0; i < o_length; i++)
-				T.thumb[i] = t_thumb[i] >> 8;
-			free(t_thumb);
-			T.tformat = LIBRAW_THUMBNAIL_BITMAP;
-		}
+        if ((imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_PPM16_THUMBS))
+        {
+          T.thumb = (char *)t_thumb;
+          T.tformat = LIBRAW_THUMBNAIL_BITMAP16;
+        }
+        else
+        {
+          T.thumb = (char *)malloc(o_length);
+          merror(T.thumb, "ppm_thumb()");
+          for (int i = 0; i < o_length; i++)
+            T.thumb[i] = t_thumb[i] >> 8;
+          free(t_thumb);
+          T.tformat = LIBRAW_THUMBNAIL_BITMAP;
+        }
         SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
         return 0;
       }
