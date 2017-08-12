@@ -1,6 +1,6 @@
 2017-08-12  Alex Tutubalin <lexa@lexa.ru>
  * 0.19-Snapshot-20170812
- * Camera support (981 total):
+ * Camera support (984 total):
     BlackMagic URSA Mini 4k, URSA Mini 4.6k, URSA Mini Pro 4.6k
     Canon PowerShot G9 X Mark II, EOS 6D Mark II, 77D, 200D, 800D, EOS M6
     FujiFilm X-A3, X-A10
@@ -8,10 +8,12 @@
     Leica TL2
     Nikon D7500
     Olympus TG-5
+    OnePlus A5000
     Panasonic DC-GH5, DC-ZS70 (DC-TZ90/91/92, DC-T93)
     PARROT Bebop 2, Bebop Drone
     Pentax KP
     Sony A9
+    Yi M1
     YUNEEC CGO3, CGO3P
     Several mobile phones cameras (DNG format, only really tested cameras added to camera list)
 
