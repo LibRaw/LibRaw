@@ -32,8 +32,10 @@
   - Canon multishot params extracted into makernotes.canon.multishot
 
  * Color data added/updated/fixed for many cameras
- * Correct data maximum for Fuji X-* cameras
- * Thumbnail processing:
+
+* Correct data maximum for Fuji X-* cameras
+
+* Thumbnail processing:
    - JPEG thumbnails: if compiled with libjpeg, color count is extracted into imgdata.thumbnail.tcolors
    - PPM (bitmap) thumbnails: color count is set according to thumbnail IFD tag
    - PPM16 thumbnails: if LIBRAW_PROCESSING_USE_PPM16_THUMBS set in raw_processing_options, than thumbnail will be extracted
