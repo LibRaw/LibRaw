@@ -7996,12 +7996,28 @@ void CLASS setCanonBodyFeatures(unsigned id)
   return;
 }
 
-void CLASS processCanonCameraInfo(unsigned id, uchar *CameraInfo, unsigned maxlen)
+void CLASS processCanonCameraInfo(unsigned id, uchar *CameraInfo, unsigned maxlen, unsigned type)
 {
   ushort iCanonLensID = 0, iCanonMaxFocal = 0, iCanonMinFocal = 0, iCanonLens = 0, iCanonCurFocal = 0,
          iCanonFocalType = 0;
   CameraInfo[0] = 0;
   CameraInfo[1] = 0;
+  if (type == 4) {
+    if ((maxlen == 94)  ||
+        (maxlen == 138) ||
+        (maxlen == 148) ||
+        (maxlen == 156) ||
+        (maxlen == 162) ||
+        (maxlen == 167) ||
+        (maxlen == 171) ||
+        (maxlen == 264) ||
+        (maxlen > 400))
+         imgdata.other.CameraTemperature = sget4(CameraInfo + ((maxlen-3)<<2));
+      else if (maxlen == 72) imgdata.other.CameraTemperature = sget4(CameraInfo + ((maxlen-1)<<2));
+      else if ((maxlen == 85) || (maxlen == 93)) imgdata.other.CameraTemperature = sget4(CameraInfo + ((maxlen-2)<<2));
+      else if ((maxlen == 96) || (maxlen == 104)) imgdata.other.CameraTemperature = sget4(CameraInfo + ((maxlen-4)<<2));
+  }
+
   switch (id)
   {
   case 0x80000001: // 1D
@@ -8016,6 +8032,7 @@ void CLASS processCanonCameraInfo(unsigned id, uchar *CameraInfo, unsigned maxle
       imgdata.lens.makernotes.MinFocal = sget2(CameraInfo + iCanonMinFocal);
     if (!imgdata.lens.makernotes.MaxFocal)
       imgdata.lens.makernotes.MaxFocal = sget2(CameraInfo + iCanonMaxFocal);
+    imgdata.other.CameraTemperature = 0.0f;
     break;
   case 0x80000174: // 1DMkII
   case 0x80000188: // 1DsMkII
@@ -8482,7 +8499,16 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
   else if (tag == 0x0004) // shot info
   {
     short tempAp;
-    fseek(ifp, 30, SEEK_CUR);
+
+    fseek(ifp, 24, SEEK_CUR);
+    tempAp = get2();
+    if (tempAp != 0) {
+      imgdata.other.CameraTemperature = (float)(tempAp-128);
+    }
+    imgdata.other.FlashGN = ((float)get2()) / 32;
+    get2();
+
+    // fseek(ifp, 30, SEEK_CUR);
     imgdata.other.FlashEC = _CanonConvertEV((signed short)get2());
     fseek(ifp, 8 - 32, SEEK_CUR);
     if ((tempAp = get2()) != 0x7fff)
@@ -9808,6 +9834,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
+  unsigned typeCanonCameraInfo = 0;
 
   uchar *table_buf;
   uchar *table_buf_0x9050;
@@ -9880,9 +9907,15 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     {
       if (tag == 0x000d && len < 256000) // camera info
       {
-        CanonCameraInfo = (uchar *)malloc(len);
-        fread(CanonCameraInfo, len, 1, ifp);
+        if (type != 4) {
+          CanonCameraInfo = (uchar *)malloc(len);
+          fread(CanonCameraInfo, len, 1, ifp);
+        } else {
+          CanonCameraInfo = (uchar *)malloc(len*4);
+          fread(CanonCameraInfo, len, 4, ifp);
+        }
         lenCanonCameraInfo = len;
+        typeCanonCameraInfo = type;
       }
 
       else if (tag == 0x10) // Canon ModelID
@@ -9899,7 +9932,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         setCanonBodyFeatures(unique_id);
         if (lenCanonCameraInfo)
         {
-          processCanonCameraInfo(unique_id, CanonCameraInfo, lenCanonCameraInfo);
+          processCanonCameraInfo(unique_id, CanonCameraInfo, lenCanonCameraInfo, typeCanonCameraInfo);
           free(CanonCameraInfo);
           CanonCameraInfo = 0;
           lenCanonCameraInfo = 0;
@@ -10382,6 +10415,7 @@ void CLASS parse_makernote(int base, int uptag)
 
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
+  unsigned typeCanonCameraInfo = 0;
 
   uchar *table_buf;
   uchar *table_buf_0x9050;
@@ -10515,9 +10549,15 @@ void CLASS parse_makernote(int base, int uptag)
     {
       if (tag == 0x000d && len < 256000) // camera info
       {
-        CanonCameraInfo = (uchar *)malloc(len);
-        fread(CanonCameraInfo, len, 1, ifp);
+        if (type != 4) {
+          CanonCameraInfo = (uchar *)malloc(len);
+          fread(CanonCameraInfo, len, 1, ifp);
+        } else {
+          CanonCameraInfo = (uchar *)malloc(len*4);
+          fread(CanonCameraInfo, len, 4, ifp);
+        }
         lenCanonCameraInfo = len;
+        typeCanonCameraInfo = type;
       }
 
       else if (tag == 0x10) // Canon ModelID
@@ -10534,7 +10574,7 @@ void CLASS parse_makernote(int base, int uptag)
         setCanonBodyFeatures(unique_id);
         if (lenCanonCameraInfo)
         {
-          processCanonCameraInfo(unique_id, CanonCameraInfo, lenCanonCameraInfo);
+          processCanonCameraInfo(unique_id, CanonCameraInfo, lenCanonCameraInfo, typeCanonCameraInfo);
           free(CanonCameraInfo);
           CanonCameraInfo = 0;
           lenCanonCameraInfo = 0;

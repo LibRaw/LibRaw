@@ -455,6 +455,8 @@ typedef struct
   libraw_gps_info_t parsed_gps;
   char desc[512], artist[64];
   float FlashEC;
+  float FlashGN;
+  float CameraTemperature;
 } libraw_imgother_t;
 
 typedef struct

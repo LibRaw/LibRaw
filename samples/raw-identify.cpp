@@ -437,6 +437,8 @@ int main(int ac, char *av[])
       printf("%0.1f sec\n", P2.shutter);
       printf("Aperture: f/%0.1f\n", P2.aperture);
       printf("Focal length: %0.1f mm\n", P2.focal_len);
+      printf("Camera temperature: %6.2f° C\n", P2.CameraTemperature);
+      printf("Flash Guide Number: %6.2f\n", P2.FlashGN);
       printf("Flash exposure compensation: %0.2f EV\n", P2.FlashEC);
       if (C.profile)
         printf("Embedded ICC profile: yes, %d bytes\n", C.profile_length);
