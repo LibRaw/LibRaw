@@ -8927,7 +8927,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         imgdata.other.CameraTemperature = (float)get2();
         break;
       case 0x20501500:
-        {
+        if (OlyID != 0x0ULL) {
           short temp = get2();
           if (((OlyID == 0x4434303430ULL)  || // E-1
                (OlyID == 0x5330303336ULL)) || // E-M5
@@ -9622,7 +9622,7 @@ void CLASS parse_makernote(int base, int uptag)
         imgdata.other.CameraTemperature = (float)get2();
         break;
       case 0x20501500:
-        {
+        if (OlyID != 0x0ULL) {
           short temp = get2();
           if (((OlyID == 0x4434303430ULL)  || // E-1
                (OlyID == 0x5330303336ULL)) || // E-M5
@@ -15759,13 +15759,13 @@ void CLASS identify()
   iso_speed = shutter = aperture = focal_len = unique_id = 0;
   tiff_nifds = 0;
   memset(tiff_ifd, 0, sizeof tiff_ifd);
-  
+
 #ifdef LIBRAW_LIBRARY_BUILD
   imgdata.other.CameraTemperature =
   imgdata.other.SensorTemperature =
   imgdata.other.LensTemperature =
   imgdata.other.AmbientTemperature = -1000;
-  
+
   for (i = 0; i < LIBRAW_IFD_MAXCOUNT; i++)
   {
     tiff_ifd[i].dng_color[0].illuminant = tiff_ifd[i].dng_color[1].illuminant = 0xffff;
