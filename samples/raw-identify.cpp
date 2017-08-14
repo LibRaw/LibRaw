@@ -152,7 +152,7 @@ int main(int ac, char *av[])
 
       printf("\nFilename: %s\n", av[i]);
       printf("Timestamp: %s", ctime(&(P2.timestamp)));
-      printf("Camera: %s %s\n", P1.make, P1.model);
+      printf("Camera: %s %s ID: 0x%x\n", P1.make, P1.model, mnLens.CamID);
       if (ShootingInfo.BodySerial[0])
       {
         trimSpaces(ShootingInfo.BodySerial);
