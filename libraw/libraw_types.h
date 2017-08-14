@@ -457,6 +457,9 @@ typedef struct
   float FlashEC;
   float FlashGN;
   float CameraTemperature;
+  float SensorTemperature;
+  float LensTemperature;
+  float AmbientTemperature;
 } libraw_imgother_t;
 
 typedef struct

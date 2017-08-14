@@ -112,6 +112,7 @@ typedef struct
 {
   unsigned olympus_exif_cfa;
   unsigned unique_id;
+  unsigned long long OlyID;
   unsigned tiff_nifds;
   int tiff_flip;
 } identify_data_t;

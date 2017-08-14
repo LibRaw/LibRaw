@@ -10171,7 +10171,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       case 0x20100100:
       {
         uchar sOlyID[8];
-        unsigned long long OlyID;
         fread(sOlyID, MIN(len, 7), 1, ifp);
         sOlyID[7] = 0;
         OlyID = sOlyID[0];
@@ -10239,6 +10238,26 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         break;
       case 0x20200401:
         imgdata.other.FlashEC = getreal(type);
+        break;
+      case 0x1007:
+        imgdata.other.SensorTemperature = (float)get2();
+        break;
+      case 0x1008:
+        imgdata.other.LensTemperature = (float)get2();
+        break;
+      case 0x20401306:
+        imgdata.other.CameraTemperature = (float)get2();
+        break;
+      case 0x20501500:
+        {
+          short temp = get2();
+          if (((OlyID == 0x4434303430ULL)  || // E-1
+               (OlyID == 0x5330303336ULL)) || // E-M5
+               (len != 1))
+            imgdata.other.SensorTemperature = (float)temp;
+          else if ((temp != -32768) && (temp != 0))
+            imgdata.other.SensorTemperature = 85.488077f - 0.117346f*(float)temp;
+        }
         break;
       }
     skip_Oly_broken_tags:;
@@ -10843,7 +10862,6 @@ void CLASS parse_makernote(int base, int uptag)
       case 0x20100100:
       {
         uchar sOlyID[8];
-        unsigned long long OlyID;
         fread(sOlyID, MIN(len, 7), 1, ifp);
         sOlyID[7] = 0;
         OlyID = sOlyID[0];
@@ -10915,6 +10933,26 @@ void CLASS parse_makernote(int base, int uptag)
         break;
       case 0x20100403:
         stmread(imgdata.lens.makernotes.Attachment, len, ifp);
+        break;
+      case 0x1007:
+        imgdata.other.SensorTemperature = (float)get2();
+        break;
+      case 0x1008:
+        imgdata.other.LensTemperature = (float)get2();
+        break;
+      case 0x20401306:
+        imgdata.other.CameraTemperature = (float)get2();
+        break;
+      case 0x20501500:
+        {
+          short temp = get2();
+          if (((OlyID == 0x4434303430ULL)  || // E-1
+               (OlyID == 0x5330303336ULL)) || // E-M5
+               (len != 1))
+            imgdata.other.SensorTemperature = (float)temp;
+          else if ((temp != -32768) && (temp != 0))
+            imgdata.other.SensorTemperature = 85.488077f - 0.117346f*(float)temp;
+        }
         break;
       }
     }
@@ -11628,7 +11666,8 @@ void CLASS parse_makernote(int base, int uptag)
       fseek(ifp, _pos3, SEEK_SET);
     }
 
-    if (((tag == 0x2020) || (tag == 0x3000) || (tag == 0x2030) || (tag == 0x2031)) && ((type == 7) || (type == 13)) &&
+    if (((tag == 0x2020) || (tag == 0x3000) || (tag == 0x2030) || (tag == 0x2031) || (tag == 0x2050)) &&
+        ((type == 7) || (type == 13)) &&
         !strncasecmp(make, "Olympus", 7))
     {
       INT64 _pos3 = ftell(ifp);
