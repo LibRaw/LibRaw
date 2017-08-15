@@ -9855,6 +9855,15 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   INT64 fsize = ifp->size();
 
   fread(buf, 1, 10, ifp);
+
+/*
+  printf("===>>buf: 0x");
+  for (int i = 0; i < sizeof buf; i ++) {
+        printf("%02x", buf[i]);
+  }
+  putchar('\n');
+*/
+
   if (!strcmp(buf, "Nikon"))
   {
     base = ftell(ifp);
@@ -9948,6 +9957,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncasecmp(make, "LEICA", 5))
     {
+
+      if ((tag == 0x0320) && (type == 9) && (len == 1) &&
+          !strncasecmp (make, "Leica Camera AG", 15)   &&
+          !strncmp (buf, "LEICA", 5) && (buf[5] == 0) && (buf[6] == 0) && (buf[7] == 0)
+         ) imgdata.other.CameraTemperature = getreal(type);
+
+      if (tag == 0x34003402) imgdata.other.CameraTemperature = getreal(type);
+
       if (((tag == 0x035e) || (tag == 0x035f)) && (type == 10) && (len == 9))
       {
         int ind = tag == 0x035e ? 0 : 1;
@@ -10287,6 +10304,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       {
         imgdata.lens.makernotes.LensID = fgetc(ifp) << 8 | fgetc(ifp);
       }
+      else if (tag == 0x0047)
+      {
+        imgdata.other.CameraTemperature = (float)fgetc(ifp);
+      }
       else if (tag == 0x004d)
       {
         if (type == 9)
@@ -10374,6 +10395,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       {
         imgdata.lens.makernotes.CamID = unique_id = get4();
       }
+      else if (tag == 0x0043)
+      {
+        if (int temp = get4()) {
+          imgdata.other.CameraTemperature = (float) temp;
+          if (get4() == 10) imgdata.other.CameraTemperature /= 10.0f;
+        }
+      }
       else if (tag == 0xa003)
       {
         imgdata.lens.makernotes.LensID = get2();
@@ -10451,6 +10479,15 @@ void CLASS parse_makernote(int base, int uptag)
   if (!strncmp(make, "Nokia", 5))
     return;
   fread(buf, 1, 10, ifp);
+
+/*
+  printf("===>>buf: 0x");
+  for (int i = 0; i < sizeof buf; i ++) {
+        printf("%02x", buf[i]);
+  }
+  putchar('\n');
+*/
+
   if (!strncmp(buf, "KDK", 3) || /* these aren't TIFF tables */
       !strncmp(buf, "VER", 3) || !strncmp(buf, "IIII", 4) || !strncmp(buf, "MMMM", 4))
     return;
@@ -10692,6 +10729,13 @@ void CLASS parse_makernote(int base, int uptag)
           FORCC imgdata.color.dng_color[ind].forwardmatrix[j][c] = getreal(type);
         imgdata.color.dng_color[ind].parsedfields |= LIBRAW_DNGFM_FORWARDMATRIX;
       }
+
+      if (tag == 0x34003402) imgdata.other.CameraTemperature = getreal(type);
+
+      if ((tag == 0x0320) && (type == 9) && (len == 1) &&
+          !strncasecmp (make, "Leica Camera AG", 15)   &&
+          !strncmp (buf, "LEICA", 5) && (buf[5] == 0) && (buf[6] == 0) && (buf[7] == 0)
+         ) imgdata.other.CameraTemperature = getreal(type);
 
       if ((tag == 0x0303) && (type != 4))
       {
@@ -11097,6 +11141,10 @@ void CLASS parse_makernote(int base, int uptag)
       {
         imgdata.lens.makernotes.LensID = fgetc(ifp) << 8 | fgetc(ifp);
       }
+      else if (tag == 0x0047)
+      {
+        imgdata.other.CameraTemperature = (float)fgetc(ifp);
+      }
       else if (tag == 0x004d)
       {
         if (type == 9)
@@ -11183,6 +11231,13 @@ void CLASS parse_makernote(int base, int uptag)
       else if (tag == 0x0003)
       {
         unique_id = imgdata.lens.makernotes.CamID = get4();
+      }
+      else if (tag == 0x0043)
+      {
+        if (int temp = get4()) {
+          imgdata.other.CameraTemperature = (float) temp;
+          if (get4() == 10) imgdata.other.CameraTemperature /= 10.0f;
+        }
       }
       else if (tag == 0xa002)
       {
@@ -11839,6 +11894,26 @@ void CLASS parse_exif(int base)
     switch (tag)
     {
 #ifdef LIBRAW_LIBRARY_BUILD
+
+    case 0x9400:
+      imgdata.other.exifAmbientTemperature = getreal(type);
+      break;
+    case 0x9401:
+      imgdata.other.exifHumidity = getreal(type);
+      break;
+    case 0x9402:
+      imgdata.other.exifPressure = getreal(type);
+      break;
+    case 0x9403:
+      imgdata.other.exifWaterDepth = getreal(type);
+      break;
+    case 0x9404:
+      imgdata.other.exifAcceleration = getreal(type);
+      break;
+    case 0x9405:
+      imgdata.other.exifCameraElevationAngle = getreal(type);
+      break;
+
     case 0xa405: // FocalLengthIn35mmFormat
       imgdata.lens.FocalLengthIn35mmFormat = get2();
       break;
@@ -12265,6 +12340,11 @@ void CLASS parse_kodak_ifd(int base)
       FORC3 cam_mul[c] = 2048.0 / fMAX(1.0f, get2());
       wbi = -2;
     }
+
+    if ((tag == 1030) && (len == 1))
+      imgdata.other.CameraTemperature = getreal(type);
+    if ((tag == 1043) && (len == 1))
+      imgdata.other.SensorTemperature = getreal(type);
 
     if ((tag == 0x03ef) && (!strcmp(model, "EOS D2000C")))
       black = get2();
@@ -14454,6 +14534,9 @@ void CLASS parse_phase_one(int base)
       }
       setPhaseOneFeatures(unique_id);
       break;
+    case 0x0211:
+      imgdata.other.SensorTemperature2 = int_to_float(data);
+      break;
     case 0x0401:
       if (type == 4)
         imgdata.lens.makernotes.CurAp = powf64(2.0f, (int_to_float(data) / 2.0f));
@@ -14565,6 +14648,9 @@ void CLASS parse_phase_one(int base)
       break;
     case 0x210:
       ph1.tag_210 = int_to_float(data);
+#ifdef LIBRAW_LIBRARY_BUILD
+      imgdata.other.SensorTemperature = ph1.tag_210;
+#endif
       break;
     case 0x21a:
       ph1.tag_21a = data;
@@ -17248,8 +17334,10 @@ void CLASS identify()
 #ifdef LIBRAW_LIBRARY_BUILD
   imgdata.other.CameraTemperature =
   imgdata.other.SensorTemperature =
+  imgdata.other.SensorTemperature2 =
   imgdata.other.LensTemperature =
-  imgdata.other.AmbientTemperature = -1000;
+  imgdata.other.AmbientTemperature =
+  imgdata.other.exifAmbientTemperature = -1000.0f;
 
   for (i = 0; i < LIBRAW_IFD_MAXCOUNT; i++)
   {

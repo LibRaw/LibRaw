@@ -458,8 +458,15 @@ typedef struct
   float FlashGN;
   float CameraTemperature;
   float SensorTemperature;
+  float SensorTemperature2;
   float LensTemperature;
   float AmbientTemperature;
+  float exifAmbientTemperature;
+  float exifHumidity;
+  float exifPressure;
+  float exifWaterDepth;
+  float exifAcceleration;
+  float exifCameraElevationAngle;
 } libraw_imgother_t;
 
 typedef struct
