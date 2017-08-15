@@ -443,6 +443,7 @@ int main(int ac, char *av[])
       if (P2.SensorTemperature2 > -273.15f) printf("Sensor temperature2: %6.2f° C\n", P2.SensorTemperature2);
       if (P2.LensTemperature > -273.15f) printf("Lens temperature: %6.2f° C\n", P2.LensTemperature);
       if (P2.AmbientTemperature > -273.15f) printf("Ambient temperature: %6.2f° C\n", P2.AmbientTemperature);
+      if (P2.BatteryTemperature > -273.15f) printf("Battery temperature: %6.2f° C\n", P2.BatteryTemperature);
       if (P2.FlashGN > 1.0f) printf("Flash Guide Number: %6.2f\n", P2.FlashGN);
       printf("Flash exposure compensation: %0.2f EV\n", P2.FlashEC);
       if (C.profile)

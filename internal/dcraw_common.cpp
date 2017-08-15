@@ -8176,6 +8176,61 @@ void CLASS parseSonyLensFeatures(uchar a, uchar b)
 }
 #undef strnXcat
 
+void CLASS process_Sony_0x0116(uchar *buf, unsigned id) {
+
+  if ((id == 257) ||
+      (id == 262) ||
+      (id == 269) ||
+      (id == 270))
+    imgdata.other.BatteryTemperature = (float) (buf[1]-32) / 1.8f;
+  else if ((id != 263) &&
+           (id != 264) &&
+           (id != 265) &&
+           (id != 266))
+    imgdata.other.BatteryTemperature = (float) (buf[2]-32) / 1.8f;
+  return;
+}
+
+void CLASS process_Sony_0x9402(uchar *buf) {
+
+  if (buf[2] != 0xff) return;
+  short bufx = SonySubstitution[buf[0]];
+  if ((bufx < 0x0f) ||
+      (bufx > 0x1a) ||
+      (bufx == 0x16) ||
+      (bufx == 0x18)) return;
+
+  imgdata.other.AmbientTemperature = (float) ((short) SonySubstitution[buf[4]]);
+
+  return;
+}
+
+void CLASS process_Sony_0x9403(uchar *buf) {
+
+  short bufx = SonySubstitution[buf[4]];
+  if ((bufx == 0x00) ||
+      (bufx == 0x94)) return;
+
+  imgdata.other.SensorTemperature = (float) ((short) SonySubstitution[buf[5]]);
+
+  return;
+}
+
+void CLASS process_Sony_0x9406(uchar *buf) {
+
+  short bufx = SonySubstitution[buf[0]];
+  if ((bufx != 0x00) &&
+      (bufx == 0x01) &&
+      (bufx == 0x03)) return;
+  bufx = SonySubstitution[buf[2]];
+  if ((bufx != 0x02) &&
+      (bufx == 0x03)) return;
+
+  imgdata.other.BatteryTemperature = (float) (SonySubstitution[buf[5]]-32) / 1.8f;
+
+  return;
+}
+
 void CLASS process_Sony_0x940c(uchar *buf)
 {
   ushort lid2;
@@ -8298,9 +8353,13 @@ void CLASS process_Sony_0x9050(uchar *buf, unsigned id)
   return;
 }
 
-void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer, uchar *&table_buf_0x9050,
-                               ushort &table_buf_0x9050_present, uchar *&table_buf_0x940c,
-                               ushort &table_buf_0x940c_present)
+void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
+                               uchar *&table_buf_0x9050, ushort &table_buf_0x9050_present,
+                               uchar *&table_buf_0x940c, ushort &table_buf_0x940c_present,
+                               uchar *&table_buf_0x0116, ushort &table_buf_0x0116_present,
+                               uchar *&table_buf_0x9402, ushort &table_buf_0x9402_present,
+                               uchar *&table_buf_0x9403, ushort &table_buf_0x9403_present,
+                               uchar *&table_buf_0x9406, ushort &table_buf_0x9406_present)
 {
 
   ushort lid;
@@ -8310,16 +8369,39 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
   {
     unique_id = get2();
     setSonyBodyFeatures(unique_id);
-    if (table_buf_0x9050_present)
-    {
+
+    if (table_buf_0x0116_present) {
+      process_Sony_0x0116(table_buf_0x0116, unique_id);
+      free(table_buf_0x0116);
+      table_buf_0x0116_present = 0;
+    }
+
+    if (table_buf_0x9050_present) {
       process_Sony_0x9050(table_buf_0x9050, unique_id);
       free(table_buf_0x9050);
       table_buf_0x9050_present = 0;
     }
-    if (table_buf_0x940c_present)
-    {
-      if (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E)
-      {
+
+    if (table_buf_0x9402_present) {
+      process_Sony_0x9402(table_buf_0x9402);
+      free(table_buf_0x9402);
+      table_buf_0x9402_present = 0;
+    }
+
+    if (table_buf_0x9403_present) {
+      process_Sony_0x9403(table_buf_0x9403);
+      free(table_buf_0x9403);
+      table_buf_0x9403_present = 0;
+    }
+
+    if (table_buf_0x9406_present) {
+      process_Sony_0x9406(table_buf_0x9406);
+      free(table_buf_0x9406);
+      table_buf_0x9406_present = 0;
+    }
+
+    if (table_buf_0x940c_present) {
+      if (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E) {
         process_Sony_0x940c(table_buf_0x940c);
       }
       free(table_buf_0x940c);
@@ -8436,6 +8518,17 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     free(table_buf);
   }
 
+  else if (tag == 0x0116  && len < 256000) {
+    table_buf_0x0116 = (uchar *)malloc(len);
+    table_buf_0x0116_present = 1;
+    fread(table_buf_0x0116, len, 1, ifp);
+    if (imgdata.lens.makernotes.CamID) {
+      process_Sony_0x0116 (table_buf_0x0116, unique_id);
+      free(table_buf_0x0116);
+      table_buf_0x0116_present = 0;
+    }
+  }
+
   else if (tag == 0x9050 && len < 256000) // little endian
   {
     table_buf_0x9050 = (uchar *)malloc(len);
@@ -8447,6 +8540,39 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
       process_Sony_0x9050(table_buf_0x9050, imgdata.lens.makernotes.CamID);
       free(table_buf_0x9050);
       table_buf_0x9050_present = 0;
+    }
+  }
+
+  else if (tag == 0x9402 && len < 256000) {
+    table_buf_0x9402 = (uchar *)malloc(len);
+    table_buf_0x9402_present = 1;
+    fread(table_buf_0x9402, len, 1, ifp);
+    if (imgdata.lens.makernotes.CamID) {
+      process_Sony_0x9402(table_buf_0x9402);
+      free(table_buf_0x9402);
+      table_buf_0x9402_present = 0;
+    }
+  }
+
+    else if (tag == 0x9403 && len < 256000) {
+    table_buf_0x9403 = (uchar *)malloc(len);
+    table_buf_0x9403_present = 1;
+    fread(table_buf_0x9403, len, 1, ifp);
+    if (imgdata.lens.makernotes.CamID) {
+      process_Sony_0x9403(table_buf_0x9403);
+      free(table_buf_0x9403);
+      table_buf_0x9403_present = 0;
+    }
+  }
+
+  else if (tag == 0x9406 && len < 256000) {
+    table_buf_0x9406 = (uchar *)malloc(len);
+    table_buf_0x9406_present = 1;
+    fread(table_buf_0x9406, len, 1, ifp);
+    if (imgdata.lens.makernotes.CamID) {
+      process_Sony_0x9406(table_buf_0x9406);
+      free(table_buf_0x9406);
+      table_buf_0x9406_present = 0;
     }
   }
 
@@ -8525,8 +8651,16 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   uchar *table_buf;
   uchar *table_buf_0x9050;
   ushort table_buf_0x9050_present = 0;
+  uchar *table_buf_0x9402;
+  ushort table_buf_0x9402_present = 0;
+  uchar *table_buf_0x9403;
+  ushort table_buf_0x9403_present = 0;
+  uchar *table_buf_0x9406;
+  ushort table_buf_0x9406_present = 0;
   uchar *table_buf_0x940c;
   ushort table_buf_0x940c_present = 0;
+  uchar *table_buf_0x0116;
+  ushort table_buf_0x0116_present = 0;
 
   short morder, sorder = order;
   char buf[10];
@@ -9102,13 +9236,22 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       }
     }
 
-    else if (!strncasecmp(make, "SONY", 4) || !strncasecmp(make, "Konica", 6) || !strncasecmp(make, "Minolta", 7) ||
+    else if (!strncasecmp(make, "SONY", 4) ||
+             !strncasecmp(make, "Konica", 6) ||
+             !strncasecmp(make, "Minolta", 7) ||
              (!strncasecmp(make, "Hasselblad", 10) &&
-              (!strncasecmp(model, "Stellar", 7) || !strncasecmp(model, "Lunar", 5) ||
-               !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
+              (!strncasecmp(model, "Stellar", 7) ||
+               !strncasecmp(model, "Lunar", 5) ||
+               !strncasecmp(model, "Lusso", 5) ||
+               !strncasecmp(model, "HV", 2))))
     {
-      parseSonyMakernotes(tag, type, len, AdobeDNG, table_buf_0x9050, table_buf_0x9050_present, table_buf_0x940c,
-                          table_buf_0x940c_present);
+      parseSonyMakernotes(tag, type, len, AdobeDNG,
+                          table_buf_0x9050, table_buf_0x9050_present,
+                          table_buf_0x940c, table_buf_0x940c_present,
+                          table_buf_0x0116, table_buf_0x0116_present,
+                          table_buf_0x9402, table_buf_0x9402_present,
+                          table_buf_0x9403, table_buf_0x9403_present,
+                          table_buf_0x9406, table_buf_0x9406_present);
     }
   next:
     fseek(ifp, save, SEEK_SET);
@@ -9145,8 +9288,16 @@ void CLASS parse_makernote(int base, int uptag)
   uchar *table_buf;
   uchar *table_buf_0x9050;
   ushort table_buf_0x9050_present = 0;
+  uchar *table_buf_0x9402;
+  ushort table_buf_0x9402_present = 0;
+  uchar *table_buf_0x9403;
+  ushort table_buf_0x9403_present = 0;
+  uchar *table_buf_0x9406;
+  ushort table_buf_0x9406_present = 0;
   uchar *table_buf_0x940c;
   ushort table_buf_0x940c_present = 0;
+  uchar *table_buf_0x0116;
+  ushort table_buf_0x0116_present = 0;
 
   INT64 fsize = ifp->size();
 #endif
@@ -9943,13 +10094,22 @@ void CLASS parse_makernote(int base, int uptag)
       }
     }
 
-    else if (!strncasecmp(make, "SONY", 4) || !strncasecmp(make, "Konica", 6) || !strncasecmp(make, "Minolta", 7) ||
+    else if (!strncasecmp(make, "SONY", 4) ||
+             !strncasecmp(make, "Konica", 6) ||
+             !strncasecmp(make, "Minolta", 7) ||
              (!strncasecmp(make, "Hasselblad", 10) &&
-              (!strncasecmp(model, "Stellar", 7) || !strncasecmp(model, "Lunar", 5) ||
-               !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
+              (!strncasecmp(model, "Stellar", 7) ||
+               !strncasecmp(model, "Lunar", 5) ||
+               !strncasecmp(model, "Lusso", 5) ||
+               !strncasecmp(model, "HV", 2))))
     {
-      parseSonyMakernotes(tag, type, len, nonDNG, table_buf_0x9050, table_buf_0x9050_present, table_buf_0x940c,
-                          table_buf_0x940c_present);
+      parseSonyMakernotes(tag, type, len, nonDNG,
+                          table_buf_0x9050, table_buf_0x9050_present,
+                          table_buf_0x940c, table_buf_0x940c_present,
+                          table_buf_0x0116, table_buf_0x0116_present,
+                          table_buf_0x9402, table_buf_0x9402_present,
+                          table_buf_0x9403, table_buf_0x9403_present,
+                          table_buf_0x9406, table_buf_0x9406_present);
     }
 
     fseek(ifp, _pos, SEEK_SET);
@@ -15852,6 +16012,7 @@ void CLASS identify()
   imgdata.other.SensorTemperature2 =
   imgdata.other.LensTemperature =
   imgdata.other.AmbientTemperature =
+  imgdata.other.BatteryTemperature =
   imgdata.other.exifAmbientTemperature = -1000.0f;
 
   for (i = 0; i < LIBRAW_IFD_MAXCOUNT; i++)

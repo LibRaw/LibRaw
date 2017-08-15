@@ -461,6 +461,7 @@ typedef struct
   float SensorTemperature2;
   float LensTemperature;
   float AmbientTemperature;
+  float BatteryTemperature;
   float exifAmbientTemperature;
   float exifHumidity;
   float exifPressure;
