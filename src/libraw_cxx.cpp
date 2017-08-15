@@ -5256,6 +5256,7 @@ static const char *static_camera_list[] = {
 	"Hasselblad H5D-40",
 	"Hasselblad H6D-100c",
 	"Hasselblad CFV",
+	"Hasselblad CFV-50",
 	"Hasselblad CFH",
 	"Hasselblad CF-22",
 	"Hasselblad CF-31",
