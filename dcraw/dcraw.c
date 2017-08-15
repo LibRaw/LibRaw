@@ -15433,6 +15433,8 @@ void CLASS parse_foveon()
           strcpy(imgdata.shootinginfo.BodySerial, value);
         if (!strcmp(name, "FLEQ35MM"))
           imgdata.lens.makernotes.FocalLengthIn35mmFormat = atof(value);
+        if (!strcmp(name, "IMAGERTEMP"))
+          imgdata.other.SensorTemperature = atof(value);
         if (!strcmp(name, "LENSARANGE"))
         {
           char *sp;
