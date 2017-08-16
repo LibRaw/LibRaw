@@ -9075,17 +9075,27 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         imgdata.other.LensTemperature = (float)get2();
         break;
       case 0x20401306:
-        imgdata.other.CameraTemperature = (float)get2();
+        {
+          int temp = get2();
+          if ((temp != 0) && (temp != 100)) {
+						if (temp < 61) imgdata.other.CameraTemperature = (float) temp;
+						else imgdata.other.CameraTemperature = (float) (temp-32) / 1.8f;
+						if ((OlyID == 0x4434353933ULL) &&   // TG-5
+								(imgdata.other.exifAmbientTemperature > -273.15f))
+							imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
+						}
+        }
         break;
       case 0x20501500:
         if (OlyID != 0x0ULL) {
           short temp = get2();
-          if (((OlyID == 0x4434303430ULL)  || // E-1
-               (OlyID == 0x5330303336ULL)) || // E-M5
-               (len != 1))
+          if ((OlyID == 0x4434303430ULL) || // E-1
+              (OlyID == 0x5330303336ULL) || // E-M5
+              (len != 1))
             imgdata.other.SensorTemperature = (float)temp;
           else if ((temp != -32768) && (temp != 0))
-            imgdata.other.SensorTemperature = 85.488077f - 0.117346f*(float)temp;
+            if (temp > 199) imgdata.other.SensorTemperature = 86.474958f - 0.120228f*(float)temp;
+            else imgdata.other.SensorTemperature = (float)temp;
         }
         break;
       }
@@ -9209,7 +9219,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       }
       else if (tag == 0x0043)
       {
-        if (int temp = get4()) {
+        int temp = get4();
+        if (temp) {
           imgdata.other.CameraTemperature = (float) temp;
           if (get4() == 10) imgdata.other.CameraTemperature /= 10.0f;
         }
@@ -9814,17 +9825,27 @@ void CLASS parse_makernote(int base, int uptag)
         imgdata.other.LensTemperature = (float)get2();
         break;
       case 0x20401306:
-        imgdata.other.CameraTemperature = (float)get2();
+        {
+          int temp = get2();
+          if ((temp != 0) && (temp != 100)) {
+						if (temp < 61) imgdata.other.CameraTemperature = (float) temp;
+						else imgdata.other.CameraTemperature = (float) (temp-32) / 1.8f;
+						if ((OlyID == 0x4434353933ULL) &&   // TG-5
+								(imgdata.other.exifAmbientTemperature > -273.15f))
+							imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
+						}
+        }
         break;
       case 0x20501500:
         if (OlyID != 0x0ULL) {
           short temp = get2();
-          if (((OlyID == 0x4434303430ULL)  || // E-1
-               (OlyID == 0x5330303336ULL)) || // E-M5
-               (len != 1))
+          if ((OlyID == 0x4434303430ULL) || // E-1
+              (OlyID == 0x5330303336ULL) || // E-M5
+              (len != 1))
             imgdata.other.SensorTemperature = (float)temp;
           else if ((temp != -32768) && (temp != 0))
-            imgdata.other.SensorTemperature = 85.488077f - 0.117346f*(float)temp;
+            if (temp > 199) imgdata.other.SensorTemperature = 86.474958f - 0.120228f*(float)temp;
+            else imgdata.other.SensorTemperature = (float)temp;
         }
         break;
       }
@@ -10063,7 +10084,8 @@ void CLASS parse_makernote(int base, int uptag)
       }
       else if (tag == 0x0043)
       {
-        if (int temp = get4()) {
+        int temp = get4();
+        if (temp) {
           imgdata.other.CameraTemperature = (float) temp;
           if (get4() == 10) imgdata.other.CameraTemperature /= 10.0f;
         }
@@ -10735,6 +10757,9 @@ void CLASS parse_exif(int base)
 
     case 0x9400:
       imgdata.other.exifAmbientTemperature = getreal(type);
+      if ((imgdata.other.CameraTemperature > -273.15f) &&
+          (OlyID == 0x4434353933ULL))  // TG-5
+        imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
       break;
     case 0x9401:
       imgdata.other.exifHumidity = getreal(type);
@@ -11353,7 +11378,9 @@ int CLASS parse_tiff_ifd(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
     if (!strncasecmp(make, "SONY", 4) ||
         (!strncasecmp(make, "Hasselblad", 10) &&
-         (!strncasecmp(model, "Stellar", 7) || !strncasecmp(model, "Lunar", 5) || !strncasecmp(model, "HV", 2))))
+         (!strncasecmp(model, "Stellar", 7) ||
+          !strncasecmp(model, "Lunar", 5) ||
+          !strncasecmp(model, "HV", 2))))
     {
       switch (tag)
       {
@@ -11887,6 +11914,27 @@ int CLASS parse_tiff_ifd(int base)
       break;
 #ifdef LIBRAW_LIBRARY_BUILD
     // IB start
+    case 0x9400:
+      imgdata.other.exifAmbientTemperature = getreal(type);
+      if ((imgdata.other.CameraTemperature > -273.15f) &&
+          (OlyID == 0x4434353933ULL))  // TG-5
+        imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
+      break;
+    case 0x9401:
+      imgdata.other.exifHumidity = getreal(type);
+      break;
+    case 0x9402:
+      imgdata.other.exifPressure = getreal(type);
+      break;
+    case 0x9403:
+      imgdata.other.exifWaterDepth = getreal(type);
+      break;
+    case 0x9404:
+      imgdata.other.exifAcceleration = getreal(type);
+      break;
+    case 0x9405:
+      imgdata.other.exifCameraElevationAngle = getreal(type);
+      break;
     case 0xa405: // FocalLengthIn35mmFormat
       imgdata.lens.FocalLengthIn35mmFormat = get2();
       break;
@@ -12875,18 +12923,24 @@ void CLASS parse_minolta(int base)
         imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][2] = get2();
         imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][0] = get2();
         imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][2] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] =
-            imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] =
-                imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] =
-                    imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] =
-                        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] =
-                            imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][3] =
-                                imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][1] =
-                                    imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][3] =
-                                        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][1] =
-                                            imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][3] =
-                                                imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][1] =
-                                                    imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][3] = 0x100;
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][3] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][1] =
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][3] = 0x100;
       }
       break;
 #endif
