@@ -5160,6 +5160,7 @@ static const char *static_camera_list[] = {
 	"Digital Bolex D16M",
 	"DJI 4384x3288",
 	"DJI Zenmuse X5",
+	"DJI Zenmuse X5R",
 	"DXO One",
 	"Epson R-D1",
 	"Epson R-D1s",
