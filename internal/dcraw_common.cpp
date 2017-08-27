@@ -1234,7 +1234,7 @@ void CLASS canon_sraw_load_raw()
           pix[2] = rp[0] + rp[1];
           pix[1] = rp[0] + ((-778 * rp[1] - (rp[2] << 11)) >> 12);
         }
-        FORC3 rp[c] = CLIP(pix[c] * sraw_mul[c] >> 10);
+        FORC3 rp[c] = CLIP15(pix[c] * sraw_mul[c] >> 10);
       }
 #ifdef LIBRAW_LIBRARY_BUILD
   }

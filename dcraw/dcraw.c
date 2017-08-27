@@ -206,6 +206,7 @@ struct ph1
 #define LIM(x, min, max) MAX(min, MIN(x, max))
 #define ULIM(x, y, z) ((y) < (z) ? LIM(x, y, z) : LIM(x, z, y))
 #define CLIP(x) LIM((int)(x), 0, 65535)
+#define CLIP15(x) LIM((int)(x), 0, 32767)
 #define SWAP(a, b)                                                                                                     \
   {                                                                                                                    \
     a = a + b;                                                                                                         \
@@ -1525,7 +1526,7 @@ void CLASS canon_sraw_load_raw()
           pix[2] = rp[0] + rp[1];
           pix[1] = rp[0] + ((-778 * rp[1] - (rp[2] << 11)) >> 12);
         }
-        FORC3 rp[c] = CLIP(pix[c] * sraw_mul[c] >> 10);
+        FORC3 rp[c] = CLIP15(pix[c] * sraw_mul[c] >> 10);
       }
 #ifdef LIBRAW_LIBRARY_BUILD
   }
