@@ -9093,9 +9093,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               (OlyID == 0x5330303336ULL) || // E-M5
               (len != 1))
             imgdata.other.SensorTemperature = (float)temp;
-          else if ((temp != -32768) && (temp != 0))
+          else if ((temp != -32768) && (temp != 0)) {
             if (temp > 199) imgdata.other.SensorTemperature = 86.474958f - 0.120228f*(float)temp;
             else imgdata.other.SensorTemperature = (float)temp;
+          }
         }
         break;
       }
@@ -9843,9 +9844,10 @@ void CLASS parse_makernote(int base, int uptag)
               (OlyID == 0x5330303336ULL) || // E-M5
               (len != 1))
             imgdata.other.SensorTemperature = (float)temp;
-          else if ((temp != -32768) && (temp != 0))
+          else if ((temp != -32768) && (temp != 0)) {
             if (temp > 199) imgdata.other.SensorTemperature = 86.474958f - 0.120228f*(float)temp;
             else imgdata.other.SensorTemperature = (float)temp;
+          }
         }
         break;
       }
