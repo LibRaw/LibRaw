@@ -105,6 +105,7 @@ typedef unsigned long long UINT64;
 #define LIM(x, min, max) MAX(min, MIN(x, max))
 #define ULIM(x, y, z) ((y) < (z) ? LIM(x, y, z) : LIM(x, z, y))
 #define CLIP(x) LIM((int)(x), 0, 65535)
+#define CLIP15(x) LIM((int)(x), 0, 32767)
 #define SWAP(a, b)                                                                                                     \
   {                                                                                                                    \
     a = a + b;                                                                                                         \

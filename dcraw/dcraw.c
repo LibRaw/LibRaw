@@ -206,6 +206,7 @@ struct ph1
 #define LIM(x, min, max) MAX(min, MIN(x, max))
 #define ULIM(x, y, z) ((y) < (z) ? LIM(x, y, z) : LIM(x, z, y))
 #define CLIP(x) LIM((int)(x), 0, 65535)
+#define CLIP15(x) LIM((int)(x), 0, 32767)
 #define SWAP(a, b)                                                                                                     \
   {                                                                                                                    \
     a = a + b;                                                                                                         \
@@ -1525,7 +1526,7 @@ void CLASS canon_sraw_load_raw()
           pix[2] = rp[0] + rp[1];
           pix[1] = rp[0] + ((-778 * rp[1] - (rp[2] << 11)) >> 12);
         }
-        FORC3 rp[c] = CLIP(pix[c] * sraw_mul[c] >> 10);
+        FORC3 rp[c] = CLIP15(pix[c] * sraw_mul[c] >> 10);
       }
 #ifdef LIBRAW_LIBRARY_BUILD
   }
@@ -17774,9 +17775,15 @@ void CLASS identify()
     order = 0x4949;
     fseek(ifp, 300, SEEK_SET);
     data_offset = get4();
-    i = get4();
+    i = get4(); // bytes count
     width = get2();
     height = get2();
+#ifdef LIBRAW_LIBRARY_BUILD
+    // Data integrity check
+    if(width < 1 || width > 16000 || height < 1 || height > 16000
+       || i < (width*height) || i > (2* width*height))
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
     switch (tiff_bps = i * 8 / (width * height))
     {
     case 8:

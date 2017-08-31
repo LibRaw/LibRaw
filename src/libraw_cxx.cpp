@@ -4167,8 +4167,9 @@ int LibRaw::unpack_thumb(void)
         T.thumb = (char *)malloc(T.tlength);
         merror(T.thumb, "jpeg_thumb()");
         ID.input->read(T.thumb, 1, T.tlength);
-        T.thumb[0] = 0xff;
-        T.thumb[1] = 0xd8;
+	unsigned char *tthumb = (unsigned char*)T.thumb;
+        tthumb[0] = 0xff;
+        tthumb[1] = 0xd8;
 #ifdef NO_JPEG
         T.tcolors = 3;
 #else
