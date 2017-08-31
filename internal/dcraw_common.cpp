@@ -7141,6 +7141,9 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
 void CLASS setOlympusBodyFeatures(unsigned long long id)
 {
   imgdata.lens.makernotes.CamID = id;
+  if (id == 0x5330303638ULL) {
+    strcpy (model, "E-M10MarkIII");
+  }
   if ((id == 0x4434303430ULL) || // E-1
       (id == 0x4434303431ULL) || // E-300
       ((id & 0x00ffff0000ULL) == 0x0030300000ULL))
@@ -14904,7 +14907,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 7575,-2159,-571,-3722,11341,2725,-1434,2819,6271 } },
     { "Olympus E-PM2", 0, 0,
       { 8380,-2630,-639,-2887,10725,2496,-627,1427,5438 } },
-    { "Olympus E-M10", 0, 0, /* Same for E-M10MarkII */
+    { "Olympus E-M10", 0, 0, /* Same for E-M10MarkII, E-M10MarkIII */
       { 8380,-2630,-639,-2887,10725,2496,-627,1427,5438 } },
     { "Olympus E-M1MarkII", 0, 0,
       { 9383,-3170,-763,-2457,10702,2020,-384,1236,5552 } },
