@@ -903,7 +903,12 @@ void LibRaw::fuji_decode_strip(const struct fuji_compressed_params *info_common,
 
   cur_block_width = libraw_internal_data.unpacker_data.fuji_block_width;
   if (cur_block + 1 == libraw_internal_data.unpacker_data.fuji_total_blocks)
-    cur_block_width = imgdata.sizes.raw_width % libraw_internal_data.unpacker_data.fuji_block_width;
+  {
+   cur_block_width = imgdata.sizes.raw_width - (libraw_internal_data.unpacker_data.fuji_block_width * cur_block);
+   /* Old code, may get incorrect results on GFX50, but luckily large optical black 
+   cur_block_width = imgdata.sizes.raw_width % libraw_internal_data.unpacker_data.fuji_block_width;
+   */
+  }
 
   struct i_pair
   {
@@ -1021,7 +1026,8 @@ void LibRaw::parse_fuji_compressed_header()
   h_total_lines = sgetn(2, header + 14);
 
   // general validation
-  if (signature != 0x4953 || version != 1 || h_raw_height > 0x3000 || h_raw_height < 6 || h_raw_height % 6 ||
+  if (signature != 0x4953 || version != 1 || h_raw_height > 0x3000 || h_raw_height < 6 || h_raw_height % 6 
+      || h_block_size < 1  ||
       h_raw_width > 0x3000 || h_raw_width < 0x300 || h_raw_width % 24 || h_raw_rounded_width > 0x3000 ||
       h_raw_rounded_width < h_block_size || h_raw_rounded_width % h_block_size ||
       h_raw_rounded_width - h_raw_width >= h_block_size || h_block_size != 0x300 || h_blocks_in_row > 0x10 ||

@@ -3437,6 +3437,10 @@ void CLASS kodak_radc_load_raw()
     checkCancel();
 #endif
     FORC3 mul[c] = getbits(6);
+#ifdef LIBRAW_LIBRARY_BUILD
+    if(!mul[0] || !mul[1] || !mul[2])
+      throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
     FORC3
     {
       val = ((0x1000000 / last[c] + 0x7ff) >> 12) * mul[c];
