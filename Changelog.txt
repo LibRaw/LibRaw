@@ -1,3 +1,16 @@
+2017-09-09  Alex Tutubalin <lexa@lexa.ru>
+ * Fix for CVE-2017-13735
+ * Additional check for X-Trans CFA pattern data
+ * LibRaw 0.18.3
+
+
+2017-03-08  Alex Tutubalin <lexa@lexa.ru>
+ * Fixed several errors (Secunia advisory SA75000)
+ * ACES colorspace output option included in dcraw_emu help page
+ * Avoided possible 32-bit overflows in Sony metadata parser
+ * Phase One flat field code called even for half-s
+ * LibRaw 0.18.2
+
 2017-02-12  Alex Tutubalin <lexa@lexa.ru>
  * Camera Support: Sigma Quatto H
  * Fixed bug in FujiExpoMidPointShift parser
