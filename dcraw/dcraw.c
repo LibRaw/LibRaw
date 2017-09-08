@@ -15003,7 +15003,11 @@ void CLASS parse_fuji(int offset)
     else if (tag == 0x131)
     {
       filters = 9;
-      FORC(36) xtrans_abs[0][35 - c] = fgetc(ifp) & 3;
+      FORC(36)
+        {
+	   int q = fgetc(ifp);
+	   xtrans_abs[0][35 - c] = MAX(0,MIN(q,2)); /* & 3;*/
+	}
     }
     else if (tag == 0x2ff0)
     {

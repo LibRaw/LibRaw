@@ -5937,6 +5937,7 @@ static const char *static_camera_list[] = {
 	"YUNEEC CGO4",
 	"Xiaomi MI3",
 	"Xiaomi RedMi Note3 Pro",
+	"Xiaoyi YIAC3 (YI 4k)",
 	NULL
 };
 // clang-format on
