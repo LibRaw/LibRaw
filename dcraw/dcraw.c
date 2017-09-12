@@ -7071,6 +7071,7 @@ void CLASS setCanonBodyFeatures (unsigned id)
 void CLASS processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxlen)
 {
   ushort iCanonLensID = 0, iCanonMaxFocal = 0, iCanonMinFocal = 0, iCanonLens = 0, iCanonCurFocal = 0, iCanonFocalType = 0;
+  if(maxlen<16) return; // too short, so broken
   CameraInfo[0] = 0;
   CameraInfo[1] = 0;
   switch (id) {
@@ -8631,7 +8632,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       {
         if (tag == 0x000d && len < 256000) // camera info
           {
-            CanonCameraInfo = (uchar*)malloc(len);
+            CanonCameraInfo = (uchar*)malloc(MAX(16,len));
             fread(CanonCameraInfo, len, 1, ifp);
             lenCanonCameraInfo = len;
           }
@@ -9496,7 +9497,7 @@ void CLASS parse_makernote (int base, int uptag)
       {
         if (tag == 0x000d && len < 256000)	// camera info
           {
-            CanonCameraInfo = (uchar*)malloc(len);
+            CanonCameraInfo = (uchar*)malloc(MAX(16,len));
             fread(CanonCameraInfo, len, 1, ifp);
             lenCanonCameraInfo = len;
           }
