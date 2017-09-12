@@ -10083,10 +10083,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       if (tag == 0x000d && len < 256000) // camera info
       {
         if (type != 4) {
-          CanonCameraInfo = (uchar *)malloc(len);
+          CanonCameraInfo = (uchar *)malloc(MAX(16,len));
           fread(CanonCameraInfo, len, 1, ifp);
         } else {
-          CanonCameraInfo = (uchar *)malloc(len*4);
+          CanonCameraInfo = (uchar *)malloc(MAX(16,len*4));
           fread(CanonCameraInfo, len, 4, ifp);
         }
         lenCanonCameraInfo = len;
@@ -10793,10 +10793,10 @@ void CLASS parse_makernote(int base, int uptag)
       if (tag == 0x000d && len < 256000) // camera info
       {
         if (type != 4) {
-          CanonCameraInfo = (uchar *)malloc(len);
+          CanonCameraInfo = (uchar *)malloc(MAX(16,len));
           fread(CanonCameraInfo, len, 1, ifp);
         } else {
-          CanonCameraInfo = (uchar *)malloc(len*4);
+          CanonCameraInfo = (uchar *)malloc(MAX(16,len*4));
           fread(CanonCameraInfo, len, 4, ifp);
         }
         lenCanonCameraInfo = len;
