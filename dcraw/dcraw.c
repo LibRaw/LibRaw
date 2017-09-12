@@ -8029,6 +8029,7 @@ void CLASS processCanonCameraInfo(unsigned id, uchar *CameraInfo, unsigned maxle
 {
   ushort iCanonLensID = 0, iCanonMaxFocal = 0, iCanonMinFocal = 0, iCanonLens = 0, iCanonCurFocal = 0,
          iCanonFocalType = 0;
+  if(maxlen<16) return; // too short
   CameraInfo[0] = 0;
   CameraInfo[1] = 0;
   if (type == 4) {
