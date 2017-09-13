@@ -3528,8 +3528,15 @@ void CLASS kodak_65000_load_raw()
       len = MIN (256, width-col);
       ret = kodak_65000_decode (buf, len);
       for (i=0; i < len; i++)
-	if ((RAW(row,col+i) =	curve[ret ? buf[i] :
-		(pred[i & 1] += buf[i])]) >> 12) derror();
+      {
+	int idx = ret ? buf[i] : (pred[i & 1] += buf[i]);
+	if(idx >=0 && idx <= 0xffff)
+	 {
+	   if ((RAW(row,col+i) = curve[idx]) >> 12) derror();
+         }
+	 else
+	   derror();
+      }
     }
   }
 }
