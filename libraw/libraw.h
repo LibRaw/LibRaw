@@ -190,6 +190,7 @@ public:
   int sraw_midpoint();
   int is_nikon_sraw();
   int is_coolscan_nef();
+  int is_jpeg_thumb();
   int is_floating_point();
   int have_fpdata();
   /* memory writers */

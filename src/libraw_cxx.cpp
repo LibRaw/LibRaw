@@ -288,6 +288,7 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t *p)
 
 int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
 int LibRaw::is_coolscan_nef() { return load_raw == &LibRaw::nikon_coolscan_load_raw; }
+int LibRaw::is_jpeg_thumb() { return write_thumb == &LibRaw::jpeg_thumb; }
 
 int LibRaw::is_nikon_sraw() { return load_raw == &LibRaw::nikon_load_sraw; }
 int LibRaw::sraw_midpoint()
