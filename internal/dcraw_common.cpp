@@ -5725,7 +5725,7 @@ void CLASS xtrans_interpolate(int passes)
 	  for (col = 0; col < 6; col++)
 		  cstat[fcol(row,col)]++;
 
-  if(cstat[0] < 6 || cstat[0]>10 || cstat[1]< 16 
+  if(cstat[0] < 6 || cstat[0]>10 || cstat[1]< 16
     || cstat[1]>24 || cstat[2]< 6 || cstat[2]>10 || cstat[3])
 	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
 #endif
@@ -8020,7 +8020,8 @@ void CLASS setSonyBodyFeatures(unsigned id)
            (id == 341) || // DSC-RX100M4
            (id == 342) || // DSC-RX10M2
            (id == 355) || // DSC-RX10M3
-           (id == 356)    // DSC-RX100M5
+           (id == 356) || // DSC-RX100M5
+           (id == 365)    // DSC-RX10M4
   )
   {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_1INCH;
@@ -8080,7 +8081,8 @@ void CLASS setSonyBodyFeatures(unsigned id)
       (id == 341) || // DSC-RX100M4
       (id == 342) || // DSC-RX10M2
       (id == 355) || // DSC-RX10M3
-      (id == 356)    // DSC-RX100M5
+      (id == 356) || // DSC-RX100M5
+      (id == 365)    // DSC-RX10M4
   )
   {
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
@@ -15486,6 +15488,10 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 6596,-2079,-562,-4782,13016,1933,-970,1581,5181 } },
     { "Sony DSC-RX100", 0, 0,
       { 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
+
+    {"Sony DSC-RX10M4", -800, 0, /* temp */
+      { 6596,-2079,-562,-4782,13016,1933,-970,1581,5181 } },
+
     { "Sony DSC-RX10",0, 0, /* same for M2/M3 */
       { 6679,-1825,-745,-5047,13256,1953,-1580,2422,5183 } },
     { "Sony DSC-RX1RM2", 0, 0,
@@ -15908,7 +15914,7 @@ void CLASS identify()
         {0x155, "DSC-RX100M4"}, {0x156, "DSC-RX10M2"},  {0x158, "DSC-RX1RM2"}, {0x15a, "ILCE-QX1"},
         {0x15b, "ILCE-7RM2"},   {0x15e, "ILCE-7SM2"},   {0x161, "ILCA-68"},    {0x162, "ILCA-99M2"},
         {0x163, "DSC-RX10M3"},  {0x164, "DSC-RX100M5"}, {0x165, "ILCE-6300"},  {0x166, "ILCE-9"},
-        {0x168, "ILCE-6500"},
+        {0x168, "ILCE-6500"},   {0x16d, "DSC-RX10M4"},
     };
 
 #ifdef LIBRAW_LIBRARY_BUILD
