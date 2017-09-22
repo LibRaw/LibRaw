@@ -3227,7 +3227,7 @@ int CLASS kodak_65000_decode (short *out, int bsize)
 
 void CLASS kodak_65000_load_raw()
 {
-  short buf[256];
+  short buf[272]; /* extra room for data stored w/o predictor */
   int row, col, len, pred[2], ret, i;
 
   for (row=0; row < height; row++)

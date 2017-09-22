@@ -1,5 +1,6 @@
-2017-09-13  Alex Tutubalin <lexa@lexa.ru>
+2017-09-22  Alex Tutubalin <lexa@lexa.ru>
  * Fixed possible out of bound access in Kodak 6500 loader
+ * LibRaw 0.18.5
 
 2017-09-12  Alex Tutubalin <lexa@lexa.ru>
  * CVE-2017-14348: Fix for possible heap overrun in Canon makernotes parser
