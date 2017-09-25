@@ -27,26 +27,12 @@
 <dd>Sets number of additional DCB-demosaic iterations (option valid only for -q 4, i.e. for DCB demosaic).</dd>
 <dt><strong>-dcbe</strong></dt>
 <dd>Turns on DCB color enhance mode (only for DCB demosaic, -q 4).</dd>
-<dt><strong>-eeci</strong></dt>
-<dd>Turns on EECI refine (only for mixed VCD/AHD -q 8)</dd>
-<dt><strong>-esmed N</strong></dt>
-<dd>Number of passes of edge-sensitive median filter for VCD+AHD demosaic.</dd>
-<dt><strong>-acae r b</strong></dt>
-<dd>Turns on chromatic aberration suppression. r and b parameters are amount of red and blue axis correction respectively. For automatic correction use <strong>-acae 0 0</strong>.</dd>
-<dt><strong>-aline l</strong></dt>
-<dd>Turns on banding suppression. l is the correction amount, useable range is from 0.001 to 0.02, typical value is 0.005.</dd>
-<dt><strong>-aclean l c</strong></dt>
-<dd>Turns on impulse noise suppression. l and c are luminocity and chrominance suppression values, respectively. Useable range for both is 0.005-0.05 and typical value is 0.01.</dd>
-<dt><strong>-agreen g</strong></dt>
-<dd>Turns on green channels equalization on uniform surfaces. g is the algorithm sensitivity with useable range 0.01-0.1 and typical value 0.03.</dd>
 <dt><strong>-aexpo e p</strong></dt>
 <dd>Turns on exposure correction. e is exposure shift in linear scale from 0.25 (darken 2 stops) to 8.0 (lighten 3 stops). p is highlights preservation amount from 0.0 (no preservation, full clipping) to 1.0 (full preservation, S-like curve in highlights).</dd>
 <dt><strong>-apentax4shot</strong></dt>
 <dd>Will merge 4 frames from Pentax 4-shot RAWs</dd>
 <dt><strong>-apentax4shotorder abce</strong></dt>
 <dd>Order of frames in pentax 4-shot files (default is 3102)</dd>
-<dt><strong>-dbnd r g b g</strong></dt>
-<dd>Turns on debanding code</dd>
 <dt><strong>-mmap</strong></dt>
 <dd>Use mmap + memory IO instead of file IO (unix only)</dd>
 <dt><strong>-disars</strong></dt>
@@ -57,8 +43,6 @@
 <dd>Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation enabled)</dd>
 <dt><strong>-dsrawrgb2</strong></dt>
 <dd>Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation disabled)</dd>
-<dt><strong>-disadcf</strong></dt>
-<dd>Do not use dcraw Foveon code even if compiled with demosaic-pack-GPL2</dd>
 </dl>
 </li>
 <li><strong>half_mt</strong> Emulation of <strong>dcraw -h</strong>. It "understands" the following keys: -a (automatic white balance over the entire image), -w (white balance of the camera), -T (output in the tiff format), and -J n (number of parallel threads launched for image processing).<br /> On multiprocessor/multicore computers, the speed gain is notable in the case of mass processing. On a Win32 machine, the example is assembled from the initial file half_mt_win32.c, since work with threads under Windows is fundamentally different and it it easier to copy simple source codes than write one complex code.</li>

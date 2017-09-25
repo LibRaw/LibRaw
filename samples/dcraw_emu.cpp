@@ -82,12 +82,7 @@ void usage(const char *prog)
          "-b <num>  Adjust brightness (default = 1.0)\n"
          "-q N      Set the interpolation quality:\n"
          "          0 - linear, 1 - VNG, 2 - PPG, 3 - AHD, 4 - DCB\n"
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-         "          5 - modified AHD,6 - AFD (5pass), 7 - VCD, 8 - VCD+AHD, 9 - LMMSE\n"
-#endif
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
-         "          10-AMaZE\n"
-#endif
+         "          11 - DHT, 12 - AAHD\n"
          "-h        Half-size color image (twice as fast as \"-q 0\")\n"
          "-f        Interpolate RGGB as four colors\n"
          "-m <num>  Apply a 3x3 median filter to R-G and B-G\n"
@@ -103,22 +98,9 @@ void usage(const char *prog)
          "-fbdd N   0 - disable FBDD noise reduction (default), 1 - light FBDD, 2 - full\n"
          "-dcbi N   Number of extra DCD iterations (default - 0)\n"
          "-dcbe     DCB color enhance\n"
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-         "-eeci     EECI refine for mixed VCD/AHD (q=8)\n"
-         "-esmed N  Number of edge-sensitive median filter passes (only if q=8)\n"
-#endif
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
-         //"-amazeca  Use AMaZE chromatic aberrations refine (only if q=10)\n"
-         "-acae <r b>Use chromatic aberrations correction\n" // modifJD
-         "-aline <l> reduction of line noise\n"
-         "-aclean <l c> clean CFA\n"
-         "-agreen <g> equilibrate green\n"
-#endif
          "-aexpo <e p> exposure correction\n"
          "-apentax4shot enables merge of 4-shot pentax files\n"
          "-apentax4shotorder 3102 sets pentax 4-shot alignment order\n"
-         // WF
-         "-dbnd <r g b g> debanding\n"
 #ifndef WIN32
          "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
 #endif
@@ -127,7 +109,6 @@ void usage(const char *prog)
          "-disinterp Do not run interpolation step\n"
          "-dsrawrgb1 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation enabled)\n"
          "-dsrawrgb2 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation disabled)\n"
-         "-disadcf  Do not use dcraw Foveon code even if compiled with demosaic-pack-GPL2\n"
 #ifdef USE_DNGSDK
          "-dngsdk   Use Adobe DNG SDK for DNG decode\n"
          "-dngflags N set DNG decoding options to value N\n"
@@ -347,31 +328,6 @@ int main(int argc, char *argv[])
         strncpy(OUT.p4shot_order, argv[arg++], 5);
       }
       else
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
-          if (!strcmp(optstr, "-acae"))
-      {
-        OUT.ca_correc = 1;
-        OUT.cared = (float)atof(argv[arg++]);
-        OUT.cablue = (float)atof(argv[arg++]);
-      }
-      else if (!strcmp(optstr, "-aline"))
-      {
-        OUT.cfaline = 1;
-        OUT.linenoise = (float)atof(argv[arg++]);
-      }
-      else if (!strcmp(optstr, "-aclean"))
-      {
-        OUT.cfa_clean = 1;
-        OUT.lclean = (float)atof(argv[arg++]);
-        OUT.cclean = (float)atof(argv[arg++]);
-      }
-      else if (!strcmp(optstr, "-agreen"))
-      {
-        OUT.cfa_green = 1;
-        OUT.green_thresh = (float)atof(argv[arg++]);
-      }
-      else
-#endif
           if (!argv[arg - 1][2])
         OUT.use_auto_wb = 1;
       else
@@ -405,8 +361,6 @@ int main(int argc, char *argv[])
         OUT.dcb_iterations = atoi(argv[arg++]);
       else if (!strcmp(optstr, "-disars"))
         OUT.use_rawspeed = 0;
-      else if (!strcmp(optstr, "-disadcf"))
-        OUT.raw_processing_options |= LIBRAW_PROCESSING_FORCE_FOVEON_X3F;
       else if (!strcmp(optstr, "-disinterp"))
         OUT.no_interpolation = 1;
       else if (!strcmp(optstr, "-dcbe"))
@@ -420,12 +374,6 @@ int main(int argc, char *argv[])
       {
         OUT.raw_processing_options &= ~LIBRAW_PROCESSING_SRAW_NO_RGB;
         OUT.raw_processing_options |= LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE;
-      }
-      else if (!strcmp(optstr, "-dbnd"))
-      {
-        for (c = 0; c < 4; c++)
-          OUT.wf_deband_treshold[c] = (float)atof(argv[arg++]);
-        OUT.wf_debanding = 1;
       }
 #ifdef USE_DNGSDK
       else if (!strcmp(optstr, "-dngsdk"))
@@ -441,16 +389,6 @@ int main(int argc, char *argv[])
       else
         fprintf(stderr, "Unknown option \"%s\".\n", argv[arg - 1]);
       break;
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-    case 'e':
-      if (!strcmp(optstr, "-eeci"))
-        OUT.eeci_refine = 1;
-      else if (!strcmp(optstr, "-esmed"))
-        OUT.es_med_passes = atoi(argv[arg++]);
-      else
-        fprintf(stderr, "Unknown option \"%s\".\n", argv[arg - 1]);
-      break;
-#endif
     default:
       fprintf(stderr, "Unknown option \"-%c\".\n", opt);
       return 1;

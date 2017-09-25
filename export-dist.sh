@@ -14,13 +14,13 @@ else
   exit 1
 fi
 cd ..
-for dir in LibRaw LibRaw-demosaic-pack-GPL2 LibRaw-demosaic-pack-GPL3
+for dir in LibRaw 
 do
  cd $dir
  git pull origin
  cd ..
 done
-for dir in LibRaw LibRaw-demosaic-pack-GPL2 LibRaw-demosaic-pack-GPL3
+for dir in LibRaw 
 do
  cd $dir
  git archive --prefix=$dir-$VERSION/ $VERSION | (cd $DEST; tar xvf - )

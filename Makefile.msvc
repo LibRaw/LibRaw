@@ -11,14 +11,6 @@
 #LDFLAGS_DNG=..\\dng_sdk\\release\\libdng.lib  ..\\dng_sdk\\release\\XMPCore.lib 
 # you may also need to specify zlib.lib and jpeg.lib in the line above
 
-# Demosaic Pack GPL2:
-#CFLAGS_DP2=/I"..\\LibRaw-demosaic-pack-GPL2"
-#CFLAGSG2=/DLIBRAW_DEMOSAIC_PACK_GPL2
-
-# Demosaic Pack GPL3:
-#CFLAGS_DP3=/I"..\\LibRaw-demosaic-pack-GPL3"
-#CFLAGSG3=/DLIBRAW_DEMOSAIC_PACK_GPL3
-
 # LCMS 1.x support
 #LCMS_DEF=/DUSE_LCMS /DCMS_DLL /I..\lcms-1.19\include
 #LCMS_LIB=..\lcms-1.19\bin\lcms.lib

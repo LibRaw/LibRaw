@@ -1,5 +1,14 @@
 ======================= LibRaw demosaic pack(s) ===============================
 
+ We're removing built-in demosaic packs support from core libraw.
+ Work in progress
+ Future versions of LibRaw will have enough callback calls to
+ integrate with demosaic packs code, but no direct support for it
+ (like holding demosaic packs parameters in internal libraw data structures)
+
+
+=== old (outdated) notice:
+
 There are many good interpolation (demosaic) methods implemented in open-source
 world.
 

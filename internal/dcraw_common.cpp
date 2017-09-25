@@ -16391,17 +16391,9 @@ void CLASS identify()
     parse_minolta(0);
   else if (!memcmp(head, "FOVb", 4))
   {
-#ifdef LIBRAW_LIBRARY_BUILD
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-    if (!(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_FORCE_FOVEON_X3F))
-      parse_foveon();
-    else
-#endif
+#ifdef LIBRAW_LIBRARY_BUILD 
+	/* no foveon support for dcraw build from libraw source */
       parse_x3f();
-#else
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-    parse_foveon();
-#endif
 #endif
   }
   else if (!memcmp(head, "CI", 2))
@@ -16751,10 +16743,6 @@ void CLASS identify()
     if (height > width)
       pixel_aspect = 2;
     filters = 0;
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-    if (!(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_FORCE_FOVEON_X3F))
-      simple_coeff(0);
-#endif
   }
   else if (!strncmp(make, "Pentax", 6) && !strncmp(model, "K-1", 3))
   {

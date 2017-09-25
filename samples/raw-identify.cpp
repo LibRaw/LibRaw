@@ -129,8 +129,6 @@ int main(int ac, char *av[])
         O.half_size = 1;
       if (av[i][1] == 'f' && av[i][2] == 0)
         print_frame++;
-      if (av[i][1] == 'x' && av[i][2] == 0)
-        O.raw_processing_options |= LIBRAW_PROCESSING_FORCE_FOVEON_X3F;
       continue;
     }
     if ((ret = MyCoolRawProcessor.open_file(av[i])) != LIBRAW_SUCCESS)

@@ -212,23 +212,6 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        parse_minolta (int base);
 
 // Foveon/Sigma
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-    void        foveon_sd_load_raw();
-    void        foveon_dp_load_raw();
-    void        foveon_huff (ushort *huff);
-    void        foveon_load_camf();
-
-    const char* foveon_camf_param (const char *block, const char *param);
-    void *      foveon_camf_matrix (unsigned dim[3], const char *name);
-    int         foveon_fixed (void *ptr, int size, const char *name);
-    float       foveon_avg (short *pix, int range[2], float cfilt);
-    short *     foveon_make_curve (double max, double mul, double filt);
-    void        foveon_make_curves(short **curvep, float dq[3], float div[3], float filt);
-    int         foveon_apply_curve (short *curve, int i);
-    void        foveon_interpolate();
-    char *      foveon_gets (int offset, char *str, int len);
-    void        parse_foveon();
-#endif
 // We always have x3f code compiled in!
     void        parse_x3f();
     void        x3f_load_raw();
@@ -289,9 +272,6 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 	void fuji_14bit_load_raw();
 	void parse_fuji_compressed_header();
 
-// LibRaw demosaic packs  functions
-// AMaZe
-    int         LinEqSolve(int,  float*, float*, float*);
 // DCB
     void        dcb_pp();
     void        dcb_copy_to_buffer(float (*image2)[3]);
@@ -313,11 +293,6 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void 	dcb_color3(float (*image3)[3]);
     void 	dcb_decide(float (*image2)[3], float (*image3)[3]);
     void 	dcb_nyquist();
-// VCD/modified dcraw
-    void        refinement();
-    void        ahd_partial_interpolate(int threshold_value);
-    void        es_median_filter();
-    void        median_filter_new();
 #endif
 
 #endif

@@ -509,26 +509,9 @@ typedef struct
   int dcb_iterations;
   int dcb_enhance_fl;
   int fbdd_noiserd;
-  /* VCD parameters */
-  int eeci_refine;
-  int es_med_passes;
-  /* AMaZE*/
-  int ca_correc;
-  float cared;
-  float cablue;
-  int cfaline;
-  float linenoise;
-  int cfa_clean;
-  float lclean;
-  float cclean;
-  int cfa_green;
-  float green_thresh;
   int exp_correc;
   float exp_shift;
   float exp_preser;
-  /* WF debanding */
-  int wf_debanding;
-  float wf_deband_treshold[4];
   /* Raw speed */
   int use_rawspeed;
   /* DNG SDK */

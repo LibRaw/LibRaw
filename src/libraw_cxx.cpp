@@ -168,12 +168,6 @@ unsigned LibRaw::capabilities()
 #ifdef USE_DNGSDK
   ret |= LIBRAW_CAPS_DNGSDK;
 #endif
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-  ret |= LIBRAW_CAPS_DEMOSAICSGPL2;
-#endif
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL3
-  ret |= LIBRAW_CAPS_DEMOSAICSGPL3;
-#endif
   return ret;
 }
 
@@ -948,16 +942,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "nikon_load_striped_packed_raw()";
   }
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-  else if (load_raw == &LibRaw::foveon_sd_load_raw)
-  {
-    d_info->decoder_name = "foveon_sd_load_raw()";
-  }
-  else if (load_raw == &LibRaw::foveon_dp_load_raw)
-  {
-    d_info->decoder_name = "foveon_dp_load_raw()";
-  }
-#endif
   else
   {
     d_info->decoder_name = "Unknown unpack function";
@@ -3354,11 +3338,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     // process cropping
     int do_crop = 0;
     unsigned save_width = S.width;
-    if (~O.cropbox[2] && ~O.cropbox[3]
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-        && load_raw != &LibRaw::foveon_sd_load_raw
-#endif
-    ) // Foveon SD to be cropped later
+    if (~O.cropbox[2] && ~O.cropbox[3])
     {
       int crop[4], c, filt;
       for (int c = 0; c < 4; c++)
@@ -4258,17 +4238,6 @@ int LibRaw::unpack_thumb(void)
         SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
         return 0;
       }
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-      else if (write_thumb == &LibRaw::foveon_thumb)
-      {
-        foveon_thumb_loader();
-        // may return with error, so format is set in
-        // foveon thumb loader itself
-        SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
-        return 0;
-      }
-// else if -- all other write_thumb cases!
-#endif
       else
       {
         return LIBRAW_UNSUPPORTED_THUMBNAIL;
@@ -4679,7 +4648,7 @@ int LibRaw::dcraw_process(void)
     get_decoder_info(&di);
 
     bool is_bayer = (imgdata.idata.filters || P1.colors == 1);
-    int subtract_inline = !O.bad_pixels && !O.dark_frame && !O.wf_debanding && is_bayer && !IO.zero_is_bad;
+    int subtract_inline = !O.bad_pixels && !O.dark_frame && is_bayer && !IO.zero_is_bad;
 
     raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
 
@@ -4704,11 +4673,7 @@ int LibRaw::dcraw_process(void)
       subtract(O.dark_frame);
       SET_PROC_FLAG(LIBRAW_PROGRESS_DARK_FRAME);
     }
-
-    if (O.wf_debanding)
-    {
-      wf_remove_banding();
-    }
+    /* pre subtract black callback: check for it above to disable subtract inline */
 
     quality = 2 + !IO.fuji_width;
 
@@ -4736,18 +4701,6 @@ int LibRaw::dcraw_process(void)
           if ((short)imgdata.image[0][i] < 0)
             imgdata.image[0][i] = 0;
       }
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-      else if (load_raw == &LibRaw::foveon_dp_load_raw)
-      {
-        for (int i = 0; i < S.height * S.width * 4; i++)
-          if ((short)imgdata.image[0][i] < 0)
-            imgdata.image[0][i] = 0;
-      }
-      else
-      {
-        foveon_interpolate();
-      }
-#endif
       SET_PROC_FLAG(LIBRAW_PROGRESS_FOVEON_INTERPOLATE);
     }
 
@@ -4756,11 +4709,7 @@ int LibRaw::dcraw_process(void)
       green_matching();
     }
 
-    if (
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-        (!P1.is_foveon || (O.raw_processing_options & LIBRAW_PROCESSING_FORCE_FOVEON_X3F)) &&
-#endif
-        !O.no_auto_scale)
+    if ( !O.no_auto_scale)
     {
       scale_colors();
       SET_PROC_FLAG(LIBRAW_PROGRESS_SCALE_COLORS);
@@ -4776,41 +4725,17 @@ int LibRaw::dcraw_process(void)
       dcb_enhance = O.dcb_enhance_fl;
     if (O.fbdd_noiserd >= 0)
       noiserd = O.fbdd_noiserd;
-    if (O.eeci_refine >= 0)
-      eeci_refine_fl = O.eeci_refine;
-    if (O.es_med_passes > 0)
-      es_med_passes_fl = O.es_med_passes;
 
-    // LIBRAW_DEMOSAIC_PACK_GPL3
+    /* pre-exposure correction callback */
 
-    if (!O.half_size && O.cfa_green > 0)
-    {
-      thresh = O.green_thresh;
-      green_equilibrate(thresh);
-    }
     if (O.exp_correc > 0)
     {
       expos = O.exp_shift;
       preser = O.exp_preser;
       exp_bef(expos, preser);
     }
-    if (O.ca_correc > 0)
-    {
-      cablue = O.cablue;
-      cared = O.cared;
-      CA_correct_RT(cablue, cared);
-    }
-    if (O.cfaline > 0)
-    {
-      linenoise = O.linenoise;
-      cfa_linedn(linenoise);
-    }
-    if (O.cfa_clean > 0)
-    {
-      lclean = O.lclean;
-      cclean = O.cclean;
-      cfa_impulse_gauss(lclean, cclean);
-    }
+
+    /* post-exposure correction fallback */
 
     if (P1.filters && !O.no_interpolation)
     {
@@ -4836,22 +4761,7 @@ int LibRaw::dcraw_process(void)
         ahd_interpolate(); // really don't need it here due to fallback op
       else if (quality == 4)
         dcb(iterations, dcb_enhance);
-      //  LIBRAW_DEMOSAIC_PACK_GPL2
-      else if (quality == 5)
-        ahd_interpolate_mod();
-      else if (quality == 6)
-        afd_interpolate_pl(2, 1);
-      else if (quality == 7)
-        vcd_interpolate(0);
-      else if (quality == 8)
-        vcd_interpolate(12);
-      else if (quality == 9)
-        lmmse_interpolate(1);
 
-      // LIBRAW_DEMOSAIC_PACK_GPL3
-      else if (quality == 10)
-        amaze_demosaic_RT();
-      // LGPL2
       else if (quality == 11)
         dht_interpolate();
       else if (quality == 12)
@@ -4877,19 +4787,8 @@ int LibRaw::dcraw_process(void)
       if (P1.colors == 3)
       {
 
-        if (quality == 8)
-        {
-          if (eeci_refine_fl == 1)
-            refinement();
-          if (O.med_passes > 0)
-            median_filter_new();
-          if (es_med_passes_fl > 0)
-            es_median_filter();
-        }
-        else
-        {
-          median_filter();
-        }
+ 	/* median filter callback, if not set use own */
+        median_filter();
         SET_PROC_FLAG(LIBRAW_PROGRESS_MEDIAN_FILTER);
       }
     }

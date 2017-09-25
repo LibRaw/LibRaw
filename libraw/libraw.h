@@ -103,11 +103,6 @@ DllDef float libraw_get_cam_mul(libraw_data_t *lr, int index);
 DllDef float libraw_get_pre_mul(libraw_data_t *lr, int index);
 DllDef float libraw_get_rgb_cam(libraw_data_t *lr, int index1, int index2);
 DllDef int libraw_get_color_maximum(libraw_data_t *lr);
-DllDef void libraw_set_ca_correction(libraw_data_t *lr, int ca_correc, float ca_red, float ca_blue);
-DllDef void libraw_set_cfalinenoise(libraw_data_t *lr, int cfaline, float linenoise);
-DllDef void libraw_set_wf_debanding(libraw_data_t *lr, int wf_debanding, float wfd0, float wfd1, float wfd2,
-                                    float wfd3);
-DllDef void libraw_set_interpolation_passes(libraw_data_t *lr, int passes);
 
 DllDef libraw_iparams_t *libraw_get_iparams(libraw_data_t *lr);
 DllDef libraw_lensinfo_t *libraw_get_lensinfo(libraw_data_t *lr);
@@ -301,9 +296,6 @@ protected:
   void write_thumb_ppm_tiff(FILE *);
   void x3f_thumb_loader();
   INT64 x3f_thumb_size();
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-  void foveon_thumb_loader(void);
-#endif
 
   int own_filtering_supported() { return 0; }
   void identify();
@@ -327,22 +319,9 @@ protected:
   void dht_interpolate();
   void aahd_interpolate();
 
-  /* from demosaic pack */
-  void ahd_interpolate_mod();
-  void afd_interpolate_pl(int afd_passes, int clip_on);
-  void afd_noise_filter_pl();
-  void lmmse_interpolate(int gamma_apply);
   void dcb(int iterations, int dcb_enhance);
   void fbdd(int noiserd);
-  void vcd_interpolate(int ahd_cutoff);
-  void amaze_demosaic_RT();
   void exp_bef(float expos, float preser);
-  void CA_correct_RT(float cared, float cablue);
-  void cfa_linedn(float linenoise);
-  void cfa_impulse_gauss(float lclean, float cclean);
-  void green_equilibrate(float thresh);
-
-  /* demosaic pack end */
 
   void bad_pixels(const char *);
   void subtract(const char *);
@@ -356,9 +335,6 @@ protected:
 
   void stretch();
 
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-  void foveon_thumb();
-#endif
   void jpeg_thumb_writer(FILE *tfp, char *thumb, int thumb_length);
   void jpeg_thumb();
   void ppm_thumb();
@@ -367,9 +343,6 @@ protected:
   void rollei_thumb();
   void kodak_thumb_load_raw();
 
-#ifdef LIBRAW_DEMOSAIC_PACK_GPL2
-  void foveon_decoder(unsigned size, unsigned code);
-#endif
   unsigned get4();
 
   int flip_index(int row, int col);
