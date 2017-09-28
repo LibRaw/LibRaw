@@ -6652,6 +6652,8 @@ unsigned CLASS setCanonBodyFeatures(unsigned id)
       id = 0x80000394;
     else if (id == 0x04070000) // EOS M6
       id = 0x80000407;
+    else if (id == 0x03980000) // EOS M100
+      id = 0x80000398;
 
   imgdata.lens.makernotes.CamID = id;
   if ((id == 0x80000001) || // 1D
@@ -6687,7 +6689,8 @@ unsigned CLASS setCanonBodyFeatures(unsigned id)
            (id == 0x80000374) || // M3
            (id == 0x80000384) || // M10
            (id == 0x80000394) || // M5
-           (id == 0x80000407)    // M6
+           (id == 0x80000407) || // M6
+           (id == 0x80000398)    // M100
   )
   {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -7038,6 +7041,7 @@ void CLASS Canon_WBCTpresets(short WBCTversion)
                                   (unique_id == 0x80000384) || // M10
                                   (unique_id == 0x80000394) || // M5
                                   (unique_id == 0x80000407) || // M6
+                                  (unique_id == 0x80000398) || // M100
                                   (unique_id == 0x03970000) || // G7 X Mark II
                                   (unique_id == 0x04100000)))  // G9 X Mark II
     for (int i = 0; i < 15; i++)                               // tint, offset, as shot R, as shot B, CСT
@@ -7426,6 +7430,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
         if ((unique_id == 0x03970000) || // G7 X Mark II
             (unique_id == 0x04100000) || // G9 X Mark II
             (unique_id == 0x80000394) || // EOS M5
+            (unique_id == 0x80000398) || // EOS M100
             (unique_id == 0x80000407))   // EOS M6
         {
           fseek(ifp, save1 + (0x4f << 1), SEEK_SET);
@@ -14204,6 +14209,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 6362,-823,-847,-4426,12109,2616,-743,1857,5635 } },
     { "Canon EOS M2", 0, 0, /* added */
       { 6400,-480,-888,-5294,13416,2047,-1296,2203,6137 } },
+    { "Canon EOS M100", 0, 0, /* temp */
+      { 8532,-701,-1167,-4095,11879,2508,-797,2424,7010 } },
     { "Canon EOS M10", 0, 0,
       { 6400,-480,-888,-5294,13416,2047,-1296,2203,6137 } },
     { "Canon EOS M", 0, 0,
@@ -15881,9 +15888,10 @@ void CLASS identify()
           {0x328, "EOS-1D X Mark II"},
           {0x331, "EOS M"},
           {0x335, "EOS M2"},
-          {0x374, "EOS M3"},  /* temp */
-          {0x384, "EOS M10"}, /* temp */
-          {0x394, "EOS M5"},  /* temp */
+          {0x374, "EOS M3"},   /* temp */
+          {0x384, "EOS M10"},  /* temp */
+          {0x394, "EOS M5"},   /* temp */
+          {0x398, "EOS M100"}, /* temp */
           {0x346, "EOS 100D"},
           {0x347, "EOS 760D"},
           {0x349, "EOS 5D Mark IV"},
@@ -16391,7 +16399,7 @@ void CLASS identify()
     parse_minolta(0);
   else if (!memcmp(head, "FOVb", 4))
   {
-#ifdef LIBRAW_LIBRARY_BUILD 
+#ifdef LIBRAW_LIBRARY_BUILD
 	/* no foveon support for dcraw build from libraw source */
       parse_x3f();
 #endif
