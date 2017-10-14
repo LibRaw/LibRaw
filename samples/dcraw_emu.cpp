@@ -99,6 +99,7 @@ void usage(const char *prog)
          "-G        Use green_matching() filter\n"
          "-B <x y w h> use cropbox\n"
          "-F        Use FILE I/O instead of streambuf API\n"
+         "-output <file> Output file name\n"
          "-timing   Detailed timing report\n"
          "-fbdd N   0 - disable FBDD noise reduction (default), 1 - light FBDD, 2 - full\n"
          "-dcbi N   Number of extra DCD iterations (default - 0)\n"
@@ -109,7 +110,7 @@ void usage(const char *prog)
 #endif
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL3
          //"-amazeca  Use AMaZE chromatic aberrations refine (only if q=10)\n"
-         "-acae <r b>Use chromatic aberrations correction\n" // modifJD
+         "-acae <r b> Use chromatic aberrations correction\n" // modifJD
          "-aline <l> reduction of line noise\n"
          "-aclean <l c> clean CFA\n"
          "-agreen <g> equilibrate green\n"
@@ -216,7 +217,7 @@ int main(int argc, char *argv[])
           fprintf(stderr, "Non-numeric argument to \"-%c\"\n", opt);
           return 1;
         }
-    if (!strchr("ftdeam", opt) && argv[arg - 1][2])
+    if (!strchr("ftdeamo", opt) && argv[arg - 1][2])
       fprintf(stderr, "Unknown option \"%s\".\n", argv[arg - 1]);
     switch (opt)
     {
@@ -299,7 +300,9 @@ int main(int argc, char *argv[])
       OUT.shot_select = abs(atoi(argv[arg++]));
       break;
     case 'o':
-      if (isdigit(argv[arg][0]) && !isdigit(argv[arg][1]))
+      if(!strcmp(optstr,"-output"))
+        OUT.outfn = argv[arg++];
+      else if(isdigit(argv[arg][0]) && !isdigit(argv[arg][1]))
         OUT.output_color = atoi(argv[arg++]);
 #ifndef NO_LCMS
       else
@@ -592,7 +595,10 @@ int main(int argc, char *argv[])
     if (use_timing)
       timerprint("LibRaw::dcraw_process()", argv[arg]);
 
-    snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg], OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
+    if(OUT.outfn)
+      strcpy(outfn, OUT.outfn);
+    else
+      snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg], OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
 
     if (verbosity)
     {
