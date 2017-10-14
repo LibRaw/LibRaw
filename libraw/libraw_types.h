@@ -478,7 +478,6 @@ typedef struct
   char *camera_profile;  /* -p */
   char *bad_pixels;      /* -P */
   char *dark_frame;      /* -K */
-  char *outfn;           /* -output */
   int output_bps;        /* -4 */
   int output_tiff;       /* -T */
   int user_flip;         /* -t */
