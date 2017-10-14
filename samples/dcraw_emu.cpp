@@ -56,7 +56,7 @@ void usage(const char *prog)
 {
   printf("dcraw_emu: almost complete dcraw emulator\n");
   printf("Usage:  %s [OPTION]... [FILE]...\n", prog);
-  printf("-c float-num       Set adjust maximum threshold (default 0.75)\n"
+  printf("-c float-num       Set adjust maximum threshold (default = 0.75)\n"
          "-v        Verbose: print progress messages (repeated -v will add verbosity)\n"
          "-w        Use camera white balance, if possible\n"
          "-a        Average the whole image for white balance\n"
@@ -99,10 +99,10 @@ void usage(const char *prog)
          "-G        Use green_matching() filter\n"
          "-B <x y w h> use cropbox\n"
          "-F        Use FILE I/O instead of streambuf API\n"
-         "-output <file> Output file name\n"
+         "-output <file> Output file name (default = inputfile.[tiff|ppm|pgm]\n"
          "-timing   Detailed timing report\n"
-         "-fbdd N   0 - disable FBDD noise reduction (default), 1 - light FBDD, 2 - full\n"
-         "-dcbi N   Number of extra DCD iterations (default - 0)\n"
+         "-fbdd N   0 - disable FBDD noise reduction, 1 - light FBDD, 2 - full (default = 0)\n"
+         "-dcbi N   Number of extra DCD iterations (default = 0)\n"
          "-dcbe     DCB color enhance\n"
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
          "-eeci     EECI refine for mixed VCD/AHD (q=8)\n"
