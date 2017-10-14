@@ -191,6 +191,7 @@ int main(int argc, char *argv[])
   int i, arg, c, ret;
   char opm, opt, *cp, *sp;
   int use_bigfile = 0, use_timing = 0, use_mem = 0;
+  char outfn[1024];
 #ifdef USE_DNGSDK
   dng_host *dnghost = NULL;
 #endif
@@ -301,7 +302,7 @@ int main(int argc, char *argv[])
       break;
     case 'o':
       if(!strcmp(optstr,"-output"))
-        OUT.outfn = argv[arg++];
+        strcpy(outfn, argv[arg++]);
       else if(isdigit(argv[arg][0]) && !isdigit(argv[arg][1]))
         OUT.output_color = atoi(argv[arg++]);
 #ifndef NO_LCMS
@@ -479,8 +480,6 @@ int main(int argc, char *argv[])
 
   for (; arg < argc; arg++)
   {
-    char outfn[1024];
-
     if (verbosity)
       printf("Processing file %s\n", argv[arg]);
 
@@ -595,10 +594,8 @@ int main(int argc, char *argv[])
     if (use_timing)
       timerprint("LibRaw::dcraw_process()", argv[arg]);
 
-    if(OUT.outfn)
-      strcpy(outfn, OUT.outfn);
-    else
-      snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg], OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
+    if(strlen(outfn) == 0)
+       snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg], OUT.output_tiff ? "tiff" : (P1.colors>1?"ppm":"pgm"));
 
     if (verbosity)
     {
