@@ -4183,7 +4183,7 @@ int LibRaw::unpack_thumb(void)
           }
           jpeg_create_decompress(&cinfo);
           jpeg_mem_src(&cinfo, (unsigned char *)T.thumb, T.tlength);
-          int rc = jpeg_read_header(&cinfo, TRUE);
+          int rc = jpeg_read_header(&cinfo, boolean(TRUE));
           if (rc != 1)
             goto err2;
           T.tcolors = (cinfo.num_components > 0 && cinfo.num_components <= 3) ? cinfo.num_components : 3;
