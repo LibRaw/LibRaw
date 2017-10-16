@@ -3242,7 +3242,7 @@ void CLASS kodak_jpeg_load_raw()
   jpeg_create_decompress(&cinfo);
   jpeg_stdio_src(&cinfo, ifp);
   cinfo.src->fill_input_buffer = fill_input_buffer;
-  jpeg_read_header(&cinfo, TRUE);
+  jpeg_read_header(&cinfo, boolean(TRUE));
   jpeg_start_decompress(&cinfo);
   if ((cinfo.output_width != width) || (cinfo.output_height * 2 != height) || (cinfo.output_components != 3))
   {
@@ -3306,7 +3306,7 @@ void CLASS kodak_jpeg_load_raw()
   try
   {
     jpeg_mem_src(&cinfo, jpg_buf, data_size);
-    int rc = jpeg_read_header(&cinfo, TRUE);
+    int rc = jpeg_read_header(&cinfo, boolean(TRUE));
     if (rc != 1)
       throw LIBRAW_EXCEPTION_DECODE_JPEG;
 
@@ -3418,7 +3418,7 @@ void CLASS lossy_dng_load_raw()
 #else
     jpeg_stdio_src(&cinfo, ifp);
 #endif
-    jpeg_read_header(&cinfo, TRUE);
+    jpeg_read_header(&cinfo, boolean(TRUE));
     jpeg_start_decompress(&cinfo);
     buf = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, cinfo.output_width * 3, 1);
 #ifdef LIBRAW_LIBRARY_BUILD
