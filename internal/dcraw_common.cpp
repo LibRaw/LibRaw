@@ -7043,7 +7043,8 @@ void CLASS Canon_WBCTpresets(short WBCTversion)
                                   (unique_id == 0x80000407) || // M6
                                   (unique_id == 0x80000398) || // M100
                                   (unique_id == 0x03970000) || // G7 X Mark II
-                                  (unique_id == 0x04100000)))  // G9 X Mark II
+                                  (unique_id == 0x04100000) || // G9 X Mark II
+                                  (unique_id == 0x04180000)))  // G1 X Mark III
     for (int i = 0; i < 15; i++)                               // tint, offset, as shot R, as shot B, CСT
     {
       fseek(ifp, 2, SEEK_CUR);
@@ -7429,6 +7430,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       {
         if ((unique_id == 0x03970000) || // G7 X Mark II
             (unique_id == 0x04100000) || // G9 X Mark II
+            (unique_id == 0x04180000) || // G1 X Mark III
             (unique_id == 0x80000394) || // EOS M5
             (unique_id == 0x80000398) || // EOS M100
             (unique_id == 0x80000407))   // EOS M6
@@ -14257,6 +14259,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 7474,-2301,-567,-4056,11456,2975,-222,716,4181 } },
     { "Canon PowerShot G16", 0, 0, /* updated */
       { 8020,-2687,-682,-3704,11879,2052,-965,1921,5556 } },
+    { "Canon PowerShot G1 X Mark III", 0, 0, /* temp */
+      { 8532,-701,-1167,-4095,11879,2508,-797,2424,7010 } },
     { "Canon PowerShot G1 X Mark II", 0, 0,
       { 7378,-1255,-1043,-4088,12251,2048,-876,1946,5805 } },
     { "Canon PowerShot G1 X", 0, 0,
