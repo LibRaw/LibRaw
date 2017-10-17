@@ -17960,6 +17960,7 @@ void CLASS identify()
           load_raw = table[i].offset == 0xffff ? &CLASS unpacked_load_raw_reversed : &CLASS unpacked_load_raw;
         }
         maximum = (1 << tiff_bps) - (1 << table[i].max);
+	break;
       }
   if (zero_fsize)
     fsize = 0;
