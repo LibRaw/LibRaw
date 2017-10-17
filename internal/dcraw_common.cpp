@@ -8028,6 +8028,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
            (id == 342) || // DSC-RX10M2
            (id == 355) || // DSC-RX10M3
            (id == 356) || // DSC-RX100M5
+           (id == 364) || // DSC-RX0
            (id == 365)    // DSC-RX10M4
   )
   {
@@ -8089,6 +8090,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
       (id == 342) || // DSC-RX10M2
       (id == 355) || // DSC-RX10M3
       (id == 356) || // DSC-RX100M5
+      (id == 364) || // DSC-RX0
       (id == 365)    // DSC-RX10M4
   )
   {
@@ -15513,6 +15515,10 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 6344,-1612,-462,-4863,12477,2681,-865,1786,6899 } },
     { "Sony DSC-RX1", 0, 0,
       { 6344,-1612,-462,-4863,12477,2681,-865,1786,6899 } },
+
+    {"Sony DSC-RX0", -800, 0, /* temp */
+      { 6596,-2079,-562,-4782,13016,1933,-970,1581,5181 } },
+
     { "Sony DSLR-A100", 0, 0xfeb,
       { 9437,-2811,-774,-8405,16215,2290,-710,596,7181 } },
     { "Sony DSLR-A290", 0, 0,
@@ -15928,7 +15934,7 @@ void CLASS identify()
         {0x155, "DSC-RX100M4"}, {0x156, "DSC-RX10M2"},  {0x158, "DSC-RX1RM2"}, {0x15a, "ILCE-QX1"},
         {0x15b, "ILCE-7RM2"},   {0x15e, "ILCE-7SM2"},   {0x161, "ILCA-68"},    {0x162, "ILCA-99M2"},
         {0x163, "DSC-RX10M3"},  {0x164, "DSC-RX100M5"}, {0x165, "ILCE-6300"},  {0x166, "ILCE-9"},
-        {0x168, "ILCE-6500"},   {0x16d, "DSC-RX10M4"},
+        {0x168, "ILCE-6500"},   {0x16c, "DSC-RX0"}, {0x16d, "DSC-RX10M4"},
     };
 
 #ifdef LIBRAW_LIBRARY_BUILD
