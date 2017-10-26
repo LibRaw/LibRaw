@@ -8015,6 +8015,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
       (id == 344) || // DSC-RX1RM2
       (id == 354) || // ILCA-99M2
       (id == 358) || // ILCE-9
+      (id == 362) || // ILCE-7RM3
       (id == 294)    // SLT-99, Hasselblad HV
   )
   {
@@ -8042,7 +8043,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
 
   if ( // E-mount cameras, ILCE series
       (id == 302) || (id == 306) || (id == 311) || (id == 312) || (id == 313) || (id == 318) || (id == 339) ||
-      (id == 340) || (id == 346) || (id == 347) || (id == 350) || (id == 360) || (id == 358))
+      (id == 340) || (id == 346) || (id == 347) || (id == 350) || (id == 358) || (id == 360) || (id == 362))
   {
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Sony_E;
     imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_ILCE;
@@ -15563,6 +15564,10 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 5838,-1430,-246,-3497,11477,2297,-748,1885,5778 } },
     { "Sony ILCE-7S", 0, 0,
       { 5838,-1430,-246,-3497,11477,2297,-748,1885,5778 } },
+
+    { "Sony ILCE-7RM3", 0, 0, /* temp */
+      { 6596,-2079,-562,-4782,13016,1933,-970,1581,5181 } },
+
     { "Sony ILCE-7RM2", 0, 0,
       { 6629,-1900,-483,-4618,12349,2550,-622,1381,6514 } },
     { "Sony ILCE-7R", 0, 0,
@@ -15934,7 +15939,7 @@ void CLASS identify()
         {0x155, "DSC-RX100M4"}, {0x156, "DSC-RX10M2"},  {0x158, "DSC-RX1RM2"}, {0x15a, "ILCE-QX1"},
         {0x15b, "ILCE-7RM2"},   {0x15e, "ILCE-7SM2"},   {0x161, "ILCA-68"},    {0x162, "ILCA-99M2"},
         {0x163, "DSC-RX10M3"},  {0x164, "DSC-RX100M5"}, {0x165, "ILCE-6300"},  {0x166, "ILCE-9"},
-        {0x168, "ILCE-6500"},   {0x16c, "DSC-RX0"}, {0x16d, "DSC-RX10M4"},
+        {0x168, "ILCE-6500"},   {0x16a, "ILCE-7RM3"},   {0x16c, "DSC-RX0"},    {0x16d, "DSC-RX10M4"},
     };
 
 #ifdef LIBRAW_LIBRARY_BUILD
