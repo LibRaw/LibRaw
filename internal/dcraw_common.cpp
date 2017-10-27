@@ -9592,7 +9592,9 @@ void CLASS parse_makernote(int base, int uptag)
         parseFujiMakernotes(tag, type);
     }
 
-    else if (!strncasecmp(model, "Hasselblad X1D", 14) || !strncasecmp(model, "Hasselblad H6D", 14))
+    else if (!strncasecmp(model, "Hasselblad X1D", 14)
+          || !strncasecmp(model, "Hasselblad H6D", 14)
+          || !strncasecmp(model, "Hasselblad A6D", 14))
     {
       if (tag == 0x0045)
       {
@@ -17308,7 +17310,7 @@ void CLASS identify()
         strcpy(model, "H3DII-39");
       }
     }
-    else if (raw_width == 12000) // H6D 100c
+    else if (raw_width == 12000) // H6D 100c, A6D 100c
     {
       left_margin = 64;
       width = 11608;
