@@ -661,7 +661,7 @@ typedef struct
 
 struct fuji_compressed_params
 {
-  char *q_table;  /* quantization table */
+  int8_t *q_table;  /* quantization table */
   int q_point[5]; /* quantization points */
   int max_bits;
   int min_value;
