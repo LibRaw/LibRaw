@@ -5187,6 +5187,7 @@ static const char *static_camera_list[] = {
 	"Huawei P9 (EVA-L09/AL00)",
 	"Huawei Honor6a",
 	"Huawei Honor9",
+	"Huawei Mate10 (BLA-L29)",
 	"Imacon Ixpress 96, 96C",
 	"Imacon Ixpress 384, 384C (single shot only)",
 	"Imacon Ixpress 132C",
