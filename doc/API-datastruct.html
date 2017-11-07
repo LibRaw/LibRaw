@@ -131,7 +131,7 @@
 <dt><strong> unsigned black; </strong></dt>
 <dd>Black level. Depending on the camera, it may be zero (this means that black has been subtracted at the unpacking stage or by the camera itself), calculated at the unpacking stage, read from the RAW file, or hardcoded.</dd>
 <dt><strong> unsigned cblack[4102]; </strong></dt>
-<dd>Per-channel black level correction. First 4 values are per-channel correction, next two are black level pattern block size, than cblack[5]*cblack[6] correction values.</dd>
+<dd>Per-channel black level correction. First 4 values are per-channel correction, next two are black level pattern block size, than cblack[4]*cblack[5] correction values (for indexes [6....6+cblack[4]*cblack[5]).</dd>
 <dt><strong> unsigned data_maximum; </strong></dt>
 <dd>Maximum pixel value in current file. Calculated at raw2image or dcraw_process() calls.</dd>
 <dt><strong> unsigned maximum; </strong></dt>
@@ -291,7 +291,7 @@
 <dt><strong> unsigned cropbox[4]; </strong></dt>
 <dd><strong> dcraw keys: </strong> none <br /> This field sets the image cropping rectangle. Cropbox[0] and cropbox[1] are the rectangle's top-left corner coordinates, remaining two values are width and height respectively. All coordinates are applied before any image rotation.</dd>
 <dt><strong> double aber[4]; </strong></dt>
-<dd><strong> dcraw keys: </strong> -C <br /> Correction of chromatic aberrations; the only specified values are <br /> aber[0], the red multiplier <br /> aber[2], the green multiplier. For some formats, it affects <a href="API-notes.html"> RAW data reading </a> , since correction of aberrations changes the output size.</dd>
+<dd><strong> dcraw keys: </strong> -C <br /> Correction of chromatic aberrations; the only specified values are <br /> aber[0], the red multiplier <br /> aber[2], the blue multiplier. For some formats, it affects <a href="API-notes.html"> RAW data reading </a> , since correction of aberrations changes the output size.</dd>
 <dt><strong> double gamm[6]; </strong></dt>
 <dd><strong> dcraw keys: </strong> -g power toe_slope <br /> Sets user gamma-curve. Library user should set first two fields of gamm array: <br /> gamm[0] - <strong> inverted </strong> gamma value) <br /> gamm[1] - slope for linear part (so called toe slope). Set to zero for simple power curve. <br /> Remaining 4 values are filled automatically.
 <p>By default settings for rec. BT.709 are used: power 2.222 (i.e. gamm[0]=1/2.222) and slope 4.5. For sRGB curve use gamm[0]=1/2.4 and gamm[1]=12.92, for linear curve set gamm[0]/gamm[1] to 1.0.</p>
