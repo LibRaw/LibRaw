@@ -16697,6 +16697,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
     { "Panasonic DMC-G8", -15, 0xfff, /* markets: DMC-G8, DMC-G80, DMC-G81, DMC-G85 */
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
+    { "Panasonic DC-G9", -15, 0, /* temp */
+      { 7641,-2336,-605,-3218,11299,2187,-485,1338,5121 } },
     { "Panasonic DMC-GF1", -15, 0xf92,
       { 7888,-1902,-1011,-8106,16085,2099,-2353,2866,7330 } },
     { "Panasonic DMC-GF2", -15, 0xfff,
