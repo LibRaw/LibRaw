@@ -357,6 +357,9 @@ typedef struct
   uchar FlashGroupOutputAndCompensation[4];
   uchar FlashColorFilter;
   ushort NEFCompression;
+  int ExposureMode;
+  int nMEshots;
+  int MEgainOn;
 } libraw_nikon_makernotes_t;
 
 typedef struct

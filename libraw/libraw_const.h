@@ -95,6 +95,14 @@ enum LibRaw_whitebalance_code
   LIBRAW_WBI_Other = 255
 };
 
+enum LibRaw_MultiExposure_related
+{
+  LIBRAW_ME_NONE = 0,
+  LIBRAW_ME_SIMPLE = 1,
+  LIBRAW_ME_OVERLAY = 2,
+  LIBRAW_ME_HDR = 3
+};
+
 enum LibRaw_dng_processing
 {
   LIBRAW_DNG_NONE = 0,
