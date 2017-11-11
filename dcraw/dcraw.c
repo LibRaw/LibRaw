@@ -11101,6 +11101,13 @@ void CLASS parse_makernote(int base, int uptag)
           NikonFlashInfoVersion = NikonFlashInfoVersion * 10 + fgetc(ifp) - '0';
         }
       }
+      else if (tag == 0x00b0)
+      {
+        get4(); // ME tag version, 4 symbols
+        imgdata.makernotes.nikon.ExposureMode = get4();
+        imgdata.makernotes.nikon.nMEshots = get4();
+        imgdata.makernotes.nikon.MEgainOn = get4();
+      }
     }
 
     else if (!strncmp(make, "OLYMPUS", 7))
