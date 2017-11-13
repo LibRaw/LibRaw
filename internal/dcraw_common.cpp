@@ -2901,6 +2901,12 @@ void CLASS panasonic_load_raw()
     }
   }
 }
+void CLASS panasonic_16x10_load_raw()
+{
+#ifdef LIBRAW_LIBRARY_BUILD
+	throw LIBRAW_EXCEPTION_DECODE_RAW;
+#endif
+}
 
 void CLASS olympus_load_raw()
 {
@@ -17512,6 +17518,7 @@ void CLASS identify()
   }
   else if (!strncmp(make, "Leica", 5) || !strncmp(make, "Panasonic", 9) || !strncasecmp(make, "YUNEEC", 6))
   {
+
     if (raw_width > 0 && ((flen - data_offset) / (raw_width * 8 / 7) == raw_height))
       load_raw = &CLASS panasonic_load_raw;
     if (!load_raw)
@@ -17520,6 +17527,14 @@ void CLASS identify()
       load_flags = 4;
     }
     zero_is_bad = 1;
+#ifdef LIBRAW_LIBRARY_BUILD
+    float fratio = float(data_size) / (float(raw_height) * float(raw_width));
+    if(!(raw_width % 10) && !(data_size % 16384) && fratio >= 1.6f && fratio <= 1.6001f)
+    {
+      load_raw = &CLASS panasonic_16x10_load_raw;
+      zero_is_bad = 0;
+    }
+#endif
     if ((height += 12) > raw_height)
       height = raw_height;
     for (i = 0; i < sizeof pana / sizeof *pana; i++)

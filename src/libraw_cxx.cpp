@@ -281,6 +281,7 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t *p)
 }
 
 int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
+int LibRaw::is_panasonic_16x10() { return load_raw == &LibRaw::panasonic_16x10_load_raw ; }
 int LibRaw::is_coolscan_nef() { return load_raw == &LibRaw::nikon_coolscan_load_raw; }
 int LibRaw::is_jpeg_thumb() { return  thumb_load_raw == 0 && write_thumb == &LibRaw::jpeg_thumb; }
 
@@ -807,6 +808,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "panasonic_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
+  }
+  else if (load_raw == &LibRaw::panasonic_16x10_load_raw)
+  {
+    d_info->decoder_name = "panasonic_16x10_load_raw()";
   }
   else if (load_raw == &LibRaw::olympus_load_raw)
   {
@@ -5054,6 +5059,7 @@ static const char *static_camera_list[] = {
 	"Casio EX-ZR1500",
 	"Casio EX-ZR3000",
 	"Casio EX-ZR4000/5000",
+	"Casio EX-ZR4100/5100",
 	"Casio EX-100",
 	"Casio EX-100F",
 	"Casio EX-10",

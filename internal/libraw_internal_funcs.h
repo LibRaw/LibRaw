@@ -169,6 +169,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        canon_rmf_load_raw();
     unsigned    pana_bits (int nbits);
     void        panasonic_load_raw();
+    void        panasonic_16x10_load_raw();
     void        olympus_load_raw();
     void        olympus_cseries_load_raw();
     void        minolta_rd175_load_raw();
