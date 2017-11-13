@@ -9686,7 +9686,7 @@ void CLASS parse_makernote(int base, int uptag)
         if (c)
           imgdata.other.FlashEC = (float)(a * b) / (float)c;
       }
-      else if (tag == 0x003b) //
+      else if (tag == 0x003b) // all 1s for regular exposures
       {
         imgdata.makernotes.nikon.ME_WB[0] = getreal(type);
         imgdata.makernotes.nikon.ME_WB[2] = getreal(type);
