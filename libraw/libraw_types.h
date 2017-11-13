@@ -360,6 +360,7 @@ typedef struct
   int ExposureMode;
   int nMEshots;
   int MEgainOn;
+  double ME_WB[4];
 } libraw_nikon_makernotes_t;
 
 typedef struct
