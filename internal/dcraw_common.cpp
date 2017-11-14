@@ -9686,6 +9686,13 @@ void CLASS parse_makernote(int base, int uptag)
         if (c)
           imgdata.other.FlashEC = (float)(a * b) / (float)c;
       }
+      else if (tag == 0x003b) // all 1s for regular exposures
+      {
+        imgdata.makernotes.nikon.ME_WB[0] = getreal(type);
+        imgdata.makernotes.nikon.ME_WB[2] = getreal(type);
+        imgdata.makernotes.nikon.ME_WB[1] = getreal(type);
+        imgdata.makernotes.nikon.ME_WB[3] = getreal(type);
+      }
       else if (tag == 0x0082) // lens attachment
       {
         stmread(imgdata.lens.makernotes.Attachment, len, ifp);
