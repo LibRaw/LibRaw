@@ -47,6 +47,7 @@ it under the terms of the one of two licenses as you choose:
 #define Hasselblad MyCoolRawProcessor.imgdata.makernotes.hasselblad
 #define Fuji MyCoolRawProcessor.imgdata.makernotes.fuji
 #define Oly MyCoolRawProcessor.imgdata.makernotes.olympus
+#define Nikon MyCoolRawProcessor.imgdata.makernotes.nikon
 
 const char *EXIF_LightSources[] = {
     "Unknown",
@@ -612,6 +613,13 @@ int main(int ac, char *av[])
         printf("\nMakernotes 'Custom6' WB multipliers:");
         for (int c = 0; c < 4; c++)
           printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Custom6][c]);
+      }
+
+      if ((Nikon.ME_WB[0] != 0.0f) && (Nikon.ME_WB[0] != 1.0f))
+      {
+        printf ("\nNikon multi-exposure WB multipliers:");
+        for (int c = 0; c < 4; c++)
+          printf(" %f", Nikon.ME_WB[c]);
       }
 
       if (C.rgb_cam[0][0] > 0.0001 && P1.colors > 1)
