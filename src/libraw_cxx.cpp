@@ -5287,6 +5287,7 @@ static const char *static_camera_list[] = {
 	"Leaf Volare",
 	"Lenovo a820",
 	"Leica C (Typ 112)",
+	"Leica CL",
 	"Leica Digilux 2",
 	"Leica Digilux 3",
 	"Leica Digital-Modul-R",
