@@ -5329,6 +5329,7 @@ static const char *static_camera_list[] = {
 	"Leica X VARIO (Typ 107)",
 	"LG G3",
 	"LG G4",
+	"LG V20 (F800K)",
 	"LG VS995",
 	"Logitech Fotoman Pixtura",
 	"Mamiya ZD",
