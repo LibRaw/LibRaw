@@ -4861,6 +4861,7 @@ static const char *static_camera_list[] = {
 	"Apple iPhone 7",
 	"Apple iPhone 7 plus",
 	"Apple iPhone 8",
+	"Apple iPhone 8 plus",
 	"Apple QuickTake 100",
 	"Apple QuickTake 150",
 	"Apple QuickTake 200",
