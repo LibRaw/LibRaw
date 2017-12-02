@@ -55,55 +55,56 @@ it under the terms of the one of two licenses as you choose:
 #include "libraw_fuji_compressed.cpp"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-void default_memory_callback(void *, const char *file, const char *where)
-{
-  fprintf(stderr, "%s: Out of memory in %s\n", file ? file : "unknown file", where);
-}
-
-void default_data_callback(void *, const char *file, const int offset)
-{
-  if (offset < 0)
-    fprintf(stderr, "%s: Unexpected end of file\n", file ? file : "unknown file");
-  else
-    fprintf(stderr, "%s: data corrupted at %d\n", file ? file : "unknown file", offset);
-}
-const char *libraw_strerror(int e)
-{
-  enum LibRaw_errors errorcode = (LibRaw_errors)e;
-  switch (errorcode)
+  void default_memory_callback(void *, const char *file, const char *where)
   {
-  case LIBRAW_SUCCESS:
-    return "No error";
-  case LIBRAW_UNSPECIFIED_ERROR:
-    return "Unspecified error";
-  case LIBRAW_FILE_UNSUPPORTED:
-    return "Unsupported file format or not RAW file";
-  case LIBRAW_REQUEST_FOR_NONEXISTENT_IMAGE:
-    return "Request for nonexisting image number";
-  case LIBRAW_OUT_OF_ORDER_CALL:
-    return "Out of order call of libraw function";
-  case LIBRAW_NO_THUMBNAIL:
-    return "No thumbnail in file";
-  case LIBRAW_UNSUPPORTED_THUMBNAIL:
-    return "Unsupported thumbnail format";
-  case LIBRAW_INPUT_CLOSED:
-    return "No input stream, or input stream closed";
-  case LIBRAW_UNSUFFICIENT_MEMORY:
-    return "Unsufficient memory";
-  case LIBRAW_DATA_ERROR:
-    return "Corrupted data or unexpected EOF";
-  case LIBRAW_IO_ERROR:
-    return "Input/output error";
-  case LIBRAW_CANCELLED_BY_CALLBACK:
-    return "Cancelled by user callback";
-  case LIBRAW_BAD_CROP:
-    return "Bad crop box";
-  default:
-    return "Unknown error code";
+    fprintf(stderr, "%s: Out of memory in %s\n", file ? file : "unknown file", where);
   }
-}
+
+  void default_data_callback(void *, const char *file, const int offset)
+  {
+    if (offset < 0)
+      fprintf(stderr, "%s: Unexpected end of file\n", file ? file : "unknown file");
+    else
+      fprintf(stderr, "%s: data corrupted at %d\n", file ? file : "unknown file", offset);
+  }
+  const char *libraw_strerror(int e)
+  {
+    enum LibRaw_errors errorcode = (LibRaw_errors)e;
+    switch (errorcode)
+    {
+    case LIBRAW_SUCCESS:
+      return "No error";
+    case LIBRAW_UNSPECIFIED_ERROR:
+      return "Unspecified error";
+    case LIBRAW_FILE_UNSUPPORTED:
+      return "Unsupported file format or not RAW file";
+    case LIBRAW_REQUEST_FOR_NONEXISTENT_IMAGE:
+      return "Request for nonexisting image number";
+    case LIBRAW_OUT_OF_ORDER_CALL:
+      return "Out of order call of libraw function";
+    case LIBRAW_NO_THUMBNAIL:
+      return "No thumbnail in file";
+    case LIBRAW_UNSUPPORTED_THUMBNAIL:
+      return "Unsupported thumbnail format";
+    case LIBRAW_INPUT_CLOSED:
+      return "No input stream, or input stream closed";
+    case LIBRAW_UNSUFFICIENT_MEMORY:
+      return "Unsufficient memory";
+    case LIBRAW_DATA_ERROR:
+      return "Corrupted data or unexpected EOF";
+    case LIBRAW_IO_ERROR:
+      return "Input/output error";
+    case LIBRAW_CANCELLED_BY_CALLBACK:
+      return "Cancelled by user callback";
+    case LIBRAW_BAD_CROP:
+      return "Bad crop box";
+    default:
+      return "Unknown error code";
+    }
+  }
 
 #ifdef __cplusplus
 }
@@ -281,9 +282,9 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t *p)
 }
 
 int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
-int LibRaw::is_panasonic_16x10() { return load_raw == &LibRaw::panasonic_16x10_load_raw ; }
+int LibRaw::is_panasonic_16x10() { return load_raw == &LibRaw::panasonic_16x10_load_raw; }
 int LibRaw::is_coolscan_nef() { return load_raw == &LibRaw::nikon_coolscan_load_raw; }
-int LibRaw::is_jpeg_thumb() { return  thumb_load_raw == 0 && write_thumb == &LibRaw::jpeg_thumb; }
+int LibRaw::is_jpeg_thumb() { return thumb_load_raw == 0 && write_thumb == &LibRaw::jpeg_thumb; }
 
 int LibRaw::is_nikon_sraw() { return load_raw == &LibRaw::nikon_load_sraw; }
 int LibRaw::sraw_midpoint()
@@ -1689,7 +1690,10 @@ void LibRaw::pentax_4shot_load_raw()
   {
     int row, col;
   } _move[4] = {
-      {1, 1}, {0, 1}, {0, 0}, {1, 0},
+      {1, 1},
+      {0, 1},
+      {0, 0},
+      {1, 0},
   };
 
   int tidx = 0;
@@ -4153,7 +4157,7 @@ int LibRaw::unpack_thumb(void)
         T.thumb = (char *)malloc(T.tlength);
         merror(T.thumb, "jpeg_thumb()");
         ID.input->read(T.thumb, 1, T.tlength);
-	unsigned char *tthumb = (unsigned char*)T.thumb;
+        unsigned char *tthumb = (unsigned char *)T.thumb;
         tthumb[0] = 0xff;
         tthumb[1] = 0xd8;
 #ifdef NO_JPEG
@@ -4714,7 +4718,7 @@ int LibRaw::dcraw_process(void)
       green_matching();
     }
 
-    if ( !O.no_auto_scale)
+    if (!O.no_auto_scale)
     {
       scale_colors();
       SET_PROC_FLAG(LIBRAW_PROGRESS_SCALE_COLORS);
@@ -4792,7 +4796,7 @@ int LibRaw::dcraw_process(void)
       if (P1.colors == 3)
       {
 
- 	/* median filter callback, if not set use own */
+        /* median filter callback, if not set use own */
         median_filter();
         SET_PROC_FLAG(LIBRAW_PROGRESS_MEDIAN_FILTER);
       }

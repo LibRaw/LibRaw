@@ -327,8 +327,7 @@ int main(int argc, char *argv[])
       {
         strncpy(OUT.p4shot_order, argv[arg++], 5);
       }
-      else
-          if (!argv[arg - 1][2])
+      else if (!argv[arg - 1][2])
         OUT.use_auto_wb = 1;
       else
         fprintf(stderr, "Unknown option \"%s\".\n", argv[arg - 1]);

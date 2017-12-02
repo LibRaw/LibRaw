@@ -435,14 +435,22 @@ int main(int ac, char *av[])
       printf("%0.1f sec\n", P2.shutter);
       printf("Aperture: f/%0.1f\n", P2.aperture);
       printf("Focal length: %0.1f mm\n", P2.focal_len);
-      if (P2.exifAmbientTemperature > -273.15f) printf("Ambient temperature (exif data): %6.2f° C\n", P2.exifAmbientTemperature);
-      if (P2.CameraTemperature > -273.15f) printf("Camera temperature: %6.2f° C\n", P2.CameraTemperature);
-      if (P2.SensorTemperature > -273.15f) printf("Sensor temperature: %6.2f° C\n", P2.SensorTemperature);
-      if (P2.SensorTemperature2 > -273.15f) printf("Sensor temperature2: %6.2f° C\n", P2.SensorTemperature2);
-      if (P2.LensTemperature > -273.15f) printf("Lens temperature: %6.2f° C\n", P2.LensTemperature);
-      if (P2.AmbientTemperature > -273.15f) printf("Ambient temperature: %6.2f° C\n", P2.AmbientTemperature);
-      if (P2.BatteryTemperature > -273.15f) printf("Battery temperature: %6.2f° C\n", P2.BatteryTemperature);
-      if (P2.FlashGN > 1.0f) printf("Flash Guide Number: %6.2f\n", P2.FlashGN);
+      if (P2.exifAmbientTemperature > -273.15f)
+        printf("Ambient temperature (exif data): %6.2f° C\n", P2.exifAmbientTemperature);
+      if (P2.CameraTemperature > -273.15f)
+        printf("Camera temperature: %6.2f° C\n", P2.CameraTemperature);
+      if (P2.SensorTemperature > -273.15f)
+        printf("Sensor temperature: %6.2f° C\n", P2.SensorTemperature);
+      if (P2.SensorTemperature2 > -273.15f)
+        printf("Sensor temperature2: %6.2f° C\n", P2.SensorTemperature2);
+      if (P2.LensTemperature > -273.15f)
+        printf("Lens temperature: %6.2f° C\n", P2.LensTemperature);
+      if (P2.AmbientTemperature > -273.15f)
+        printf("Ambient temperature: %6.2f° C\n", P2.AmbientTemperature);
+      if (P2.BatteryTemperature > -273.15f)
+        printf("Battery temperature: %6.2f° C\n", P2.BatteryTemperature);
+      if (P2.FlashGN > 1.0f)
+        printf("Flash Guide Number: %6.2f\n", P2.FlashGN);
       printf("Flash exposure compensation: %0.2f EV\n", P2.FlashEC);
       if (C.profile)
         printf("Embedded ICC profile: yes, %d bytes\n", C.profile_length);

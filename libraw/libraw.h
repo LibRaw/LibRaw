@@ -39,74 +39,75 @@ it under the terms of the one of two licenses as you choose:
 #include "libraw_alloc.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-DllDef const char *libraw_strerror(int errorcode);
-DllDef const char *libraw_strprogress(enum LibRaw_progress);
-/* LibRaw C API */
-DllDef libraw_data_t *libraw_init(unsigned int flags);
-DllDef int libraw_open_file(libraw_data_t *, const char *);
-DllDef int libraw_open_file_ex(libraw_data_t *, const char *, INT64 max_buff_sz);
+  DllDef const char *libraw_strerror(int errorcode);
+  DllDef const char *libraw_strprogress(enum LibRaw_progress);
+  /* LibRaw C API */
+  DllDef libraw_data_t *libraw_init(unsigned int flags);
+  DllDef int libraw_open_file(libraw_data_t *, const char *);
+  DllDef int libraw_open_file_ex(libraw_data_t *, const char *, INT64 max_buff_sz);
 #if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
-DllDef int libraw_open_wfile(libraw_data_t *, const wchar_t *);
-DllDef int libraw_open_wfile_ex(libraw_data_t *, const wchar_t *, INT64 max_buff_sz);
+  DllDef int libraw_open_wfile(libraw_data_t *, const wchar_t *);
+  DllDef int libraw_open_wfile_ex(libraw_data_t *, const wchar_t *, INT64 max_buff_sz);
 #endif
-DllDef int libraw_open_buffer(libraw_data_t *, void *buffer, size_t size);
-DllDef int libraw_unpack(libraw_data_t *);
-DllDef int libraw_unpack_thumb(libraw_data_t *);
-DllDef void libraw_recycle_datastream(libraw_data_t *);
-DllDef void libraw_recycle(libraw_data_t *);
-DllDef void libraw_close(libraw_data_t *);
-DllDef void libraw_subtract_black(libraw_data_t *);
-DllDef int libraw_raw2image(libraw_data_t *);
-DllDef void libraw_free_image(libraw_data_t *);
-/* version helpers */
-DllDef const char *libraw_version();
-DllDef int libraw_versionNumber();
-/* Camera list */
-DllDef const char **libraw_cameraList();
-DllDef int libraw_cameraCount();
+  DllDef int libraw_open_buffer(libraw_data_t *, void *buffer, size_t size);
+  DllDef int libraw_unpack(libraw_data_t *);
+  DllDef int libraw_unpack_thumb(libraw_data_t *);
+  DllDef void libraw_recycle_datastream(libraw_data_t *);
+  DllDef void libraw_recycle(libraw_data_t *);
+  DllDef void libraw_close(libraw_data_t *);
+  DllDef void libraw_subtract_black(libraw_data_t *);
+  DllDef int libraw_raw2image(libraw_data_t *);
+  DllDef void libraw_free_image(libraw_data_t *);
+  /* version helpers */
+  DllDef const char *libraw_version();
+  DllDef int libraw_versionNumber();
+  /* Camera list */
+  DllDef const char **libraw_cameraList();
+  DllDef int libraw_cameraCount();
 
-/* helpers */
-DllDef void libraw_set_memerror_handler(libraw_data_t *, memory_callback cb, void *datap);
-DllDef void libraw_set_exifparser_handler(libraw_data_t *, exif_parser_callback cb, void *datap);
-DllDef void libraw_set_dataerror_handler(libraw_data_t *, data_callback func, void *datap);
-DllDef void libraw_set_progress_handler(libraw_data_t *, progress_callback cb, void *datap);
-DllDef const char *libraw_unpack_function_name(libraw_data_t *lr);
-DllDef int libraw_get_decoder_info(libraw_data_t *lr, libraw_decoder_info_t *d);
-DllDef int libraw_COLOR(libraw_data_t *, int row, int col);
-DllDef unsigned libraw_capabilities();
+  /* helpers */
+  DllDef void libraw_set_memerror_handler(libraw_data_t *, memory_callback cb, void *datap);
+  DllDef void libraw_set_exifparser_handler(libraw_data_t *, exif_parser_callback cb, void *datap);
+  DllDef void libraw_set_dataerror_handler(libraw_data_t *, data_callback func, void *datap);
+  DllDef void libraw_set_progress_handler(libraw_data_t *, progress_callback cb, void *datap);
+  DllDef const char *libraw_unpack_function_name(libraw_data_t *lr);
+  DllDef int libraw_get_decoder_info(libraw_data_t *lr, libraw_decoder_info_t *d);
+  DllDef int libraw_COLOR(libraw_data_t *, int row, int col);
+  DllDef unsigned libraw_capabilities();
 
-/* DCRAW compatibility */
-DllDef int libraw_adjust_sizes_info_only(libraw_data_t *);
-DllDef int libraw_dcraw_ppm_tiff_writer(libraw_data_t *lr, const char *filename);
-DllDef int libraw_dcraw_thumb_writer(libraw_data_t *lr, const char *fname);
-DllDef int libraw_dcraw_process(libraw_data_t *lr);
-DllDef libraw_processed_image_t *libraw_dcraw_make_mem_image(libraw_data_t *lr, int *errc);
-DllDef libraw_processed_image_t *libraw_dcraw_make_mem_thumb(libraw_data_t *lr, int *errc);
-DllDef void libraw_dcraw_clear_mem(libraw_processed_image_t *);
-/* getters/setters used by 3DLut Creator */
-DllDef void libraw_set_demosaic(libraw_data_t *lr, int value);
-DllDef void libraw_set_output_color(libraw_data_t *lr, int value);
-DllDef void libraw_set_user_mul(libraw_data_t *lr, int index, float val);
-DllDef void libraw_set_output_bps(libraw_data_t *lr, int value);
-DllDef void libraw_set_gamma(libraw_data_t *lr, int index, float value);
-DllDef void libraw_set_no_auto_bright(libraw_data_t *lr, int value);
-DllDef void libraw_set_bright(libraw_data_t *lr, float value);
-DllDef void libraw_set_highlight(libraw_data_t *lr, int value);
-DllDef void libraw_set_fbdd_noiserd(libraw_data_t *lr, int value);
-DllDef int libraw_get_raw_height(libraw_data_t *lr);
-DllDef int libraw_get_raw_width(libraw_data_t *lr);
-DllDef int libraw_get_iheight(libraw_data_t *lr);
-DllDef int libraw_get_iwidth(libraw_data_t *lr);
-DllDef float libraw_get_cam_mul(libraw_data_t *lr, int index);
-DllDef float libraw_get_pre_mul(libraw_data_t *lr, int index);
-DllDef float libraw_get_rgb_cam(libraw_data_t *lr, int index1, int index2);
-DllDef int libraw_get_color_maximum(libraw_data_t *lr);
+  /* DCRAW compatibility */
+  DllDef int libraw_adjust_sizes_info_only(libraw_data_t *);
+  DllDef int libraw_dcraw_ppm_tiff_writer(libraw_data_t *lr, const char *filename);
+  DllDef int libraw_dcraw_thumb_writer(libraw_data_t *lr, const char *fname);
+  DllDef int libraw_dcraw_process(libraw_data_t *lr);
+  DllDef libraw_processed_image_t *libraw_dcraw_make_mem_image(libraw_data_t *lr, int *errc);
+  DllDef libraw_processed_image_t *libraw_dcraw_make_mem_thumb(libraw_data_t *lr, int *errc);
+  DllDef void libraw_dcraw_clear_mem(libraw_processed_image_t *);
+  /* getters/setters used by 3DLut Creator */
+  DllDef void libraw_set_demosaic(libraw_data_t *lr, int value);
+  DllDef void libraw_set_output_color(libraw_data_t *lr, int value);
+  DllDef void libraw_set_user_mul(libraw_data_t *lr, int index, float val);
+  DllDef void libraw_set_output_bps(libraw_data_t *lr, int value);
+  DllDef void libraw_set_gamma(libraw_data_t *lr, int index, float value);
+  DllDef void libraw_set_no_auto_bright(libraw_data_t *lr, int value);
+  DllDef void libraw_set_bright(libraw_data_t *lr, float value);
+  DllDef void libraw_set_highlight(libraw_data_t *lr, int value);
+  DllDef void libraw_set_fbdd_noiserd(libraw_data_t *lr, int value);
+  DllDef int libraw_get_raw_height(libraw_data_t *lr);
+  DllDef int libraw_get_raw_width(libraw_data_t *lr);
+  DllDef int libraw_get_iheight(libraw_data_t *lr);
+  DllDef int libraw_get_iwidth(libraw_data_t *lr);
+  DllDef float libraw_get_cam_mul(libraw_data_t *lr, int index);
+  DllDef float libraw_get_pre_mul(libraw_data_t *lr, int index);
+  DllDef float libraw_get_rgb_cam(libraw_data_t *lr, int index1, int index2);
+  DllDef int libraw_get_color_maximum(libraw_data_t *lr);
 
-DllDef libraw_iparams_t *libraw_get_iparams(libraw_data_t *lr);
-DllDef libraw_lensinfo_t *libraw_get_lensinfo(libraw_data_t *lr);
-DllDef libraw_imgother_t *libraw_get_imgother(libraw_data_t *lr);
+  DllDef libraw_iparams_t *libraw_get_iparams(libraw_data_t *lr);
+  DllDef libraw_lensinfo_t *libraw_get_lensinfo(libraw_data_t *lr);
+  DllDef libraw_imgother_t *libraw_get_imgother(libraw_data_t *lr);
 
 #ifdef __cplusplus
 }
@@ -204,8 +205,10 @@ public:
 
   int COLOR(int row, int col)
   {
-    if(!imgdata.idata.filters) return 6; // Special value 0+1+2+3
-    if(imgdata.idata.filters < 1000) return fcol(row,col);
+    if (!imgdata.idata.filters)
+      return 6; // Special value 0+1+2+3
+    if (imgdata.idata.filters < 1000)
+      return fcol(row, col);
     return libraw_internal_data.internal_output_params.fuji_width ? FCF(row, col) : FC(row, col);
   }
 
