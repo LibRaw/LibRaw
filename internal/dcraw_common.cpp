@@ -2874,7 +2874,7 @@ void CLASS panasonic_load_raw()
   int row, col, i, j, sh = 0, pred[2], nonz[2];
 
   pana_bits(0);
-  for (row = 0; row < height; row++)
+  for (row = 0; row < raw_height; row++)
   {
 #ifdef LIBRAW_LIBRARY_BUILD
     checkCancel();
@@ -2896,7 +2896,7 @@ void CLASS panasonic_load_raw()
       }
       else if ((nonz[i & 1] = pana_bits(8)) || i > 11)
         pred[i & 1] = nonz[i & 1] << 4 | pana_bits(4);
-      if ((RAW(row, col) = pred[col & 1]) > 4098 && col < width)
+      if ((RAW(row, col) = pred[col & 1]) > 4098 && col < width && row < height)
         derror();
     }
   }
@@ -13269,6 +13269,9 @@ void CLASS parse_fuji(int offset)
   entries = get4();
   if (entries > 255)
     return;
+#ifdef LIBRAW_LIBRARY_BUILD
+  imgdata.process_warnings |=  LIBRAW_WARN_PARSEFUJI_PROCESSED; 
+#endif
   while (entries--)
   {
     tag = get2();
@@ -17610,6 +17613,11 @@ dng_skip:
     if (raw_color)
       adobe_coeff("Apple", "Quicktake");
 
+#ifdef LIBRAW_LIBRARY_BUILD
+  // Clear erorneus fuji_width if not set through parse_fuji or for DNG
+  if(fuji_width && !dng_version && !(imgdata.process_warnings & LIBRAW_WARN_PARSEFUJI_PROCESSED ))
+     fuji_width = 0;
+#endif
   if (fuji_width)
   {
     fuji_width = width >> !fuji_layout;
