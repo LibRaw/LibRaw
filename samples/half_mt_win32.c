@@ -190,7 +190,7 @@ int main(int ac, char *av[])
                                            NULL,      // no thread function arguments
                                            0,         // default creation flags
                                            &ThreadID) // receive thread identifier
-                ))
+                 ))
     {
       printf("CreateThread error: %d\n", GetLastError());
       return 1;

@@ -55,55 +55,56 @@ it under the terms of the one of two licenses as you choose:
 #include "libraw_fuji_compressed.cpp"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-void default_memory_callback(void *, const char *file, const char *where)
-{
-  fprintf(stderr, "%s: Out of memory in %s\n", file ? file : "unknown file", where);
-}
-
-void default_data_callback(void *, const char *file, const int offset)
-{
-  if (offset < 0)
-    fprintf(stderr, "%s: Unexpected end of file\n", file ? file : "unknown file");
-  else
-    fprintf(stderr, "%s: data corrupted at %d\n", file ? file : "unknown file", offset);
-}
-const char *libraw_strerror(int e)
-{
-  enum LibRaw_errors errorcode = (LibRaw_errors)e;
-  switch (errorcode)
+  void default_memory_callback(void *, const char *file, const char *where)
   {
-  case LIBRAW_SUCCESS:
-    return "No error";
-  case LIBRAW_UNSPECIFIED_ERROR:
-    return "Unspecified error";
-  case LIBRAW_FILE_UNSUPPORTED:
-    return "Unsupported file format or not RAW file";
-  case LIBRAW_REQUEST_FOR_NONEXISTENT_IMAGE:
-    return "Request for nonexisting image number";
-  case LIBRAW_OUT_OF_ORDER_CALL:
-    return "Out of order call of libraw function";
-  case LIBRAW_NO_THUMBNAIL:
-    return "No thumbnail in file";
-  case LIBRAW_UNSUPPORTED_THUMBNAIL:
-    return "Unsupported thumbnail format";
-  case LIBRAW_INPUT_CLOSED:
-    return "No input stream, or input stream closed";
-  case LIBRAW_UNSUFFICIENT_MEMORY:
-    return "Unsufficient memory";
-  case LIBRAW_DATA_ERROR:
-    return "Corrupted data or unexpected EOF";
-  case LIBRAW_IO_ERROR:
-    return "Input/output error";
-  case LIBRAW_CANCELLED_BY_CALLBACK:
-    return "Cancelled by user callback";
-  case LIBRAW_BAD_CROP:
-    return "Bad crop box";
-  default:
-    return "Unknown error code";
+    fprintf(stderr, "%s: Out of memory in %s\n", file ? file : "unknown file", where);
   }
-}
+
+  void default_data_callback(void *, const char *file, const int offset)
+  {
+    if (offset < 0)
+      fprintf(stderr, "%s: Unexpected end of file\n", file ? file : "unknown file");
+    else
+      fprintf(stderr, "%s: data corrupted at %d\n", file ? file : "unknown file", offset);
+  }
+  const char *libraw_strerror(int e)
+  {
+    enum LibRaw_errors errorcode = (LibRaw_errors)e;
+    switch (errorcode)
+    {
+    case LIBRAW_SUCCESS:
+      return "No error";
+    case LIBRAW_UNSPECIFIED_ERROR:
+      return "Unspecified error";
+    case LIBRAW_FILE_UNSUPPORTED:
+      return "Unsupported file format or not RAW file";
+    case LIBRAW_REQUEST_FOR_NONEXISTENT_IMAGE:
+      return "Request for nonexisting image number";
+    case LIBRAW_OUT_OF_ORDER_CALL:
+      return "Out of order call of libraw function";
+    case LIBRAW_NO_THUMBNAIL:
+      return "No thumbnail in file";
+    case LIBRAW_UNSUPPORTED_THUMBNAIL:
+      return "Unsupported thumbnail format";
+    case LIBRAW_INPUT_CLOSED:
+      return "No input stream, or input stream closed";
+    case LIBRAW_UNSUFFICIENT_MEMORY:
+      return "Unsufficient memory";
+    case LIBRAW_DATA_ERROR:
+      return "Corrupted data or unexpected EOF";
+    case LIBRAW_IO_ERROR:
+      return "Input/output error";
+    case LIBRAW_CANCELLED_BY_CALLBACK:
+      return "Cancelled by user callback";
+    case LIBRAW_BAD_CROP:
+      return "Bad crop box";
+    default:
+      return "Unknown error code";
+    }
+  }
 
 #ifdef __cplusplus
 }
@@ -281,9 +282,9 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t *p)
 }
 
 int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
-int LibRaw::is_panasonic_16x10() { return load_raw == &LibRaw::panasonic_16x10_load_raw ; }
+int LibRaw::is_panasonic_16x10() { return load_raw == &LibRaw::panasonic_16x10_load_raw; }
 int LibRaw::is_coolscan_nef() { return load_raw == &LibRaw::nikon_coolscan_load_raw; }
-int LibRaw::is_jpeg_thumb() { return  thumb_load_raw == 0 && write_thumb == &LibRaw::jpeg_thumb; }
+int LibRaw::is_jpeg_thumb() { return thumb_load_raw == 0 && write_thumb == &LibRaw::jpeg_thumb; }
 
 int LibRaw::is_nikon_sraw() { return load_raw == &LibRaw::nikon_load_sraw; }
 int LibRaw::sraw_midpoint()
@@ -1689,7 +1690,10 @@ void LibRaw::pentax_4shot_load_raw()
   {
     int row, col;
   } _move[4] = {
-      {1, 1}, {0, 1}, {0, 0}, {1, 0},
+      {1, 1},
+      {0, 1},
+      {0, 0},
+      {1, 0},
   };
 
   int tidx = 0;
@@ -4153,7 +4157,7 @@ int LibRaw::unpack_thumb(void)
         T.thumb = (char *)malloc(T.tlength);
         merror(T.thumb, "jpeg_thumb()");
         ID.input->read(T.thumb, 1, T.tlength);
-	unsigned char *tthumb = (unsigned char*)T.thumb;
+        unsigned char *tthumb = (unsigned char *)T.thumb;
         tthumb[0] = 0xff;
         tthumb[1] = 0xd8;
 #ifdef NO_JPEG
@@ -4188,6 +4192,60 @@ int LibRaw::unpack_thumb(void)
         if (t_bytesps > 1)
           throw LIBRAW_EXCEPTION_IO_CORRUPT; // 8-bit thumb, but parsed for more bits
         int t_length = T.twidth * T.theight * t_colors;
+
+		if (T.tlength && T.tlength < t_length) // try to find tiff ifd with needed offset
+		{
+			int pifd = -1;
+			for (int ii = 0; ii < libraw_internal_data.identify_data.tiff_nifds && ii < LIBRAW_IFD_MAXCOUNT; ii++)
+				if (tiff_ifd[ii].offset == libraw_internal_data.internal_data.toffset) // found
+				{
+					pifd = ii;
+					break;
+				}
+			if (pifd >= 0 && tiff_ifd[pifd].strip_offsets_count && tiff_ifd[pifd].strip_byte_counts_count)
+			{
+				// We found it, calculate final size
+				unsigned total_size = 0;
+				for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count; i++)
+					total_size += tiff_ifd[pifd].strip_byte_counts[i];
+				if (total_size != t_length) // recalculate colors
+				{
+					if (total_size == T.twidth * T.tlength * 3)
+						T.tcolors = 3;
+					else if (total_size == T.twidth * T.tlength)
+						T.tcolors = 1;
+				}
+				T.tlength = total_size;
+				if (T.thumb)
+					free(T.thumb);
+				T.thumb = (char *)malloc(T.tlength);
+				merror(T.thumb, "ppm_thumb()");
+
+				char *dest = T.thumb;
+				INT64 pos = ID.input->tell();
+
+				for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count
+					&& i < tiff_ifd[pifd].strip_offsets_count; i++)
+				{
+					int remain = T.tlength;
+					int sz = tiff_ifd[pifd].strip_byte_counts[i];
+					int off = tiff_ifd[pifd].strip_offsets[i];
+					if (off >= 0 && off + sz <= ID.input->size() && sz <= remain)
+					{
+						ID.input->seek(off, SEEK_SET);
+						ID.input->read(dest,sz,1);
+						remain -= sz;
+						dest += sz;
+					}
+				}
+				ID.input->seek(pos, SEEK_SET);
+				T.tformat = LIBRAW_THUMBNAIL_BITMAP;
+				SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
+				return 0;
+			}
+
+		}
+
         if (!T.tlength)
           T.tlength = t_length;
         if (T.thumb)
@@ -4714,7 +4772,7 @@ int LibRaw::dcraw_process(void)
       green_matching();
     }
 
-    if ( !O.no_auto_scale)
+    if (!O.no_auto_scale)
     {
       scale_colors();
       SET_PROC_FLAG(LIBRAW_PROGRESS_SCALE_COLORS);
@@ -4792,7 +4850,7 @@ int LibRaw::dcraw_process(void)
       if (P1.colors == 3)
       {
 
- 	/* median filter callback, if not set use own */
+        /* median filter callback, if not set use own */
         median_filter();
         SET_PROC_FLAG(LIBRAW_PROGRESS_MEDIAN_FILTER);
       }
@@ -4861,6 +4919,7 @@ static const char *static_camera_list[] = {
 	"Apple iPhone 7",
 	"Apple iPhone 7 plus",
 	"Apple iPhone 8",
+	"Apple iPhone 8 plus",
 	"Apple QuickTake 100",
 	"Apple QuickTake 150",
 	"Apple QuickTake 200",
@@ -5139,6 +5198,7 @@ static const char *static_camera_list[] = {
 	"FujiFilm X-E1",
 	"FujiFilm X-E2",
 	"FujiFilm X-E2S",
+	"FujiFilm X-E3",
 	"FujiFilm X-M1",
 	"FujiFilm XF1",
 	"FujiFilm X-T1",
@@ -5287,6 +5347,7 @@ static const char *static_camera_list[] = {
 	"Leaf Volare",
 	"Lenovo a820",
 	"Leica C (Typ 112)",
+	"Leica CL",
 	"Leica Digilux 2",
 	"Leica Digilux 3",
 	"Leica Digital-Modul-R",
@@ -5329,6 +5390,7 @@ static const char *static_camera_list[] = {
 	"Leica X VARIO (Typ 107)",
 	"LG G3",
 	"LG G4",
+	"LG V20 (F800K)",
 	"LG VS995",
 	"Logitech Fotoman Pixtura",
 	"Mamiya ZD",
@@ -5693,9 +5755,12 @@ static const char *static_camera_list[] = {
 	"Samsung GX-1S",
 	"Samsung GX10",
 	"Samsung GX20",
+	"Samsung Galaxy Nexus",
 	"Samsung Galaxy NX (EK-GN120)",
+	"Samsung Galaxy S3",
 	"Samsung Galaxy S6 (SM-G920F)",
-	"Samsung Galaxy S7 (SM-G935F)",
+	"Samsung Galaxy S7",
+	"Samsung Galaxy S7 Edge",
 	"Samsung Galaxy S8 (SM-G950U)",
 	"Samsung NX1",
 	"Samsung NX5",
@@ -5719,10 +5784,6 @@ static const char *static_camera_list[] = {
 	"Samsung WB2000",
 	"Samsung S85 (hacked)",
 	"Samsung S850 (hacked)",
-	"Samsung Galaxy S3",
-	"Samsung Galaxy S7",
-	"Samsung Galaxy S7 Edge",
-	"Samsung Galaxy Nexus",
 	"Sarnoff 4096x5440",
 	"Seitz 6x17",
 	"Seitz Roundshot D3",
