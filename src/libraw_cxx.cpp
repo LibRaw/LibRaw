@@ -4192,6 +4192,60 @@ int LibRaw::unpack_thumb(void)
         if (t_bytesps > 1)
           throw LIBRAW_EXCEPTION_IO_CORRUPT; // 8-bit thumb, but parsed for more bits
         int t_length = T.twidth * T.theight * t_colors;
+
+		if (T.tlength && T.tlength < t_length) // try to find tiff ifd with needed offset
+		{
+			int pifd = -1;
+			for (int ii = 0; ii < libraw_internal_data.identify_data.tiff_nifds && ii < LIBRAW_IFD_MAXCOUNT; ii++)
+				if (tiff_ifd[ii].offset == libraw_internal_data.internal_data.toffset) // found
+				{
+					pifd = ii;
+					break;
+				}
+			if (pifd >= 0 && tiff_ifd[pifd].strip_offsets_count && tiff_ifd[pifd].strip_byte_counts_count)
+			{
+				// We found it, calculate final size
+				unsigned total_size = 0;
+				for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count; i++)
+					total_size += tiff_ifd[pifd].strip_byte_counts[i];
+				if (total_size != t_length) // recalculate colors
+				{
+					if (total_size == T.twidth * T.tlength * 3)
+						T.tcolors = 3;
+					else if (total_size == T.twidth * T.tlength)
+						T.tcolors = 1;
+				}
+				T.tlength = total_size;
+				if (T.thumb)
+					free(T.thumb);
+				T.thumb = (char *)malloc(T.tlength);
+				merror(T.thumb, "ppm_thumb()");
+
+				char *dest = T.thumb;
+				INT64 pos = ID.input->tell();
+
+				for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count
+					&& i < tiff_ifd[pifd].strip_offsets_count; i++)
+				{
+					int remain = T.tlength;
+					int sz = tiff_ifd[pifd].strip_byte_counts[i];
+					int off = tiff_ifd[pifd].strip_offsets[i];
+					if (off >= 0 && off + sz <= ID.input->size() && sz <= remain)
+					{
+						ID.input->seek(off, SEEK_SET);
+						ID.input->read(dest,sz,1);
+						remain -= sz;
+						dest += sz;
+					}
+				}
+				ID.input->seek(pos, SEEK_SET);
+				T.tformat = LIBRAW_THUMBNAIL_BITMAP;
+				SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
+				return 0;
+			}
+
+		}
+
         if (!T.tlength)
           T.tlength = t_length;
         if (T.thumb)
