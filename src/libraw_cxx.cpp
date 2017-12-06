@@ -4100,6 +4100,7 @@ int LibRaw::thumbOK(INT64 maxsz)
   return (tsize + ID.toffset <= fsize) ? 1 : 0;
 }
 
+#ifndef NO_JPEG
 struct jpegErrorManager
 {
   struct jpeg_error_mgr pub;
@@ -4111,6 +4112,7 @@ static void jpegErrorExit(j_common_ptr cinfo)
   jpegErrorManager *myerr = (jpegErrorManager *)cinfo->err;
   longjmp(myerr->setjmp_buffer, 1);
 }
+#endif
 
 int LibRaw::unpack_thumb(void)
 {
