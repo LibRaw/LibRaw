@@ -5016,6 +5016,9 @@ void CLASS xtrans_interpolate (int passes)
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
+  if(width < TS || height < TS)
+         throw LIBRAW_EXCEPTION_IO_CORRUPT; // too small image
+
 /* Check against right pattern */
   for (row = 0; row < 6; row++)
          for (col = 0; col < 6; col++)
@@ -5024,8 +5027,14 @@ void CLASS xtrans_interpolate (int passes)
   if(cstat[0] < 6 || cstat[0]>10 || cstat[1]< 16 
     || cstat[1]>24 || cstat[2]< 6 || cstat[2]>10 || cstat[3])
          throw LIBRAW_EXCEPTION_IO_CORRUPT;
-#endif
 
+ // Init allhex table to unreasonable values
+ for(int i = 0; i < 3; i++)
+  for(int j = 0; j < 3; j++)
+   for(int k = 0; k < 2; k++)
+    for(int l = 0; l < 8; l++)
+     allhex[i][j][k][l]=32700;
+#endif
 
   cielab (0,0);
   ndir = 4 << (passes > 1);
@@ -5036,6 +5045,7 @@ void CLASS xtrans_interpolate (int passes)
   drv  = (float (*)[TS][TS])   (buffer + TS*TS*(ndir*6+6));
   homo = (char  (*)[TS][TS])   (buffer + TS*TS*(ndir*10+6));
 
+  int minv=0,maxv=0,minh=0,maxh=0;
 /* Map a green hexagon around each non-green pixel and vice versa:	*/
   for (row=0; row < 3; row++)
     for (col=0; col < 3; col++)
@@ -5046,10 +5056,25 @@ void CLASS xtrans_interpolate (int passes)
 	if (ng == g+1) FORC(8) {
 	  v = orth[d  ]*patt[g][c*2] + orth[d+1]*patt[g][c*2+1];
 	  h = orth[d+2]*patt[g][c*2] + orth[d+3]*patt[g][c*2+1];
+          minv=MIN(v,minv);
+          maxv=MAX(v,maxv);
+          minh=MIN(v,minh);
+          maxh=MAX(v,maxh);
 	  allhex[row][col][0][c^(g*2 & d)] = h + v*width;
 	  allhex[row][col][1][c^(g*2 & d)] = h + v*TS;
 	}
       }
+
+#ifdef LIBRAW_LIBRARY_BUILD
+   // Check allhex table initialization
+  for(int i = 0; i < 3; i++)
+    for(int j = 0; j < 3; j++)
+      for(int k = 0; k < 2; k++)
+        for(int l = 0; l < 8; l++)
+         if(allhex[i][j][k][l]>maxh+maxv*width+1 || allhex[i][j][k][l]<minh+minv*width-1)
+         throw LIBRAW_EXCEPTION_IO_CORRUPT;
+  int retrycount = 0;
+#endif
 
 /* Set green1 and green3 to the minimum and maximum allowed values:	*/
   for (row=2; row < height-2; row++)
@@ -5066,7 +5091,16 @@ void CLASS xtrans_interpolate (int passes)
       pix[0][3] = max;
       switch ((row-sgrow) % 3) {
 	case 1: if (row < height-3) { row++; col--; } break;
-	case 2: if ((min=~(max=0)) && (col+=2) < width-3 && row > 2) row--;
+	case 2: 
+	 if ((min = ~(max = 0)) && (col += 2) < width - 3 && row > 2)
+        {
+           row--;
+#ifdef LIBRAW_LIBRARY_BUILD
+         if(retrycount++ > width*height)
+               throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
+       }
+
       }
     }
 
