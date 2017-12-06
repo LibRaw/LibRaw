@@ -56,7 +56,7 @@ void usage(const char *prog)
 {
   printf("dcraw_emu: almost complete dcraw emulator\n");
   printf("Usage:  %s [OPTION]... [FILE]...\n", prog);
-  printf("-c float-num       Set adjust maximum threshold (default 0.75)\n"
+  printf("-c float-num       Set adjust maximum threshold (default = 0.75)\n"
          "-v        Verbose: print progress messages (repeated -v will add verbosity)\n"
          "-w        Use camera white balance, if possible\n"
          "-a        Average the whole image for white balance\n"
@@ -99,9 +99,10 @@ void usage(const char *prog)
          "-G        Use green_matching() filter\n"
          "-B <x y w h> use cropbox\n"
          "-F        Use FILE I/O instead of streambuf API\n"
+         "-output <file> Output file name (default = inputfile.[tiff|ppm|pgm]\n"
          "-timing   Detailed timing report\n"
-         "-fbdd N   0 - disable FBDD noise reduction (default), 1 - light FBDD, 2 - full\n"
-         "-dcbi N   Number of extra DCD iterations (default - 0)\n"
+         "-fbdd N   0 - disable FBDD noise reduction, 1 - light FBDD, 2 - full (default = 0)\n"
+         "-dcbi N   Number of extra DCD iterations (default = 0)\n"
          "-dcbe     DCB color enhance\n"
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL2
          "-eeci     EECI refine for mixed VCD/AHD (q=8)\n"
@@ -109,7 +110,7 @@ void usage(const char *prog)
 #endif
 #ifdef LIBRAW_DEMOSAIC_PACK_GPL3
          //"-amazeca  Use AMaZE chromatic aberrations refine (only if q=10)\n"
-         "-acae <r b>Use chromatic aberrations correction\n" // modifJD
+         "-acae <r b> Use chromatic aberrations correction\n" // modifJD
          "-aline <l> reduction of line noise\n"
          "-aclean <l c> clean CFA\n"
          "-agreen <g> equilibrate green\n"
@@ -190,6 +191,7 @@ int main(int argc, char *argv[])
   int i, arg, c, ret;
   char opm, opt, *cp, *sp;
   int use_bigfile = 0, use_timing = 0, use_mem = 0;
+  char outfn[1024];
 #ifdef USE_DNGSDK
   dng_host *dnghost = NULL;
 #endif
@@ -216,7 +218,7 @@ int main(int argc, char *argv[])
           fprintf(stderr, "Non-numeric argument to \"-%c\"\n", opt);
           return 1;
         }
-    if (!strchr("ftdeam", opt) && argv[arg - 1][2])
+    if (!strchr("ftdeamo", opt) && argv[arg - 1][2])
       fprintf(stderr, "Unknown option \"%s\".\n", argv[arg - 1]);
     switch (opt)
     {
@@ -299,7 +301,9 @@ int main(int argc, char *argv[])
       OUT.shot_select = abs(atoi(argv[arg++]));
       break;
     case 'o':
-      if (isdigit(argv[arg][0]) && !isdigit(argv[arg][1]))
+      if(!strcmp(optstr,"-output"))
+        strcpy(outfn, argv[arg++]);
+      else if(isdigit(argv[arg][0]) && !isdigit(argv[arg][1]))
         OUT.output_color = atoi(argv[arg++]);
 #ifndef NO_LCMS
       else
@@ -476,8 +480,6 @@ int main(int argc, char *argv[])
 
   for (; arg < argc; arg++)
   {
-    char outfn[1024];
-
     if (verbosity)
       printf("Processing file %s\n", argv[arg]);
 
@@ -592,7 +594,8 @@ int main(int argc, char *argv[])
     if (use_timing)
       timerprint("LibRaw::dcraw_process()", argv[arg]);
 
-    snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg], OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
+    if(strlen(outfn) == 0)
+       snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg], OUT.output_tiff ? "tiff" : (P1.colors>1?"ppm":"pgm"));
 
     if (verbosity)
     {
