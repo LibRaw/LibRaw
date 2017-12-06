@@ -1,3 +1,10 @@
+2017-12-06  Alex Tutubalin <lexa@lexa.ru>
+Secunia #76000:
+ * Fixed fuji_width handling if file is neither fuji nor DNG
+ * Fixed xtrans interpolate for broken xtrans pattern
+ * Fixed panasonic decoder
+ * LibRaw 0.18.6
+
 2017-09-22  Alex Tutubalin <lexa@lexa.ru>
  * Fixed possible out of bound access in Kodak 6500 loader
  * LibRaw 0.18.5
