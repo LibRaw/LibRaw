@@ -1340,6 +1340,10 @@ void CLASS nikon_load_raw()
 
 void CLASS nikon_yuv_load_raw()
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
   int row, col, yuv[4], rgb[3], b, c;
   UINT64 bitbuf=0;
   float cmul[4];
@@ -2156,6 +2160,10 @@ void CLASS sinar_4shot_load_raw()
     unpacked_load_raw();
     return;
   }
+#ifdef LIBRAW_LIBRARY_BUILD
+  else if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
   pixel = (ushort *) calloc (raw_width, sizeof *pixel);
   merror (pixel, "sinar_4shot_load_raw()");
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -2675,6 +2683,11 @@ void CLASS quicktake_100_load_raw()
 
 void CLASS kodak_radc_load_raw()
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  // All kodak radc images are 768x512
+  if(width>768 || raw_width>768 || height > 512 || raw_height>512 )
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
   static const signed char src[] = {
     1,1, 2,3, 3,4, 4,2, 5,7, 6,5, 7,6, 7,8,
     1,0, 2,1, 3,3, 4,4, 5,2, 6,7, 7,6, 8,5, 8,8,
@@ -2926,6 +2939,10 @@ void CLASS gamma_curve (double pwr, double ts, int mode, int imax);
 
 void CLASS lossy_dng_load_raw()
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
   JSAMPARRAY buf;
@@ -3057,6 +3074,10 @@ void CLASS eight_bit_load_raw()
 
 void CLASS kodak_c330_load_raw()
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
   uchar *pixel;
   int row, col, y, cb, cr, rgb[3], c;
 
@@ -3094,6 +3115,10 @@ void CLASS kodak_c330_load_raw()
 
 void CLASS kodak_c603_load_raw()
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
   uchar *pixel;
   int row, col, y, cb, cr, rgb[3], c;
 
@@ -3257,6 +3282,10 @@ void CLASS kodak_65000_load_raw()
 
 void CLASS kodak_ycbcr_load_raw()
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
   short buf[384], *bp;
   int row, col, len, c, i, j, k, y[2][2], cb, cr, rgb[3];
   ushort *ip;
@@ -3291,6 +3320,10 @@ void CLASS kodak_ycbcr_load_raw()
 
 void CLASS kodak_rgb_load_raw()
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
   short buf[768], *bp;
   int row, col, len, c, i, rgb[3],ret;
   ushort *ip=image[0];
@@ -3319,6 +3352,10 @@ void CLASS kodak_rgb_load_raw()
 
 void CLASS kodak_thumb_load_raw()
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
   int row, col;
   colors = thumb_misc >> 5;
   for (row=0; row < height; row++)

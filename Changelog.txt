@@ -1,3 +1,12 @@
+2018-01-19  Alex Tutubalin <lexa@lexa.ru>
+Secunia #79000: 
+Credit: Laurent Delosieres, Secunia Research at Flexera
+ * All legacy (RGB raw) image loaders checks for imgdata.image is not NULL
+ * kodak_radc_load_raw: check image size before processing
+ * legacy memory allocator: allocate max(widh,raw_width)*max(height,raw_height)
+ * LibRaw 0.18.7
+
+
 2017-12-06  Alex Tutubalin <lexa@lexa.ru>
 Secunia #76000:
  * Fixed fuji_width handling if file is neither fuji nor DNG
