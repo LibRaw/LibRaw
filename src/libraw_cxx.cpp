@@ -3601,7 +3601,7 @@ libraw_processed_image_t *LibRaw::dcraw_make_mem_thumb(int *errcode)
     if (!ret)
     {
       if (errcode)
-        *errcode = ENOMEM;
+        *errcode = LIBRAW_UNSUFFICIENT_MEMORY;
       return NULL;
     }
 
@@ -3631,7 +3631,7 @@ libraw_processed_image_t *LibRaw::dcraw_make_mem_thumb(int *errcode)
     if (!ret)
     {
       if (errcode)
-        *errcode = ENOMEM;
+        *errcode = LIBRAW_UNSUFFICIENT_MEMORY;
       return NULL;
     }
 
@@ -3789,7 +3789,7 @@ libraw_processed_image_t *LibRaw::dcraw_make_mem_image(int *errcode)
   if (!ret)
   {
     if (errcode)
-      *errcode = ENOMEM;
+      *errcode = LIBRAW_UNSUFFICIENT_MEMORY;
     return NULL;
   }
   memset(ret, 0, sizeof(libraw_processed_image_t));
