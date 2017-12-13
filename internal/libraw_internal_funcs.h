@@ -254,7 +254,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        tiff_set(struct tiff_hdr *th, ushort *ntag,ushort tag, ushort type, int count, int val);
     void        tiff_head (struct tiff_hdr *th, int full);
 
-// splitted AHD code
+// split AHD code
 #define TS 512
     void        ahd_interpolate_green_h_and_v(int top, int left, ushort (*out_rgb)[TS][TS][3]);
     void ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[TS][3], short (*out_lab)[TS][3]);

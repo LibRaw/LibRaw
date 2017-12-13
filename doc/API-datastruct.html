@@ -14,7 +14,7 @@
 <li><a href="#libraw_thumbnail_t"> Structure libraw_thumbnail_t: Description of Thumbnail </a></li>
 <li><a href="#libraw_lensinfo_t"> Structure libraw_lensinfo_t - lens data, extracted from EXIF/Makernotes </a></li>
 <li><a href="#libraw_output_params_t"> Structure libraw_output_params_t: Management of dcraw-Style Postprocessing </a> .</li>
-<li><a href="#libraw_processed_image_t"> Stucture libraw_processed_image_t - result set for dcraw_make_mem_image()/dcraw_make_mem_thumb() functions </a></li>
+<li><a href="#libraw_processed_image_t"> Structure libraw_processed_image_t - result set for dcraw_make_mem_image()/dcraw_make_mem_thumb() functions </a></li>
 </ol>
 </li>
 <li><a href="#datastream"> Input abstraction layer </a>
@@ -196,7 +196,7 @@
 <dt><strong> unsigned gpsdata[32]; </strong></dt>
 <dd>GPS data (unparsed block, to write to output as is).</dd>
 <dt><strong> libraw_gps_info_t parsed_gps; </strong></dt>
-<dd>Parsed GPS-data: longtitude/lattitude/altitude and time stamp.</dd>
+<dd>Parsed GPS-data: longtitude/latitude/altitude and time stamp.</dd>
 <dt><strong> char desc[512]; </strong></dt>
 <dd>Image description.</dd>
 <dt><strong> char artist[64]; </strong></dt>
@@ -440,7 +440,7 @@
 <dd>Decoder data format. See <a href="#decoder_flags"> list of LibRaw_decoder_flags </a> for details.</dd>
 </dl>
 <p><a name="libraw_processed_image_t"></a></p>
-<h3>Stucture libraw_processed_image_t - result set for dcraw_make_mem_image()/dcraw_make_mem_thumb() functions</h3>
+<h3>Structure libraw_processed_image_t - result set for dcraw_make_mem_image()/dcraw_make_mem_thumb() functions</h3>
 <p>Structure libraw_processed_image_t is produced by call of dcraw_make_mem_image()/dcraw_make_mem_thumb() and contains in-memory image of interpolated data or thumbnail. <br /> Data fields:</p>
 <dl>
 <dt><strong> LibRaw_image_formats type </strong></dt>
@@ -471,7 +471,7 @@
 </ul>
 <p>LibRaw user can create own datastream object derived from <a href="API-CXX.html#datastream"> LibRaw_abstract_datastream </a> . For example, such object may implement reading RAW data directly from camera (by remote interface). LibRaw can use these objects via <a href="API-CXX.html#open_datastream"> LibRaw::open_datastream() </a> interface.</p>
 <p>Datastreams can be used either via <a href="API-CXX.html#open_datastream"> LibRaw::open_datastream() </a> call (in this case datastream object should be created an maintained by user) or via <a href="API-CXX.html#open_file"> LibRaw::open_file() </a> and <a href="API-CXX.html#open_buffer"> LibRaw::open_buffer() </a> shortcuts.</p>
-<p>Only <a href="API-CXX.html"> C++ API </a> users may use object-oriented interface and implement own input interfaces. For <a href="API-C.html"> C API </a> users only built-on <strong> libraw_open_file()/libraw_open_buffer() </strong> shortcuts are avaliable.</p>
+<p>Only <a href="API-CXX.html"> C++ API </a> users may use object-oriented interface and implement own input interfaces. For <a href="API-C.html"> C API </a> users only built-on <strong> libraw_open_file()/libraw_open_buffer() </strong> shortcuts are available.</p>
 <p><a name="datastream_data"></a></p>
 <h3>Data fields</h3>
 <p>Definition:</p>

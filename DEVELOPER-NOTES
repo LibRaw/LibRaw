@@ -34,7 +34,7 @@ If you wish to participate in LibRaw development please use GitHub fork.
      - removes .PSD files from doc/
      - removes itself
 
-3. Please do not use ./configure script in development enviroment.
+3. Please do not use ./configure script in development environment.
    This script generates Makefile from ./Makefile.in for use in production.
    The generated Makefile does not contain section to build internal/*
    from dcraw/dcraw.c

@@ -4527,7 +4527,6 @@ void LibRaw::exp_bef(float shift, float smooth)
     C.data_maximum = lut[C.data_maximum];
   if (C.maximum <= TBLN)
     C.maximum = lut[C.maximum];
-  // no need to adjust the minumum, black is already subtracted
   free(lut);
 }
 
