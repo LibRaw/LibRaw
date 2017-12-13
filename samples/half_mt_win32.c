@@ -123,7 +123,7 @@ int process_files(void *q)
 void usage(const char *p)
 {
   printf("Options:\n"
-         "-J n  - set parrallel job coun (default 2)\n"
+         "-J n  - set parallel job count (default 2)\n"
          "-v    - verbose\n"
          "-w    - use camera white balance\n"
          "-T    - output TIFF instead of PPM\n"

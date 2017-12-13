@@ -146,7 +146,7 @@
  if( LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_ppm_tiff_writer(outfn)))
  fprintf(stderr,"Cannot write %s: error %d\n",outfn,ret);
  }
- // we don't evoke recycle() or call the desctructor; C++ will do everything for us
+ // we don't evoke recycle() or call the destructor; C++ will do everything for us
  return 0;
 end:
  // got here after an error
