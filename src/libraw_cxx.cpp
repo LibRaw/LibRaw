@@ -899,6 +899,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
     d_info->decoder_name = "sony_arw2_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_SONYARW2;
   }
+  else if (load_raw == &LibRaw::sony_arq_load_raw)
+  {
+    d_info->decoder_name = "sony_arq_load_raw()";
+    d_info->decoder_flags = LIBRAW_DECODER_LEGACY_WITH_MARGINS;
+  }
   else if (load_raw == &LibRaw::samsung_load_raw)
   {
     d_info->decoder_name = "samsung_load_raw()";
@@ -1680,6 +1685,27 @@ void LibRaw::convertFloatToInt(float dmin /* =4096.f */, float dmax /* =32767.f 
   imgdata.rawdata.float3_image = 0;
   imgdata.rawdata.float4_image = 0;
 }
+
+void LibRaw::sony_arq_load_raw()
+{
+  int row, col;
+  read_shorts(imgdata.rawdata.raw_image, imgdata.sizes.raw_width * imgdata.sizes.raw_height * 4);
+  for (row = 0; row < imgdata.sizes.raw_height; row++)
+  {
+    unsigned short(*rowp)[4] = (unsigned short(*)[4]) & imgdata.rawdata.raw_image[row * imgdata.sizes.raw_width * 4];
+    for (col = 0; col < imgdata.sizes.raw_width; col++)
+    {
+      unsigned short g2 = rowp[col][2];
+      rowp[col][2] = rowp[col][3];
+      rowp[col][3] = g2;
+      if (((unsigned)(row - imgdata.sizes.top_margin) < imgdata.sizes.height) &&
+          ((unsigned)(col - imgdata.sizes.left_margin) < imgdata.sizes.width) &&
+          (MAX(MAX(rowp[col][0], rowp[col][1]), MAX(rowp[col][2], rowp[col][3])) > imgdata.color.maximum))
+        derror();
+    }
+  }
+}
+
 
 void LibRaw::pentax_4shot_load_raw()
 {
@@ -2816,7 +2842,8 @@ int LibRaw::unpack(void)
         // Restore saved values. Note: Foveon have masked frame
         // Other 4-color legacy data: no borders
         if (!(libraw_internal_data.unpacker_data.load_flags & 256) &&
-            !(decoder_info.decoder_flags & LIBRAW_DECODER_ADOBECOPYPIXEL))
+            !(decoder_info.decoder_flags & LIBRAW_DECODER_ADOBECOPYPIXEL) &&
+            !(decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY_WITH_MARGINS))
         {
           S.raw_width = S.width;
           S.left_margin = 0;
@@ -4193,58 +4220,56 @@ int LibRaw::unpack_thumb(void)
           throw LIBRAW_EXCEPTION_IO_CORRUPT; // 8-bit thumb, but parsed for more bits
         int t_length = T.twidth * T.theight * t_colors;
 
-		if (T.tlength && T.tlength < t_length) // try to find tiff ifd with needed offset
-		{
-			int pifd = -1;
-			for (int ii = 0; ii < libraw_internal_data.identify_data.tiff_nifds && ii < LIBRAW_IFD_MAXCOUNT; ii++)
-				if (tiff_ifd[ii].offset == libraw_internal_data.internal_data.toffset) // found
-				{
-					pifd = ii;
-					break;
-				}
-			if (pifd >= 0 && tiff_ifd[pifd].strip_offsets_count && tiff_ifd[pifd].strip_byte_counts_count)
-			{
-				// We found it, calculate final size
-				unsigned total_size = 0;
-				for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count; i++)
-					total_size += tiff_ifd[pifd].strip_byte_counts[i];
-				if (total_size != t_length) // recalculate colors
-				{
-					if (total_size == T.twidth * T.tlength * 3)
-						T.tcolors = 3;
-					else if (total_size == T.twidth * T.tlength)
-						T.tcolors = 1;
-				}
-				T.tlength = total_size;
-				if (T.thumb)
-					free(T.thumb);
-				T.thumb = (char *)malloc(T.tlength);
-				merror(T.thumb, "ppm_thumb()");
+        if (T.tlength && T.tlength < t_length) // try to find tiff ifd with needed offset
+        {
+          int pifd = -1;
+          for (int ii = 0; ii < libraw_internal_data.identify_data.tiff_nifds && ii < LIBRAW_IFD_MAXCOUNT; ii++)
+            if (tiff_ifd[ii].offset == libraw_internal_data.internal_data.toffset) // found
+            {
+              pifd = ii;
+              break;
+            }
+          if (pifd >= 0 && tiff_ifd[pifd].strip_offsets_count && tiff_ifd[pifd].strip_byte_counts_count)
+          {
+            // We found it, calculate final size
+            unsigned total_size = 0;
+            for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count; i++)
+              total_size += tiff_ifd[pifd].strip_byte_counts[i];
+            if (total_size != t_length) // recalculate colors
+            {
+              if (total_size == T.twidth * T.tlength * 3)
+                T.tcolors = 3;
+              else if (total_size == T.twidth * T.tlength)
+                T.tcolors = 1;
+            }
+            T.tlength = total_size;
+            if (T.thumb)
+              free(T.thumb);
+            T.thumb = (char *)malloc(T.tlength);
+            merror(T.thumb, "ppm_thumb()");
 
-				char *dest = T.thumb;
-				INT64 pos = ID.input->tell();
+            char *dest = T.thumb;
+            INT64 pos = ID.input->tell();
 
-				for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count
-					&& i < tiff_ifd[pifd].strip_offsets_count; i++)
-				{
-					int remain = T.tlength;
-					int sz = tiff_ifd[pifd].strip_byte_counts[i];
-					int off = tiff_ifd[pifd].strip_offsets[i];
-					if (off >= 0 && off + sz <= ID.input->size() && sz <= remain)
-					{
-						ID.input->seek(off, SEEK_SET);
-						ID.input->read(dest,sz,1);
-						remain -= sz;
-						dest += sz;
-					}
-				}
-				ID.input->seek(pos, SEEK_SET);
-				T.tformat = LIBRAW_THUMBNAIL_BITMAP;
-				SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
-				return 0;
-			}
-
-		}
+            for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count && i < tiff_ifd[pifd].strip_offsets_count; i++)
+            {
+              int remain = T.tlength;
+              int sz = tiff_ifd[pifd].strip_byte_counts[i];
+              int off = tiff_ifd[pifd].strip_offsets[i];
+              if (off >= 0 && off + sz <= ID.input->size() && sz <= remain)
+              {
+                ID.input->seek(off, SEEK_SET);
+                ID.input->read(dest, sz, 1);
+                remain -= sz;
+                dest += sz;
+              }
+            }
+            ID.input->seek(pos, SEEK_SET);
+            T.tformat = LIBRAW_THUMBNAIL_BITMAP;
+            SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
+            return 0;
+          }
+        }
 
         if (!T.tlength)
           T.tlength = t_length;
@@ -4798,7 +4823,6 @@ int LibRaw::dcraw_process(void)
     }
 
     /* post-exposure correction fallback */
-
     if (P1.filters && !O.no_interpolation)
     {
       if (noiserd > 0 && P1.colors == 3 && P1.filters)

@@ -625,7 +625,7 @@ int main(int ac, char *av[])
 
       if ((Nikon.ME_WB[0] != 0.0f) && (Nikon.ME_WB[0] != 1.0f))
       {
-        printf ("\nNikon multi-exposure WB multipliers:");
+        printf("\nNikon multi-exposure WB multipliers:");
         for (int c = 0; c < 4; c++)
           printf(" %f", Nikon.ME_WB[c]);
       }

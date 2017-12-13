@@ -14157,6 +14157,16 @@ void CLASS apply_tiff()
         load_raw = &CLASS unpacked_load_raw;
         break;
       }
+      if (!strncasecmp(make, "Sony", 4) && tiff_ifd[raw].samples == 4 &&
+          tiff_ifd[raw].bytes == raw_width * raw_height * 8) // Sony ARQ
+      {
+        tiff_bps = 14;
+        tiff_samples = 4;
+        load_raw = &CLASS sony_arq_load_raw;
+        filters = 0;
+        strcpy(cdesc, "RGBG");
+        break;
+      }
       if (!strncasecmp(make, "Nikon", 5) && !strncmp(software, "Nikon Scan", 10))
       {
         load_raw = &CLASS nikon_coolscan_load_raw;
