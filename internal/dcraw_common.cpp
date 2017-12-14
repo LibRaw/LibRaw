@@ -8332,37 +8332,78 @@ void CLASS process_Sony_0x940c(uchar *buf)
 }
 
 void CLASS process_Sony_0x9400 (uchar *buf)
-{
-  if ((buf[0x0] != 0x23) &&
-      (buf[0x0] != 0x24) &&
-      (buf[0x0] != 0x26))
-  return; // not a 0x9400 'c' version
-
-// ILCE-7RM3 aka a7R3
-// names per https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Sony.html#Tag9400c
+{  // names per https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Sony.html#Tag9400a - Tag9400c
 
   uchar s[4];
   int c;
 
-  imgdata.makernotes.sony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x09]];
+  if ((buf[0x0] == 0x23) ||
+      (buf[0x0] == 0x24) ||
+      (buf[0x0] == 0x26))
+  {  // 0x9400 'c' version
+    imgdata.makernotes.sony.Sony0x9400_version = 0xc;
 
-  FORC4 s[c] = SonySubstitution[buf[0x12+c]];
-  imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber = sget4(s);
+    imgdata.makernotes.sony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x09]];
 
-  imgdata.makernotes.sony.Sony0x9400_SequenceLength0x16 = SonySubstitution[buf[0x16]];
+    FORC4 s[c] = SonySubstitution[buf[0x12+c]];
+    imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber = sget4(s);
 
-  FORC4 s[c] = SonySubstitution[buf[0x1a+c]];
-  imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber =  sget4(s);
+    imgdata.makernotes.sony.Sony0x9400_SequenceLength1 = SonySubstitution[buf[0x16]]; // shots
 
-  imgdata.makernotes.sony.Sony0x9400_SequenceLength0x1e = SonySubstitution[buf[0x1e]];
+    FORC4 s[c] = SonySubstitution[buf[0x1a+c]];
+    imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber =  sget4(s);
 
-  printf (
-  "==>>\nSony0x9400_ReleaseMode2: %d\nSony0x9400_SequenceImageNumber: %d\nSony0x9400_SequenceLength0x16: %d\nSony0x9400_SequenceFileNumber %d\nSony0x9400_SequenceLength0x1e: %d\n",
+    imgdata.makernotes.sony.Sony0x9400_SequenceLength2 = SonySubstitution[buf[0x1e]]; // files
+  }
+
+  else if (buf[0x0] == 0x0c)
+  {  // 0x9400 'b' version
+    imgdata.makernotes.sony.Sony0x9400_version = 0xb;
+
+    FORC4 s[c] = SonySubstitution[buf[0x08+c]];
+    imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber = sget4(s);
+
+    FORC4 s[c] = SonySubstitution[buf[0x0c+c]];
+    imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber =  sget4(s);
+
+    imgdata.makernotes.sony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x10]];
+
+    imgdata.makernotes.sony.Sony0x9400_SequenceLength1 = SonySubstitution[buf[0x1e]];
+  }
+
+  else if ((buf[0x0] == 0x07) ||
+           (buf[0x0] == 0x09) ||
+           (buf[0x0] == 0x0a))
+  {  // 0x9400 'a' version
+    imgdata.makernotes.sony.Sony0x9400_version = 0xa;
+
+    FORC4 s[c] = SonySubstitution[buf[0x08+c]];
+    imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber = sget4(s);
+
+    FORC4 s[c] = SonySubstitution[buf[0x0c+c]];
+    imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber =  sget4(s);
+
+    imgdata.makernotes.sony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x10]];
+
+    imgdata.makernotes.sony.Sony0x9400_SequenceLength1 = SonySubstitution[buf[0x22]];
+  }
+
+  else return;
+
+  if (imgdata.makernotes.sony.Sony0x9400_version) printf (
+  "==>>\n\
+  SONY 0x9400 version %x\n\
+  ReleaseMode2: %d\n\
+  SequenceImageNumber: %d (starts at zero)\n\
+  SequenceLength1: %d shots\n\
+  SequenceFileNumber: %d (starts at zero, exiftool starts at 1)\n\
+  SequenceLength2: %d file(s)\n",
+  imgdata.makernotes.sony.Sony0x9400_version,
   imgdata.makernotes.sony.Sony0x9400_ReleaseMode2,
   imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber,
-  imgdata.makernotes.sony.Sony0x9400_SequenceLength0x16,
+  imgdata.makernotes.sony.Sony0x9400_SequenceLength1,
   imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber,
-  imgdata.makernotes.sony.Sony0x9400_SequenceLength0x1e);
+  imgdata.makernotes.sony.Sony0x9400_SequenceLength2);
 
 }
 
