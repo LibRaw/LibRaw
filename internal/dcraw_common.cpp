@@ -8331,6 +8331,41 @@ void CLASS process_Sony_0x940c(uchar *buf)
   return;
 }
 
+void CLASS process_Sony_0x9400 (uchar *buf)
+{
+  if ((buf[0x0] != 0x23) &&
+      (buf[0x0] != 0x24) &&
+      (buf[0x0] != 0x26))
+  return; // not a 0x9400 'c' version
+
+// ILCE-7RM3 aka a7R3
+// names per https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Sony.html#Tag9400c
+
+  uchar s[4];
+  int c;
+
+  imgdata.makernotes.sony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x09]];
+
+  FORC4 s[c] = SonySubstitution[buf[0x12+c]];
+  imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber = sget4(s);
+
+  imgdata.makernotes.sony.Sony0x9400_SequenceLength0x16 = SonySubstitution[buf[0x16]];
+
+  FORC4 s[c] = SonySubstitution[buf[0x1a+c]];
+  imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber =  sget4(s);
+
+  imgdata.makernotes.sony.Sony0x9400_SequenceLength0x1e = SonySubstitution[buf[0x1e]];
+
+  printf (
+  "==>>\nSony0x9400_ReleaseMode2: %d\nSony0x9400_SequenceImageNumber: %d\nSony0x9400_SequenceLength0x16: %d\nSony0x9400_SequenceFileNumber %d\nSony0x9400_SequenceLength0x1e: %d\n",
+  imgdata.makernotes.sony.Sony0x9400_ReleaseMode2,
+  imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber,
+  imgdata.makernotes.sony.Sony0x9400_SequenceLength0x16,
+  imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber,
+  imgdata.makernotes.sony.Sony0x9400_SequenceLength0x1e);
+
+}
+
 void CLASS process_Sony_0x9050(uchar *buf, unsigned id)
 {
   ushort lid;
@@ -8429,13 +8464,14 @@ void CLASS process_Sony_0x9050(uchar *buf, unsigned id)
   return;
 }
 
-void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer, uchar *&table_buf_0x9050,
-                               ushort &table_buf_0x9050_present, uchar *&table_buf_0x940c,
-                               ushort &table_buf_0x940c_present, uchar *&table_buf_0x0116,
-                               ushort &table_buf_0x0116_present, uchar *&table_buf_0x9402,
-                               ushort &table_buf_0x9402_present, uchar *&table_buf_0x9403,
-                               ushort &table_buf_0x9403_present, uchar *&table_buf_0x9406,
-                               ushort &table_buf_0x9406_present)
+void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
+                               uchar *&table_buf_0x9050, ushort &table_buf_0x9050_present,
+                               uchar *&table_buf_0x940c, ushort &table_buf_0x940c_present,
+                               uchar *&table_buf_0x0116, ushort &table_buf_0x0116_present,
+                               uchar *&table_buf_0x9402, ushort &table_buf_0x9402_present,
+                               uchar *&table_buf_0x9403, ushort &table_buf_0x9403_present,
+                               uchar *&table_buf_0x9406, ushort &table_buf_0x9406_present,
+                               uchar *&table_buf_0x9400, ushort &table_buf_0x9400_present)
 {
 
   ushort lid;
@@ -8490,6 +8526,14 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
       free(table_buf_0x940c);
       table_buf_0x940c_present = 0;
     }
+
+    if (table_buf_0x9400_present)
+    {
+      process_Sony_0x9400(table_buf_0x9400);
+      free(table_buf_0x9400);
+      table_buf_0x9400_present = 0;
+    }
+
   }
 
   else if ((tag == 0x0010) && // CameraInfo
@@ -8680,6 +8724,19 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     }
   }
 
+  else if (tag == 0x9400 && len < 256000)
+  {
+    table_buf_0x9400 = (uchar *)malloc(len);
+    table_buf_0x9400_present = 1;
+    fread(table_buf_0x9400, len, 1, ifp);
+    if (imgdata.lens.makernotes.CamID)
+    {
+      process_Sony_0x9400(table_buf_0x9400);
+      free(table_buf_0x9400);
+      table_buf_0x9400_present = 0;
+    }
+  }
+
   else if (((tag == 0xb027) || (tag == 0x010c)) && (imgdata.lens.makernotes.LensID == -1))
   {
     imgdata.lens.makernotes.LensID = get4();
@@ -8752,6 +8809,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   ushort table_buf_0x940c_present = 0;
   uchar *table_buf_0x0116;
   ushort table_buf_0x0116_present = 0;
+  uchar *table_buf_0x9400;
+  ushort table_buf_0x9400_present = 0;
 
   short morder, sorder = order;
   char buf[10];
@@ -9356,10 +9415,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
               (!strncasecmp(model, "Stellar", 7) || !strncasecmp(model, "Lunar", 5) ||
                !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
     {
-      parseSonyMakernotes(tag, type, len, AdobeDNG, table_buf_0x9050, table_buf_0x9050_present, table_buf_0x940c,
-                          table_buf_0x940c_present, table_buf_0x0116, table_buf_0x0116_present, table_buf_0x9402,
-                          table_buf_0x9402_present, table_buf_0x9403, table_buf_0x9403_present, table_buf_0x9406,
-                          table_buf_0x9406_present);
+      parseSonyMakernotes(tag, type, len, AdobeDNG,
+                          table_buf_0x9050, table_buf_0x9050_present,
+                          table_buf_0x940c, table_buf_0x940c_present,
+                          table_buf_0x0116, table_buf_0x0116_present,
+                          table_buf_0x9402, table_buf_0x9402_present,
+                          table_buf_0x9403, table_buf_0x9403_present,
+                          table_buf_0x9406, table_buf_0x9406_present,
+                          table_buf_0x9400, table_buf_0x9400_present);
     }
   next:
     fseek(ifp, save, SEEK_SET);
@@ -9408,6 +9471,8 @@ void CLASS parse_makernote(int base, int uptag)
   ushort table_buf_0x940c_present = 0;
   uchar *table_buf_0x0116;
   ushort table_buf_0x0116_present = 0;
+  uchar *table_buf_0x9400;
+  ushort table_buf_0x9400_present = 0;
 
   INT64 fsize = ifp->size();
 #endif
@@ -10248,10 +10313,14 @@ void CLASS parse_makernote(int base, int uptag)
               (!strncasecmp(model, "Stellar", 7) || !strncasecmp(model, "Lunar", 5) ||
                !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
     {
-      parseSonyMakernotes(tag, type, len, nonDNG, table_buf_0x9050, table_buf_0x9050_present, table_buf_0x940c,
-                          table_buf_0x940c_present, table_buf_0x0116, table_buf_0x0116_present, table_buf_0x9402,
-                          table_buf_0x9402_present, table_buf_0x9403, table_buf_0x9403_present, table_buf_0x9406,
-                          table_buf_0x9406_present);
+      parseSonyMakernotes(tag, type, len, nonDNG,
+                          table_buf_0x9050, table_buf_0x9050_present,
+                          table_buf_0x940c, table_buf_0x940c_present,
+                          table_buf_0x0116, table_buf_0x0116_present,
+                          table_buf_0x9402, table_buf_0x9402_present,
+                          table_buf_0x9403, table_buf_0x9403_present,
+                          table_buf_0x9406, table_buf_0x9406_present,
+                          table_buf_0x9400, table_buf_0x9400_present);
     }
 
     fseek(ifp, _pos, SEEK_SET);

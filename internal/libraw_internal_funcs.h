@@ -51,19 +51,15 @@ it under the terms of the one of two licenses as you choose:
     void	process_Sony_0x9403 (uchar * buf);
     void	process_Sony_0x9406 (uchar * buf);
     void	process_Sony_0x940c (uchar * buf);
+    void	process_Sony_0x9400 (uchar * buf);
     void	parseSonyMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
-                               uchar *&table_buf_0x9050,
-                               ushort &table_buf_0x9050_present,
-                               uchar *&table_buf_0x940c,
-                               ushort &table_buf_0x940c_present,
-                               uchar *&table_buf_0x0116,
-                               ushort &table_buf_0x0116_present,
-                               uchar *&table_buf_0x9402,
-                               ushort &table_buf_0x9402_present,
-                               uchar *&table_buf_0x9403,
-                               ushort &table_buf_0x9403_present,
-                               uchar *&table_buf_0x9406,
-                               ushort &table_buf_0x9406_present);
+                               uchar *&table_buf_0x9050, ushort &table_buf_0x9050_present,
+                               uchar *&table_buf_0x940c, ushort &table_buf_0x940c_present,
+                               uchar *&table_buf_0x0116, ushort &table_buf_0x0116_present,
+                               uchar *&table_buf_0x9402, ushort &table_buf_0x9402_present,
+                               uchar *&table_buf_0x9403, ushort &table_buf_0x9403_present,
+                               uchar *&table_buf_0x9406, ushort &table_buf_0x9406_present,
+                               uchar *&table_buf_0x9400, ushort &table_buf_0x9400_present);
     void	parseFujiMakernotes (unsigned tag, unsigned type);
 
     ushort      get2();

@@ -393,6 +393,12 @@ typedef unsigned long long UINT64;
   typedef struct
   {
     ushort SonyCameraType;
+    uchar Sony0x9400_ReleaseMode2;
+    unsigned Sony0x9400_SequenceImageNumber;
+    uchar Sony0x9400_SequenceLength0x16;
+    unsigned Sony0x9400_SequenceFileNumber;
+    uchar Sony0x9400_SequenceLength0x1e;
+
   } libraw_sony_info_t;
 
   typedef struct
