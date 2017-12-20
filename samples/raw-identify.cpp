@@ -46,8 +46,10 @@ it under the terms of the one of two licenses as you choose:
 #define Canon MyCoolRawProcessor.imgdata.makernotes.canon
 #define Hasselblad MyCoolRawProcessor.imgdata.makernotes.hasselblad
 #define Fuji MyCoolRawProcessor.imgdata.makernotes.fuji
-#define Oly MyCoolRawProcessor.imgdata.makernotes.olympus
 #define Nikon MyCoolRawProcessor.imgdata.makernotes.nikon
+#define Oly MyCoolRawProcessor.imgdata.makernotes.olympus
+#define Sony MyCoolRawProcessor.imgdata.makernotes.sony
+
 
 const char *EXIF_LightSources[] = {
     "Unknown",
@@ -741,6 +743,22 @@ int main(int ac, char *av[])
       for (int c = 0; c < P1.colors; c++)
         printf(" %f", C.pre_mul[c]);
       printf("\n");
+
+
+      if (Sony.Sony0x9400_version) printf (
+        "\nSONY Sequence data, tag 0x9400 version %x\n\
+\tReleaseMode2: %d\n\
+\tSequenceImageNumber: %d (starts at zero)\n\
+\tSequenceLength1: %d shots\n\
+\tSequenceFileNumber: %d (starts at zero, exiftool starts at 1)\n\
+\tSequenceLength2: %d file(s)\n",
+        Sony.Sony0x9400_version,
+        Sony.Sony0x9400_ReleaseMode2,
+        Sony.Sony0x9400_SequenceImageNumber,
+        Sony.Sony0x9400_SequenceLength1,
+        Sony.Sony0x9400_SequenceFileNumber,
+        Sony.Sony0x9400_SequenceLength2);
+
     }
     else
     {

@@ -8402,21 +8402,6 @@ void CLASS process_Sony_0x9400 (uchar *buf, ushort len)
 
   else return;
 
-  if (imgdata.makernotes.sony.Sony0x9400_version) printf (
-  "==>>\n\
-  SONY 0x9400 version %x\n\
-  ReleaseMode2: %d\n\
-  SequenceImageNumber: %d (starts at zero)\n\
-  SequenceLength1: %d shots\n\
-  SequenceFileNumber: %d (starts at zero, exiftool starts at 1)\n\
-  SequenceLength2: %d file(s)\n",
-  imgdata.makernotes.sony.Sony0x9400_version,
-  imgdata.makernotes.sony.Sony0x9400_ReleaseMode2,
-  imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber,
-  imgdata.makernotes.sony.Sony0x9400_SequenceLength1,
-  imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber,
-  imgdata.makernotes.sony.Sony0x9400_SequenceLength2);
-
 }
 
 void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
@@ -13932,17 +13917,12 @@ void CLASS parse_fuji(int offset)
     {
       raw_height = get2();
       raw_width = get2();
-//      printf ("==>>0x100 RawImageFullSize: height= %d width= %d\n", raw_height, raw_width);
     }
     else if (tag == 0x121)
     {
       height = get2();
       if ((width = get2()) == 4284)
         width += 3;
-//      if (!strcmp(model, "DBP for GX680")) { height=raw_height; width=raw_width; }
-
-//      printf ("==>>0x121 RawImageSize: height= %d width= %d\n", height, width);
-
     }
     else if (tag == 0x130)
     {
@@ -13966,19 +13946,10 @@ void CLASS parse_fuji(int offset)
 #ifdef LIBRAW_LIBRARY_BUILD
     }
 
-    else if (tag == 0x110)
-    {
-      int l = get2();
-      int m = get2();
-//      printf ("==>>0x110: l= %d m= %d\n", l, m);
-    }
-
     else if (tag == 0x111)
     {
       imgdata.raw_crop_height = get2();
       imgdata.raw_crop_width = get2();
-//      printf ("==>>0x111 RawImageCropSize: height= %d width= %d\n",
-//         imgdata.raw_crop_height, imgdata.raw_crop_width);
     }
 
     else if ((tag == 0x122) && !strcmp(model, "DBP for GX680"))
