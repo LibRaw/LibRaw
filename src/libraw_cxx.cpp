@@ -1982,8 +1982,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     ID.input = stream;
     SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
-#if 0
     identify();
+#if 0
     if(!strcasecmp(imgdata.idata.make, "Sony")
        && imgdata.color.maximum > 0
        && imgdata.color.linear_max[0] > imgdata.color.maximum*3
