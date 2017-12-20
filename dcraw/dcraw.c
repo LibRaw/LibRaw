@@ -10156,10 +10156,10 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     free(table_buf);
   }
 
-  else if ((tag == 0xb02b) && (len == 2))
+  else if ((tag == 0xb02b) && !imgdata.sizes.raw_crop.cwidth && (len == 2))
   {
-    imgdata.sizes.raw_crop.cwidth = get4();
     imgdata.sizes.raw_crop.cheight = get4();
+    imgdata.sizes.raw_crop.cwidth = get4();
   }
 
 }
@@ -13949,6 +13949,10 @@ int CLASS parse_tiff_ifd(int base)
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_CROPORIGIN;
         tiff_ifd[ifd].dng_levels.default_crop[0] = getreal(type);
         tiff_ifd[ifd].dng_levels.default_crop[1] = getreal(type);
+        if (!strncasecmp(make, "SONY", 4)) {
+          imgdata.sizes.raw_crop.cleft = tiff_ifd[ifd].dng_levels.default_crop[0];
+          imgdata.sizes.raw_crop.ctop = tiff_ifd[ifd].dng_levels.default_crop[1];
+        }
       }
       break;
     case 50720: /* DefaultCropSize */
@@ -13957,6 +13961,10 @@ int CLASS parse_tiff_ifd(int base)
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_CROPSIZE;
         tiff_ifd[ifd].dng_levels.default_crop[2] = getreal(type);
         tiff_ifd[ifd].dng_levels.default_crop[3] = getreal(type);
+        if (!strncasecmp(make, "SONY", 4)) {
+          imgdata.sizes.raw_crop.cwidth = tiff_ifd[ifd].dng_levels.default_crop[2];
+          imgdata.sizes.raw_crop.cheight = tiff_ifd[ifd].dng_levels.default_crop[3];
+        }
       }
       break;
 #endif
@@ -15276,6 +15284,12 @@ void CLASS parse_fuji(int offset)
 
 // IB start
 #ifdef LIBRAW_LIBRARY_BUILD
+    }
+
+    else if (tag == 0x110)
+    {
+      imgdata.sizes.raw_crop.ctop = get2();
+      imgdata.sizes.raw_crop.cleft = get2();
     }
 
     else if (tag == 0x111)

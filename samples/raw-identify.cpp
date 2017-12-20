@@ -753,7 +753,7 @@ int main(int ac, char *av[])
       if (Sony.Sony0x9400_version) printf ("\nSONY Sequence data, tag 0x9400 version %x\n\
 \tReleaseMode2: %d\n\
 \tSequenceImageNumber: %d (starts at zero)\n\
-\tSequenceLength1: %d shots\n\
+\tSequenceLength1: %d shot(s)\n\
 \tSequenceFileNumber: %d (starts at zero, exiftool starts at 1)\n\
 \tSequenceLength2: %d file(s)\n",
         Sony.Sony0x9400_version,
