@@ -11717,8 +11717,18 @@ int CLASS parse_tiff_ifd(int base)
         imgdata.color.WBCT_Coeffs[4][4] = imgdata.color.WBCT_Coeffs[4][2];
         break;
       case 0x787f:
-        FORC3 imgdata.color.linear_max[c] = get2();
-        imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
+        if(len == 3)
+	{
+          FORC3 imgdata.color.linear_max[c] = get2();
+          imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
+	}
+	else if(len == 1)
+	{
+          imgdata.color.linear_max[0] = imgdata.color.linear_max[1]
+           = imgdata.color.linear_max[2] = imgdata.color.linear_max[3]
+	   = getreal(type); // Is non-short possible here??
+
+	}
         break;
       }
     }

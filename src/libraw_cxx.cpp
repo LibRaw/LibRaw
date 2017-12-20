@@ -1983,6 +1983,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
     identify();
+    if(!strcasecmp(imgdata.idata.make, "Sony")
+       && imgdata.color.maximum > 0
+       && imgdata.color.linear_max[0] > imgdata.color.maximum*3
+       && imgdata.color.linear_max[0] <= imgdata.color.maximum*4)
+         for(int c = 0; c<4; c++)
+	   imgdata.color.linear_max[c] /= 4;
 
     if (!strcasecmp(imgdata.idata.make, "Canon") && (load_raw == &LibRaw::canon_sraw_load_raw) &&
         imgdata.sizes.raw_width > 0)
