@@ -8645,8 +8645,10 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
   else if (tag == 0x009a)
   {
     get4();
-    imgdata.raw_crop_width = get4();
-    imgdata.raw_crop_height = get4();
+    imgdata.sizes.raw_crop.cwidth = get4();
+    imgdata.sizes.raw_crop.cheight = get4();
+    imgdata.sizes.raw_crop.cleft = get4();
+    imgdata.sizes.raw_crop.ctop = get4();
   }
 
   else if (tag == 0x00a9)
@@ -10154,10 +10156,10 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     free(table_buf);
   }
 
-  else if (tag == 0xb02b && len < 256000)
+  else if ((tag == 0xb02b) && (len == 2))
   {
-    imgdata.raw_crop_width = get4();
-    imgdata.raw_crop_height = get4();
+    imgdata.sizes.raw_crop.cwidth = get4();
+    imgdata.sizes.raw_crop.cheight = get4();
   }
 
 }
@@ -11193,9 +11195,10 @@ void CLASS parse_makernote(int base, int uptag)
       }
       else if (tag == 0x0045)
       {
-        get2(); get2();
-        imgdata.raw_crop_width = get2();
-        imgdata.raw_crop_height = get2();
+        imgdata.sizes.raw_crop.cleft = get2();
+        imgdata.sizes.raw_crop.ctop = get2();
+        imgdata.sizes.raw_crop.cwidth = get2();
+        imgdata.sizes.raw_crop.cheight = get2();
       }
       else if (tag == 0x0082) // lens attachment
       {
@@ -15277,8 +15280,8 @@ void CLASS parse_fuji(int offset)
 
     else if (tag == 0x111)
     {
-      imgdata.raw_crop_height = get2();
-      imgdata.raw_crop_width = get2();
+      imgdata.sizes.raw_crop.cheight = get2();
+      imgdata.sizes.raw_crop.cwidth = get2();
     }
 
     else if ((tag == 0x122) && !strcmp(model, "DBP for GX680"))

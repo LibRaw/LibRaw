@@ -180,12 +180,18 @@ typedef unsigned long long UINT64;
 
   typedef struct
   {
+    unsigned cleft, ctop, cwidth, cheight;
+  } libraw_raw_crop_t;
+
+  typedef struct
+  {
     ushort raw_height, raw_width, height, width, top_margin, left_margin;
     ushort iheight, iwidth;
     unsigned raw_pitch;
     double pixel_aspect;
     int flip;
     int mask[8][4];
+    libraw_raw_crop_t raw_crop;
   } libraw_image_sizes_t;
 
   struct ph1_t
@@ -657,7 +663,6 @@ typedef unsigned long long UINT64;
   {
     ushort (*image)[4];
     libraw_image_sizes_t sizes;
-    ushort raw_crop_height, raw_crop_width;
     libraw_iparams_t idata;
     libraw_lensinfo_t lens;
     libraw_makernotes_t makernotes;

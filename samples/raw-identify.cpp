@@ -484,9 +484,9 @@ int main(int ac, char *av[])
         printf("Thumb size:  %4d x %d\n", T.twidth, T.theight);
       printf("Full size:   %4d x %d\n", S.raw_width, S.raw_height);
 
-      if (MyCoolRawProcessor.imgdata.raw_crop_width)
+      if (S.raw_crop.cwidth)
         printf("Raw crop size: %4d x %d\n",
-          MyCoolRawProcessor.imgdata.raw_crop_width, MyCoolRawProcessor.imgdata.raw_crop_height);
+          S.raw_crop.cwidth, S.raw_crop.cheight);
 
       printf("Image size:  %4d x %d\n", S.width, S.height);
       printf("Output size: %4d x %d\n", S.iwidth, S.iheight);
@@ -745,8 +745,7 @@ int main(int ac, char *av[])
       printf("\n");
 
 
-      if (Sony.Sony0x9400_version) printf (
-        "\nSONY Sequence data, tag 0x9400 version %x\n\
+      if (Sony.Sony0x9400_version) printf ("\nSONY Sequence data, tag 0x9400 version %x\n\
 \tReleaseMode2: %d\n\
 \tSequenceImageNumber: %d (starts at zero)\n\
 \tSequenceLength1: %d shots\n\
