@@ -13066,8 +13066,18 @@ int CLASS parse_tiff_ifd(int base)
         imgdata.color.WBCT_Coeffs[4][4] = imgdata.color.WBCT_Coeffs[4][2];
         break;
       case 0x787f:
-        FORC3 imgdata.color.linear_max[c] = get2();
-        imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
+        if(len == 3)
+	{
+          FORC3 imgdata.color.linear_max[c] = get2();
+          imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
+	}
+	else if(len == 1)
+	{
+          imgdata.color.linear_max[0] = imgdata.color.linear_max[1]
+           = imgdata.color.linear_max[2] = imgdata.color.linear_max[3]
+	   = getreal(type); // Is non-short possible here??
+
+	}
         break;
       }
     }
@@ -17286,11 +17296,13 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 6038,-1484,-579,-9145,16746,2512,-875,746,7218 } },
     { "Sony DSLR-A450", 0, 0xfeb,
       { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
-    { "Sony DSLR-A580", 0, 0xfeb,
+    { "Sony DSLR-A580", 0, 16596,
       { 5932,-1492,-411,-4813,12285,2856,-741,1524,6739 } },
-    { "Sony DSLR-A500", 0, 0xfeb,
+    { "Sony DSLR-A500", 0, 16596,
       { 6046,-1127,-278,-5574,13076,2786,-691,1419,7625 } },
-    { "Sony DSLR-A5", 0, 0xfeb,
+    { "Sony DSLR-A550", 0, 16596,
+      { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
+    { "Sony DSLR-A5", 0, 0xfeb, /* Is there any cameras not covered above? */
       { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
     { "Sony DSLR-A700", 0, 0,
       { 5775,-805,-359,-8574,16295,2391,-1943,2341,7249 } },
