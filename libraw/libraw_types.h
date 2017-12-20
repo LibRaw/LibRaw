@@ -657,6 +657,7 @@ typedef unsigned long long UINT64;
   {
     ushort (*image)[4];
     libraw_image_sizes_t sizes;
+    ushort raw_crop_height, raw_crop_width;
     libraw_iparams_t idata;
     libraw_lensinfo_t lens;
     libraw_makernotes_t makernotes;

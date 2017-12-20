@@ -482,6 +482,10 @@ int main(int ac, char *av[])
         printf("Thumb size:  %4d x %d\n", T.twidth, T.theight);
       printf("Full size:   %4d x %d\n", S.raw_width, S.raw_height);
 
+      if (MyCoolRawProcessor.imgdata.raw_crop_width)
+        printf("Raw crop size: %4d x %d\n",
+          MyCoolRawProcessor.imgdata.raw_crop_width, MyCoolRawProcessor.imgdata.raw_crop_height);
+
       printf("Image size:  %4d x %d\n", S.width, S.height);
       printf("Output size: %4d x %d\n", S.iwidth, S.iheight);
 

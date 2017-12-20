@@ -8642,6 +8642,13 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     }
   }
 
+  else if (tag == 0x009a)
+  {
+    get4();
+    imgdata.raw_crop_width = get4();
+    imgdata.raw_crop_height = get4();
+  }
+
   else if (tag == 0x00a9)
   {
     long int save1 = ftell(ifp);
@@ -10161,6 +10168,13 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     }
     free(table_buf);
   }
+
+  else if (tag == 0xb02b && len < 256000)
+  {
+    imgdata.raw_crop_width = get4();
+    imgdata.raw_crop_height = get4();
+  }
+
 }
 
 void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
@@ -11191,6 +11205,12 @@ void CLASS parse_makernote(int base, int uptag)
         imgdata.makernotes.nikon.ME_WB[2] = getreal(type);
         imgdata.makernotes.nikon.ME_WB[1] = getreal(type);
         imgdata.makernotes.nikon.ME_WB[3] = getreal(type);
+      }
+      else if (tag == 0x0045)
+      {
+        get2(); get2();
+        imgdata.raw_crop_width = get2();
+        imgdata.raw_crop_height = get2();
       }
       else if (tag == 0x0082) // lens attachment
       {
@@ -13951,6 +13971,7 @@ int CLASS parse_tiff_ifd(int base)
       tiff_ifd[ifd].dng_color[1].illuminant = get2();
       tiff_ifd[ifd].dng_color[1].parsedfields |= LIBRAW_DNGFM_ILLUMINANT;
       break;
+
 #endif
     case 50721: /* ColorMatrix1 */
     case 50722: /* ColorMatrix2 */
@@ -15230,12 +15251,17 @@ void CLASS parse_fuji(int offset)
     {
       raw_height = get2();
       raw_width = get2();
+//      printf ("==>>0x100 RawImageFullSize: height= %d width= %d\n", raw_height, raw_width);
     }
     else if (tag == 0x121)
     {
       height = get2();
       if ((width = get2()) == 4284)
         width += 3;
+//      if (!strcmp(model, "DBP for GX680")) { height=raw_height; width=raw_width; }
+
+//      printf ("==>>0x121 RawImageSize: height= %d width= %d\n", height, width);
+
     }
     else if (tag == 0x130)
     {
@@ -15258,6 +15284,31 @@ void CLASS parse_fuji(int offset)
 // IB start
 #ifdef LIBRAW_LIBRARY_BUILD
     }
+
+    else if (tag == 0x110)
+    {
+      int l = get2();
+      int m = get2();
+//      printf ("==>>0x110: l= %d m= %d\n", l, m);
+    }
+
+    else if (tag == 0x111)
+    {
+      imgdata.raw_crop_height = get2();
+      imgdata.raw_crop_width = get2();
+//      printf ("==>>0x111 RawImageCropSize: height= %d width= %d\n",
+//         imgdata.raw_crop_height, imgdata.raw_crop_width);
+    }
+
+    else if ((tag == 0x122) && !strcmp(model, "DBP for GX680"))
+    {
+      int k = get2();
+      int l = get2();	/* margins? */
+      int m = get2();	/* margins? */
+      int n = get2();
+//      printf ("==>>0x122: height= %d l= %d m= %d width= %d\n", k, l, m, n);
+    }
+
     else if (tag == 0x9650)
     {
       short a = (short)get2();
