@@ -583,6 +583,9 @@ void LibRaw::recycle()
 #undef FREE
 
   ZERO(imgdata.sizes);
+  imgdata.sizes.raw_crop.cleft = 0xffff;
+  imgdata.sizes.raw_crop.ctop = 0xffff;
+
   ZERO(imgdata.idata);
   ZERO(imgdata.makernotes);
   ZERO(imgdata.color);

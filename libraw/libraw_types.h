@@ -180,7 +180,7 @@ typedef unsigned long long UINT64;
 
   typedef struct
   {
-    unsigned cleft, ctop, cwidth, cheight;
+    ushort cleft, ctop, cwidth, cheight;
   } libraw_raw_crop_t;
 
   typedef struct

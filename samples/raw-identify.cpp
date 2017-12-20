@@ -484,9 +484,14 @@ int main(int ac, char *av[])
         printf("Thumb size:  %4d x %d\n", T.twidth, T.theight);
       printf("Full size:   %4d x %d\n", S.raw_width, S.raw_height);
 
-      if (S.raw_crop.cwidth)
-        printf("Raw crop size: %4d x %d\n",
-          S.raw_crop.cwidth, S.raw_crop.cheight);
+      if (S.raw_crop.cwidth) {
+        printf("Raw crop, width x height: %4d x %d ", S.raw_crop.cwidth, S.raw_crop.cheight);
+        if (S.raw_crop.cleft != 0xffff)
+          printf("left: %d ", S.raw_crop.cleft);
+        if (S.raw_crop.ctop != 0xffff)
+          printf("top: %d", S.raw_crop.ctop);
+        printf ("\n");
+      }
 
       printf("Image size:  %4d x %d\n", S.width, S.height);
       printf("Output size: %4d x %d\n", S.iwidth, S.iheight);
