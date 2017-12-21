@@ -11334,6 +11334,22 @@ void CLASS parse_makernote(int base, int uptag)
       case 0x1002:
         imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type) / 2);
         break;
+      case 0x20400612:
+      case 0x30000612:
+        imgdata.sizes.raw_crop.cleft = get2();
+        break;
+      case 0x20400613:
+      case 0x30000613:
+        imgdata.sizes.raw_crop.ctop = get2();
+        break;
+      case 0x20400614:
+      case 0x30000614:
+        imgdata.sizes.raw_crop.cwidth = get2();
+        break;
+      case 0x20400615:
+      case 0x30000615:
+        imgdata.sizes.raw_crop.cheight = get2();
+        break;
       case 0x20401112:
         imgdata.makernotes.olympus.OlympusCropID = get2();
         break;
