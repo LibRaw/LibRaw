@@ -12654,6 +12654,19 @@ int CLASS parse_tiff_ifd(int base)
         }
       }
       break;
+      case 0x74c7:
+        if ((len == 2) && !strncasecmp(make, "SONY", 4)) {
+          imgdata.makernotes.sony.raw_crop.cleft = get4();
+          imgdata.makernotes.sony.raw_crop.ctop = get4();
+        }
+        break;
+      case 0x74c8:
+        if ((len == 2) && !strncasecmp(make, "SONY", 4)) {
+          imgdata.makernotes.sony.raw_crop.cwidth = get4();
+          imgdata.makernotes.sony.raw_crop.cheight = get4();
+        }
+        break;
+
 #endif
 #ifdef LIBRAW_LIBRARY_BUILD
     case 50778:

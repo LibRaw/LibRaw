@@ -405,7 +405,7 @@ typedef unsigned long long UINT64;
     uchar Sony0x9400_SequenceLength1;
     unsigned Sony0x9400_SequenceFileNumber;
     uchar Sony0x9400_SequenceLength2;
-
+    libraw_raw_crop_t raw_crop;
   } libraw_sony_info_t;
 
   typedef struct

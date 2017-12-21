@@ -593,6 +593,8 @@ void LibRaw::recycle()
   ZERO(imgdata.thumbnail);
   ZERO(imgdata.rawdata);
   imgdata.makernotes.olympus.OlympusCropID = -1;
+  imgdata.makernotes.sony.raw_crop.cleft = 0xffff;
+  imgdata.makernotes.sony.raw_crop.ctop = 0xffff;
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
 
