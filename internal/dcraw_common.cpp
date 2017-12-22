@@ -9344,6 +9344,16 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       {
         imgdata.lens.makernotes.CurFocal = (float)get4() / 100.0f;
       }
+      else if (tag == 0x0038)
+      {
+        imgdata.sizes.raw_crop.cleft = get2();
+        imgdata.sizes.raw_crop.ctop = get2();
+      }
+      else if (tag == 0x0039)
+      {
+        imgdata.sizes.raw_crop.cwidth = get2();
+        imgdata.sizes.raw_crop.cheight = get2();
+      }
       else if (tag == 0x003f)
       {
         imgdata.lens.makernotes.LensID = fgetc(ifp) << 8 | fgetc(ifp);
@@ -10260,6 +10270,16 @@ void CLASS parse_makernote(int base, int uptag)
       else if (tag == 0x001d)
       {
         imgdata.lens.makernotes.CurFocal = (float)get4() / 100.0f;
+      }
+      else if (tag == 0x0038)
+      {
+        imgdata.sizes.raw_crop.cleft = get2();
+        imgdata.sizes.raw_crop.ctop = get2();
+      }
+      else if (tag == 0x0039)
+      {
+        imgdata.sizes.raw_crop.cwidth = get2();
+        imgdata.sizes.raw_crop.cheight = get2();
       }
       else if (tag == 0x003f)
       {
