@@ -9676,6 +9676,15 @@ void CLASS parse_makernote(int base, int uptag)
     INT64 _pos = ftell(ifp);
     if (len > 8 && _pos + len > 2 * fsize)
       continue;
+    if (!strncasecmp(model, "KODAK P880", 10) ||
+        !strncasecmp(model, "KODAK P850", 10) ||
+        !strncasecmp(model, "KODAK P712", 10)) {
+          if (tag == 0xf90b) {
+            imgdata.makernotes.kodak.clipBlack =  get2();
+        } else if (tag == 0xf90c) {
+            imgdata.makernotes.kodak.clipWhite = get2();
+        }
+    }
     if (!strncmp(make, "Canon", 5))
     {
       if (tag == 0x000d && len < 256000) // camera info
@@ -11484,6 +11493,18 @@ void CLASS parse_kodak_ifd(int base)
       callbacks.exif_cb(callbacks.exifparser_data, tag | 0x20000, type, len, order, ifp);
       fseek(ifp, savepos, SEEK_SET);
     }
+    if (tag == 1003)
+      imgdata.sizes.raw_crop.cleft = get2();
+    if (tag == 1004)
+      imgdata.sizes.raw_crop.ctop = get2();
+    if (tag == 1005)
+      imgdata.sizes.raw_crop.cwidth = get2();
+    if (tag == 1006)
+      imgdata.sizes.raw_crop.cheight = get2();
+    if (tag == 1007)
+      imgdata.makernotes.kodak.BlackLevelTop = get2();
+    if (tag == 1008)
+      imgdata.makernotes.kodak.BlackLevelBottom = get2();
     if (tag == 1011)
       imgdata.other.FlashEC = getreal(type);
     if (tag == 1020)
@@ -11566,10 +11587,37 @@ void CLASS parse_kodak_ifd(int base)
       wbi = fgetc(ifp);
     if ((unsigned)wbi < 7 && tag == wbtag[wbi])
       FORC3 cam_mul[c] = get4();
-    if (tag == 64019)
+    if (tag == 0xfa13)
       width = getint(type);
-    if (tag == 64020)
+    if (tag == 0xfa14)
       height = (getint(type) + 1) & -2;
+
+/*
+    height = getint(type);
+
+    if (tag == 0xfa16)
+      raw_width = get2();
+    if (tag == 0xfa17)
+      raw_height = get2();
+*/
+    if (tag == 0xfa18) {
+      imgdata.makernotes.kodak.offset_left = getint(8);
+      if (type !=8) imgdata.makernotes.kodak.offset_left += 1;
+    }
+    if (tag == 0xfa19) {
+      imgdata.makernotes.kodak.offset_top = getint(8);
+      if (type !=8) imgdata.makernotes.kodak.offset_top += 1;
+    }
+
+   if (tag == 0xfa31)
+      imgdata.sizes.raw_crop.cwidth = get2();
+   if (tag == 0xfa32)
+      imgdata.sizes.raw_crop.cheight = get2();
+   if (tag == 0xfa3e)
+      imgdata.sizes.raw_crop.cleft = get2();
+   if (tag == 0xfa3f)
+      imgdata.sizes.raw_crop.ctop = get2();
+
     fseek(ifp, save, SEEK_SET);
   }
 }

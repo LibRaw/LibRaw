@@ -396,6 +396,15 @@ typedef unsigned long long UINT64;
     uchar ShakeReduction;
   } libraw_pentax_makernotes_t;
 
+
+  typedef struct
+  {
+    ushort BlackLevelTop;
+    ushort BlackLevelBottom;
+    short offset_left, offset_top; /* KDC files, negative values or zeros */
+    ushort clipBlack, clipWhite;   /* valid for P712, P850, P880 */
+  } libraw_kodak_makernotes_t;
+
   typedef struct
   {
     ushort SonyCameraType;
@@ -636,6 +645,7 @@ typedef unsigned long long UINT64;
     libraw_fuji_info_t fuji;
     libraw_olympus_makernotes_t olympus;
     libraw_sony_info_t sony;
+    libraw_kodak_makernotes_t kodak;
   } libraw_makernotes_t;
 
   typedef struct

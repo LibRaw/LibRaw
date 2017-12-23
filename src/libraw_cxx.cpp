@@ -611,6 +611,10 @@ void LibRaw::recycle()
       imgdata.makernotes.fuji.ImageStabilization[2] = 0xffff;
 
   imgdata.makernotes.sony.SonyCameraType = 0xffff;
+
+  imgdata.makernotes.kodak.BlackLevelTop = 0xffff;
+  imgdata.makernotes.kodak.BlackLevelBottom = 0xffff;
+
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
 
   for (int i = 0; i < 4; i++)
