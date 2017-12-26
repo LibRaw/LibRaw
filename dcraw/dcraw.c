@@ -12897,12 +12897,12 @@ void CLASS parse_kodak_ifd(int base)
     fseek(ifp, _pos2, SEEK_SET);
 
     if (((tag == 0x07e4) || (tag == 0xfb01)) && (len == 9)) {
-      printf ("==>>romm_camDaylight type %d\n", type);
+      short validM = 0;
       if (type == 10) {
         for (j = 0; j < 9; j++) {
-          imgdata.makernotes.kodak.romm_camDaylight[j] = getreal(type);
-          printf (" %f", imgdata.makernotes.kodak.romm_camDaylight[j]);
+          ((float *)imgdata.makernotes.kodak.romm_camDaylight)[j] = getreal(type);
         }
+        validM = 1;
       } else if (type == 9) {
           FORC3 {
             romm_camScale[c] = 0;
@@ -12913,19 +12913,19 @@ void CLASS parse_kodak_ifd(int base)
           }
           if ((romm_camScale[0] > 0x1fff) && (romm_camScale[1] > 0x1fff) && (romm_camScale[2] > 0x1fff)) {
             FORC3 for (j = 0; j < 3; j++) {
-              imgdata.makernotes.kodak.romm_camDaylight[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
-              printf (" %f", imgdata.makernotes.kodak.romm_camDaylight[c*3+j]);
+              ((float *)imgdata.makernotes.kodak.romm_camDaylight)[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
             }
+            validM = 1;
           }
       }
-      printf ("\n");
+      if ( validM ) {
+        romm_coeff(imgdata.makernotes.kodak.romm_camDaylight);
+      }
     }
     if (((tag == 0x07e5) || (tag == 0xfb02)) && (len == 9)) {
-      printf ("==>>romm_camTungsten type %d\n", type);
       if (type == 10) {
         for (j = 0; j < 9; j++) {
-          imgdata.makernotes.kodak.romm_camTungsten[j] = getreal(type);
-          printf (" %f", imgdata.makernotes.kodak.romm_camTungsten[j]);
+          ((float *)imgdata.makernotes.kodak.romm_camTungsten)[j] = getreal(type);
         }
       } else if (type == 9) {
           FORC3 {
@@ -12936,21 +12936,16 @@ void CLASS parse_kodak_ifd(int base)
             }
           }
           if ((romm_camScale[0] > 0x1fff) && (romm_camScale[1] > 0x1fff) && (romm_camScale[2] > 0x1fff)) {
-            printf ("scale0..2: %d %d %d\n",romm_camScale[0], romm_camScale[1], romm_camScale[2]);
             FORC3 for (j = 0; j < 3; j++) {
-              imgdata.makernotes.kodak.romm_camTungsten[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
-              printf (" %f", imgdata.makernotes.kodak.romm_camTungsten[c*3+j]);
+              ((float *)imgdata.makernotes.kodak.romm_camTungsten)[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
             }
           }
       }
-      printf ("\n");
     }
     if (((tag == 0x07e6) || (tag == 0xfb03)) && (len == 9)) {
-      printf ("==>>romm_camFluorescent type %d\n", type);
       if (type == 10) {
         for (j = 0; j < 9; j++) {
-          imgdata.makernotes.kodak.romm_camFluorescent[j] = getreal(type);
-          printf (" %f", imgdata.makernotes.kodak.romm_camFluorescent[j]);
+          ((float *)imgdata.makernotes.kodak.romm_camFluorescent)[j] = getreal(type);
         }
       } else if (type == 9) {
           FORC3 {
@@ -12962,19 +12957,15 @@ void CLASS parse_kodak_ifd(int base)
           }
           if ((romm_camScale[0] > 0x1fff) && (romm_camScale[1] > 0x1fff) && (romm_camScale[2] > 0x1fff)) {
             FORC3 for (j = 0; j < 3; j++) {
-              imgdata.makernotes.kodak.romm_camFluorescent[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
-              printf (" %f", imgdata.makernotes.kodak.romm_camFluorescent[c*3+j]);
+              ((float *)imgdata.makernotes.kodak.romm_camFluorescent)[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
             }
           }
       }
-      printf ("\n");
     }
     if (((tag == 0x07e7) || (tag == 0xfb04)) && (len == 9)) {
-      printf ("==>>romm_camFlash type %d\n", type);
       if (type == 10) {
         for (j = 0; j < 9; j++) {
-          imgdata.makernotes.kodak.romm_camFlash[j] = getreal(type);
-          printf (" %f", imgdata.makernotes.kodak.romm_camFlash[j]);
+          ((float *)imgdata.makernotes.kodak.romm_camFlash)[j] = getreal(type);
         }
       } else if (type == 9) {
           FORC3 {
@@ -12986,19 +12977,15 @@ void CLASS parse_kodak_ifd(int base)
           }
           if ((romm_camScale[0] > 0x1fff) && (romm_camScale[1] > 0x1fff) && (romm_camScale[2] > 0x1fff)) {
             FORC3 for (j = 0; j < 3; j++) {
-              imgdata.makernotes.kodak.romm_camFlash[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
-              printf (" %f", imgdata.makernotes.kodak.romm_camFlash[c*3+j]);
+              ((float *)imgdata.makernotes.kodak.romm_camFlash)[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
             }
           }
       }
-      printf ("\n");
     }
     if (((tag == 0x07e8) || (tag == 0xfb05)) && (len == 9)) {
-      printf ("==>>romm_camCustom type %d\n", type);
       if (type == 10) {
         for (j = 0; j < 9; j++) {
-          imgdata.makernotes.kodak.romm_camCustom[j] = getreal(type);
-          printf (" %f", imgdata.makernotes.kodak.romm_camCustom[j]);
+          ((float *)imgdata.makernotes.kodak.romm_camCustom)[j] = getreal(type);
         }
       } else if (type == 9) {
           FORC3 {
@@ -13010,19 +12997,15 @@ void CLASS parse_kodak_ifd(int base)
           }
           if ((romm_camScale[0] > 0x1fff) && (romm_camScale[1] > 0x1fff) && (romm_camScale[2] > 0x1fff)) {
             FORC3 for (j = 0; j < 3; j++) {
-              imgdata.makernotes.kodak.romm_camCustom[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
-              printf (" %f", imgdata.makernotes.kodak.romm_camCustom[c*3+j]);
+              ((float *)imgdata.makernotes.kodak.romm_camCustom)[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
             }
           }
       }
-      printf ("\n");
     }
     if (((tag == 0x07e9) || (tag == 0xfb06)) && (len == 9)) {
-      printf ("==>>romm_camAuto type %d\n", type);
       if (type == 10) {
         for (j = 0; j < 9; j++) {
-          imgdata.makernotes.kodak.romm_camAuto[j] = getreal(type);
-          printf (" %f", imgdata.makernotes.kodak.romm_camAuto[j]);
+          ((float *)imgdata.makernotes.kodak.romm_camAuto)[j] = getreal(type);
         }
       } else if (type == 9) {
           FORC3 {
@@ -13034,12 +13017,10 @@ void CLASS parse_kodak_ifd(int base)
           }
           if ((romm_camScale[0] > 0x1fff) && (romm_camScale[1] > 0x1fff) && (romm_camScale[2] > 0x1fff)) {
             FORC3 for (j = 0; j < 3; j++) {
-              imgdata.makernotes.kodak.romm_camAuto[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
-              printf (" %f", imgdata.makernotes.kodak.romm_camAuto[c*3+j]);
+              ((float *)imgdata.makernotes.kodak.romm_camAuto)[c*3+j] = ((float)romm_camTemp[c*3+j]) / ((float)romm_camScale[c]);
             }
           }
       }
-      printf ("\n");
     }
 
     if (tag == 2120 + wbi || (wbi < 0 && tag == 2125)) /* use Auto WB if illuminant index is not set */

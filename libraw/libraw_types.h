@@ -403,12 +403,12 @@ typedef unsigned long long UINT64;
     ushort BlackLevelBottom;
     short offset_left, offset_top; /* KDC files, negative values or zeros */
     ushort clipBlack, clipWhite;   /* valid for P712, P850, P880 */
-    float romm_camDaylight[9];
-    float romm_camTungsten[9];
-    float romm_camFluorescent[9];
-    float romm_camFlash[9];
-    float romm_camCustom[9];
-    float romm_camAuto[9];
+    float romm_camDaylight[3][3];
+    float romm_camTungsten[3][3];
+    float romm_camFluorescent[3][3];
+    float romm_camFlash[3][3];
+    float romm_camCustom[3][3];
+    float romm_camAuto[3][3];
   } libraw_kodak_makernotes_t;
 
   typedef struct
