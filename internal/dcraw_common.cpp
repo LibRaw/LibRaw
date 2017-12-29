@@ -7352,6 +7352,13 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     imgdata.makernotes.canon.BlackMaskBottomBorder = get2();
   }
 
+  else if (tag == 0x4013)
+  {
+    get4();
+    imgdata.makernotes.canon.AFMicroAdjMode = get4();
+    imgdata.makernotes.canon.AFMicroAdjValue = ((float) get4()) / ((float) get4());
+  }
+
   else if (tag == 0x4001 && len > 500)
   {
     int c;
@@ -9184,6 +9191,26 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         }
       }
 
+      else if (tag == 0x00b0)
+      {
+        get4(); // ME tag version, 4 symbols
+        imgdata.makernotes.nikon.ExposureMode = get4();
+        imgdata.makernotes.nikon.nMEshots = get4();
+        imgdata.makernotes.nikon.MEgainOn = get4();
+      }
+
+      else if (tag == 0x00b9)
+      {
+        uchar uc;
+        int8_t sc;
+        fread(&uc, 1, 1, ifp);
+        imgdata.makernotes.nikon.AFFineTune = uc;
+        fread(&uc, 1, 1, ifp);
+        imgdata.makernotes.nikon.AFFineTuneIndex = uc;
+        fread(&sc, 1, 1, ifp);
+        imgdata.makernotes.nikon.AFFineTuneAdj = sc;
+      }
+
       else if (tag == 37 && (!iso_speed || iso_speed == 65535))
       {
         unsigned char cc;
@@ -9994,6 +10021,17 @@ void CLASS parse_makernote(int base, int uptag)
         imgdata.makernotes.nikon.ExposureMode = get4();
         imgdata.makernotes.nikon.nMEshots = get4();
         imgdata.makernotes.nikon.MEgainOn = get4();
+      }
+      else if (tag == 0x00b9)
+      {
+        uchar uc;
+        int8_t sc;
+        fread(&uc, 1, 1, ifp);
+        imgdata.makernotes.nikon.AFFineTune = uc;
+        fread(&uc, 1, 1, ifp);
+        imgdata.makernotes.nikon.AFFineTuneIndex = uc;
+        fread(&sc, 1, 1, ifp);
+        imgdata.makernotes.nikon.AFFineTuneAdj = sc;
       }
     }
 

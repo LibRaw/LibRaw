@@ -285,6 +285,8 @@ typedef unsigned long long UINT64;
     short BlackMaskTopBorder;
     short BlackMaskRightBorder;
     short BlackMaskBottomBorder;
+    int AFMicroAdjMode;
+    float AFMicroAdjValue;
 
   } libraw_canon_makernotes_t;
 
@@ -368,6 +370,9 @@ typedef unsigned long long UINT64;
     int nMEshots;
     int MEgainOn;
     double ME_WB[4];
+    uchar AFFineTune;
+    uchar AFFineTuneIndex;
+    int8_t AFFineTuneAdj;
   } libraw_nikon_makernotes_t;
 
   typedef struct
