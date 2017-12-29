@@ -388,17 +388,21 @@ typedef unsigned long long UINT64;
     ushort AFResult;
     unsigned ImageStabilization;
     ushort ColorSpace;
+    uchar AFFineTune;
+    short AFFineTuneAdj[3];
   } libraw_olympus_makernotes_t;
 
   typedef struct
   {
     ushort FocusMode;
-    uchar AFPointMode;
-    ushort AFPointSelected[2];
+    ushort AFPointSelected;
     unsigned AFPointsInFocus;
+    ushort FocusPosition;
     uchar DriveMode[4];
-    uchar SRResult;
-    uchar ShakeReduction;
+    short AFAdjustment;
+//    uchar AFPointMode;
+//    uchar SRResult;
+//    uchar ShakeReduction;
   } libraw_pentax_makernotes_t;
 
 
@@ -657,6 +661,7 @@ typedef unsigned long long UINT64;
     libraw_olympus_makernotes_t olympus;
     libraw_sony_info_t sony;
     libraw_kodak_makernotes_t kodak;
+    libraw_pentax_makernotes_t pentax;
   } libraw_makernotes_t;
 
   typedef struct

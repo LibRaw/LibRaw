@@ -10629,6 +10629,16 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       case 0x20100403:
         stmread(imgdata.lens.makernotes.Attachment, len, ifp);
         break;
+      case 0x202000306:
+        {
+          uchar uc;
+          fread(&uc, 1, 1, ifp);
+          imgdata.makernotes.olympus.AFFineTune = uc;
+        }
+        break;
+      case 0x202000307:
+        FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
+        break;
       case 0x20200401:
         imgdata.other.FlashEC = getreal(type);
         break;
@@ -10682,6 +10692,22 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         unique_id = get4();
         setPentaxBodyFeatures(unique_id);
       }
+      else if (tag == 0x000d)
+      {
+        imgdata.makernotes.pentax.FocusMode = get2();
+      }
+      else if (tag == 0x000e)
+      {
+        imgdata.makernotes.pentax.AFPointSelected = get2();
+      }
+      else if (tag == 0x000f)
+      {
+        imgdata.makernotes.pentax.AFPointsInFocus = getint(type);
+      }
+      else if (tag == 0x0010)
+      {
+        imgdata.makernotes.pentax.FocusPosition = get2();
+      }
       else if (tag == 0x0013)
       {
         imgdata.lens.makernotes.CurAp = (float)get2() / 10.0f;
@@ -10693,6 +10719,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       else if (tag == 0x001d)
       {
         imgdata.lens.makernotes.CurFocal = (float)get4() / 100.0f;
+      }
+      else if (tag == 0x0034)
+      {
+        uchar uc;
+        FORC4 {
+          fread(&uc, 1, 1, ifp);
+          imgdata.makernotes.pentax.DriveMode[c] = uc;
+        }
       }
       else if (tag == 0x0038)
       {
@@ -10718,6 +10752,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
           imgdata.other.FlashEC = getreal(type) / 256.0f;
         else
           imgdata.other.FlashEC = (float)((signed short)fgetc(ifp)) / 6.0f;
+      }
+      else if (tag == 0x0072)
+      {
+        imgdata.makernotes.pentax.AFAdjustment = get2();
       }
       else if (tag == 0x007e)
       {
@@ -11629,6 +11667,22 @@ void CLASS parse_makernote(int base, int uptag)
         unique_id = get4();
         setPentaxBodyFeatures(unique_id);
       }
+      else if (tag == 0x000d)
+      {
+        imgdata.makernotes.pentax.FocusMode = get2();
+      }
+      else if (tag == 0x000e)
+      {
+        imgdata.makernotes.pentax.AFPointSelected = get2();
+      }
+      else if (tag == 0x000f)
+      {
+        imgdata.makernotes.pentax.AFPointsInFocus = getint(type);
+      }
+      else if (tag == 0x0010)
+      {
+        imgdata.makernotes.pentax.FocusPosition = get2();
+      }
       else if (tag == 0x0013)
       {
         imgdata.lens.makernotes.CurAp = (float)get2() / 10.0f;
@@ -11640,6 +11694,14 @@ void CLASS parse_makernote(int base, int uptag)
       else if (tag == 0x001d)
       {
         imgdata.lens.makernotes.CurFocal = (float)get4() / 100.0f;
+      }
+      else if (tag == 0x0034)
+      {
+        uchar uc;
+        FORC4 {
+          fread(&uc, 1, 1, ifp);
+          imgdata.makernotes.pentax.DriveMode[c] = uc;
+        }
       }
       else if (tag == 0x0038)
       {
@@ -11665,6 +11727,10 @@ void CLASS parse_makernote(int base, int uptag)
           imgdata.other.FlashEC = getreal(type) / 256.0f;
         else
           imgdata.other.FlashEC = (float)((signed short)fgetc(ifp)) / 6.0f;
+      }
+      else if (tag == 0x0072)
+      {
+        imgdata.makernotes.pentax.AFAdjustment = get2();
       }
       else if (tag == 0x007e)
       {
@@ -11972,6 +12038,16 @@ void CLASS parse_makernote(int base, int uptag)
         imgdata.makernotes.olympus.OlympusSensorCalibration[0] = getreal(type);
         imgdata.makernotes.olympus.OlympusSensorCalibration[1] = getreal(type);
         FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.olympus.OlympusSensorCalibration[0];
+      }
+      if (tag == 0x202000306)
+      {
+        uchar uc;
+        fread(&uc, 1, 1, ifp);
+        imgdata.makernotes.olympus.AFFineTune = uc;
+      }
+      if (tag == 0x202000307)
+      {
+        FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
       }
       if (tag == 0x20200401)
       {
