@@ -46,6 +46,7 @@ it under the terms of the one of two licenses as you choose:
     void	parseSonyLensType2 (uchar a, uchar b);
     void 	parseSonyLensFeatures (uchar a, uchar b);
     void	process_Sony_0x0116 (uchar * buf, ushort, unsigned id);
+    void	process_Sony_0x2010 (uchar * buf, ushort, unsigned id);
     void	process_Sony_0x9050 (uchar * buf, ushort, unsigned id);
     void	process_Sony_0x9402 (uchar * buf, ushort);
     void	process_Sony_0x9403 (uchar * buf, ushort);
@@ -59,7 +60,8 @@ it under the terms of the one of two licenses as you choose:
                                uchar *&table_buf_0x9402, ushort &table_buf_0x9402_present,
                                uchar *&table_buf_0x9403, ushort &table_buf_0x9403_present,
                                uchar *&table_buf_0x9406, ushort &table_buf_0x9406_present,
-                               uchar *&table_buf_0x9400, ushort &table_buf_0x9400_present);
+                               uchar *&table_buf_0x9400, ushort &table_buf_0x9400_present,
+                               uchar *&table_buf_0x2010, ushort &table_buf_0x2010_present);
     void	parseFujiMakernotes (unsigned tag, unsigned type);
 
     ushort      get2();

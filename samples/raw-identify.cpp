@@ -432,6 +432,8 @@ int main(int ac, char *av[])
       printf("\n");
 
       printf("ISO speed: %d\n", (int)P2.iso_speed);
+      if (P2.real_ISO > 0.1f)
+        printf("real ISO speed: %d\n", (int)P2.real_ISO);
       printf("Shutter: ");
       if (P2.shutter > 0 && P2.shutter < 1)
         P2.shutter = (printf("1/"), 1 / P2.shutter);
