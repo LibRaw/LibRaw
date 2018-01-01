@@ -430,6 +430,9 @@ typedef unsigned long long UINT64;
     unsigned Sony0x9400_SequenceFileNumber;
     uchar Sony0x9400_SequenceLength2;
     libraw_raw_crop_t raw_crop;
+    int8_t AFMicroAdjValue;
+    int8_t AFMicroAdjOn;
+    uchar AFMicroAdjRegisteredLenses;
   } libraw_sony_info_t;
 
   typedef struct

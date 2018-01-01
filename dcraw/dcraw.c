@@ -9721,6 +9721,21 @@ void CLASS process_Sony_0x940c(uchar *buf, ushort len)
   return;
 }
 
+void CLASS process_Sony_0x940e(uchar *buf, ushort len, unsigned id)
+{
+  if (((id == 286) || (id == 287) || (id == 294)) && (len >= 0x017d))  {
+    imgdata.makernotes.sony.AFMicroAdjValue = SonySubstitution[buf[0x017d]];
+  }
+  else
+  if (((id == 319) || (id == 353) || (id == 354)) && (len >= 0x0050)) {
+    imgdata.makernotes.sony.AFMicroAdjValue = SonySubstitution[buf[0x0050]];
+  }
+  else
+    return;
+  if (imgdata.makernotes.sony.AFMicroAdjValue != 0)
+    imgdata.makernotes.sony.AFMicroAdjOn = 1;
+}
+
 void CLASS process_Sony_0x9400 (uchar *buf, ushort len)
 {  // names per https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Sony.html#Tag9400a - Tag9400c
 
@@ -9898,14 +9913,15 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
 }
 
 void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
-                               uchar *&table_buf_0x9050, ushort &table_buf_0x9050_len,
-                               uchar *&table_buf_0x940c, ushort &table_buf_0x940c_len,
                                uchar *&table_buf_0x0116, ushort &table_buf_0x0116_len,
+                               uchar *&table_buf_0x2010, ushort &table_buf_0x2010_len,
+                               uchar *&table_buf_0x9050, ushort &table_buf_0x9050_len,
+                               uchar *&table_buf_0x9400, ushort &table_buf_0x9400_len,
                                uchar *&table_buf_0x9402, ushort &table_buf_0x9402_len,
                                uchar *&table_buf_0x9403, ushort &table_buf_0x9403_len,
                                uchar *&table_buf_0x9406, ushort &table_buf_0x9406_len,
-                               uchar *&table_buf_0x9400, ushort &table_buf_0x9400_len,
-                               uchar *&table_buf_0x2010, ushort &table_buf_0x2010_len)
+                               uchar *&table_buf_0x940c, ushort &table_buf_0x940c_len,
+                               uchar *&table_buf_0x940e, ushort &table_buf_0x940e_len)
 {
 
   ushort lid;
@@ -9968,6 +9984,16 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
       table_buf_0x940c_len = 0;
     }
 
+    if (table_buf_0x940e_len)
+    {
+      if (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E)
+      {
+        process_Sony_0x940e(table_buf_0x940e, table_buf_0x940e_len, imgdata.lens.makernotes.CamID);
+      }
+      free(table_buf_0x940e);
+      table_buf_0x940e_len = 0;
+    }
+
     if (table_buf_0x9400_len)
     {
       process_Sony_0x9400(table_buf_0x9400,table_buf_0x9400_len);
@@ -10010,6 +10036,13 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
           if (table_buf[4])
             imgdata.lens.makernotes.MaxAp4MaxFocal = bcd2dec(table_buf[7]) / 10.0f;
           parseSonyLensFeatures(table_buf[1], table_buf[6]);
+
+          if (len == 5478)
+          {
+            imgdata.makernotes.sony.AFMicroAdjValue = table_buf[304] - 20;
+            imgdata.makernotes.sony.AFMicroAdjOn = (((table_buf[305] & 0x80) == 0x80) ? 1 : 0);
+            imgdata.makernotes.sony.AFMicroAdjRegisteredLenses = table_buf[305] & 0x7f;
+          }
         }
         break;
       default:
@@ -10133,7 +10166,7 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     fread(table_buf_0x9402, len, 1, ifp);
     if (imgdata.lens.makernotes.CamID)
     {
-      process_Sony_0x9402(table_buf_0x9402,table_buf_0x9402_len);
+      process_Sony_0x9402(table_buf_0x9402, table_buf_0x9402_len);
       free(table_buf_0x9402);
       table_buf_0x9402_len = 0;
     }
@@ -10197,6 +10230,19 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
       process_Sony_0x940c(table_buf_0x940c,table_buf_0x940c_len);
       free(table_buf_0x940c);
       table_buf_0x940c_len = 0;
+    }
+  }
+
+  else if (tag == 0x940e && len < 256000)
+  {
+    table_buf_0x940e = (uchar *)malloc(len);
+    table_buf_0x940e_len = len;
+    fread(table_buf_0x940e, len, 1, ifp);
+    if ((imgdata.lens.makernotes.CamID) && (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E))
+    {
+      process_Sony_0x940e(table_buf_0x940e, table_buf_0x940e_len, imgdata.lens.makernotes.CamID);
+      free(table_buf_0x940e);
+      table_buf_0x940e_len = 0;
     }
   }
 
@@ -10280,8 +10326,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   unsigned typeCanonCameraInfo = 0;
 
   uchar *table_buf;
+  uchar *table_buf_0x0116;
+  ushort table_buf_0x0116_len = 0;
+  uchar *table_buf_0x2010;
+  ushort table_buf_0x2010_len = 0;
   uchar *table_buf_0x9050;
   ushort table_buf_0x9050_len = 0;
+  uchar *table_buf_0x9400;
+  ushort table_buf_0x9400_len = 0;
   uchar *table_buf_0x9402;
   ushort table_buf_0x9402_len = 0;
   uchar *table_buf_0x9403;
@@ -10290,12 +10342,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   ushort table_buf_0x9406_len = 0;
   uchar *table_buf_0x940c;
   ushort table_buf_0x940c_len = 0;
-  uchar *table_buf_0x0116;
-  ushort table_buf_0x0116_len = 0;
-  uchar *table_buf_0x2010;
-  ushort table_buf_0x2010_len = 0;
-  uchar *table_buf_0x9400;
-  ushort table_buf_0x9400_len = 0;
+  uchar *table_buf_0x940e;
+  ushort table_buf_0x940e_len = 0;
 
   short morder, sorder = order;
   char buf[10];
@@ -10969,14 +11017,15 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
     {
       parseSonyMakernotes(tag, type, len, AdobeDNG,
-                          table_buf_0x9050, table_buf_0x9050_len,
-                          table_buf_0x940c, table_buf_0x940c_len,
                           table_buf_0x0116, table_buf_0x0116_len,
+                          table_buf_0x2010, table_buf_0x2010_len,
+                          table_buf_0x9050, table_buf_0x9050_len,
+                          table_buf_0x9400, table_buf_0x9400_len,
                           table_buf_0x9402, table_buf_0x9402_len,
                           table_buf_0x9403, table_buf_0x9403_len,
                           table_buf_0x9406, table_buf_0x9406_len,
-                          table_buf_0x9400, table_buf_0x9400_len,
-                          table_buf_0x2010, table_buf_0x2010_len);
+                          table_buf_0x940c, table_buf_0x940c_len,
+                          table_buf_0x940e, table_buf_0x940e_len);
     }
   next:
     fseek(ifp, save, SEEK_SET);
@@ -11013,8 +11062,14 @@ void CLASS parse_makernote(int base, int uptag)
   unsigned typeCanonCameraInfo = 0;
 
   uchar *table_buf;
+  uchar *table_buf_0x0116;
+  ushort table_buf_0x0116_len = 0;
+  uchar *table_buf_0x2010;
+  ushort table_buf_0x2010_len = 0;
   uchar *table_buf_0x9050;
   ushort table_buf_0x9050_len = 0;
+  uchar *table_buf_0x9400;
+  ushort table_buf_0x9400_len = 0;
   uchar *table_buf_0x9402;
   ushort table_buf_0x9402_len = 0;
   uchar *table_buf_0x9403;
@@ -11023,12 +11078,8 @@ void CLASS parse_makernote(int base, int uptag)
   ushort table_buf_0x9406_len = 0;
   uchar *table_buf_0x940c;
   ushort table_buf_0x940c_len = 0;
-  uchar *table_buf_0x0116;
-  ushort table_buf_0x0116_len = 0;
-  uchar *table_buf_0x2010;
-  ushort table_buf_0x2010_len = 0;
-  uchar *table_buf_0x9400;
-  ushort table_buf_0x9400_len = 0;
+  uchar *table_buf_0x940e;
+  ushort table_buf_0x940e_len = 0;
 
   INT64 fsize = ifp->size();
 #endif
@@ -11951,14 +12002,15 @@ void CLASS parse_makernote(int base, int uptag)
                !strncasecmp(model, "Lusso", 5) || !strncasecmp(model, "HV", 2))))
     {
       parseSonyMakernotes(tag, type, len, nonDNG,
-                          table_buf_0x9050, table_buf_0x9050_len,
-                          table_buf_0x940c, table_buf_0x940c_len,
                           table_buf_0x0116, table_buf_0x0116_len,
+                          table_buf_0x2010, table_buf_0x2010_len,
+                          table_buf_0x9050, table_buf_0x9050_len,
+                          table_buf_0x9400, table_buf_0x9400_len,
                           table_buf_0x9402, table_buf_0x9402_len,
                           table_buf_0x9403, table_buf_0x9403_len,
                           table_buf_0x9406, table_buf_0x9406_len,
-                          table_buf_0x9400, table_buf_0x9400_len,
-                          table_buf_0x2010, table_buf_0x2010_len);
+                          table_buf_0x940c, table_buf_0x940c_len,
+                          table_buf_0x940e, table_buf_0x940e_len);
     }
 
     fseek(ifp, _pos, SEEK_SET);
