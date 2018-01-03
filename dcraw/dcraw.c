@@ -9599,9 +9599,9 @@ void CLASS process_Sony_0x0116(uchar *buf, ushort len, unsigned id)
 {
   short bufx;
 
-  if (((id == 257) || (id == 262) || (id == 269) || (id == 270)) && len >= 2)
+  if (((id == 257) || (id == 262) || (id == 269) || (id == 270)) && (len >= 2))
     bufx = buf[1];
-  else if (((id != 263) && (id != 264) && (id != 265) && (id != 266)) && len >=3)
+  else if ((id >= 273) && (len >= 3))
     bufx = buf[2];
   else
     return;
@@ -9611,51 +9611,45 @@ void CLASS process_Sony_0x0116(uchar *buf, ushort len, unsigned id)
 
 void CLASS process_Sony_0x2010(uchar *buf, ushort len, unsigned id)
 {
-  ushort iReal_ISO;
-  uchar s[2];
-
-  if (((id == 286) ||
-       (id == 287) ||
-       (id == 289) ||
-       (id == 290)) &&
-      (len >= 0x1219))
-    iReal_ISO = 0x1218;
-  else
-  if (((id == 291) ||
-       (id == 292) ||
-       (id == 293)) &&
-      (len >= 0x11f5))
-    iReal_ISO = 0x11f4;
-  else
-  if (((id == 294) ||
-       (id == 295) ||
-       (id == 296) ||
-       (id == 297) ||
-       (id == 299) ||
-       (id == 300) ||
-       (id == 307)) &&
-      (len >= 0x1255))
-    iReal_ISO = 0x1254;
-  else
-  if (((id == 298) ||
-       (id == 310)) &&
-      (len >= 0x1259))
-    iReal_ISO = 0x1258;
-  else
-  if (((id == 302) ||
-       (id == 303) ||
-       (id == 305)) &&
-      (len >= 0x1281))
-    iReal_ISO = 0x1280;
-  else
-  if ((id == 308) &&
-      (len >= 0x113d))
-    iReal_ISO = 0x113c;
-  else
+  if ((id < 286) || (id > 365))
     return;
-  s[0] = SonySubstitution[buf[iReal_ISO]];
-  s[1] = SonySubstitution[buf[iReal_ISO+1]];
-  imgdata.other.real_ISO = 100.0f * powf64(2.0f, (16 - ((float)sget2(s))/256.0f));
+
+  ushort groups [365-286+1] = {
+    2, 2, 1, 2, 2, 3, 3, 3, 5, 5,
+    5, 5, 5, 5, 5, 0, 5, 5, 0, 5,
+    7, 5, 6, 7, 5, 7, 7, 7, 0, 0,
+    0, 7, 7, 7, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 7, 7, 8, 8, 0, 8, 0,
+    7, 8, 0, 0, 8, 0, 0, 7, 8, 8,
+    8, 8, 9, 0, 8, 0, 9, 0, 8, 9
+  };
+
+  int ind = id - 286;
+  int group = groups[ind];
+  if (!group) return;
+
+  if (imgdata.other.real_ISO < 0.1f) {
+    ushort real_iso_offsets [] = {
+      0x1218, 0x1218, 0x113e, 0x1218, 0x1218, 0x11f4, 0x11f4, 0x11f4, 0x1254, 0x1254,
+      0x1254, 0x1254, 0x1258, 0x1254, 0x1254, 0xffff, 0x1280, 0x1280, 0xffff, 0x1280,
+      0x0344, 0x1254, 0x113c, 0x0344, 0x1258, 0x0344, 0x0344, 0x0344, 0xffff, 0xffff,
+      0xffff, 0x0344, 0x0344, 0x0344, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
+      0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
+      0xffff, 0xffff, 0xffff, 0x0344, 0x0344, 0x0346, 0x0346, 0xffff, 0x0346, 0xffff,
+      0x0344, 0x0346, 0xffff, 0xffff, 0x0346, 0xffff, 0xffff, 0x0344, 0x0346, 0x0346,
+      0x0346, 0x0346, 0x0320, 0xffff, 0x0346, 0xffff, 0x0320, 0xffff, 0x0346, 0x0320
+    };
+    ushort real_iso_offset = real_iso_offsets[ind];
+    if (real_iso_offset == 0xffff) return;
+    if (len < (real_iso_offset+2)) return;
+
+    uchar s[2];
+    s[0] = SonySubstitution[buf[real_iso_offset]];
+    s[1] = SonySubstitution[buf[real_iso_offset+1]];
+    imgdata.other.real_ISO = 100.0f * powf64(2.0f, (16 - ((float)sget2(s))/256.0f));
+  }
+
 }
 
 void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
@@ -10209,6 +10203,7 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     table_buf_0x9405 = (uchar *)malloc(len);
     short bufx = table_buf_0x9405[0x0];
     fread(table_buf_0x9405, len, 1, ifp);
+    if (imgdata.other.real_ISO < 0.1f) {
       if ((bufx == 0x25) ||
           (bufx == 0x3a) ||
           (bufx == 0x76) ||
@@ -10217,12 +10212,13 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
           (bufx == 0x9a) ||
           (bufx == 0xb3) ||
           (bufx == 0xe1))
-     {
+      {
        uchar s[2];
        s[0] = SonySubstitution[table_buf_0x9405[0x04]];
        s[1] = SonySubstitution[table_buf_0x9405[0x05]];
        imgdata.other.real_ISO = 100.0f * powf64(2.0f, (16 - ((float)sget2(s))/256.0f));
-     }
+      }
+    }
     free(table_buf_0x9405);
   }
 
