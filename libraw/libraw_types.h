@@ -433,6 +433,8 @@ typedef unsigned long long UINT64;
     int8_t AFMicroAdjValue;
     int8_t AFMicroAdjOn;
     uchar AFMicroAdjRegisteredLenses;
+    ushort group2010;
+    ushort real_iso_offset;
   } libraw_sony_info_t;
 
   typedef struct
