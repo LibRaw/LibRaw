@@ -8499,9 +8499,6 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     imgdata.makernotes.sony.ImageCount3 = sget4(s);
   }
 
-if (imgdata.makernotes.sony.ImageCount3)
-  printf ("==>> ImageCount3: %d\n", imgdata.makernotes.sony.ImageCount3);
-
   return;
 }
 
