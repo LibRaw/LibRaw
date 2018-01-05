@@ -9378,6 +9378,15 @@ void CLASS setSonyBodyFeatures(unsigned id)
   static const struct
   {
     ushort scf[7];
+/*
+scf[0] camera id
+scf[1] camera format
+scf[2] camera mount: Minolta A, Sony E, fixed,
+scf[3] camera type: DSLR, NEX, SLT, ILCE, ILCA, DSC
+scf[4] lens mount
+scf[5] tag 0x2010 group (0 if not used)
+scf[6] offset of Sony ISO in 0x2010 table, 0xffff if not valid
+*/
   } SonyCamFeatures[] = {
     {256, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
     {257, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
@@ -9772,7 +9781,7 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x", (b7c << 24) + (b7d << 16) + (b7e << 8) + b7f);
   }
 
-  if ((id >= 286) && (id <= 350) && (len >= (0x01bd+4)))
+  if ((id >= 286) && (id <= 293) && (len >= (0x01bd+4)))
   {
     FORC4 s[c] = SonySubstitution[buf[0x01bd+c]];
     imgdata.makernotes.sony.ImageCount3 = sget4(s);
