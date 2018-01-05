@@ -8341,6 +8341,8 @@ void CLASS process_Sony_0x2010 (uchar *buf, ushort len)
 void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
 {
   ushort lid;
+  uchar s[4];
+  int c;
 
   if ((imgdata.lens.makernotes.CameraMount != LIBRAW_MOUNT_Sony_E) &&
       (imgdata.lens.makernotes.CameraMount != LIBRAW_MOUNT_FixedLens))
@@ -8446,6 +8448,59 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     unsigned b7f = SonySubstitution[buf[0x7f]];
     sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x", (b7c << 24) + (b7d << 16) + (b7e << 8) + b7f);
   }
+
+  if ((id >= 286) && (id <= 350) && (len >= (0x01bd+4)))
+  {
+    FORC4 s[c] = SonySubstitution[buf[0x01bd+c]];
+    imgdata.makernotes.sony.ImageCount3 = sget4(s);
+  }
+  else
+  if (((id == 294) ||
+       (id == 295) ||
+       (id == 296) ||
+       (id == 299) ||
+       (id == 300) ||
+       (id == 302) ||
+       (id == 303) ||
+       (id == 305) ||
+       (id == 307) ||
+       (id == 313)) &&
+       (len >= (0x01aa+4)))
+  {
+    FORC4 s[c] = SonySubstitution[buf[0x01aa+c]];
+    imgdata.makernotes.sony.ImageCount3 = sget4(s);
+  }
+  else
+  if (((id == 319) ||
+       (id == 339) ||
+       (id == 346) ||
+       (id == 353)) &&
+       (len >= (0x01a0+4)))
+  {
+    FORC4 s[c] = SonySubstitution[buf[0x01a0+c]];
+    imgdata.makernotes.sony.ImageCount3 = sget4(s);
+  }
+  else
+  if (((id == 347) || (id == 350)) && (len >= (0x01cb+4)))
+  {
+    FORC4 s[c] = SonySubstitution[buf[0x01cb+c]];
+    imgdata.makernotes.sony.ImageCount3 = sget4(s);
+  }
+  else
+  if ((id == 354) || ((id == 357) || (id == 360)) && (len >= (0x01cd+4)))
+  {
+    FORC4 s[c] = SonySubstitution[buf[0x01cd+c]];
+    imgdata.makernotes.sony.ImageCount3 = sget4(s);
+  }
+  else
+  if (((id == 358) || (id == 362)) && (len >= (0x019f+4)))
+  {
+    FORC4 s[c] = SonySubstitution[buf[0x019f+c]];
+    imgdata.makernotes.sony.ImageCount3 = sget4(s);
+  }
+
+if (imgdata.makernotes.sony.ImageCount3)
+  printf ("==>> ImageCount3: %d\n", imgdata.makernotes.sony.ImageCount3);
 
   return;
 }
