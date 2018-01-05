@@ -8054,7 +8054,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
   ushort idx;
   static const struct
   {
-    ushort scf[7];
+    ushort scf[8];
 /*
 scf[0] camera id
 scf[1] camera format
@@ -8063,118 +8063,119 @@ scf[3] camera type: DSLR, NEX, SLT, ILCE, ILCA, DSC
 scf[4] lens mount
 scf[5] tag 0x2010 group (0 if not used)
 scf[6] offset of Sony ISO in 0x2010 table, 0xffff if not valid
+scf[7] offset of ImageCount3 in 0x9050 table, 0xffff if not valid
 */
   } SonyCamFeatures[] = {
-    {256, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {257, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {258, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {259, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {260, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {261, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {262, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {263, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {264, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {265, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {266, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {267, 0, 0, 0, 0, 0, 0xffff},
-    {268, 0, 0, 0, 0, 0, 0xffff},
-    {269, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {270, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {271, 0, 0, 0, 0, 0, 0xffff},
-    {272, 0, 0, 0, 0, 0, 0xffff},
-    {273, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {274, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {275, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {276, 0, 0, 0, 0, 0, 0xffff},
-    {277, 0, 0, 0, 0, 0, 0xffff},
-    {278, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 0, 0xffff},
-    {279, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 0, 0xffff},
-    {280, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 0, 0xffff},
-    {281, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 0, 0xffff},
-    {282, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {283, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff},
-    {284, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 0, 0xffff},
-    {285, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 0, 0xffff},
-    {286, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 2, 0x1218},
-    {287, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 2, 0x1218},
-    {288, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 1, 0x113e},
-    {289, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 2, 0x1218},
-    {290, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 2, 0x1218},
-    {291, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 3, 0x11f4},
-    {292, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 3, 0x11f4},
-    {293, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 3, 0x11f4},
-    {294, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 5, 0x1254},
-    {295, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254},
-    {296, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254},
-    {297, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 5, 0x1254},
-    {298, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 5, 0x1258},
-    {299, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254},
-    {300, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254},
-    {301, 0, 0, 0, 0, 0, 0xffff},
-    {302, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 5, 0x1280},
-    {303, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 5, 0x1280},
-    {304, 0, 0, 0, 0, 0, 0xffff},
-    {305, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1280},
-    {306, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344},
-    {307, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254},
-    {308, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 6, 0x113c},
-    {309, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 7, 0x0344},
-    {310, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 5, 0x1258},
-    {311, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344},
-    {312, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344},
-    {313, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344},
-    {314, 0, 0, 0, 0, 0, 0xffff},
-    {315, 0, 0, 0, 0, 0, 0xffff},
-    {316, 0, 0, 0, 0, 0, 0xffff},
-    {317, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 7, 0x0344},
-    {318, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344},
-    {319, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, 0, 7, 0x0344},
-    {320, 0, 0, 0, 0, 0, 0xffff},
-    {321, 0, 0, 0, 0, 0, 0xffff},
-    {322, 0, 0, 0, 0, 0, 0xffff},
-    {323, 0, 0, 0, 0, 0, 0xffff},
-    {324, 0, 0, 0, 0, 0, 0xffff},
-    {325, 0, 0, 0, 0, 0, 0xffff},
-    {326, 0, 0, 0, 0, 0, 0xffff},
-    {327, 0, 0, 0, 0, 0, 0xffff},
-    {328, 0, 0, 0, 0, 0, 0xffff},
-    {329, 0, 0, 0, 0, 0, 0xffff},
-    {330, 0, 0, 0, 0, 0, 0xffff},
-    {331, 0, 0, 0, 0, 0, 0xffff},
-    {332, 0, 0, 0, 0, 0, 0xffff},
-    {333, 0, 0, 0, 0, 0, 0xffff},
-    {334, 0, 0, 0, 0, 0, 0xffff},
-    {335, 0, 0, 0, 0, 0, 0xffff},
-    {336, 0, 0, 0, 0, 0, 0xffff},
-    {337, 0, 0, 0, 0, 0, 0xffff},
-    {338, 0, 0, 0, 0, 0, 0xffff},
-    {339, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344},
-    {340, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344},
-    {341, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346},
-    {342, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346},
-    {343, 0, 0, 0, 0, 0, 0xffff},
-    {344, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346},
-    {345, 0, 0, 0, 0, 0, 0xffff},
-    {346, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344},
-    {347, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8, 0x0346},
-    {348, 0, 0, 0, 0, 0, 0xffff},
-    {349, 0, 0, 0, 0, 0, 0xffff},
-    {350, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8, 0x0346},
-    {351, 0, 0, 0, 0, 0, 0xffff},
-    {352, 0, 0, 0, 0, 0, 0xffff},
-    {353, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, 0, 7, 0x0344},
-    {354, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, 0, 8, 0x0346},
-    {355, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346},
-    {356, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346},
-    {357, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8, 0x0346},
-    {358, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9, 0x0320},
-    {359, 0, 0, 0, 0, 0, 0xffff},
-    {360, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8, 0x0346},
-    {361, 0, 0, 0, 0, 0, 0xffff},
-    {362, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9, 0x0320},
-    {363, 0, 0, 0, 0, 0, 0xffff},
-    {364, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346},
-    {365, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320},
+    {256, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {257, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {258, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {259, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {260, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {261, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {262, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {263, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {264, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {265, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {266, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {267, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {268, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {269, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {270, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {271, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {272, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {273, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {274, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {275, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {276, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {277, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {278, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 0, 0xffff, 0xffff},
+    {279, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 0, 0xffff, 0xffff},
+    {280, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 0, 0xffff, 0xffff},
+    {281, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 0, 0xffff, 0xffff},
+    {282, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {283, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0, 0xffff, 0xffff},
+    {284, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 0, 0xffff, 0xffff},
+    {285, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 0, 0xffff, 0xffff},
+    {286, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 2, 0x1218, 0x01bd},
+    {287, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 2, 0x1218, 0x01bd},
+    {288, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 1, 0x113e, 0x01bd},
+    {289, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 2, 0x1218, 0x01bd},
+    {290, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 2, 0x1218, 0x01bd},
+    {291, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 3, 0x11f4, 0x01bd},
+    {292, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 3, 0x11f4, 0x01bd},
+    {293, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 3, 0x11f4, 0x01bd},
+    {294, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 5, 0x1254, 0x01aa},
+    {295, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254, 0x01aa},
+    {296, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254, 0x01aa},
+    {297, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 5, 0x1254, 0xffff},
+    {298, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 5, 0x1258, 0xffff},
+    {299, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254, 0x01aa},
+    {300, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254, 0x01aa},
+    {301, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {302, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 5, 0x1280, 0x01aa},
+    {303, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 5, 0x1280, 0x01aa},
+    {304, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {305, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1280, 0x01aa},
+    {306, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344, 0xffff},
+    {307, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5, 0x1254, 0x01aa},
+    {308, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 6, 0x113c, 0xffff},
+    {309, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 7, 0x0344, 0xffff},
+    {310, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 5, 0x1258, 0xffff},
+    {311, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344, 0xffff},
+    {312, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344, 0xffff},
+    {313, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344, 0x01aa},
+    {314, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {315, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {316, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {317, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 7, 0x0344, 0xffff},
+    {318, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344, 0xffff},
+    {319, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, 0, 7, 0x0344, 0x01a0},
+    {320, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {321, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {322, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {323, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {324, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {325, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {326, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {327, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {328, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {329, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {330, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {331, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {332, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {333, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {334, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {335, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {336, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {337, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {338, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {339, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344, 0x01a0},
+    {340, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344, 0xffff},
+    {341, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff},
+    {342, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff},
+    {343, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {344, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff},
+    {345, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {346, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7, 0x0344, 0x01a0},
+    {347, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8, 0x0346, 0x01cb},
+    {348, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {349, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {350, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8, 0x0346, 0x01cb},
+    {351, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {352, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {353, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, 0, 7, 0x0344, 0x01a0},
+    {354, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, 0, 8, 0x0346, 0x01cd},
+    {355, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff},
+    {356, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff},
+    {357, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8, 0x0346, 0x01cd},
+    {358, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9, 0x0320, 0x019f},
+    {359, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {360, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8, 0x0346, 0x01cd},
+    {361, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {362, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9, 0x0320, 0x019f},
+    {363, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+    {364, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff},
+    {365, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff},
   };
   imgdata.lens.makernotes.CamID = id;
   if (id == 2)
@@ -8183,6 +8184,7 @@ scf[6] offset of Sony ISO in 0x2010 table, 0xffff if not valid
     imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_DSC;
     imgdata.makernotes.sony.group2010 = 0;
     imgdata.makernotes.sony.real_iso_offset = 0xffff;
+    imgdata.makernotes.sony.ImageCount3_offset = 0xffff;
     return;
   }
   else idx = id - 256;
@@ -8196,6 +8198,7 @@ scf[6] offset of Sony ISO in 0x2010 table, 0xffff if not valid
     if (SonyCamFeatures[idx].scf[4]) imgdata.lens.makernotes.LensMount = SonyCamFeatures[idx].scf[4];
     imgdata.makernotes.sony.group2010 = SonyCamFeatures[idx].scf[5];
     imgdata.makernotes.sony.real_iso_offset = SonyCamFeatures[idx].scf[6];
+    imgdata.makernotes.sony.ImageCount3_offset = SonyCamFeatures[idx].scf[7];
   }
 }
 
@@ -8458,53 +8461,10 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x", (b7c << 24) + (b7d << 16) + (b7e << 8) + b7f);
   }
 
-  if ((id >= 286) && (id <= 293) && (len >= (0x01bd+4)))
+  if ((imgdata.makernotes.sony.ImageCount3_offset != 0xffff) &&
+      (len >= (imgdata.makernotes.sony.ImageCount3_offset+4)))
   {
-    FORC4 s[c] = SonySubstitution[buf[0x01bd+c]];
-    imgdata.makernotes.sony.ImageCount3 = sget4(s);
-  }
-  else
-  if (((id == 294) ||
-       (id == 295) ||
-       (id == 296) ||
-       (id == 299) ||
-       (id == 300) ||
-       (id == 302) ||
-       (id == 303) ||
-       (id == 305) ||
-       (id == 307) ||
-       (id == 313)) &&
-       (len >= (0x01aa+4)))
-  {
-    FORC4 s[c] = SonySubstitution[buf[0x01aa+c]];
-    imgdata.makernotes.sony.ImageCount3 = sget4(s);
-  }
-  else
-  if (((id == 319) ||
-       (id == 339) ||
-       (id == 346) ||
-       (id == 353)) &&
-       (len >= (0x01a0+4)))
-  {
-    FORC4 s[c] = SonySubstitution[buf[0x01a0+c]];
-    imgdata.makernotes.sony.ImageCount3 = sget4(s);
-  }
-  else
-  if (((id == 347) || (id == 350)) && (len >= (0x01cb+4)))
-  {
-    FORC4 s[c] = SonySubstitution[buf[0x01cb+c]];
-    imgdata.makernotes.sony.ImageCount3 = sget4(s);
-  }
-  else
-  if ((id == 354) || ((id == 357) || (id == 360)) && (len >= (0x01cd+4)))
-  {
-    FORC4 s[c] = SonySubstitution[buf[0x01cd+c]];
-    imgdata.makernotes.sony.ImageCount3 = sget4(s);
-  }
-  else
-  if (((id == 358) || (id == 362)) && (len >= (0x019f+4)))
-  {
-    FORC4 s[c] = SonySubstitution[buf[0x019f+c]];
+    FORC4 s[c] = SonySubstitution[buf[imgdata.makernotes.sony.ImageCount3_offset+c]];
     imgdata.makernotes.sony.ImageCount3 = sget4(s);
   }
 
