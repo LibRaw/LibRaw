@@ -8178,6 +8178,7 @@ scf[7] offset of ImageCount3 in 0x9050 table, 0xffff if not valid
     {365, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff},
   };
   imgdata.lens.makernotes.CamID = id;
+
   if (id == 2)
   {
     imgdata.lens.makernotes.CameraMount = imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
@@ -8200,6 +8201,38 @@ scf[7] offset of ImageCount3 in 0x9050 table, 0xffff if not valid
     imgdata.makernotes.sony.real_iso_offset = SonyCamFeatures[idx].scf[6];
     imgdata.makernotes.sony.ImageCount3_offset = SonyCamFeatures[idx].scf[7];
   }
+
+  char *sbstr = strstr(software, " v");
+  if (sbstr != NULL)
+  {
+    sbstr += 2;
+    imgdata.makernotes.sony.firmware = atof(sbstr);
+
+    if ((id == 306) || (id == 311))
+    {
+      if (imgdata.makernotes.sony.firmware < 1.2f)
+        imgdata.makernotes.sony.ImageCount3_offset = 0x01aa;
+      else
+        imgdata.makernotes.sony.ImageCount3_offset = 0x01c0;
+    }
+    else
+    if (id == 312)
+    {
+      if (imgdata.makernotes.sony.firmware < 2.0f)
+        imgdata.makernotes.sony.ImageCount3_offset = 0x01aa;
+      else
+        imgdata.makernotes.sony.ImageCount3_offset = 0x01c0;
+    }
+    else
+    if ((id == 318) || (id == 340))
+    {
+      if (imgdata.makernotes.sony.firmware < 1.2f)
+        imgdata.makernotes.sony.ImageCount3_offset = 0x01a0;
+      else
+        imgdata.makernotes.sony.ImageCount3_offset = 0x01b6;
+    }
+  }
+
 }
 
 void CLASS parseSonyLensType2(uchar a, uchar b)

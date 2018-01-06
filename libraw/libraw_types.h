@@ -435,6 +435,7 @@ typedef unsigned long long UINT64;
     uchar AFMicroAdjRegisteredLenses;
     ushort group2010;
     ushort real_iso_offset;
+    float firmware;
     ushort ImageCount3_offset;
     unsigned ImageCount3;
   } libraw_sony_info_t;
