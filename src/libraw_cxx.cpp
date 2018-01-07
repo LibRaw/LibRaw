@@ -613,6 +613,7 @@ void LibRaw::recycle()
   imgdata.makernotes.sony.SonyCameraType = 0xffff;
   imgdata.makernotes.sony.real_iso_offset = 0xffff;
   imgdata.makernotes.sony.ImageCount3_offset = 0xffff;
+  imgdata.makernotes.sony.ElectronicFrontCurtainShutter = 0xffff;
 
   imgdata.makernotes.kodak.BlackLevelTop = 0xffff;
   imgdata.makernotes.kodak.BlackLevelBottom = 0xffff;

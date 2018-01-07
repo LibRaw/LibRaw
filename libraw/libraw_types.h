@@ -438,6 +438,8 @@ typedef unsigned long long UINT64;
     float firmware;
     ushort ImageCount3_offset;
     unsigned ImageCount3;
+    unsigned ElectronicFrontCurtainShutter;
+    ushort MeteringMode2;
   } libraw_sony_info_t;
 
   typedef struct

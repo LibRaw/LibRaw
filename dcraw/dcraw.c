@@ -10207,6 +10207,23 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     }
   }
 
+  else if (tag == 0x201a)
+  {
+    imgdata.makernotes.sony.ElectronicFrontCurtainShutter = get4();
+  }
+
+  else if (tag == 0x201b)
+  {
+    uchar uc;
+    fread(&uc, 1, 1, ifp);
+    imgdata.shootinginfo.FocusMode = (short) uc;
+  }
+
+  else if (tag == 0x202c)
+  {
+    imgdata.makernotes.sony.MeteringMode2 = get2();
+  }
+
   else if (tag == 0x9050 && len < 256000) // little endian
   {
     table_buf_0x9050 = (uchar *)malloc(len);
