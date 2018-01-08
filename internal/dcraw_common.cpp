@@ -8509,6 +8509,12 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     imgdata.makernotes.sony.ImageCount3 = sget4(s);
   }
 
+  if (id == 362)
+  {
+    for (c=0; c<6; c++)
+      imgdata.makernotes.sony.TimeStamp[c] = SonySubstitution[buf[0x0066+c]];
+  }
+
   return;
 }
 
