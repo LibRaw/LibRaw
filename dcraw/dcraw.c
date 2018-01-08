@@ -9803,7 +9803,7 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
             (b88 << 40) + (b89 << 32) + (b8a << 24) + (b8b << 16) + (b8c << 8) + b8d);
   }
   else
-  if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) && (id > 279) && (id != 282) && (id != 283))
+  if (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A)
   {
     if(len <= 0xf4) return;
     unsigned long long bf0 = SonySubstitution[buf[0xf0]];
@@ -10187,6 +10187,15 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
       break;
     }
     free(table_buf);
+  }
+
+  else if ((tag == 0x3000) && (len < 256000))
+  {
+    uchar *table_buf_0x3000;
+    table_buf_0x3000 = (uchar *)malloc(len);
+    fread(table_buf_0x3000, len, 1, ifp);
+    for (int i=0; i<20; i++)
+      imgdata.makernotes.sony.SonyDateTime[i] = table_buf_0x3000[6 +i];
   }
 
   else if (tag == 0x0116 && len < 256000)

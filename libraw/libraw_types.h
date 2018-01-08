@@ -440,6 +440,7 @@ typedef unsigned long long UINT64;
     unsigned ImageCount3;
     unsigned ElectronicFrontCurtainShutter;
     ushort MeteringMode2;
+    char SonyDateTime[20];
   } libraw_sony_info_t;
 
   typedef struct
