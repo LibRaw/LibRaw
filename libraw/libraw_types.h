@@ -442,6 +442,7 @@ typedef unsigned long long UINT64;
     ushort MeteringMode2;
     char SonyDateTime[20];
     uchar TimeStamp[6];
+    unsigned ShotNumberSincePowerUp;
   } libraw_sony_info_t;
 
   typedef struct

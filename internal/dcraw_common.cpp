@@ -8520,7 +8520,7 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
   return;
 }
 
-void CLASS process_Sony_0x9400 (uchar *buf, ushort len)
+void CLASS process_Sony_0x9400 (uchar *buf, ushort len, unsigned id)
 {
 
   uchar s[4];
@@ -8532,6 +8532,19 @@ void CLASS process_Sony_0x9400 (uchar *buf, ushort len)
        (bufx == 0x26)) &&
       (len >= 0x1f))
   {  // 0x9400 'c' version
+
+    if ((id == 358) ||
+        (id == 362) ||
+        (id == 365))
+    {
+      imgdata.makernotes.sony.ShotNumberSincePowerUp = SonySubstitution[buf[0x0a]];
+    }
+    else
+    {
+      FORC4 s[c] = SonySubstitution[buf[0x0a+c]];
+      imgdata.makernotes.sony.ShotNumberSincePowerUp =  sget4(s);
+    }
+
     imgdata.makernotes.sony.Sony0x9400_version = 0xc;
 
     imgdata.makernotes.sony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x09]];
@@ -8716,7 +8729,7 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
 
     if (table_buf_0x9400_len)
     {
-      process_Sony_0x9400(table_buf_0x9400,table_buf_0x9400_len);
+      process_Sony_0x9400(table_buf_0x9400,table_buf_0x9400_len, unique_id);
       free(table_buf_0x9400);
       table_buf_0x9400_len = 0;
     }
@@ -8947,7 +8960,7 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     fread(table_buf_0x9400, len, 1, ifp);
     if (imgdata.lens.makernotes.CamID)
     {
-      process_Sony_0x9400(table_buf_0x9400, table_buf_0x9400_len);
+      process_Sony_0x9400(table_buf_0x9400, table_buf_0x9400_len, unique_id);
       free(table_buf_0x9400);
       table_buf_0x9400_len = 0;
     }

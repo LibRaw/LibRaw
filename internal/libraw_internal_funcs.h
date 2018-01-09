@@ -48,7 +48,7 @@ it under the terms of the one of two licenses as you choose:
     void	process_Sony_0x0116 (uchar * buf, ushort, unsigned id);
     void	process_Sony_0x2010 (uchar * buf, ushort);
     void	process_Sony_0x9050 (uchar * buf, ushort, unsigned id);
-    void	process_Sony_0x9400 (uchar * buf, ushort);
+    void	process_Sony_0x9400 (uchar * buf, ushort, unsigned id);
     void	process_Sony_0x9402 (uchar * buf, ushort);
     void	process_Sony_0x9403 (uchar * buf, ushort);
     void	process_Sony_0x9406 (uchar * buf, ushort);
