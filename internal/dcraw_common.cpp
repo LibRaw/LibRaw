@@ -8514,7 +8514,6 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     for (c=0; c<6; c++)
     {
       imgdata.makernotes.sony.TimeStamp[c] = SonySubstitution[buf[0x0066+c]];
-      imgdata.makernotes.sony.TimeStampEnc[c] = buf[0x0066+c];
     }
   }
 
