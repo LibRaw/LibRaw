@@ -20848,7 +20848,7 @@ int CLASS flip_index(int row, int col)
 }
 //@end COMMON
 
-struct tiff_tag
+struct libraw_tiff_tag
 {
   ushort tag, type;
   int count;
@@ -20864,12 +20864,12 @@ struct tiff_hdr
   ushort t_order, magic;
   int ifd;
   ushort pad, ntag;
-  struct tiff_tag tag[23];
+  struct libraw_tiff_tag tag[23];
   int nextifd;
   ushort pad2, nexif;
-  struct tiff_tag exif[4];
+  struct libraw_tiff_tag exif[4];
   ushort pad3, ngps;
-  struct tiff_tag gpst[10];
+  struct libraw_tiff_tag gpst[10];
   short bps[4];
   int rat[10];
   unsigned gps[26];
@@ -20880,10 +20880,10 @@ struct tiff_hdr
 
 void CLASS tiff_set(struct tiff_hdr *th, ushort *ntag, ushort tag, ushort type, int count, int val)
 {
-  struct tiff_tag *tt;
+  struct libraw_tiff_tag *tt;
   int c;
 
-  tt = (struct tiff_tag *)(ntag + 1) + (*ntag)++;
+  tt = (struct libraw_tiff_tag *)(ntag + 1) + (*ntag)++;
   tt->val.i = val;
   if (type == 1 && count <= 4)
     FORC(4) tt->val.c[c] = val >> (c << 3);

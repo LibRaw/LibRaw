@@ -19268,10 +19268,10 @@ int CLASS flip_index(int row, int col)
 
 void CLASS tiff_set(struct tiff_hdr *th, ushort *ntag, ushort tag, ushort type, int count, int val)
 {
-  struct tiff_tag *tt;
+  struct libraw_tiff_tag *tt;
   int c;
 
-  tt = (struct tiff_tag *)(ntag + 1) + (*ntag)++;
+  tt = (struct libraw_tiff_tag *)(ntag + 1) + (*ntag)++;
   tt->val.i = val;
   if (type == 1 && count <= 4)
     FORC(4) tt->val.c[c] = val >> (c << 3);
