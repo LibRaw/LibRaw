@@ -20284,7 +20284,9 @@ dng_skip:
       {
         sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_CROPORIGIN);
         int sidx2 = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_CROPSIZE);
-        if (sidx >= 0 && sidx == sidx2)
+        if (sidx >= 0 && sidx == sidx2
+	 && tiff_ifd[sidx].dng_levels.default_crop[2] > 0 
+	 && tiff_ifd[sidx].dng_levels.default_crop[3] > 0)
         {
           int lm = tiff_ifd[sidx].dng_levels.default_crop[0];
           int lmm = CFAROUND(lm, filters);
