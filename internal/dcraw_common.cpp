@@ -13358,7 +13358,36 @@ int CLASS parse_tiff_ifd(int base)
             MakN_order = get2();
             pos_in_original_raw = get4();
             order = MakN_order;
+
+printf ("==>> DNG Main Data: MakN found at 0x%x, \
+length %d, \
+order 0x%x, \
+offset in orig. raw 0x%x\n",
+curr_pos, MakN_length, MakN_order, pos_in_original_raw);
+
+            INT64 save_pos = ifp->tell();
             parse_makernote_0xc634(curr_pos + 6 - pos_in_original_raw, 0, AdobeDNG);
+
+            curr_pos = save_pos + MakN_length - 6;
+            fseek(ifp, curr_pos, SEEK_SET);
+
+            fread(mbuf, 1, 4, ifp);
+            curr_pos += 8;
+            if (!strncmp(mbuf, "SR2 ", 4))
+            {
+              order = 0x4d4d;
+              MakN_length = get4();
+              MakN_order = get2();
+              pos_in_original_raw = get4();
+              order = MakN_order;
+
+printf ("==>> DNG Private Data: SR2 found at 0x%x, \
+length %d, \
+order 0x%x, \
+offset in orig. raw 0x%x\n",
+curr_pos, MakN_length, MakN_order, pos_in_original_raw);
+
+            }
             break;
           }
         }
@@ -18796,7 +18825,7 @@ dng_skip:
         sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_CROPORIGIN);
         int sidx2 = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_CROPSIZE);
         if (sidx >= 0 && sidx == sidx2
-	 && tiff_ifd[sidx].dng_levels.default_crop[2] > 0 
+	 && tiff_ifd[sidx].dng_levels.default_crop[2] > 0
 	 && tiff_ifd[sidx].dng_levels.default_crop[3] > 0)
         {
           int lm = tiff_ifd[sidx].dng_levels.default_crop[0];
