@@ -13359,12 +13359,6 @@ int CLASS parse_tiff_ifd(int base)
             pos_in_original_raw = get4();
             order = MakN_order;
 
-printf ("==>> DNG Main Data: MakN found at 0x%x, \
-length %d, \
-order 0x%x, \
-offset in orig. raw 0x%x\n",
-curr_pos, MakN_length, MakN_order, pos_in_original_raw);
-
             INT64 save_pos = ifp->tell();
             parse_makernote_0xc634(curr_pos + 6 - pos_in_original_raw, 0, AdobeDNG);
 
@@ -13381,11 +13375,155 @@ curr_pos, MakN_length, MakN_order, pos_in_original_raw);
               pos_in_original_raw = get4();
               order = MakN_order;
 
-printf ("==>> DNG Private Data: SR2 found at 0x%x, \
-length %d, \
-order 0x%x, \
-offset in orig. raw 0x%x\n",
-curr_pos, MakN_length, MakN_order, pos_in_original_raw);
+              unsigned *buf_SR2;
+              uchar *cbuf_SR2;
+              unsigned icbuf_SR2;
+              unsigned entries, tag, type, len, save;
+              int ival;
+              unsigned SR2SubIFDOffset = 0;
+              unsigned SR2SubIFDLength = 0;
+              unsigned SR2SubIFDKey = 0;
+              int base = curr_pos + 6 - pos_in_original_raw;
+              entries = get2();
+              while (entries--)
+              {
+                tiff_get(base, &tag, &type, &len, &save);
+
+                if (tag == 0x7200) {
+                  SR2SubIFDOffset = get4();
+                }
+                else
+                if (tag == 0x7201) {
+                  SR2SubIFDLength = get4();
+                }
+                else
+                if (tag == 0x7221) {
+                  SR2SubIFDKey = get4();
+                }
+                fseek(ifp, save, SEEK_SET);
+              }
+
+              if (SR2SubIFDLength              &&
+                  (SR2SubIFDLength < 10240000) &&
+                  (buf_SR2 = (unsigned *)malloc(SR2SubIFDLength)))
+              {
+                fseek(ifp, SR2SubIFDOffset+base, SEEK_SET);
+                fread(buf_SR2, SR2SubIFDLength, 1, ifp);
+                sony_decrypt(buf_SR2, SR2SubIFDLength / 4, 1, SR2SubIFDKey);
+                cbuf_SR2 = (uchar *) buf_SR2;
+                entries = sget2(cbuf_SR2);
+                icbuf_SR2 = 2;
+                while (entries--)
+                {
+                  tag  = sget2(cbuf_SR2 + icbuf_SR2);
+                  icbuf_SR2 += 2;
+                  type = sget2(cbuf_SR2 + icbuf_SR2);
+                  icbuf_SR2 += 2;
+                  len  = sget4(cbuf_SR2 + icbuf_SR2);
+                  icbuf_SR2 += 4;
+
+                  if (len * ("11124811248484"[type < 14 ? type : 0] - '0') > 4)
+                  {
+                    ival = sget4(cbuf_SR2 + icbuf_SR2) - SR2SubIFDOffset;
+                  }
+                  else
+                  {
+                    ival = icbuf_SR2;
+                  }
+
+                  icbuf_SR2 += 4;
+
+                  switch (tag)
+                  {
+                    case 0x7302:
+                      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c < 2)] = sget2(cbuf_SR2+ival+2*c);
+                      break;
+                    case 0x7312:
+                    {
+                      int i, lc[4];
+                      FORC4 lc[c] = sget2(cbuf_SR2+ival+2*c);
+                      i = (lc[1] == 1024 && lc[2] == 1024) << 1;
+                      SWAP(lc[i], lc[i + 1]);
+                      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c] = lc[c];
+                    }
+                      break;
+                    case 0x7480:
+                    case 0x7820:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1];
+                      break;
+                    case 0x7481:
+                    case 0x7821:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1];
+                      break;
+                    case 0x7482:
+                    case 0x7822:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1];
+                      break;
+                    case 0x7483:
+                    case 0x7823:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1];
+                      break;
+                    case 0x7484:
+                    case 0x7824:
+                      imgdata.color.WBCT_Coeffs[0][0] = 4500;
+                      FORC3 imgdata.color.WBCT_Coeffs[0][c + 1] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WBCT_Coeffs[0][4] = imgdata.color.WBCT_Coeffs[0][2];
+                      break;
+                    case 0x7486:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][1];
+                      break;
+                    case 0x7825:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1];
+                      break;
+                    case 0x7826:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][1];
+                      break;
+                    case 0x7827:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][1];
+                      break;
+                    case 0x7828:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][1];
+                      break;
+                    case 0x7829:
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][c] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][1];
+                      break;
+                    case 0x782a:
+                      imgdata.color.WBCT_Coeffs[1][0] = 8500;
+                      FORC3 imgdata.color.WBCT_Coeffs[1][c + 1] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WBCT_Coeffs[1][4] = imgdata.color.WBCT_Coeffs[1][2];
+                      break;
+                    case 0x782b:
+                      imgdata.color.WBCT_Coeffs[2][0] = 6000;
+                      FORC3 imgdata.color.WBCT_Coeffs[2][c + 1] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WBCT_Coeffs[2][4] = imgdata.color.WBCT_Coeffs[2][2];
+                      break;
+                    case 0x782c:
+                      imgdata.color.WBCT_Coeffs[3][0] = 3200;
+                      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][c] = imgdata.color.WBCT_Coeffs[3][c + 1] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][3] = imgdata.color.WBCT_Coeffs[3][4] =
+                      imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][1];
+                      break;
+                    case 0x782d:
+                      imgdata.color.WBCT_Coeffs[4][0] = 2500;
+                      FORC3 imgdata.color.WBCT_Coeffs[4][c + 1] = sget2(cbuf_SR2+ival+2*c);
+                      imgdata.color.WBCT_Coeffs[4][4] = imgdata.color.WBCT_Coeffs[4][2];
+                      break;
+                  }
+
+                }
+
+                free (buf_SR2);
+              }
 
             }
             break;
