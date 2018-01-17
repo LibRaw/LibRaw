@@ -10807,10 +10807,17 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncmp(make, "OLYMPUS", 7))
     {
+      short nWB, tWB;
       int SubDirOffsetValid = strncmp(model, "E-300", 5) && strncmp(model, "E-330", 5) && strncmp(model, "E-400", 5) &&
                               strncmp(model, "E-500", 5) && strncmp(model, "E-1", 3);
 
-      if ((tag == 0x2010) || (tag == 0x2020))
+      if ((tag == 0x2010) ||
+          (tag == 0x2020) ||
+          (tag == 0x2030) ||
+          (tag == 0x2031) ||
+          (tag == 0x2040) ||
+          (tag == 0x2050) ||
+          (tag == 0x3000))
       {
         fseek(ifp, save - 4, SEEK_SET);
         fseek(ifp, base + get4(), SEEK_SET);
@@ -10820,128 +10827,241 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                                  (((type == 4) || (type == 9)) && (len > 1)) || (type == 5) || (type > 9)))
         goto skip_Oly_broken_tags;
 
-      switch (tag)
+
+      if ((tag >= 0x20400101) && (tag <= 0x20400111))
       {
-      case 0x0207:
-      case 0x20100100:
-      {
-        uchar sOlyID[8];
-        fread(sOlyID, MIN(len, 7), 1, ifp);
-        sOlyID[7] = 0;
-        OlyID = sOlyID[0];
-        i = 1;
-        while (i < 7 && sOlyID[i])
+        if ((tag == 0x20400101)              &&
+            (len == 2)                       &&
+            (!strncasecmp(model, "E-410", 5) ||
+             !strncasecmp(model, "E-510", 5)))
         {
-          OlyID = OlyID << 8 | sOlyID[i];
-          i++;
-        }
-        setOlympusBodyFeatures(OlyID);
-      }
-      break;
-      case 0x1002:
-        imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type) / 2);
-        break;
-      case 0x20100102:
-        stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
-        break;
-      case 0x20100201:
-        imgdata.lens.makernotes.LensID = (unsigned long long)fgetc(ifp) << 16 |
-                                         (unsigned long long)(fgetc(ifp), fgetc(ifp)) << 8 |
-                                         (unsigned long long)fgetc(ifp);
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FT;
-        imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FT;
-        if (((imgdata.lens.makernotes.LensID < 0x20000) || (imgdata.lens.makernotes.LensID > 0x4ffff)) &&
-            (imgdata.lens.makernotes.LensID & 0x10))
-        {
-          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
-        }
-        break;
-      case 0x20100202:
-        if ((!imgdata.lens.LensSerial[0]))
-          stmread(imgdata.lens.LensSerial, len, ifp);
-        break;
-      case 0x20100203:
-        stmread(imgdata.lens.makernotes.Lens, len, ifp);
-        break;
-      case 0x20100205:
-        imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
-        break;
-      case 0x20100206:
-        imgdata.lens.makernotes.MaxAp4MaxFocal = powf64(sqrt(2.0f), get2() / 256.0f);
-        break;
-      case 0x20100207:
-        imgdata.lens.makernotes.MinFocal = (float)get2();
-        break;
-      case 0x20100208:
-        imgdata.lens.makernotes.MaxFocal = (float)get2();
-        if (imgdata.lens.makernotes.MaxFocal > 1000.0f)
-          imgdata.lens.makernotes.MaxFocal = imgdata.lens.makernotes.MinFocal;
-        break;
-      case 0x2010020a:
-        imgdata.lens.makernotes.MaxAp4CurFocal = powf64(sqrt(2.0f), get2() / 256.0f);
-        break;
-      case 0x20100301:
-        imgdata.lens.makernotes.TeleconverterID = fgetc(ifp) << 8;
-        fgetc(ifp);
-        imgdata.lens.makernotes.TeleconverterID = imgdata.lens.makernotes.TeleconverterID | fgetc(ifp);
-        break;
-      case 0x20100303:
-        stmread(imgdata.lens.makernotes.Teleconverter, len, ifp);
-        break;
-      case 0x20100403:
-        stmread(imgdata.lens.makernotes.Attachment, len, ifp);
-        break;
-      case 0x202000306:
-        {
-          uchar uc;
-          fread(&uc, 1, 1, ifp);
-          imgdata.makernotes.olympus.AFFineTune = uc;
-        }
-        break;
-      case 0x202000307:
-        FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
-        break;
-      case 0x20200401:
-        imgdata.other.FlashEC = getreal(type);
-        break;
-      case 0x1007:
-        imgdata.other.SensorTemperature = (float)get2();
-        break;
-      case 0x1008:
-        imgdata.other.LensTemperature = (float)get2();
-        break;
-      case 0x20401306:
-      {
-        int temp = get2();
-        if ((temp != 0) && (temp != 100))
-        {
-          if (temp < 61)
-            imgdata.other.CameraTemperature = (float)temp;
-          else
-            imgdata.other.CameraTemperature = (float)(temp - 32) / 1.8f;
-          if ((OlyID == 0x4434353933ULL) && // TG-5
-              (imgdata.other.exifAmbientTemperature > -273.15f))
-            imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
-        }
-      }
-      break;
-      case 0x20501500:
-        if (OlyID != 0x0ULL)
-        {
-          short temp = get2();
-          if ((OlyID == 0x4434303430ULL) || // E-1
-              (OlyID == 0x5330303336ULL) || // E-M5
-              (len != 1))
-            imgdata.other.SensorTemperature = (float)temp;
-          else if ((temp != -32768) && (temp != 0))
+          int i;
+          for (i = 0; i < 64; i++)
           {
-            if (temp > 199)
-              imgdata.other.SensorTemperature = 86.474958f - 0.120228f * (float)temp;
-            else
-              imgdata.other.SensorTemperature = (float)temp;
+            imgdata.color.WBCT_Coeffs[i][2] =
+            imgdata.color.WBCT_Coeffs[i][4] =
+            imgdata.color.WB_Coeffs[i][1]   =
+            imgdata.color.WB_Coeffs[i][3]   = 0x100;
+          }
+          for (i = 64; i < 256; i++)
+          {
+            imgdata.color.WB_Coeffs[i][1] =
+            imgdata.color.WB_Coeffs[i][3] = 0x100;
           }
         }
-        break;
+        nWB = tag - 0x20400101;
+        tWB = Oly_wb_list2[nWB << 1];
+        ushort CT = Oly_wb_list2[(nWB << 1) | 1];
+        int wb[4];
+        wb[0] = get2();
+        wb[2] = get2();
+        if (tWB != 0x100)
+        {
+          imgdata.color.WB_Coeffs[tWB][0] = wb[0];
+          imgdata.color.WB_Coeffs[tWB][2] = wb[2];
+        }
+        if (CT)
+        {
+          imgdata.color.WBCT_Coeffs[nWB - 1][0] = CT;
+          imgdata.color.WBCT_Coeffs[nWB - 1][1] = wb[0];
+          imgdata.color.WBCT_Coeffs[nWB - 1][3] = wb[2];
+        }
+        if (len == 4)
+        {
+          wb[1] = get2();
+          wb[3] = get2();
+          if (tWB != 0x100)
+          {
+            imgdata.color.WB_Coeffs[tWB][1] = wb[1];
+            imgdata.color.WB_Coeffs[tWB][3] = wb[3];
+          }
+          if (CT)
+          {
+            imgdata.color.WBCT_Coeffs[nWB - 1][2] = wb[1];
+            imgdata.color.WBCT_Coeffs[nWB - 1][4] = wb[3];
+          }
+        }
+      }
+      else
+      if ((tag >= 0x20400112) && (tag <= 0x2040011e))
+      {
+        nWB = tag - 0x20400112;
+        int wbG = get2();
+        tWB = Oly_wb_list2[nWB << 1];
+        if (nWB)
+          imgdata.color.WBCT_Coeffs[nWB - 1][2] = imgdata.color.WBCT_Coeffs[nWB - 1][4] = wbG;
+        if (tWB != 0x100)
+          imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = wbG;
+      }
+      else
+      if (tag == 0x2040011f)
+      {
+        int wbG = get2();
+        if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0])
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = wbG;
+        FORC4 if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][0])
+            imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][3] =
+            wbG;
+      }
+      else
+      if (tag == 0x20400121)
+      {
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0] = get2();
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][2] = get2();
+        if (len == 4)
+        {
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = get2();
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = get2();
+        }
+      }
+      else
+      if ((tag == 0x30000110) && strcmp(software, "v757-71"))
+      {
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] = get2();
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][2] = get2();
+        if (len == 2)
+        {
+          for (int i = 0; i < 256; i++)
+            imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
+        }
+      }
+      else
+      if ((((tag >= 0x30000120) && (tag <= 0x30000124)) || ((tag >= 0x30000130) && (tag <= 0x30000133))) &&
+          strcmp(software, "v757-71"))
+      {
+        int wb_ind;
+        if (tag <= 0x30000124)
+          wb_ind = tag - 0x30000120;
+        else
+          wb_ind = tag - 0x30000130 + 5;
+        imgdata.color.WB_Coeffs[Oly_wb_list1[wb_ind]][0] = get2();
+        imgdata.color.WB_Coeffs[Oly_wb_list1[wb_ind]][2] = get2();
+      }
+      else
+      {
+        switch (tag)
+				{
+				case 0x0207:
+				case 0x20100100:
+				{
+					uchar sOlyID[8];
+					fread(sOlyID, MIN(len, 7), 1, ifp);
+					sOlyID[7] = 0;
+					OlyID = sOlyID[0];
+					i = 1;
+					while (i < 7 && sOlyID[i])
+					{
+						OlyID = OlyID << 8 | sOlyID[i];
+						i++;
+					}
+					setOlympusBodyFeatures(OlyID);
+				}
+				break;
+				case 0x1002:
+					imgdata.lens.makernotes.CurAp = powf64(2.0f, getreal(type) / 2);
+					break;
+				case 0x20100102:
+					stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
+					break;
+				case 0x20100201:
+					imgdata.lens.makernotes.LensID = (unsigned long long)fgetc(ifp) << 16 |
+																					 (unsigned long long)(fgetc(ifp), fgetc(ifp)) << 8 |
+																					 (unsigned long long)fgetc(ifp);
+					imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FT;
+					imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FT;
+					if (((imgdata.lens.makernotes.LensID < 0x20000) || (imgdata.lens.makernotes.LensID > 0x4ffff)) &&
+							(imgdata.lens.makernotes.LensID & 0x10))
+					{
+						imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
+					}
+					break;
+				case 0x20100202:
+					if ((!imgdata.lens.LensSerial[0]))
+						stmread(imgdata.lens.LensSerial, len, ifp);
+					break;
+				case 0x20100203:
+					stmread(imgdata.lens.makernotes.Lens, len, ifp);
+					break;
+				case 0x20100205:
+					imgdata.lens.makernotes.MaxAp4MinFocal = powf64(sqrt(2.0f), get2() / 256.0f);
+					break;
+				case 0x20100206:
+					imgdata.lens.makernotes.MaxAp4MaxFocal = powf64(sqrt(2.0f), get2() / 256.0f);
+					break;
+				case 0x20100207:
+					imgdata.lens.makernotes.MinFocal = (float)get2();
+					break;
+				case 0x20100208:
+					imgdata.lens.makernotes.MaxFocal = (float)get2();
+					if (imgdata.lens.makernotes.MaxFocal > 1000.0f)
+						imgdata.lens.makernotes.MaxFocal = imgdata.lens.makernotes.MinFocal;
+					break;
+				case 0x2010020a:
+					imgdata.lens.makernotes.MaxAp4CurFocal = powf64(sqrt(2.0f), get2() / 256.0f);
+					break;
+				case 0x20100301:
+					imgdata.lens.makernotes.TeleconverterID = fgetc(ifp) << 8;
+					fgetc(ifp);
+					imgdata.lens.makernotes.TeleconverterID = imgdata.lens.makernotes.TeleconverterID | fgetc(ifp);
+					break;
+				case 0x20100303:
+					stmread(imgdata.lens.makernotes.Teleconverter, len, ifp);
+					break;
+				case 0x20100403:
+					stmread(imgdata.lens.makernotes.Attachment, len, ifp);
+					break;
+				case 0x202000306:
+					{
+						uchar uc;
+						fread(&uc, 1, 1, ifp);
+						imgdata.makernotes.olympus.AFFineTune = uc;
+					}
+					break;
+				case 0x202000307:
+					FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
+					break;
+				case 0x20200401:
+					imgdata.other.FlashEC = getreal(type);
+					break;
+				case 0x1007:
+					imgdata.other.SensorTemperature = (float)get2();
+					break;
+				case 0x1008:
+					imgdata.other.LensTemperature = (float)get2();
+					break;
+				case 0x20401306:
+				{
+					int temp = get2();
+					if ((temp != 0) && (temp != 100))
+					{
+						if (temp < 61)
+							imgdata.other.CameraTemperature = (float)temp;
+						else
+							imgdata.other.CameraTemperature = (float)(temp - 32) / 1.8f;
+						if ((OlyID == 0x4434353933ULL) && // TG-5
+								(imgdata.other.exifAmbientTemperature > -273.15f))
+							imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
+					}
+				}
+				break;
+				case 0x20501500:
+					if (OlyID != 0x0ULL)
+					{
+						short temp = get2();
+						if ((OlyID == 0x4434303430ULL) || // E-1
+								(OlyID == 0x5330303336ULL) || // E-M5
+								(len != 1))
+							imgdata.other.SensorTemperature = (float)temp;
+						else if ((temp != -32768) && (temp != 0))
+						{
+							if (temp > 199)
+								imgdata.other.SensorTemperature = 86.474958f - 0.120228f * (float)temp;
+							else
+								imgdata.other.SensorTemperature = (float)temp;
+						}
+					}
+					break;
+				}
       }
     skip_Oly_broken_tags:;
     }
@@ -14854,7 +14974,7 @@ int CLASS parse_tiff_ifd(int base)
                 free (buf_SR2);
               }
 
-            }
+            }  /* SR2 processed */
             break;
           }
         }
