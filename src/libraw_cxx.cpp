@@ -2098,7 +2098,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
          (!strcasecmp(imgdata.idata.make, "Panasonic") && !strcasecmp(imgdata.idata.model, "LX100"))))
       imgdata.sizes.width = 4288;
 
-    if (!strncasecmp(imgdata.idata.make, "Sony", 4) && imgdata.idata.dng_version)
+    if (!strncasecmp(imgdata.idata.make, "Sony", 4) && imgdata.idata.dng_version
+	&& !(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP))
     {
       if (S.raw_width == 3984)
         S.width = 3925;
