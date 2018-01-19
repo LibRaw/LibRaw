@@ -1,3 +1,10 @@
+2018-01-19  Alex Tutubalin <lexa@lexa.ru>
+Secunia #79000:
+Credit: Laurent Delosieres, Secunia Research at Flexera
+ * All legacy (RGB raw) image loaders checks for imgdata.image is not NULL
+ * kodak_radc_load_raw: check image size before processing
+ * legacy memory allocator: allocate max(widh,raw_width)*max(height,raw_height)
+
 2017-08-12  Alex Tutubalin <lexa@lexa.ru>
  * 0.19-Snapshot-20170812
  * Camera support (984 total):
