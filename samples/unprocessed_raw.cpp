@@ -230,10 +230,10 @@ void gamma_curve(unsigned short *curve)
 
 void tiff_set(ushort *ntag, ushort tag, ushort type, int count, int val)
 {
-  struct tiff_tag *tt;
+  struct libraw_tiff_tag *tt;
   int c;
 
-  tt = (struct tiff_tag *)(ntag + 1) + (*ntag)++;
+  tt = (struct libraw_tiff_tag *)(ntag + 1) + (*ntag)++;
   tt->tag = tag;
   tt->type = type;
   tt->count = count;

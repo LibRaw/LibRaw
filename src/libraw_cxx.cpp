@@ -583,6 +583,9 @@ void LibRaw::recycle()
 #undef FREE
 
   ZERO(imgdata.sizes);
+  imgdata.sizes.raw_crop.cleft = 0xffff;
+  imgdata.sizes.raw_crop.ctop = 0xffff;
+
   ZERO(imgdata.idata);
   ZERO(imgdata.makernotes);
   ZERO(imgdata.color);
@@ -590,6 +593,8 @@ void LibRaw::recycle()
   ZERO(imgdata.thumbnail);
   ZERO(imgdata.rawdata);
   imgdata.makernotes.olympus.OlympusCropID = -1;
+  imgdata.makernotes.sony.raw_crop.cleft = 0xffff;
+  imgdata.makernotes.sony.raw_crop.ctop = 0xffff;
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
 
@@ -606,6 +611,13 @@ void LibRaw::recycle()
       imgdata.makernotes.fuji.ImageStabilization[2] = 0xffff;
 
   imgdata.makernotes.sony.SonyCameraType = 0xffff;
+  imgdata.makernotes.sony.real_iso_offset = 0xffff;
+  imgdata.makernotes.sony.ImageCount3_offset = 0xffff;
+  imgdata.makernotes.sony.ElectronicFrontCurtainShutter = 0xffff;
+
+  imgdata.makernotes.kodak.BlackLevelTop = 0xffff;
+  imgdata.makernotes.kodak.BlackLevelBottom = 0xffff;
+
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
 
   for (int i = 0; i < 4; i++)

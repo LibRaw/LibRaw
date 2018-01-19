@@ -46,8 +46,10 @@ it under the terms of the one of two licenses as you choose:
 #define Canon MyCoolRawProcessor.imgdata.makernotes.canon
 #define Hasselblad MyCoolRawProcessor.imgdata.makernotes.hasselblad
 #define Fuji MyCoolRawProcessor.imgdata.makernotes.fuji
-#define Oly MyCoolRawProcessor.imgdata.makernotes.olympus
 #define Nikon MyCoolRawProcessor.imgdata.makernotes.nikon
+#define Oly MyCoolRawProcessor.imgdata.makernotes.olympus
+#define Sony MyCoolRawProcessor.imgdata.makernotes.sony
+
 
 const char *EXIF_LightSources[] = {
     "Unknown",
@@ -430,6 +432,8 @@ int main(int ac, char *av[])
       printf("\n");
 
       printf("ISO speed: %d\n", (int)P2.iso_speed);
+      if (P2.real_ISO > 0.1f)
+        printf("real ISO speed: %d\n", (int)P2.real_ISO);
       printf("Shutter: ");
       if (P2.shutter > 0 && P2.shutter < 1)
         P2.shutter = (printf("1/"), 1 / P2.shutter);
@@ -481,6 +485,15 @@ int main(int ac, char *av[])
       if (T.tlength)
         printf("Thumb size:  %4d x %d\n", T.twidth, T.theight);
       printf("Full size:   %4d x %d\n", S.raw_width, S.raw_height);
+
+      if (S.raw_crop.cwidth) {
+        printf("Raw crop, width x height: %4d x %d ", S.raw_crop.cwidth, S.raw_crop.cheight);
+        if (S.raw_crop.cleft != 0xffff)
+          printf("left: %d ", S.raw_crop.cleft);
+        if (S.raw_crop.ctop != 0xffff)
+          printf("top: %d", S.raw_crop.ctop);
+        printf ("\n");
+      }
 
       printf("Image size:  %4d x %d\n", S.width, S.height);
       printf("Output size: %4d x %d\n", S.iwidth, S.iheight);
@@ -737,6 +750,21 @@ int main(int ac, char *av[])
       for (int c = 0; c < P1.colors; c++)
         printf(" %f", C.pre_mul[c]);
       printf("\n");
+
+
+      if (Sony.Sony0x9400_version) printf ("\nSONY Sequence data, tag 0x9400 version %x\n\
+\tReleaseMode2: %d\n\
+\tSequenceImageNumber: %d (starts at zero)\n\
+\tSequenceLength1: %d shot(s)\n\
+\tSequenceFileNumber: %d (starts at zero, exiftool starts at 1)\n\
+\tSequenceLength2: %d file(s)\n",
+        Sony.Sony0x9400_version,
+        Sony.Sony0x9400_ReleaseMode2,
+        Sony.Sony0x9400_SequenceImageNumber,
+        Sony.Sony0x9400_SequenceLength1,
+        Sony.Sony0x9400_SequenceFileNumber,
+        Sony.Sony0x9400_SequenceLength2);
+
     }
     else
     {
