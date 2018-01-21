@@ -904,6 +904,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
     d_info->decoder_name = "sony_arq_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_LEGACY_WITH_MARGINS;
   }
+  else if (load_raw == &LibRaw::sony_arq_load_raw_3c)
+  {
+	  d_info->decoder_name = "sony_arq_load_raw_3c()";
+	  d_info->decoder_flags = LIBRAW_DECODER_LEGACY_WITH_MARGINS | LIBRAW_DECODER_3CHANNEL;
+  }
   else if (load_raw == &LibRaw::samsung_load_raw)
   {
     d_info->decoder_name = "samsung_load_raw()";
@@ -1706,6 +1711,26 @@ void LibRaw::sony_arq_load_raw()
   }
 }
 
+void LibRaw::sony_arq_load_raw_3c()
+{
+	int row, col;
+	ushort(*rowdata)[4] = (ushort(*)[4])malloc(imgdata.sizes.raw_width * 8);
+
+	//read_shorts(imgdata.rawdata.raw_image, imgdata.sizes.raw_width * imgdata.sizes.raw_height * 4);
+	for (row = 0; row < imgdata.sizes.raw_height; row++)
+	{
+		read_shorts((ushort*)rowdata, imgdata.sizes.raw_width * 4);
+		unsigned short(*rowp)[3] = &imgdata.rawdata.color3_image[row * imgdata.sizes.raw_width];
+		for (col = 0; col < imgdata.sizes.raw_width; col++)
+		{
+			rowp[col][0] = rowdata[col][0];
+			rowp[col][1] = (rowdata[col][1] + rowdata[col][2])/2;
+			rowp[col][2] = rowdata[col][3];
+		}
+	}
+}
+
+
 
 void LibRaw::pentax_4shot_load_raw()
 {
@@ -1991,6 +2016,14 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
          for(int c = 0; c<4; c++)
 	   imgdata.color.linear_max[c] /= 4;
 #endif
+	if ((imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONY_ARW_TO_3COLOR)	&& 
+		load_raw == &LibRaw::sony_arq_load_raw)
+	{
+		load_raw = &LibRaw::sony_arq_load_raw_3c;
+		libraw_internal_data.unpacker_data.tiff_samples = 3;
+		imgdata.idata.colors = 3;
+	}
+
     if (!strcasecmp(imgdata.idata.make, "Canon") && (load_raw == &LibRaw::canon_sraw_load_raw) &&
         imgdata.sizes.raw_width > 0)
     {
@@ -2794,7 +2827,15 @@ int LibRaw::unpack(void)
         // x3f foveon decoder and DNG float
         // Do nothing! Decoder will allocate data internally
       }
-      else if (imgdata.idata.filters || P1.colors == 1) // Bayer image or single color -> decode to raw_image
+	  if (decoder_info.decoder_flags & LIBRAW_DECODER_3CHANNEL)
+	  {
+
+		  imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3);
+		  imgdata.rawdata.color3_image = (ushort (*)[3])imgdata.rawdata.raw_alloc;
+		  if (!S.raw_pitch)
+			  S.raw_pitch = S.raw_width * 6; 
+	  }
+	  else if (imgdata.idata.filters || P1.colors == 1) // Bayer image or single color -> decode to raw_image
       {
         imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
         imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
