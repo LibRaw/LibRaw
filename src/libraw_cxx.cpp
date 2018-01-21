@@ -583,6 +583,9 @@ void LibRaw::recycle()
 #undef FREE
 
   ZERO(imgdata.sizes);
+  imgdata.sizes.raw_crop.cleft = 0xffff;
+  imgdata.sizes.raw_crop.ctop = 0xffff;
+
   ZERO(imgdata.idata);
   ZERO(imgdata.makernotes);
   ZERO(imgdata.color);
@@ -590,6 +593,8 @@ void LibRaw::recycle()
   ZERO(imgdata.thumbnail);
   ZERO(imgdata.rawdata);
   imgdata.makernotes.olympus.OlympusCropID = -1;
+  imgdata.makernotes.sony.raw_crop.cleft = 0xffff;
+  imgdata.makernotes.sony.raw_crop.ctop = 0xffff;
   cleargps(&imgdata.other.parsed_gps);
   imgdata.color.baseline_exposure = -999.f;
 
@@ -606,6 +611,13 @@ void LibRaw::recycle()
       imgdata.makernotes.fuji.ImageStabilization[2] = 0xffff;
 
   imgdata.makernotes.sony.SonyCameraType = 0xffff;
+  imgdata.makernotes.sony.real_iso_offset = 0xffff;
+  imgdata.makernotes.sony.ImageCount3_offset = 0xffff;
+  imgdata.makernotes.sony.ElectronicFrontCurtainShutter = 0xffff;
+
+  imgdata.makernotes.kodak.BlackLevelTop = 0xffff;
+  imgdata.makernotes.kodak.BlackLevelBottom = 0xffff;
+
   imgdata.color.dng_color[0].illuminant = imgdata.color.dng_color[1].illuminant = 0xffff;
 
   for (int i = 0; i < 4; i++)
@@ -2119,7 +2131,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
          (!strcasecmp(imgdata.idata.make, "Panasonic") && !strcasecmp(imgdata.idata.model, "LX100"))))
       imgdata.sizes.width = 4288;
 
-    if (!strncasecmp(imgdata.idata.make, "Sony", 4) && imgdata.idata.dng_version)
+    if (!strncasecmp(imgdata.idata.make, "Sony", 4) && imgdata.idata.dng_version
+	&& !(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP))
     {
       if (S.raw_width == 3984)
         S.width = 3925;
@@ -2860,7 +2873,7 @@ int LibRaw::unpack(void)
         // sRAW and old Foveon decoders only, so extra buffer size is just 1/4
         // allocate image as temporary buffer, size
         imgdata.rawdata.raw_alloc = 0;
-        imgdata.image = (ushort(*)[4])calloc(unsigned(S.raw_width) * unsigned(S.raw_height), sizeof(*imgdata.image));
+        imgdata.image = (ushort(*)[4])calloc(unsigned(MAX(S.width,S.raw_width)) * unsigned(MAX(S.height,S.raw_height)), sizeof(*imgdata.image));
         if (!(decoder_info.decoder_flags & LIBRAW_DECODER_ADOBECOPYPIXEL))
         {
           imgdata.rawdata.raw_image = (ushort *)imgdata.image;

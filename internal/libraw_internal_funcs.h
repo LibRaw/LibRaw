@@ -46,20 +46,25 @@ it under the terms of the one of two licenses as you choose:
     void	parseSonyLensType2 (uchar a, uchar b);
     void 	parseSonyLensFeatures (uchar a, uchar b);
     void	process_Sony_0x0116 (uchar * buf, ushort, unsigned id);
+    void	process_Sony_0x2010 (uchar * buf, ushort);
     void	process_Sony_0x9050 (uchar * buf, ushort, unsigned id);
+    void	process_Sony_0x9400 (uchar * buf, ushort, unsigned id);
     void	process_Sony_0x9402 (uchar * buf, ushort);
     void	process_Sony_0x9403 (uchar * buf, ushort);
     void	process_Sony_0x9406 (uchar * buf, ushort);
     void	process_Sony_0x940c (uchar * buf, ushort);
-    void	process_Sony_0x9400 (uchar * buf, ushort);
+    void	process_Sony_0x940e (uchar * buf, ushort, unsigned id);
     void	parseSonyMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
-                               uchar *&table_buf_0x9050, ushort &table_buf_0x9050_present,
-                               uchar *&table_buf_0x940c, ushort &table_buf_0x940c_present,
-                               uchar *&table_buf_0x0116, ushort &table_buf_0x0116_present,
-                               uchar *&table_buf_0x9402, ushort &table_buf_0x9402_present,
-                               uchar *&table_buf_0x9403, ushort &table_buf_0x9403_present,
-                               uchar *&table_buf_0x9406, ushort &table_buf_0x9406_present,
-                               uchar *&table_buf_0x9400, ushort &table_buf_0x9400_present);
+                               uchar *&table_buf_0x0116, ushort &table_buf_0x0116_len,
+                               uchar *&table_buf_0x2010, ushort &table_buf_0x2010_len,
+                               uchar *&table_buf_0x9050, ushort &table_buf_0x9050_len,
+                               uchar *&table_buf_0x9400, ushort &table_buf_0x9400_len,
+                               uchar *&table_buf_0x9402, ushort &table_buf_0x9402_len,
+                               uchar *&table_buf_0x9403, ushort &table_buf_0x9403_len,
+                               uchar *&table_buf_0x9406, ushort &table_buf_0x9406_len,
+                               uchar *&table_buf_0x940c, ushort &table_buf_0x940c_len,
+                               uchar *&table_buf_0x940e, ushort &table_buf_0x940e_len);
+
     void	parseFujiMakernotes (unsigned tag, unsigned type);
 
     ushort      get2();

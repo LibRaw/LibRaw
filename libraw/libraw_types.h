@@ -180,12 +180,18 @@ typedef unsigned long long UINT64;
 
   typedef struct
   {
+    ushort cleft, ctop, cwidth, cheight;
+  } libraw_raw_crop_t;
+
+  typedef struct
+  {
     ushort raw_height, raw_width, height, width, top_margin, left_margin;
     ushort iheight, iwidth;
     unsigned raw_pitch;
     double pixel_aspect;
     int flip;
     int mask[8][4];
+    libraw_raw_crop_t raw_crop;
   } libraw_image_sizes_t;
 
   struct ph1_t
@@ -279,6 +285,8 @@ typedef unsigned long long UINT64;
     short BlackMaskTopBorder;
     short BlackMaskRightBorder;
     short BlackMaskBottomBorder;
+    int AFMicroAdjMode;
+    float AFMicroAdjValue;
 
   } libraw_canon_makernotes_t;
 
@@ -362,6 +370,9 @@ typedef unsigned long long UINT64;
     int nMEshots;
     int MEgainOn;
     double ME_WB[4];
+    uchar AFFineTune;
+    uchar AFFineTuneIndex;
+    int8_t AFFineTuneAdj;
   } libraw_nikon_makernotes_t;
 
   typedef struct
@@ -377,18 +388,37 @@ typedef unsigned long long UINT64;
     ushort AFResult;
     unsigned ImageStabilization;
     ushort ColorSpace;
+    uchar AFFineTune;
+    short AFFineTuneAdj[3];
   } libraw_olympus_makernotes_t;
 
   typedef struct
   {
     ushort FocusMode;
-    uchar AFPointMode;
-    ushort AFPointSelected[2];
+    ushort AFPointSelected;
     unsigned AFPointsInFocus;
+    ushort FocusPosition;
     uchar DriveMode[4];
-    uchar SRResult;
-    uchar ShakeReduction;
+    short AFAdjustment;
+/*    uchar AFPointMode;     */
+/*    uchar SRResult;        */
+/*    uchar ShakeReduction;  */
   } libraw_pentax_makernotes_t;
+
+
+  typedef struct
+  {
+    ushort BlackLevelTop;
+    ushort BlackLevelBottom;
+    short offset_left, offset_top; /* KDC files, negative values or zeros */
+    ushort clipBlack, clipWhite;   /* valid for P712, P850, P880 */
+    float romm_camDaylight[3][3];
+    float romm_camTungsten[3][3];
+    float romm_camFluorescent[3][3];
+    float romm_camFlash[3][3];
+    float romm_camCustom[3][3];
+    float romm_camAuto[3][3];
+  } libraw_kodak_makernotes_t;
 
   typedef struct
   {
@@ -399,7 +429,20 @@ typedef unsigned long long UINT64;
     uchar Sony0x9400_SequenceLength1;
     unsigned Sony0x9400_SequenceFileNumber;
     uchar Sony0x9400_SequenceLength2;
-
+    libraw_raw_crop_t raw_crop;
+    int8_t AFMicroAdjValue;
+    int8_t AFMicroAdjOn;
+    uchar AFMicroAdjRegisteredLenses;
+    ushort group2010;
+    ushort real_iso_offset;
+    float firmware;
+    ushort ImageCount3_offset;
+    unsigned ImageCount3;
+    unsigned ElectronicFrontCurtainShutter;
+    ushort MeteringMode2;
+    char SonyDateTime[20];
+    uchar TimeStamp[6];
+    unsigned ShotNumberSincePowerUp;
   } libraw_sony_info_t;
 
   typedef struct
@@ -480,6 +523,7 @@ typedef unsigned long long UINT64;
     float exifWaterDepth;
     float exifAcceleration;
     float exifCameraElevationAngle;
+    float real_ISO;
   } libraw_imgother_t;
 
   typedef struct
@@ -630,6 +674,8 @@ typedef unsigned long long UINT64;
     libraw_fuji_info_t fuji;
     libraw_olympus_makernotes_t olympus;
     libraw_sony_info_t sony;
+    libraw_kodak_makernotes_t kodak;
+    libraw_pentax_makernotes_t pentax;
   } libraw_makernotes_t;
 
   typedef struct

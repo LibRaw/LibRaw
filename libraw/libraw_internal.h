@@ -177,7 +177,7 @@ struct jhead
   ushort quant[64], idct[64], *huff[20], *free[20], *row;
 };
 
-struct tiff_tag
+struct libraw_tiff_tag
 {
   ushort tag, type;
   int count;
@@ -193,12 +193,12 @@ struct tiff_hdr
   ushort t_order, magic;
   int ifd;
   ushort pad, ntag;
-  struct tiff_tag tag[23];
+  struct libraw_tiff_tag tag[23];
   int nextifd;
   ushort pad2, nexif;
-  struct tiff_tag exif[4];
+  struct libraw_tiff_tag exif[4];
   ushort pad3, ngps;
-  struct tiff_tag gpst[10];
+  struct libraw_tiff_tag gpst[10];
   short bps[4];
   int rat[10];
   unsigned gps[26];
