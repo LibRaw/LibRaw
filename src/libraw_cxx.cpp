@@ -2028,7 +2028,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
          for(int c = 0; c<4; c++)
 	   imgdata.color.linear_max[c] /= 4;
 #endif
-	if ((imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONY_ARW_TO_3COLOR)	&& 
+	if ((imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SONY_ARQ_TO_3COLOR)	&& 
 		load_raw == &LibRaw::sony_arq_load_raw)
 	{
 		load_raw = &LibRaw::sony_arq_load_raw_3c;
