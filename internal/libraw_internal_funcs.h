@@ -209,7 +209,6 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        sony_arw_load_raw();
     void        sony_arw2_load_raw();
     void        sony_arq_load_raw();
-    void        sony_arq_load_raw_3c();
     void        samsung_load_raw();
     void        samsung2_load_raw();
     void        samsung3_load_raw();
