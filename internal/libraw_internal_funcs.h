@@ -54,7 +54,7 @@ it under the terms of the one of two licenses as you choose:
     unsigned    getint (int type);
     float       int_to_float (int i);
     double      getreal (int type);
-    void        read_shorts (ushort *pixel, int count);
+    void        read_shorts (ushort *pixel, unsigned count);
 
 /* Canon P&S cameras */
     void        canon_600_fixed_wb (int temp);

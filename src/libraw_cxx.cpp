@@ -2436,7 +2436,8 @@ int LibRaw::unpack(void)
         if(rheight < S.height + S.top_margin)
           rheight = S.height + S.top_margin;
       }
-
+    if(rwidth > 65535 || rheight > 65535) // No way to make image larger than 64k pix
+      throw LIBRAW_EXCEPTION_IO_CORRUPT;
     imgdata.rawdata.raw_image = 0;
     imgdata.rawdata.color4_image = 0;
     imgdata.rawdata.color3_image = 0;
@@ -2493,6 +2494,10 @@ int LibRaw::unpack(void)
           }
         else if(imgdata.idata.filters || P1.colors == 1) // Bayer image or single color -> decode to raw_image
           {
+
+	    if(INT64(rwidth)*INT64(rheight+8)*sizeof(imgdata.rawdata.raw_image[0]) > LIBRAW_MAX_ALLOC_MB * INT64(1024*1024))
+	      throw LIBRAW_EXCEPTION_ALLOC;
+	    
             imgdata.rawdata.raw_alloc = malloc(rwidth*(rheight+8)*sizeof(imgdata.rawdata.raw_image[0]));
             imgdata.rawdata.raw_image = (ushort*) imgdata.rawdata.raw_alloc;
             if(!S.raw_pitch)
@@ -2508,6 +2513,9 @@ int LibRaw::unpack(void)
 				S.raw_pitch = (decoder_info.decoder_flags & LIBRAW_DECODER_LEGACY_WITH_MARGINS) ? S.raw_width*8 : S.width*8;
             // allocate image as temporary buffer, size
             imgdata.rawdata.raw_alloc = 0;
+	    if(INT64(MAX(S.width,S.raw_width))*INT64(MAX(S.height,S.raw_height))*sizeof(*imgdata.image) > LIBRAW_MAX_ALLOC_MB * INT64(1024*1024))
+	      throw LIBRAW_EXCEPTION_ALLOC;
+
             imgdata.image = (ushort (*)[4]) calloc(unsigned(MAX(S.width,S.raw_width))*unsigned(MAX(S.height,S.raw_height)),sizeof(*imgdata.image));
 			if(!(decoder_info.decoder_flags &  LIBRAW_DECODER_ADOBECOPYPIXEL))
 			{

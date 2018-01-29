@@ -1,3 +1,9 @@
+2018-01-29  Alex Tutubalin <lexa@lexa.ru>
+ * Checks for width+left_margin/height+top_margin not larger than 64k
+ * LIBRAW_MAX_ALLOC_MB define limits maximum image/raw_image allocation
+   (default is 2048 so 2Gb per array)
+ * LibRaw::read_shorts item count is now unsigned
+
 2018-01-19  Alex Tutubalin <lexa@lexa.ru>
 Secunia #79000: 
 Credit: Laurent Delosieres, Secunia Research at Flexera
