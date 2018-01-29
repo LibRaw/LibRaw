@@ -12544,17 +12544,6 @@ int CLASS parse_tiff_ifd(int base)
     case 9:
       if ((i = get2()))
         filters = i;
-#ifdef LIBRAW_LIBRARY_BUILD
-      if (pana_raw && len == 1 && type == 3)
-        pana_black[3] += i;
-#endif
-      break;
-    case 8:
-    case 10:
-#ifdef LIBRAW_LIBRARY_BUILD
-      if (pana_raw && len == 1 && type == 3)
-        pana_black[3] += get2();
-#endif
       break;
     case 14:
     case 15:

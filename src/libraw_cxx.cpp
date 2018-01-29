@@ -2258,9 +2258,9 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         ID.pana_black[0] && ID.pana_black[1] && ID.pana_black[2])
     {
       C.black = 0;
-      C.cblack[0] = ID.pana_black[0] + ID.pana_black[3];
-      C.cblack[1] = C.cblack[3] = ID.pana_black[1] + ID.pana_black[3];
-      C.cblack[2] = ID.pana_black[2] + ID.pana_black[3];
+      C.cblack[0] = ID.pana_black[0];
+      C.cblack[1] = C.cblack[3] = ID.pana_black[1];
+      C.cblack[2] = ID.pana_black[2];
       int i = C.cblack[3];
       for (int c = 0; c < 3; c++)
         if (i > C.cblack[c])
