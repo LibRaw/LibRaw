@@ -2098,8 +2098,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
          (!strcasecmp(imgdata.idata.make, "Panasonic") && !strcasecmp(imgdata.idata.model, "LX100"))))
       imgdata.sizes.width = 4288;
 
-    if (!strncasecmp(imgdata.idata.make, "Sony", 4) && imgdata.idata.dng_version
-	&& !(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP))
+    if (!strncasecmp(imgdata.idata.make, "Sony", 4) && imgdata.idata.dng_version &&
+        !(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP))
     {
       if (S.raw_width == 3984)
         S.width = 3925;
@@ -2733,6 +2733,8 @@ int LibRaw::unpack(void)
       if (rheight < S.height + S.top_margin)
         rheight = S.height + S.top_margin;
     }
+    if (rwidth > 65535 || rheight > 65535) // No way to make image larger than 64k pix
+      throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
     imgdata.rawdata.raw_image = 0;
     imgdata.rawdata.color4_image = 0;
@@ -2797,16 +2799,22 @@ int LibRaw::unpack(void)
         // x3f foveon decoder and DNG float
         // Do nothing! Decoder will allocate data internally
       }
-	  if (decoder_info.decoder_flags & LIBRAW_DECODER_3CHANNEL)
-	  {
-
-		  imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3);
-		  imgdata.rawdata.color3_image = (ushort (*)[3])imgdata.rawdata.raw_alloc;
-		  if (!S.raw_pitch)
-			  S.raw_pitch = S.raw_width * 6; 
-	  }
-	  else if (imgdata.idata.filters || P1.colors == 1) // Bayer image or single color -> decode to raw_image
+      if (decoder_info.decoder_flags & LIBRAW_DECODER_3CHANNEL)
       {
+        if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3 >
+            LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
+          throw LIBRAW_EXCEPTION_ALLOC;
+
+        imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3);
+        imgdata.rawdata.color3_image = (ushort(*)[3])imgdata.rawdata.raw_alloc;
+        if (!S.raw_pitch)
+          S.raw_pitch = S.raw_width * 6;
+      }
+      else if (imgdata.idata.filters || P1.colors == 1) // Bayer image or single color -> decode to raw_image
+      {
+        if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) >
+            LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
+          throw LIBRAW_EXCEPTION_ALLOC;
         imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
         imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
         if (!S.raw_pitch)
@@ -2829,8 +2837,13 @@ int LibRaw::unpack(void)
         }
         // sRAW and old Foveon decoders only, so extra buffer size is just 1/4
         // allocate image as temporary buffer, size
+        if (INT64(MAX(S.width, S.raw_width)) * INT64(MAX(S.height, S.raw_height)) * sizeof(*imgdata.image) >
+            LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
+          throw LIBRAW_EXCEPTION_ALLOC;
+
         imgdata.rawdata.raw_alloc = 0;
-        imgdata.image = (ushort(*)[4])calloc(unsigned(MAX(S.width,S.raw_width)) * unsigned(MAX(S.height,S.raw_height)), sizeof(*imgdata.image));
+        imgdata.image = (ushort(*)[4])calloc(
+            unsigned(MAX(S.width, S.raw_width)) * unsigned(MAX(S.height, S.raw_height)), sizeof(*imgdata.image));
         if (!(decoder_info.decoder_flags & LIBRAW_DECODER_ADOBECOPYPIXEL))
         {
           imgdata.rawdata.raw_image = (ushort *)imgdata.image;

@@ -19,6 +19,10 @@ it under the terms of the one of two licenses as you choose:
 
 #define LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD 0.75
 #define LIBRAW_DEFAULT_AUTO_BRIGHTNESS_THRESHOLD 0.01
+/* limit allocation size, default is 2Gb */
+#ifndef LIBRAW_MAX_ALLOC_MB
+#define LIBRAW_MAX_ALLOC_MB 2048L
+#endif
 
 #define LIBRAW_IFD_MAXCOUNT 10
 

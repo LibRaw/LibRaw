@@ -400,11 +400,10 @@ typedef unsigned long long UINT64;
     ushort FocusPosition;
     uchar DriveMode[4];
     short AFAdjustment;
-/*    uchar AFPointMode;     */
-/*    uchar SRResult;        */
-/*    uchar ShakeReduction;  */
+    /*    uchar AFPointMode;     */
+    /*    uchar SRResult;        */
+    /*    uchar ShakeReduction;  */
   } libraw_pentax_makernotes_t;
-
 
   typedef struct
   {
