@@ -11028,14 +11028,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         case 0x20100403:
           stmread(imgdata.lens.makernotes.Attachment, len, ifp);
           break;
-        case 0x202000306:
+        case 0x20200306:
         {
           uchar uc;
           fread(&uc, 1, 1, ifp);
           imgdata.makernotes.olympus.AFFineTune = uc;
         }
         break;
-        case 0x202000307:
+        case 0x20200307:
           FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
           break;
         case 0x20200401:
@@ -12442,13 +12442,13 @@ void CLASS parse_makernote(int base, int uptag)
         imgdata.makernotes.olympus.OlympusSensorCalibration[1] = getreal(type);
         FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.olympus.OlympusSensorCalibration[0];
       }
-      if (tag == 0x202000306)
+      if (tag == 0x20200306)
       {
         uchar uc;
         fread(&uc, 1, 1, ifp);
         imgdata.makernotes.olympus.AFFineTune = uc;
       }
-      if (tag == 0x202000307)
+      if (tag == 0x20200307)
       {
         FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
       }
