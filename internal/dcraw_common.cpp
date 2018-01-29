@@ -13597,7 +13597,7 @@ int CLASS parse_tiff_ifd(int base)
                 fseek(ifp, save, SEEK_SET);
               }
 
-              if (SR2SubIFDLength && (SR2SubIFDLength < 10240000) && (buf_SR2 = (unsigned *)malloc(SR2SubIFDLength)))
+              if (SR2SubIFDLength && (SR2SubIFDLength < 10240000) && (buf_SR2 = (unsigned *)malloc(SR2SubIFDLength+1024))) // 1024b for safety
               {
                 fseek(ifp, SR2SubIFDOffset + base, SEEK_SET);
                 fread(buf_SR2, SR2SubIFDLength, 1, ifp);
@@ -13622,6 +13622,8 @@ int CLASS parse_tiff_ifd(int base)
                   {
                     ival = icbuf_SR2;
                   }
+		  if(ival > SR2SubIFDLength) // points out of orig. buffer size
+		     break; // END processing. Generally we should check against SR2SubIFDLength minus 6 of 8, depending on tag, but we allocated extra 1024b for buffer, so this does not matter
 
                   icbuf_SR2 += 4;
 
