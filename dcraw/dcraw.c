@@ -600,7 +600,7 @@ double CLASS getreal(int type)
   }
 }
 
-void CLASS read_shorts(ushort *pixel, int count)
+void CLASS read_shorts(ushort *pixel, unsigned count)
 {
   if (fread(pixel, 2, count, ifp) < count)
     derror();
@@ -19005,7 +19005,11 @@ void CLASS identify()
 #else
       tiff_bps > 16
 #endif
-      || tiff_samples > 4 || colors > 4 || colors < 1)
+      || tiff_samples > 4 || colors > 4 || colors < 1
+      /* alloc in unpack() may be fooled by size adjust */
+      || ( (int)width + (int)left_margin > 65535) 
+      || ( (int)height + (int)top_margin > 65535)
+      )
   {
     is_raw = 0;
 #ifdef LIBRAW_LIBRARY_BUILD
