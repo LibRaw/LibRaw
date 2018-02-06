@@ -231,6 +231,7 @@ typedef unsigned long long UINT64;
     int CanonColorDataVer;
     int CanonColorDataSubVer;
     int SpecularWhiteLevel;
+    int NormalWhiteLevel;
     int ChannelBlackLevel[4];
     int AverageBlackLevel;
     /* multishot */

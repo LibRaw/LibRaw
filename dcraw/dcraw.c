@@ -8826,20 +8826,23 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       }
       if ((imgdata.makernotes.canon.CanonColorDataSubVer == 4) || (imgdata.makernotes.canon.CanonColorDataSubVer == 5))
       {
-        fseek(ifp, save1 + (0x2b9 << 1), SEEK_SET); // offset 697 shorts
+        fseek(ifp, save1 + (0x2b8 << 1), SEEK_SET); // offset 696 shorts
+        imgdata.makernotes.canon.NormalWhiteLevel = get2();
         imgdata.makernotes.canon.SpecularWhiteLevel = get2();
         FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
       }
       else if ((imgdata.makernotes.canon.CanonColorDataSubVer == 6) ||
                (imgdata.makernotes.canon.CanonColorDataSubVer == 7))
       {
-        fseek(ifp, save1 + (0x2d0 << 1), SEEK_SET); // offset 720 shorts
+        fseek(ifp, save1 + (0x2cf << 1), SEEK_SET); // offset 719 shorts
+        imgdata.makernotes.canon.NormalWhiteLevel = get2();
         imgdata.makernotes.canon.SpecularWhiteLevel = get2();
         FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
       }
       else if (imgdata.makernotes.canon.CanonColorDataSubVer == 9)
       {
-        fseek(ifp, save1 + (0x2d4 << 1), SEEK_SET); // offset 724 shorts
+        fseek(ifp, save1 + (0x2d3 << 1), SEEK_SET); // offset 723 shorts
+        imgdata.makernotes.canon.NormalWhiteLevel = get2();
         imgdata.makernotes.canon.SpecularWhiteLevel = get2();
         FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
       }
@@ -8909,7 +8912,8 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
         bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
         imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
       }
-      fseek(ifp, save1 + (0x1e4 << 1), SEEK_SET); // offset 484 shorts
+      fseek(ifp, save1 + (0x1e3 << 1), SEEK_SET); // offset 483 shorts
+      imgdata.makernotes.canon.NormalWhiteLevel = get2();
       imgdata.makernotes.canon.SpecularWhiteLevel = get2();
       FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
       break;
@@ -8939,13 +8943,15 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       }
       if (imgdata.makernotes.canon.CanonColorDataSubVer == 10)
       {
-        fseek(ifp, save1 + (0x1fd << 1), SEEK_SET); // offset 509 shorts
+        fseek(ifp, save1 + (0x1fc << 1), SEEK_SET); // offset 508 shorts
+        imgdata.makernotes.canon.NormalWhiteLevel = get2();
         imgdata.makernotes.canon.SpecularWhiteLevel = get2();
         FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
       }
       else if (imgdata.makernotes.canon.CanonColorDataSubVer == 11)
       {
-        fseek(ifp, save1 + (0x2dd << 1), SEEK_SET); // offset 733 shorts
+        fseek(ifp, save1 + (0x2dc << 1), SEEK_SET); // offset 732 shorts
+        imgdata.makernotes.canon.NormalWhiteLevel = get2();
         imgdata.makernotes.canon.SpecularWhiteLevel = get2();
         FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
       }
@@ -8976,13 +8982,15 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       }
       if (imgdata.makernotes.canon.CanonColorDataSubVer == 14) // 1300D
       {
-        fseek(ifp, save1 + (0x231 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x230 << 1), SEEK_SET); // offset 560 shorts
+        imgdata.makernotes.canon.NormalWhiteLevel = get2();
         imgdata.makernotes.canon.SpecularWhiteLevel = get2();
         FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
       }
       else
       {
-        fseek(ifp, save1 + (0x30f << 1), SEEK_SET); // offset 783 shorts
+        fseek(ifp, save1 + (0x30e << 1), SEEK_SET); // offset 782 shorts
+        imgdata.makernotes.canon.NormalWhiteLevel = get2();
         imgdata.makernotes.canon.SpecularWhiteLevel = get2();
         FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
       }
