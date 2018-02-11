@@ -8648,6 +8648,12 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       aperture = imgdata.lens.makernotes.CurAp;
   }
 
+  else if (tag == 0x000c)
+  {
+    unsigned tS = get4();
+    sprintf (imgdata.shootinginfo.BodySerial, "%d", tS);
+  }
+
   else if (tag == 0x0095 && // lens model tag
            !imgdata.lens.makernotes.Lens[0])
   {
