@@ -13249,14 +13249,20 @@ int CLASS parse_tiff_ifd(int base)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     case 0xf00d:
-      if (strcmp(model, "X-A3") && strcmp(model, "X-A10"))
+      if (strcmp(model, "X-A3")  &&
+          strcmp(model, "X-A10") &&
+          strcmp(model, "X-A5")  &&
+          strcmp(model, "X-A20"))
       {
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
       }
       break;
     case 0xf00c:
-      if (strcmp(model, "X-A3") && strcmp(model, "X-A10"))
+      if (strcmp(model, "X-A3")  &&
+          strcmp(model, "X-A10") &&
+          strcmp(model, "X-A5")  &&
+          strcmp(model, "X-A20"))
       {
         unsigned fwb[4];
         FORC4 fwb[c] = get4();
@@ -15039,7 +15045,10 @@ void CLASS parse_fuji(int offset)
       width = tag;
       height = get4();
 #ifdef LIBRAW_LIBRARY_BUILD
-      if (!strcmp(model, "X-A3") || !strcmp(model, "X-A10"))
+      if (!strcmp(model, "X-A3")  ||
+          !strcmp(model, "X-A10") ||
+          !strcmp(model, "X-A5")  ||
+          !strcmp(model, "X-A20"))
       {
         int wb[4];
         int nWB, tWB, pWB;
@@ -15698,12 +15707,20 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
     { "Fujifilm X-A10", 0, 0,
       { 11540,-4999,-991,-2949,10963,2278,-382,1049,5605} },
+
+    { "Fujifilm X-A20", 0, 0, /* temp */
+      { 11540,-4999,-991,-2949,10963,2278,-382,1049,5605} },
+
     { "Fujifilm X-A1", 0, 0,
       { 11086,-4555,-839,-3512,11310,2517,-815,1341,5940 } },
     { "Fujifilm X-A2", 0, 0,
       { 10763,-4560,-917,-3346,11311,2322,-475,1135,5843 } },
     { "Fujifilm X-A3", 0, 0,
       { 12407,-5222,-1086,-2971,11116,2120,-294,1029,5284 } },
+
+    { "Fujifilm X-A5", 0, 0, /* temp */
+      { 12407,-5222,-1086,-2971,11116,2120,-294,1029,5284 } },
+
     { "Fujifilm X-E1", 0, 0,
       { 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
     { "Fujifilm X-E2S", 0, 0,
@@ -16181,7 +16198,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 9197,-3190,-659,-2606,10830,2039,-458,1250,5458 } },
     { "Olympus E-PL8", 0, 0,
       { 9197,-3190,-659,-2606,10830,2039,-458,1250,5458 } },
-    { "Olympus E-PL9", 0, 0, /* temp */
+    { "Olympus E-PL9", 0, 0,
       { 8380,-2630,-639,-2887,10725,2496,-627,1427,5438 } },
     { "Olympus E-PM1", 0, 0,
       { 7575,-2159,-571,-3722,11341,2725,-1434,2819,6271 } },
@@ -16462,6 +16479,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 7122,-2108,-512,-3155,11201,2231,-541,1423,5045 } },
     { "Panasonic AG-GH4", -15, 0, /* added */
       { 7122,-2108,-512,-3155,11201,2231,-541,1423,5045 } },
+    {"Panasonic DC-GH5s", -15, 0,
+      { 6929,-2355,-708,-4192,12534,1828,-1097,1989,5195 } },
     { "Panasonic DC-GH5", -15, 0,
       { 7641,-2336,-605,-3218,11299,2187,-485,1338,5121 } },
     { "Yuneec CGO4", -15, 0,
@@ -16472,6 +16491,12 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8238,-3244,-679,-3921,11814,2384,-836,2022,5852 } },
     { "Panasonic DMC-GX1", -15, 0,
       { 6763,-1919,-863,-3868,11515,2684,-1216,2387,5879 } },
+
+    { "Panasonic DC-GF10", -15, 0, /* temp, markets: GF10, GF90 */
+      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
+    { "Panasonic DC-GF90", -15, 0, /* temp, markets: GF10, GF90 */
+      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
+
     { "Panasonic DC-GX850", -15, 0, /* markets: GX850 GX800 GF9 */
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
     { "Panasonic DC-GX800", -15, 0, /* markets: GX850 GX800 GF9 */
@@ -16488,6 +16513,10 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
     { "Panasonic DMC-GX8", -15,0,
       { 7564,-2263,-606,-3148,11239,2177,-540,1435,4853 } },
+
+    { "Panasonic DC-GX9", -15, 0, /* temp */
+      { 7685,-2375,-634,-3687,11700,2249,-748,1546,5111 } },
+
     { "Panasonic DMC-TZ6", -15, 0,  /* markets: ZS40 TZ60 TZ61 */
       { 8607,-2822,-808,-3755,11930,2049,-820,2060,5224 } },
     { "Panasonic DMC-TZ8", -15, 0, /* markets: ZS60 TZ80 TZ81 TZ82 TZ85 */
@@ -16521,6 +16550,11 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Panasonic DMC-TZ110", -15, 0, /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
     { "Panasonic DMC-TX1", -15, 0, /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
+      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
+
+    { "Panasonic DC-ZS200", -15, 0, /* temp, markets: ZS200 TZ200 */
+      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
+    { "Panasonic DC-TZ200", -15, 0, /* temp, markets: ZS200 TZ200 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
 
     { "Phase One H 20", 0, 0, /* DJC */
