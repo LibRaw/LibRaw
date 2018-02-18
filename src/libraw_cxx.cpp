@@ -282,7 +282,6 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t *p)
 }
 
 int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
-int LibRaw::is_panasonic_16x10() { return load_raw == &LibRaw::panasonic_16x10_load_raw; }
 int LibRaw::is_coolscan_nef() { return load_raw == &LibRaw::nikon_coolscan_load_raw; }
 int LibRaw::is_jpeg_thumb() { return thumb_load_raw == 0 && write_thumb == &LibRaw::jpeg_thumb; }
 
@@ -821,10 +820,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "panasonic_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
-  }
-  else if (load_raw == &LibRaw::panasonic_16x10_load_raw)
-  {
-    d_info->decoder_name = "panasonic_16x10_load_raw()";
   }
   else if (load_raw == &LibRaw::olympus_load_raw)
   {
@@ -2257,10 +2252,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
          !strcasecmp(imgdata.idata.make, "YUNEEC")) &&
         ID.pana_black[0] && ID.pana_black[1] && ID.pana_black[2])
     {
+      if(libraw_internal_data.unpacker_data.pana_encoding == 5)
+          P1.raw_count = 0; // Disable for new decoder
       C.black = 0;
-      C.cblack[0] = ID.pana_black[0];
-      C.cblack[1] = C.cblack[3] = ID.pana_black[1];
-      C.cblack[2] = ID.pana_black[2];
+      int add = libraw_internal_data.unpacker_data.pana_encoding == 4?15:0;
+      C.cblack[0] = ID.pana_black[0]+add;
+      C.cblack[1] = C.cblack[3] = ID.pana_black[1]+add;
+      C.cblack[2] = ID.pana_black[2]+add;
       int i = C.cblack[3];
       for (int c = 0; c < 3; c++)
         if (i > C.cblack[c])

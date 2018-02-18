@@ -2911,13 +2911,6 @@ void CLASS panasonic_load_raw()
     }
   }
 }
-void CLASS panasonic_16x10_load_raw()
-{
-#ifdef LIBRAW_LIBRARY_BUILD
-  throw LIBRAW_EXCEPTION_DECODE_RAW;
-#endif
-}
-
 void CLASS olympus_load_raw()
 {
   ushort huff[4096];
@@ -12559,6 +12552,14 @@ int CLASS parse_tiff_ifd(int base)
       if ((i = get2()))
         filters = i;
       break;
+#ifdef LIBRAW_LIBRARY_BUILD
+    case 10:
+      if (pana_raw && len == 1 && type == 3)
+      {
+        libraw_internal_data.unpacker_data.pana_bpp = get2();
+      }
+    break;
+#endif
     case 14:
     case 15:
     case 16:
@@ -12651,6 +12652,14 @@ int CLASS parse_tiff_ifd(int base)
       fseek(ifp, 12, SEEK_CUR);
       FORC3 cam_mul[c] = get2();
       break;
+#ifdef LIBRAW_LIBRARY_BUILD
+    case 45:
+      if (pana_raw && len == 1 && type == 3)
+      {
+        libraw_internal_data.unpacker_data.pana_encoding = get2();
+      }
+      break;
+#endif
     case 46:
       if (type != 7 || fgetc(ifp) != 0xff || fgetc(ifp) != 0xd8)
         break;
@@ -18764,14 +18773,6 @@ void CLASS identify()
       load_flags = 4;
     }
     zero_is_bad = 1;
-#ifdef LIBRAW_LIBRARY_BUILD
-    float fratio = float(data_size) / (float(raw_height) * float(raw_width));
-    if (!(raw_width % 10) && !(data_size % 16384) && fratio >= 1.6f && fratio <= 1.6001f)
-    {
-      load_raw = &CLASS panasonic_16x10_load_raw;
-      zero_is_bad = 0;
-    }
-#endif
     if ((height += 12) > raw_height)
       height = raw_height;
     for (i = 0; i < sizeof pana / sizeof *pana; i++)

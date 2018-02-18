@@ -183,7 +183,6 @@ public:
   /* information calls */
   int is_fuji_rotated() { return libraw_internal_data.internal_output_params.fuji_width; }
   int is_sraw();
-  int is_panasonic_16x10();
   int sraw_midpoint();
   int is_nikon_sraw();
   int is_coolscan_nef();
