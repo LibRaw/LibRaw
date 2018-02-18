@@ -282,7 +282,6 @@ void LibRaw::dcraw_clear_mem(libraw_processed_image_t *p)
 }
 
 int LibRaw::is_sraw() { return load_raw == &LibRaw::canon_sraw_load_raw || load_raw == &LibRaw::nikon_load_sraw; }
-int LibRaw::is_panasonic_16x10() { return load_raw == &LibRaw::panasonic_16x10_load_raw; }
 int LibRaw::is_coolscan_nef() { return load_raw == &LibRaw::nikon_coolscan_load_raw; }
 int LibRaw::is_jpeg_thumb() { return thumb_load_raw == 0 && write_thumb == &LibRaw::jpeg_thumb; }
 
@@ -821,10 +820,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "panasonic_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
-  }
-  else if (load_raw == &LibRaw::panasonic_16x10_load_raw)
-  {
-    d_info->decoder_name = "panasonic_16x10_load_raw()";
   }
   else if (load_raw == &LibRaw::olympus_load_raw)
   {
@@ -2257,10 +2252,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
          !strcasecmp(imgdata.idata.make, "YUNEEC")) &&
         ID.pana_black[0] && ID.pana_black[1] && ID.pana_black[2])
     {
+      if(libraw_internal_data.unpacker_data.pana_encoding == 5)
+          P1.raw_count = 0; // Disable for new decoder
       C.black = 0;
-      C.cblack[0] = ID.pana_black[0];
-      C.cblack[1] = C.cblack[3] = ID.pana_black[1];
-      C.cblack[2] = ID.pana_black[2];
+      int add = libraw_internal_data.unpacker_data.pana_encoding == 4?15:0;
+      C.cblack[0] = ID.pana_black[0]+add;
+      C.cblack[1] = C.cblack[3] = ID.pana_black[1]+add;
+      C.cblack[2] = ID.pana_black[2]+add;
       int i = C.cblack[3];
       for (int c = 0; c < 3; c++)
         if (i > C.cblack[c])
@@ -5248,13 +5246,16 @@ static const char *static_camera_list[] = {
 	"FujiFilm X-A1",
 	"FujiFilm X-A2",
 	"FujiFilm X-A3",
+	"FujiFilm X-A5",
 	"FujiFilm X-A10",
+	"FujiFilm X-A20",
 	"FujiFilm X-E1",
 	"FujiFilm X-E2",
 	"FujiFilm X-E2S",
 	"FujiFilm X-E3",
 	"FujiFilm X-M1",
 	"FujiFilm XF1",
+	"FujiFilm X-H1",
 	"FujiFilm X-T1",
 	"FujiFilm X-T1 Graphite Silver",
 	"FujiFilm X-T2",
@@ -5676,6 +5677,7 @@ static const char *static_camera_list[] = {
 	"Panasonic DMC-GF5",
 	"Panasonic DMC-GF6",
 	"Panasonic DMC-GF7",
+	"Panasonic DC-GF10/GF90",
 	"Panasonic DMC-GH1",
 	"Panasonic DMC-GH2",
 	"Panasonic DMC-GH3",
@@ -5688,6 +5690,7 @@ static const char *static_camera_list[] = {
 	"Panasonic DMC-GX1",
 	"Panasonic DMC-GX7",
 	"Panasonic DMC-GX8",
+	"Panasonic DC-GX9",
 	"Panasonic DMC-GX80/85",
 	"Panasonic DC-GX800/850/GF9",
 	"Panasonic DMC-L1",
@@ -5705,7 +5708,8 @@ static const char *static_camera_list[] = {
 	"Panasonic DMC-TZ70/71/ZS50",
 	"Panasonic DMC-TZ80/81/85/ZS60",
 	"Panasonic DC-ZS70 (DC-TZ90/91/92, DC-T93)",
-	"Panasonic DMC-TZ100/101/ZS100",
+	"Panasonic DC-TZ100/101/ZS100",
+	"Panasonic DC-TZ200/ZS200",
 	"PARROT Bebop 2",
 	"PARROT Bebop Drone",
 	"Pentax *ist D",
