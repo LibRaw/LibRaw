@@ -6572,7 +6572,7 @@ void LibRaw::x3f_load_raw()
       }
       else if (imgdata.sizes.raw_width == 6656 && imgdata.sizes.raw_height == 4480) // sd Quattro H normal raw
       {
-        x3f_dpq_interpolate_af_sd(232, 592, imgdata.sizes.raw_width - 1, 3888, 16, 32, 2);
+        x3f_dpq_interpolate_af_sd(232, 592, imgdata.sizes.raw_width - 1, 3920, 16, 32, 2);
       }
       else if (imgdata.sizes.raw_width == 3328 && imgdata.sizes.raw_height == 2240) // sd Quattro H half size
       {
