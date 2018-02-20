@@ -18367,7 +18367,7 @@ void CLASS identify()
       width = 2880;
       flip = 6;
     }
-    else if (load_raw != &CLASS packed_load_raw && strncmp(model, "X-", 2))
+    else if (load_raw != &CLASS packed_load_raw && strncmp(model, "X-", 2) && filters >=1000) // Bayer and not X-models
       maximum = (is_raw == 2 && shot_select) ? 0x2f00 : 0x3e00;
     top_margin = (raw_height - height) >> 2 << 1;
     left_margin = (raw_width - width) >> 2 << 1;
