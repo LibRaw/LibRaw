@@ -395,6 +395,13 @@ typedef unsigned long long UINT64;
 
   typedef struct
   {
+/* Compression:
+ 34826 (Panasonic RAW 2): LEICA DIGILUX 2;
+ 34828 (Panasonic RAW 3): LEICA D-LUX 3; LEICA V-LUX 1; Panasonic DMC-LX1; Panasonic DMC-LX2; Panasonic DMC-FZ30; Panasonic DMC-FZ50;
+ 34830 (not in exiftool): LEICA DIGILUX 3; Panasonic DMC-L1;
+ 34316 (Panasonic RAW 1): others (LEICA, Panasonic, YUNEEC);
+*/
+    ushort Compression;
     ushort BlackLevelDim;
     float BlackLevel[8];
   } libraw_panasonic_makernotes_t;

@@ -14156,6 +14156,13 @@ int CLASS parse_tiff_ifd(int base)
       break;
     case 305:
     case 11: /* Software */
+      if ((pana_raw) && (tag == 11) && (type == 3))
+      {
+#ifdef LIBRAW_LIBRARY_BUILD
+        imgdata.makernotes.panasonic.Compression = get2();
+#endif
+        break;
+      }
       fgets(software, 64, ifp);
       if (!strncmp(software, "Adobe", 5) || !strncmp(software, "dcraw", 5) || !strncmp(software, "UFRaw", 5) ||
           !strncmp(software, "Bibble", 6) || !strcmp(software, "Digital Photo Professional"))
