@@ -395,6 +395,12 @@ typedef unsigned long long UINT64;
 
   typedef struct
   {
+    ushort BlackLevelDim;
+    float BlackLevel[8];
+  } libraw_panasonic_makernotes_t;
+
+  typedef struct
+  {
     ushort FocusMode;
     ushort AFPointSelected;
     unsigned AFPointsInFocus;
@@ -675,6 +681,7 @@ typedef unsigned long long UINT64;
     libraw_olympus_makernotes_t olympus;
     libraw_sony_info_t sony;
     libraw_kodak_makernotes_t kodak;
+    libraw_panasonic_makernotes_t panasonic;
     libraw_pentax_makernotes_t pentax;
   } libraw_makernotes_t;
 

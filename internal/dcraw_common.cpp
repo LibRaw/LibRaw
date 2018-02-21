@@ -12599,7 +12599,40 @@ int CLASS parse_tiff_ifd(int base)
         }
       }
       break;
+
+    case 0x0120:
+      if (pana_raw)
+      {
+        unsigned sorder = order;
+        unsigned long sbase = base;
+        base = ftell(ifp);
+        order = get2();
+        fseek(ifp, 2, SEEK_CUR);
+        fseek(ifp, get4()-8, SEEK_CUR);
+        parse_tiff_ifd (base);
+        base = sbase;
+        order = sorder;
+      }
+    break;
+
+    case 0x2009:
+      if ((libraw_internal_data.unpacker_data.pana_encoding == 4) ||
+          (libraw_internal_data.unpacker_data.pana_encoding == 5))
+      {
+        int n = MIN (8, len);
+        int permut[8] = {3, 2, 1, 0, 3+4, 2+4, 1+4, 0+4};
+
+        imgdata.makernotes.panasonic.BlackLevelDim = len;
+
+        for (int i=0; i < n; i++)
+        {
+          imgdata.makernotes.panasonic.BlackLevel[permut[i]] =
+            (float) (get2()) / (float) (pow(2, 14-libraw_internal_data.unpacker_data.pana_bpp));
+        }
+      }
+      break;
 #endif
+
     case 23:
       if (type == 3)
         iso_speed = get2();
