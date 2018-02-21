@@ -13964,7 +13964,7 @@ int CLASS parse_tiff_ifd(int base)
         for (int i=0; i < n; i++)
         {
           imgdata.makernotes.panasonic.BlackLevel[permut[i]] =
-            (float) (get2()) / (float) (pow(2, 14-libraw_internal_data.unpacker_data.pana_bpp));
+            (float) (get2()) / (float) (powf(2.f, 14.f-libraw_internal_data.unpacker_data.pana_bpp));
         }
       }
       break;
