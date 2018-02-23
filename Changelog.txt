@@ -1,4 +1,19 @@
-+2018-01-29  Alex Tutubalin <lexa@lexa.ru>
+2018-02-23 Alex Tutubalin <lexa@lexa.ru>
+ * No more compile-time support for LibRaw demosaic packs.
+   User-settable callbacks added to support demosaic packs functions by user-set code.
+   All callbacks are called with (this) as the only arg.
+   -  int callbacks.pre_identify_cb(void *) => to be called in LibRaw::open_datastream
+       before call to (standard) identify() function. If this call returns 1, this means
+       that all identify() is done and no standard identify() is called.
+   - void callbacks.post_identify_cb(void*) => called just after identify(), but before 
+       any cleanup code;
+   - dcraw_process() callbacks are called before dcraw_process phases (names speaks for itself):
+       	pre_subtractblack_cb, pre_scalecolors_cb, pre_preinterpolate_cb, pre_interpolate_cb,
+	interpolate_bayer_cb, interpolate_xtrans_cb, post_interpolate_cb, pre_converttorgb_cb, 
+	post_converttorgb_cb
+  
+
+2018-01-29  Alex Tutubalin <lexa@lexa.ru>
  * Checks for width+left_margin/height+top_margin not larger than 64k
  * LIBRAW_MAX_ALLOC_MB define limits maximum image/raw_image allocation
    (default is 2048 so 2Gb per array)

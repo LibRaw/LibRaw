@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_cxx.cpp
- * Copyright 2008-2017 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2018 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  *
  * LibRaw C++ interface (implementation)
@@ -442,6 +442,13 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
   callbacks.mem_cb = (flags & LIBRAW_OPIONS_NO_MEMERR_CALLBACK) ? NULL : &default_memory_callback;
   callbacks.data_cb = (flags & LIBRAW_OPIONS_NO_DATAERR_CALLBACK) ? NULL : &default_data_callback;
   callbacks.exif_cb = NULL; // no default callback
+  callbacks.pre_identify_cb = NULL;
+  callbacks.post_identify_cb = NULL;
+  callbacks.pre_subtractblack_cb = callbacks.pre_scalecolors_cb = callbacks.pre_preinterpolate_cb
+    = callbacks.pre_interpolate_cb = callbacks.interpolate_bayer_cb = callbacks.interpolate_xtrans_cb
+    = callbacks.post_interpolate_cb = callbacks.pre_converttorgb_cb = callbacks.post_converttorgb_cb 
+  = NULL;
+
   memmove(&imgdata.params.aber, &aber, sizeof(aber));
   memmove(&imgdata.params.gamm, &gamm, sizeof(gamm));
   memmove(&imgdata.params.greybox, &greybox, sizeof(greybox));
@@ -478,8 +485,6 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
   tls = new LibRaw_TLS;
   tls->init();
 
-  interpolate_bayer = 0;
-  interpolate_xtrans = 0;
 }
 
 int LibRaw::set_rawspeed_camerafile(char *filename)
@@ -1982,6 +1987,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
   if (!stream->valid())
     return LIBRAW_IO_ERROR;
   recycle();
+  if(callbacks.pre_identify_cb)
+  {
+    int r = (callbacks.pre_identify_cb)(this);
+    if(r == 1) goto final;
+  }
+
 
   try
   {
@@ -1989,6 +2000,9 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
     identify();
+    if(callbacks.post_identify_cb)
+	(callbacks.post_identify_cb)(this);
+
 #if 0
     if(!strcasecmp(imgdata.idata.make, "Sony")
        && imgdata.color.maximum > 0
@@ -2322,6 +2336,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
   {
     EXCEPTION_HANDLER(LIBRAW_EXCEPTION_IO_CORRUPT);
   }
+
+final:;
 
   if (P1.raw_count < 1)
     return LIBRAW_FILE_UNSUPPORTED;
@@ -4791,6 +4807,9 @@ int LibRaw::dcraw_process(void)
     }
     /* pre subtract black callback: check for it above to disable subtract inline */
 
+    if(callbacks.pre_subtractblack_cb)
+	(callbacks.pre_subtractblack_cb)(this);
+
     quality = 2 + !IO.fuji_width;
 
     if (O.user_qual >= 0)
@@ -4825,11 +4844,17 @@ int LibRaw::dcraw_process(void)
       green_matching();
     }
 
+    if(callbacks.pre_scalecolors_cb)
+	(callbacks.pre_scalecolors_cb)(this);
+
     if (!O.no_auto_scale)
     {
       scale_colors();
       SET_PROC_FLAG(LIBRAW_PROGRESS_SCALE_COLORS);
     }
+
+    if(callbacks.pre_preinterpolate_cb)
+	(callbacks.pre_preinterpolate_cb)(this);
 
     pre_interpolate();
 
@@ -4851,16 +4876,19 @@ int LibRaw::dcraw_process(void)
       exp_bef(expos, preser);
     }
 
+    if(callbacks.pre_interpolate_cb)
+	(callbacks.pre_interpolate_cb)(this);
+
     /* post-exposure correction fallback */
     if (P1.filters && !O.no_interpolation)
     {
       if (noiserd > 0 && P1.colors == 3 && P1.filters)
         fbdd(noiserd);
 
-      if (P1.filters > 1000 && interpolate_bayer)
-        (this->*interpolate_bayer)();
-      else if (P1.filters == 9 && interpolate_xtrans)
-        (this->*interpolate_xtrans)();
+      if (P1.filters > 1000 && callbacks.interpolate_bayer_cb)
+        (callbacks.interpolate_bayer_cb)(this);
+      else if (P1.filters == 9 && callbacks.interpolate_xtrans_cb)
+        (callbacks.interpolate_xtrans_cb)(this);
       else if (quality == 0)
         lin_interpolate();
       else if (quality == 1 || P1.colors > 3)
@@ -4896,6 +4924,9 @@ int LibRaw::dcraw_process(void)
         imgdata.image[i][1] = (imgdata.image[i][1] + imgdata.image[i][3]) >> 1;
       SET_PROC_FLAG(LIBRAW_PROGRESS_MIX_GREEN);
     }
+
+    if(callbacks.post_interpolate_cb)
+	(callbacks.post_interpolate_cb)(this);
 
     if (!P1.is_foveon)
     {
@@ -4940,8 +4971,14 @@ int LibRaw::dcraw_process(void)
     }
 #endif
 
+    if(callbacks.pre_converttorgb_cb)
+	(callbacks.pre_converttorgb_cb)(this);
+
     convert_to_rgb();
     SET_PROC_FLAG(LIBRAW_PROGRESS_CONVERT_RGB);
+
+    if(callbacks.post_converttorgb_cb)
+	(callbacks.post_converttorgb_cb)(this);
 
     if (O.use_fuji_rotate)
     {

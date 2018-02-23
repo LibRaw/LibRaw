@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_types.h
- * Copyright 2008-2017 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2018 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  *
  * LibRaw C data structures
@@ -135,6 +135,9 @@ typedef unsigned long long UINT64;
   DllDef void default_data_callback(void *data, const char *file, const int offset);
 
   typedef int (*progress_callback)(void *data, enum LibRaw_progress stage, int iteration, int expected);
+  typedef int (*pre_identify_callback)(void *ctx);
+  typedef void (*post_identify_callback)(void *ctx);
+  typedef void (*process_step_callback)(void *ctx);
 
   typedef struct
   {
@@ -149,6 +152,11 @@ typedef unsigned long long UINT64;
 
     exif_parser_callback exif_cb;
     void *exifparser_data;
+    pre_identify_callback pre_identify_cb;
+    post_identify_callback post_identify_cb;
+    process_step_callback pre_subtractblack_cb, pre_scalecolors_cb, pre_preinterpolate_cb, pre_interpolate_cb,
+			interpolate_bayer_cb, interpolate_xtrans_cb,
+		     	post_interpolate_cb, pre_converttorgb_cb, post_converttorgb_cb;
   } libraw_callbacks_t;
 
   typedef struct

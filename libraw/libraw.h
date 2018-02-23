@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw.h
- * Copyright 2008-2017 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2018 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8, 2008
  *
  * LibRaw C++ interface
@@ -294,8 +294,6 @@ protected:
   void (LibRaw::*load_raw)();
   void (LibRaw::*thumb_load_raw)();
   void (LibRaw::*pentax_component_load_raw)();
-  void (LibRaw::*interpolate_bayer)();
-  void (LibRaw::*interpolate_xtrans)();
 
   void kodak_thumb_loader();
   void write_thumb_ppm_tiff(FILE *);
