@@ -2267,7 +2267,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         ID.pana_black[0] && ID.pana_black[1] && ID.pana_black[2])
     {
       if(libraw_internal_data.unpacker_data.pana_encoding == 5)
-          P1.raw_count = 0; // Disable for new decoder
+         libraw_internal_data.internal_output_params.zero_is_bad = 0;
       C.black = 0;
       int add = libraw_internal_data.unpacker_data.pana_encoding == 4?15:0;
       C.cblack[0] = ID.pana_black[0]+add;
@@ -2770,6 +2770,9 @@ int LibRaw::unpack(void)
       int rawspeed_enabled = 1;
 
       if (imgdata.idata.dng_version && libraw_internal_data.unpacker_data.tiff_samples == 2)
+        rawspeed_enabled = 0;
+
+      if(libraw_internal_data.unpacker_data.pana_encoding == 5)
         rawspeed_enabled = 0;
 
       if (imgdata.idata.raw_count > 1)
@@ -5722,6 +5725,7 @@ static const char *static_camera_list[] = {
 	"Panasonic DMC-GH4",
 	"Panasonic AG-GH4",
 	"Panasonic DC-GH5",
+	"Panasonic DC-GH5S",
 	"Panasonic DMC-GM1",
 	"Panasonic DMC-GM1s",
 	"Panasonic DMC-GM5",
