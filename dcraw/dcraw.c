@@ -2727,6 +2727,10 @@ void CLASS leaf_hdr_load_raw()
 
   if (!filters || !raw_image)
   {
+#ifdef LIBRAW_LIBRARY_BUILD
+    if(!image)
+      throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
     pixel = (ushort *)calloc(raw_width, sizeof *pixel);
     merror(pixel, "leaf_hdr_load_raw()");
   }
@@ -3332,6 +3336,10 @@ void CLASS quicktake_100_load_raw()
       631, 643, 654, 665, 676, 687, 698, 710, 721, 732, 743, 754,  766,  777, 788, 799, 810, 822, 833, 844, 855, 866,
       878, 889, 900, 911, 922, 933, 945, 956, 967, 978, 989, 1001, 1012, 1023};
   int rb, row, col, sharp, val = 0;
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(width>640 || height > 480)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
 
   getbits(-1);
   memset(pixel, 0x80, sizeof pixel);

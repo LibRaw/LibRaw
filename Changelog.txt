@@ -1,4 +1,11 @@
-+2018-01-29  Alex Tutubalin <lexa@lexa.ru>
+2018-02-23  Alex Tutubalin <lexa@lexa.ru>
+Secunia #81000: 
+Credit: Laurent Delosieres, Secunia Research at Flexera
+ * leaf_hdr_load_raw: check for image pointer for demosaiced raw
+ * NOKIARAW parser: check image dimensions readed from file
+ * quicktake_100_load_raw: check width/height limits
+
+2018-01-29  Alex Tutubalin <lexa@lexa.ru>
  * Checks for width+left_margin/height+top_margin not larger than 64k
  * LIBRAW_MAX_ALLOC_MB define limits maximum image/raw_image allocation
    (default is 2048 so 2Gb per array)
