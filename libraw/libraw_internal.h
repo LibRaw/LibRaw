@@ -60,8 +60,8 @@ public:
   struct
   {
     uchar buf[0x4000];
-    int vbits, padding;
-  } pana_bits;
+    int vpos, padding;
+  } pana_data;
   uchar jpeg_buffer[4096];
   struct
   {
@@ -73,7 +73,7 @@ public:
     getbits.vbits = getbits.reset = 0;
     ph1_bits.bitbuf = 0;
     ph1_bits.vbits = 0;
-    pana_bits.vbits = 0;
+    pana_data.vpos = 0;
     ahd_data.cbrt[0] = -2.0f;
   }
 };
@@ -97,7 +97,7 @@ typedef struct
   char *meta_data;
   INT64 profile_offset;
   INT64 toffset;
-  unsigned pana_black[3];
+  unsigned pana_black[4];
 
 } internal_data_t;
 

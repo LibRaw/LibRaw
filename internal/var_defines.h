@@ -194,6 +194,8 @@ it under the terms of the one of two licenses as you choose:
 #define tile_width      (libraw_internal_data.unpacker_data.tile_width)
 #define tile_length     (libraw_internal_data.unpacker_data.tile_length)
 #define load_flags      (libraw_internal_data.unpacker_data.load_flags)
+#define pana_encoding   (libraw_internal_data.unpacker_data.pana_encoding)
+#define pana_bpp        (libraw_internal_data.unpacker_data.pana_bpp)
 
 #ifdef LIBRAW_IO_REDEFINED
 #define fread(ptr,size,n,stream) stream->read(ptr,size,n)
