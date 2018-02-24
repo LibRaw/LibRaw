@@ -1,57 +1,79 @@
 2018-02-23 Alex Tutubalin <lexa@lexa.ru>
- * No more compile-time support for LibRaw demosaic packs.
-   User-settable callbacks added to support demosaic packs functions by user-set code.
-   All callbacks are called with (this) as the only arg.
+
+ * LibRaw 0.19
+
+ * 91 cameras added compared to 0.18 (1013 total):
+    Apple 
+	iPhone 8(*), iPhone 8 plus, iPhone X
+    BlackMagic 
+	URSA Mini 4k, URSA Mini 4.6k, URSA Mini Pro 4.6k
+    Canon CHDK hack
+	 PowerShot A410, A540, D10, ELPH 130 IS, ELPH 160 IS, SD750,
+	    SX100 IS,SX130 IS, SX160 IS, SX510 HS, SX10 IS, IXUS 900Ti
+    Canon 
+	PowerShot G1 X Mark III, G9 X Mark II, EOS 6D Mark II, EOS 77D,
+ 	EOS 200D, EOS 800D, EOS M6, EOS M100
+    Casio EX-ZR4100/5100
+    DJI 
+	Phantom4 Pro/Pro+, Zenmuse X5, Zenmuse X5R
+    FujiFilm 
+	S6500fd, GFX 50S, X100f, X-A3, X-A5, X-A10, X-A20, X-E3, X-H1, X-T20
+    GITUP GIT2P
+    Hasselblad 
+	H6D-100c, A6D-100c
+    Huawei 
+	P9 (EVA-L09/AL00), Honor6a, Honor9, Mate10 (BLA-L29)
+    Leica 
+	CL, M10, TL2
+    LG 
+	V20 (F800K), VS995,
+    Nikon 
+	D850, D5600, D7500, Coolpix B700
+    Olympus 
+	E-PL9, E-M10 Mark III, TG-5
+    OnePlus 
+	One, A3303, A5000
+    Panasonic 
+	DMC-FZ45, DMC-FZ72, DC-FZ80/82, DC-G9 (std. res mode only), DC-GF10/GF90,
+  	DC-GH5, DC-GX9, DC-GX800/850/GF9, DMC-LX1, DC-ZS70 (DC-TZ90/91/92, DC-T93),
+	DC-TZ100/101/ZS100, DC-TZ200/ZS200
+    PARROT
+	Bebop 2, Bebop Drone
+    Pentax KP
+    PhaseOne IQ3 100MP Trichromatic
+    Samsung 
+	Galaxy Nexus, Galaxy S3, S6 (SM-G920F), S7, S7 Edge, S8 (SM-G950U),
+    Sony 
+	A7R III, A9, DSC-RX0, DSC-RX10IV
+    Yi M1
+    YUNEEC 
+	CGO3, CGO3P
+    Xiaoyi YIAC3 (YI 4k)
+
+  Note(*): for mobile phones with DNG format recording, only really tested cameras
+  are added to supported camera list. Really LibRaw should support any correct DNG.
+
+ * No more built-in support for LibRaw demosaic packs (GPL2/GPL3).
+   We're unable to support this (very old code), so we'll be happy to transfer this
+   code to some maintainer who wish to work with it.
+   
+   In LibRaw 0.19 we provide extension API: user-settable callbacks to be called in 
+   code points where demosaic pack code was called.
+
    -  int callbacks.pre_identify_cb(void *) => to be called in LibRaw::open_datastream
        before call to (standard) identify() function. If this call returns 1, this means
-       that all identify() is done and no standard identify() is called.
+       that RAW file is identified and all metadata fields are set, so no need to run
+       standard identify code.
    - void callbacks.post_identify_cb(void*) => called just after identify(), but before 
        any cleanup code;
-   - dcraw_process() callbacks are called before dcraw_process phases (names speaks for itself):
+   - dcraw_process() callbacks are called before dcraw_process phases (name speaks for itself):
        	pre_subtractblack_cb, pre_scalecolors_cb, pre_preinterpolate_cb, pre_interpolate_cb,
 	interpolate_bayer_cb, interpolate_xtrans_cb, post_interpolate_cb, pre_converttorgb_cb, 
 	post_converttorgb_cb
-  
-2018-02-23  Alex Tutubalin <lexa@lexa.ru>
-Secunia #81000: 
-Credit: Laurent Delosieres, Secunia Research at Flexera
- * leaf_hdr_load_raw: check for image pointer for demosaiced raw
- * NOKIARAW parser: check image dimensions readed from file
- * quicktake_100_load_raw: check width/height limits
 
-2018-01-29  Alex Tutubalin <lexa@lexa.ru>
- * Checks for width+left_margin/height+top_margin not larger than 64k
- * LIBRAW_MAX_ALLOC_MB define limits maximum image/raw_image allocation
-   (default is 2048 so 2Gb per array)
- * LibRaw::read_shorts item count is now unsigned
-
-2018-01-19  Alex Tutubalin <lexa@lexa.ru>
-Secunia #79000:
-Credit: Laurent Delosieres, Secunia Research at Flexera
- * All legacy (RGB raw) image loaders checks for imgdata.image is not NULL
- * kodak_radc_load_raw: check image size before processing
- * legacy memory allocator: allocate max(widh,raw_width)*max(height,raw_height)
-
-2017-08-12  Alex Tutubalin <lexa@lexa.ru>
- * 0.19-Snapshot-20170812
- * Camera support (984 total):
-    BlackMagic URSA Mini 4k, URSA Mini 4.6k, URSA Mini Pro 4.6k
-    Canon PowerShot G9 X Mark II, EOS 6D Mark II, 77D, 200D, 800D, EOS M6
-    FujiFilm X-A3, X-A10
-    GITUP GIT2P
-    Leica TL2
-    Nikon D7500
-    Olympus TG-5
-    OnePlus A5000
-    Panasonic DC-GH5, DC-ZS70 (DC-TZ90/91/92, DC-T93)
-    PARROT Bebop 2, Bebop Drone
-    Pentax KP
-    Sony A9
-    Yi M1
-    YUNEEC CGO3, CGO3P
-    Several mobile phones cameras (DNG format, only really tested cameras added to camera list)
-
- * Fuji 14-bit uncompressed decoder (X-A3)
+   All these new callbacks are called with (this) as the only arg.
+   To continue LibRaw-demosaic-pack-GPLx support one need to subclass LibRaw, set needed
+   callbacks in (e.g.) constructor code, than these callbacks to be called
 
  * Better DNG parser:
     - support for DefaultCrop Origin/Size tags (add LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP to raw_processing_options to enable)
@@ -64,29 +86,8 @@ Credit: Laurent Delosieres, Secunia Research at Flexera
   - Nikon data compression tag extracted into  makernotes.nikon.NEFCompression 
   - Hasselblad BaseISO and Gain extracted into makernotes.hasselblad
   - Canon multishot params extracted into makernotes.canon.multishot
+  - lot of other vendor-specific makernotes data (see data structures definitions for details).
 
- * Color data added/updated/fixed for many cameras
-
-* Correct data maximum for Fuji X-* cameras
-
-* Thumbnail processing:
-   - JPEG thumbnails: if compiled with libjpeg, color count is extracted into imgdata.thumbnail.tcolors
-   - PPM (bitmap) thumbnails: color count is set according to thumbnail IFD tag
-   - PPM16 thumbnails: if LIBRAW_PROCESSING_USE_PPM16_THUMBS set in raw_processing_options, than thumbnail will be extracted
-     as is, not converted to 8 bit. thumbnail.tformat is set to LIBRAW_THUMBNAIL_BITMAP16 in this case.
-     Untested, because it is hard to find RAWs with 16-bit bitmaps.
-
-2017-02-12  Alex Tutubalin <lexa@lexa.ru>
- * 0.19-Snapshot-20170212
- * Fuji compressed decoder updated to handle Bayer compressed data (GFX 50s)
- * Camera support:
-   Fujifilm: GFX50s, X100f, X-T20
-   Leica M10
-   Nikon D5600, B700
-   Panasonic FZ80/82, GX800/850
-   
- * Added several C-API calls to access parts of libraw public structures
- * Source completely reformatted using clang-format
  * New LibRaw::open_bayer call allows to pass sensor dump w/o metadata directly to LibRaw:
      virtual int open_bayer(unsigned char *data, unsigned datalen,
 	  ushort _raw_width, ushort _raw_height, ushort _left_margin, ushort _top_margin,
@@ -112,6 +113,61 @@ Credit: Laurent Delosieres, Secunia Research at Flexera
 
     see samples/openbayer_sample.cpp for usage sample (note, this sample is 'sample only', suited for
     Kodak KAI-0340 sensor, you'll need change open_bayer() params for your data).
+
+ * Color data added/updated/fixed for many cameras
+
+ * Correct data maximum for Fuji X-* cameras
+
+ * Thumbnail processing:
+   - JPEG thumbnails: if compiled with libjpeg, color count is extracted into imgdata.thumbnail.tcolors
+   - PPM (bitmap) thumbnails: color count is set according to thumbnail IFD tag
+   - PPM16 thumbnails: if LIBRAW_PROCESSING_USE_PPM16_THUMBS set in raw_processing_options, than thumbnail will be extracted
+     as is, not converted to 8 bit. thumbnail.tformat is set to LIBRAW_THUMBNAIL_BITMAP16 in this case.
+     Untested, because it is hard to find RAWs with 16-bit bitmaps.
+
+== Compatibility fixes
+
+ * struct tiff_tag renamed to libraw_tiff_tag
+ * pow64f renamed to libraw_pow64f
+
+== Bugs fixed:
+
+ * COLOR(r,c) works correctly on X-Trans files
+
+== Security fixes:
+Secunia #81000: 
+Credit: Laurent Delosieres, Secunia Research at Flexera
+ * leaf_hdr_load_raw: check for image pointer for demosaiced raw
+ * NOKIARAW parser: check image dimensions readed from file
+ * quicktake_100_load_raw: check width/height limits
+
+Secunia #79000:
+Credit: Laurent Delosieres, Secunia Research at Flexera
+ * All legacy (RGB raw) image loaders checks for imgdata.image is not NULL
+ * kodak_radc_load_raw: check image size before processing
+ * legacy memory allocator: allocate max(widh,raw_width)*max(height,raw_height)
+
+Secunia #76000:
+ * Fixed fuji_width handling if file is neither fuji nor DNG
+ * Fixed xtrans interpolate for broken xtrans pattern
+ * Fixed panasonic decoder
+ * LibRaw 0.18.6
+
+Other fixes:
+ * Checks for width+left_margin/height+top_margin not larger than 64k
+ * LIBRAW_MAX_ALLOC_MB define limits maximum image/raw_image allocation
+   (default is 2048 so 2Gb per array)
+ * LibRaw::read_shorts item count is now unsigned
+ * Fixed possible out of bound access in Kodak 6500 loader
+ * CVE-2017-14348: Fix for possible heap overrun in Canon makernotes parser
+   Credit: Henri Salo from Nixu Corporation
+ * Fix for CVE-2017-13735
+ * CVE-2017-14265: Additional check for X-Trans CFA pattern data
+ * Fixed several errors (Secunia advisory SA75000)
+ * ACES colorspace output option included in dcraw_emu help page
+ * Avoided possible 32-bit overflows in Sony metadata parser
+ * Phase One flat field code called even for half-size
+
 
 2016-12-27  Alex Tutubalin <lexa@lexa.ru>
  * Licensing changes:
