@@ -15657,7 +15657,7 @@ void CLASS identify()
     i = get4();
     width = get2();
     height = get2();
-#ifdef LIBRAW_LIBRARY_BUIL
+#ifdef LIBRAW_LIBRARY_BUILD
     // data length should be in range w*h..w*h*2
     if(width*height < (LIBRAW_MAX_ALLOC_MB*1024*512L) && width*height>1
        && i >= width * height && i <= width*height*2)
@@ -15670,7 +15670,7 @@ void CLASS identify()
 	raw_height = height + (top_margin = i / (width * tiff_bps/8) - height);
 	mask[0][3] = 1;
 	filters = 0x61616161;
-#ifdef LIBRAW_LIBRARY_BUIL
+#ifdef LIBRAW_LIBRARY_BUILD
       }
     else
       is_raw = 0;
