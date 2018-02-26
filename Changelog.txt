@@ -1,8 +1,8 @@
 2018-02-23 Alex Tutubalin <lexa@lexa.ru>
 
- * LibRaw 0.19
+ * LibRaw 0.19-Beta1
 
- * 91 cameras added compared to 0.18 (1013 total):
+ * 84 cameras added compared to 0.18 (1014 total):
     Apple 
 	iPhone 8(*), iPhone 8 plus, iPhone X
     BlackMagic 

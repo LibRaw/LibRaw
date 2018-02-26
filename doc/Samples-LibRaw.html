@@ -9,11 +9,11 @@
     <p>The LibRaw package contains several examples illustrating the use of this library. Their source codes are located in the samples/ folder, and after library build they will be in the bin/ folder:</p>
     <ul>
       <li><strong>raw-identify</strong> The only LibRaw call it uses is <a
-          href="API-CXX.html#open_file">open_file()</a>; further code prints the values of the fields of the imgdata structure. The output of <strong>raw-identify</strong> (without switches) is virtually identical to the output of<strong> <strong>dcraw -i</strong>.<br>
-        </strong><strong>raw-identify -v</strong> provides data similar to <strong>dcraw -i -v&nbsp;</strong>and also lot of additional metadata is dumped too<br>
+          href="API-CXX.html#open_file">open_file()</a>; further code prints the values of the fields of the imgdata structure. <strong><br>
+        </strong><strong>raw-identify -v</strong> provides extensive dump of metadata/<br>
         Command line key <strong>-u</strong> shows unpacking function name, while <strong>-u -f</strong> prints function name and masked are sizes.<br>
         <strong>raw-identify -w </strong>will print white balance tables stored in RAW file.</li>
-      <li><strong>simple_dcraw</strong> A simple "emulation" of dcraw reproducing the behavior of <strong>dcraw [-D] [-e] [-v] [-T]</strong>.&nbsp; A simplified version of this example is <a
+      <li><strong>simple_dcraw</strong> A simple "emulation" of dcraw reproducing the behavior of <strong>dcraw [-e] [-v] [-T]</strong>.&nbsp; A simplified version of this example is <a
           href="#code">considered below</a>. <br>
         <strong>-B</strong> command-line switch turns on use of <a href="API-CXX.html#open_buffer">open_buffer() API call</a> used via mmap() of input file (Unix only).</li>
       <li><strong>dcraw_half</strong> Demonstrates the use of <a href="API-C.html">C API</a>. The example emulates the behavior of <strong>dcraw -h</strong> (no other control parameters can be specified in this example). </li>
@@ -61,7 +61,7 @@
       <li><strong>half_mt</strong> Emulation of <strong>dcraw -h</strong>. It "understands" the following keys: -a (automatic white balance over the entire image), -w (white balance of the camera), -T (output in the tiff format), and -J n (number of parallel threads launched for image processing).<br>
         On multiprocessor/multicore computers, the speed gain is notable in the case of mass processing. On a Win32 machine, the example is assembled from the initial file half_mt_win32.c, since work with threads under Windows is fundamentally different and it it easier to copy simple source codes than write one complex code.</li>
       <li><strong>mem_image</strong> This sample uses <a href="API-CXX.html#dcraw_make_mem_image">dcraw_make_mem_image</a> and <a
-          href="API-CXX.html#dcraw_make_mem_thumb">dcraw_make_mem_thumb</a> calls, than writes data in PPM format. Results should be identical with dcraw with same command-line options (options supported: <strong>-4, -1, -e, -h</strong>).</li>
+          href="API-CXX.html#dcraw_make_mem_thumb">dcraw_make_mem_thumb</a> calls, than writes data in PPM format. </li>
       <li><strong>unprocessed_raw</strong> This sample extracts (mostly) unaltered RAW data including masked pixels data (on supported cameras). If black frame exists and black frame extraction is supported for given format, masked pixels data is added to resulting .TIFF file. Command line options: <strong>-q</strong> - be quiet, <strong>-A</strong> - autoscale data (integer multiplier), <strong>-g</strong> gamma-correction (gamma 2.2) for data (instead of precise linear one), <strong>-B</strong> turns on black level subtraction</li>
       <li><strong>4channnels</strong> - splits RAW-file into four separate 16-bit grayscale TIFFs (per RAW channel).<br>
         Command line switches:
@@ -77,7 +77,7 @@
       <li><strong>postprocessing_benchmark</strong> - will print timings of RAW processing steps</li>
     </ul>
     <h2>Example of docmode</h2>
-    <p>Below we consider the samples/simple_dcraw.cpp example, which emulates the behavior of <strong>dcraw [-D] [-e][-v][-t]</strong>. To save space, let us assume that keys -t -v are always specified (to avoid comments on command line parsing) and there is always one parameter (name of file), which is the only one and always passed to the program.</p>
+    <p>Below we consider the samples/simple_dcraw.cpp example, which emulates the behavior of <strong>dcraw [-e][-v][-t]</strong>. To save space, let us assume that keys -t -v are always specified (to avoid comments on command line parsing) and there is always one parameter (name of file), which is the only one and always passed to the program.</p>
     <pre>int main(int ac, char *av[])
 {
  int i, ret, verbose=0, output_thumbs=0;
