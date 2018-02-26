@@ -7633,7 +7633,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       }
       break;
 
-    // 5DS / 5DS R / 80D / 1300D / 5D4 / 800D / 77D / 6D II / 200D
+    // 5DS / 5DS R / 80D / 1300D / 2000D / 4000D / 5D4 / 800D / 77D / 6D II / 200D
     case 1560:
     case 1592:
     case 1353:
@@ -7656,7 +7656,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
         bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
         imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
       }
-      if (imgdata.makernotes.canon.CanonColorDataSubVer == 14) // 1300D
+      if (imgdata.makernotes.canon.CanonColorDataSubVer == 14) // 1300D / 2000D / 4000D
       {
         fseek(ifp, save1 + (0x230 << 1), SEEK_SET); // offset 560 shorts
         imgdata.makernotes.canon.NormalWhiteLevel = get2();
@@ -15450,6 +15450,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 7457,-671,-937,-4849,12495,2643,-1213,2354,5492 } },
     { "Canon EOS 10D", 0, 0xfa0, /* updated */
       { 8250,-2044,-1127,-8092,15606,2664,-2893,3453,8348 } },
+    { "Canon EOS 2000D", 0, 0, /* temp */
+      { 6875,-970,-932,-4691,12459,2501,-874,1953,5809 } },
     { "Canon EOS 200D", 0, 0,
       { 7377,-742,-998,-4235,11981,2549,-673,1918,5538 } },
     { "Canon EOS 20Da", 0, 0,
@@ -15474,6 +15476,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8250,-2044,-1127,-8092,15606,2664,-2893,3453,8348 } },
     { "Canon EOS 350D", 0, 0xfff,
       { 6018,-617,-965,-8645,15881,2975,-1530,1719,7642 } },
+    { "Canon EOS 4000D", 0, 0, /* temp */
+      { 6939,-1016,-866,-4428,12473,2177,-1175,2178,6162 } },
     { "Canon EOS 400D", 0, 0xe8e,
       { 7054,-1501,-990,-8156,15544,2812,-1278,1414,7796 } },
     { "Canon EOS 450D", 0, 0x390d,
@@ -17245,6 +17249,8 @@ void CLASS identify()
           {0x407, "EOS M6"},
           {0x408, "EOS 77D"},
           {0x417, "EOS 200D"},
+          {0x422, "EOS 4000D"},
+          {0x432, "EOS 2000D"},
       },
     sonique[] = {
         {0x002, "DSC-R1"},      {0x100, "DSLR-A100"},   {0x101, "DSLR-A900"},  {0x102, "DSLR-A700"},
