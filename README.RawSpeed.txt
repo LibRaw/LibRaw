@@ -1,6 +1,11 @@
 ================= Compile LibRaw with RawSpeed support ========================
 
+0) RawSpeed version: 
+   LibRaw supports 'master' version of RawSpeed library: https://github.com/darktable-org/rawspeed/tree/master
 
+   Although this version is really outdated, newer versions does not looks stable enough for production
+   use (for example, this critical issue not fixed for 10+ months: https://github.com/darktable-org/rawspeed/issues/100 )
+   
 1) Prerequisites
 
 To build RawSpeed you need libxml2, iconv, and JPEG library installed on your 
