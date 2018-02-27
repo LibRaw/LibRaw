@@ -8228,7 +8228,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
       {360, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8, 0x0346, 0x01cd},
       {361, 0, 0, 0, 0, 0, 0xffff, 0xffff},
       {362, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9, 0x0320, 0x019f},
-      {363, 0, 0, 0, 0, 0, 0xffff, 0xffff},
+      {363, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9, 0x0320, 0x019f},
       {364, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff},
       {365, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff},
   };
@@ -8520,7 +8520,14 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     parseSonyLensFeatures(SonySubstitution[buf[0x116]], SonySubstitution[buf[0x117]]);
   }
 
-  if ((id == 347) || (id == 350) || (id == 354) || (id == 357) || (id == 358) || (id == 360) || (id == 362))
+  if ((id == 347) ||
+      (id == 350) ||
+      (id == 354) ||
+      (id == 357) ||
+      (id == 358) ||
+      (id == 360) ||
+      (id == 362) ||
+      (id == 363))
   {
     if (len <= 0x8d)
       return;
@@ -8565,10 +8572,13 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
 
   if (id == 362)
   {
+//    printf("==>>");
     for (c = 0; c < 6; c++)
     {
       imgdata.makernotes.sony.TimeStamp[c] = SonySubstitution[buf[0x0066 + c]];
+//      printf ("%c", imgdata.makernotes.sony.TimeStamp[c]);
     }
+//    printf("<<==\n");
   }
 
   return;
@@ -8584,7 +8594,7 @@ void CLASS process_Sony_0x9400(uchar *buf, ushort len, unsigned id)
   if (((bufx == 0x23) || (bufx == 0x24) || (bufx == 0x26)) && (len >= 0x1f))
   { // 0x9400 'c' version
 
-    if ((id == 358) || (id == 362) || (id == 365))
+    if ((id == 358) || (id == 362) || (id == 363) || (id == 365))
     {
       imgdata.makernotes.sony.ShotNumberSincePowerUp = SonySubstitution[buf[0x0a]];
     }
@@ -16889,6 +16899,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 6660,-1918,-471,-4613,12398,2485,-649,1433,6447 } },
     { "Sony ILCE-9", 0, 0,
       { 6389,-1703,-378,-4562,12265,2587,-670,1489,6550 } },
+    { "Sony ILCE-7M3", 0, 0, /* temp */
+      { 5271,-712,-347,-6153,13653,2763,-1601,2366,7242 } },
     { "Sony ILCE-7M2", 0, 0,
       { 5271,-712,-347,-6153,13653,2763,-1601,2366,7242 } },
     { "Sony ILCE-7SM2", 0, 0,
@@ -17271,7 +17283,8 @@ void CLASS identify()
         {0x155, "DSC-RX100M4"}, {0x156, "DSC-RX10M2"},  {0x158, "DSC-RX1RM2"}, {0x15a, "ILCE-QX1"},
         {0x15b, "ILCE-7RM2"},   {0x15e, "ILCE-7SM2"},   {0x161, "ILCA-68"},    {0x162, "ILCA-99M2"},
         {0x163, "DSC-RX10M3"},  {0x164, "DSC-RX100M5"}, {0x165, "ILCE-6300"},  {0x166, "ILCE-9"},
-        {0x168, "ILCE-6500"},   {0x16a, "ILCE-7RM3"},   {0x16c, "DSC-RX0"},    {0x16d, "DSC-RX10M4"},
+        {0x168, "ILCE-6500"},   {0x16a, "ILCE-7RM3"},   {0x16b, "ILCE-7M3"},   {0x16c, "DSC-RX0"},
+        {0x16d, "DSC-RX10M4"},
     };
 
 #ifdef LIBRAW_LIBRARY_BUILD
