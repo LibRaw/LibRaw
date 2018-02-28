@@ -81,7 +81,8 @@
     - DNG PreviewColorspace extracted into dng_levels.preview_colorspace
 
  * Metadata extraction:
-  - Better extraction of camera measured balance (LIBRAW_WBI_Auto and WBI_Measured), this not the same as 'as shot' if some preset/manual tune is used.
+  - Better extraction of camera measured balance (LIBRAW_WBI_Auto and WBI_Measured), 
+    this not the same as 'as shot' if some preset/manual tune is used.
   - Extraction of camera custom balances (LIBRAW_WBI_CustomN)
   - Nikon data compression tag extracted into  makernotes.nikon.NEFCompression 
   - Hasselblad BaseISO and Gain extracted into makernotes.hasselblad
@@ -158,7 +159,7 @@ Other fixes:
  * LIBRAW_MAX_ALLOC_MB define limits maximum image/raw_image allocation
    (default is 2048 so 2Gb per array)
  * LibRaw::read_shorts item count is now unsigned
- * Fixed possible out of bound access in Kodak 6500 loader
+ * Fixed possible out of bound access in Kodak 65000 loader
  * CVE-2017-14348: Fix for possible heap overrun in Canon makernotes parser
    Credit: Henri Salo from Nixu Corporation
  * Fix for CVE-2017-13735
