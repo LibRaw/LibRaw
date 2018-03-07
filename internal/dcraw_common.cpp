@@ -8570,17 +8570,6 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     imgdata.makernotes.sony.ImageCount3 = sget4(s);
   }
 
-  if (id == 362)
-  {
-//    printf("==>>");
-    for (c = 0; c < 6; c++)
-    {
-      imgdata.makernotes.sony.TimeStamp[c] = SonySubstitution[buf[0x0066 + c]];
-//      printf ("%c", imgdata.makernotes.sony.TimeStamp[c]);
-    }
-//    printf("<<==\n");
-  }
-
   return;
 }
 
@@ -9213,14 +9202,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   INT64 fsize = ifp->size();
 
   fread(buf, 1, 10, ifp);
-
-  /*
-    printf("===>>buf: 0x");
-    for (int i = 0; i < sizeof buf; i ++) {
-          printf("%02x", buf[i]);
-    }
-    putchar('\n');
-  */
 
   if (!strcmp(buf, "Nikon"))
   {
@@ -10052,14 +10033,6 @@ void CLASS parse_makernote(int base, int uptag)
   if (!strncmp(make, "Nokia", 5))
     return;
   fread(buf, 1, 10, ifp);
-
-  /*
-    printf("===>>buf: 0x");
-    for (int i = 0; i < sizeof buf; i ++) {
-          printf("%02x", buf[i]);
-    }
-    putchar('\n');
-  */
 
   if (!strncmp(buf, "KDK", 3) || /* these aren't TIFF tables */
       !strncmp(buf, "VER", 3) || !strncmp(buf, "IIII", 4) || !strncmp(buf, "MMMM", 4))
@@ -15035,7 +15008,6 @@ void CLASS parse_fuji(int offset)
       int l = get2(); /* margins? */
       int m = get2(); /* margins? */
       int n = get2();
-      //      printf ("==>>0x122: height= %d l= %d m= %d width= %d\n", k, l, m, n);
     }
 
     else if (tag == 0x9650)
