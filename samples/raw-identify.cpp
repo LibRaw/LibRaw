@@ -751,6 +751,16 @@ int main(int ac, char *av[])
         printf(" %f", C.pre_mul[c]);
       printf("\n");
 
+      if (Sony.PixelShiftGroupID) {
+        printf("\nSony PixelShiftGroupPrefix 0x%x PixelShiftGroupID %d, ",
+                Sony.PixelShiftGroupPrefix, Sony.PixelShiftGroupID);
+        if (Sony.numInPixelShiftGroup) {
+             printf("shot# %d (starts at 1) of total %d\n", Sony.numInPixelShiftGroup, Sony.nShotsInPixelShiftGroup);
+        } else {
+           printf("shots in PixelShiftGroup %d, already ARQ\n", Sony.nShotsInPixelShiftGroup);
+        }
+      }
+
       if (Sony.Sony0x9400_version)
         printf("\nSONY Sequence data, tag 0x9400 version %x\n\
 \tReleaseMode2: %d\n\
