@@ -10328,6 +10328,20 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     imgdata.makernotes.sony.MeteringMode2 = get2();
   }
 
+  else if (tag == 0x202f)
+  {
+    imgdata.makernotes.sony.PixelShiftGroupID = get4();
+    imgdata.makernotes.sony.PixelShiftGroupPrefix = imgdata.makernotes.sony.PixelShiftGroupID >> 22;
+    imgdata.makernotes.sony.PixelShiftGroupID =
+      ((imgdata.makernotes.sony.PixelShiftGroupID >> 17) & (unsigned) 0x1f) * (unsigned) 1000000 +
+      ((imgdata.makernotes.sony.PixelShiftGroupID >> 12) & (unsigned) 0x1f) * (unsigned) 10000 +
+      ((imgdata.makernotes.sony.PixelShiftGroupID >>  6) & (unsigned) 0x3f) * (unsigned) 100 +
+      (imgdata.makernotes.sony.PixelShiftGroupID         & (unsigned) 0x3f);
+
+    imgdata.makernotes.sony.numInPixelShiftGroup = fgetc(ifp);
+    imgdata.makernotes.sony.nShotsInPixelShiftGroup = fgetc(ifp);
+  }
+
   else if (tag == 0x9050 && len < 256000) // little endian
   {
     table_buf_0x9050 = (uchar *)malloc(len);

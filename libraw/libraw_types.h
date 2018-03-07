@@ -464,6 +464,10 @@ typedef unsigned long long UINT64;
     char SonyDateTime[20];
     uchar TimeStamp[6];
     unsigned ShotNumberSincePowerUp;
+    ushort PixelShiftGroupPrefix;
+    unsigned PixelShiftGroupID;
+    char nShotsInPixelShiftGroup;
+    char numInPixelShiftGroup;	/* '0' if ARQ, first shot in the group has '1' here */
   } libraw_sony_info_t;
 
   typedef struct
