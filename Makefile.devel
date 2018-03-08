@@ -1,4 +1,4 @@
-all: sources library all_samples dcraw_binaries
+all: sources library all_samples 
 
 PP=./internal/preprocess.pl
 
