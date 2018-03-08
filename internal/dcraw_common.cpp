@@ -9225,6 +9225,10 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
 
 void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES)
+  	return;
+#endif
   unsigned ver97 = 0, offset = 0, entries, tag, type, len, save, c;
   unsigned i;
 
@@ -10055,6 +10059,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
 void CLASS parse_makernote(int base, int uptag)
 {
+#ifdef LIBRAW_LIBRARY_BUILD
+  if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES)
+  	return;
+#endif
   unsigned offset = 0, entries, tag, type, len, save, c;
   unsigned ver97 = 0, serial = 0, i, wbi = 0, wb[4] = {0, 0, 0, 0};
   uchar buf97[324], ci, cj, ck;
@@ -13667,6 +13675,7 @@ int CLASS parse_tiff_ifd(int base)
     // IB start
     case 50740: /* tag 0xc634 : DNG Adobe, DNG Pentax, Sony SR2, DNG Private */
 #ifdef LIBRAW_LIBRARY_BUILD
+  if (!(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES))
     {
       char mbuf[64];
       unsigned short makernote_found = 0;
