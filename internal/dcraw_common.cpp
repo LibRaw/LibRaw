@@ -19244,6 +19244,70 @@ dng_skip:
     {
       int sidx;
       // Per field, not per structure
+	  if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_CHECK_DNG_ILLUMINANT)
+	  {
+		  int illidx[2], cmidx[2],calidx[2], abidx;
+		  for(int i = 0; i < 2; i++)
+		  {
+			  illidx[i] = IFDCOLORINDEX(iifd, i, LIBRAW_DNGFM_ILLUMINANT);
+			  cmidx[i] = IFDCOLORINDEX(iifd, i, LIBRAW_DNGFM_COLORMATRIX);
+			  calidx[i] = IFDCOLORINDEX(iifd, i, LIBRAW_DNGFM_CALIBRATION);
+		  }
+		  abidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_ANALOGBALANCE);
+		  // Data found, all in same ifd, illuminants are inited
+		  if (illidx[0] >= 0 && illidx[0] < tiff_nifds && illidx[0] == illidx[1] && illidx[0] == cmidx[0] && illidx[0] == cmidx[1]
+			  && tiff_ifd[illidx[0]].dng_color[0].illuminant>0 && tiff_ifd[illidx[0]].dng_color[1].illuminant>0)
+		  {
+			  sidx = illidx[0]; // => selected IFD
+			  double cc[4][4], cm[4][3], cam_xyz[4][3];
+			  // CM -> Color Matrix
+			  // CC -> Camera calibration
+			  for (int j = 0; j < 4; j++)  for (int i = 0; i < 4; i++)  cc[j][i] = i == j;
+			  int colidx = -1;
+
+			  // IS D65 here?
+			  for(int i = 0; i < 2; i++)
+			  {
+				  int ill = tiff_ifd[sidx].dng_color[i].illuminant;
+				  if (tiff_ifd[sidx].dng_color[i].illuminant == LIBRAW_WBI_D65)
+				  {
+					  colidx = i; break;
+				  }
+			  }
+
+			  // Other daylight-type ill
+			  if(colidx<0)
+				  for(int i = 0; i < 2; i++)
+				  {
+					  int ill = tiff_ifd[sidx].dng_color[i].illuminant;
+					  if (ill == LIBRAW_WBI_Daylight || ill == LIBRAW_WBI_D55 || ill == LIBRAW_WBI_D75 || ill == LIBRAW_WBI_D50 || ill == LIBRAW_WBI_Flash)
+					  {
+						  colidx = i; break;
+					  }
+				  }
+			  if(colidx>=0) // Selected
+			  {
+				  // Init camera matrix from DNG
+				  FORCC for (int j = 0; j < 3; j++)
+					  cm[c][j] = tiff_ifd[sidx].dng_color[colidx].colormatrix[c][j];
+
+				  if(calidx[colidx] == sidx)
+				  {
+					  for (int i = 0; i < colors; i++)
+						  FORCC
+						  cc[i][c] = tiff_ifd[sidx].dng_color[colidx].calibration[i][c];
+				  }
+
+				  if(abidx == sidx)
+					for (int i = 0; i < colors; i++)
+						  FORCC cc[i][c] *= tiff_ifd[sidx].dng_levels.analogbalance[i];
+				  int j;
+				  FORCC for (int i = 0; i < 3; i++) for (cam_xyz[c][i] = j = 0; j < colors; j++) cam_xyz[c][i] +=
+					  cc[c][j] * cm[j][i];// add AsShotXY later * xyz[i];
+				  cam_xyz_coeff(cmatrix, cam_xyz);
+			  }
+		  }
+	  }
 
       if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP)
       {
