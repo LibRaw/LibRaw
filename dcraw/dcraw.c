@@ -20923,6 +20923,30 @@ dng_skip:
 #endif
     return;
   }
+  {
+   // Check cam_mul range
+   int cmul_ok =1;
+   FORCC if(cam_mul[c] <= 0.001f)  cmul_ok = 0;;
+
+   if(cmul_ok)
+   {
+	  double cmin = cam_mul[0],cmax;
+	  double cnorm[4];
+	  FORCC	  cmin = MIN(cmin,cam_mul[c]);
+	  FORCC	  cnorm[c] = cam_mul[c]/cmin;
+	  cmax = cmin = cnorm[0];
+	  FORCC
+	  {
+		  cmin = MIN(cmin,cnorm[c]);
+		  cmax = MIN(cmax,cnorm[c]);
+	  }
+	  if(cmin <= 0.01f || cmax > 100.f)
+		  cmul_ok = false;
+   }
+   if(!cmul_ok)
+	  cam_mul[0] = cam_mul[3] = 0;
+
+  }
   if ((use_camera_matrix & ((use_camera_wb || dng_version) | 0x2)) && cmatrix[0][0] > 0.125)
   {
     memcpy(rgb_cam, cmatrix, sizeof cmatrix);
