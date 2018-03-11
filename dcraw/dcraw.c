@@ -20875,7 +20875,7 @@ dng_skip:
 				  }
 
 				  if(abidx == sidx)
-					for (i = 0; i < colors; i++)
+					for (int i = 0; i < colors; i++)
 						  FORCC cc[i][c] *= tiff_ifd[sidx].dng_levels.analogbalance[i];
 				  int j;
 				  FORCC for (int i = 0; i < 3; i++) for (cam_xyz[c][i] = j = 0; j < colors; j++) cam_xyz[c][i] +=
