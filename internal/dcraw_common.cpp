@@ -5197,7 +5197,7 @@ void CLASS scale_colors()
 
   if (user_mul[0])
     memcpy(pre_mul, user_mul, sizeof pre_mul);
-  if (use_auto_wb || (use_camera_wb && cam_mul[0] == -1))
+  if (use_auto_wb || (use_camera_wb && cam_mul[0] <= 0.001f))
   {
     memset(dsum, 0, sizeof dsum);
     bottom = MIN(greybox[1] + greybox[3], height);
@@ -5231,7 +5231,7 @@ void CLASS scale_colors()
       }
     FORC4 if (dsum[c]) pre_mul[c] = dsum[c + 4] / dsum[c];
   }
-  if (use_camera_wb && cam_mul[0] != -1)
+  if (use_camera_wb && cam_mul[0] > 0.001f)
   {
     memset(sum, 0, sizeof sum);
     for (row = 0; row < 8; row++)
@@ -5252,7 +5252,7 @@ void CLASS scale_colors()
 #endif
         if (sum[0] && sum[1] && sum[2] && sum[3])
       FORC4 pre_mul[c] = (float)sum[c + 4] / sum[c];
-    else if (cam_mul[0] && cam_mul[2])
+    else if (cam_mul[0] > 0.001f && cam_mul[2] > 0.001f)
       memcpy(pre_mul, cam_mul, sizeof pre_mul);
     else
     {
@@ -5266,7 +5266,8 @@ void CLASS scale_colors()
   }
 #ifdef LIBRAW_LIBRARY_BUILD
   // Nikon sRAW, daylight
-  if (load_raw == &LibRaw::nikon_load_sraw && !use_camera_wb && !use_auto_wb && cam_mul[0] > 0.001f &&
+  if (load_raw == &LibRaw::nikon_load_sraw && !use_camera_wb 
+       && !use_auto_wb && cam_mul[0] > 0.001f &&
       cam_mul[1] > 0.001f && cam_mul[2] > 0.001f)
   {
     for (c = 0; c < 3; c++)
@@ -12027,7 +12028,9 @@ void CLASS parse_mos(int offset)
     if (!strcmp(data, "NeutObj_neutrals") && !cam_mul[0])
     {
       FORC4 fscanf(ifp, "%d", neut + c);
-      FORC3 cam_mul[c] = (float)neut[0] / neut[c + 1];
+      FORC3 
+        if(neut[c + 1]) 
+      		cam_mul[c] = (float)neut[0] / neut[c + 1];
     }
     if (!strcmp(data, "Rows_data"))
       load_flags = get4();
@@ -12357,7 +12360,7 @@ void CLASS parse_kodak_ifd(int base)
 
     if (tag == 2120 + wbi || (wbi < 0 && tag == 2125)) /* use Auto WB if illuminant index is not set */
     {
-      FORC3 mul[c] = (num = getreal(type)) == 0 ? 1 : num;
+      FORC3 mul[c] = (num = getreal(type)) <= 0.001f ? 1 : num;
       FORC3 cam_mul[c] = mul[1] / mul[c]; /* normalise against green */
     }
     if (tag == 2317)
@@ -12757,7 +12760,7 @@ int CLASS parse_tiff_ifd(int base)
       }
       break;
 #endif
-      if (len < 50 || cam_mul[0])
+      if (len < 50 || cam_mul[0]>0.001f)
         break;
       fseek(ifp, 12, SEEK_CUR);
       FORC3 cam_mul[c] = get2();
@@ -13146,7 +13149,12 @@ int CLASS parse_tiff_ifd(int base)
 // IB end
 #endif
     case 34306: /* Leaf white balance */
-      FORC4 cam_mul[c ^ 1] = 4096.0 / get2();
+      FORC4
+      {
+      	int q = get2();
+	if(q)
+      		cam_mul[c ^ 1] = 4096.0 / q;
+      }
       break;
     case 34307: /* Leaf CatchLight color matrix */
       fread(software, 1, 7, ifp);
@@ -13960,7 +13968,9 @@ int CLASS parse_tiff_ifd(int base)
   if (asn[0])
   {
     cam_mul[3] = 0;
-    FORCC cam_mul[c] = 1 / asn[c];
+    FORCC
+     if(asn[c])
+     	cam_mul[c] = 1 / asn[c];
   }
   if (!use_cm)
     FORCC pre_mul[c] /= cc[c][c];
@@ -14608,7 +14618,7 @@ void CLASS parse_ciff(int offset, int length, int depth)
         if (!wbi)
           cam_mul[0] = -1; /* use my auto white balance */
       }
-      else if (!cam_mul[0])
+      else if (cam_mul[0] <= 0.001f)
       {
         if (get2() == key[0]) /* Pro1, G6, S60, S70 */
           c = (strstr(model, "Pro1") ? "012346000000000000" : "01345:000000006008")[LIM(0, wbi, 17)] - '0' + 2;
