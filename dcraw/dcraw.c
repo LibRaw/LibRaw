@@ -9053,7 +9053,6 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       offsetWhiteLevels = save1 + (0x031c << 1);
       break;
 
-
     }
 
     if (offsetChannelBlackLevel) {
@@ -9063,6 +9062,8 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
     }
     if (offsetWhiteLevels) {
+      if ((offsetWhiteLevels - offsetChannelBlackLevel) != 8L)
+        fseek(ifp, offsetWhiteLevels, SEEK_SET);
       imgdata.makernotes.canon.NormalWhiteLevel = get2();
       imgdata.makernotes.canon.SpecularWhiteLevel = get2();
       FORC4
