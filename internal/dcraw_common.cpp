@@ -7154,52 +7154,48 @@ void CLASS Canon_WBpresets(int skip1, int skip2)
   return;
 }
 
-void CLASS Canon_WBCTpresets(short WBCTversion)
-{
-  if (WBCTversion == 0)
-    for (int i = 0; i < 15; i++) // tint, as shot R, as shot B, CСT
-    {
-      imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-      fseek(ifp, 2, SEEK_CUR);
-      imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(get2(), 1.f);
-      imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(get2(), 1.f);
-      imgdata.color.WBCT_Coeffs[i][0] = get2();
+void CLASS Canon_WBCTpresets(short WBCTversion) {
+
+  int i;
+
+  if (WBCTversion == 0) { // tint, as shot R, as shot B, CСT
+      for (i = 0; i < 15; i++) {
+        imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+        fseek(ifp, 2, SEEK_CUR);
+        imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(get2(), 1.f);
+        imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(get2(), 1.f);
+        imgdata.color.WBCT_Coeffs[i][0] = get2();
     }
-  else if (WBCTversion == 1)
-    for (int i = 0; i < 15; i++) // as shot R, as shot B, tint, CСT
-    {
-      imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-      imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(get2(), 1.f);
-      imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(get2(), 1.f);
-      fseek(ifp, 2, SEEK_CUR);
-      imgdata.color.WBCT_Coeffs[i][0] = get2();
-    }
-  else if ((WBCTversion == 2) && ((unique_id == 0x80000374) || // M3
-                                  (unique_id == 0x80000384) || // M10
-                                  (unique_id == 0x80000394) || // M5
-                                  (unique_id == 0x80000407) || // M6
-                                  (unique_id == 0x80000398) || // M100
-                                  (unique_id == 0x03970000) || // G7 X Mark II
-                                  (unique_id == 0x04100000) || // G9 X Mark II
-                                  (unique_id == 0x04180000)))  // G1 X Mark III
-    for (int i = 0; i < 15; i++)                               // tint, offset, as shot R, as shot B, CСT
-    {
-      fseek(ifp, 2, SEEK_CUR);
-      fseek(ifp, 2, SEEK_CUR);
-      imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-      imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(1.f, get2());
-      imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(1.f, get2());
-      imgdata.color.WBCT_Coeffs[i][0] = get2();
-    }
-  else if ((WBCTversion == 2) && ((unique_id == 0x03950000) || (unique_id == 0x03930000))) // G5 X, G9 X
-    for (int i = 0; i < 15; i++) // tint, offset, as shot R, as shot B, CСT
-    {
-      fseek(ifp, 2, SEEK_CUR);
-      fseek(ifp, 2, SEEK_CUR);
-      imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-      imgdata.color.WBCT_Coeffs[i][1] = (float)get2() / 512.0f;
-      imgdata.color.WBCT_Coeffs[i][3] = (float)get2() / 512.0f;
-      imgdata.color.WBCT_Coeffs[i][0] = get2();
+
+  } else if (WBCTversion == 1) { // as shot R, as shot B, tint, CСT
+      for (i = 0; i < 15; i++) {
+        imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+        imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(get2(), 1.f);
+        imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(get2(), 1.f);
+        fseek(ifp, 2, SEEK_CUR);
+        imgdata.color.WBCT_Coeffs[i][0] = get2();
+      }
+
+  } else if (WBCTversion == 2) { // tint, offset, as shot R, as shot B, CСT
+      if ((unique_id == 0x80000374) || // M3
+          (unique_id == 0x80000384) || // M10
+          (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffc)) {
+          for (i = 0; i < 15; i++) {
+            fseek(ifp, 4, SEEK_CUR);
+            imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+            imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(1.f, get2());
+            imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(1.f, get2());
+            imgdata.color.WBCT_Coeffs[i][0] = get2();
+          }
+      } else if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffd) {
+          for (i = 0; i < 15; i++) {
+            fseek(ifp, 4, SEEK_CUR);
+            imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+            imgdata.color.WBCT_Coeffs[i][1] = (float)get2() / 512.0f;
+            imgdata.color.WBCT_Coeffs[i][3] = (float)get2() / 512.0f;
+            imgdata.color.WBCT_Coeffs[i][0] = get2();
+          }
+      }
     }
   return;
 }
@@ -7587,14 +7583,18 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
 
     case 5120:
       imgdata.makernotes.canon.CanonColorDataVer = 5; // PowerSot G10, G12, G5 X, G7 X, G9 X, EOS M3, EOS M5, EOS M6
+      imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
+/*
         if ((unique_id == 0x03970000) || // G7 X Mark II
             (unique_id == 0x04100000) || // G9 X Mark II
             (unique_id == 0x04180000) || // G1 X Mark III
             (unique_id == 0x80000394) || // EOS M5
             (unique_id == 0x80000398) || // EOS M100
             (unique_id == 0x80000407))   // EOS M6
-        {
+*/
+        if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffc) // -4
+        { // G7 X Mark II, G9 X Mark II, G1 X Mark III, M5, M100, M6
           fseek(ifp, save1 + (0x004f << 1), SEEK_SET);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
           fseek(ifp, 8, SEEK_CUR);
@@ -7609,7 +7609,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
           Canon_WBCTpresets(2); // BCADT
           offsetChannelBlackLevel = save1 + (0x014d << 1);
         }
-        else
+        else if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffd) // -3
         {
           fseek(ifp, save1 + (0x004c << 1), SEEK_SET);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
