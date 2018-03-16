@@ -2854,13 +2854,13 @@ int LibRaw::unpack(void)
         }
         // sRAW and old Foveon decoders only, so extra buffer size is just 1/4
         // allocate image as temporary buffer, size
-        if (INT64(MAX(S.width, S.raw_width)) * INT64(MAX(S.height, S.raw_height)) * sizeof(*imgdata.image) >
+        if (INT64(MAX(S.width, S.raw_width)) * INT64(MAX(S.height, S.raw_height)+8) * sizeof(*imgdata.image) >
             LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_ALLOC;
 
         imgdata.rawdata.raw_alloc = 0;
         imgdata.image = (ushort(*)[4])calloc(
-            unsigned(MAX(S.width, S.raw_width)) * unsigned(MAX(S.height, S.raw_height)), sizeof(*imgdata.image));
+            unsigned(MAX(S.width, S.raw_width)) * unsigned(MAX(S.height, S.raw_height)+8), sizeof(*imgdata.image));
         if (!(decoder_info.decoder_flags & LIBRAW_DECODER_ADOBECOPYPIXEL))
         {
           imgdata.rawdata.raw_image = (ushort *)imgdata.image;
