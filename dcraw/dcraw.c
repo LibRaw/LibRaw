@@ -6592,7 +6592,7 @@ void CLASS scale_colors()
   }
 #ifdef LIBRAW_LIBRARY_BUILD
   // Nikon sRAW, daylight
-  if (load_raw == &LibRaw::nikon_load_sraw && !use_camera_wb 
+  if (load_raw == &LibRaw::nikon_load_sraw && !use_camera_wb
        && !use_auto_wb && cam_mul[0] > 0.001f &&
       cam_mul[1] > 0.001f && cam_mul[2] > 0.001f)
   {
@@ -8485,52 +8485,48 @@ void CLASS Canon_WBpresets(int skip1, int skip2)
   return;
 }
 
-void CLASS Canon_WBCTpresets(short WBCTversion)
-{
-  if (WBCTversion == 0)
-    for (int i = 0; i < 15; i++) // tint, as shot R, as shot B, CСT
-    {
-      imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-      fseek(ifp, 2, SEEK_CUR);
-      imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(get2(), 1.f);
-      imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(get2(), 1.f);
-      imgdata.color.WBCT_Coeffs[i][0] = get2();
+void CLASS Canon_WBCTpresets(short WBCTversion) {
+
+  int i;
+
+  if (WBCTversion == 0) { // tint, as shot R, as shot B, CСT
+      for (i = 0; i < 15; i++) {
+        imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+        fseek(ifp, 2, SEEK_CUR);
+        imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(get2(), 1.f);
+        imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(get2(), 1.f);
+        imgdata.color.WBCT_Coeffs[i][0] = get2();
     }
-  else if (WBCTversion == 1)
-    for (int i = 0; i < 15; i++) // as shot R, as shot B, tint, CСT
-    {
-      imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-      imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(get2(), 1.f);
-      imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(get2(), 1.f);
-      fseek(ifp, 2, SEEK_CUR);
-      imgdata.color.WBCT_Coeffs[i][0] = get2();
-    }
-  else if ((WBCTversion == 2) && ((unique_id == 0x80000374) || // M3
-                                  (unique_id == 0x80000384) || // M10
-                                  (unique_id == 0x80000394) || // M5
-                                  (unique_id == 0x80000407) || // M6
-                                  (unique_id == 0x80000398) || // M100
-                                  (unique_id == 0x03970000) || // G7 X Mark II
-                                  (unique_id == 0x04100000) || // G9 X Mark II
-                                  (unique_id == 0x04180000)))  // G1 X Mark III
-    for (int i = 0; i < 15; i++)                               // tint, offset, as shot R, as shot B, CСT
-    {
-      fseek(ifp, 2, SEEK_CUR);
-      fseek(ifp, 2, SEEK_CUR);
-      imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-      imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(1.f, get2());
-      imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(1.f, get2());
-      imgdata.color.WBCT_Coeffs[i][0] = get2();
-    }
-  else if ((WBCTversion == 2) && ((unique_id == 0x03950000) || (unique_id == 0x03930000))) // G5 X, G9 X
-    for (int i = 0; i < 15; i++) // tint, offset, as shot R, as shot B, CСT
-    {
-      fseek(ifp, 2, SEEK_CUR);
-      fseek(ifp, 2, SEEK_CUR);
-      imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-      imgdata.color.WBCT_Coeffs[i][1] = (float)get2() / 512.0f;
-      imgdata.color.WBCT_Coeffs[i][3] = (float)get2() / 512.0f;
-      imgdata.color.WBCT_Coeffs[i][0] = get2();
+
+  } else if (WBCTversion == 1) { // as shot R, as shot B, tint, CСT
+      for (i = 0; i < 15; i++) {
+        imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+        imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(get2(), 1.f);
+        imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(get2(), 1.f);
+        fseek(ifp, 2, SEEK_CUR);
+        imgdata.color.WBCT_Coeffs[i][0] = get2();
+      }
+
+  } else if (WBCTversion == 2) { // tint, offset, as shot R, as shot B, CСT
+      if ((unique_id == 0x80000374) || // M3
+          (unique_id == 0x80000384) || // M10
+          (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffc)) {
+          for (i = 0; i < 15; i++) {
+            fseek(ifp, 4, SEEK_CUR);
+            imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+            imgdata.color.WBCT_Coeffs[i][1] = 1024.0f / fMAX(1.f, get2());
+            imgdata.color.WBCT_Coeffs[i][3] = 1024.0f / fMAX(1.f, get2());
+            imgdata.color.WBCT_Coeffs[i][0] = get2();
+          }
+      } else if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffd) {
+          for (i = 0; i < 15; i++) {
+            fseek(ifp, 4, SEEK_CUR);
+            imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
+            imgdata.color.WBCT_Coeffs[i][1] = (float)get2() / 512.0f;
+            imgdata.color.WBCT_Coeffs[i][3] = (float)get2() / 512.0f;
+            imgdata.color.WBCT_Coeffs[i][0] = get2();
+          }
+      }
     }
   return;
 }
@@ -8802,71 +8798,75 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
   else if (tag == 0x4001 && len > 500)
   {
     int c;
+    int bls = 0;
+    long int offsetChannelBlackLevel = 0L;
+    long int offsetWhiteLevels = 0L;
     long int save1 = ftell(ifp);
     switch (len)
     {
     case 582:
       imgdata.makernotes.canon.CanonColorDataVer = 1; // 20D / 350D
       {
-        fseek(ifp, save1 + (0x1e << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x001e << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x41 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0041 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x46 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0046 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x23 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0023 << 1), SEEK_SET);
         Canon_WBpresets(2, 2);
-        fseek(ifp, save1 + (0x4b << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x004b << 1), SEEK_SET);
         Canon_WBCTpresets(1); // ABCT
+        offsetChannelBlackLevel = save1 + (0x00a6 << 1);
       }
       break;
+
     case 653:
       imgdata.makernotes.canon.CanonColorDataVer = 2; // 1Dmk2 / 1DsMK2
       {
-        fseek(ifp, save1 + (0x18 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0018 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x90 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0090 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x95 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0095 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x9a << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x009a << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom3][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x27 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0027 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0xa4 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x00a4 << 1), SEEK_SET);
         Canon_WBCTpresets(1); // ABCT
+        offsetChannelBlackLevel = save1 + (0x011e << 1);
       }
       break;
+
     case 796:
       imgdata.makernotes.canon.CanonColorDataVer = 3; // 1DmkIIN / 5D / 30D / 400D
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
-        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x71 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0071 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x76 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0076 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x7b << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x007b << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom3][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x80 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0080 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x4e << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x004e << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0x85 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0085 << 1), SEEK_SET);
         Canon_WBCTpresets(0);                       // BCAT
-        fseek(ifp, save1 + (0x0c4 << 1), SEEK_SET); // offset 196 short
-        int bls = 0;
-        FORC4
-        bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
-        imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
+        offsetChannelBlackLevel = save1 + (0x00c4 << 1);
       }
       break;
+
     // 1DmkIII / 1DSmkIII / 1DmkIV / 5DmkII
     // 7D / 40D / 50D / 60D / 450D / 500D
     // 550D / 1000D / 1100D
@@ -8882,56 +8882,51 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.CanonColorDataVer = 4;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
-        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x53 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0053 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0xa8 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x00a8 << 1), SEEK_SET);
         Canon_WBCTpresets(0);                       // BCAT
-        fseek(ifp, save1 + (0x0e7 << 1), SEEK_SET); // offset 231 short
-        int bls = 0;
-        FORC4
-        bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
-        imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
       }
-      if ((imgdata.makernotes.canon.CanonColorDataSubVer == 4) || (imgdata.makernotes.canon.CanonColorDataSubVer == 5))
+      if ((imgdata.makernotes.canon.CanonColorDataSubVer == 4) ||
+          (imgdata.makernotes.canon.CanonColorDataSubVer == 5))
       {
-        fseek(ifp, save1 + (0x2b8 << 1), SEEK_SET); // offset 696 shorts
-        imgdata.makernotes.canon.NormalWhiteLevel = get2();
-        imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-        FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+        offsetChannelBlackLevel = save1 + (0x02b4 << 1);
+        offsetWhiteLevels = save1 + (0x02b8 << 1);
       }
       else if ((imgdata.makernotes.canon.CanonColorDataSubVer == 6) ||
                (imgdata.makernotes.canon.CanonColorDataSubVer == 7))
       {
-        fseek(ifp, save1 + (0x2cf << 1), SEEK_SET); // offset 719 shorts
-        imgdata.makernotes.canon.NormalWhiteLevel = get2();
-        imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-        FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+        offsetChannelBlackLevel = save1 + (0x02cb << 1);
+        offsetWhiteLevels = save1 + (0x02cf << 1);
       }
       else if (imgdata.makernotes.canon.CanonColorDataSubVer == 9)
       {
-        fseek(ifp, save1 + (0x2d3 << 1), SEEK_SET); // offset 723 shorts
-        imgdata.makernotes.canon.NormalWhiteLevel = get2();
-        imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-        FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+        offsetChannelBlackLevel = save1 + (0x02cf << 1);
+        offsetWhiteLevels = save1 + (0x02d3 << 1);
       }
+      else offsetChannelBlackLevel = save1 + (0x00e7 << 1);
       break;
 
     case 5120:
       imgdata.makernotes.canon.CanonColorDataVer = 5; // PowerSot G10, G12, G5 X, G7 X, G9 X, EOS M3, EOS M5, EOS M6
+      imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
+/*
         if ((unique_id == 0x03970000) || // G7 X Mark II
             (unique_id == 0x04100000) || // G9 X Mark II
             (unique_id == 0x04180000) || // G1 X Mark III
             (unique_id == 0x80000394) || // EOS M5
             (unique_id == 0x80000398) || // EOS M100
             (unique_id == 0x80000407))   // EOS M6
-        {
-          fseek(ifp, save1 + (0x4f << 1), SEEK_SET);
+*/
+        if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffc) // -4
+        { // G7 X Mark II, G9 X Mark II, G1 X Mark III, M5, M100, M6
+          fseek(ifp, save1 + (0x004f << 1), SEEK_SET);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
           fseek(ifp, 8, SEEK_CUR);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
@@ -8943,11 +8938,11 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][c ^ (c >> 1)] = get2();
           fseek(ifp, 24, SEEK_CUR);
           Canon_WBCTpresets(2); // BCADT
-          fseek(ifp, 6, SEEK_CUR);
+          offsetChannelBlackLevel = save1 + (0x014d << 1);
         }
-        else
+        else if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffd) // -3
         {
-          fseek(ifp, save1 + (0x4c << 1), SEEK_SET);
+          fseek(ifp, save1 + (0x004c << 1), SEEK_SET);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
           get2();
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
@@ -8955,13 +8950,10 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
           get2();
           Canon_WBpresets(2, 12);
-          fseek(ifp, save1 + (0xba << 1), SEEK_SET);
+          fseek(ifp, save1 + (0x00ba << 1), SEEK_SET);
           Canon_WBCTpresets(2);                       // BCADT
-          fseek(ifp, save1 + (0x108 << 1), SEEK_SET); // offset 264 short
+          offsetChannelBlackLevel = save1 + (0x0108 << 1);
         }
-        int bls = 0;
-        FORC4 bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
-        imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
       }
       break;
 
@@ -8970,25 +8962,18 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.CanonColorDataVer = 6; // 600D / 1200D
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
-        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x67 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0067 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0xbc << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x00bc << 1), SEEK_SET);
         Canon_WBCTpresets(0);                       // BCAT
-        fseek(ifp, save1 + (0x0fb << 1), SEEK_SET); // offset 251 short
-        int bls = 0;
-        FORC4
-        bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
-        imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
+        offsetChannelBlackLevel = save1 + (0x01df << 1);
+        offsetWhiteLevels = save1 + (0x01e3 << 1);
       }
-      fseek(ifp, save1 + (0x1e3 << 1), SEEK_SET); // offset 483 shorts
-      imgdata.makernotes.canon.NormalWhiteLevel = get2();
-      imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-      FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
       break;
 
     // 1DX / 5DmkIII / 6D / 100D / 650D / 700D / EOS M / 7DmkII / 750D / 760D
@@ -8999,34 +8984,25 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.CanonColorDataVer = 7;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
-        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x80 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0080 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0xd5 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x00d5 << 1), SEEK_SET);
         Canon_WBCTpresets(0);                       // BCAT
-        fseek(ifp, save1 + (0x114 << 1), SEEK_SET); // offset 276 shorts
-        int bls = 0;
-        FORC4
-        bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
-        imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
       }
       if (imgdata.makernotes.canon.CanonColorDataSubVer == 10)
       {
-        fseek(ifp, save1 + (0x1fc << 1), SEEK_SET); // offset 508 shorts
-        imgdata.makernotes.canon.NormalWhiteLevel = get2();
-        imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-        FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+        offsetChannelBlackLevel = save1 + (0x01f8 << 1);
+        offsetWhiteLevels = save1 + (0x01fc << 1);
       }
       else if (imgdata.makernotes.canon.CanonColorDataSubVer == 11)
       {
-        fseek(ifp, save1 + (0x2dc << 1), SEEK_SET); // offset 732 shorts
-        imgdata.makernotes.canon.NormalWhiteLevel = get2();
-        imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-        FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+        offsetChannelBlackLevel = save1 + (0x02d8 << 1);
+        offsetWhiteLevels = save1 + (0x02dc << 1);
       }
       break;
 
@@ -9038,36 +9014,60 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       imgdata.makernotes.canon.CanonColorDataVer = 8;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
       {
-        fseek(ifp, save1 + (0x44 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x49 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x85 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0085 << 1), SEEK_SET);
         Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0x107 << 1), SEEK_SET);
+        fseek(ifp, save1 + (0x0107 << 1), SEEK_SET);
         Canon_WBCTpresets(0);                       // BCAT
-        fseek(ifp, save1 + (0x146 << 1), SEEK_SET); // offset 326 shorts
-        int bls = 0;
-        FORC4
-        bls += (imgdata.makernotes.canon.ChannelBlackLevel[c] = get2());
-        imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
       }
       if (imgdata.makernotes.canon.CanonColorDataSubVer == 14) // 1300D / 2000D / 4000D
       {
-        fseek(ifp, save1 + (0x230 << 1), SEEK_SET); // offset 560 shorts
-        imgdata.makernotes.canon.NormalWhiteLevel = get2();
-        imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-        FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+        offsetChannelBlackLevel = save1 + (0x022c << 1);
+        offsetWhiteLevels = save1 + (0x0230 << 1);
       }
       else
       {
-        fseek(ifp, save1 + (0x30e << 1), SEEK_SET); // offset 782 shorts
-        imgdata.makernotes.canon.NormalWhiteLevel = get2();
-        imgdata.makernotes.canon.SpecularWhiteLevel = get2();
-        FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
+        offsetChannelBlackLevel = save1 + (0x030a << 1);
+        offsetWhiteLevels = save1 + (0x030e << 1);
       }
       break;
+
+    case 1820:	// M50
+      imgdata.makernotes.canon.CanonColorDataVer = 9;
+      imgdata.makernotes.canon.CanonColorDataSubVer = get2();
+      fseek(ifp, save1 + (0x0047 << 1), SEEK_SET);
+      FORC4 cam_mul[c ^ (c >> 1)] = (float)get2();
+      get2();
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+      get2();
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0088 << 1), SEEK_SET);
+      Canon_WBpresets(2, 12);
+      fseek(ifp, save1 + (0x010a << 1), SEEK_SET);
+      Canon_WBCTpresets(0);
+      offsetChannelBlackLevel = save1 + (0x0318 << 1);
+      offsetWhiteLevels = save1 + (0x031c << 1);
+      break;
+
+    }
+
+    if (offsetChannelBlackLevel) {
+      fseek(ifp, offsetChannelBlackLevel, SEEK_SET);
+      FORC4
+        bls += (imgdata.makernotes.canon.ChannelBlackLevel[c ^ (c >> 1)] = get2());
+      imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
+    }
+    if (offsetWhiteLevels) {
+      if ((offsetWhiteLevels - offsetChannelBlackLevel) != 8L)
+        fseek(ifp, offsetWhiteLevels, SEEK_SET);
+      imgdata.makernotes.canon.NormalWhiteLevel = get2();
+      imgdata.makernotes.canon.SpecularWhiteLevel = get2();
+      FORC4
+        imgdata.color.linear_max[c] = imgdata.makernotes.canon.SpecularWhiteLevel;
     }
     fseek(ifp, save1, SEEK_SET);
   }
@@ -13359,8 +13359,8 @@ void CLASS parse_mos(int offset)
     if (!strcmp(data, "NeutObj_neutrals") && !cam_mul[0])
     {
       FORC4 fscanf(ifp, "%d", neut + c);
-      FORC3 
-        if(neut[c + 1]) 
+      FORC3
+        if(neut[c + 1])
       		cam_mul[c] = (float)neut[0] / neut[c + 1];
     }
     if (!strcmp(data, "Rows_data"))
