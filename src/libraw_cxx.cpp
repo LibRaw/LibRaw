@@ -4246,8 +4246,15 @@ int LibRaw::unpack_thumb(void)
           if (setjmp(jerr.setjmp_buffer))
           {
           err2:
+	    // Error in original JPEG thumb, read it again because
+	    // original bytes 0-1 was damaged above
             jpeg_destroy_decompress(&cinfo);
             T.tcolors = 3;
+            T.tformat = LIBRAW_THUMBNAIL_UNKNOWN;
+            ID.input->seek(ID.toffset, SEEK_SET);
+            ID.input->read(T.thumb, 1, T.tlength);
+            SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
+            return 0;
           }
           jpeg_create_decompress(&cinfo);
           jpeg_mem_src(&cinfo, (unsigned char *)T.thumb, T.tlength);
