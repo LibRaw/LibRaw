@@ -1,3 +1,9 @@
+2018-03-22 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.19-Beta2
+ * Better handling of broken JPEG thumbnails
+ * Panasonic GH5S/G9-hires decoder, thanks to Alexey Danilchenko
+   Note: ABI has changed due to this patch, so shlib version increased
+ 
 2018-02-23 Alex Tutubalin <lexa@lexa.ru>
 
  * LibRaw 0.19-Beta1
