@@ -101,6 +101,8 @@ extern "C"
       return "Cancelled by user callback";
     case LIBRAW_BAD_CROP:
       return "Bad crop box";
+    case LIBRAW_TOO_BIG:
+      return "Image too big for processing";
     default:
       return "Unknown error code";
     }
@@ -134,6 +136,9 @@ const float LibRaw_constants::d65_white[3] = {0.95047f, 1.0f, 1.08883f};
     case LIBRAW_EXCEPTION_ALLOC:                                                                                       \
       recycle();                                                                                                       \
       return LIBRAW_UNSUFFICIENT_MEMORY;                                                                               \
+    case LIBRAW_EXCEPTION_TOOBIG:                                                                                      \
+      recycle();                                                                                                       \
+      return LIBRAW_TOO_BIG;                                                                                           \
     case LIBRAW_EXCEPTION_DECODE_RAW:                                                                                  \
     case LIBRAW_EXCEPTION_DECODE_JPEG:                                                                                 \
       recycle();                                                                                                       \
@@ -2760,6 +2765,7 @@ int LibRaw::unpack(void)
     if (imgdata.idata.dng_version && dnghost && imgdata.idata.raw_count == 1 && valid_for_dngsdk() &&
         load_raw != &LibRaw::pentax_4shot_load_raw)
     {
+      // Data size check
       int rr = try_dngsdk();
     }
 #endif
@@ -2820,7 +2826,7 @@ int LibRaw::unpack(void)
       {
         if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3 >
             LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
-          throw LIBRAW_EXCEPTION_ALLOC;
+          throw LIBRAW_EXCEPTION_TOOBIG;
 
         imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3);
         imgdata.rawdata.color3_image = (ushort(*)[3])imgdata.rawdata.raw_alloc;
@@ -2831,7 +2837,7 @@ int LibRaw::unpack(void)
       {
         if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) >
             LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
-          throw LIBRAW_EXCEPTION_ALLOC;
+          throw LIBRAW_EXCEPTION_TOOBIG;
         imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
         imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
         if (!S.raw_pitch)
@@ -2856,7 +2862,7 @@ int LibRaw::unpack(void)
         // allocate image as temporary buffer, size
         if (INT64(MAX(S.width, S.raw_width)) * INT64(MAX(S.height, S.raw_height)+8) * sizeof(*imgdata.image) >
             LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
-          throw LIBRAW_EXCEPTION_ALLOC;
+          throw LIBRAW_EXCEPTION_TOOBIG;
 
         imgdata.rawdata.raw_alloc = 0;
         imgdata.image = (ushort(*)[4])calloc(
