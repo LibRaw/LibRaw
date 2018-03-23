@@ -27,6 +27,9 @@ it under the terms of the one of two licenses as you choose:
 #ifndef __cplusplus
 
 #else /* __cplusplus */
+#if defined WIN32 || defined(__MINGW32__)
+#include <winsock2.h>
+#endif
 
 #include "libraw_const.h"
 #include "libraw_types.h"
@@ -34,7 +37,6 @@ it under the terms of the one of two licenses as you choose:
 #include <memory>
 
 #if defined WIN32 || defined(__MINGW32__)
-#include <winsock2.h>
 
 /* MSVS 2008 and above... */
 #if _MSC_VER >= 1500
