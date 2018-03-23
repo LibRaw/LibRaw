@@ -604,6 +604,7 @@ typedef unsigned long long UINT64;
     /* Sony ARW2 digging mode */
     /* int sony_arw2_options; */
     unsigned raw_processing_options;
+    unsigned max_raw_memory_mb;
     int sony_arw2_posterization_thr;
     /* Nikon Coolscan */
     float coolscan_nef_gamma;

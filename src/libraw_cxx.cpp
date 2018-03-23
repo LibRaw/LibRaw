@@ -480,6 +480,7 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
   imgdata.params.raw_processing_options = LIBRAW_PROCESSING_DP2Q_INTERPOLATERG | LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF |
                                           LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT;
   imgdata.params.sony_arw2_posterization_thr = 0;
+  imgdata.params.max_raw_memory_mb = LIBRAW_MAX_ALLOC_MB_DEFAULT;
   imgdata.params.green_matching = 0;
   imgdata.params.custom_camera_strings = 0;
   imgdata.params.coolscan_nef_gamma = 1.0f;
@@ -2770,7 +2771,7 @@ int LibRaw::unpack(void)
 		INT64 planecount = (imgdata.idata.filters || P1.colors == 1)?1: LIM(P1.colors,3,4);
 		INT64 samplesize = is_floating_point()?4:2;
 		INT64 bytes = pixcount * planecount * samplesize;
-		if(bytes > LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024)) 	throw LIBRAW_EXCEPTION_TOOBIG;
+		if(bytes > INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024)) 	throw LIBRAW_EXCEPTION_TOOBIG;
 
 		// find ifd to check sample
       int rr = try_dngsdk();
@@ -2819,7 +2820,7 @@ int LibRaw::unpack(void)
 		  INT64 pixcount = INT64(MAX(S.width, S.raw_width)) * INT64(MAX(S.height, S.raw_height));
 		  INT64 planecount = (imgdata.idata.filters || P1.colors == 1)?1: LIM(P1.colors,3,4);
 		  INT64 bytes = pixcount * planecount * 2; // sample size is always 2 for rawspeed
-		  if(bytes > LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024)) 	throw LIBRAW_EXCEPTION_TOOBIG;
+		  if(bytes > INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024)) 	throw LIBRAW_EXCEPTION_TOOBIG;
 
         int rr = try_rawspeed();
       }
@@ -2837,7 +2838,7 @@ int LibRaw::unpack(void)
       if (decoder_info.decoder_flags & LIBRAW_DECODER_3CHANNEL)
       {
         if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3 >
-            LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
+            INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
 
         imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3);
@@ -2848,7 +2849,7 @@ int LibRaw::unpack(void)
       else if (imgdata.idata.filters || P1.colors == 1) // Bayer image or single color -> decode to raw_image
       {
         if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) >
-            LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
+            INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
         imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
         imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
@@ -2873,7 +2874,7 @@ int LibRaw::unpack(void)
         // sRAW and old Foveon decoders only, so extra buffer size is just 1/4
         // allocate image as temporary buffer, size
         if (INT64(MAX(S.width, S.raw_width)) * INT64(MAX(S.height, S.raw_height)+8) * sizeof(*imgdata.image) >
-            LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
+            INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
 
         imgdata.rawdata.raw_alloc = 0;
