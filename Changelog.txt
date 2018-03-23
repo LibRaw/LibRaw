@@ -3,6 +3,9 @@
  * Better handling of broken JPEG thumbnails
  * Panasonic GH5S/G9-hires decoder, thanks to Alexey Danilchenko
    Note: ABI has changed due to this patch, so shlib version increased
+ * Fujifilm X-A5/A20 metadata parsing fix
+ * New error code LIBRAW_TOO_BIG: image data size excess LIBRAW_MAX_ALLOC_MB
+ * winsock2 included before windows.h to make MinGW happy
  
 2018-02-23 Alex Tutubalin <lexa@lexa.ru>
 
