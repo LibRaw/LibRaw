@@ -7157,6 +7157,7 @@ void CLASS Canon_WBpresets(int skip1, int skip2)
 void CLASS Canon_WBCTpresets(short WBCTversion) {
 
   int i;
+  float norm;
 
   if (WBCTversion == 0) { // tint, as shot R, as shot B, CСT
       for (i = 0; i < 15; i++) {
@@ -7189,10 +7190,12 @@ void CLASS Canon_WBCTpresets(short WBCTversion) {
           }
       } else if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffd) {
           for (i = 0; i < 15; i++) {
-            fseek(ifp, 4, SEEK_CUR);
+            fseek(ifp, 2, SEEK_CUR);
+            norm = (signed short)get2();
+            norm = 512.0f + norm / 8.0f;
             imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-            imgdata.color.WBCT_Coeffs[i][1] = (float)get2() / 512.0f;
-            imgdata.color.WBCT_Coeffs[i][3] = (float)get2() / 512.0f;
+            imgdata.color.WBCT_Coeffs[i][1] = (float)get2() / norm;
+            imgdata.color.WBCT_Coeffs[i][3] = (float)get2() / norm;
             imgdata.color.WBCT_Coeffs[i][0] = get2();
           }
       }
@@ -7610,7 +7613,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
           offsetChannelBlackLevel = save1 + (0x014d << 1);
         }
         else if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffd) // -3
-        {
+        { // M10/M3/G1 X/G1 X II/G10/G11/G12/G15/G16/G3 X/G5 X/G7 X/G9 X/S100/S110/S120/S90/S95/SX1 IX/SX50 HS/SX60 HS
           fseek(ifp, save1 + (0x004c << 1), SEEK_SET);
           FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
           get2();
@@ -8803,12 +8806,15 @@ void CLASS process_Sony_0x940e(uchar *buf, ushort len, unsigned id)
     imgdata.makernotes.sony.AFMicroAdjOn = 1;
 }
 
-void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer, uchar *&table_buf_0x0116,
-                               ushort &table_buf_0x0116_len, uchar *&table_buf_0x2010, ushort &table_buf_0x2010_len,
-                               uchar *&table_buf_0x9050, ushort &table_buf_0x9050_len, uchar *&table_buf_0x9400,
-                               ushort &table_buf_0x9400_len, uchar *&table_buf_0x9402, ushort &table_buf_0x9402_len,
-                               uchar *&table_buf_0x9403, ushort &table_buf_0x9403_len, uchar *&table_buf_0x9406,
-                               ushort &table_buf_0x9406_len, uchar *&table_buf_0x940c, ushort &table_buf_0x940c_len,
+void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
+                               uchar *&table_buf_0x0116, ushort &table_buf_0x0116_len,
+                               uchar *&table_buf_0x2010, ushort &table_buf_0x2010_len,
+                               uchar *&table_buf_0x9050, ushort &table_buf_0x9050_len,
+                               uchar *&table_buf_0x9400, ushort &table_buf_0x9400_len,
+                               uchar *&table_buf_0x9402, ushort &table_buf_0x9402_len,
+                               uchar *&table_buf_0x9403, ushort &table_buf_0x9403_len,
+                               uchar *&table_buf_0x9406, ushort &table_buf_0x9406_len,
+                               uchar *&table_buf_0x940c, ushort &table_buf_0x940c_len,
                                uchar *&table_buf_0x940e, ushort &table_buf_0x940e_len)
 {
 
@@ -18490,7 +18496,7 @@ void CLASS identify()
   }
   else if (!strncmp(make, "Fujifilm", 8))
   {
-    if (!strcmp(model, "X-A3") || !strcmp(model, "X-A10") 
+    if (!strcmp(model, "X-A3") || !strcmp(model, "X-A10")
     || !strcmp(model, "X-A5") || !strcmp(model, "X-A20"))
     {
       left_margin = 0;
