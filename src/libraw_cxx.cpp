@@ -2766,6 +2766,13 @@ int LibRaw::unpack(void)
         load_raw != &LibRaw::pentax_4shot_load_raw)
     {
       // Data size check
+		INT64 pixcount = INT64(MAX(S.width, S.raw_width)) * INT64(MAX(S.height, S.raw_height));
+		INT64 planecount = (imgdata.idata.filters || P1.colors == 1)?1: LIM(P1.colors,3,4);
+		INT64 samplesize = is_floating_point()?4:2;
+		INT64 bytes = pixcount * planecount * samplesize;
+		if(bytes > LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024)) 	throw LIBRAW_EXCEPTION_TOOBIG;
+
+		// find ifd to check sample
       int rr = try_dngsdk();
     }
 #endif
@@ -2809,6 +2816,11 @@ int LibRaw::unpack(void)
             (O.raw_processing_options & (LIBRAW_PROCESSING_SRAW_NO_RGB | LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE))) &&
           (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) && _rawspeed_camerameta)
       {
+		  INT64 pixcount = INT64(MAX(S.width, S.raw_width)) * INT64(MAX(S.height, S.raw_height));
+		  INT64 planecount = (imgdata.idata.filters || P1.colors == 1)?1: LIM(P1.colors,3,4);
+		  INT64 bytes = pixcount * planecount * 2; // sample size is always 2 for rawspeed
+		  if(bytes > LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024)) 	throw LIBRAW_EXCEPTION_TOOBIG;
+
         int rr = try_rawspeed();
       }
     }
