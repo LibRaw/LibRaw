@@ -20,6 +20,7 @@
           <li><a href="#libraw_thumbnail_t"> Structure libraw_thumbnail_t: Description of Thumbnail </a></li>
           <li><a href="#libraw_lensinfo_t"> Structure libraw_lensinfo_t - lens data, extracted from EXIF/Makernotes </a></li>
           <li><a href="#libraw_output_params_t"> Structure libraw_output_params_t: Management of dcraw-Style Postprocessing </a> .</li>
+          <li><a href="#libraw_callbacks_t">Structure libraw_callbacks_t: user-settable callbacks</a> </li>
           <li><a href="#libraw_processed_image_t"> Structure libraw_processed_image_t - result set for dcraw_make_mem_image()/dcraw_make_mem_thumb() functions </a></li>
         </ol>
       </li>
@@ -516,6 +517,55 @@
       <dt><strong> char p4shot_order[5]; </strong></dt>
       <dd>Shot order for Pentax 4shot files. Default is "3102".</dd>
     </dl>
+    <p><a name="libraw_callbacks_t"></a></p>
+    <h3>Structure libraw_callbacks_t: user-settable callbacks</h3>
+    <dl>
+      <dt>memory_callback mem_cb</dt>
+      <dd>Called on memory allocation error. Settable via set_memerror_handler. See <a
+          href="API-CXX.html#callbacks">C++ API</a> for details.</dd>
+      <dt>data_callback data_cb</dt>
+      <dd>Called on data error, settable via set_dataerror_handler. See <a
+          href="API-CXX.html#callbacks">C++ API</a> for details.</dd>
+      <dt>progress_callback progress_cb</dt>
+      <dd>Called on process callback, settable via set_progress_handler. See <a
+          href="API-CXX.html#callbacks">C++ API</a> for details.</dd>
+      <dt>exif_parser_callback exif_cb, params: (void *context, int tag, int type, int len, unsigned int ord, void *ifp)</dt>
+      <dd> Called by EXIF/TIFF IFD parsers on each processed tag.<br>
+        Parameters:
+        <ul>
+          <li>context: user-specified context, set via set_exifparser_handler()</li>
+          <li>tag: 16-bit of TIFF/EXIF tag or'ed with
+            <ul>
+              <li>0 - for EXIF parsing</li>
+              <li>0x20000 - for Kodak makernotes parsing</li>
+              <li>0x30000 - for Panasonic makernotes parsing</li>
+              <li>(ifdN + 1) &lt;&lt; 20) - for TIFF ifdN</li>
+            </ul>
+          </li>
+          <li>type: tag type (see TIFF/EXIF specs)</li>
+          <li>len: tag length</li>
+          <li>ord: byte order: 0x4949 for intel, 0x4d4d for motorola</li>
+          <li>ifp: pointer to LibRaw_abstract_datastream input stream, positioned to start of data. There is no need to restore data position in callback.</li>
+        </ul>
+      </dd>
+      <dt>int pre_identify_cb(void *)</dt>
+      <dd>Called with this pointer as the only arg before calling to LibRaw::identify. If this callback return non-zero value, that means that identify() is not needed and all internal data fields are filled with values.</dd>
+      <dt>void post_identify_cb(void *)</dt>
+      <dd>Called after identify() from open_datastream(). May be used to tune internal variables after metadata parse.</dd>
+      <dt>dcraw_process() callbacks</dt>
+      <dd>These callbacks are called before/after dcraw_process phases, the only passed parameter is this pointer
+        <ul>
+          <li>pre_subtractblack_cb - called before black subtraction</li>
+          <li>pre_scalecolors_cb - called before scale_colors() call</li>
+          <li>pre_preinterpolate_cb - called before interpolaton (demosaic)</li>
+          <li>interpolate_bayer_cb - if set, called for bayer demosaic (regardless of params.user_qual value)</li>
+          <li>interpolate_xtrans_cb - if set, called for X-Trans demosaic</li>
+          <li>post_interpolate_cb - called after demosaic step</li>
+          <li>pre_converttorgb_cb - called after convert_to_rgb()</li>
+          <li>post_converttorgb_cb - called after convert_to_rgb(), so very last processing step.</li>
+        </ul>
+      </dd>
+    </dl>
     <p><a name="libraw_decoder_info_t"></a></p>
     <h3>Structure libraw_decoder_info_t: RAW decoder name and data format</h3>
     <p>This structure describes RAW format decoder name and data format:</p>
@@ -593,21 +643,25 @@
         All allocated resources will be freed, <a href="API-CXX.html#recycle"> recycle() </a> will be called, and the LibRaw object will be brought to the state "right after creation."</dd>
       <dt><strong> LIBRAW_BAD_CROP </strong></dt>
       <dd>The incorrect cropping coordinates are set via params.cropbox[]: the left-top corner of cropping rectangle is outside the image. The processing will be cancelled, all allocated resources will be freed, <a
-          href="API-CXX.html#recycle"> recycle() </a> will be called, and the LibRaw object will be brought to the state "right after creation."</dd>
+          <dt=""><strong> LIBRAW_TOO_BIG</strong> </a></dd>
+      <dd><a <dt="">Raw data size exceeds data limit.</a></dd>
+      <a <dt=""> </a>
     </dl>
-    <p><strong> Non-Fatal Errors </strong></p>
+    <a <dt="">
+      <p><strong> Non-Fatal Errors </strong></p>
+    </a>
     <dl>
-      <dt><strong> LIBRAW_SUCCESS=0 </strong></dt>
-      <dd>No error; function terminated successfully.</dd>
-      <dt><strong> LIBRAW_UNSPECIFIED_ERROR </strong></dt>
-      <dd>An unknown error has been encountered. This code should never be generated.</dd>
-      <dt><strong> LIBRAW_FILE_UNSUPPORTED </strong></dt>
-      <dd>Unsupported file format (attempt to open a RAW file with a format unknown to the program).</dd>
-      <dt><strong> LIBRAW_REQUEST_FOR_NONEXISTENT_IMAGE </strong></dt>
-      <dd>Attempt to retrieve a RAW image with a number absent in the data file (only for formats supporting storage of several images in a file).</dd>
-      <dt><strong> LIBRAW_OUT_OF_ORDER_CALL </strong></dt>
-      <dd>API functions have been called in wrong order (e.g., <a href="API-CXX.html#unpack"> unpack() </a> before <a
-          href="API-CXX.html#open_file"> open_file() </a> ) or the previous stage has ended with an error (e.g., <a
+      <a <dt=""> <dt><strong> LIBRAW_SUCCESS=0 </strong></dt>
+        <dd>No error; function terminated successfully.</dd>
+        <dt><strong> LIBRAW_UNSPECIFIED_ERROR </strong></dt>
+        <dd>An unknown error has been encountered. This code should never be generated.</dd>
+        <dt><strong> LIBRAW_FILE_UNSUPPORTED </strong></dt>
+        <dd>Unsupported file format (attempt to open a RAW file with a format unknown to the program).</dd>
+        <dt><strong> LIBRAW_REQUEST_FOR_NONEXISTENT_IMAGE </strong></dt>
+        <dd>Attempt to retrieve a RAW image with a number absent in the data file (only for formats supporting storage of several images in a file).</dd>
+        <dt><strong> LIBRAW_OUT_OF_ORDER_CALL </strong></dt>
+      </a><dd><a <dt="">API functions have been called in wrong order (e.g., </a><a
+          href="API-CXX.html#unpack"> unpack() </a> before <a href="API-CXX.html#open_file"> open_file() </a> ) or the previous stage has ended with an error (e.g., <a
           href="API-CXX.html#unpack"> unpack() </a> is called after <a
           href="API-CXX.html#open_file"> open_file() </a> has returned an error).</dd>
       <dt><strong> LIBRAW_NO_THUMBNAIL </strong></dt>
