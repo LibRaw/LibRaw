@@ -14595,10 +14595,19 @@ void CLASS parse_ciff(int offset, int length, int depth)
 #ifdef LIBRAW_LIBRARY_BUILD
     if (type == 0x10a9)
     {
+      int bls = 0;
       INT64 o = ftell(ifp);
       fseek(ifp, (0x1 << 1), SEEK_CUR);
       FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
       Canon_WBpresets(0, 0);
+      if (unique_id != 0x1668000)  // Canon EOS D60
+      {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom][c ^ (c >> 1)] = get2();
+        fseek (ifp, 8L, SEEK_CUR);
+      }
+      FORC4
+        bls += (imgdata.makernotes.canon.ChannelBlackLevel[c ^ (c >> 1)] = get2());
+      imgdata.makernotes.canon.AverageBlackLevel = bls / 4;
       fseek(ifp, o, SEEK_SET);
     }
     if (type == 0x102d)
