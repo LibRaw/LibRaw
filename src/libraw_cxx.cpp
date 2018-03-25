@@ -4786,11 +4786,6 @@ int LibRaw::dcraw_process(void)
   int quality, i;
 
   int iterations = -1, dcb_enhance = 1, noiserd = 0;
-  int eeci_refine_fl = 0, es_med_passes_fl = 0;
-  float cared = 0, cablue = 0;
-  float linenoise = 0;
-  float lclean = 0, cclean = 0;
-  float thresh = 0;
   float preser = 0;
   float expos = 1.0;
 
@@ -4956,16 +4951,10 @@ int LibRaw::dcraw_process(void)
 
     if(callbacks.post_interpolate_cb)
 	(callbacks.post_interpolate_cb)(this);
-
-    if (!P1.is_foveon)
+    else if (!P1.is_foveon && P1.colors == 3 && O.med_passes > 0)
     {
-      if (P1.colors == 3)
-      {
-
-        /* median filter callback, if not set use own */
         median_filter();
         SET_PROC_FLAG(LIBRAW_PROGRESS_MEDIAN_FILTER);
-      }
     }
 
     if (O.highlight == 2)

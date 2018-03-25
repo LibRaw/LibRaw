@@ -560,7 +560,7 @@
           <li>pre_preinterpolate_cb - called before interpolaton (demosaic)</li>
           <li>interpolate_bayer_cb - if set, called for bayer demosaic (regardless of params.user_qual value)</li>
           <li>interpolate_xtrans_cb - if set, called for X-Trans demosaic</li>
-          <li>post_interpolate_cb - called after demosaic step</li>
+          <li>post_interpolate_cb - called after demosaic step. Note: if this callback is set, standard median_filter() is not called. So, if you need median filtering you should call it from callback function.</li>
           <li>pre_converttorgb_cb - called after convert_to_rgb()</li>
           <li>post_converttorgb_cb - called after convert_to_rgb(), so very last processing step.</li>
         </ul>
