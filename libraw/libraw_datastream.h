@@ -31,7 +31,10 @@ it under the terms of the one of two licenses as you choose:
 #include <winsock2.h>
 #endif
 /* No unique_ptr on Apple ?? */
-#ifdef __APPLE__
+#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
+/* OK - use unique_ptr */
+#else
+/* Force to use auto_ptr */
 #ifndef LIBRAW_USE_AUTOPTR
 #define LIBRAW_USE_AUTOPTR
 #endif
