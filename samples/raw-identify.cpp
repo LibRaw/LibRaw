@@ -109,7 +109,7 @@ void trimSpaces(char *s)
 
 int main(int ac, char *av[])
 {
-  int verbose = 0, ret, print_sz = 0, print_unpack = 0, print_frame = 0, print_wb = 0;
+  int verbose = 0, ret, print_sz = 0, print_unpack = 0, print_frame = 0, print_wb = 0, print_1 = 0;
   int compact = 0;
   LibRaw MyCoolRawProcessor;
 
@@ -131,6 +131,8 @@ int main(int ac, char *av[])
         O.half_size = 1;
       if (av[i][1] == 'f' && av[i][2] == 0)
         print_frame++;
+      if (av[i][1] == '1' && av[i][2] == 0)
+        print_1++;
       continue;
     }
     if ((ret = MyCoolRawProcessor.open_file(av[i])) != LIBRAW_SUCCESS)
@@ -141,6 +143,19 @@ int main(int ac, char *av[])
     if (print_sz)
     {
       printf("%s\t%s\t%s\t%d\t%d\n", av[i], P1.make, P1.model, S.width, S.height);
+    }
+    if (print_1)
+    {
+      printf("%s=%s", P1.make, P1.model);
+      if (P1.filters)
+      {
+        printf("=");
+        if (!P1.cdesc[3])
+          P1.cdesc[3] = 'G';
+        for (int i = 0; i < 16; i++)
+          putchar(P1.cdesc[MyCoolRawProcessor.fcol(i >> 1, i & 1)]);
+      }
+      printf("\n");
     }
     else if (verbose)
     {

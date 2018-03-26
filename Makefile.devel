@@ -1,4 +1,4 @@
-all: sources library all_samples 
+all: sources library all_samples
 
 PP=./internal/preprocess.pl
 
@@ -6,7 +6,7 @@ CC=gcc
 CXX=g++
 LDADD+=-lz
 
-#CFLAGS=
+CFLAGS=-DLIBRAW_USE_AUTOPTR
 
 # RawSpeed Support
 # CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/opt/local/include/libxml2
