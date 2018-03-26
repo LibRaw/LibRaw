@@ -2484,6 +2484,7 @@ void CLASS unpacked_load_raw()
   while (1 << ++bits < maximum)
     ;
   read_shorts(raw_image, raw_width * raw_height);
+  fseek(ifp,-2,SEEK_CUR); // avoid EOF error
   if (maximum < 0xffff || load_flags)
     for (row = 0; row < raw_height; row++)
     {
