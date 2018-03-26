@@ -12525,13 +12525,7 @@ int CLASS parse_tiff_ifd(int base)
         FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c < 2)] = get2();
         break;
       case 0x7312:
-      {
-        int i, lc[4];
-        FORC4 lc[c] = get2();
-        i = (lc[1] == 1024 && lc[2] == 1024) << 1;
-        SWAP(lc[i], lc[i + 1]);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c] = lc[c];
-      }
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
       break;
       case 0x7480:
       case 0x7820:
@@ -13017,9 +13011,7 @@ int CLASS parse_tiff_ifd(int base)
       FORC4 cam_mul[c ^ (c < 2)] = get2();
       break;
     case 29459:
-      FORC4 cam_mul[c] = get2();
-      i = (cam_mul[1] == 1024 && cam_mul[2] == 1024) << 1;
-      SWAP(cam_mul[i], cam_mul[i + 1])
+      FORC4 cam_mul[c ^ (c >> 1)] = get2();
       break;
 #ifdef LIBRAW_LIBRARY_BUILD
     case 30720: // Sony matrix, Sony_SR2SubIFD_0x7800
@@ -13783,13 +13775,7 @@ int CLASS parse_tiff_ifd(int base)
                     FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c < 2)] = sget2(cbuf_SR2 + ival + 2 * c);
                     break;
                   case 0x7312:
-                  {
-                    int i, lc[4];
-                    FORC4 lc[c] = sget2(cbuf_SR2 + ival + 2 * c);
-                    i = (lc[1] == 1024 && lc[2] == 1024) << 1;
-                    SWAP(lc[i], lc[i + 1]);
-                    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c] = lc[c];
-                  }
+                    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
                   break;
                   case 0x7480:
                   case 0x7820:
