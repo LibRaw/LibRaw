@@ -444,7 +444,7 @@ typedef unsigned long long UINT64;
   typedef struct
   {
     ushort SonyCameraType;
-    uchar Sony0x9400_version; /* 0 if not found/deciphered, 0xa, 0xb, 0xc following exiftool convention */
+    uchar Sony0x9400_version;  /* 0 if not found/deciphered, 0xa, 0xb, 0xc following exiftool convention */
     uchar Sony0x9400_ReleaseMode2;
     unsigned Sony0x9400_SequenceImageNumber;
     uchar Sony0x9400_SequenceLength1;
@@ -466,7 +466,11 @@ typedef unsigned long long UINT64;
     ushort PixelShiftGroupPrefix;
     unsigned PixelShiftGroupID;
     char nShotsInPixelShiftGroup;
-    char numInPixelShiftGroup;	/* '0' if ARQ, first shot in the group has '1' here */
+    char numInPixelShiftGroup;  /* '0' if ARQ, first shot in the group has '1' here */
+    ushort prd_ImageHeight, prd_ImageWidth;
+    ushort prd_RawBitDepth;
+    ushort prd_StorageMethod;  /* 82 -> Padded; 89 -> Linear */
+    ushort prd_BayerPattern;  /* 0 -> not valid; 1 -> RGGB; 4 -> GBRG */
   } libraw_sony_info_t;
 
   typedef struct
