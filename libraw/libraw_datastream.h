@@ -30,6 +30,12 @@ it under the terms of the one of two licenses as you choose:
 #if defined WIN32 || defined(__MINGW32__)
 #include <winsock2.h>
 #endif
+/* No unique_ptr on Apple ?? */
+#ifdef __APPLE__
+#ifndef LIBRAW_USE_AUTOPTR
+#define LIBRAW_USE_AUTOPTR
+#endif
+#endif
 
 #include "libraw_const.h"
 #include "libraw_types.h"
