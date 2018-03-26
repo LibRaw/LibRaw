@@ -109,8 +109,9 @@ void trimSpaces(char *s)
 
 int main(int ac, char *av[])
 {
-  int verbose = 0, ret, print_sz = 0, print_unpack = 0, print_frame = 0, print_wb = 0, print_1 = 0;
-  int compact = 0;
+  int ret;
+  int verbose = 0, print_sz = 0, print_unpack = 0, print_frame = 0, print_wb = 0;
+  int compact = 0, print_1 = 0, print_2 = 0;
   LibRaw MyCoolRawProcessor;
 
   for (int i = 1; i < ac; i++)
@@ -133,6 +134,8 @@ int main(int ac, char *av[])
         print_frame++;
       if (av[i][1] == '1' && av[i][2] == 0)
         print_1++;
+      if (av[i][1] == '2' && av[i][2] == 0)
+        print_2++;
       continue;
     }
     if ((ret = MyCoolRawProcessor.open_file(av[i])) != LIBRAW_SUCCESS)
@@ -144,7 +147,7 @@ int main(int ac, char *av[])
     {
       printf("%s\t%s\t%s\t%d\t%d\n", av[i], P1.make, P1.model, S.width, S.height);
     }
-    if (print_1)
+    else if (print_1)
     {
       printf("%s=%s", P1.make, P1.model);
       if (P1.filters)
@@ -156,6 +159,29 @@ int main(int ac, char *av[])
           putchar(P1.cdesc[MyCoolRawProcessor.fcol(i >> 1, i & 1)]);
       }
       printf("\n");
+    }
+    else if (print_2)
+    {
+      printf("// %s %s", P1.make, P1.model);
+      if (C.cam_mul[0] > 0)
+      {
+        printf("\n'As shot' WB:");
+        for (int c = 0; c < 4; c++)
+          printf(" %.3f", C.cam_mul[c]);
+      }
+      if (C.WB_Coeffs[LIBRAW_WBI_Auto][0] > 0)
+      {
+        printf("\n'Camera Auto' WB:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Auto][c]);
+      }
+      if (C.WB_Coeffs[LIBRAW_WBI_Measured][0] > 0)
+      {
+        printf("\n'Camera Measured' WB:");
+        for (int c = 0; c < 4; c++)
+          printf(" %d", C.WB_Coeffs[LIBRAW_WBI_Measured][c]);
+      }
+      printf("\n\n");
     }
     else if (verbose)
     {

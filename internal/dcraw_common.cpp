@@ -12607,8 +12607,21 @@ int CLASS parse_tiff_ifd(int base)
         }
         else if (len == 1)
         {
-          imgdata.color.linear_max[0] = imgdata.color.linear_max[1] = imgdata.color.linear_max[2] =
-              imgdata.color.linear_max[3] = getreal(type); // Is non-short possible here??
+          unsigned lm = get2();
+          if (imgdata.makernotes.sony.prd_RawBitDepth && lm)
+          {
+            unsigned n = lm - 1;
+            n |= n >> 1;
+            n |= n >> 2;
+            n |= n >> 4;
+            n |= n >> 8;
+            n |= n >> 16;
+            lm /= ((n+1) >> imgdata.makernotes.sony.prd_RawBitDepth);
+            imgdata.color.linear_max[0] =
+              imgdata.color.linear_max[1] =
+              imgdata.color.linear_max[2] =
+              imgdata.color.linear_max[3] = lm;
+          }
         }
         break;
       }
@@ -14288,6 +14301,15 @@ void CLASS parse_minolta(int base)
       fseek(ifp, 8, SEEK_CUR);
       high = get2();
       wide = get2();
+#ifdef LIBRAW_LIBRARY_BUILD
+      imgdata.makernotes.sony.prd_ImageHeight = get2();
+      imgdata.makernotes.sony.prd_ImageWidth = get2();
+      fseek(ifp, 1L, SEEK_CUR);
+      imgdata.makernotes.sony.prd_RawBitDepth = (ushort)fgetc(ifp);
+      imgdata.makernotes.sony.prd_StorageMethod = (ushort)fgetc(ifp);
+      fseek(ifp, 4L, SEEK_CUR);
+      imgdata.makernotes.sony.prd_BayerPattern = (ushort)fgetc(ifp);
+#endif
       break;
 #ifdef LIBRAW_LIBRARY_BUILD
     case 0x524946: /* RIF */
