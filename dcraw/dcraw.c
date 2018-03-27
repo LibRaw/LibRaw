@@ -13952,21 +13952,10 @@ int CLASS parse_tiff_ifd(int base)
         }
         else if (len == 1)
         {
-          unsigned lm = get2();
-          if (imgdata.makernotes.sony.prd_RawBitDepth && lm)
-          {
-            unsigned n = lm - 1;
-            n |= n >> 1;
-            n |= n >> 2;
-            n |= n >> 4;
-            n |= n >> 8;
-            n |= n >> 16;
-            lm /= ((n+1) >> imgdata.makernotes.sony.prd_RawBitDepth);
-            imgdata.color.linear_max[0] =
-              imgdata.color.linear_max[1] =
-              imgdata.color.linear_max[2] =
-              imgdata.color.linear_max[3] = lm;
-          }
+          imgdata.color.linear_max[0] =
+            imgdata.color.linear_max[1] =
+            imgdata.color.linear_max[2] =
+            imgdata.color.linear_max[3] = get2();
         }
         break;
       }
