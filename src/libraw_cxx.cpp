@@ -2009,14 +2009,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     if(callbacks.post_identify_cb)
 	(callbacks.post_identify_cb)(this);
 
-#if 0
-    if(!strcasecmp(imgdata.idata.make, "Sony")
-       && imgdata.color.maximum > 0
-       && imgdata.color.linear_max[0] > imgdata.color.maximum*3
+
+	// Linear max from 14-bit camera, but on 12-bit data?
+    if(( !strcasecmp(imgdata.idata.make, "Sony") /* || !strcasecmp(imgdata.idata.make, "Nikon") */)
+       && imgdata.color.maximum > 0   && imgdata.color.linear_max[0] > imgdata.color.maximum
        && imgdata.color.linear_max[0] <= imgdata.color.maximum*4)
          for(int c = 0; c<4; c++)
-	   imgdata.color.linear_max[c] /= 4;
-#endif
+			imgdata.color.linear_max[c] /= 4;
 
     if (!strcasecmp(imgdata.idata.make, "Canon") && (load_raw == &LibRaw::canon_sraw_load_raw) &&
         imgdata.sizes.raw_width > 0)
