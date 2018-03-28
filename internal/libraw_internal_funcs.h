@@ -235,6 +235,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        parse_exif (int base);
     void        linear_table (unsigned len);
     void        Kodak_WB_0x08tags(int wb, unsigned type);
+    short       KodakIllumMatrix (unsigned type, float *romm_camIllum);
     void        parse_kodak_ifd (int base);
     int         parse_tiff_ifd (int base);
     int         parse_tiff (int base);
