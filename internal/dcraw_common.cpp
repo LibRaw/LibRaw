@@ -12242,10 +12242,14 @@ void CLASS parse_kodak_ifd(int base)
       linear_table(len);
     else if (tag == 0x09ce)  // 2510
       stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
+    else if (tag == 0x0e92)  // 3730
+      imgdata.makernotes.kodak.val018percent = get2();
     else if (tag == 0x0e93)  // 3731
       imgdata.color.linear_max[0] = imgdata.color.linear_max[1] =
           imgdata.color.linear_max[2] = imgdata.color.linear_max[3] =
-          imgdata.makernotes.kodak.clipWhite = get2();
+          imgdata.makernotes.kodak.val170percent = get2();
+    else if (tag == 0x0e94)  // 3732
+      imgdata.makernotes.kodak.val100percent = get2();
 /*
     else if (tag == 6020)    // 6020
       iso_speed = getint(type);

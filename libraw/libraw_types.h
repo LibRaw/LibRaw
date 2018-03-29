@@ -439,6 +439,7 @@ typedef unsigned long long UINT64;
     float romm_camFlash[3][3];
     float romm_camCustom[3][3];
     float romm_camAuto[3][3];
+    ushort val018percent, val100percent, val170percent;
   } libraw_kodak_makernotes_t;
 
   typedef struct
