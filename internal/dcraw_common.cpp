@@ -10074,6 +10074,7 @@ void CLASS parse_makernote(int base, int uptag)
   char buf[10];
   unsigned SamsungKey[11];
   uchar NikonKey;
+  short MakerNoteKodak8a = 0;
 
 #ifdef LIBRAW_LIBRARY_BUILD
   unsigned custom_serial = 0;
@@ -10173,7 +10174,16 @@ void CLASS parse_makernote(int base, int uptag)
       base = ftell(ifp);
   }
 
-  // adjust pos & base for Leica M8/M9/M Mono tags and dir in tag 0x3400
+  if (strcasestr(make, "Kodak")       &&
+      (sget2((uchar *)buf) > 1)       &&  // check number of entries
+      (sget2((uchar *)buf) < 128)     &&
+      (sget2((uchar *)(buf+4)) > 0)   &&  // check type
+      (sget2((uchar *)(buf+4)) < 13)  &&
+      (sget4((uchar *)(buf+6)) < 256)     // check count
+     )
+    MakerNoteKodak8a = 1;  // Kodak P712 / P850 / P880
+
+// adjust pos & base for Leica M8/M9/M Mono tags and dir in tag 0x3400
   if (!strncasecmp(make, "LEICA", 5))
   {
     if (!strncmp(model, "M8", 2) || !strncasecmp(model, "Leica M8", 8) || !strncasecmp(model, "LEICA X", 7))
@@ -10229,15 +10239,19 @@ void CLASS parse_makernote(int base, int uptag)
     INT64 _pos = ftell(ifp);
     if (len > 8 && _pos + len > 2 * fsize)
       continue;
-    if (!strncasecmp(model, "KODAK P880", 10) || !strncasecmp(model, "KODAK P850", 10) ||
-        !strncasecmp(model, "KODAK P712", 10))
-    {
-      if (tag == 0xf90b)
-      {
+
+    if (MakerNoteKodak8a) {
+      if ((tag == 0xff00) && (type == 4) && (len == 1)) {
+        INT64 _pos1 = get4();
+        if ((_pos1 < fsize) && (_pos1 > 0)) {
+          fseek(ifp, _pos1, SEEK_SET);
+          parse_makernote(base, tag);
+        }
+
+      } else if (tag == 0xff00f90b) {
         imgdata.makernotes.kodak.clipBlack = get2();
-      }
-      else if (tag == 0xf90c)
-      {
+
+      } else if (tag == 0xff00f90c) {
         imgdata.makernotes.kodak.clipWhite =
           imgdata.color.linear_max[0] =
           imgdata.color.linear_max[1] =
@@ -10245,7 +10259,7 @@ void CLASS parse_makernote(int base, int uptag)
           imgdata.color.linear_max[3] = get2();
       }
     }
-    if (!strncmp(make, "Canon", 5))
+    else if (!strncmp(make, "Canon", 5))
     {
       if (tag == 0x000d && len < 256000) // camera info
       {
@@ -12111,7 +12125,7 @@ short CLASS KodakIllumMatrix (unsigned type, float *romm_camIllum)
 void CLASS parse_kodak_ifd(int base)
 {
   unsigned entries, tag, type, len, save;
-  int j, c, wbi = -1, romm_camTemp[9], romm_camScale[3];
+  int j, c, wbi = -1;
   float mul[3] = {1, 1, 1}, num;
 
   static const int wbtag_kdc[] = {
