@@ -121,6 +121,9 @@ AAHD::AAHD(LibRaw& _libraw) :
 	nr_width = libraw.imgdata.sizes.iwidth + nr_margin * 2;
 	rgb_ahd[0] = (ushort3*) calloc(nr_height * nr_width,
 			(sizeof(ushort3) * 2 + sizeof(int3) * 2 + 3));
+	if(!rgb_ahd[0])
+		    throw LIBRAW_EXCEPTION_ALLOC;
+
 	rgb_ahd[1] = rgb_ahd[0] + nr_height * nr_width;
 	yuv[0] = (int3 *) (rgb_ahd[1] + nr_height * nr_width);
 	yuv[1] = yuv[0] + nr_height * nr_width;
