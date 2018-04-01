@@ -1370,6 +1370,14 @@ void CLASS lossless_dng_load_raw()
           checkCancel();
 #endif
           rp = ljpeg_row(jrow, &jh);
+	  if(tiff_samples == 1 && jh.clrs > 1 && jh.clrs*jwide == raw_width)
+          for (jcol = 0; jcol < jwide*jh.clrs; jcol++)
+          {
+            adobe_copy_pixel(trow + row, tcol + col, &rp);
+            if (++col >= tile_width || col >= raw_width)
+              row += 1 + (col = 0);
+	  }
+	  else
           for (jcol = 0; jcol < jwide; jcol++)
           {
             adobe_copy_pixel(trow + row, tcol + col, &rp);
