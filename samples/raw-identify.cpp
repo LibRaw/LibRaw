@@ -219,11 +219,12 @@ int main(int ac, char *av[])
       printf("\n");
 
       printf("\nMakernotes:\n");
-      printf("\tDriveMode: %d\n", ShootingInfo.DriveMode);
+      printf("\tID: %lld DriveMode: %d\n",mnLens.CamID, ShootingInfo.DriveMode);
       printf("\tFocusMode: %d\n", ShootingInfo.FocusMode);
       printf("\tMeteringMode: %d\n", ShootingInfo.MeteringMode);
       printf("\tAFPoint: %d\n", ShootingInfo.AFPoint);
       printf("\tExposureMode: %d\n", ShootingInfo.ExposureMode);
+      printf("\tExposureProgram: %d\n", ShootingInfo.ExposureProgram);
       printf("\tImageStabilization: %d\n", ShootingInfo.ImageStabilization);
       if (mnLens.body[0])
       {

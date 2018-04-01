@@ -451,7 +451,7 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
   callbacks.post_identify_cb = NULL;
   callbacks.pre_subtractblack_cb = callbacks.pre_scalecolors_cb = callbacks.pre_preinterpolate_cb
     = callbacks.pre_interpolate_cb = callbacks.interpolate_bayer_cb = callbacks.interpolate_xtrans_cb
-    = callbacks.post_interpolate_cb = callbacks.pre_converttorgb_cb = callbacks.post_converttorgb_cb 
+    = callbacks.post_interpolate_cb = callbacks.pre_converttorgb_cb = callbacks.post_converttorgb_cb
   = NULL;
 
   memmove(&imgdata.params.aber, &aber, sizeof(aber));
@@ -643,6 +643,7 @@ void LibRaw::recycle()
   imgdata.shootinginfo.MeteringMode = -1;
   imgdata.shootinginfo.AFPoint = -1;
   imgdata.shootinginfo.ExposureMode = -1;
+  imgdata.shootinginfo.ExposureProgram = -1;
   imgdata.shootinginfo.ImageStabilization = -1;
 
   _exitflag = 0;
