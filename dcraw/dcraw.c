@@ -10272,6 +10272,66 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     }
   }
 
+  else if (((tag == 0x0001)  ||  // Minolta CameraSettings, big endian
+            (tag == 0x0003)) &&
+           (len >= 196))
+  {
+    table_buf = (uchar *)malloc(len);
+    fread(table_buf, len, 1, ifp);
+
+    lid = 0x01<<2;
+      imgdata.shootinginfo.ExposureMode =
+          (unsigned)table_buf[lid] << 24 | (unsigned)table_buf[lid + 1] << 16 |
+          (unsigned)table_buf[lid + 2] << 8 | (unsigned)table_buf[lid + 3];
+
+    lid = 0x06<<2;
+      imgdata.shootinginfo.DriveMode =
+          (unsigned)table_buf[lid] << 24 | (unsigned)table_buf[lid + 1] << 16 |
+          (unsigned)table_buf[lid + 2] << 8 | (unsigned)table_buf[lid + 3];
+
+    lid = 0x07<<2;
+      imgdata.shootinginfo.MeteringMode =
+          (unsigned)table_buf[lid] << 24 | (unsigned)table_buf[lid + 1] << 16 |
+          (unsigned)table_buf[lid + 2] << 8 | (unsigned)table_buf[lid + 3];
+
+    lid = 0x25<<2;
+      imgdata.makernotes.sony.MinoltaCamID =
+          (unsigned)table_buf[lid] << 24 | (unsigned)table_buf[lid + 1] << 16 |
+          (unsigned)table_buf[lid + 2] << 8 | (unsigned)table_buf[lid + 3];
+
+    lid = 0x30<<2;
+      imgdata.shootinginfo.FocusMode =
+          (unsigned)table_buf[lid] << 24 | (unsigned)table_buf[lid + 1] << 16 |
+          (unsigned)table_buf[lid + 2] << 8 | (unsigned)table_buf[lid + 3];
+
+    free(table_buf);
+  }
+
+  else if ((tag == 0x0004)  &&  // Minolta CameraSettings7D, big endian
+           (len >= 227))
+  {
+    table_buf = (uchar *)malloc(len);
+    fread(table_buf, len, 1, ifp);
+
+    lid = 0x0;
+      imgdata.shootinginfo.ExposureMode =
+          (ushort)table_buf[lid] << 8 | (ushort)table_buf[lid + 1];
+
+    lid = 0x0e<<1;
+      imgdata.shootinginfo.FocusMode =
+          (ushort)table_buf[lid] << 8 | (ushort)table_buf[lid + 1];
+
+    lid = 0x10<<1;
+      imgdata.shootinginfo.AFPoint =
+          (ushort)table_buf[lid] << 8 | (ushort)table_buf[lid + 1];
+
+    lid = 0x71<<1;
+      imgdata.shootinginfo.ImageStabilization =
+          (ushort)table_buf[lid] << 24 | (ushort)table_buf[lid + 1];
+
+    free(table_buf);
+  }
+
   else if ((tag == 0x0010) && // CameraInfo
            strncasecmp(model, "DSLR-A100", 9) &&
            strncasecmp(model, "NEX-5C", 6) &&
@@ -10341,12 +10401,14 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     free(table_buf);
   }
 
-  else if ((!dng_writer) && (tag == 0x0020))
+  else if ((!dng_writer) &&
+           (tag == 0x0020) ||
+           (tag == 0xb0280020))
   {
-    if (!strncasecmp(model, "DSLR-A100", 9))  // WBInfoA100, needs 0xb028 processing
+    if (!strncasecmp(model, "DSLR-A100", 9))  // WBInfoA100
     {
       fseek(ifp, 0x49dc, SEEK_CUR);
-      stmread(imgdata.shootinginfo.InternalBodySerial, 12, ifp);
+      stmread(imgdata.shootinginfo.InternalBodySerial, 13, ifp);
     }
     else if ((len == 19154) ||
              (len == 19148))
@@ -10388,15 +10450,52 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
 
   else if (tag == 0x0105) // Teleconverter
   {
-    imgdata.lens.makernotes.TeleconverterID = get2();
+    imgdata.lens.makernotes.TeleconverterID = get4();
   }
 
-  else if (tag == 0x0114 && len < 256000) // CameraSettings
+  else if (tag == 0x0107)
+  {
+    imgdata.shootinginfo.ImageStabilization = get4();
+  }
+
+  else if (((tag == 0x0114) ||     // CameraSettings
+            (tag == 0xb0280114)) &&
+           (len < 256000))
   {
     table_buf = (uchar *)malloc(len);
     fread(table_buf, len, 1, ifp);
     switch (len)
     {
+    case 260:  // Sony A100, big endian
+      imgdata.shootinginfo.ExposureMode =
+          ((ushort)table_buf[0]) << 8 | ((ushort)table_buf[1]);
+      lid = 0x0a<<1;
+      imgdata.shootinginfo.DriveMode =
+          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      lid = 0x0c<<1;
+      imgdata.shootinginfo.FocusMode =
+          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      lid = 0x0d<<1;
+      imgdata.shootinginfo.AFPoint =
+          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      lid = 0x12<<1;
+      imgdata.shootinginfo.MeteringMode =
+          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      lid = 0x57<<1;
+      imgdata.shootinginfo.ImageStabilization =
+          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      break;
+    case 448:  // Minolta "DYNAX 5D" / "MAXXUM 5D" / "ALPHA SWEET", big endian
+      lid = 0x0a<<1;
+      imgdata.shootinginfo.ExposureMode =
+          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      lid = 0x25<<1;
+      imgdata.shootinginfo.MeteringMode =
+          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      lid = 0xbd<<1;
+      imgdata.shootinginfo.ImageStabilization =
+          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      break;
     case 280:
     case 364:
       // CameraSettings and CameraSettings2 are big endian
@@ -12497,6 +12596,17 @@ void CLASS parse_makernote(int base, int uptag)
                !strncasecmp(model, "Lusso", 5)   ||
                !strncasecmp(model, "HV", 2))))
     {
+
+      if ((tag == 0xb028) && (len == 1) && (type == 4)) // DSLR-A100
+      {
+        unsigned a = get4();
+        if (a != 0)
+        {
+          fseek (ifp, a, SEEK_SET);
+          parse_makernote(base, tag);
+        }
+      }
+
       parseSonyMakernotes(tag, type, len, nonDNG,
                           table_buf_0x0116, table_buf_0x0116_len,
                           table_buf_0x2010, table_buf_0x2010_len,
@@ -12507,6 +12617,9 @@ void CLASS parse_makernote(int base, int uptag)
                           table_buf_0x9406, table_buf_0x9406_len,
                           table_buf_0x940c, table_buf_0x940c_len,
                           table_buf_0x940e, table_buf_0x940e_len);
+
+      if (imgdata.makernotes.sony.MinoltaCamID != -1)
+        imgdata.lens.makernotes.CamID = imgdata.makernotes.sony.MinoltaCamID;
     }
 
     fseek(ifp, _pos, SEEK_SET);

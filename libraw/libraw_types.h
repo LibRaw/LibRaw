@@ -461,6 +461,7 @@ typedef unsigned long long UINT64;
     ushort MeteringMode_offset;
     ushort ExposureProgram_offset;
     ushort ReleaseMode2_offset;
+    unsigned MinoltaCamID;
     float firmware;
     ushort ImageCount3_offset;
     unsigned ImageCount3;
@@ -723,7 +724,7 @@ typedef unsigned long long UINT64;
     short ExposureProgram;
     short ImageStabilization;
     char BodySerial[64];
-    char InternalBodySerial[64]; /* this may be PCB or sensor serial, depends on make/model*/
+    char InternalBodySerial[64]; /* this may be PCB or sensor serial, depends on make/model */
   } libraw_shootinginfo_t;
 
   typedef struct

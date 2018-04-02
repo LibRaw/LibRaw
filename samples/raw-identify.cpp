@@ -219,7 +219,7 @@ int main(int ac, char *av[])
       printf("\n");
 
       printf("\nMakernotes:\n");
-      printf("\tID: %lld DriveMode: %d\n",mnLens.CamID, ShootingInfo.DriveMode);
+      printf("\tDriveMode: %d\n" ,ShootingInfo.DriveMode);
       printf("\tFocusMode: %d\n", ShootingInfo.FocusMode);
       printf("\tMeteringMode: %d\n", ShootingInfo.MeteringMode);
       printf("\tAFPoint: %d\n", ShootingInfo.AFPoint);
