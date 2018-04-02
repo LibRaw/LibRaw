@@ -10402,8 +10402,8 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
   }
 
   else if ((!dng_writer) &&
-           (tag == 0x0020) ||
-           (tag == 0xb0280020))
+           ((tag == 0x0020) ||
+            (tag == 0xb0280020)))
   {
     if (!strncasecmp(model, "DSLR-A100", 9))  // WBInfoA100
     {
