@@ -38,6 +38,8 @@ it under the terms of the one of two licenses as you choose:
     void	parseCanonMakernotes (unsigned tag, unsigned type, unsigned len);
     void	processNikonLensData (uchar *LensData, unsigned len);
     void	setOlympusBodyFeatures (unsigned long long id);
+    void	parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
+    void	parseOlympus_ImageProcessing (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	setPhaseOneFeatures (unsigned id);
     void	setPentaxBodyFeatures (unsigned id);
     void	PentaxISO (ushort c);
@@ -54,7 +56,7 @@ it under the terms of the one of two licenses as you choose:
     void	process_Sony_0x9406 (uchar * buf, ushort);
     void	process_Sony_0x940c (uchar * buf, ushort);
     void	process_Sony_0x940e (uchar * buf, ushort, unsigned id);
-    void	parseSonyMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
+    void	parseSonyMakernotes (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
                                uchar *&table_buf_0x0116, ushort &table_buf_0x0116_len,
                                uchar *&table_buf_0x2010, ushort &table_buf_0x2010_len,
                                uchar *&table_buf_0x9050, ushort &table_buf_0x9050_len,

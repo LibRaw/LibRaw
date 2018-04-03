@@ -8681,6 +8681,225 @@ void CLASS setOlympusBodyFeatures(unsigned long long id)
   return;
 }
 
+void CLASS parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
+{
+// uptag 0x2020
+  int c;
+  uchar uc;
+
+  switch (tag) {
+
+  case 0x0101:
+    if (dng_writer == nonDNG) {
+      thumb_offset = get4() + base;
+    }
+    break;
+
+  case 0x0102:
+    if (dng_writer == nonDNG) {
+      thumb_length = get4();
+  }
+    break;
+
+  case 0x0200:
+    imgdata.shootinginfo.ExposureMode = get2();
+    break;
+
+  case 0x0202:
+    imgdata.shootinginfo.MeteringMode = get2();
+    break;
+
+  case 0x0301:
+    imgdata.shootinginfo.FocusMode =
+    imgdata.makernotes.olympus.FocusMode[0] = get2();
+    if (len == 2) {
+      imgdata.makernotes.olympus.FocusMode[1] = get2();
+    }
+    break;
+
+  case 0x0304:
+    for (c = 0; c < 64; c++) {
+      imgdata.makernotes.olympus.AFAreas[c] = get4();
+    }
+    break;
+
+  case 0x0305:
+    for (c = 0; c < 5; c++) {
+      imgdata.makernotes.olympus.AFPointSelected[c] = getreal(type);
+    }
+    break;
+
+  case 0x0306:
+    fread(&uc, 1, 1, ifp);
+    imgdata.makernotes.olympus.AFFineTune = uc;
+    break;
+
+  case 0x0307:
+    FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
+    break;
+
+  case 0x0401:
+    imgdata.other.FlashEC = getreal(type);
+    break;
+
+  case 0x0507:
+    imgdata.makernotes.olympus.ColorSpace = get2();
+    break;
+
+  case 0x0600:
+    imgdata.shootinginfo.DriveMode =
+    imgdata.makernotes.olympus.DriveMode[0] = get2();
+    for (c = 1; c < len; c++) {
+      imgdata.makernotes.olympus.DriveMode[c] = get2();
+    }
+    break;
+
+  case 0x0604:
+    imgdata.shootinginfo.ImageStabilization = get4();
+    break;
+
+  }
+
+  return;
+}
+
+void CLASS parseOlympus_ImageProcessing (unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
+{
+// uptag 0x2040
+
+  int i, c, wb[4], nWB, tWB, wbG;
+  ushort CT;
+  short sorder;
+
+    if ((tag == 0x0100) && (dng_writer == nonDNG)) {
+      cam_mul[0] = get2() / 256.0;
+      cam_mul[2] = get2() / 256.0;
+
+  } else if ((tag == 0x0101) &&
+             (len == 2)      &&
+             (!strncasecmp(model, "E-410", 5) ||
+              !strncasecmp(model, "E-510", 5))) {
+      for (c = 0; i < 64; i++) {
+        imgdata.color.WBCT_Coeffs[i][2] =
+          imgdata.color.WBCT_Coeffs[i][4] =
+          imgdata.color.WB_Coeffs[i][1] =
+          imgdata.color.WB_Coeffs[i][3] = 0x100;
+      }
+      for (c = 64; i < 256; i++) {
+        imgdata.color.WB_Coeffs[i][1] =
+          imgdata.color.WB_Coeffs[i][3] = 0x100;
+      }
+
+  } else if ((tag > 0x0101) &&
+             (tag <= 0x0111)) {
+      nWB = tag - 0x0101;
+      tWB = Oly_wb_list2[nWB << 1];
+      CT = Oly_wb_list2[(nWB << 1) | 1];
+      wb[0] = get2();
+      wb[2] = get2();
+      if (tWB != 0x100) {
+        imgdata.color.WB_Coeffs[tWB][0] = wb[0];
+        imgdata.color.WB_Coeffs[tWB][2] = wb[2];
+      }
+      if (CT) {
+        imgdata.color.WBCT_Coeffs[nWB - 1][0] = CT;
+        imgdata.color.WBCT_Coeffs[nWB - 1][1] = wb[0];
+        imgdata.color.WBCT_Coeffs[nWB - 1][3] = wb[2];
+      }
+      if (len == 4) {
+        wb[1] = get2();
+        wb[3] = get2();
+        if (tWB != 0x100) {
+          imgdata.color.WB_Coeffs[tWB][1] = wb[1];
+          imgdata.color.WB_Coeffs[tWB][3] = wb[3];
+        }
+        if (CT) {
+          imgdata.color.WBCT_Coeffs[nWB - 1][2] = wb[1];
+          imgdata.color.WBCT_Coeffs[nWB - 1][4] = wb[3];
+        }
+      }
+
+  } else if ((tag >= 0x0112) &&
+             (tag <= 0x011e)) {
+      nWB = tag - 0x0112;
+      wbG = get2();
+      tWB = Oly_wb_list2[nWB << 1];
+      if (nWB)
+        imgdata.color.WBCT_Coeffs[nWB - 1][2] =
+          imgdata.color.WBCT_Coeffs[nWB - 1][4] = wbG;
+      if (tWB != 0x100)
+        imgdata.color.WB_Coeffs[tWB][1] =
+          imgdata.color.WB_Coeffs[tWB][3] = wbG;
+
+  } else if (tag == 0x011f) {
+      wbG = get2();
+      if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0])
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = wbG;
+      FORC4 if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][0])
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][1] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][3] = wbG;
+
+  } else if (tag == 0x0121) {
+      imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0] = get2();
+      imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][2] = get2();
+      if (len == 4) {
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = get2();
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = get2();
+      }
+
+  } else if ((tag == 0x0200)        &&
+             (dng_writer == nonDNG) &&
+             strcmp(software, "v757-71")) {
+      for (i = 0; i < 3; i++) {
+        if (!imgdata.makernotes.olympus.ColorSpace) {
+          FORC3 cmatrix[i][c] = ((short)get2()) / 256.0;
+        } else {
+          FORC3 imgdata.color.ccm[i][c] = ((short)get2()) / 256.0;
+        }
+      }
+
+  } else if ((tag == 0x0600) && (dng_writer == nonDNG)) {
+      FORC4 cblack[c ^ c >> 1] = get2();
+  } else if ((tag == 0x0612) && (dng_writer == nonDNG)) {
+        imgdata.sizes.raw_crop.cleft = get2();
+  } else if ((tag == 0x0613)  && (dng_writer == nonDNG)){
+        imgdata.sizes.raw_crop.ctop = get2();
+  } else if ((tag == 0x0614)  && (dng_writer == nonDNG)){
+        imgdata.sizes.raw_crop.cwidth = get2();
+  } else if ((tag == 0x0615)  && (dng_writer == nonDNG)){
+        imgdata.sizes.raw_crop.cheight = get2();
+
+  } else if ((tag == 0x0805) && (len == 2)) {
+      imgdata.makernotes.olympus.OlympusSensorCalibration[0] = getreal(type);
+      imgdata.makernotes.olympus.OlympusSensorCalibration[1] = getreal(type);
+      if (dng_writer == nonDNG)
+        FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.olympus.OlympusSensorCalibration[0];
+
+  } else if (tag == 0x1112) {
+        sorder = order;
+        order = 0x4d4d;
+        imgdata.makernotes.olympus.OlympusCropID = get2();
+        order = sorder;
+  } else if (tag == 0x1113) {
+        FORC4 imgdata.makernotes.olympus.OlympusFrame[c] = get2();
+
+  } else if (tag == 0x1306) {
+       c = get2();
+       if ((c != 0) && (c != 100)) {
+          if (c < 61)
+            imgdata.other.CameraTemperature = (float)c;
+          else
+            imgdata.other.CameraTemperature = (float)(c - 32) / 1.8f;
+          if ((OlyID == 0x4434353933ULL) && // TG-5
+              (imgdata.other.exifAmbientTemperature > -273.15f))
+            imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
+          }
+  }
+
+  return;
+}
+
 void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
 {
 
@@ -10188,7 +10407,7 @@ void CLASS process_Sony_0x940e(uchar *buf, ushort len, unsigned id)
     imgdata.makernotes.sony.AFMicroAdjOn = 1;
 }
 
-void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
+void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
                                uchar *&table_buf_0x0116, ushort &table_buf_0x0116_len,
                                uchar *&table_buf_0x2010, ushort &table_buf_0x2010_len,
                                uchar *&table_buf_0x9050, ushort &table_buf_0x9050_len,
@@ -10456,6 +10675,16 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
   else if (tag == 0x0107)
   {
     imgdata.shootinginfo.ImageStabilization = get4();
+  }
+
+  else if ((tag == 0xb0280088) && (dng_writer == nonDNG))
+  {
+    thumb_offset = get4() + base;
+  }
+
+  else if ((tag == 0xb0280089) && (dng_writer == nonDNG))
+  {
+    thumb_length = get4();
   }
 
   else if (((tag == 0x0114) ||     // CameraSettings
@@ -10780,10 +11009,12 @@ void CLASS parseSonyMakernotes(unsigned tag, unsigned type, unsigned len, unsign
 
 void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 {
+/*
 #ifdef LIBRAW_LIBRARY_BUILD
   if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES)
   	return;
 #endif
+*/
   unsigned ver97 = 0, offset = 0, entries, tag, type, len, save, c;
   unsigned i;
 
@@ -11167,84 +11398,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                                  (((type == 4) || (type == 9)) && (len > 1)) || (type == 5) || (type > 9)))
         goto skip_Oly_broken_tags;
 
-      if ((tag >= 0x20400101) && (tag <= 0x20400111))
-      {
-        if ((tag == 0x20400101) && (len == 2) && (!strncasecmp(model, "E-410", 5) || !strncasecmp(model, "E-510", 5)))
-        {
-          int i;
-          for (i = 0; i < 64; i++)
-          {
-            imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = imgdata.color.WB_Coeffs[i][1] =
-                imgdata.color.WB_Coeffs[i][3] = 0x100;
-          }
-          for (i = 64; i < 256; i++)
-          {
-            imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
-          }
-        }
-        nWB = tag - 0x20400101;
-        tWB = Oly_wb_list2[nWB << 1];
-        ushort CT = Oly_wb_list2[(nWB << 1) | 1];
-        int wb[4];
-        wb[0] = get2();
-        wb[2] = get2();
-        if (tWB != 0x100)
-        {
-          imgdata.color.WB_Coeffs[tWB][0] = wb[0];
-          imgdata.color.WB_Coeffs[tWB][2] = wb[2];
-        }
-        if (CT)
-        {
-          imgdata.color.WBCT_Coeffs[nWB - 1][0] = CT;
-          imgdata.color.WBCT_Coeffs[nWB - 1][1] = wb[0];
-          imgdata.color.WBCT_Coeffs[nWB - 1][3] = wb[2];
-        }
-        if (len == 4)
-        {
-          wb[1] = get2();
-          wb[3] = get2();
-          if (tWB != 0x100)
-          {
-            imgdata.color.WB_Coeffs[tWB][1] = wb[1];
-            imgdata.color.WB_Coeffs[tWB][3] = wb[3];
-          }
-          if (CT)
-          {
-            imgdata.color.WBCT_Coeffs[nWB - 1][2] = wb[1];
-            imgdata.color.WBCT_Coeffs[nWB - 1][4] = wb[3];
-          }
-        }
-      }
-      else if ((tag >= 0x20400112) && (tag <= 0x2040011e))
-      {
-        nWB = tag - 0x20400112;
-        int wbG = get2();
-        tWB = Oly_wb_list2[nWB << 1];
-        if (nWB)
-          imgdata.color.WBCT_Coeffs[nWB - 1][2] = imgdata.color.WBCT_Coeffs[nWB - 1][4] = wbG;
-        if (tWB != 0x100)
-          imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = wbG;
-      }
-      else if (tag == 0x2040011f)
-      {
-        int wbG = get2();
-        if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0])
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = wbG;
-        FORC4 if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][0])
-            imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][3] =
-            wbG;
-      }
-      else if (tag == 0x20400121)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][2] = get2();
-        if (len == 4)
-        {
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = get2();
-        }
-      }
-      else if ((tag == 0x30000110) && strcmp(software, "v757-71"))
+      if (( tag >= 0x20200000) && (tag <= 0x2020ffff))
+        parseOlympus_CameraSettings (base, (tag & 0x0000ffff), type, len, AdobeDNG);
+
+      if (( tag >= 0x20400000) && (tag <= 0x2040ffff))
+        parseOlympus_ImageProcessing ((tag & 0x0000ffff), type, len, AdobeDNG);
+
+      if ((tag == 0x30000110) && strcmp(software, "v757-71"))
       {
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] = get2();
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][2] = get2();
@@ -11338,40 +11498,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         case 0x20100403:
           stmread(imgdata.lens.makernotes.Attachment, len, ifp);
           break;
-        case 0x20200306:
-        {
-          uchar uc;
-          fread(&uc, 1, 1, ifp);
-          imgdata.makernotes.olympus.AFFineTune = uc;
-        }
-        break;
-        case 0x20200307:
-          FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
-          break;
-        case 0x20200401:
-          imgdata.other.FlashEC = getreal(type);
-          break;
         case 0x1007:
           imgdata.other.SensorTemperature = (float)get2();
           break;
         case 0x1008:
           imgdata.other.LensTemperature = (float)get2();
           break;
-        case 0x20401306:
-        {
-          int temp = get2();
-          if ((temp != 0) && (temp != 100))
-          {
-            if (temp < 61)
-              imgdata.other.CameraTemperature = (float)temp;
-            else
-              imgdata.other.CameraTemperature = (float)(temp - 32) / 1.8f;
-            if ((OlyID == 0x4434353933ULL) && // TG-5
-                (imgdata.other.exifAmbientTemperature > -273.15f))
-              imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
-          }
-        }
-        break;
+
         case 0x20501500:
           if (OlyID != 0x0ULL)
           {
@@ -11589,7 +11722,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
                !strncasecmp(model, "Lusso", 5)   ||
                !strncasecmp(model, "HV", 2))))
     {
-      parseSonyMakernotes(tag, type, len, AdobeDNG,
+      parseSonyMakernotes(base, tag, type, len, AdobeDNG,
                           table_buf_0x0116, table_buf_0x0116_len,
                           table_buf_0x2010, table_buf_0x2010_len,
                           table_buf_0x9050, table_buf_0x9050_len,
@@ -12167,28 +12300,19 @@ void CLASS parse_makernote(int base, int uptag)
       case 0x1002:
         imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, getreal(type) / 2);
         break;
-      case 0x20400612:
       case 0x30000612:
         imgdata.sizes.raw_crop.cleft = get2();
         break;
-      case 0x20400613:
       case 0x30000613:
         imgdata.sizes.raw_crop.ctop = get2();
         break;
-      case 0x20400614:
       case 0x30000614:
         imgdata.sizes.raw_crop.cwidth = get2();
         break;
-      case 0x20400615:
       case 0x30000615:
         imgdata.sizes.raw_crop.cheight = get2();
         break;
-      case 0x20401112:
-        imgdata.makernotes.olympus.OlympusCropID = get2();
-        break;
-      case 0x20401113:
-        FORC4 imgdata.makernotes.olympus.OlympusFrame[c] = get2();
-        break;
+
       case 0x20100201:
       {
         unsigned long long oly_lensid[3];
@@ -12246,21 +12370,7 @@ void CLASS parse_makernote(int base, int uptag)
       case 0x1008:
         imgdata.other.LensTemperature = (float)get2();
         break;
-      case 0x20401306:
-      {
-        int temp = get2();
-        if ((temp != 0) && (temp != 100))
-        {
-          if (temp < 61)
-            imgdata.other.CameraTemperature = (float)temp;
-          else
-            imgdata.other.CameraTemperature = (float)(temp - 32) / 1.8f;
-          if ((OlyID == 0x4434353933ULL) && // TG-5
-              (imgdata.other.exifAmbientTemperature > -273.15f))
-            imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
-        }
-      }
-      break;
+
       case 0x20501500:
         if (OlyID != 0x0ULL)
         {
@@ -12607,7 +12717,7 @@ void CLASS parse_makernote(int base, int uptag)
         }
       }
 
-      parseSonyMakernotes(tag, type, len, nonDNG,
+      parseSonyMakernotes(base, tag, type, len, nonDNG,
                           table_buf_0x0116, table_buf_0x0116_len,
                           table_buf_0x2010, table_buf_0x2010_len,
                           table_buf_0x9050, table_buf_0x9050_len,
@@ -12696,80 +12806,6 @@ void CLASS parse_makernote(int base, int uptag)
       if ((tag == 0x20300108) || (tag == 0x20310109))
         imgdata.makernotes.olympus.ColorSpace = get2();
 
-      if ((tag == 0x20400101) && (len == 2) && (!strncasecmp(model, "E-410", 5) || !strncasecmp(model, "E-510", 5)))
-      {
-        int i;
-        for (i = 0; i < 64; i++)
-          imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = imgdata.color.WB_Coeffs[i][1] =
-              imgdata.color.WB_Coeffs[i][3] = 0x100;
-        for (i = 64; i < 256; i++)
-          imgdata.color.WB_Coeffs[i][1] = imgdata.color.WB_Coeffs[i][3] = 0x100;
-      }
-      if ((tag >= 0x20400101) && (tag <= 0x20400111))
-      {
-        nWB = tag - 0x20400101;
-        tWB = Oly_wb_list2[nWB << 1];
-        ushort CT = Oly_wb_list2[(nWB << 1) | 1];
-        int wb[4];
-        wb[0] = get2();
-        wb[2] = get2();
-        if (tWB != 0x100)
-        {
-          imgdata.color.WB_Coeffs[tWB][0] = wb[0];
-          imgdata.color.WB_Coeffs[tWB][2] = wb[2];
-        }
-        if (CT)
-        {
-          imgdata.color.WBCT_Coeffs[nWB - 1][0] = CT;
-          imgdata.color.WBCT_Coeffs[nWB - 1][1] = wb[0];
-          imgdata.color.WBCT_Coeffs[nWB - 1][3] = wb[2];
-        }
-        if (len == 4)
-        {
-          wb[1] = get2();
-          wb[3] = get2();
-          if (tWB != 0x100)
-          {
-            imgdata.color.WB_Coeffs[tWB][1] = wb[1];
-            imgdata.color.WB_Coeffs[tWB][3] = wb[3];
-          }
-          if (CT)
-          {
-            imgdata.color.WBCT_Coeffs[nWB - 1][2] = wb[1];
-            imgdata.color.WBCT_Coeffs[nWB - 1][4] = wb[3];
-          }
-        }
-      }
-      if ((tag >= 0x20400112) && (tag <= 0x2040011e))
-      {
-        nWB = tag - 0x20400112;
-        int wbG = get2();
-        tWB = Oly_wb_list2[nWB << 1];
-        if (nWB)
-          imgdata.color.WBCT_Coeffs[nWB - 1][2] = imgdata.color.WBCT_Coeffs[nWB - 1][4] = wbG;
-        if (tWB != 0x100)
-          imgdata.color.WB_Coeffs[tWB][1] = imgdata.color.WB_Coeffs[tWB][3] = wbG;
-      }
-
-      if (tag == 0x20400121)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][2] = get2();
-        if (len == 4)
-        {
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = get2();
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = get2();
-        }
-      }
-      if (tag == 0x2040011f)
-      {
-        int wbG = get2();
-        if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0])
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = wbG;
-        FORC4 if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][0])
-            imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + c][3] =
-            wbG;
-      }
       if ((tag == 0x30000110) && strcmp(software, "v757-71"))
       {
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] = get2();
@@ -12792,26 +12828,12 @@ void CLASS parse_makernote(int base, int uptag)
         imgdata.color.WB_Coeffs[Oly_wb_list1[wb_ind]][2] = get2();
       }
 
-      if ((tag == 0x20400805) && (len == 2))
-      {
-        imgdata.makernotes.olympus.OlympusSensorCalibration[0] = getreal(type);
-        imgdata.makernotes.olympus.OlympusSensorCalibration[1] = getreal(type);
-        FORC4 imgdata.color.linear_max[c] = imgdata.makernotes.olympus.OlympusSensorCalibration[0];
-      }
-      if (tag == 0x20200306)
-      {
-        uchar uc;
-        fread(&uc, 1, 1, ifp);
-        imgdata.makernotes.olympus.AFFineTune = uc;
-      }
-      if (tag == 0x20200307)
-      {
-        FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
-      }
-      if (tag == 0x20200401)
-      {
-        imgdata.other.FlashEC = getreal(type);
-      }
+      if (( tag >= 0x20200000) && (tag <= 0x2020ffff))
+        parseOlympus_CameraSettings (base, (tag & 0x0000ffff), type, len, nonDNG);
+
+      if (( tag >= 0x20400000) && (tag <= 0x2040ffff))
+        parseOlympus_ImageProcessing ((tag & 0x0000ffff), type, len, nonDNG);
+
     }
     fseek(ifp, _pos2, SEEK_SET);
 
@@ -13039,31 +13061,37 @@ void CLASS parse_makernote(int base, int uptag)
         goto next;
       goto get2_256;
     }
+
+#ifndef LIBRAW_LIBRARY_BUILD
     if (((tag == 0x1011 && len == 9) || tag == 0x20400200) && strcmp(software, "v757-71"))
       for (i = 0; i < 3; i++)
-      {
-#ifdef LIBRAW_LIBRARY_BUILD
-        if (!imgdata.makernotes.olympus.ColorSpace)
-        {
-          FORC3 cmatrix[i][c] = ((short)get2()) / 256.0;
-        }
-        else
-        {
-          FORC3 imgdata.color.ccm[i][c] = ((short)get2()) / 256.0;
-        }
-#else
         FORC3 cmatrix[i][c] = ((short)get2()) / 256.0;
-#endif
-      }
+
     if ((tag == 0x1012 || tag == 0x20400600) && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2();
     if (tag == 0x1017 || tag == 0x20400100)
       cam_mul[0] = get2() / 256.0;
     if (tag == 0x1018 || tag == 0x20400100)
       cam_mul[2] = get2() / 256.0;
-    if (tag == 0x2011 && len == 2)
-    {
-    get2_256:
+#else
+    if ((tag == 0x1011 && len == 9) && strcmp(software, "v757-71"))
+      for (i = 0; i < 3; i++) {
+        if (!imgdata.makernotes.olympus.ColorSpace) {
+          FORC3 cmatrix[i][c] = ((short)get2()) / 256.0;
+        } else {
+          FORC3 imgdata.color.ccm[i][c] = ((short)get2()) / 256.0;
+        }
+      }
+    if ((tag == 0x1012) && (len == 4))
+      FORC4 cblack[c ^ c >> 1] = get2();
+    if (tag == 0x1017)
+      cam_mul[0] = get2() / 256.0;
+    if (tag == 0x1018)
+      cam_mul[2] = get2() / 256.0;
+#endif
+
+    if (tag == 0x2011 && len == 2) {
+get2_256:
       order = 0x4d4d;
       cam_mul[0] = get2() / 256.0;
       cam_mul[2] = get2() / 256.0;
@@ -13082,21 +13110,20 @@ void CLASS parse_makernote(int base, int uptag)
     if (((tag == 0x2020) || (tag == 0x3000) || (tag == 0x2030) || (tag == 0x2031) || (tag == 0x2050)) &&
         ((type == 7) || (type == 13)) && !strncasecmp(make, "Olympus", 7))
     {
-      INT64 _pos3 = ftell(ifp);
       parse_makernote(base, tag);
-      fseek(ifp, _pos3, SEEK_SET);
     }
 // IB end
-#endif
+#else
     if ((tag == 0x2020) && ((type == 7) || (type == 13)) && !strncmp(buf, "OLYMP", 5))
       parse_thumb_note(base, 257, 258);
-    if (tag == 0x2040)
-      parse_makernote(base, 0x2040);
     if (tag == 0xb028)
     {
       fseek(ifp, get4() + base, SEEK_SET);
       parse_thumb_note(base, 136, 137);
     }
+#endif
+    if (tag == 0x2040)
+      parse_makernote(base, 0x2040);
     if (tag == 0x4001 && len > 500 && len < 100000)
     {
       i = len == 582 ? 50 : len == 653 ? 68 : len == 5120 ? 142 : 126;

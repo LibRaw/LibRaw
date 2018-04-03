@@ -396,7 +396,7 @@ typedef unsigned long long UINT64;
     unsigned AFAreas[64];
     double AFPointSelected[5];
     ushort AFResult;
-    unsigned ImageStabilization;
+    ushort DriveMode[5];
     ushort ColorSpace;
     uchar AFFineTune;
     short AFFineTuneAdj[3];
