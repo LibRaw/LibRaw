@@ -40,6 +40,7 @@ it under the terms of the one of two licenses as you choose:
     void	setOlympusBodyFeatures (unsigned long long id);
     void	parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseOlympus_ImageProcessing (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
+    void	parseOlympus_RawInfo (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	setPhaseOneFeatures (unsigned id);
     void	setPentaxBodyFeatures (unsigned id);
     void	PentaxISO (ushort c);
