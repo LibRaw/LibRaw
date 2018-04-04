@@ -8681,12 +8681,94 @@ void CLASS setOlympusBodyFeatures(unsigned long long id)
   return;
 }
 
+void CLASS parseOlympus_Equipment (unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
+{
+// uptag 2010
+
+  int i;
+  uchar sOlyID[8];
+
+  switch (tag) {
+
+  case 0x0100:
+    fread(sOlyID, MIN(len, 7), 1, ifp);
+    sOlyID[7] = 0;
+    OlyID = sOlyID[0];
+    i = 1;
+    while (i < 7 && sOlyID[i]) {
+      OlyID = OlyID << 8 | sOlyID[i];
+      i++;
+    }
+    setOlympusBodyFeatures(OlyID);
+    break;
+
+  case 0x0101:
+    if ((!imgdata.shootinginfo.BodySerial[0]) &&
+        (dng_writer == nonDNG))
+      stmread(imgdata.shootinginfo.BodySerial, len, ifp);
+    break;
+
+  case 0x0102:
+    stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
+    break;
+  case 0x0201:
+    imgdata.lens.makernotes.LensID =
+      (unsigned long long)fgetc(ifp) << 16 |
+      (unsigned long long)(fgetc(ifp), fgetc(ifp)) << 8 |
+      (unsigned long long)fgetc(ifp);
+    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FT;
+    imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FT;
+    if (((imgdata.lens.makernotes.LensID < 0x20000) ||
+         (imgdata.lens.makernotes.LensID > 0x4ffff)) &&
+        (imgdata.lens.makernotes.LensID & 0x10))
+      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
+    break;
+
+  case 0x0202:
+    if ((!imgdata.lens.LensSerial[0]))
+      stmread(imgdata.lens.LensSerial, len, ifp);
+    break;
+  case 0x0203:
+    stmread(imgdata.lens.makernotes.Lens, len, ifp);
+    break;
+  case 0x0205:
+    imgdata.lens.makernotes.MaxAp4MinFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
+    break;
+  case 0x0206:
+    imgdata.lens.makernotes.MaxAp4MaxFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
+    break;
+  case 0x0207:
+    imgdata.lens.makernotes.MinFocal = (float)get2();
+    break;
+  case 0x0208:
+    imgdata.lens.makernotes.MaxFocal = (float)get2();
+    if (imgdata.lens.makernotes.MaxFocal > 1000.0f)
+      imgdata.lens.makernotes.MaxFocal = imgdata.lens.makernotes.MinFocal;
+    break;
+  case 0x020a:
+    imgdata.lens.makernotes.MaxAp4CurFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
+    break;
+  case 0x0301:
+    imgdata.lens.makernotes.TeleconverterID = fgetc(ifp) << 8;
+    fgetc(ifp);
+    imgdata.lens.makernotes.TeleconverterID = imgdata.lens.makernotes.TeleconverterID | fgetc(ifp);
+    break;
+  case 0x0303:
+    stmread(imgdata.lens.makernotes.Teleconverter, len, ifp);
+    break;
+  case 0x0403:
+    stmread(imgdata.lens.makernotes.Attachment, len, ifp);
+    break;
+  }
+
+  return;
+}
 void CLASS parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
 {
 // uptag 0x2020
+
   int c;
   uchar uc;
-
   switch (tag) {
 
   case 0x0101:
@@ -11428,101 +11510,67 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       }
     }
 
-    else if (!strncmp(make, "OLYMPUS", 7))
-    {
-      short nWB, tWB;
-      int SubDirOffsetValid = strncmp(model, "E-300", 5) && strncmp(model, "E-330", 5) && strncmp(model, "E-400", 5) &&
-                              strncmp(model, "E-500", 5) && strncmp(model, "E-1", 3);
+    else if (!strncmp(make, "OLYMPUS", 7)) {
 
-      if ((tag == 0x2010) || (tag == 0x2020) || (tag == 0x2030) || (tag == 0x2031) || (tag == 0x2040) ||
-          (tag == 0x2050) || (tag == 0x3000))
-      {
+      uchar sOlyID[8];
+      short temp;
+
+      int SubDirOffsetValid =
+          strncmp(model, "E-300", 5) &&
+          strncmp(model, "E-330", 5) &&
+          strncmp(model, "E-400", 5) &&
+          strncmp(model, "E-500", 5) &&
+          strncmp(model, "E-1", 3);
+
+      if ((tag == 0x2010) ||
+          (tag == 0x2020) ||
+          (tag == 0x2030) ||
+          (tag == 0x2031) ||
+          (tag == 0x2040) ||
+          (tag == 0x2050) ||
+          (tag == 0x3000)) {
         fseek(ifp, save - 4, SEEK_SET);
         fseek(ifp, base + get4(), SEEK_SET);
         parse_makernote_0xc634(base, tag, dng_writer);
       }
-      if (!SubDirOffsetValid && ((len > 4) || (((type == 3) || (type == 8)) && (len > 2)) ||
-                                 (((type == 4) || (type == 9)) && (len > 1)) || (type == 5) || (type > 9)))
+
+      if (!SubDirOffsetValid &&
+          ((len > 4) ||
+           (((type == 3) || (type == 8)) && (len > 2)) ||
+           (((type == 4) || (type == 9)) && (len > 1)) ||
+           (type == 5) ||
+           (type > 9)))
         goto skip_Oly_broken_tags;
 
-      if (( tag >= 0x20200000) && (tag <= 0x2020ffff))
+      else if ((tag >= 0x20100000) && (tag <= 0x2010ffff))
+        parseOlympus_Equipment ((tag & 0x0000ffff), type, len, AdobeDNG);
+
+      else if ((tag >= 0x20200000) && (tag <= 0x2020ffff))
         parseOlympus_CameraSettings (base, (tag & 0x0000ffff), type, len, AdobeDNG);
 
-      if (( tag >= 0x20400000) && (tag <= 0x2040ffff))
+      else if ((tag == 0x20300108) || (tag == 0x20310109))
+        imgdata.makernotes.olympus.ColorSpace = get2();
+
+      else if ((tag >= 0x20400000) && (tag <= 0x2040ffff))
         parseOlympus_ImageProcessing ((tag & 0x0000ffff), type, len, AdobeDNG);
 
-      if (( tag >= 0x30000000) && (tag <= 0x3000ffff))
+      else if ((tag >= 0x30000000) && (tag <= 0x3000ffff))
         parseOlympus_RawInfo ((tag & 0x0000ffff), type, len, AdobeDNG);
 
-      switch (tag) {
+      else switch (tag) {
       case 0x0207:
-      case 0x20100100:
-      {
-        uchar sOlyID[8];
         fread(sOlyID, MIN(len, 7), 1, ifp);
         sOlyID[7] = 0;
         OlyID = sOlyID[0];
         i = 1;
-        while (i < 7 && sOlyID[i])
-        {
+        while (i < 7 && sOlyID[i]) {
           OlyID = OlyID << 8 | sOlyID[i];
           i++;
         }
         setOlympusBodyFeatures(OlyID);
-      }
         break;
       case 0x1002:
         imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, getreal(type) / 2);
-        break;
-      case 0x20100102:
-        stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
-        break;
-      case 0x20100201:
-        imgdata.lens.makernotes.LensID = (unsigned long long)fgetc(ifp) << 16 |
-                                         (unsigned long long)(fgetc(ifp), fgetc(ifp)) << 8 |
-                                         (unsigned long long)fgetc(ifp);
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FT;
-        imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FT;
-        if (((imgdata.lens.makernotes.LensID < 0x20000) || (imgdata.lens.makernotes.LensID > 0x4ffff)) &&
-            (imgdata.lens.makernotes.LensID & 0x10))
-        {
-          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
-        }
-        break;
-      case 0x20100202:
-        if ((!imgdata.lens.LensSerial[0]))
-          stmread(imgdata.lens.LensSerial, len, ifp);
-        break;
-      case 0x20100203:
-        stmread(imgdata.lens.makernotes.Lens, len, ifp);
-        break;
-      case 0x20100205:
-        imgdata.lens.makernotes.MaxAp4MinFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
-        break;
-      case 0x20100206:
-        imgdata.lens.makernotes.MaxAp4MaxFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
-        break;
-      case 0x20100207:
-        imgdata.lens.makernotes.MinFocal = (float)get2();
-        break;
-      case 0x20100208:
-        imgdata.lens.makernotes.MaxFocal = (float)get2();
-        if (imgdata.lens.makernotes.MaxFocal > 1000.0f)
-          imgdata.lens.makernotes.MaxFocal = imgdata.lens.makernotes.MinFocal;
-        break;
-      case 0x2010020a:
-        imgdata.lens.makernotes.MaxAp4CurFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
-        break;
-      case 0x20100301:
-        imgdata.lens.makernotes.TeleconverterID = fgetc(ifp) << 8;
-        fgetc(ifp);
-        imgdata.lens.makernotes.TeleconverterID = imgdata.lens.makernotes.TeleconverterID | fgetc(ifp);
-        break;
-      case 0x20100303:
-        stmread(imgdata.lens.makernotes.Teleconverter, len, ifp);
-        break;
-      case 0x20100403:
-        stmread(imgdata.lens.makernotes.Attachment, len, ifp);
         break;
       case 0x1007:
         imgdata.other.SensorTemperature = (float)get2();
@@ -11532,15 +11580,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         break;
 
       case 0x20501500:
-        if (OlyID != 0x0ULL)
-        {
-          short temp = get2();
+        if (OlyID != 0x0ULL) {
+          temp = get2();
           if ((OlyID == 0x4434303430ULL) || // E-1
               (OlyID == 0x5330303336ULL) || // E-M5
               (len != 1))
             imgdata.other.SensorTemperature = (float)temp;
-          else if ((temp != -32768) && (temp != 0))
-          {
+          else if ((temp != -32768) && (temp != 0)) {
             if (temp > 199)
               imgdata.other.SensorTemperature = 86.474958f - 0.120228f * (float)temp;
             else
@@ -11824,6 +11870,7 @@ void CLASS parse_makernote(int base, int uptag)
      The MakerNote might have its own TIFF header (possibly with
      its own byte-order!), or it might just be a table.
    */
+
   if (!strncmp(make, "Nokia", 5))
     return;
   fread(buf, 1, 10, ifp);
@@ -12299,16 +12346,11 @@ void CLASS parse_makernote(int base, int uptag)
       {
       case 0x0404:
       case 0x101a:
-      case 0x20100101:
         if (!imgdata.shootinginfo.BodySerial[0])
           stmread(imgdata.shootinginfo.BodySerial, len, ifp);
         break;
-      case 0x20100102:
-        if (!imgdata.shootinginfo.InternalBodySerial[0])
-          stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
-        break;
+
       case 0x0207:
-      case 0x20100100:
       {
         uchar sOlyID[8];
         fread(sOlyID, MIN(len, 7), 1, ifp);
@@ -12323,60 +12365,9 @@ void CLASS parse_makernote(int base, int uptag)
         setOlympusBodyFeatures(OlyID);
       }
       break;
+
       case 0x1002:
         imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, getreal(type) / 2);
-        break;
-
-      case 0x20100201:
-      {
-        unsigned long long oly_lensid[3];
-        oly_lensid[0] = fgetc(ifp);
-        fgetc(ifp);
-        oly_lensid[1] = fgetc(ifp);
-        oly_lensid[2] = fgetc(ifp);
-        imgdata.lens.makernotes.LensID = (oly_lensid[0] << 16) | (oly_lensid[1] << 8) | oly_lensid[2];
-      }
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FT;
-        imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FT;
-        if (((imgdata.lens.makernotes.LensID < 0x20000) || (imgdata.lens.makernotes.LensID > 0x4ffff)) &&
-            (imgdata.lens.makernotes.LensID & 0x10))
-        {
-          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
-        }
-        break;
-      case 0x20100202:
-        stmread(imgdata.lens.LensSerial, len, ifp);
-        break;
-      case 0x20100203:
-        stmread(imgdata.lens.makernotes.Lens, len, ifp);
-        break;
-      case 0x20100205:
-        imgdata.lens.makernotes.MaxAp4MinFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
-        break;
-      case 0x20100206:
-        imgdata.lens.makernotes.MaxAp4MaxFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
-        break;
-      case 0x20100207:
-        imgdata.lens.makernotes.MinFocal = (float)get2();
-        break;
-      case 0x20100208:
-        imgdata.lens.makernotes.MaxFocal = (float)get2();
-        if (imgdata.lens.makernotes.MaxFocal > 1000.0f)
-          imgdata.lens.makernotes.MaxFocal = imgdata.lens.makernotes.MinFocal;
-        break;
-      case 0x2010020a:
-        imgdata.lens.makernotes.MaxAp4CurFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
-        break;
-      case 0x20100301:
-        imgdata.lens.makernotes.TeleconverterID = fgetc(ifp) << 8;
-        fgetc(ifp);
-        imgdata.lens.makernotes.TeleconverterID = imgdata.lens.makernotes.TeleconverterID | fgetc(ifp);
-        break;
-      case 0x20100303:
-        stmread(imgdata.lens.makernotes.Teleconverter, len, ifp);
-        break;
-      case 0x20100403:
-        stmread(imgdata.lens.makernotes.Attachment, len, ifp);
         break;
       case 0x1007:
         imgdata.other.SensorTemperature = (float)get2();
@@ -12814,18 +12805,46 @@ void CLASS parse_makernote(int base, int uptag)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos2 = ftell(ifp);
-    if (!strncasecmp(make, "Olympus", 7))
-    {
-      if ((tag == 0x20300108) || (tag == 0x20310109))
-        imgdata.makernotes.olympus.ColorSpace = get2();
+    if (!strncasecmp(make, "Olympus", 7)) {
 
-      else if (( tag >= 0x20200000) && (tag <= 0x2020ffff))
+      if ((tag == 0x2020) ||
+          (tag == 0x2030) ||
+          (tag == 0x2031) ||
+          (tag == 0x2050) ||
+          (tag == 0x3000)) {
+        if (type == 7) { parse_makernote(base, tag); }
+        else if (type == 13) { fseek(ifp, base+get4(), SEEK_SET); parse_makernote(base, tag); }
+      }
+
+      else if ((tag == 0x1011) && strcmp(software, "v757-71"))
+        for (i = 0; i < 3; i++) {
+          if (!imgdata.makernotes.olympus.ColorSpace) {
+            FORC3 cmatrix[i][c] = ((short)get2()) / 256.0;
+          } else {
+            FORC3 imgdata.color.ccm[i][c] = ((short)get2()) / 256.0;
+          }
+        }
+
+      else if (tag == 0x1012)
+        FORC4 cblack[c ^ c >> 1] = get2();
+      else if (tag == 0x1017)
+        cam_mul[0] = get2() / 256.0;
+      else if (tag == 0x1018)
+        cam_mul[2] = get2() / 256.0;
+
+      else if ((tag >= 0x20100000) && (tag <= 0x2010ffff))
+        parseOlympus_Equipment ((tag & 0x0000ffff), type, len, nonDNG);
+
+      else if ((tag >= 0x20200000) && (tag <= 0x2020ffff))
         parseOlympus_CameraSettings (base, (tag & 0x0000ffff), type, len, nonDNG);
 
-      else if (( tag >= 0x20400000) && (tag <= 0x2040ffff))
+      else if ((tag == 0x20300108) || (tag == 0x20310109))
+        imgdata.makernotes.olympus.ColorSpace = get2();
+
+      else if ((tag >= 0x20400000) && (tag <= 0x2040ffff))
         parseOlympus_ImageProcessing ((tag & 0x0000ffff), type, len, nonDNG);
 
-      else if (( tag >= 0x30000000) && (tag <= 0x3000ffff))
+      else if ((tag >= 0x30000000) && (tag <= 0x3000ffff))
         parseOlympus_RawInfo ((tag & 0x0000ffff), type, len, nonDNG);
 
     }
@@ -13067,21 +13086,6 @@ void CLASS parse_makernote(int base, int uptag)
       cam_mul[0] = get2() / 256.0;
     if (tag == 0x1018 || tag == 0x20400100)
       cam_mul[2] = get2() / 256.0;
-#else
-    if ((tag == 0x1011 && len == 9) && strcmp(software, "v757-71"))
-      for (i = 0; i < 3; i++) {
-        if (!imgdata.makernotes.olympus.ColorSpace) {
-          FORC3 cmatrix[i][c] = ((short)get2()) / 256.0;
-        } else {
-          FORC3 imgdata.color.ccm[i][c] = ((short)get2()) / 256.0;
-        }
-      }
-    if ((tag == 0x1012) && (len == 4))
-      FORC4 cblack[c ^ c >> 1] = get2();
-    if (tag == 0x1017)
-      cam_mul[0] = get2() / 256.0;
-    if (tag == 0x1018)
-      cam_mul[2] = get2() / 256.0;
 #endif
 
     if (tag == 0x2011 && len == 2) {
@@ -13093,25 +13097,15 @@ get2_256:
     if ((tag | 0x70) == 0x2070 && (type == 4 || type == 13))
       fseek(ifp, get4() + base, SEEK_SET);
 #ifdef LIBRAW_LIBRARY_BUILD
-    // IB start
-    if (tag == 0x2010)
-    {
+    if (tag == 0x2010) {
       INT64 _pos3 = ftell(ifp);
       parse_makernote(base, 0x2010);
       fseek(ifp, _pos3, SEEK_SET);
     }
-
-    if (((tag == 0x2020) || (tag == 0x3000) || (tag == 0x2030) || (tag == 0x2031) || (tag == 0x2050)) &&
-        ((type == 7) || (type == 13)) && !strncasecmp(make, "Olympus", 7))
-    {
-      parse_makernote(base, tag);
-    }
-// IB end
 #else
     if ((tag == 0x2020) && ((type == 7) || (type == 13)) && !strncmp(buf, "OLYMP", 5))
       parse_thumb_note(base, 257, 258);
-    if (tag == 0xb028)
-    {
+    if (tag == 0xb028) {
       fseek(ifp, get4() + base, SEEK_SET);
       parse_thumb_note(base, 136, 137);
     }

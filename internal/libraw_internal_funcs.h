@@ -38,6 +38,7 @@ it under the terms of the one of two licenses as you choose:
     void	parseCanonMakernotes (unsigned tag, unsigned type, unsigned len);
     void	processNikonLensData (uchar *LensData, unsigned len);
     void	setOlympusBodyFeatures (unsigned long long id);
+    void	parseOlympus_Equipment (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseOlympus_ImageProcessing (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseOlympus_RawInfo (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
