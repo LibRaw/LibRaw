@@ -4698,7 +4698,8 @@ void CLASS pseudoinverse(double (*in)[3], double (*out)[3], int size)
   {
     num = work[i][i];
     for (j = 0; j < 6; j++)
-      work[i][j] /= num;
+      if(fabs(num)>0.00001f)
+      	work[i][j] /= num;
     for (k = 0; k < 3; k++)
     {
       if (k == i)
@@ -11973,6 +11974,8 @@ void CLASS linear_table(unsigned len)
   int i;
   if (len > 0x10000)
     len = 0x10000;
+  else if(len < 1)
+    return;
   read_shorts(curve, len);
   for (i = len; i < 0x10000; i++)
     curve[i] = curve[i - 1];
@@ -12998,6 +13001,7 @@ int CLASS parse_tiff_ifd(int base)
         fread(cfa_pat, 1, plen, ifp);
         for (colors = cfa = i = 0; i < plen && colors < 4; i++)
         {
+	  if(cfa_pat[i] > 31) continue; // Skip wrong data
           colors += !(cfa & (1 << cfa_pat[i]));
           cfa |= 1 << cfa_pat[i];
         }
@@ -13942,6 +13946,9 @@ void CLASS apply_tiff()
   }
   for (i = 0; i < tiff_nifds; i++)
   {
+    if( tiff_ifd[i].t_width < 1 ||  tiff_ifd[i].t_width > 65535
+       || tiff_ifd[i].t_height < 1 || tiff_ifd[i].t_height > 65535)
+          continue; /* wrong image dimensions */
     if (max_samp < tiff_ifd[i].samples)
       max_samp = tiff_ifd[i].samples;
     if (max_samp > 3)
@@ -17496,7 +17503,7 @@ void CLASS identify()
   hlen = get4();
   fseek(ifp, 0, SEEK_SET);
 #ifdef LIBRAW_LIBRARY_BUILD
-  fread(head, 1, 64, ifp);
+  if(fread(head, 1, 64, ifp) < 64) throw LIBRAW_EXCEPTION_IO_CORRUPT;
   libraw_internal_data.unpacker_data.lenRAFData = libraw_internal_data.unpacker_data.posRAFData = 0;
 #else
   fread(head, 1, 32, ifp);
