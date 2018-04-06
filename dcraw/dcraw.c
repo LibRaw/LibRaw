@@ -14418,7 +14418,11 @@ int CLASS parse_tiff_ifd(int base)
 // IB end
 #endif
     case 34306: /* Leaf white balance */
-      FORC4 cam_mul[c ^ 1] = 4096.0 / get2();
+      FORC4
+      {
+	int q = get2();
+	if(q > 0) cam_mul[c ^ 1] = 4096.0 / q;
+      }
       break;
     case 34307: /* Leaf CatchLight color matrix */
       fread(software, 1, 7, ifp);
