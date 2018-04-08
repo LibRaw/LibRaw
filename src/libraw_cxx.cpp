@@ -5182,6 +5182,7 @@ static const char *static_camera_list[] = {
 	"Casio EX-FH20",
 	"Casio EX-FH25",
 	"Casio EX-FH100",
+	"Casio EX-P600",
 	"Casio EX-S20",
 	"Casio EX-S100",
 	"Casio EX-Z4",

@@ -2862,7 +2862,7 @@ unsigned CLASS pana_bits(int nbits)
 #define buf tls->pana_bits.buf
 #define vbits tls->pana_bits.vbits
 #else
-  static uchar buf[0x4000];
+  static uchar buf[0x4002];
   static int vbits;
 #endif
   int byte;
@@ -17629,7 +17629,8 @@ void CLASS identify()
   else if (!memcmp(head, "FUJIFILM", 8))
   {
 #ifdef LIBRAW_LIBRARY_BUILD
-    strcpy(model, head + 0x1c);
+    strncpy(model, head + 0x1c,0x20);
+    model[0x20]=0;
     memcpy(model2, head + 0x3c, 4);
     model2[4] = 0;
 #endif
