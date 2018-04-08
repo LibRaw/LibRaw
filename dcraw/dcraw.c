@@ -3168,7 +3168,7 @@ unsigned CLASS pana_data(int nb, unsigned *bytes)
 #define vpos tls->pana_data.vpos
 #define buf tls->pana_data.buf
 #else
-  static uchar buf[0x4000];
+  static uchar buf[0x4002];
   static int vpos;
 #endif
   int byte;
@@ -3193,7 +3193,7 @@ unsigned CLASS pana_data(int nb, unsigned *bytes)
   else
   {
     vpos = (vpos - nb) & 0x1ffff;
-    byte = LIM(vpos >> 3 ^ 0x3ff0,0, 16382);
+    byte = vpos >> 3 ^ 0x3ff0;
     return (buf[byte] | buf[byte + 1] << 8) >> (vpos & 7) & ~((~0u) << nb);
   }
   return 0;

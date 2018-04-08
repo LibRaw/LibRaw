@@ -59,7 +59,7 @@ public:
   } sony_decrypt;
   struct
   {
-    uchar buf[0x4000];
+    uchar buf[0x4002];
     int vpos, padding;
   } pana_data;
   uchar jpeg_buffer[4096];
