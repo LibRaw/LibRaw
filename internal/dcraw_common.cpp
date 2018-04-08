@@ -2871,7 +2871,7 @@ unsigned CLASS pana_data(int nb, unsigned *bytes)
 #define vpos tls->pana_data.vpos
 #define buf tls->pana_data.buf
 #else
-  static uchar buf[0x4000];
+  static uchar buf[0x4002];
   static int vpos;
 #endif
   int byte;
@@ -17919,7 +17919,8 @@ void CLASS identify()
   else if (!memcmp(head, "FUJIFILM", 8))
   {
 #ifdef LIBRAW_LIBRARY_BUILD
-    strcpy(model, head + 0x1c);
+    strncpy(model, head + 0x1c,0x20);
+    model[0x20]=0;
     memcpy(model2, head + 0x3c, 4);
     model2[4] = 0;
 #endif
