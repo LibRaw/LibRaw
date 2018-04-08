@@ -4370,7 +4370,7 @@ int LibRaw::unpack_thumb(void)
         int i_length = T.twidth * T.theight * t_colors * 2;
         if (!T.tlength)
           T.tlength = o_length;
-        ushort *t_thumb = (ushort *)calloc(o_length, 1);
+        ushort *t_thumb = (ushort *)calloc(i_length, 1);
         ID.input->read(t_thumb, 1, i_length);
         if ((libraw_internal_data.unpacker_data.order == 0x4949) == (ntohs(0x1234) == 0x1234))
           swab((char *)t_thumb, (char *)t_thumb, i_length);
