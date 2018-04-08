@@ -3193,7 +3193,7 @@ unsigned CLASS pana_data(int nb, unsigned *bytes)
   else
   {
     vpos = (vpos - nb) & 0x1ffff;
-    byte = vpos >> 3 ^ 0x3ff0;
+    byte = LIM(vpos >> 3 ^ 0x3ff0,0, 16382);
     return (buf[byte] | buf[byte + 1] << 8) >> (vpos & 7) & ~((~0u) << nb);
   }
   return 0;
@@ -19199,7 +19199,8 @@ void CLASS identify()
   else if (!memcmp(head, "FUJIFILM", 8))
   {
 #ifdef LIBRAW_LIBRARY_BUILD
-    strcpy(model, head + 0x1c);
+    strncpy(model, head + 0x1c,0x20);
+    model[0x20]=0;
     memcpy(model2, head + 0x3c, 4);
     model2[4] = 0;
 #endif
