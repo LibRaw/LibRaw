@@ -22,6 +22,19 @@ it under the terms of the one of two licenses as you choose:
 /* limit allocation size, default is 2Gb */
 #define LIBRAW_MAX_ALLOC_MB_DEFAULT 2048L
 
+/* Check if enough file space exists before tag read */
+#ifndef LIBRAW_NO_IOSPACE_CHECK
+#define LIBRAW_IOSPACE_CHECK
+#endif
+/* LibRaw uses own memory pool management, with LIBRAW_MSIZE (512)
+entries. It is enough for parsing/decoding non-damaged files, but
+may overflow on specially crafted files (eg. with many string values
+like XMP blocks.
+LIBRAW_MEMPOOL_CHECK define will result in error on pool overflow */
+#ifndef LIBRAW_NO_MEMPOOL_CHECK
+#define LIBRAW_MEMPOOL_CHECK
+#endif
+
 #define LIBRAW_IFD_MAXCOUNT 10
 
 enum LibRaw_openbayer_patterns
