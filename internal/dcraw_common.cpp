@@ -6704,6 +6704,12 @@ void CLASS recover_highlights()
 
 void CLASS tiff_get(unsigned base, unsigned *tag, unsigned *type, unsigned *len, unsigned *save)
 {
+#ifdef LIBRAW_IOSPACE_CHECK
+  INT64 pos = ftell(ifp);
+  INT64 fsize = ifp->size();
+  if(fsize < 12 || (fsize-pos) < 12)
+     throw LIBRAW_EXCEPTION_IO_EOF;
+#endif
   *tag = get2();
   *type = get2();
   *len = get4();
@@ -9324,7 +9330,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     tiff_get(base, &tag, &type, &len, &save);
     INT64 pos = ifp->tell();
     if (len > 8 && pos + len > 2 * fsize)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;
+    }
     tag |= uptag << 16;
     if (len > 100 * 1024 * 1024)
       goto next; // 100Mb tag? No!
@@ -10224,7 +10233,10 @@ void CLASS parse_makernote(int base, int uptag)
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
     if (len > 8 && _pos + len > 2 * fsize)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;
+    }
     if (!strncasecmp(model, "KODAK P880", 10) || !strncasecmp(model, "KODAK P850", 10) ||
         !strncasecmp(model, "KODAK P712", 10))
     {
@@ -11644,7 +11656,10 @@ void CLASS parse_exif(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 savepos = ftell(ifp);
     if (len > 8 && savepos + len > fsize * 2)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;
+    }
     if (callbacks.exif_cb)
     {
       callbacks.exif_cb(callbacks.exifparser_data, tag, type, len, order, ifp);
@@ -11823,7 +11838,10 @@ void CLASS parse_gps_libraw(int base)
   {
     tiff_get(base, &tag, &type, &len, &save);
     if (len > 1024)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue; // no GPS tags are 1k or larger
+    }
     switch (tag)
     {
     case 1:
@@ -11868,7 +11886,10 @@ void CLASS parse_gps(int base)
   {
     tiff_get(base, &tag, &type, &len, &save);
     if (len > 1024)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue; // no GPS tags are 1k or larger
+    }
     switch (tag)
     {
     case 1:
@@ -12088,7 +12109,10 @@ void CLASS parse_kodak_ifd(int base)
     tiff_get(base, &tag, &type, &len, &save);
     INT64 savepos = ftell(ifp);
     if (len > 8 && len + savepos > 2 * fsize)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;
+    }
     if (callbacks.exif_cb)
     {
       callbacks.exif_cb(callbacks.exifparser_data, tag | 0x20000, type, len, order, ifp);
@@ -12498,8 +12522,11 @@ int CLASS parse_tiff_ifd(int base)
     tiff_get(base, &tag, &type, &len, &save);
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 savepos = ftell(ifp);
-    if (len > 8 && len + savepos > fsize * 2)
-      continue; // skip tag pointing out of 2xfile
+    if (len > 8 && savepos + len > 2 * fsize)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
+      continue;
+    }
     if (callbacks.exif_cb)
     {
       callbacks.exif_cb(callbacks.exifparser_data, tag | (pana_raw ? 0x30000 : ((ifd + 1) << 20)), type, len, order,
