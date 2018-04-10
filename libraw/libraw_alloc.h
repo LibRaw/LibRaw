@@ -21,6 +21,7 @@ it under the terms of the one of two licenses as you choose:
 
 #include <stdlib.h>
 #include <string.h>
+#include "libraw_const.h"
 
 #ifdef __cplusplus
 
@@ -43,18 +44,30 @@ public:
   }
   void *malloc(size_t sz)
   {
+#ifdef LIBRAW_MEMPOOL_CHECK
+    if(alloc_cnt >= LIBRAW_MSIZE)
+       throw LIBRAW_EXCEPTION_ALLOC;
+#endif
     void *ptr = ::malloc(sz + extra_bytes);
     mem_ptr(ptr);
     return ptr;
   }
   void *calloc(size_t n, size_t sz)
   {
+#ifdef LIBRAW_MEMPOOL_CHECK
+    if(alloc_cnt >= LIBRAW_MSIZE)
+       throw LIBRAW_EXCEPTION_ALLOC;
+#endif
     void *ptr = ::calloc(n + (extra_bytes + sz - 1) / (sz ? sz : 1), sz);
     mem_ptr(ptr);
     return ptr;
   }
   void *realloc(void *ptr, size_t newsz)
   {
+#ifdef LIBRAW_MEMPOOL_CHECK
+    if(alloc_cnt >= LIBRAW_MSIZE)
+       throw LIBRAW_EXCEPTION_ALLOC;
+#endif
     void *ret = ::realloc(ptr, newsz + extra_bytes);
     forget_ptr(ptr);
     mem_ptr(ret);

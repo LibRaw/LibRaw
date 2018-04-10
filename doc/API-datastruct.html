@@ -156,6 +156,8 @@
       <dd>Maximum pixel value in current file. Calculated at raw2image or dcraw_process() calls.</dd>
       <dt><strong> unsigned maximum; </strong></dt>
       <dd>Maximum pixel value. Calculated from the data for most cameras, hardcoded for others. This value may be changed on postprocessing stage (when black subtraction performed) and by automated maximum adjustment (this adjustment performed if <strong> params.adjust_maximum_thr </strong> is set to nonzero).</dd>
+      <dt><strong> unsigned linear_max[4]; </strong></dt>
+      <dd>Per-channel linear data maximum read from file metadata. If RAW file does not contains this data, linear_max[] is set to zero. Black value is not subtracted</dd>
       <dt><strong> float fmaximum; </strong></dt>
       <dd>Maximum pixel value in real image for floating data files.</dd>
       <dt><strong> float fnorm; </strong></dt>

@@ -3168,7 +3168,7 @@ unsigned CLASS pana_data(int nb, unsigned *bytes)
 #define vpos tls->pana_data.vpos
 #define buf tls->pana_data.buf
 #else
-  static uchar buf[0x4000];
+  static uchar buf[0x4002];
   static int vpos;
 #endif
   int byte;
@@ -6098,7 +6098,8 @@ void CLASS pseudoinverse(double (*in)[3], double (*out)[3], int size)
   {
     num = work[i][i];
     for (j = 0; j < 6; j++)
-      work[i][j] /= num;
+      if(fabs(num)>0.00001f)
+      	work[i][j] /= num;
     for (k = 0; k < 3; k++)
     {
       if (k == i)
@@ -8030,6 +8031,12 @@ void CLASS recover_highlights()
 
 void CLASS tiff_get(unsigned base, unsigned *tag, unsigned *type, unsigned *len, unsigned *save)
 {
+#ifdef LIBRAW_IOSPACE_CHECK
+  INT64 pos = ftell(ifp);
+  INT64 fsize = ifp->size();
+  if(fsize < 12 || (fsize-pos) < 12)
+     throw LIBRAW_EXCEPTION_IO_EOF;
+#endif
   *tag = get2();
   *type = get2();
   *len = get4();
@@ -11251,7 +11258,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     tiff_get(base, &tag, &type, &len, &save);
     INT64 pos = ifp->tell();
     if (len > 8 && pos + len > 2 * fsize)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;
+    }
     tag |= uptag << 16;
     if (len > 100 * 1024 * 1024)
       goto next; // 100Mb tag? No!
@@ -11995,8 +12005,10 @@ else
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
     if (len > 8 && _pos + len > 2 * fsize)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;
-
+    }
     if (MakerNoteKodak8a) {
       if ((tag == 0xff00) && (type == 4) && (len == 1)) {
         INT64 _pos1 = get4();
@@ -13214,7 +13226,10 @@ void CLASS parse_exif(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 savepos = ftell(ifp);
     if (len > 8 && savepos + len > fsize * 2)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;
+    }
     if (callbacks.exif_cb)
     {
       callbacks.exif_cb(callbacks.exifparser_data, tag, type, len, order, ifp);
@@ -13393,7 +13408,10 @@ void CLASS parse_gps_libraw(int base)
   {
     tiff_get(base, &tag, &type, &len, &save);
     if (len > 1024)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue; // no GPS tags are 1k or larger
+    }
     switch (tag)
     {
     case 1:
@@ -13438,7 +13456,10 @@ void CLASS parse_gps(int base)
   {
     tiff_get(base, &tag, &type, &len, &save);
     if (len > 1024)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue; // no GPS tags are 1k or larger
+    }
     switch (tag)
     {
     case 1:
@@ -13620,6 +13641,8 @@ void CLASS linear_table(unsigned len)
   int i;
   if (len > 0x10000)
     len = 0x10000;
+  else if(len < 1)
+    return;
   read_shorts(curve, len);
   for (i = len; i < 0x10000; i++)
     curve[i] = curve[i - 1];
@@ -13717,7 +13740,10 @@ void CLASS parse_kodak_ifd(int base)
     tiff_get(base, &tag, &type, &len, &save);
     INT64 savepos = ftell(ifp);
     if (len > 8 && len + savepos > 2 * fsize)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;
+    }
     if (callbacks.exif_cb)
     {
       callbacks.exif_cb(callbacks.exifparser_data, tag | 0x20000, type, len, order, ifp);
@@ -13971,8 +13997,11 @@ int CLASS parse_tiff_ifd(int base)
     tiff_get(base, &tag, &type, &len, &save);
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 savepos = ftell(ifp);
-    if (len > 8 && len + savepos > fsize * 2)
-      continue; // skip tag pointing out of 2xfile
+    if (len > 8 && savepos + len > 2 * fsize)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
+      continue;
+    }
     if (callbacks.exif_cb)
     {
       callbacks.exif_cb(callbacks.exifparser_data, tag | (pana_raw ? 0x30000 : ((ifd + 1) << 20)), type, len, order,
@@ -14541,6 +14570,7 @@ int CLASS parse_tiff_ifd(int base)
         fread(cfa_pat, 1, plen, ifp);
         for (colors = cfa = i = 0; i < plen && colors < 4; i++)
         {
+	  if(cfa_pat[i] > 31) continue; // Skip wrong data
           colors += !(cfa & (1 << cfa_pat[i]));
           cfa |= 1 << cfa_pat[i];
         }
@@ -15487,6 +15517,9 @@ void CLASS apply_tiff()
   }
   for (i = 0; i < tiff_nifds; i++)
   {
+    if( tiff_ifd[i].t_width < 1 ||  tiff_ifd[i].t_width > 65535
+       || tiff_ifd[i].t_height < 1 || tiff_ifd[i].t_height > 65535)
+          continue; /* wrong image dimensions */
     if (max_samp < tiff_ifd[i].samples)
       max_samp = tiff_ifd[i].samples;
     if (max_samp > 3)
@@ -18605,6 +18638,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 6046,-1127,-278,-5574,13076,2786,-691,1419,7625 } },
     { "Sony DSLR-A550", 0, 16596,
       { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
+    { "Sony DSLR-A560", 0, 16596,
+      { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
     { "Sony DSLR-A5", 0, 0xfeb, /* Is there any cameras not covered above? */
       { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
     { "Sony DSLR-A700", 0, 0,
@@ -19238,7 +19273,7 @@ void CLASS identify()
   hlen = get4();
   fseek(ifp, 0, SEEK_SET);
 #ifdef LIBRAW_LIBRARY_BUILD
-  fread(head, 1, 64, ifp);
+  if(fread(head, 1, 64, ifp) < 64) throw LIBRAW_EXCEPTION_IO_CORRUPT;
   libraw_internal_data.unpacker_data.lenRAFData = libraw_internal_data.unpacker_data.posRAFData = 0;
 #else
   fread(head, 1, 32, ifp);
@@ -19360,7 +19395,8 @@ void CLASS identify()
   else if (!memcmp(head, "FUJIFILM", 8))
   {
 #ifdef LIBRAW_LIBRARY_BUILD
-    strcpy(model, head + 0x1c);
+    strncpy(model, head + 0x1c,0x20);
+    model[0x20]=0;
     memcpy(model2, head + 0x3c, 4);
     model2[4] = 0;
 #endif
