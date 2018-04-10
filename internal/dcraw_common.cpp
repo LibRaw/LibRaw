@@ -14101,19 +14101,31 @@ void CLASS apply_tiff()
     switch (tiff_compress)
     {
     case 32767:
+#ifdef LIBRAW_LIBRARY_BUILD
+      if (INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height))
+#else
       if (tiff_ifd[raw].bytes == raw_width * raw_height)
+#endif
       {
         tiff_bps = 12;
         load_raw = &CLASS sony_arw2_load_raw;
         break;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      if (!strncasecmp(make, "Sony", 4) && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 2ULL)
+#else
       if (!strncasecmp(make, "Sony", 4) && tiff_ifd[raw].bytes == raw_width * raw_height * 2)
+#endif
       {
         tiff_bps = 14;
         load_raw = &CLASS unpacked_load_raw;
         break;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      if (INT64(tiff_ifd[raw].bytes) * 8ULL != INT64(raw_width) * INT64(raw_height) * INT64(tiff_bps))
+#else
       if (tiff_ifd[raw].bytes * 8 != raw_width * raw_height * tiff_bps)
+#endif
       {
         raw_height += 8;
         load_raw = &CLASS sony_arw_load_raw;
@@ -14129,14 +14141,14 @@ void CLASS apply_tiff()
     case 1:
 #ifdef LIBRAW_LIBRARY_BUILD
       // Sony 14-bit uncompressed
-      if (!strncasecmp(make, "Sony", 4) && tiff_ifd[raw].bytes == raw_width * raw_height * 2)
+      if (!strncasecmp(make, "Sony", 4) && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 2ULL)
       {
         tiff_bps = 14;
         load_raw = &CLASS unpacked_load_raw;
         break;
       }
       if (!strncasecmp(make, "Sony", 4) && tiff_ifd[raw].samples == 4 &&
-          tiff_ifd[raw].bytes == raw_width * raw_height * 8) // Sony ARQ
+          INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 8ULL) // Sony ARQ
       {
         tiff_bps = 14;
         tiff_samples = 4;
@@ -14152,10 +14164,16 @@ void CLASS apply_tiff()
         filters = 0;
         break;
       }
-#endif
+      if (!strncmp(make, "OLYMPUS", 7) && INT64(tiff_ifd[raw].bytes) * 2ULL == INT64(raw_width) * INT64(raw_height) * 3ULL)
+#else 
       if (!strncmp(make, "OLYMPUS", 7) && tiff_ifd[raw].bytes * 2 == raw_width * raw_height * 3)
+#endif
         load_flags = 24;
+#ifdef LIBRAW_LIBRARY_BUILD
+      if (INT64(tiff_ifd[raw].bytes) * 5ULL == INT64(raw_width) * INT64(raw_height) * 8ULL)
+#else
       if (tiff_ifd[raw].bytes * 5 == raw_width * raw_height * 8)
+#endif
       {
         load_flags = 81;
         tiff_bps = 12;
@@ -14175,7 +14193,11 @@ void CLASS apply_tiff()
         load_flags = 0;
       case 16:
         load_raw = &CLASS unpacked_load_raw;
+#ifdef LIBRAW_LIBRARY_BUILD
+        if (!strncmp(make, "OLYMPUS", 7) && INT64(tiff_ifd[raw].bytes) * 7ULL > INT64(raw_width) * INT64(raw_height))
+#else
         if (!strncmp(make, "OLYMPUS", 7) && tiff_ifd[raw].bytes * 7 > raw_width * raw_height)
+#endif
           load_raw = &CLASS olympus_load_raw;
       }
       break;
@@ -14188,25 +14210,41 @@ void CLASS apply_tiff()
       load_raw = &CLASS kodak_262_load_raw;
       break;
     case 34713:
+#ifdef LIBRAW_LIBRARY_BUILD
+      if ((INT64(raw_width) + 9ULL) / 10ULL * 16ULL * INT64(raw_height) == INT64(tiff_ifd[raw].bytes))
+#else
       if ((raw_width + 9) / 10 * 16 * raw_height == tiff_ifd[raw].bytes)
+#endif
       {
         load_raw = &CLASS packed_load_raw;
         load_flags = 1;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      else if (INT64(raw_width) * INT64(raw_height) * 3ULL == INT64(tiff_ifd[raw].bytes) * 2ULL)
+#else
       else if (raw_width * raw_height * 3 == tiff_ifd[raw].bytes * 2)
+#endif
       {
         load_raw = &CLASS packed_load_raw;
         if (model[0] == 'N')
           load_flags = 80;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      else if (INT64(raw_width) * INT64(raw_height) * 3ULL == INT64(tiff_ifd[raw].bytes))
+#else
       else if (raw_width * raw_height * 3 == tiff_ifd[raw].bytes)
+#endif
       {
         load_raw = &CLASS nikon_yuv_load_raw;
         gamma_curve(1 / 2.4, 12.92, 1, 4095);
         memset(cblack, 0, sizeof cblack);
         filters = 0;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      else if (INT64(raw_width) * INT64(raw_height) * 2ULL == INT64(tiff_ifd[raw].bytes))
+#else
       else if (raw_width * raw_height * 2 == tiff_ifd[raw].bytes)
+#endif
       {
         load_raw = &CLASS unpacked_load_raw;
         load_flags = 4;
@@ -14214,7 +14252,7 @@ void CLASS apply_tiff()
       }
       else
 #ifdef LIBRAW_LIBRARY_BUILD
-          if (raw_width * raw_height * 3 == tiff_ifd[raw].bytes * 2)
+          if (INT64(raw_width) * INT64(raw_height) * 3ULL == INT64(tiff_ifd[raw].bytes) * 2ULL)
       {
         load_raw = &CLASS packed_load_raw;
         load_flags = 80;
@@ -14224,7 +14262,7 @@ void CLASS apply_tiff()
       {
         int fit = 1;
         for (int i = 0; i < tiff_ifd[raw].strip_byte_counts_count - 1; i++) // all but last
-          if (tiff_ifd[raw].strip_byte_counts[i] * 2 != tiff_ifd[raw].rows_per_strip * raw_width * 3)
+          if (INT64(tiff_ifd[raw].strip_byte_counts[i]) * 2ULL != INT64(tiff_ifd[raw].rows_per_strip) * INT64(raw_width) * 3ULL)
           {
             fit = 0;
             break;
