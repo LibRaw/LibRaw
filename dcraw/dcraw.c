@@ -15152,7 +15152,7 @@ int CLASS parse_tiff_ifd(int base)
                     FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c < 2)] = sget2(cbuf_SR2 + ival + 2 * c);
                     break;
                   case 0x7312:
-                    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+                    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = sget2(cbuf_SR2 + ival + 2 * c);
                   break;
                   case 0x7480:
                   case 0x7820:
