@@ -38,6 +38,8 @@ it under the terms of the one of two licenses as you choose:
     void	parseCanonMakernotes (unsigned tag, unsigned type, unsigned len);
     void	processNikonLensData (uchar *LensData, unsigned len);
     void	setOlympusBodyFeatures (unsigned long long id);
+    void	getOlympus_CameraType2 ();
+    void	getOlympus_SensorTemperature (unsigned len);
     void	parseOlympus_Equipment (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseOlympus_ImageProcessing (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
@@ -238,7 +240,8 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 		void        parse_makernote_0xc634(int base, int uptag, unsigned dng_writer);
     void        parse_exif (int base);
     void        linear_table (unsigned len);
-    void        Kodak_WB_0x08tags(int wb, unsigned type);
+    void        Kodak_DCR_WBtags(int wb, unsigned type, int wbi);
+    void        Kodak_KDC_WBtags(int wb, int wbi);
     short       KodakIllumMatrix (unsigned type, float *romm_camIllum);
     void        parse_kodak_ifd (int base);
     int         parse_tiff_ifd (int base);

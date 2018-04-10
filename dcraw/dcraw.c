@@ -8681,25 +8681,54 @@ void CLASS setOlympusBodyFeatures(unsigned long long id)
   return;
 }
 
+void CLASS getOlympus_CameraType2 ()
+{
+
+  if (OlyID != 0x0ULL) return;
+
+  int i=0;
+
+  fread(imgdata.makernotes.olympus.CameraType2, 6, 1, ifp);
+  while ((i < 6) &&
+         imgdata.makernotes.olympus.CameraType2[i]) {
+     OlyID = OlyID << 8 | imgdata.makernotes.olympus.CameraType2[i];
+     if (isspace(imgdata.makernotes.olympus.CameraType2[i+1]))
+       imgdata.makernotes.olympus.CameraType2[i+1] = '\0';
+     i++;
+  }
+
+  setOlympusBodyFeatures(OlyID);
+  return;
+}
+
+void CLASS getOlympus_SensorTemperature (unsigned len)
+{
+  if (OlyID != 0x0ULL) {
+    short temp = get2();
+    if ((OlyID == 0x4434303430ULL) || // E-1
+        (OlyID == 0x5330303336ULL) || // E-M5
+        (len != 1))
+      imgdata.other.SensorTemperature = (float)temp;
+    else if ((temp != -32768) && (temp != 0)) {
+      if (temp > 199)
+        imgdata.other.SensorTemperature = 86.474958f - 0.120228f * (float)temp;
+      else
+        imgdata.other.SensorTemperature = (float)temp;
+    }
+  }
+  return;
+}
+
 void CLASS parseOlympus_Equipment (unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
 {
 // uptag 2010
 
   int i;
-  uchar sOlyID[8];
 
   switch (tag) {
 
   case 0x0100:
-    fread(sOlyID, MIN(len, 7), 1, ifp);
-    sOlyID[7] = 0;
-    OlyID = sOlyID[0];
-    i = 1;
-    while (i < 7 && sOlyID[i]) {
-      OlyID = OlyID << 8 | sOlyID[i];
-      i++;
-    }
-    setOlympusBodyFeatures(OlyID);
+    getOlympus_CameraType2();
     break;
 
   case 0x0101:
@@ -8976,7 +9005,7 @@ void CLASS parseOlympus_ImageProcessing (unsigned tag, unsigned type, unsigned l
           if ((OlyID == 0x4434353933ULL) && // TG-5
               (imgdata.other.exifAmbientTemperature > -273.15f))
             imgdata.other.CameraTemperature += imgdata.other.exifAmbientTemperature;
-          }
+       }
   }
 
   return;
@@ -9155,76 +9184,73 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     imgdata.makernotes.canon.AFMicroAdjValue = ((float)get4()) / ((float)get4());
   }
 
-  else if (tag == 0x4001 && len > 500)
-  {
+  else if (tag == 0x4001 && len > 500) {
     int c;
     int bls = 0;
     long int offsetChannelBlackLevel = 0L;
     long int offsetWhiteLevels = 0L;
     long int save1 = ftell(ifp);
-    switch (len)
-    {
+
+    switch (len) {
+
     case 582:
       imgdata.makernotes.canon.CanonColorDataVer = 1; // 20D / 350D
-      {
-        fseek(ifp, save1 + (0x001e << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0041 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0046 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x0023 << 1), SEEK_SET);
-        Canon_WBpresets(2, 2);
-        fseek(ifp, save1 + (0x004b << 1), SEEK_SET);
-        Canon_WBCTpresets(1); // ABCT
-        offsetChannelBlackLevel = save1 + (0x00a6 << 1);
-      }
+      fseek(ifp, save1 + (0x001e << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0041 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0046 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
+
+      fseek(ifp, save1 + (0x0023 << 1), SEEK_SET);
+      Canon_WBpresets(2, 2);
+      fseek(ifp, save1 + (0x004b << 1), SEEK_SET);
+      Canon_WBCTpresets(1); // ABCT
+      offsetChannelBlackLevel = save1 + (0x00a6 << 1);
       break;
 
     case 653:
       imgdata.makernotes.canon.CanonColorDataVer = 2; // 1Dmk2 / 1DsMK2
-      {
-        fseek(ifp, save1 + (0x0018 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0090 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0095 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x009a << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom3][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x0027 << 1), SEEK_SET);
-        Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0x00a4 << 1), SEEK_SET);
-        Canon_WBCTpresets(1); // ABCT
-        offsetChannelBlackLevel = save1 + (0x011e << 1);
-      }
+      fseek(ifp, save1 + (0x0018 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0090 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0095 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x009a << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom3][c ^ (c >> 1)] = get2();
+
+      fseek(ifp, save1 + (0x0027 << 1), SEEK_SET);
+      Canon_WBpresets(2, 12);
+      fseek(ifp, save1 + (0x00a4 << 1), SEEK_SET);
+      Canon_WBCTpresets(1); // ABCT
+      offsetChannelBlackLevel = save1 + (0x011e << 1);
       break;
 
     case 796:
       imgdata.makernotes.canon.CanonColorDataVer = 3; // 1DmkIIN / 5D / 30D / 400D
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-      {
-        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0071 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0076 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x007b << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom3][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0080 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x004e << 1), SEEK_SET);
-        Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0x0085 << 1), SEEK_SET);
-        Canon_WBCTpresets(0);                       // BCAT
-        offsetChannelBlackLevel = save1 + (0x00c4 << 1);
-      }
+      fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0071 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0076 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom2][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x007b << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom3][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0080 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom][c ^ (c >> 1)] = get2();
+
+      fseek(ifp, save1 + (0x004e << 1), SEEK_SET);
+      Canon_WBpresets(2, 12);
+      fseek(ifp, save1 + (0x0085 << 1), SEEK_SET);
+      Canon_WBCTpresets(0);                       // BCAT
+      offsetChannelBlackLevel = save1 + (0x00c4 << 1);
       break;
 
     // 1DmkIII / 1DSmkIII / 1DmkIV / 5DmkII
@@ -9241,17 +9267,17 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 1346:
       imgdata.makernotes.canon.CanonColorDataVer = 4;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-      {
-        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x0053 << 1), SEEK_SET);
-        Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0x00a8 << 1), SEEK_SET);
-        Canon_WBCTpresets(0);                       // BCAT
-      }
+      fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+
+      fseek(ifp, save1 + (0x0053 << 1), SEEK_SET);
+      Canon_WBpresets(2, 12);
+      fseek(ifp, save1 + (0x00a8 << 1), SEEK_SET);
+      Canon_WBCTpresets(0);                       // BCAT
+
       if ((imgdata.makernotes.canon.CanonColorDataSubVer == 4) ||
           (imgdata.makernotes.canon.CanonColorDataSubVer == 5))
       {
@@ -9275,45 +9301,36 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 5120:
       imgdata.makernotes.canon.CanonColorDataVer = 5; // PowerSot G10, G12, G5 X, G7 X, G9 X, EOS M3, EOS M5, EOS M6
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-      {
-/*
-        if ((unique_id == 0x03970000) || // G7 X Mark II
-            (unique_id == 0x04100000) || // G9 X Mark II
-            (unique_id == 0x04180000) || // G1 X Mark III
-            (unique_id == 0x80000394) || // EOS M5
-            (unique_id == 0x80000398) || // EOS M100
-            (unique_id == 0x80000407))   // EOS M6
-*/
-        if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffc) // -4
-        { // G7 X Mark II, G9 X Mark II, G1 X Mark III, M5, M100, M6
-          fseek(ifp, save1 + (0x004f << 1), SEEK_SET);
-          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-          fseek(ifp, 8, SEEK_CUR);
-          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
-          fseek(ifp, 8, SEEK_CUR);
-          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
-          fseek(ifp, 8, SEEK_CUR);
-          Canon_WBpresets(8, 24);
-          fseek(ifp, 168, SEEK_CUR);
-          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][c ^ (c >> 1)] = get2();
-          fseek(ifp, 24, SEEK_CUR);
-          Canon_WBCTpresets(2); // BCADT
-          offsetChannelBlackLevel = save1 + (0x014d << 1);
-        }
-        else if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffd) // -3
-        { // M10/M3/G1 X/G1 X II/G10/G11/G12/G15/G16/G3 X/G5 X/G7 X/G9 X/S100/S110/S120/S90/S95/SX1 IX/SX50 HS/SX60 HS
-          fseek(ifp, save1 + (0x004c << 1), SEEK_SET);
-          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-          get2();
-          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
-          get2();
-          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
-          get2();
-          Canon_WBpresets(2, 12);
-          fseek(ifp, save1 + (0x00ba << 1), SEEK_SET);
-          Canon_WBCTpresets(2);                       // BCADT
-          offsetChannelBlackLevel = save1 + (0x0108 << 1);
-        }
+
+      if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffc) // -4
+      { // G7 X Mark II, G9 X Mark II, G1 X Mark III, M5, M100, M6
+        fseek(ifp, save1 + (0x004f << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+        fseek(ifp, 8, SEEK_CUR);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+        fseek(ifp, 8, SEEK_CUR);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
+        fseek(ifp, 8, SEEK_CUR);
+        Canon_WBpresets(8, 24);
+        fseek(ifp, 168, SEEK_CUR);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][c ^ (c >> 1)] = get2();
+        fseek(ifp, 24, SEEK_CUR);
+        Canon_WBCTpresets(2); // BCADT
+        offsetChannelBlackLevel = save1 + (0x014d << 1);
+      }
+      else if (imgdata.makernotes.canon.CanonColorDataSubVer == 0xfffd) // -3
+      { // M10/M3/G1 X/G1 X II/G10/G11/G12/G15/G16/G3 X/G5 X/G7 X/G9 X/S100/S110/S120/S90/S95/SX1 IX/SX50 HS/SX60 HS
+        fseek(ifp, save1 + (0x004c << 1), SEEK_SET);
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+        get2();
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+        get2();
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Other][c ^ (c >> 1)] = get2();
+        get2();
+        Canon_WBpresets(2, 12);
+        fseek(ifp, save1 + (0x00ba << 1), SEEK_SET);
+        Canon_WBCTpresets(2);                       // BCADT
+        offsetChannelBlackLevel = save1 + (0x0108 << 1);
       }
       break;
 
@@ -9321,19 +9338,18 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 1275:
       imgdata.makernotes.canon.CanonColorDataVer = 6; // 600D / 1200D
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-      {
-        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x0067 << 1), SEEK_SET);
-        Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0x00bc << 1), SEEK_SET);
-        Canon_WBCTpresets(0);                       // BCAT
-        offsetChannelBlackLevel = save1 + (0x01df << 1);
-        offsetWhiteLevels = save1 + (0x01e3 << 1);
-      }
+      fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+
+      fseek(ifp, save1 + (0x0067 << 1), SEEK_SET);
+      Canon_WBpresets(2, 12);
+      fseek(ifp, save1 + (0x00bc << 1), SEEK_SET);
+      Canon_WBCTpresets(0);                       // BCAT
+      offsetChannelBlackLevel = save1 + (0x01df << 1);
+      offsetWhiteLevels = save1 + (0x01e3 << 1);
       break;
 
     // 1DX / 5DmkIII / 6D / 100D / 650D / 700D / EOS M / 7DmkII / 750D / 760D
@@ -9343,17 +9359,17 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 1506:
       imgdata.makernotes.canon.CanonColorDataVer = 7;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-      {
-        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x0080 << 1), SEEK_SET);
-        Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0x00d5 << 1), SEEK_SET);
-        Canon_WBCTpresets(0);                       // BCAT
-      }
+      fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+
+      fseek(ifp, save1 + (0x0080 << 1), SEEK_SET);
+      Canon_WBpresets(2, 12);
+      fseek(ifp, save1 + (0x00d5 << 1), SEEK_SET);
+      Canon_WBCTpresets(0);                       // BCAT
+
       if (imgdata.makernotes.canon.CanonColorDataSubVer == 10)
       {
         offsetChannelBlackLevel = save1 + (0x01f8 << 1);
@@ -9373,17 +9389,17 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 1602:
       imgdata.makernotes.canon.CanonColorDataVer = 8;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
-      {
-        fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
-        fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
 
-        fseek(ifp, save1 + (0x0085 << 1), SEEK_SET);
-        Canon_WBpresets(2, 12);
-        fseek(ifp, save1 + (0x0107 << 1), SEEK_SET);
-        Canon_WBCTpresets(0);                       // BCAT
-      }
+      fseek(ifp, save1 + (0x0044 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+      fseek(ifp, save1 + (0x0049 << 1), SEEK_SET);
+      FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Measured][c ^ (c >> 1)] = get2();
+
+      fseek(ifp, save1 + (0x0085 << 1), SEEK_SET);
+      Canon_WBpresets(2, 12);
+      fseek(ifp, save1 + (0x0107 << 1), SEEK_SET);
+      Canon_WBCTpresets(0);                       // BCAT
+
       if (imgdata.makernotes.canon.CanonColorDataSubVer == 14) // 1300D / 2000D / 4000D
       {
         offsetChannelBlackLevel = save1 + (0x022c << 1);
@@ -9399,6 +9415,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
     case 1820:	// M50
       imgdata.makernotes.canon.CanonColorDataVer = 9;
       imgdata.makernotes.canon.CanonColorDataSubVer = get2();
+
       fseek(ifp, save1 + (0x0047 << 1), SEEK_SET);
       FORC4 cam_mul[c ^ (c >> 1)] = (float)get2();
       get2();
@@ -9412,7 +9429,6 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       offsetChannelBlackLevel = save1 + (0x0318 << 1);
       offsetWhiteLevels = save1 + (0x031c << 1);
       break;
-
     }
 
     if (offsetChannelBlackLevel) {
@@ -11512,9 +11528,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncmp(make, "OLYMPUS", 7)) {
 
-      uchar sOlyID[8];
-      short temp;
-
       int SubDirOffsetValid =
           strncmp(model, "E-300", 5) &&
           strncmp(model, "E-330", 5) &&
@@ -11559,15 +11572,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
       else switch (tag) {
       case 0x0207:
-        fread(sOlyID, MIN(len, 7), 1, ifp);
-        sOlyID[7] = 0;
-        OlyID = sOlyID[0];
-        i = 1;
-        while (i < 7 && sOlyID[i]) {
-          OlyID = OlyID << 8 | sOlyID[i];
-          i++;
-        }
-        setOlympusBodyFeatures(OlyID);
+        getOlympus_CameraType2();
         break;
       case 0x1002:
         imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, getreal(type) / 2);
@@ -11580,19 +11585,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         break;
 
       case 0x20501500:
-        if (OlyID != 0x0ULL) {
-          temp = get2();
-          if ((OlyID == 0x4434303430ULL) || // E-1
-              (OlyID == 0x5330303336ULL) || // E-M5
-              (len != 1))
-            imgdata.other.SensorTemperature = (float)temp;
-          else if ((temp != -32768) && (temp != 0)) {
-            if (temp > 199)
-              imgdata.other.SensorTemperature = 86.474958f - 0.120228f * (float)temp;
-            else
-              imgdata.other.SensorTemperature = (float)temp;
-          }
-        }
+        getOlympus_SensorTemperature(len);
         break;
       }
 
@@ -11992,6 +11985,12 @@ void CLASS parse_makernote(int base, int uptag)
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
     tag |= uptag << 16;
+/*
+if (!uptag)
+  printf ("==>> tag: 0x%04x type %d\n", tag, type);
+else
+  printf ("==>> tag: 0x%08x type %d\n", tag, type);
+*/
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos = ftell(ifp);
@@ -12337,62 +12336,6 @@ void CLASS parse_makernote(int base, int uptag)
         imgdata.makernotes.nikon.AFFineTuneIndex = uc;
         fread(&sc, 1, 1, ifp);
         imgdata.makernotes.nikon.AFFineTuneAdj = sc;
-      }
-    }
-
-    else if (!strncmp(make, "OLYMPUS", 7))
-    {
-      switch (tag)
-      {
-      case 0x0404:
-      case 0x101a:
-        if (!imgdata.shootinginfo.BodySerial[0])
-          stmread(imgdata.shootinginfo.BodySerial, len, ifp);
-        break;
-
-      case 0x0207:
-      {
-        uchar sOlyID[8];
-        fread(sOlyID, MIN(len, 7), 1, ifp);
-        sOlyID[7] = 0;
-        OlyID = sOlyID[0];
-        i = 1;
-        while (i < 7 && sOlyID[i])
-        {
-          OlyID = OlyID << 8 | sOlyID[i];
-          i++;
-        }
-        setOlympusBodyFeatures(OlyID);
-      }
-      break;
-
-      case 0x1002:
-        imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, getreal(type) / 2);
-        break;
-      case 0x1007:
-        imgdata.other.SensorTemperature = (float)get2();
-        break;
-      case 0x1008:
-        imgdata.other.LensTemperature = (float)get2();
-        break;
-
-      case 0x20501500:
-        if (OlyID != 0x0ULL)
-        {
-          short temp = get2();
-          if ((OlyID == 0x4434303430ULL) || // E-1
-              (OlyID == 0x5330303336ULL) || // E-M5
-              (len != 1))
-            imgdata.other.SensorTemperature = (float)temp;
-          else if ((temp != -32768) && (temp != 0))
-          {
-            if (temp > 199)
-              imgdata.other.SensorTemperature = 86.474958f - 0.120228f * (float)temp;
-            else
-              imgdata.other.SensorTemperature = (float)temp;
-          }
-        }
-        break;
       }
     }
 
@@ -12807,50 +12750,69 @@ void CLASS parse_makernote(int base, int uptag)
     INT64 _pos2 = ftell(ifp);
     if (!strncasecmp(make, "Olympus", 7)) {
 
-      if ((tag == 0x2020) ||
+      if ((tag == 0x2010) ||
+          (tag == 0x2020) ||
           (tag == 0x2030) ||
           (tag == 0x2031) ||
+          (tag == 0x2040) ||
           (tag == 0x2050) ||
           (tag == 0x3000)) {
         if (type == 7) { parse_makernote(base, tag); }
         else if (type == 13) { fseek(ifp, base+get4(), SEEK_SET); parse_makernote(base, tag); }
-      }
 
-      else if ((tag == 0x1011) && strcmp(software, "v757-71"))
-        for (i = 0; i < 3; i++) {
-          if (!imgdata.makernotes.olympus.ColorSpace) {
-            FORC3 cmatrix[i][c] = ((short)get2()) / 256.0;
-          } else {
-            FORC3 imgdata.color.ccm[i][c] = ((short)get2()) / 256.0;
+      } else if (tag == 0x0207) {
+          getOlympus_CameraType2();
+
+      } else if ((tag == 0x0404) || (tag == 0x101a)) {
+          if (!imgdata.shootinginfo.BodySerial[0])
+            stmread(imgdata.shootinginfo.BodySerial, len, ifp);
+
+      } else if (tag == 0x1002) {
+          imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, getreal(type) / 2);
+      } else if (tag == 0x1007) {
+          imgdata.other.SensorTemperature = (float)get2();
+      } else if (tag == 0x1008) {
+          imgdata.other.LensTemperature = (float)get2();
+
+      } else if ((tag == 0x1011) && strcmp(software, "v757-71")) {
+          for (i = 0; i < 3; i++) {
+            if (!imgdata.makernotes.olympus.ColorSpace) {
+              FORC3 cmatrix[i][c] = ((short)get2()) / 256.0;
+            } else {
+              FORC3 imgdata.color.ccm[i][c] = ((short)get2()) / 256.0;
+            }
           }
-        }
 
-      else if (tag == 0x1012)
-        FORC4 cblack[c ^ c >> 1] = get2();
-      else if (tag == 0x1017)
-        cam_mul[0] = get2() / 256.0;
-      else if (tag == 0x1018)
-        cam_mul[2] = get2() / 256.0;
+      } else if (tag == 0x1012) {
+          FORC4 cblack[c ^ c >> 1] = get2();
+      } else if (tag == 0x1017) {
+          cam_mul[0] = get2() / 256.0;
+      } else if (tag == 0x1018) {
+          cam_mul[2] = get2() / 256.0;
 
-      else if ((tag >= 0x20100000) && (tag <= 0x2010ffff))
-        parseOlympus_Equipment ((tag & 0x0000ffff), type, len, nonDNG);
+      } else if ((tag >= 0x20100000) && (tag <= 0x2010ffff)) {
+          parseOlympus_Equipment ((tag & 0x0000ffff), type, len, nonDNG);
 
-      else if ((tag >= 0x20200000) && (tag <= 0x2020ffff))
-        parseOlympus_CameraSettings (base, (tag & 0x0000ffff), type, len, nonDNG);
+      } else if ((tag >= 0x20200000) && (tag <= 0x2020ffff)) {
+          parseOlympus_CameraSettings (base, (tag & 0x0000ffff), type, len, nonDNG);
 
-      else if ((tag == 0x20300108) || (tag == 0x20310109))
-        imgdata.makernotes.olympus.ColorSpace = get2();
+      } else if ((tag == 0x20300108) || (tag == 0x20310109)) {
+          imgdata.makernotes.olympus.ColorSpace = get2();
 
-      else if ((tag >= 0x20400000) && (tag <= 0x2040ffff))
-        parseOlympus_ImageProcessing ((tag & 0x0000ffff), type, len, nonDNG);
+      } else if ((tag >= 0x20400000) && (tag <= 0x2040ffff)) {
+          parseOlympus_ImageProcessing ((tag & 0x0000ffff), type, len, nonDNG);
 
-      else if ((tag >= 0x30000000) && (tag <= 0x3000ffff))
-        parseOlympus_RawInfo ((tag & 0x0000ffff), type, len, nonDNG);
+      } else if (tag == 0x20501500) {
+          getOlympus_SensorTemperature(len);
+
+      } else if ((tag >= 0x30000000) && (tag <= 0x3000ffff)) {
+          parseOlympus_RawInfo ((tag & 0x0000ffff), type, len, nonDNG);
+      }
 
     }
     fseek(ifp, _pos2, SEEK_SET);
-
 #endif
+
     if (tag == 0x11 && is_raw && !strncmp(make, "NIKON", 5))
     {
       fseek(ifp, get4() + base, SEEK_SET);
@@ -12881,9 +12843,9 @@ void CLASS parse_makernote(int base, int uptag)
       if (tag == 0x1c)
         tag = 0x1017;
     }
-    if (tag == 0x1d)
+    if ((tag == 0x1d) && (type == 2) && (len > 0))
     {
-      while ((c = fgetc(ifp)) && c != EOF)
+      while ((c = fgetc(ifp)) && (len-- > 0) && (c != EOF))
 #ifdef LIBRAW_LIBRARY_BUILD
       {
         if ((!custom_serial) && (!isdigit(c)))
@@ -12923,7 +12885,9 @@ void CLASS parse_makernote(int base, int uptag)
       raw_width = get2();
       filters = 0x61616161;
     }
-    if ((tag == 0x81 && type == 7) || (tag == 0x100 && type == 7) || (tag == 0x280 && type == 1))
+    if ((tag == 0x81 && type == 7)  ||
+        (tag == 0x100 && type == 7 && strncmp(make, "NIKON", 5)) ||
+        (tag == 0x280 && type == 1))
     {
       thumb_offset = ftell(ifp);
       thumb_length = len;
@@ -12932,9 +12896,9 @@ void CLASS parse_makernote(int base, int uptag)
       thumb_offset += base;
     if (tag == 0x89 && type == 4)
       thumb_length = get4();
-    if (tag == 0x8c || tag == 0x96)
+    if ((tag == 0x8c || tag == 0x96) && (type == 7))
       meta_offset = ftell(ifp);
-    if (tag == 0x97)
+    if ((tag == 0x97) && !strncmp(make, "NIKON", 5))
     {
       for (i = 0; i < 4; i++)
         ver97 = ver97 * 10 + fgetc(ifp) - '0';
@@ -13094,24 +13058,18 @@ get2_256:
       cam_mul[0] = get2() / 256.0;
       cam_mul[2] = get2() / 256.0;
     }
+#ifndef LIBRAW_LIBRARY_BUILD
     if ((tag | 0x70) == 0x2070 && (type == 4 || type == 13))
       fseek(ifp, get4() + base, SEEK_SET);
-#ifdef LIBRAW_LIBRARY_BUILD
-    if (tag == 0x2010) {
-      INT64 _pos3 = ftell(ifp);
-      parse_makernote(base, 0x2010);
-      fseek(ifp, _pos3, SEEK_SET);
-    }
-#else
     if ((tag == 0x2020) && ((type == 7) || (type == 13)) && !strncmp(buf, "OLYMP", 5))
       parse_thumb_note(base, 257, 258);
     if (tag == 0xb028) {
       fseek(ifp, get4() + base, SEEK_SET);
       parse_thumb_note(base, 136, 137);
     }
-#endif
     if (tag == 0x2040)
       parse_makernote(base, 0x2040);
+#endif
     if (tag == 0x4001 && len > 500 && len < 100000)
     {
       i = len == 582 ? 50 : len == 653 ? 68 : len == 5120 ? 142 : 126;
@@ -13670,15 +13628,27 @@ void CLASS linear_table(unsigned len)
 
 #ifdef LIBRAW_LIBRARY_BUILD
 
-void CLASS Kodak_WB_0x08tags(int wb, unsigned type)
+void CLASS Kodak_KDC_WBtags(int wb, int wbi)
 {
-  float mul[3] = {1, 1, 1}, num, mul2;
   int c;
-  FORC3 mul[c] = (num = getreal(type)) == 0 ? 1 : num;
+  FORC3 imgdata.color.WB_Coeffs[wb][c] = get4();
+  imgdata.color.WB_Coeffs[wb][3] = imgdata.color.WB_Coeffs[wb][1];
+  if (wbi == wb)
+    FORC4 cam_mul[c] = imgdata.color.WB_Coeffs[wb][c];
+  return;
+}
+
+void CLASS Kodak_DCR_WBtags(int wb, unsigned type, int wbi)
+{
+  float mul[3] = {1.0f, 1.0f, 1.0f}, num, mul2;
+  int c;
+  FORC3 mul[c] = (num = getreal(type)) <= 0.001f ? 1.0f : num;
   imgdata.color.WB_Coeffs[wb][1] = imgdata.color.WB_Coeffs[wb][3] = mul[1];
   mul2 = mul[1] * mul[1];
   imgdata.color.WB_Coeffs[wb][0] = mul2 / mul[0];
   imgdata.color.WB_Coeffs[wb][2] = mul2 / mul[2];
+  if (wbi == wb)
+    FORC4 cam_mul[c] = imgdata.color.WB_Coeffs[wb][c];
   return;
 }
 
@@ -13701,15 +13671,14 @@ short CLASS KodakIllumMatrix (unsigned type, float *romm_camIllum)
       if ((romm_camScale[0] > 0x1fff) &&
           (romm_camScale[1] > 0x1fff) &&
           (romm_camScale[2] > 0x1fff)) {
-          FORC3 for (j = 0; j < 3; j++)
-            ((float *)romm_camIllum)[c * 3 + j] =
-                ((float)romm_camTemp[c * 3 + j]) / ((float)romm_camScale[c]);
+        FORC3 for (j = 0; j < 3; j++)
+          ((float *)romm_camIllum)[c * 3 + j] =
+            ((float)romm_camTemp[c * 3 + j]) / ((float)romm_camScale[c]);
           return 1;
       }
   }
   return 0;
 }
-
 
 /* Thanks to Alexey Danilchenko for wb as-shot parsing code */
 void CLASS parse_kodak_ifd(int base)
@@ -13719,23 +13688,22 @@ void CLASS parse_kodak_ifd(int base)
   float mul[3] = {1, 1, 1}, num;
 
   static const int wbtag_kdc[] = {
-// 64037,  64040,  64039,  64041,  -1, -1, 64042
-// 0xfa25, 0xfa28, 0xfa27, 0xfa29, -1, -1, 0xfa2a
-    LIBRAW_WBI_Auto,
-    LIBRAW_WBI_Fluorescent,
-    LIBRAW_WBI_Tungsten,
-    LIBRAW_WBI_Daylight,
+    LIBRAW_WBI_Auto,         // 64037 / 0xfa25
+    LIBRAW_WBI_Fluorescent,  // 64040 / 0xfa28
+    LIBRAW_WBI_Tungsten,     // 64039 / 0xfa27
+    LIBRAW_WBI_Daylight,     // 64041 / 0xfa29
     -1,
     -1,
-    LIBRAW_WBI_Shade
+    LIBRAW_WBI_Shade         // 64042 / 0xfa2a
   };
 
   static const int wbtag_dcr[] = {
-    LIBRAW_WBI_Daylight,
-    LIBRAW_WBI_Tungsten,
-    LIBRAW_WBI_Fluorescent,
-    LIBRAW_WBI_Flash,
-    LIBRAW_WBI_Custom
+    LIBRAW_WBI_Daylight,     // 2120 / 0x0848
+    LIBRAW_WBI_Tungsten,     // 2121 / 0x0849
+    LIBRAW_WBI_Fluorescent,  // 2122 / 0x084a
+    LIBRAW_WBI_Flash,        // 2123 / 0x084b
+    LIBRAW_WBI_Custom,       // 2124 / 0x084c
+    LIBRAW_WBI_Auto          // 2125 / 0x084d
   };
 
 //  int a_blck = 0;
@@ -13763,14 +13731,14 @@ void CLASS parse_kodak_ifd(int base)
       imgdata.sizes.raw_crop.cwidth = get2();
     else if (tag == 1006)  // 1006
       imgdata.sizes.raw_crop.cheight = get2();
-    else if (tag == 1007)  // 1007
+    else if (tag == 1007)  // 1007 / 0x03ef
     {
       if (!strcmp(model, "EOS D2000C"))
         black = get2();
       else
         imgdata.makernotes.kodak.BlackLevelTop = get2();
     }
-    else if (tag == 1008)  // 1008
+    else if (tag == 1008)  // 1008 / 0x03f0
     {
       if (!strcmp(model, "EOS D2000C"))
       {
@@ -13784,8 +13752,12 @@ void CLASS parse_kodak_ifd(int base)
     }
     else if (tag == 1011)  // 1011
       imgdata.other.FlashEC = getreal(type);
+
     else if (tag == 1020)  // 1020
+    {
       wbi = getint(type);
+      if ((wbi >= 0) && (wbi < 6) && (wbi != -2)) wbi = wbtag_dcr[wbi];
+    }
     else if (tag == 1021 && len == 72)     // 1021
     { /* WB set in software */
       fseek(ifp, 40, SEEK_CUR);
@@ -13798,25 +13770,19 @@ void CLASS parse_kodak_ifd(int base)
     else if ((tag == 1043) && (len == 1))  // 1043
       imgdata.other.SensorTemperature = getreal(type);
     else if (tag == 0x0848)  // 2120
-      Kodak_WB_0x08tags(LIBRAW_WBI_Daylight, type);
+      Kodak_DCR_WBtags(LIBRAW_WBI_Daylight, type, wbi);
     else if (tag == 0x0849)  // 2121
-      Kodak_WB_0x08tags(LIBRAW_WBI_Tungsten, type);
+      Kodak_DCR_WBtags(LIBRAW_WBI_Tungsten, type, wbi);
     else if (tag == 0x084a)  // 2122
-      Kodak_WB_0x08tags(LIBRAW_WBI_Fluorescent, type);
+      Kodak_DCR_WBtags(LIBRAW_WBI_Fluorescent, type, wbi);
     else if (tag == 0x084b)  // 2123
-      Kodak_WB_0x08tags(LIBRAW_WBI_Flash, type);
+      Kodak_DCR_WBtags(LIBRAW_WBI_Flash, type, wbi);
     else if (tag == 0x084c)  // 2124
-      Kodak_WB_0x08tags(LIBRAW_WBI_Custom, type);
+      Kodak_DCR_WBtags(LIBRAW_WBI_Custom, type, wbi);
     else if (tag == 0x084d)  // 2125
     {
-      Kodak_WB_0x08tags(LIBRAW_WBI_Auto, type);
-      if ((unsigned)wbi < 5) {
-        j = wbtag_dcr[wbi];
-        FORC4 cam_mul[c] = imgdata.color.WB_Coeffs[j][c];
-      } else if (wbi != -2) {
-        j = LIBRAW_WBI_Auto;
-        FORC4 cam_mul[c] = imgdata.color.WB_Coeffs[j][c];
-      }
+      if (wbi == -1) wbi = LIBRAW_WBI_Auto;
+      Kodak_DCR_WBtags(LIBRAW_WBI_Auto, type, wbi);
     }
     else if (tag == 0x0903)  // 2307
       iso_speed = getreal(type);
@@ -13844,7 +13810,10 @@ void CLASS parse_kodak_ifd(int base)
     else if (tag == 0xfa00)  // 64000
       stmread(imgdata.shootinginfo.BodySerial, len, ifp);
     else if (tag == 0xfa0d)  // 64013
+    {
       wbi = fgetc(ifp);
+      if ((wbi >= 0) && (wbi < 7)) wbi = wbtag_kdc[wbi];
+    }
     else if (tag == 0xfa13)  // 64019
       width = getint(type);
     else if (tag == 0xfa14)  // 64020
@@ -13869,36 +13838,18 @@ void CLASS parse_kodak_ifd(int base)
       if (type != 8)
         imgdata.makernotes.kodak.offset_top += 1;
     }
+
     else if (tag == 0xfa25)  // 64037
-    {
-      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c] = get4();
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
-    }
+      Kodak_KDC_WBtags(LIBRAW_WBI_Auto, wbi);
     else if (tag == 0xfa27)  // 64039
-    {
-      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c] = get4();
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1];
-    }
+      Kodak_KDC_WBtags(LIBRAW_WBI_Tungsten, wbi);
     else if (tag == 0xfa28)  // 64040
-    {
-      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][c] = get4();
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][1];
-    }
+      Kodak_KDC_WBtags(LIBRAW_WBI_Fluorescent, wbi);
     else if (tag == 0xfa29)  // 64041
-    {
-      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = get4();
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1];
-    }
+      Kodak_KDC_WBtags(LIBRAW_WBI_Daylight, wbi);
     else if (tag == 0xfa2a)  // 64042
-    {
-      FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c] = get4();
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1];
-      if ((unsigned)wbi < 6)
-        j = wbtag_kdc[wbi];
-      else
-        j = LIBRAW_WBI_Auto;
-      FORC4 cam_mul[c] = imgdata.color.WB_Coeffs[j][c];
-    }
+      Kodak_KDC_WBtags(LIBRAW_WBI_Shade, wbi);
+
     else if (tag == 0xfa31)  // 64049
       imgdata.sizes.raw_crop.cwidth = get2();
     else if (tag == 0xfa32)  // 64050
@@ -15297,7 +15248,7 @@ int CLASS parse_tiff_ifd(int base)
                     FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c < 2)] = sget2(cbuf_SR2 + ival + 2 * c);
                     break;
                   case 0x7312:
-                    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get2();
+                    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = sget2(cbuf_SR2 + ival + 2 * c);
                   break;
                   case 0x7480:
                   case 0x7820:

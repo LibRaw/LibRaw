@@ -400,6 +400,7 @@ typedef unsigned long long UINT64;
     ushort ColorSpace;
     uchar AFFineTune;
     short AFFineTuneAdj[3];
+    char CameraType2[6];
   } libraw_olympus_makernotes_t;
 
   typedef struct
