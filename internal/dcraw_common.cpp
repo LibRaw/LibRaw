@@ -13474,7 +13474,8 @@ int CLASS parse_tiff_ifd(int base)
     case 50716: /* BlackLevelDeltaV */
       for (num = i = 0; i < len && i < 65536; i++)
         num += getreal(type);
-      black += num / len + 0.5;
+      if(len>0)
+        black += num / len + 0.5;
 #ifdef LIBRAW_LIBRARY_BUILD
       tiff_ifd[ifd].dng_levels.dng_black += num / len + 0.5;
       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
