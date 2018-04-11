@@ -13405,15 +13405,18 @@ int CLASS parse_tiff_ifd(int base)
     case 50713: /* BlackLevelRepeatDim */
 #ifdef LIBRAW_LIBRARY_BUILD
       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
+      tiff_ifd[ifd].dng_levels.dng_fcblack[4] =
       tiff_ifd[ifd].dng_levels.dng_cblack[4] =
 #endif
           cblack[4] = get2();
 #ifdef LIBRAW_LIBRARY_BUILD
+      tiff_ifd[ifd].dng_levels.dng_fcblack[5] =
       tiff_ifd[ifd].dng_levels.dng_cblack[5] =
 #endif
           cblack[5] = get2();
       if (cblack[4] * cblack[5] > (sizeof(cblack) / sizeof(cblack[0]) - 6))
 #ifdef LIBRAW_LIBRARY_BUILD
+        tiff_ifd[ifd].dng_levels.dng_fcblack[4] = tiff_ifd[ifd].dng_levels.dng_fcblack[5] =
         tiff_ifd[ifd].dng_levels.dng_cblack[4] = tiff_ifd[ifd].dng_levels.dng_cblack[5] =
 #endif
             cblack[4] = cblack[5] = 1;
@@ -13515,9 +13518,12 @@ int CLASS parse_tiff_ifd(int base)
       {
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
         for (i = 0; i < colors && i < 4 && i < len; i++)
-          tiff_ifd[ifd].dng_levels.dng_cblack[i] = cblack[i] = getreal(type) + 0.5;
+	  {
+	    tiff_ifd[ifd].dng_levels.dng_fcblack[i] = getreal(type);
+	    tiff_ifd[ifd].dng_levels.dng_cblack[i] = cblack[i] = tiff_ifd[ifd].dng_levels.dng_fcblack[i]+0.5;
+	  }
 
-        tiff_ifd[ifd].dng_levels.dng_black = black = 0;
+        tiff_ifd[ifd].dng_levels.dng_fblack = tiff_ifd[ifd].dng_levels.dng_black = black = 0;
       }
       else
 #endif
@@ -13525,14 +13531,23 @@ int CLASS parse_tiff_ifd(int base)
       {
 #ifdef LIBRAW_LIBRARY_BUILD
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
-        tiff_ifd[ifd].dng_levels.dng_black =
-#endif
+        tiff_ifd[ifd].dng_levels.dng_fblack = getreal(type);
+	black = tiff_ifd[ifd].dng_levels.dng_black = tiff_ifd[ifd].dng_levels.dng_fblack;
+#else
             black = getreal(type);
+#endif
       }
       else if (cblack[4] * cblack[5] <= len)
       {
         FORC(cblack[4] * cblack[5])
-        cblack[6 + c] = getreal(type);
+#ifdef LIBRAW_LIBRARY_BUILD
+	  {
+	    tiff_ifd[ifd].dng_levels.dng_fcblack[6+c] = getreal(type);
+	    cblack[6+c] = tiff_ifd[ifd].dng_levels.dng_fcblack[6+c];
+	  }
+#else	  
+	  cblack[6 + c] = getreal(type);
+#endif
         black = 0;
         FORC4
         cblack[c] = 0;
@@ -13542,10 +13557,12 @@ int CLASS parse_tiff_ifd(int base)
         {
           tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
           FORC(cblack[4] * cblack[5])
-          tiff_ifd[ifd].dng_levels.dng_cblack[6 + c] = cblack[6 + c];
+	    tiff_ifd[ifd].dng_levels.dng_cblack[6 + c] = cblack[6 + c];
+          tiff_ifd[ifd].dng_levels.dng_fblack = 0;
           tiff_ifd[ifd].dng_levels.dng_black = 0;
           FORC4
-          tiff_ifd[ifd].dng_levels.dng_cblack[c] = 0;
+	    tiff_ifd[ifd].dng_levels.dng_fcblack[c] = 
+	    tiff_ifd[ifd].dng_levels.dng_cblack[c] = 0;
         }
 #endif
       }
@@ -13555,11 +13572,14 @@ int CLASS parse_tiff_ifd(int base)
       for (num = i = 0; i < len && i < 65536; i++)
         num += getreal(type);
       if(len>0)
+	{
         black += num / len + 0.5;
 #ifdef LIBRAW_LIBRARY_BUILD
-      tiff_ifd[ifd].dng_levels.dng_black += num / len + 0.5;
-      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
+	tiff_ifd[ifd].dng_levels.dng_fblack += num/float(len);
+	tiff_ifd[ifd].dng_levels.dng_black += num / len + 0.5;
+	tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
 #endif
+	}
       break;
     case 50717: /* WhiteLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -19547,8 +19567,10 @@ dng_skip:
       sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_BLACK);
       if (sidx >= 0)
       {
+        imgdata.color.dng_levels.dng_fblack = tiff_ifd[sidx].dng_levels.dng_fblack;
         imgdata.color.dng_levels.dng_black = tiff_ifd[sidx].dng_levels.dng_black;
         COPYARR(imgdata.color.dng_levels.dng_cblack, tiff_ifd[sidx].dng_levels.dng_cblack);
+        COPYARR(imgdata.color.dng_levels.dng_fcblack, tiff_ifd[sidx].dng_levels.dng_fcblack);
       }
       if (pifd >= 0)
       {

@@ -223,6 +223,8 @@ typedef unsigned long long UINT64;
     unsigned parsedfields;
     unsigned dng_cblack[4102];
     unsigned dng_black;
+    float    dng_fcblack[4102];
+    float    dng_fblack;
     unsigned dng_whitelevel[4];
     unsigned default_crop[4]; /* Origin and size */
     unsigned preview_colorspace;
