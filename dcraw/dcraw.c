@@ -14812,11 +14812,13 @@ int CLASS parse_tiff_ifd(int base)
       for (num = i = 0; i < len && i < 65536; i++)
         num += getreal(type);
       if(len>0)
+       {
         black += num / len + 0.5;
 #ifdef LIBRAW_LIBRARY_BUILD
       tiff_ifd[ifd].dng_levels.dng_black += num / len + 0.5;
       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
 #endif
+       }
       break;
     case 50717: /* WhiteLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
