@@ -9806,10 +9806,69 @@ void CLASS setPhaseOneFeatures(unsigned id)
   return;
 }
 
-void CLASS parseFujiMakernotes(unsigned tag, unsigned type)
+void CLASS parseFujiMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
 {
-  switch (tag)
-  {
+  if ((dng_writer == nonDNG) && (tag == 0x0010)) {
+    char FujiSerial[sizeof(imgdata.shootinginfo.InternalBodySerial)];
+    char *words[4];
+    char yy[2], mm[3], dd[3], ystr[16], ynum[16];
+    int year, nwords, ynum_len;
+    unsigned c;
+    stmread(FujiSerial, len, ifp);
+    nwords = getwords(FujiSerial, words, 4, sizeof(imgdata.shootinginfo.InternalBodySerial));
+    for (int i = 0; i < nwords; i++) {
+      mm[2] = dd[2] = 0;
+      if (strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) < 18) {
+        if (i == 0) {
+          strncpy(imgdata.shootinginfo.InternalBodySerial, words[0],
+                  sizeof(imgdata.shootinginfo.InternalBodySerial) - 1);
+        } else {
+          char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
+          snprintf(tbuf, sizeof(tbuf), "%s %s", imgdata.shootinginfo.InternalBodySerial, words[i]);
+          strncpy(imgdata.shootinginfo.InternalBodySerial, tbuf,
+                  sizeof(imgdata.shootinginfo.InternalBodySerial) - 1);
+        }
+      } else {
+        strncpy(dd, words[i] + strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 14, 2);
+        strncpy(mm, words[i] + strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 16, 2);
+        strncpy(yy, words[i] + strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 18, 2);
+        year = (yy[0] - '0') * 10 + (yy[1] - '0');
+        if (year < 70) year += 2000; else year += 1900;
+
+        ynum_len = (int)strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 18;
+        strncpy(ynum, words[i], ynum_len);
+        ynum[ynum_len] = 0;
+        for (int j = 0; ynum[j] && ynum[j + 1] && sscanf(ynum + j, "%2x", &c); j += 2)
+          ystr[j / 2] = c;
+        ystr[ynum_len / 2 + 1] = 0;
+        strcpy(model2, ystr);
+
+        if (i == 0) {
+          char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
+
+          if (nwords == 1) {
+            snprintf(tbuf, sizeof(tbuf), "%s %s %d:%s:%s",
+                     words[0] + strnlen(words[0], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 12, ystr,
+                     year, mm, dd);
+
+          } else {
+            snprintf(tbuf, sizeof(tbuf), "%s %d:%s:%s %s", ystr, year, mm, dd,
+                     words[0] + strnlen(words[0], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 12);
+          }
+          strncpy(imgdata.shootinginfo.InternalBodySerial, tbuf,
+                  sizeof(imgdata.shootinginfo.InternalBodySerial) - 1);
+
+        } else {
+          char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
+          snprintf(tbuf, sizeof(tbuf), "%s %s %d:%s:%s %s", imgdata.shootinginfo.InternalBodySerial, ystr, year, mm,
+                   dd, words[i] + strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 12);
+          strncpy(imgdata.shootinginfo.InternalBodySerial, tbuf,
+                  sizeof(imgdata.shootinginfo.InternalBodySerial) - 1);
+        }
+      }
+    }
+
+  } else switch (tag) {
   case 0x1002:
     imgdata.makernotes.fuji.WB_Preset = get2();
     break;
@@ -9820,7 +9879,7 @@ void CLASS parseFujiMakernotes(unsigned tag, unsigned type)
     imgdata.makernotes.fuji.Macro = get2();
     break;
   case 0x1021:
-    imgdata.makernotes.fuji.FocusMode = get2();
+    imgdata.makernotes.fuji.FocusMode = imgdata.shootinginfo.FocusMode = get2();
     break;
   case 0x1022:
     imgdata.makernotes.fuji.AFMode = get2();
@@ -11302,7 +11361,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     }
 
     else if (!strncmp(make, "FUJI", 4))
-      parseFujiMakernotes(tag, type);
+      parseFujiMakernotes(tag, type, len, AdobeDNG);
 
     else if (!strncasecmp(make, "LEICA", 5))
     {
@@ -11834,7 +11893,6 @@ void CLASS parse_makernote(int base, int uptag)
   char buf[10];
   unsigned SamsungKey[11];
   uchar NikonKey;
-  short MakerNoteKodak8a = 0;
 
 #ifdef LIBRAW_LIBRARY_BUILD
   unsigned custom_serial = 0;
@@ -11942,7 +12000,7 @@ void CLASS parse_makernote(int base, int uptag)
       (sget2((uchar *)(buf+4)) < 13)  &&
       (sget4((uchar *)(buf+6)) < 256)     // check count
      )
-    MakerNoteKodak8a = 1;  // Kodak P712 / P850 / P880
+    imgdata.makernotes.kodak.MakerNoteKodak8a = 1;  // Kodak P712 / P850 / P880
 
 // adjust pos & base for Leica M8/M9/M Mono tags and dir in tag 0x3400
   if (!strncasecmp(make, "LEICA", 5))
@@ -12009,7 +12067,7 @@ else
       fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;
     }
-    if (MakerNoteKodak8a) {
+    if (imgdata.makernotes.kodak.MakerNoteKodak8a) {
       if ((tag == 0xff00) && (type == 4) && (len == 1)) {
         INT64 _pos1 = get4();
         if ((_pos1 < fsize) && (_pos1 > 0)) {
@@ -12064,79 +12122,7 @@ else
     }
 
     else if (!strncmp(make, "FUJI", 4))
-    {
-      if (tag == 0x0010)
-      {
-        char FujiSerial[sizeof(imgdata.shootinginfo.InternalBodySerial)];
-        char *words[4];
-        char yy[2], mm[3], dd[3], ystr[16], ynum[16];
-        int year, nwords, ynum_len;
-        unsigned c;
-        stmread(FujiSerial, len, ifp);
-        nwords = getwords(FujiSerial, words, 4, sizeof(imgdata.shootinginfo.InternalBodySerial));
-        for (int i = 0; i < nwords; i++)
-        {
-          mm[2] = dd[2] = 0;
-          if (strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) < 18)
-            if (i == 0)
-              strncpy(imgdata.shootinginfo.InternalBodySerial, words[0],
-                      sizeof(imgdata.shootinginfo.InternalBodySerial) - 1);
-            else
-            {
-              char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
-              snprintf(tbuf, sizeof(tbuf), "%s %s", imgdata.shootinginfo.InternalBodySerial, words[i]);
-              strncpy(imgdata.shootinginfo.InternalBodySerial, tbuf,
-                      sizeof(imgdata.shootinginfo.InternalBodySerial) - 1);
-            }
-          else
-          {
-            strncpy(dd, words[i] + strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 14, 2);
-            strncpy(mm, words[i] + strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 16, 2);
-            strncpy(yy, words[i] + strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 18, 2);
-            year = (yy[0] - '0') * 10 + (yy[1] - '0');
-            if (year < 70)
-              year += 2000;
-            else
-              year += 1900;
-
-            ynum_len = (int)strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 18;
-            strncpy(ynum, words[i], ynum_len);
-            ynum[ynum_len] = 0;
-            for (int j = 0; ynum[j] && ynum[j + 1] && sscanf(ynum + j, "%2x", &c); j += 2)
-              ystr[j / 2] = c;
-            ystr[ynum_len / 2 + 1] = 0;
-            strcpy(model2, ystr);
-
-            if (i == 0)
-            {
-              char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
-
-              if (nwords == 1)
-                snprintf(tbuf, sizeof(tbuf), "%s %s %d:%s:%s",
-                         words[0] + strnlen(words[0], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 12, ystr,
-                         year, mm, dd);
-
-              else
-                snprintf(tbuf, sizeof(tbuf), "%s %d:%s:%s %s", ystr, year, mm, dd,
-                         words[0] + strnlen(words[0], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 12);
-
-              strncpy(imgdata.shootinginfo.InternalBodySerial, tbuf,
-                      sizeof(imgdata.shootinginfo.InternalBodySerial) - 1);
-            }
-            else
-            {
-              char tbuf[sizeof(imgdata.shootinginfo.InternalBodySerial)];
-              snprintf(tbuf, sizeof(tbuf), "%s %s %d:%s:%s %s", imgdata.shootinginfo.InternalBodySerial, ystr, year, mm,
-                       dd, words[i] + strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 12);
-              strncpy(imgdata.shootinginfo.InternalBodySerial, tbuf,
-                      sizeof(imgdata.shootinginfo.InternalBodySerial) - 1);
-            }
-          }
-        }
-      }
-      else
-        parseFujiMakernotes(tag, type);
-    }
+        parseFujiMakernotes(tag, type, len, nonDNG);
 
     else if (!strncasecmp(model, "Hasselblad X1D", 14) || !strncasecmp(model, "Hasselblad H6D", 14) ||
              !strncasecmp(model, "Hasselblad A6D", 14))

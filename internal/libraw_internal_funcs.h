@@ -71,7 +71,7 @@ it under the terms of the one of two licenses as you choose:
                                uchar *&table_buf_0x940c, ushort &table_buf_0x940c_len,
                                uchar *&table_buf_0x940e, ushort &table_buf_0x940e_len);
 
-    void	parseFujiMakernotes (unsigned tag, unsigned type);
+    void	parseFujiMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
 
     ushort      get2();
     unsigned    sget4 (uchar *s);
