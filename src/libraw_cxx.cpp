@@ -4288,6 +4288,71 @@ int LibRaw::unpack_thumb(void)
         SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
         return 0;
       }
+	  else if (write_thumb == &LibRaw::layer_thumb)
+	  {
+		  int colors = libraw_internal_data.unpacker_data.thumb_misc >> 5 & 7;
+		  if(colors != 1 && colors != 3) return LIBRAW_UNSUPPORTED_THUMBNAIL;
+
+		  int tlength = T.twidth * T.theight;
+		  if (T.thumb)
+			  free(T.thumb);
+		  T.thumb = (char *)calloc(colors, tlength);
+		  merror(T.thumb, "layer_thumb()");
+		  unsigned char *tbuf = (unsigned char*)calloc(colors, tlength);
+		  merror(tbuf, "layer_thumb()");
+		  ID.input->read(tbuf, colors, T.tlength);
+		  if(libraw_internal_data.unpacker_data.thumb_misc>>8 && colors==3) // GRB order
+			  for(int i = 0; i < tlength; i++)
+			  {
+				  T.thumb[i*3] = tbuf[i+tlength];
+				  T.thumb[i*3+1] = tbuf[i];
+				  T.thumb[i*3+2] = tbuf[i+2*tlength];
+			  }
+		  else if (colors == 3)// RGB or 1-channel
+			  for(int i = 0; i < tlength; i++)
+			  {
+				  T.thumb[i*3] = tbuf[i];
+				  T.thumb[i*3+1] = tbuf[i+tlength];
+				  T.thumb[i*3+2] = tbuf[i+2*tlength];
+			  }
+		  else if(colors == 1)
+		  {
+			  free(T.thumb);
+			  T.thumb = (char*)tbuf;
+			  tbuf = 0;
+		  }
+		  if(tbuf)
+			free(tbuf);
+		  T.tcolors = colors;
+		  T.tlength = colors*tlength;
+		  T.tformat = LIBRAW_THUMBNAIL_BITMAP;
+		  SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
+		  return 0; 
+	  }
+	  else if (write_thumb == &LibRaw::rollei_thumb)
+	  {
+		  unsigned i;
+		  int tlength = T.twidth * T.theight;
+		  if (T.thumb)
+			  free(T.thumb);
+		  T.tcolors = 3;
+		  T.thumb = (char *)calloc(T.tcolors, tlength);
+		  merror(T.thumb, "layer_thumb()");
+		  unsigned short *tbuf = (unsigned short*)calloc(2, tlength);
+		  merror(tbuf, "layer_thumb()");
+		  read_shorts(tbuf, tlength);
+		  for (i = 0; i < tlength; i++)
+		  {
+			  T.thumb[i*3] = (tbuf[i] << 3) & 0xff;
+			  T.thumb[i*3+1] = (tbuf[i] >> 5 << 2) & 0xff;
+			  T.thumb[i*3+2] = (tbuf[i] >> 11 << 3) & 0xff;
+		  }	  
+		  free(tbuf);
+		  T.tlength = T.tcolors*tlength;
+		  T.tformat = LIBRAW_THUMBNAIL_BITMAP;
+		  SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
+		  return 0; 
+	  }
       else if (write_thumb == &LibRaw::ppm_thumb)
       {
         if (t_bytesps > 1)
