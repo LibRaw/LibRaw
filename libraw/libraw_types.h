@@ -426,6 +426,7 @@ typedef unsigned long long UINT64;
     ushort FocusPosition;
     uchar DriveMode[4];
     short AFAdjustment;
+    ushort Quality;  /* 4 is raw, 7 is raw w/ pixel shift */
     /*    uchar AFPointMode;     */
     /*    uchar SRResult;        */
     /*    uchar ShakeReduction;  */
