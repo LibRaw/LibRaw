@@ -14854,15 +14854,18 @@ int CLASS parse_tiff_ifd(int base)
     case 50713: /* BlackLevelRepeatDim */
 #ifdef LIBRAW_LIBRARY_BUILD
       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
+      tiff_ifd[ifd].dng_levels.dng_fcblack[4] =
       tiff_ifd[ifd].dng_levels.dng_cblack[4] =
 #endif
           cblack[4] = get2();
 #ifdef LIBRAW_LIBRARY_BUILD
+      tiff_ifd[ifd].dng_levels.dng_fcblack[5] =
       tiff_ifd[ifd].dng_levels.dng_cblack[5] =
 #endif
           cblack[5] = get2();
       if (cblack[4] * cblack[5] > (sizeof(cblack) / sizeof(cblack[0]) - 6))
 #ifdef LIBRAW_LIBRARY_BUILD
+        tiff_ifd[ifd].dng_levels.dng_fcblack[4] = tiff_ifd[ifd].dng_levels.dng_fcblack[5] =
         tiff_ifd[ifd].dng_levels.dng_cblack[4] = tiff_ifd[ifd].dng_levels.dng_cblack[5] =
 #endif
             cblack[4] = cblack[5] = 1;
@@ -14964,9 +14967,12 @@ int CLASS parse_tiff_ifd(int base)
       {
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
         for (i = 0; i < colors && i < 4 && i < len; i++)
-          tiff_ifd[ifd].dng_levels.dng_cblack[i] = cblack[i] = getreal(type) + 0.5;
+	  {
+	    tiff_ifd[ifd].dng_levels.dng_fcblack[i] = getreal(type);
+	    tiff_ifd[ifd].dng_levels.dng_cblack[i] = cblack[i] = tiff_ifd[ifd].dng_levels.dng_fcblack[i]+0.5;
+	  }
 
-        tiff_ifd[ifd].dng_levels.dng_black = black = 0;
+        tiff_ifd[ifd].dng_levels.dng_fblack = tiff_ifd[ifd].dng_levels.dng_black = black = 0;
       }
       else
 #endif
@@ -14974,14 +14980,23 @@ int CLASS parse_tiff_ifd(int base)
       {
 #ifdef LIBRAW_LIBRARY_BUILD
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
-        tiff_ifd[ifd].dng_levels.dng_black =
-#endif
+        tiff_ifd[ifd].dng_levels.dng_fblack = getreal(type);
+	black = tiff_ifd[ifd].dng_levels.dng_black = tiff_ifd[ifd].dng_levels.dng_fblack;
+#else
             black = getreal(type);
+#endif
       }
       else if (cblack[4] * cblack[5] <= len)
       {
         FORC(cblack[4] * cblack[5])
-        cblack[6 + c] = getreal(type);
+#ifdef LIBRAW_LIBRARY_BUILD
+	  {
+	    tiff_ifd[ifd].dng_levels.dng_fcblack[6+c] = getreal(type);
+	    cblack[6+c] = tiff_ifd[ifd].dng_levels.dng_fcblack[6+c];
+	  }
+#else	  
+	  cblack[6 + c] = getreal(type);
+#endif
         black = 0;
         FORC4
         cblack[c] = 0;
@@ -14991,10 +15006,12 @@ int CLASS parse_tiff_ifd(int base)
         {
           tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
           FORC(cblack[4] * cblack[5])
-          tiff_ifd[ifd].dng_levels.dng_cblack[6 + c] = cblack[6 + c];
+	    tiff_ifd[ifd].dng_levels.dng_cblack[6 + c] = cblack[6 + c];
+          tiff_ifd[ifd].dng_levels.dng_fblack = 0;
           tiff_ifd[ifd].dng_levels.dng_black = 0;
           FORC4
-          tiff_ifd[ifd].dng_levels.dng_cblack[c] = 0;
+	    tiff_ifd[ifd].dng_levels.dng_fcblack[c] = 
+	    tiff_ifd[ifd].dng_levels.dng_cblack[c] = 0;
         }
 #endif
       }
@@ -15003,11 +15020,15 @@ int CLASS parse_tiff_ifd(int base)
     case 50716: /* BlackLevelDeltaV */
       for (num = i = 0; i < len && i < 65536; i++)
         num += getreal(type);
-      black += num / len + 0.5;
+      if(len>0)
+	{
+        black += num / len + 0.5;
 #ifdef LIBRAW_LIBRARY_BUILD
-      tiff_ifd[ifd].dng_levels.dng_black += num / len + 0.5;
-      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
+	tiff_ifd[ifd].dng_levels.dng_fblack += num/float(len);
+	tiff_ifd[ifd].dng_levels.dng_black += num / len + 0.5;
+	tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
 #endif
+	}
       break;
     case 50717: /* WhiteLevel */
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -15550,19 +15571,31 @@ void CLASS apply_tiff()
     switch (tiff_compress)
     {
     case 32767:
+#ifdef LIBRAW_LIBRARY_BUILD
+      if (INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height))
+#else
       if (tiff_ifd[raw].bytes == raw_width * raw_height)
+#endif
       {
         tiff_bps = 12;
         load_raw = &CLASS sony_arw2_load_raw;
         break;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      if (!strncasecmp(make, "Sony", 4) && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 2ULL)
+#else
       if (!strncasecmp(make, "Sony", 4) && tiff_ifd[raw].bytes == raw_width * raw_height * 2)
+#endif
       {
         tiff_bps = 14;
         load_raw = &CLASS unpacked_load_raw;
         break;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      if (INT64(tiff_ifd[raw].bytes) * 8ULL != INT64(raw_width) * INT64(raw_height) * INT64(tiff_bps))
+#else
       if (tiff_ifd[raw].bytes * 8 != raw_width * raw_height * tiff_bps)
+#endif
       {
         raw_height += 8;
         load_raw = &CLASS sony_arw_load_raw;
@@ -15578,14 +15611,14 @@ void CLASS apply_tiff()
     case 1:
 #ifdef LIBRAW_LIBRARY_BUILD
       // Sony 14-bit uncompressed
-      if (!strncasecmp(make, "Sony", 4) && tiff_ifd[raw].bytes == raw_width * raw_height * 2)
+      if (!strncasecmp(make, "Sony", 4) && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 2ULL)
       {
         tiff_bps = 14;
         load_raw = &CLASS unpacked_load_raw;
         break;
       }
       if (!strncasecmp(make, "Sony", 4) && tiff_ifd[raw].samples == 4 &&
-          tiff_ifd[raw].bytes == raw_width * raw_height * 8) // Sony ARQ
+          INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 8ULL) // Sony ARQ
       {
         tiff_bps = 14;
         tiff_samples = 4;
@@ -15601,10 +15634,16 @@ void CLASS apply_tiff()
         filters = 0;
         break;
       }
-#endif
+      if (!strncmp(make, "OLYMPUS", 7) && INT64(tiff_ifd[raw].bytes) * 2ULL == INT64(raw_width) * INT64(raw_height) * 3ULL)
+#else 
       if (!strncmp(make, "OLYMPUS", 7) && tiff_ifd[raw].bytes * 2 == raw_width * raw_height * 3)
+#endif
         load_flags = 24;
+#ifdef LIBRAW_LIBRARY_BUILD
+      if (INT64(tiff_ifd[raw].bytes) * 5ULL == INT64(raw_width) * INT64(raw_height) * 8ULL)
+#else
       if (tiff_ifd[raw].bytes * 5 == raw_width * raw_height * 8)
+#endif
       {
         load_flags = 81;
         tiff_bps = 12;
@@ -15624,7 +15663,11 @@ void CLASS apply_tiff()
         load_flags = 0;
       case 16:
         load_raw = &CLASS unpacked_load_raw;
+#ifdef LIBRAW_LIBRARY_BUILD
+        if (!strncmp(make, "OLYMPUS", 7) && INT64(tiff_ifd[raw].bytes) * 7ULL > INT64(raw_width) * INT64(raw_height))
+#else
         if (!strncmp(make, "OLYMPUS", 7) && tiff_ifd[raw].bytes * 7 > raw_width * raw_height)
+#endif
           load_raw = &CLASS olympus_load_raw;
       }
       break;
@@ -15637,25 +15680,41 @@ void CLASS apply_tiff()
       load_raw = &CLASS kodak_262_load_raw;
       break;
     case 34713:
+#ifdef LIBRAW_LIBRARY_BUILD
+      if ((INT64(raw_width) + 9ULL) / 10ULL * 16ULL * INT64(raw_height) == INT64(tiff_ifd[raw].bytes))
+#else
       if ((raw_width + 9) / 10 * 16 * raw_height == tiff_ifd[raw].bytes)
+#endif
       {
         load_raw = &CLASS packed_load_raw;
         load_flags = 1;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      else if (INT64(raw_width) * INT64(raw_height) * 3ULL == INT64(tiff_ifd[raw].bytes) * 2ULL)
+#else
       else if (raw_width * raw_height * 3 == tiff_ifd[raw].bytes * 2)
+#endif
       {
         load_raw = &CLASS packed_load_raw;
         if (model[0] == 'N')
           load_flags = 80;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      else if (INT64(raw_width) * INT64(raw_height) * 3ULL == INT64(tiff_ifd[raw].bytes))
+#else
       else if (raw_width * raw_height * 3 == tiff_ifd[raw].bytes)
+#endif
       {
         load_raw = &CLASS nikon_yuv_load_raw;
         gamma_curve(1 / 2.4, 12.92, 1, 4095);
         memset(cblack, 0, sizeof cblack);
         filters = 0;
       }
+#ifdef LIBRAW_LIBRARY_BUILD
+      else if (INT64(raw_width) * INT64(raw_height) * 2ULL == INT64(tiff_ifd[raw].bytes))
+#else
       else if (raw_width * raw_height * 2 == tiff_ifd[raw].bytes)
+#endif
       {
         load_raw = &CLASS unpacked_load_raw;
         load_flags = 4;
@@ -15663,7 +15722,7 @@ void CLASS apply_tiff()
       }
       else
 #ifdef LIBRAW_LIBRARY_BUILD
-          if (raw_width * raw_height * 3 == tiff_ifd[raw].bytes * 2)
+          if (INT64(raw_width) * INT64(raw_height) * 3ULL == INT64(tiff_ifd[raw].bytes) * 2ULL)
       {
         load_raw = &CLASS packed_load_raw;
         load_flags = 80;
@@ -15673,7 +15732,7 @@ void CLASS apply_tiff()
       {
         int fit = 1;
         for (int i = 0; i < tiff_ifd[raw].strip_byte_counts_count - 1; i++) // all but last
-          if (tiff_ifd[raw].strip_byte_counts[i] * 2 != tiff_ifd[raw].rows_per_strip * raw_width * 3)
+          if (INT64(tiff_ifd[raw].strip_byte_counts[i]) * 2ULL != INT64(tiff_ifd[raw].rows_per_strip) * INT64(raw_width) * 3ULL)
           {
             fit = 0;
             break;
@@ -21136,8 +21195,10 @@ dng_skip:
       sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_BLACK);
       if (sidx >= 0)
       {
+        imgdata.color.dng_levels.dng_fblack = tiff_ifd[sidx].dng_levels.dng_fblack;
         imgdata.color.dng_levels.dng_black = tiff_ifd[sidx].dng_levels.dng_black;
         COPYARR(imgdata.color.dng_levels.dng_cblack, tiff_ifd[sidx].dng_levels.dng_cblack);
+        COPYARR(imgdata.color.dng_levels.dng_fcblack, tiff_ifd[sidx].dng_levels.dng_fcblack);
       }
       if (pifd >= 0)
       {
