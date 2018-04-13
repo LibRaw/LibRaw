@@ -15316,11 +15316,11 @@ int CLASS parse_tiff_ifd(int base)
   {
     cam_mul[3] = 0;
     FORCC
-     if(asn[c])
+     if(fabs(asn[c])>0.0001)
      	cam_mul[c] = 1 / asn[c];
   }
   if (!use_cm)
-    FORCC pre_mul[c] /= cc[c][c];
+    FORCC if(fabs(cc[c][c])>0.0001) pre_mul[c] /= cc[c][c];
   return 0;
 }
 
@@ -19556,9 +19556,9 @@ void CLASS identify()
   if (!strncasecmp(model, make, i) && model[i++] == ' ')
     memmove(model, model + i, 64 - i);
   if (!strncmp(model, "FinePix ", 8))
-    strcpy(model, model + 8);
+    memmove(model, model + 8,strlen(model)-7);
   if (!strncmp(model, "Digital Camera ", 15))
-    strcpy(model, model + 15);
+   memmove(model, model + 15,strlen(model)-14);
   desc[511] = artist[63] = make[63] = model[63] = model2[63] = 0;
   if (!is_raw)
     goto notraw;
