@@ -49,6 +49,7 @@ it under the terms of the one of two licenses as you choose:
     void	PentaxISO (ushort c);
     void	PentaxLensInfo (unsigned id, unsigned len);
     void	parsePentaxMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
+    void	parseRicohMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	setSonyBodyFeatures (unsigned id);
     void	parseSonyLensType2 (uchar a, uchar b);
     void 	parseSonyLensFeatures (uchar a, uchar b);
