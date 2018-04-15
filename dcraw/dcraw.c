@@ -20977,7 +20977,16 @@ dng_skip:
         COPYARR(imgdata.color.dng_levels.dng_whitelevel, tiff_ifd[sidx].dng_levels.dng_whitelevel);
       sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_ASSHOTNEUTRAL);
       if (sidx >= 0)
+      {
         COPYARR(imgdata.color.dng_levels.asshotneutral, tiff_ifd[sidx].dng_levels.asshotneutral);
+	if (imgdata.color.dng_levels.asshotneutral[0])
+        {
+	   cam_mul[3] = 0;
+	   FORCC
+	      if(fabs(imgdata.color.dng_levels.asshotneutral[c])>0.0001)
+	         cam_mul[c] = 1 / imgdata.color.dng_levels.asshotneutral[c];
+	}
+      }
       sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_BLACK);
       if (sidx >= 0)
       {
