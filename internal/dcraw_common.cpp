@@ -13496,10 +13496,16 @@ int CLASS parse_tiff_ifd(int base)
 #endif
       break;
     case 50718: /* DefaultScale */
-      pixel_aspect = getreal(type);
-      pixel_aspect /= getreal(type);
-      if (pixel_aspect > 0.995 && pixel_aspect < 1.005)
-        pixel_aspect = 1.0;
+      {
+	float q1 = getreal(type);
+	float q2 = getreal(type);
+	if(q1 > 0.00001f && q2 > 0.00001f)
+	 {
+      		pixel_aspect = q1/q2;
+      		if (pixel_aspect > 0.995 && pixel_aspect < 1.005)
+        		pixel_aspect = 1.0;
+	 }
+      }
       break;
 #ifdef LIBRAW_LIBRARY_BUILD
     case 50719: /* DefaultCropOrigin */
