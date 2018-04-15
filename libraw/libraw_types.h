@@ -229,6 +229,7 @@ typedef unsigned long long UINT64;
     unsigned default_crop[4]; /* Origin and size */
     unsigned preview_colorspace;
     float analogbalance[4];
+    float asshotneutral[4];
   } libraw_dng_levels_t;
 
   typedef struct

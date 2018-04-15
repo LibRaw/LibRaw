@@ -14723,7 +14723,7 @@ int CLASS parse_tiff_ifd(int base)
       if (tiff_ifd[ifd].samples > 1 && tiff_ifd[ifd].samples == len) // LinearDNG, per-channel black
       {
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
-        for (i = 0; i < colors && i < 4 && i < len; i++)
+        for (i = 0; i < 4 && i < len; i++)
 	  {
 	    tiff_ifd[ifd].dng_levels.dng_fcblack[i] = getreal(type);
 	    tiff_ifd[ifd].dng_levels.dng_cblack[i] = cblack[i] = tiff_ifd[ifd].dng_levels.dng_fcblack[i]+0.5;
@@ -14795,7 +14795,7 @@ int CLASS parse_tiff_ifd(int base)
           maximum = getint(type);
 #ifdef LIBRAW_LIBRARY_BUILD
       if (tiff_ifd[ifd].samples > 1) // Linear DNG case
-        for (i = 1; i < colors && i < 4 && i < len; i++)
+        for (i = 1; i < 4 && i < len; i++)
           tiff_ifd[ifd].dng_levels.dng_whitelevel[i] = getint(type);
 #endif
       break;
@@ -14867,11 +14867,14 @@ int CLASS parse_tiff_ifd(int base)
 #endif
     case 50721: /* ColorMatrix1 */
     case 50722: /* ColorMatrix2 */
+    {
+      int chan = (len == 9)? 3 : (len == 12?4:0);
 #ifdef LIBRAW_LIBRARY_BUILD
       i = tag == 50721 ? 0 : 1;
-      tiff_ifd[ifd].dng_color[i].parsedfields |= LIBRAW_DNGFM_COLORMATRIX;
+      if(chan)
+         tiff_ifd[ifd].dng_color[i].parsedfields |= LIBRAW_DNGFM_COLORMATRIX;
 #endif
-      FORCC for (j = 0; j < 3; j++)
+      FORC(chan) for (j = 0; j < 3; j++)
       {
 #ifdef LIBRAW_LIBRARY_BUILD
         tiff_ifd[ifd].dng_color[i].colormatrix[c][j] =
@@ -14879,44 +14882,54 @@ int CLASS parse_tiff_ifd(int base)
             cm[c][j] = getreal(type);
       }
       use_cm = 1;
-      break;
+    }
+    break;
 
     case 0xc714: /* ForwardMatrix1 */
     case 0xc715: /* ForwardMatrix2 */
+    {
+      int chan = (len == 9)? 3 : (len == 12?4:0);
 #ifdef LIBRAW_LIBRARY_BUILD
       i = tag == 0xc714 ? 0 : 1;
-      tiff_ifd[ifd].dng_color[i].parsedfields |= LIBRAW_DNGFM_FORWARDMATRIX;
+      if(chan)
+         tiff_ifd[ifd].dng_color[i].parsedfields |= LIBRAW_DNGFM_FORWARDMATRIX;
 #endif
       for (j = 0; j < 3; j++)
-        FORCC
+        FORC(chan)
         {
 #ifdef LIBRAW_LIBRARY_BUILD
           tiff_ifd[ifd].dng_color[i].forwardmatrix[j][c] =
 #endif
               fm[j][c] = getreal(type);
         }
+      }
       break;
 
     case 50723: /* CameraCalibration1 */
     case 50724: /* CameraCalibration2 */
+    {
+      int chan = (len == 9)? 3 : (len == 16?4:0);
 #ifdef LIBRAW_LIBRARY_BUILD
       j = tag == 50723 ? 0 : 1;
-      tiff_ifd[ifd].dng_color[j].parsedfields |= LIBRAW_DNGFM_CALIBRATION;
+      if(chan)
+        tiff_ifd[ifd].dng_color[j].parsedfields |= LIBRAW_DNGFM_CALIBRATION;
 #endif
-      for (i = 0; i < colors; i++)
-        FORCC
+      for (i = 0; i < chan; i++)
+        FORC(chan)
         {
 #ifdef LIBRAW_LIBRARY_BUILD
           tiff_ifd[ifd].dng_color[j].calibration[i][c] =
 #endif
               cc[i][c] = getreal(type);
         }
+      }
       break;
     case 50727: /* AnalogBalance */
 #ifdef LIBRAW_LIBRARY_BUILD
-      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_ANALOGBALANCE;
+      if(len>=3)
+        tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_ANALOGBALANCE;
 #endif
-      FORCC
+      for(c = 0; c < len && c < 4; c++) 
       {
 #ifdef LIBRAW_LIBRARY_BUILD
         tiff_ifd[ifd].dng_levels.analogbalance[c] =
@@ -14925,7 +14938,14 @@ int CLASS parse_tiff_ifd(int base)
       }
       break;
     case 50728: /* AsShotNeutral */
+#ifdef LIBRAW_LIBRARY_BUILD
+      if(len>=3)
+        tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_ASSHOTNEUTRAL;
+      for(c = 0; c < len && c < 4; c++) 
+         tiff_ifd[ifd].dng_levels.asshotneutral[c] = asn[c] = getreal(type);
+#else
       FORCC asn[c] = getreal(type);
+#endif
       break;
     case 50729: /* AsShotWhiteXY */
       xyz[0] = getreal(type);
@@ -20955,6 +20975,9 @@ dng_skip:
       sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_WHITE);
       if (sidx >= 0)
         COPYARR(imgdata.color.dng_levels.dng_whitelevel, tiff_ifd[sidx].dng_levels.dng_whitelevel);
+      sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_ASSHOTNEUTRAL);
+      if (sidx >= 0)
+        COPYARR(imgdata.color.dng_levels.asshotneutral, tiff_ifd[sidx].dng_levels.asshotneutral);
       sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_BLACK);
       if (sidx >= 0)
       {
