@@ -2506,6 +2506,36 @@ void CLASS unpacked_load_raw()
     }
 }
 
+void CLASS unpacked_load_raw_FujiDBP()
+/*
+for Fuji DBP for GX680, aka DX-2000
+  DBP_tile_width = 688;
+  DBP_tile_height = 3856;
+  DBP_n_tiles = 8;
+*/
+{
+  int scan_line, tile_n;
+  int nTiles;
+  ushort tile_width;
+
+  nTiles = 8;
+  tile_width = raw_width / nTiles;
+
+  ushort *tile;
+  tile = (ushort *)calloc(raw_height, tile_width * 2);
+
+  for (tile_n = 0; tile_n < nTiles; tile_n++)
+  {
+    read_shorts(tile, tile_width * raw_height);
+    for (scan_line = 0; scan_line < raw_height; scan_line++)
+    {
+      memcpy (&raw_image[scan_line * raw_width + tile_n * tile_width], &tile[scan_line * tile_width], tile_width * 2);
+    }
+  }
+  free (tile);
+  fseek(ifp,-2,SEEK_CUR); // avoid EOF error
+}
+
 void CLASS unpacked_load_raw_reversed()
 {
   int row, col, bits = 0;
@@ -13592,7 +13622,7 @@ int CLASS parse_tiff_ifd(int base)
       if(len>=3)
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_ANALOGBALANCE;
 #endif
-      for(c = 0; c < len && c < 4; c++) 
+      for(c = 0; c < len && c < 4; c++)
       {
 #ifdef LIBRAW_LIBRARY_BUILD
         tiff_ifd[ifd].dng_levels.analogbalance[c] =
@@ -13604,7 +13634,7 @@ int CLASS parse_tiff_ifd(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
       if(len>=3)
         tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_ASSHOTNEUTRAL;
-      for(c = 0; c < len && c < 4; c++) 
+      for(c = 0; c < len && c < 4; c++)
          tiff_ifd[ifd].dng_levels.asshotneutral[c] = asn[c] = getreal(type);
 #else
       FORCC asn[c] = getreal(type);
@@ -15092,13 +15122,25 @@ void CLASS parse_fuji(int offset)
       imgdata.sizes.raw_crop.cwidth = get2();
     }
 
-    else if ((tag == 0x122) && !strcmp(model, "DBP for GX680"))
+/*
+    else if (tag == 0x120)
     {
-      int k = get2();
-      int l = get2(); /* margins? */
-      int m = get2(); /* margins? */
-      int n = get2();
+      top_margin = get2();
+      left_margin = get2();
     }
+*/
+
+/*
+    else if ((tag == 0x122) &&
+             (!strcmp(model, "DBP for GX680") ||
+              !strcmp(model, "DX-2000")))
+    {
+      int k = get2(); // some dimension
+      int l = get2();
+      int m = get2();
+      int n = get2(); // some dimension
+    }
+*/
 
     else if (tag == 0x9650)
     {
@@ -15790,6 +15832,10 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 11401,-4498,-1312,-5088,12751,2613,-838,1568,5941 } },
     { "Fujifilm S2Pro", 128, 0, /* updated */
       { 12741,-4916,-1420,-8510,16791,1715,-1767,2302,7771 } },
+
+    { "Fujifilm DBP for GX680", 128, 0x0fff, /* temp */
+      { 12741,-4916,-1420,-8510,16791,1715,-1767,2302,7771 } },
+
     { "Fujifilm S3Pro", 0, 0,
       { 11807,-4612,-1294,-8927,16968,1988,-2120,2741,8006 } },
     { "Fujifilm S5Pro", 0, 0,
@@ -18539,6 +18585,33 @@ void CLASS identify()
       left_margin = 4;
     if (width == 6032)
       left_margin = 0;
+
+if (!strcmp(model, "DBP for GX680") ||
+    !strcmp(model, "DX-2000")) {
+/*
+7712 2752 -> 5504 3856
+*/
+
+/*
+  width = 688;
+  height = 30848;
+  raw_width = 688;
+  raw_height = 30848;
+*/
+
+  raw_width = 5504;
+  raw_height = 3856;
+  left_margin = 24;
+  top_margin = 0;
+  width = 5504 - left_margin;
+  height = 3856 - top_margin;
+  load_raw = &CLASS unpacked_load_raw_FujiDBP;
+//  maximum = 0x0fff;
+  filters = 0x16161616;
+  load_flags = 0;
+  flip = 6;
+}
+
     if (!strcmp(model, "HS50EXR") || !strcmp(model, "F900EXR"))
     {
       width += 2;
