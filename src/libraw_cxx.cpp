@@ -438,6 +438,7 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
 
   _rawspeed_camerameta = _rawspeed_decoder = NULL;
   dnghost = NULL;
+  dngnegative = NULL;
   _x3f_data = NULL;
 
 #ifdef USE_RAWSPEED
@@ -656,7 +657,14 @@ void LibRaw::recycle()
   }
   _rawspeed_decoder = 0;
 #endif
-
+#ifdef USE_DNGSDK
+  if (dngnegative)
+  {
+	  dng_negative *ng = (dng_negative*)dngnegative;
+	  delete ng;
+	  dngnegative = 0;
+  }
+#endif
   if (_x3f_data)
   {
     x3f_clear(_x3f_data);
@@ -2631,14 +2639,12 @@ int LibRaw::try_dngsdk()
     stage2->GetPixelBuffer(buffer);
 
     int pixels = stage2->Bounds().H() * stage2->Bounds().W() * pplanes;
-    if (ptype == ttByte)
-      imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ttShort));
-    else
-      imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ptype));
+	bool zerocopy = false;
 
     if (ptype == ttShort && !is_curve_linear())
     {
-      ushort *src = (ushort *)buffer.fData;
+		imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ptype));
+		ushort *src = (ushort *)buffer.fData;
       ushort *dst = (ushort *)imgdata.rawdata.raw_alloc;
       for (int i = 0; i < pixels; i++)
         dst[i] = imgdata.color.curve[src[i]];
@@ -2646,7 +2652,8 @@ int LibRaw::try_dngsdk()
     }
     else if (ptype == ttByte)
     {
-      unsigned char *src = (unsigned char *)buffer.fData;
+		imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ttShort));
+		unsigned char *src = (unsigned char *)buffer.fData;
       ushort *dst = (ushort *)imgdata.rawdata.raw_alloc;
       if (is_curve_linear())
       {
@@ -2662,34 +2669,77 @@ int LibRaw::try_dngsdk()
     }
     else
     {
-      memmove(imgdata.rawdata.raw_alloc, buffer.fData, pixels * TagTypeSize(ptype));
-      S.raw_pitch = S.raw_width * pplanes * TagTypeSize(ptype);
-    }
+		// Alloc
+		if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNGSDK_ZEROCOPY)
+		{
+			zerocopy = true;
+		}
+		else
+		{
+			imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ptype));
+			memmove(imgdata.rawdata.raw_alloc, buffer.fData, pixels * TagTypeSize(ptype));
+		}
+		S.raw_pitch = S.raw_width * pplanes * TagTypeSize(ptype);
+	}
 
-    switch (ptype)
-    {
-    case ttFloat:
-      if (pplanes == 1)
-        imgdata.rawdata.float_image = (float *)imgdata.rawdata.raw_alloc;
-      else if (pplanes == 3)
-        imgdata.rawdata.float3_image = (float(*)[3])imgdata.rawdata.raw_alloc;
-      else if (pplanes == 4)
-        imgdata.rawdata.float4_image = (float(*)[4])imgdata.rawdata.raw_alloc;
-      break;
+	if (zerocopy)
+	{
+		switch (ptype)
+		{
+		case ttFloat:
+			if (pplanes == 1)
+				imgdata.rawdata.float_image = (float *)buffer.fData;
+			else if (pplanes == 3)
+				imgdata.rawdata.float3_image = (float(*)[3])buffer.fData;
+			else if (pplanes == 4)
+				imgdata.rawdata.float4_image = (float(*)[4])buffer.fData;
+			break;
 
-    case ttByte:
-    case ttShort:
-      if (pplanes == 1)
-        imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
-      else if (pplanes == 3)
-        imgdata.rawdata.color3_image = (ushort(*)[3])imgdata.rawdata.raw_alloc;
-      else if (pplanes == 4)
-        imgdata.rawdata.color4_image = (ushort(*)[4])imgdata.rawdata.raw_alloc;
-      break;
-    default:
-      /* do nothing */
-      break;
-    }
+		case ttShort:
+			if (pplanes == 1)
+				imgdata.rawdata.raw_image = (ushort *)buffer.fData;
+			else if (pplanes == 3)
+				imgdata.rawdata.color3_image = (ushort(*)[3])buffer.fData;
+			else if (pplanes == 4)
+				imgdata.rawdata.color4_image = (ushort(*)[4])buffer.fData;
+			break;
+		default:
+			/* do nothing */
+			break;
+		}
+	}
+	else
+	{
+		switch (ptype)
+		{
+		case ttFloat:
+			if (pplanes == 1)
+				imgdata.rawdata.float_image = (float *)imgdata.rawdata.raw_alloc;
+			else if (pplanes == 3)
+				imgdata.rawdata.float3_image = (float(*)[3])imgdata.rawdata.raw_alloc;
+			else if (pplanes == 4)
+				imgdata.rawdata.float4_image = (float(*)[4])imgdata.rawdata.raw_alloc;
+			break;
+
+		case ttByte:
+		case ttShort:
+			if (pplanes == 1)
+				imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
+			else if (pplanes == 3)
+				imgdata.rawdata.color3_image = (ushort(*)[3])imgdata.rawdata.raw_alloc;
+			else if (pplanes == 4)
+				imgdata.rawdata.color4_image = (ushort(*)[4])imgdata.rawdata.raw_alloc;
+			break;
+		default:
+			/* do nothing */
+			break;
+		}
+	}
+	if (zerocopy)
+	{
+		dng_negative *stolen = negative.Release();
+		dngnegative = stolen;
+	}
   }
   catch (...)
   {

@@ -362,6 +362,7 @@ protected:
 
   /* DNG SDK data */
   void *dnghost;
+  void *dngnegative;
   int valid_for_dngsdk();
   int try_dngsdk();
   /* X3F data */
