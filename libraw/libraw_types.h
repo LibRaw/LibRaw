@@ -316,6 +316,14 @@ typedef unsigned long long UINT64;
     ushort FujiDynamicRangeSetting;
     ushort FujiDevelopmentDynamicRange;
     ushort FujiAutoDynamicRange;
+
+/*
+tag 0x9200, converted to FujiBrightnessCompensation
+F700, S3Pro, S5Pro, S20Pro, S200EXR
+E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
+*/
+    float  FujiBrightnessCompensation;  /* in EV, if =4, raw data * 2^4 */
+
     ushort FocusMode;
     ushort AFMode;
     ushort FocusPixel[2];

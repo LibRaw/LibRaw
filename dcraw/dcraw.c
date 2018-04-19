@@ -16442,11 +16442,9 @@ void CLASS parse_fuji(int offset)
     else if (tag == 0x2ff0)
     {
       FORC4 cam_mul[c ^ 1] = get2();
-
-// IB start
-#ifdef LIBRAW_LIBRARY_BUILD
     }
 
+#ifdef LIBRAW_LIBRARY_BUILD
     else if (tag == 0x110)
     {
       imgdata.sizes.raw_crop.ctop = get2();
@@ -16460,7 +16458,7 @@ void CLASS parse_fuji(int offset)
     }
 
 /*
-    else if (tag == 0x120)
+    else if (tag == 0x120) // left and top margins?
     {
       top_margin = get2();
       left_margin = get2();
@@ -16478,6 +16476,18 @@ void CLASS parse_fuji(int offset)
       int n = get2(); // some dimension
     }
 */
+
+    else if (tag == 0x9200)
+    {
+      int a = get4();
+      if ((a == 0x01000100) || (a <= 0))
+        imgdata.makernotes.fuji.FujiBrightnessCompensation = 0.0f;
+      else if (a == 0x00100100)
+        imgdata.makernotes.fuji.FujiBrightnessCompensation = 4.0f;
+      else
+        imgdata.makernotes.fuji.FujiBrightnessCompensation =
+          24.0f - float(log((double)a) / log(2.0));
+    }
 
     else if (tag == 0x9650)
     {
@@ -16532,9 +16542,9 @@ void CLASS parse_fuji(int offset)
     else if (tag == 0x2410)
     {
       FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c ^ 1] = get2();
-#endif
-      // IB end
     }
+#endif
+
     else if (tag == 0xc000)
     /* 0xc000 tag versions, second ushort; valid if the first ushort is 0
     X100F	0x0259
@@ -17331,7 +17341,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 12741,-4916,-1420,-8510,16791,1715,-1767,2302,7771 } },
 
     { "Fujifilm DBP for GX680", 128, 0x0fff, /* temp */
-      { 12741,-4916,-1420,-8510,16791,1715,-1767,2302,7771 } },
+      { 12741,-4916,-1420,-8510,16791,1715,-1767,2302,7771 } }, // copy from S2Pro
 
     { "Fujifilm S3Pro", 0, 0,
       { 11807,-4612,-1294,-8927,16968,1988,-2120,2741,8006 } },
