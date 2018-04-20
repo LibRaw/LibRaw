@@ -2135,6 +2135,10 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       else if (S.raw_width == 5504)
         S.width = S.raw_width - (S.height > 3664 ? 8 : 32);
     }
+	if (!strncasecmp(imgdata.idata.make, "Sony", 4) && !imgdata.idata.dng_version && !strncasecmp(imgdata.idata.model, "ILCE-7RM3", 9) && 
+		S.raw_width == 5216) // A7RM3 in APS mode
+		S.width = S.raw_width - 32;
+
 
     if (!strcasecmp(imgdata.idata.make, "Pentax") &&
         /*!strcasecmp(imgdata.idata.model,"K-3 II")  &&*/ imgdata.idata.raw_count == 4 &&
