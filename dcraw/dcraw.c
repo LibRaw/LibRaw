@@ -12917,9 +12917,18 @@ get2_256:
         for (i = 0; i < 3; i++)
           FORC3 imgdata.color.ccm[i][c] = (float)((short)((get4() + SamsungKey[i * 3 + c]))) / 256.0;
 #endif
+/*
       if (tag == 0xa031 && len == 9) // get and decode Samsung color matrix
         for (i = 0; i < 3; i++)
           FORC3 cmatrix[i][c] = (float)((short)((get4() + SamsungKey[i * 3 + c]))) / 256.0;
+*/
+      if (tag == 0xa032 && len == 9)
+      {
+        float romm_cam[3][3];
+        for (i = 0; i < 9; i++)
+            ((float *)romm_cam)[i] = (float)((short)((get4() + SamsungKey[i]))) / 256.0;
+        romm_coeff(romm_cam);
+      }
 
       if (tag == 0xa028)
         FORC4 cblack[c ^ (c >> 1)] = get4() - SamsungKey[c];
