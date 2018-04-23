@@ -722,7 +722,7 @@ int main(int ac, char *av[])
         for (int i = 0; i < P1.colors; i++)
         {
           for (int j = 0; j < P1.colors; j++)
-            printf("%6.4f\t", C.cmatrix[j][i]);
+            printf("%6.4f\t", C.cmatrix[i][j]);
           printf("\n");
         }
       }
@@ -733,7 +733,7 @@ int main(int ac, char *av[])
         for (int i = 0; i < P1.colors; i++)
         {
           for (int j = 0; j < P1.colors; j++)
-            printf("%6.4f\t", C.ccm[j][i]);
+            printf("%6.4f\t", C.ccm[i][j]);
           printf("\n");
         }
       }

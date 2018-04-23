@@ -443,6 +443,12 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
 
   typedef struct
   {
+    int ColorSpace[2];
+    int PostAEGain;
+  } libraw_samsung_makernotes_t;
+
+  typedef struct
+  {
     ushort BlackLevelTop;
     ushort BlackLevelBottom;
     short offset_left, offset_top; /* KDC files, negative values or zeros */
@@ -726,6 +732,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     libraw_kodak_makernotes_t kodak;
     libraw_panasonic_makernotes_t panasonic;
     libraw_pentax_makernotes_t pentax;
+    libraw_samsung_makernotes_t samsung;
   } libraw_makernotes_t;
 
   typedef struct

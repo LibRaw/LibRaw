@@ -8863,6 +8863,10 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
    } else if (tag == 0xa005) {
      stmread(imgdata.lens.InternalLensSerial, len, ifp);
 
+   } else if ((tag == 0xa011) && ((len == 1) || (len == 2)) && (type == 3)) {
+        imgdata.makernotes.samsung.ColorSpace[0] = (int)get2();
+        if (len = 2) imgdata.makernotes.samsung.ColorSpace[1] = (int)get2();
+
    } else if (tag == 0xa019) {
      imgdata.lens.makernotes.CurAp = getreal(type);
 
@@ -11579,23 +11583,23 @@ get2_256:
           imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] >> 4;
         }
       }
-      /*
-            if (tag == 0xa025) {
-              i = get4();
-              imgdata.color.linear_max[0] = imgdata.color.linear_max[1] = imgdata.color.linear_max[2] =
-                  imgdata.color.linear_max[3] = i - SamsungKey[0]; printf ("Samsung 0xa025 %d\n", i); }
-      */
+
+      if (tag == 0xa025) {
+         imgdata.makernotes.samsung.PostAEGain = get4() - SamsungKey[0];
+      }
+
       if (tag == 0xa030 && len == 9)
         for (i = 0; i < 3; i++)
           FORC3 imgdata.color.ccm[i][c] = (float)((short)((get4() + SamsungKey[i * 3 + c]))) / 256.0;
 
-      if (tag == 0xa031 && len == 9)
+      if (tag == 0xa032 && len == 9)
       {
-        float aRGB_cam[3][3];
+        double aRGB_cam[3][3];
         for (i = 0; i < 9; i++)
-            ((float *)aRGB_cam)[i] = (float)((short)((get4() + SamsungKey[i]))) / 256.0;
+          ((double *)aRGB_cam)[i] = ((double)((short)((get4() + SamsungKey[i])))) / 256.0;
         aRGB_coeff(aRGB_cam);
       }
+
 #else
       if (tag == 0xa031 && len == 9) // get and decode Samsung color matrix
         for (i = 0; i < 3; i++)
@@ -11936,18 +11940,26 @@ void CLASS parse_gps(int base)
   }
 }
 
-void CLASS aRGB_coeff(float aRGB_cam[3][3])
+void CLASS aRGB_coeff(double aRGB_cam[3][3])
 {
   static const double rgb_aRGB[3][3] =
   {{1.39828313770000,    -0.3982830047, 9.64980900741708E-8},
    {6.09219200572997E-8,  0.9999999809, 1.33230799934103E-8},
    {2.17237099975343E-8, -0.0429383201, 1.04293828050000}};
+
+  double cmatrix_tmp [3][3] =
+  {{0.0, 0.0, 0.0},
+   {0.0, 0.0, 0.0},
+   {0.0, 0.0, 0.0}};
   int i, j, k;
 
   for (i = 0; i < 3; i++)
     for (j = 0; j < 3; j++)
-      for (cmatrix[i][j] = k = 0; k < 3; k++)
-        cmatrix[i][j] += rgb_aRGB[i][k] * (double)aRGB_cam[k][j];
+    {
+      for (k = 0; k < 3; k++)
+        cmatrix_tmp[i][j] += rgb_aRGB[i][k] * aRGB_cam[k][j];
+      cmatrix[i][j] = (float)cmatrix_tmp[i][j];
+    }
 }
 
 void CLASS romm_coeff(float romm_cam[3][3])

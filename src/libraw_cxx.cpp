@@ -621,6 +621,9 @@ void LibRaw::recycle()
   imgdata.makernotes.fuji.ImageStabilization[0] = imgdata.makernotes.fuji.ImageStabilization[1] =
       imgdata.makernotes.fuji.ImageStabilization[2] = 0xffff;
 
+  imgdata.makernotes.samsung.ColorSpace[0] =
+      imgdata.makernotes.samsung.ColorSpace[1] = -1;
+
   imgdata.makernotes.sony.SonyCameraType = 0xffff;
   imgdata.makernotes.sony.real_iso_offset = 0xffff;
   imgdata.makernotes.sony.ImageCount3_offset = 0xffff;
@@ -2135,7 +2138,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       else if (S.raw_width == 5504)
         S.width = S.raw_width - (S.height > 3664 ? 8 : 32);
     }
-	if (!strncasecmp(imgdata.idata.make, "Sony", 4) && !imgdata.idata.dng_version && !strncasecmp(imgdata.idata.model, "ILCE-7RM3", 9) && 
+	if (!strncasecmp(imgdata.idata.make, "Sony", 4) && !imgdata.idata.dng_version && !strncasecmp(imgdata.idata.model, "ILCE-7RM3", 9) &&
 		S.raw_width == 5216) // A7RM3 in APS mode
 		S.width = S.raw_width - 32;
 
@@ -4383,7 +4386,7 @@ int LibRaw::unpack_thumb(void)
 		  T.tlength = colors*tlength;
 		  T.tformat = LIBRAW_THUMBNAIL_BITMAP;
 		  SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
-		  return 0; 
+		  return 0;
 	  }
 	  else if (write_thumb == &LibRaw::rollei_thumb)
 	  {
@@ -4402,12 +4405,12 @@ int LibRaw::unpack_thumb(void)
 			  T.thumb[i*3] = (tbuf[i] << 3) & 0xff;
 			  T.thumb[i*3+1] = (tbuf[i] >> 5 << 2) & 0xff;
 			  T.thumb[i*3+2] = (tbuf[i] >> 11 << 3) & 0xff;
-		  }	  
+		  }
 		  free(tbuf);
 		  T.tlength = T.tcolors*tlength;
 		  T.tformat = LIBRAW_THUMBNAIL_BITMAP;
 		  SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
-		  return 0; 
+		  return 0;
 	  }
       else if (write_thumb == &LibRaw::ppm_thumb)
       {

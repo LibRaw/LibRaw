@@ -253,7 +253,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        apply_tiff(void);
     void        parse_gps (int base);
     void        parse_gps_libraw(int base);
-    void        aRGB_coeff(float romm_cam[3][3]);
+    void        aRGB_coeff(double aRGB_cam[3][3]);
     void        romm_coeff(float romm_cam[3][3]);
     void        parse_mos (int offset);
     void        parse_qt (int end);
