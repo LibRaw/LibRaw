@@ -8919,12 +8919,12 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
       else imgdata.makernotes.samsung.DigitalGain =
        ((double)t) / 4096.0;
 
-  } else if (tag == 0xa030 && len == 9) {
+  } else if ((tag == 0xa030) && (len == 9)) {
     for (i = 0; i < 3; i++)
       FORC3 imgdata.color.ccm[i][c] =
         (float)((short)((get4() + imgdata.makernotes.samsung.SamsungKey[i * 3 + c]))) / 256.0;
 
-  } else if (tag == 0xa032 && len == 9) {
+  } else if ((tag == 0xa032) && (len == 9) && (dng_writer == nonDNG)) {
     double aRGB_cam[3][3];
     for (i = 0; i < 9; i++)
       ((double *)aRGB_cam)[i] =
