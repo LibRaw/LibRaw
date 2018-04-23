@@ -10162,6 +10162,7 @@ void CLASS parseFujiMakernotes(unsigned tag, unsigned type, unsigned len, unsign
 
 void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
 {
+   int i, c;
    if (tag == 0x0002) {
      if (get4() == 0x2000) {
        imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Samsung_NX;
@@ -10194,6 +10195,10 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
    } else if (tag == 0xa005) {
      stmread(imgdata.lens.InternalLensSerial, len, ifp);
 
+   } else if (tag == 0xa010) {
+     FORC4 imgdata.makernotes.samsung.ImageSizeFull[c] = get4();
+     FORC4 imgdata.makernotes.samsung.ImageSizeCrop[c] = get4();
+
    } else if ((tag == 0xa011) && ((len == 1) || (len == 2)) && (type == 3)) {
         imgdata.makernotes.samsung.ColorSpace[0] = (int)get2();
         if (len = 2) imgdata.makernotes.samsung.ColorSpace[1] = (int)get2();
@@ -10205,7 +10210,59 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
      imgdata.lens.makernotes.FocalLengthIn35mmFormat = get4() / 10.0f;
      if (imgdata.lens.makernotes.FocalLengthIn35mmFormat < 10.0f)
        imgdata.lens.makernotes.FocalLengthIn35mmFormat *= 10.0f;
-   }
+
+  } else if (tag == 0xa022) {
+    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] =
+      get4() - imgdata.makernotes.samsung.SamsungKey[c + 4];
+    if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] >> 1))
+    {
+      imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] >> 4;
+      imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] >> 4;
+    }
+
+  } else if (tag == 0xa023) {
+    imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] =
+      get4() - imgdata.makernotes.samsung.SamsungKey[8];
+    imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] =
+      get4() - imgdata.makernotes.samsung.SamsungKey[9];
+    imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] =
+      get4() - imgdata.makernotes.samsung.SamsungKey[10];
+    imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][2] =
+      get4() - imgdata.makernotes.samsung.SamsungKey[0];
+    if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] >> 1))
+    {
+      imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] >> 4;
+      imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] >> 4;
+    }
+
+  } else if (tag == 0xa024) {
+    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][c ^ (c >> 1)] =
+            get4() - imgdata.makernotes.samsung.SamsungKey[c + 1];
+    if (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] >> 1))
+    {
+      imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] >> 4;
+      imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] >> 4;
+    }
+
+  } else if (tag == 0xa025) {
+      unsigned t = get4() + imgdata.makernotes.samsung.SamsungKey[0];
+      if (t == 4096) imgdata.makernotes.samsung.DigitalGain = 1.0;
+      else imgdata.makernotes.samsung.DigitalGain =
+       ((double)t) / 4096.0;
+
+  } else if (tag == 0xa030 && len == 9) {
+    for (i = 0; i < 3; i++)
+      FORC3 imgdata.color.ccm[i][c] =
+        (float)((short)((get4() + imgdata.makernotes.samsung.SamsungKey[i * 3 + c]))) / 256.0;
+
+  } else if (tag == 0xa032 && len == 9) {
+    double aRGB_cam[3][3];
+    for (i = 0; i < 9; i++)
+      ((double *)aRGB_cam)[i] =
+        ((double)((short)((get4() + imgdata.makernotes.samsung.SamsungKey[i])))) / 256.0;
+    aRGB_coeff(aRGB_cam);
+  }
+
 }
 
 void CLASS setSonyBodyFeatures(unsigned id)
@@ -12879,59 +12936,13 @@ get2_256:
     {
       if (tag == 0xa020) // get the full Samsung encryption key
         for (i = 0; i < 11; i++)
-          SamsungKey[i] = get4();
+          imgdata.makernotes.samsung.SamsungKey[i] =
+            SamsungKey[i] = get4();
+
       if (tag == 0xa021) // get and decode Samsung cam_mul array
         FORC4 cam_mul[c ^ (c >> 1)] = get4() - SamsungKey[c];
-#ifdef LIBRAW_LIBRARY_BUILD
-      if (tag == 0xa022)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] = get4() - SamsungKey[c + 4];
-        if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] >> 1))
-        {
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] >> 4;
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] >> 4;
-        }
-      }
 
-      if (tag == 0xa023)
-      {
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] = get4() - SamsungKey[8];
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] = get4() - SamsungKey[9];
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] = get4() - SamsungKey[10];
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][2] = get4() - SamsungKey[0];
-        if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] >> 1))
-        {
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] >> 4;
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] >> 4;
-        }
-      }
-      if (tag == 0xa024)
-      {
-        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][c ^ (c >> 1)] = get4() - SamsungKey[c + 1];
-        if (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][0] < (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] >> 1))
-        {
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] >> 4;
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] >> 4;
-        }
-      }
-
-      if (tag == 0xa025) {
-         imgdata.makernotes.samsung.PostAEGain = get4() - SamsungKey[0];
-      }
-
-      if (tag == 0xa030 && len == 9)
-        for (i = 0; i < 3; i++)
-          FORC3 imgdata.color.ccm[i][c] = (float)((short)((get4() + SamsungKey[i * 3 + c]))) / 256.0;
-
-      if (tag == 0xa032 && len == 9)
-      {
-        double aRGB_cam[3][3];
-        for (i = 0; i < 9; i++)
-          ((double *)aRGB_cam)[i] = ((double)((short)((get4() + SamsungKey[i])))) / 256.0;
-        aRGB_coeff(aRGB_cam);
-      }
-
-#else
+#ifndef LIBRAW_LIBRARY_BUILD
       if (tag == 0xa031 && len == 9) // get and decode Samsung color matrix
         for (i = 0; i < 3; i++)
           FORC3 cmatrix[i][c] = (float)((short)((get4() + SamsungKey[i * 3 + c]))) / 256.0;
@@ -18418,6 +18429,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8898,-2498,-994,-3144,11328,2066,-760,1381,4576 } },
     { "Samsung EX2F", 0, 0x7ff,
       { 10648,-3897,-1055,-2022,10573,1668,-492,1611,4742 } },
+    { "Samsung Galaxy S8", 0, 0, /* added */
+      { 9927,-3704,-1024,-3935,12758,1257,-389,1512,4993 } },
     { "Samsung Galaxy S7 Edge", 0, 0, /* added */
       { 9927,-3704,-1024,-3935,12758,1257,-389,1512,4993 } },
     { "Samsung Galaxy S7", 0, 0, /* added */

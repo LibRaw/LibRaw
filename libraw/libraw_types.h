@@ -443,8 +443,11 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
 
   typedef struct
   {
+    unsigned ImageSizeFull[4];
+    unsigned ImageSizeCrop[4];
     int ColorSpace[2];
-    int PostAEGain;
+    unsigned SamsungKey[11];
+    double DigitalGain; /* PostAEGain, digital stretch */
   } libraw_samsung_makernotes_t;
 
   typedef struct
