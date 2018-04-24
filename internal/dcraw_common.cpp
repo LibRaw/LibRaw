@@ -8891,13 +8891,13 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
 
    } else if ((tag == 0xa011) && ((len == 1) || (len == 2)) && (type == 3)) {
         imgdata.makernotes.samsung.ColorSpace[0] = (int)get2();
-        if (len = 2) imgdata.makernotes.samsung.ColorSpace[1] = (int)get2();
+        if (len == 2) imgdata.makernotes.samsung.ColorSpace[1] = (int)get2();
 
    } else if (tag == 0xa019) {
      imgdata.lens.makernotes.CurAp = getreal(type);
 
    } else if ((tag == 0xa01a) && (!imgdata.lens.FocalLengthIn35mmFormat)) {
-     imgdata.lens.makernotes.FocalLengthIn35mmFormat = get4();
+     imgdata.lens.makernotes.FocalLengthIn35mmFormat = get4() / 10.0f;
 
    } else if (tag == 0xa020) {
      FORC(11) imgdata.makernotes.samsung.SamsungKey[c] = get4();
