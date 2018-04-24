@@ -1,3 +1,9 @@
+2018-04-24 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.19-Beta3
+ * fixed lot of bugs reported by ImageMagic/oss-fuzz
+ * fixed several bugs reported by Secunia team (adv 81800,
+   Credit: Laurent Delosieres, Secunia Research at Flexera)
+ 
 2018-03-22 Alex Tutubalin <lexa@lexa.ru>
  * LibRaw 0.19-Beta2
  * Better handling of broken JPEG thumbnails
