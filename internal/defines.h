@@ -153,6 +153,7 @@ static float fMAX(float a, float b)
 	3 G R G R G R	3 B G B G B G	3 R G R G R G	3 G B G B G B
  */
 
+#define RAWINDEX(row, col) ((row)*raw_width + (col))
 #define RAW(row,col) \
 	raw_image[(row)*raw_width+(col)]
 #define BAYER(row,col) \
