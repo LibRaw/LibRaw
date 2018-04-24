@@ -477,7 +477,7 @@ int main(int ac, char *av[])
         printf("real ISO speed: %d\n", (int)P2.real_ISO);
       printf("Shutter: ");
       if (P2.shutter > 0 && P2.shutter < 1)
-        P2.shutter = (printf("1/"), 1 / P2.shutter);
+        P2.shutter = (printf("1/"), 1.0f / P2.shutter);
       printf("%0.1f sec\n", P2.shutter);
       printf("Aperture: f/%0.1f\n", P2.aperture);
       printf("Focal length: %0.1f mm\n", P2.focal_len);

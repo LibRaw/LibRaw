@@ -138,7 +138,7 @@ typedef struct
   long long posRAFData;
   unsigned lenRAFData;
   int fuji_total_lines, fuji_total_blocks, fuji_block_width, fuji_bits, fuji_raw_type;
- int pana_encoding, pana_bpp;
+  int pana_encoding, pana_bpp;
 } unpacker_data_t;
 
 typedef struct

@@ -10177,9 +10177,8 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
      imgdata.lens.makernotes.CamID = unique_id = get4();
 
    } else if (tag == 0x0043) {
-     int temp = get4();
-     if (temp) {
-       imgdata.other.CameraTemperature = (float)temp;
+     if (i = get4()) {
+       imgdata.other.CameraTemperature = (float)i;
        if (get4() == 10)
          imgdata.other.CameraTemperature /= 10.0f;
      }
@@ -10206,10 +10205,15 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
    } else if (tag == 0xa019) {
      imgdata.lens.makernotes.CurAp = getreal(type);
 
-   } else if (tag == 0xa01a) {
-     imgdata.lens.makernotes.FocalLengthIn35mmFormat = get4() / 10.0f;
-     if (imgdata.lens.makernotes.FocalLengthIn35mmFormat < 10.0f)
-       imgdata.lens.makernotes.FocalLengthIn35mmFormat *= 10.0f;
+   } else if ((tag == 0xa01a) && (!imgdata.lens.FocalLengthIn35mmFormat)) {
+     imgdata.lens.makernotes.FocalLengthIn35mmFormat = get4();
+
+   } else if (tag == 0xa020) {
+     FORC(11) imgdata.makernotes.samsung.SamsungKey[c] = get4();
+
+   } else if ((tag == 0xa021)   && (dng_writer == nonDNG)){
+     FORC4 cam_mul[c ^ (c >> 1)] =
+        get4() - imgdata.makernotes.samsung.SamsungKey[c];
 
   } else if (tag == 0xa022) {
     FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] =
@@ -10247,8 +10251,10 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
   } else if (tag == 0xa025) {
       unsigned t = get4() + imgdata.makernotes.samsung.SamsungKey[0];
       if (t == 4096) imgdata.makernotes.samsung.DigitalGain = 1.0;
-      else imgdata.makernotes.samsung.DigitalGain =
-       ((double)t) / 4096.0;
+      else imgdata.makernotes.samsung.DigitalGain = ((double)t) / 4096.0;
+
+  } else if ((tag == 0xa028)  && (dng_writer == nonDNG)) {
+        FORC4 cblack[c ^ (c >> 1)] = get4() - imgdata.makernotes.samsung.SamsungKey[c];
 
   } else if ((tag == 0xa030) && (len == 9)) {
     for (i = 0; i < 3; i++)
@@ -10257,9 +10263,8 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
 
   } else if ((tag == 0xa032) && (len == 9) && (dng_writer == nonDNG)) {
     double aRGB_cam[3][3];
-    for (i = 0; i < 9; i++)
-      ((double *)aRGB_cam)[i] =
-        ((double)((short)((get4() + imgdata.makernotes.samsung.SamsungKey[i])))) / 256.0;
+    FORC(9) ((double *)aRGB_cam)[c] =
+        ((double)((short)((get4() + imgdata.makernotes.samsung.SamsungKey[c])))) / 256.0;
     aRGB_coeff(aRGB_cam);
   }
 
@@ -12932,25 +12937,26 @@ get2_256:
           break;
       }
     }
+#ifndef LIBRAW_LIBRARY_BUILD
     if (!strncasecmp(make, "Samsung", 7))
     {
       if (tag == 0xa020) // get the full Samsung encryption key
         for (i = 0; i < 11; i++)
-          imgdata.makernotes.samsung.SamsungKey[i] =
-            SamsungKey[i] = get4();
+          SamsungKey[i] = get4();
 
       if (tag == 0xa021) // get and decode Samsung cam_mul array
         FORC4 cam_mul[c ^ (c >> 1)] = get4() - SamsungKey[c];
 
-#ifndef LIBRAW_LIBRARY_BUILD
+      if (tag == 0xa028)
+        FORC4 cblack[c ^ (c >> 1)] = get4() - SamsungKey[c];
+
       if (tag == 0xa031 && len == 9) // get and decode Samsung color matrix
         for (i = 0; i < 3; i++)
           FORC3 cmatrix[i][c] = (float)((short)((get4() + SamsungKey[i * 3 + c]))) / 256.0;
-#endif
-      if (tag == 0xa028)
-        FORC4 cblack[c ^ (c >> 1)] = get4() - SamsungKey[c];
+
     }
-    else
+#endif
+    if (strncasecmp(make, "Samsung", 7))
     {
       // Somebody else use 0xa021 and 0xa028?
       if (tag == 0xa021)
@@ -16506,26 +16512,6 @@ void CLASS parse_fuji(int offset)
       imgdata.sizes.raw_crop.cheight = get2();
       imgdata.sizes.raw_crop.cwidth = get2();
     }
-
-/*
-    else if (tag == 0x120) // left and top margins?
-    {
-      top_margin = get2();
-      left_margin = get2();
-    }
-*/
-
-/*
-    else if ((tag == 0x122) &&
-             (!strcmp(model, "DBP for GX680") ||
-              !strcmp(model, "DX-2000")))
-    {
-      int k = get2(); // some dimension
-      int l = get2();
-      int m = get2();
-      int n = get2(); // some dimension
-    }
-*/
 
     else if (tag == 0x9200)
     {
