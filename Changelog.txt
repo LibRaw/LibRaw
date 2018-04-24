@@ -1,3 +1,13 @@
+2018-04-24  Alex Tutubalin <lexa@lexa.ru>
+Secunia #81800: 
+Credit: Laurent Delosieres, Secunia Research at Flexera
+ * samsung_load_raw: possible buffer overrun
+ * rollei_load_raw: possible buffer overrun
+ * nikon_coolscan_load_raw: possible buffer overrun, possible NULL pointer
+ * find_green: possible stack overrun
+ * parse_exif: possible stack overrun
+ * LibRaw 0.18.9
+
 2018-02-23  Alex Tutubalin <lexa@lexa.ru>
 Secunia #81000: 
 Credit: Laurent Delosieres, Secunia Research at Flexera
