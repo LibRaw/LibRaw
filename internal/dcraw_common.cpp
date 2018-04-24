@@ -18713,10 +18713,11 @@ if (!strcmp(model, "DBP for GX680") ||
 
   raw_width = 5504;
   raw_height = 3856;
-  left_margin = 24;
-  top_margin = 0;
-  width = 5504 - left_margin;
-  height = 3856 - top_margin;
+  left_margin = 32;
+  top_margin = 8;
+  width = raw_width - left_margin -32;
+  height = raw_height - top_margin - 8;
+
   load_raw = &CLASS unpacked_load_raw_FujiDBP;
 //  maximum = 0x0fff;
   filters = 0x16161616;
