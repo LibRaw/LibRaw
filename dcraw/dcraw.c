@@ -262,6 +262,7 @@ static float fMAX(float a, float b) { return MAX(a, b); }
         3 G R G R G R	3 B G B G B G	3 R G R G R G	3 G B G B G B
  */
 
+#define RAWINDEX(row, col) ((row)*raw_width + (col))
 #define RAW(row, col) raw_image[(row)*raw_width + (col)]
 //@end DEFINES
 
@@ -1771,7 +1772,12 @@ void CLASS pentax_load_raw()
 
 void CLASS nikon_coolscan_load_raw()
 {
-  int bufsize = width * 3 * tiff_bps / 8;
+  if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+  int bypp = tiff_bps <= 8 ? 1 : 2;
+  int bufsize = width * 3 * bypp;
+
   if (tiff_bps <= 8)
     gamma_curve(1.0 / imgdata.params.coolscan_nef_gamma, 0., 1, 255);
   else
@@ -2070,6 +2076,11 @@ void CLASS rollei_load_raw()
 {
   uchar pixel[10];
   unsigned iten = 0, isix, i, buffer = 0, todo[16];
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(raw_width > 32767 || raw_height > 32767)
+    throw LIBRAW_EXCEPTION_IO_BADFILE;
+#endif
+  unsigned maxpixel = raw_width*(raw_height+7);
 
   isix = raw_width * raw_height * 5 / 8;
   while (fread(pixel, 1, 10, ifp) == 10)
@@ -2089,7 +2100,10 @@ void CLASS rollei_load_raw()
       todo[i + 1] = buffer >> (14 - i) * 5;
     }
     for (i = 0; i < 16; i += 2)
-      raw_image[todo[i]] = (todo[i + 1] & 0x3ff);
+      if(todo[i] < maxpixel)
+        raw_image[todo[i]] = (todo[i + 1] & 0x3ff);
+      else
+        derror();
   }
   maximum = 0x3ff;
 }
@@ -4464,6 +4478,11 @@ void CLASS sony_arw2_load_raw()
 void CLASS samsung_load_raw()
 {
   int row, col, c, i, dir, op[4], len[4];
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(raw_width> 32768 || raw_height > 32768)  // definitely too much for old samsung
+    throw LIBRAW_EXCEPTION_IO_BADFILE;
+#endif
+  unsigned maxpixels = raw_width*(raw_height+7);
 
   order = 0x4949;
   for (row = 0; row < raw_height; row++)
@@ -4493,8 +4512,12 @@ void CLASS samsung_load_raw()
       for (c = 0; c < 16; c += 2)
       {
         i = len[((c & 1) << 1) | (c >> 3)];
-        RAW(row, col + c) = ((signed)ph1_bits(i) << (32 - i) >> (32 - i)) +
-                            (dir ? RAW(row + (~c | -2), col + c) : col ? RAW(row, col + (c | -2)) : 128);
+	unsigned idest = RAWINDEX(row, col + c);
+	unsigned isrc = (dir ? RAWINDEX(row + (~c | -2), col + c) : col ? RAWINDEX(row, col + (c | -2)) : 0);
+	if(idest < maxpixels && isrc < maxpixels) // less than zero is handled by unsigned conversion
+  	RAW(row, col + c) = ((signed)ph1_bits(i) << (32 - i) >> (32 - i)) + 			                (dir ? RAW(row + (~c | -2), col + c) : col ? RAW(row, col + (c | -2)) : 128);
+	else
+  	  derror();
         if (c == 14)
           c = -1;
       }
@@ -13084,7 +13107,9 @@ void CLASS parse_exif(int base)
         ushort l;
         float num;
 
-        fgets(mn_text, len, ifp);
+	fgets(mn_text, MIN(len,511), ifp);
+        mn_text[511] = 0;
+
         pos = strstr(mn_text, "gain_r=");
         if (pos)
           cam_mul[0] = atof(pos + 7);
@@ -13096,26 +13121,49 @@ void CLASS parse_exif(int base)
         else
           cam_mul[0] = cam_mul[2] = 0.0f;
 
-        pos = strstr(mn_text, "ccm=") + 4;
-        l = strstr(pos, " ") - pos;
-        memcpy(ccms, pos, l);
-        ccms[l] = '\0';
-
-        pos = strtok(ccms, ",");
-        for (l = 0; l < 4; l++)
+        pos = strstr(mn_text, "ccm=");
+        if(pos)
         {
-          num = 0.0;
-          for (c = 0; c < 3; c++)
+         pos +=4;
+         char *pos2 = strstr(pos, " ");
+         if(pos2)
+         {
+           l = pos2 - pos;
+           memcpy(ccms, pos, l);
+           ccms[l] = '\0';
+#if defined WIN32 || defined(__MINGW32__)
+           // Win32 strtok is already thread-safe
+          pos = strtok(ccms, ",");
+#else
+          char *last=0;
+          pos = strtok_r(ccms, ",",&last);
+#endif
+          if(pos)
           {
-            imgdata.color.ccm[l][c] = (float)atoi(pos);
-            num += imgdata.color.ccm[l][c];
-            pos = strtok(NULL, ",");
+            for (l = 0; l < 4; l++)
+            {
+              num = 0.0;
+              for (c = 0; c < 3; c++)
+              {
+                imgdata.color.ccm[l][c] = (float)atoi(pos);
+                num += imgdata.color.ccm[l][c];
+#if defined WIN32 || defined(__MINGW32__)
+                pos = strtok(NULL, ",");
+#else
+                pos = strtok_r(NULL, ",",&last);
+#endif
+                if(!pos) goto end; // broken
+              }
+              if (num > 0.01)
+                FORC3 imgdata.color.ccm[l][c] = imgdata.color.ccm[l][c] / num;
+            }
           }
-          if (num > 0.01)
-            FORC3 imgdata.color.ccm[l][c] = imgdata.color.ccm[l][c] / num;
         }
+       }
+      end:;
       }
       else
+
 #endif
         parse_makernote(base, 0);
       break;
@@ -18648,6 +18696,7 @@ float CLASS find_green(int bps, int bite, int off0, int off1)
   int vbits, col, i, c;
   ushort img[2][2064];
   double sum[] = {0, 0};
+  if(width > 2064) return 0.f; // too wide
 
   FORC(2)
   {
@@ -18682,7 +18731,7 @@ static void remove_trailing_spaces(char *string, size_t len)
   len = strnlen(string, len - 1);
   for (int i = len - 1; i >= 0; i--)
   {
-    if (isspace(string[i]))
+    if (isspace((unsigned char)string[i]))
       string[i] = 0;
     else
       break;
