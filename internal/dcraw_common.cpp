@@ -14125,6 +14125,7 @@ void CLASS apply_tiff()
       raw_height = tiff_ifd[i].t_height;
       tiff_bps = tiff_ifd[i].bps;
       tiff_compress = tiff_ifd[i].comp;
+      tiff_sampleformat = tiff_ifd[i].sample_format;
       data_offset = tiff_ifd[i].offset;
 #ifdef LIBRAW_LIBRARY_BUILD
       data_size = tiff_ifd[i].bytes;
@@ -14189,6 +14190,14 @@ void CLASS apply_tiff()
     case 0:
     case 1:
 #ifdef LIBRAW_LIBRARY_BUILD
+#ifdef USE_DNGSDK
+    if (dng_version && tiff_sampleformat == 3
+        && (tiff_bps > 8 && (tiff_bps % 8 == 0))) // 16,24,32,48...
+    {
+       load_raw = &CLASS float_dng_load_raw_placeholder;
+       break;
+    }
+#endif
       // Sony 14-bit uncompressed
       if (!strncasecmp(make, "Sony", 4) && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 2ULL)
       {
@@ -18228,6 +18237,12 @@ void CLASS identify()
     {
     case 0: /* Compression not set, assuming uncompressed */
     case 1:
+#ifdef LIBRAW_LIBRARY_BUILD
+#ifdef USE_DNGSDK
+        // Uncompressed float
+	if (load_raw != &CLASS float_dng_load_raw_placeholder)
+#endif
+#endif
       load_raw = &CLASS packed_dng_load_raw;
       break;
     case 7:
@@ -19466,7 +19481,7 @@ if (!strcmp(model, "DBP for GX680") ||
   /* Early reject for damaged images */
   if (!load_raw || height < 22 || width < 22 ||
 #ifdef LIBRAW_LIBRARY_BUILD
-      (tiff_bps > 16 && load_raw != &LibRaw::deflate_dng_load_raw)
+    (tiff_bps > 16 && (load_raw != &LibRaw::deflate_dng_load_raw  && load_raw != &LibRaw::float_dng_load_raw_placeholder))
 #else
       tiff_bps > 16
 #endif
@@ -19710,7 +19725,7 @@ dng_skip:
   /* Early reject for damaged images */
   if (!load_raw || height < 22 || width < 22 ||
 #ifdef LIBRAW_LIBRARY_BUILD
-      (tiff_bps > 16 && load_raw != &LibRaw::deflate_dng_load_raw)
+    (tiff_bps > 16 && (load_raw != &LibRaw::deflate_dng_load_raw  && load_raw != &LibRaw::float_dng_load_raw_placeholder))
 #else
       tiff_bps > 16
 #endif
@@ -19793,7 +19808,7 @@ dng_skip:
   }
   if (!load_raw || height < 22 || width < 22 ||
 #ifdef LIBRAW_LIBRARY_BUILD
-      (tiff_bps > 16 && load_raw != &LibRaw::deflate_dng_load_raw)
+    (tiff_bps > 16 && (load_raw != &LibRaw::deflate_dng_load_raw  && load_raw != &LibRaw::float_dng_load_raw_placeholder))
 #else
       tiff_bps > 16
 #endif

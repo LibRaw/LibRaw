@@ -178,6 +178,7 @@ it under the terms of the one of two licenses as you choose:
 #define tiff_samples    (libraw_internal_data.unpacker_data.tiff_samples)
 #define tiff_bps        (libraw_internal_data.unpacker_data.tiff_bps)
 #define tiff_compress   (libraw_internal_data.unpacker_data.tiff_compress)
+#define tiff_sampleformat (libraw_internal_data.unpacker_data.tiff_sampleformat)
 #define zero_after_ff   (libraw_internal_data.unpacker_data.zero_after_ff)
 #define tile_width      (libraw_internal_data.unpacker_data.tile_width)
 #define tile_length     (libraw_internal_data.unpacker_data.tile_length)
