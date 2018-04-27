@@ -709,6 +709,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
     d_info->decoder_name = "android_loose_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC;
   }
+  else if (load_raw == &LibRaw::float_dng_load_raw_placeholder)
+  {
+      d_info->decoder_name = "float_dng_load_raw_placeholder()";
+  }
   else if (load_raw == &LibRaw::canon_600_load_raw)
   {
     d_info->decoder_name = "canon_600_load_raw()";
@@ -1467,6 +1471,7 @@ static float expandFloats(unsigned char *dst, int tileWidth, int bytesps)
   return max;
 }
 
+
 void LibRaw::deflate_dng_load_raw()
 {
   struct tiff_ifd_t *ifd = &tiff_ifd[0];
@@ -1625,6 +1630,11 @@ void LibRaw::deflate_dng_load_raw()
 #else
 void LibRaw::deflate_dng_load_raw() { throw LIBRAW_EXCEPTION_DECODE_RAW; }
 #endif
+void LibRaw::float_dng_load_raw_placeholder()
+{
+  // placeholder only, real decoding implemented in DNG SDK
+  throw LIBRAW_EXCEPTION_DECODE_RAW;
+}
 
 int LibRaw::is_floating_point()
 {
@@ -2574,8 +2584,10 @@ int LibRaw::valid_for_dngsdk()
     return 0;
   if (!imgdata.params.use_dngsdk)
     return 0;
-  if (load_raw == &LibRaw::lossy_dng_load_raw)
+  if (load_raw == &LibRaw::lossy_dng_load_raw) // WHY??
     return 0;
+  if (load_raw == &LibRaw::float_dng_load_raw_placeholder) // regardless of flags!
+    return 1;
   if (is_floating_point() && (imgdata.params.use_dngsdk & LIBRAW_DNG_FLOAT))
     return 1;
   if (!imgdata.idata.filters && (imgdata.params.use_dngsdk & LIBRAW_DNG_LINEAR))

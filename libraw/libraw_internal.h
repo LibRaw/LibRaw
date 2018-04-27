@@ -131,6 +131,7 @@ typedef struct
   unsigned tiff_samples;
   unsigned tiff_bps;
   unsigned tiff_compress;
+  unsigned tiff_sampleformat;
   unsigned zero_after_ff;
   unsigned tile_width, tile_length, load_flags;
   unsigned data_error;

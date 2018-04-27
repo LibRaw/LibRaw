@@ -211,7 +211,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        kodak_c603_load_raw();
     void        kodak_rgb_load_thumb();
     void        kodak_ycbcr_load_thumb();
-
+    void        float_dng_load_raw_placeholder();
 // It's a Sony (and K&M)
     void        sony_decrypt (unsigned *data, int len, int start, int key);
     void        sony_load_raw();
