@@ -17634,6 +17634,7 @@ void CLASS identify()
       tiff_ifd[i].dng_levels.analogbalance[c] = 1.0f;
   }
 #endif
+
   memset(gpsdata, 0, sizeof gpsdata);
   memset(cblack, 0, sizeof cblack);
   memset(white, 0, sizeof white);
