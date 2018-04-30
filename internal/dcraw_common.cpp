@@ -16489,6 +16489,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8843,-2837,-625,-5025,12644,2668,-411,1234,7410 } },
     { "Pentax K-r", 0, 0,
       { 9895,-3077,-850,-5304,13035,2521,-883,1768,6936 } },
+    { "Pentax K-1 Mark II", 0, 0, 
+      { 8966, -2874, -1258, -3612, 12204, 1550, -885, 1664, 6204, } },
     { "Pentax K-1", 0, 0, /* updated */
       { 8596,-2981,-639,-4202,12046,2431,-685,1424,6122 } },
     { "Pentax K-30", 0, 0, /* updated */
@@ -17634,7 +17636,6 @@ void CLASS identify()
       tiff_ifd[i].dng_levels.analogbalance[c] = 1.0f;
   }
 #endif
-
   memset(gpsdata, 0, sizeof gpsdata);
   memset(cblack, 0, sizeof cblack);
   memset(white, 0, sizeof white);
