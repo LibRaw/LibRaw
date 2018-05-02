@@ -11356,8 +11356,8 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
   {
     uchar *table_buf_0x9405;
     table_buf_0x9405 = (uchar *)malloc(len);
-    short bufx = table_buf_0x9405[0x0];
     fread(table_buf_0x9405, len, 1, ifp);
+    uchar bufx = table_buf_0x9405[0x0];
     if (imgdata.other.real_ISO < 0.1f)
     {
       if ((bufx == 0x25) || (bufx == 0x3a) || (bufx == 0x76) || (bufx == 0x7e) || (bufx == 0x8b) || (bufx == 0x9a) ||
