@@ -6021,6 +6021,7 @@ static const char *static_camera_list[] = {
 	"Samsung Galaxy S7",
 	"Samsung Galaxy S7 Edge",
 	"Samsung Galaxy S8 (SM-G950U)",
+	"Samsung Galaxy S9+ (SM-G965U)",
 	"Samsung NX1",
 	"Samsung NX5",
 	"Samsung NX10",
