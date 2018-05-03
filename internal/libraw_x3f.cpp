@@ -121,8 +121,6 @@ typedef struct x3f_property_s {
   /* Computed */
   utf16_t *name;		/* 0x0000 terminated UTF 16 */
   utf16_t *value;               /* 0x0000 terminated UTF 16 */
-  char *name_utf8;		/* converted to UTF 8 */
-  char *value_utf8;          /* converted to UTF 8 */
 } x3f_property_t;
 
 typedef struct x3f_property_table_s {
@@ -516,7 +514,6 @@ unsigned x3f_get4(LibRaw_abstract_datastream *f)
 		int _cur = _file->_func(_buffer,1,_left);	\
 		if (_cur == 0) {							\
 			throw LIBRAW_EXCEPTION_IO_CORRUPT;		\
-			exit(1);								\
 		}											\
 		_left -= _cur;								\
 	}												\
@@ -909,15 +906,6 @@ static void free_camf_entry(camf_entry_t *entry)
 		x3f_directory_entry_header_t *DEH = &DE->header;
 		if (DEH->identifier == X3F_SECp) {
 			x3f_property_list_t *PL = &DEH->data_subsection.property_list;
-			if (PL)
-			{
-				int i;
-
-				for (i = 0; i < PL->property_table.size; i++) {
-					FREE(PL->property_table.element[i].name_utf8);
-					FREE(PL->property_table.element[i].value_utf8);
-				}
-			}
 			FREE(PL->property_table.element);
 			FREE(PL->data);
 		}
@@ -1624,14 +1612,14 @@ static void x3f_load_property_list(x3f_info_t *I, x3f_directory_entry_t *DE)
 
 	if (!PL->data_size)
 		PL->data_size = read_data_block(&PL->data, I, DE, 0);
+        uint32_t maxoffset = PL->data_size/sizeof(utf16_t)-2; // at least 2 chars, value + terminating 0x0000
 
 	for (i=0; i<PL->num_properties; i++) {
 		x3f_property_t *P = &PL->property_table.element[i];
-
+                if(P->name_offset > maxoffset || P->value_offset > maxoffset)
+                  throw LIBRAW_EXCEPTION_IO_CORRUPT;
 		P->name = ((utf16_t *)PL->data + P->name_offset);
 		P->value = ((utf16_t *)PL->data + P->value_offset);
-		P->name_utf8 = 0;// utf16le_to_utf8(P->name);
-		P->value_utf8 = 0;//utf16le_to_utf8(P->value);
 	}
 }
 

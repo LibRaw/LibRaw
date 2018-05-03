@@ -1,3 +1,8 @@
+2018-05-03  Alex Tutubalin <lexa@lexa.ru>
+ * CVE-2018-10529 fixed: out of bounds read in X3F parser
+ * CVE-2018-10528 fixed: possible stack overrun in X3F parser
+ * LibRaw 0.18.10
+
 2018-04-24  Alex Tutubalin <lexa@lexa.ru>
 Secunia #81800: 
 Credit: Laurent Delosieres, Secunia Research at Flexera
