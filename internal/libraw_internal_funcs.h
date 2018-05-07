@@ -76,6 +76,13 @@ it under the terms of the one of two licenses as you choose:
 
     void	parseFujiMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
 
+    void	setLeicaBodyFeatures(int LeicaMakernoteSignature);
+    void	parseLeicaLensID();
+    int 	parseLeicaLensName(unsigned len);
+    int 	parseLeicaInternalBodySerial(unsigned len);
+    void 	parseLeicaMakernotes(int base, unsigned tag, unsigned type, unsigned len,
+                                 int LeicaMakernoteSignature, unsigned MakernoteTagType);
+
     ushort      get2();
     unsigned    sget4 (uchar *s);
     unsigned    getint (int type);

@@ -162,10 +162,11 @@ enum LibRaw_camera_mounts
   LIBRAW_MOUNT_Samsung_NX = 17,
   LIBRAW_MOUNT_RicohModule = 18,
   LIBRAW_MOUNT_Samsung_NX_M = 19,
-  LIBRAW_MOUNT_Leica_T = 20,
+  LIBRAW_MOUNT_Leica_L = 20, /* camera mount, takes SL and TL lenses */
   LIBRAW_MOUNT_Contax_N = 21,
   LIBRAW_MOUNT_Sigma_X3F = 22,
-  LIBRAW_MOUNT_Leica_SL = 23,
+  LIBRAW_MOUNT_Leica_TL = 23,
+  LIBRAW_MOUNT_Leica_SL = 24,
   LIBRAW_MOUNT_FixedLens = 99
 };
 
@@ -176,7 +177,15 @@ enum LibRaw_camera_formats
   LIBRAW_FORMAT_MF = 3,
   LIBRAW_FORMAT_APSH = 4,
   LIBRAW_FORMAT_1INCH = 5,
-  LIBRAW_FORMAT_FT = 8
+  LIBRAW_FORMAT_FT = 8,
+  LIBRAW_FORMAT_Leica_DMR = 15
+};
+
+enum LibRaw_lens_focal_types
+{
+  LIBRAW_FT_UNDEFINED = 0,
+  LIBRAW_FT_FIXED = 1,
+  LIBRAW_FT_ZOOM = 2
 };
 
 enum LibRaw_sony_cameratypes

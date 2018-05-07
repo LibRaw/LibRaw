@@ -194,16 +194,31 @@ int main(int ac, char *av[])
       printf("\nFilename: %s\n", av[i]);
       printf("Timestamp: %s", ctime(&(P2.timestamp)));
       printf("Camera: %s %s ID: 0x%llx\n", P1.make, P1.model, mnLens.CamID);
-      if (ShootingInfo.BodySerial[0])
-      {
+
+      if (ShootingInfo.BodySerial[0] && strcmp(ShootingInfo.BodySerial, "0")) {
         trimSpaces(ShootingInfo.BodySerial);
-        printf("Body serial: %s\n", ShootingInfo.BodySerial);
+        printf("Body#: %s", ShootingInfo.BodySerial);
+      } else if (C.model2[0] && (!strncasecmp(P1.make, "Kodak", 5) || !strcmp(P1.model, "EOS D2000C"))) {
+        trimSpaces(C.model2);
+        printf("Body#: %s", C.model2);
+      }
+      if (ShootingInfo.InternalBodySerial[0]) {
+        trimSpaces(ShootingInfo.InternalBodySerial);
+        printf(" BodyAssy#: %s", ShootingInfo.InternalBodySerial);
+      }
+      if (exifLens.LensSerial[0]) {
+        trimSpaces(exifLens.LensSerial);
+        printf(" Lens#: %s", exifLens.LensSerial);
+      }
+      if (exifLens.InternalLensSerial[0]) {
+        trimSpaces(exifLens.InternalLensSerial);
+        printf(" LensAssy#: %s", exifLens.InternalLensSerial);
       }
       if (P2.artist[0])
-        printf("Owner: %s\n", P2.artist);
+        printf(" Owner: %s\n", P2.artist);
       if (P1.dng_version)
       {
-        printf("DNG Version: ");
+        printf(" DNG Version: ");
         for (int i = 24; i >= 0; i -= 8)
           printf("%d%c", P1.dng_version >> i & 255, i ? '.' : '\n');
       }
@@ -253,6 +268,9 @@ int main(int ac, char *av[])
         break;
       case 8:
         printf("4/3\n");
+        break;
+      case 15:
+        printf("Leica DMR\n");
         break;
       default:
         printf("Unknown\n");
@@ -317,6 +335,15 @@ int main(int ac, char *av[])
         break;
       case 19:
         printf("Samsung NX-M\n");
+        break;
+      case 20:
+        printf("Leica L\n");
+        break;
+      case 21:
+        printf ("Contax N\n");
+        break;
+      case 22:
+        printf ("Sigma X3F\n");
         break;
       case 99:
         printf("Fixed Lens\n");
@@ -416,6 +443,21 @@ int main(int ac, char *av[])
         break;
       case 18:
         printf("Ricoh module\n");
+        break;
+      case 20:
+        printf("Leica L\n");
+        break;
+      case 21:
+        printf ("Contax N\n");
+        break;
+      case 22:
+        printf ("Sigma X3F\n");
+        break;
+      case 23:
+        printf ("Leica TL\n");
+        break;
+      case 24:
+        printf ("Leica SL\n");
         break;
       case 99:
         printf("Fixed Lens\n");

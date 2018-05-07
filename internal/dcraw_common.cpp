@@ -161,6 +161,10 @@ ushort CLASS sget2(uchar *s)
 #define CameraDNG 1
 #define AdobeDNG 2
 
+// Makernote tag type:
+#define is_0x927c 0 /* most cameras */
+#define is_0xc634 2 /* Adobe DNG, Sony SR2, Pentax */
+
 #ifdef LIBRAW_LIBRARY_BUILD
 static int getwords(char *line, char *words[], int maxwords, int maxlen)
 {
@@ -7786,6 +7790,227 @@ void CLASS parseOlympus_RawInfo (unsigned tag, unsigned type, unsigned len, unsi
   return;
 }
 
+void CLASS setLeicaBodyFeatures(int LeicaMakernoteSignature)
+{
+  if (LeicaMakernoteSignature == -3) { // M8
+    imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSH;
+    imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_M;
+
+  } else if (LeicaMakernoteSignature == -2) { // DMR
+    imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_Leica_DMR;
+    if ((model[0] == 'R') || (model[6] == 'R'))
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_R;
+
+  } else if (LeicaMakernoteSignature == 0) { // DIGILUX 2
+    imgdata.lens.makernotes.CameraMount =
+      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+    imgdata.lens.makernotes.FocalType = LIBRAW_FT_ZOOM;
+
+  } else if ((LeicaMakernoteSignature == 0x0100) || // X1
+             (LeicaMakernoteSignature == 0x0500) || // X2, X-E (Typ 102)
+             (LeicaMakernoteSignature == 0x0700) || // X (Typ 113)
+             (LeicaMakernoteSignature == 0x1000)) { // X-U (Typ 113)
+    imgdata.lens.makernotes.CameraFormat =
+      imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
+    imgdata.lens.makernotes.CameraMount =
+      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+    imgdata.lens.makernotes.FocalType = LIBRAW_FT_FIXED;
+
+  } else if (LeicaMakernoteSignature == 0x0400) { // X VARIO (Typ 107)
+    imgdata.lens.makernotes.CameraFormat =
+      imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
+    imgdata.lens.makernotes.CameraMount =
+      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+    imgdata.lens.makernotes.FocalType = LIBRAW_FT_ZOOM;
+
+  } else if ((LeicaMakernoteSignature == 0x0200) || // M10, S (Typ 007)
+             (LeicaMakernoteSignature == 0x02ff) || // M (Typ 240), M Monochrom (Typ 246), S (Typ 006), S-E (Typ 006), S2, S3
+             (LeicaMakernoteSignature == 0x0300)) { // M9, M9 Monochrom, M Monochrom
+    if ((model[0] == 'M') || (model[6] == 'M')) {
+      imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_M;
+    } else if ((model[0] == 'S') || (model[6] == 'S')) {
+      imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_MF;
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_S;
+    }
+
+  } else if ((LeicaMakernoteSignature == 0x0600) || // T (Typ 701), TL
+             (LeicaMakernoteSignature == 0x0900) || // SL (Typ 601), CL
+             (LeicaMakernoteSignature == 0x1a00)) { // TL2
+    imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_L;
+    if ((model[0] == 'S') || (model[6] == 'S')) {
+      imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
+    } else if ((model[0] == 'T') || (model[6] == 'T') ||
+               (model[0] == 'C') || (model[6] == 'C')) {
+      imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
+    }
+
+  } else if (LeicaMakernoteSignature == 0x0800) { // Q (Typ 116)
+    imgdata.lens.makernotes.CameraFormat =
+      imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FF;
+    imgdata.lens.makernotes.CameraMount =
+      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+    imgdata.lens.makernotes.FocalType = LIBRAW_FT_FIXED;
+
+  }
+}
+
+void CLASS parseLeicaLensID()
+{
+  imgdata.lens.makernotes.LensID = get4();
+  if (imgdata.lens.makernotes.LensID) {
+    imgdata.lens.makernotes.LensID =
+      ((imgdata.lens.makernotes.LensID >> 2) << 8) |
+       (imgdata.lens.makernotes.LensID & 0x3);
+    if ((imgdata.lens.makernotes.LensID > 0x00ff) &&
+        (imgdata.lens.makernotes.LensID < 0x3503)) {
+      imgdata.lens.makernotes.LensMount = imgdata.lens.makernotes.CameraMount;
+      imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FF;
+    }
+  }
+}
+
+int CLASS parseLeicaLensName(unsigned len)
+{
+#define plln imgdata.lens.makernotes.Lens
+  if (!len) {
+    strcpy (plln, "N/A");
+    return 0;
+  }
+  stmread(plln, len, ifp);
+  if ((plln[0] == ' ') ||
+      !strncasecmp(plln, "not ", 4) ||
+      !strncmp(plln, "---", 3) ||
+      !strncmp(plln, "***", 3)) {
+    strcpy (plln, "N/A");
+    return 0;
+  } else return 1;
+#undef plln
+}
+
+int CLASS parseLeicaInternalBodySerial(unsigned len)
+{
+#define plibs imgdata.shootinginfo.InternalBodySerial
+  if (!len) {
+    strcpy (plibs, "N/A");
+    return 0;
+  }
+  stmread(plibs, len, ifp);
+  if (!strncmp(plibs, "000000000000", 12)) {
+    plibs[0] = '0';
+    plibs[1] = '\0';
+    return 1;
+  }
+
+  if (strnlen(plibs, len) == 13) {
+    for (int i=3; i<13; i++) {
+      if (!isdigit(plibs[i])) goto non_std;
+    }
+    memcpy (plibs+15, plibs+9, 4);
+    memcpy (plibs+12, plibs+7, 2);
+    memcpy (plibs+9, plibs+5, 2);
+    memcpy (plibs+6, plibs+3, 2);
+    plibs[3] = plibs[14] =' ';
+    plibs[8] = plibs[11] = '/';
+    if (((short)(plibs[3]-'0')*10 + (short)(plibs[4]-'0')) < 70) {
+      memcpy (plibs+4, "20", 2);
+    } else {
+      memcpy (plibs+4, "19", 2);
+    }
+    return 2;
+  }
+non_std:
+#undef plibs
+  return 1;
+}
+
+void CLASS parseLeicaMakernotes (int base, unsigned tag, unsigned type, unsigned len,
+                                 int LeicaMakernoteSignature, unsigned MakernoteTagType)
+{
+  int c;
+  uchar ci, cj;
+
+  if (LeicaMakernoteSignature == -3) { // M8
+    if (tag == 0x0310) {
+      parseLeicaLensID();
+    } else if ((tag == 0x0313) && (fabs(imgdata.lens.makernotes.CurAp) < 0.17f)) {
+      imgdata.lens.makernotes.CurAp = getreal(type);
+      if (imgdata.lens.makernotes.CurAp > 126.3) {
+        imgdata.lens.makernotes.CurAp = 0.0f;
+      }
+    } else if (tag == 0x0320) {
+      imgdata.other.CameraTemperature = getreal(type);
+    }
+
+  } else if (LeicaMakernoteSignature == -2) { // DMR
+    if (tag == 0x000d) {
+      FORC3 cam_mul[c] = get2();
+      cam_mul[3] = cam_mul[1];
+    }
+
+  } else if (LeicaMakernoteSignature == 0) { // DIGILUX 2
+    if (tag == 0x0007) {
+      imgdata.shootinginfo.FocusMode = get2();
+    } else if (tag == 0x001a) {
+      imgdata.shootinginfo.ImageStabilization = get2();
+    }
+
+  } else if ((LeicaMakernoteSignature == 0x0100) || // X1
+             (LeicaMakernoteSignature == 0x0400) || // X VARIO
+             (LeicaMakernoteSignature == 0x0500) || // X2, X-E (Typ 102)
+             (LeicaMakernoteSignature == 0x0700) || // X (Typ 113)
+             (LeicaMakernoteSignature == 0x1000)) { // X-U (Typ 113)
+    if (tag == 0x040d) {
+      ci = fgetc(ifp);
+      cj = fgetc(ifp);
+      imgdata.shootinginfo.ExposureMode = ((ushort)ci << 8) | cj;
+    }
+
+  } else if ((LeicaMakernoteSignature == 0x0600) || // TL, T (Typ 701)
+             (LeicaMakernoteSignature == 0x1a00)) { // TL2
+    if (tag == 0x040d) {
+      ci = fgetc(ifp);
+      cj = fgetc(ifp);
+      imgdata.shootinginfo.ExposureMode = ((ushort)ci << 8) | cj;
+    } else if (tag == 0x0303) {
+      parseLeicaLensName(len);
+    }
+
+  } else if (LeicaMakernoteSignature == 0x0200) { // M10, S (Typ 007)
+
+  } else if (LeicaMakernoteSignature == 0x02ff) { // S2, S3 mule, M (Typ 240), S (Typ 006), M Monochrom (Typ 246)
+    if (tag == 0x0303) {
+      if (parseLeicaLensName(len)) {
+        imgdata.lens.makernotes.LensMount = imgdata.lens.makernotes.CameraMount;
+        imgdata.lens.makernotes.LensFormat = imgdata.lens.makernotes.CameraFormat;
+      }
+    }
+
+  } else if (LeicaMakernoteSignature == 0x0300) { // M9, M9 Monochrom, M Monochrom
+    if (tag == 0x3400) {
+      parse_makernote(base, 0x3400);
+    }
+
+  } else if ((LeicaMakernoteSignature == 0x0800) || // Q (Typ 116)
+             (LeicaMakernoteSignature == 0x0900)) { // SL (Typ 601), CL
+    if (tag == 0x0500) {
+      parseLeicaInternalBodySerial(len);
+    }
+
+  } else if (LeicaMakernoteSignature == 0x3400) { // tag 0x3400 in M9, M9 Monochrom, M Monochrom
+    if (tag == 0x34003402) {
+      imgdata.other.CameraTemperature = getreal(type);
+    } else if (tag == 0x34003405) {
+      parseLeicaLensID();
+    } else if ((tag == 0x34003406) && (fabs(imgdata.lens.makernotes.CurAp) < 0.17f)) {
+      imgdata.lens.makernotes.CurAp = getreal(type);
+      if (imgdata.lens.makernotes.CurAp > 126.3) {
+        imgdata.lens.makernotes.CurAp = 0.0f;
+      }
+    }
+  }
+}
+
 void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
 {
 
@@ -9272,7 +9497,7 @@ void CLASS parseSonyLensFeatures(uchar a, uchar b)
 
 void CLASS process_Sony_0x0116(uchar *buf, ushort len, unsigned id)
 {
-  short bufx;
+  uchar bufx;
 
   if (((id == 257) || (id == 262) || (id == 269) || (id == 270)) && (len >= 2))
     bufx = buf[1];
@@ -9455,7 +9680,7 @@ void CLASS process_Sony_0x9400(uchar *buf, ushort len, unsigned id)
 
   uchar s[4];
   int c;
-  short bufx = buf[0];
+  uchar bufx = buf[0];
 
   if (((bufx == 0x23) || (bufx == 0x24) || (bufx == 0x26)) && (len >= 0x1f))
   { // 0x9400 'c' version
@@ -9531,7 +9756,7 @@ void CLASS process_Sony_0x9402(uchar *buf, ushort len)
       (imgdata.makernotes.sony.SonyCameraType == LIBRAW_SONY_ILCA))
     return;
 
-  short bufx = buf[0x00];
+  uchar bufx = buf[0x00];
   if ((bufx == 0x05) || (bufx == 0xff) || (buf[0x02] != 0xff))
     return;
 
@@ -9544,7 +9769,7 @@ void CLASS process_Sony_0x9403(uchar *buf, ushort len)
 {
   if (len < 6)
     return;
-  short bufx = SonySubstitution[buf[4]];
+  uchar bufx = SonySubstitution[buf[4]];
   if ((bufx == 0x00) || (bufx == 0x94))
     return;
 
@@ -9557,7 +9782,7 @@ void CLASS process_Sony_0x9406(uchar *buf, ushort len)
 {
   if (len < 6)
     return;
-  short bufx = buf[0];
+  uchar bufx = buf[0];
   if ((bufx != 0x01) && (bufx != 0x08) && (bufx != 0x1b))
     return;
   bufx = buf[2];
@@ -10257,6 +10482,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   unsigned lenCanonCameraInfo = 0;
   unsigned typeCanonCameraInfo = 0;
 
+  int LeicaMakernoteSignature = -1;
+
   uchar *table_buf;
   uchar *table_buf_0x0116;
   ushort table_buf_0x0116_len = 0;
@@ -10292,7 +10519,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     offset = get4();
     fseek(ifp, offset - 8, SEEK_CUR);
   }
-  else if (!strcmp(buf, "OLYMPUS") || !strcmp(buf, "PENTAX ") ||
+
+  else if (!strcmp(buf, "OLYMPUS") ||
+           !strcmp(buf, "PENTAX ") ||
            (!strncmp(make, "SAMSUNG", 7) && (dng_writer == CameraDNG)))
   {
     base = ftell(ifp) - 10;
@@ -10301,10 +10530,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     if (buf[0] == 'O')
       get2();
   }
-  else if (!strncmp(buf, "SONY", 4) || !strcmp(buf, "Panasonic"))
+
+  else if (!strncmp(buf, "SONY", 4) ||
+           !strcmp(buf, "Panasonic"))
   {
     goto nf;
   }
+
   else if (!strncmp(buf, "FUJIFILM", 8))
   {
     base = ftell(ifp) - 10;
@@ -10312,15 +10544,43 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     order = 0x4949;
     fseek(ifp, 2, SEEK_CUR);
   }
-  else if (!strcmp(buf, "OLYMP") || !strcmp(buf, "LEICA") || !strcmp(buf, "Ricoh") || !strcmp(buf, "EPSON"))
+
+  else if (!strcmp(buf, "OLYMP") ||
+           !strncmp(buf, "LEICA", 5) ||
+           !strcmp(buf, "Ricoh") ||
+           !strcmp(buf, "EPSON"))
     fseek(ifp, -2, SEEK_CUR);
-  else if (!strcmp(buf, "AOC") || !strcmp(buf, "QVC"))
+
+  else if (!strcmp(buf, "AOC") ||
+           !strcmp(buf, "QVC"))
     fseek(ifp, -4, SEEK_CUR);
   else
   {
     fseek(ifp, -10, SEEK_CUR);
     if ((!strncmp(make, "SAMSUNG", 7) && (dng_writer == AdobeDNG)))
       base = ftell(ifp);
+  }
+
+  if (!strncasecmp(make, "LEICA", 5)) {
+
+int base_temp = base;
+
+    if (strncmp (buf,"LEICA", 5)) {
+      if (uptag == 0x3400) LeicaMakernoteSignature = 0x3400;
+      else LeicaMakernoteSignature = -2; // DMR
+    } else {
+      LeicaMakernoteSignature = ((uchar)buf[6] << 8) | (uchar)buf[7];
+      if (!LeicaMakernoteSignature &&
+          (!strncmp(model, "M8", 2) || !strncmp(model+6, "M8", 2)))
+        LeicaMakernoteSignature = -3;
+        if ((LeicaMakernoteSignature != 0x0000) &&
+            (LeicaMakernoteSignature != 0x0800) &&
+            (LeicaMakernoteSignature != 0x0900) &&
+            (LeicaMakernoteSignature != 0x02ff))
+        base = ftell(ifp)-8;
+    }
+
+    setLeicaBodyFeatures(LeicaMakernoteSignature);
   }
 
   entries = get2();
@@ -10380,62 +10640,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     else if (!strncmp(make, "FUJI", 4))
       parseFujiMakernotes(tag, type, len, AdobeDNG);
 
-    else if (!strncasecmp(make, "LEICA", 5))
-    {
-
-      if ((tag == 0x0320) && (type == 9) && (len == 1) && !strncasecmp(make, "Leica Camera AG", 15) &&
-          !strncmp(buf, "LEICA", 5) && (buf[5] == 0) && (buf[6] == 0) && (buf[7] == 0))
-        imgdata.other.CameraTemperature = getreal(type);
-
-      if (tag == 0x34003402)
-        imgdata.other.CameraTemperature = getreal(type);
-
-      if (((tag == 0x035e) || (tag == 0x035f)) && (type == 10) && (len == 9))
-      {
-        int ind = tag == 0x035e ? 0 : 1;
-        for (int j = 0; j < 3; j++)
-          FORCC imgdata.color.dng_color[ind].forwardmatrix[j][c] = getreal(type);
-        imgdata.color.dng_color[ind].parsedfields |= LIBRAW_DNGFM_FORWARDMATRIX;
-      }
-      if ((tag == 0x0303) && (type != 4))
-      {
-        stmread(imgdata.lens.makernotes.Lens, len, ifp);
-      }
-
-      if ((tag == 0x3405) || (tag == 0x0310) || (tag == 0x34003405))
-      {
-        imgdata.lens.makernotes.LensID = get4();
-        imgdata.lens.makernotes.LensID =
-            ((imgdata.lens.makernotes.LensID >> 2) << 8) | (imgdata.lens.makernotes.LensID & 0x3);
-        if (imgdata.lens.makernotes.LensID != -1)
-        {
-          if ((model[0] == 'M') || !strncasecmp(model, "LEICA M", 7))
-          {
-            imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_M;
-            if (imgdata.lens.makernotes.LensID)
-              imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Leica_M;
-          }
-          else if ((model[0] == 'S') || !strncasecmp(model, "LEICA S", 7))
-          {
-            imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_S;
-            if (imgdata.lens.makernotes.Lens[0])
-              imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Leica_S;
-          }
-        }
-      }
-
-      else if (((tag == 0x0313) || (tag == 0x34003406)) && (fabs(imgdata.lens.makernotes.CurAp) < 0.17f) &&
-               ((type == 10) || (type == 5)))
-      {
-        imgdata.lens.makernotes.CurAp = getreal(type);
-        if (imgdata.lens.makernotes.CurAp > 126.3)
-          imgdata.lens.makernotes.CurAp = 0.0f;
-      }
-
-      else if (tag == 0x3400)
-      {
-        parse_makernote(base, 0x3400);
-      }
+    else if (LeicaMakernoteSignature != -1) {
+      parseLeicaMakernotes (base, tag, type, len, LeicaMakernoteSignature, is_0xc634);
     }
 
     else if (!strncmp(make, "NIKON", 5))
@@ -10478,13 +10684,12 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       }
       else if (tag == 0x008b) // lens f-stops
       {
-        uchar a, b, c;
-        a = fgetc(ifp);
-        b = fgetc(ifp);
-        c = fgetc(ifp);
-        if (c)
+        ci = fgetc(ifp);
+        cj = fgetc(ifp);
+        ck = fgetc(ifp);
+        if (ck)
         {
-          imgdata.lens.nikon.NikonLensFStops = a * b * (12 / c);
+          imgdata.lens.nikon.NikonLensFStops = ci * cj * (12 / ck);
           imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops / 12.0f;
         }
       }
@@ -10553,7 +10758,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         }
       }
 
-      else if (tag == 0xa7) // shutter count
+      else if (tag == 0x00a7) // shutter count
       {
         NikonKey = fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp);
         if ((NikonLensDataVersion > 200) && lenNikonLensData)
@@ -10593,22 +10798,14 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
       else if (tag == 0x00b9)
       {
-        uchar uc;
-        int8_t sc;
-        fread(&uc, 1, 1, ifp);
-        imgdata.makernotes.nikon.AFFineTune = uc;
-        fread(&uc, 1, 1, ifp);
-        imgdata.makernotes.nikon.AFFineTuneIndex = uc;
-        fread(&sc, 1, 1, ifp);
-        imgdata.makernotes.nikon.AFFineTuneAdj = sc;
+        imgdata.makernotes.nikon.AFFineTune = fgetc(ifp);
+        imgdata.makernotes.nikon.AFFineTuneIndex = fgetc(ifp);
+        imgdata.makernotes.nikon.AFFineTuneAdj = (int8_t)fgetc(ifp);
       }
 
-      else if (tag == 37 && (!iso_speed || iso_speed == 65535))
+      else if (tag == 0x0025 && (!iso_speed || iso_speed == 65535))
       {
-        unsigned char cc;
-        fread(&cc, 1, 1, ifp);
-        iso_speed = (int)(100.0 * libraw_powf64l(2.0, (double)(cc) / 12.0 - 5.0));
-        break;
+        iso_speed = int(100.0 * libraw_powf64l(2.0f, double((uchar)fgetc(ifp)) / 12.0 - 5.0));
       }
     }
 
@@ -10678,15 +10875,18 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 skip_Oly_broken_tags:;
     }
 
-    else if (!strncmp(make, "PENTAX", 6) || !strncmp(model, "PENTAX", 6) ||
-             (!strncmp(make, "SAMSUNG", 7) && (dng_writer == CameraDNG)))
+    else if (!strncmp(make, "PENTAX", 6) ||
+             !strncmp(model, "PENTAX", 6))
     {
       parsePentaxMakernotes(base, tag, type, len, dng_writer);
     }
 
-    else if (!strncmp(make, "SAMSUNG", 7) && (dng_writer == AdobeDNG))
+    else if (!strncmp(make, "SAMSUNG", 7))
     {
-      parseSamsungMakernotes(base, tag, type, len, dng_writer);
+      if (dng_writer == AdobeDNG)
+        parseSamsungMakernotes(base, tag, type, len, dng_writer);
+      else
+        parsePentaxMakernotes(base, tag, type, len, dng_writer);
     }
 
     else if (!strncasecmp(make, "SONY", 4)    ||
@@ -10747,6 +10947,8 @@ void CLASS parse_makernote(int base, int uptag)
   unsigned lenCanonCameraInfo = 0;
   unsigned typeCanonCameraInfo = 0;
 
+  int LeicaMakernoteSignature = -1;
+
   uchar *table_buf;
   uchar *table_buf_0x0116;
   ushort table_buf_0x0116_len = 0;
@@ -10775,14 +10977,18 @@ void CLASS parse_makernote(int base, int uptag)
 */
   if (!strncmp(make, "Nokia", 5))
     return;
+
   fread(buf, 1, 10, ifp);
 
-  if (!strncmp(buf, "KDK", 3) || /* these aren't TIFF tables */
-      !strncmp(buf, "VER", 3) || !strncmp(buf, "IIII", 4) || !strncmp(buf, "MMMM", 4))
+  if (!strncmp(buf, "KDK", 3)  || /* these aren't TIFF tables */
+      !strncmp(buf, "VER", 3)  ||
+      !strncmp(buf, "IIII", 4) ||
+      !strncmp(buf, "MMMM", 4))
     return;
+
   if (!strncmp(buf, "KC", 2) || /* Konica KD-400Z, KD-510Z */
-      !strncmp(buf, "MLY", 3))
-  { /* Minolta DiMAGE G series */
+      !strncmp(buf, "MLY", 3))  /* Minolta DiMAGE G series */
+  {
     order = 0x4d4d;
     while ((i = ftell(ifp)) < data_offset && i < 16384)
     {
@@ -10795,6 +11001,7 @@ void CLASS parse_makernote(int base, int uptag)
     }
     goto quit;
   }
+
   if (!strcmp(buf, "Nikon"))
   {
     base = ftell(ifp);
@@ -10804,7 +11011,9 @@ void CLASS parse_makernote(int base, int uptag)
     offset = get4();
     fseek(ifp, offset - 8, SEEK_CUR);
   }
-  else if (!strcmp(buf, "OLYMPUS") || !strcmp(buf, "PENTAX "))
+
+  else if (!strcmp(buf, "OLYMPUS") ||
+           !strcmp(buf, "PENTAX "))
   {
     base = ftell(ifp) - 10;
     fseek(ifp, -2, SEEK_CUR);
@@ -10812,10 +11021,13 @@ void CLASS parse_makernote(int base, int uptag)
     if (buf[0] == 'O')
       get2();
   }
-  else if (!strncmp(buf, "SONY", 4) || !strcmp(buf, "Panasonic"))
+
+  else if (!strncmp(buf, "SONY", 4) ||
+           !strcmp(buf, "Panasonic"))
   {
     goto nf;
   }
+
   else if (!strncmp(buf, "FUJIFILM", 8))
   {
     base = ftell(ifp) - 10;
@@ -10823,10 +11035,17 @@ void CLASS parse_makernote(int base, int uptag)
     order = 0x4949;
     fseek(ifp, 2, SEEK_CUR);
   }
-  else if (!strcmp(buf, "OLYMP") || !strcmp(buf, "LEICA") || !strcmp(buf, "Ricoh") || !strcmp(buf, "EPSON"))
+
+  else if (!strcmp(buf, "OLYMP") ||
+           !strncmp (buf,"LEICA", 5) ||
+           !strcmp(buf, "Ricoh") ||
+           !strcmp(buf, "EPSON"))
     fseek(ifp, -2, SEEK_CUR);
-  else if (!strcmp(buf, "AOC") || !strcmp(buf, "QVC"))
+
+  else if (!strcmp(buf, "AOC") ||
+           !strcmp(buf, "QVC"))
     fseek(ifp, -4, SEEK_CUR);
+
   else
   {
     fseek(ifp, -10, SEEK_CUR);
@@ -10843,44 +11062,26 @@ void CLASS parse_makernote(int base, int uptag)
      )
     imgdata.makernotes.kodak.MakerNoteKodak8a = 1;  // Kodak P712 / P850 / P880
 
-// adjust pos & base for Leica M8/M9/M Mono tags and dir in tag 0x3400
-  if (!strncasecmp(make, "LEICA", 5))
-  {
-    if (!strncmp(model, "M8", 2) || !strncasecmp(model, "Leica M8", 8) || !strncasecmp(model, "LEICA X", 7))
-    {
-      base = ftell(ifp) - 8;
-    }
-    else if (!strncasecmp(model, "LEICA M (Typ 240)", 17))
-    {
-      base = 0;
-    }
-    else if (!strncmp(model, "M9", 2) || !strncasecmp(model, "Leica M9", 8) || !strncasecmp(model, "M Monochrom", 11) ||
-             !strncasecmp(model, "Leica M Monochrom", 11))
-    {
-      if (!uptag)
-      {
-        base = ftell(ifp) - 10;
-        fseek(ifp, 8, SEEK_CUR);
-      }
-      else if (uptag == 0x3400)
-      {
-        fseek(ifp, 10, SEEK_CUR);
-        base += 10;
-      }
-    }
-    else if (!strncasecmp(model, "LEICA T", 7))
-    {
-      base = ftell(ifp) - 8;
-#ifdef LIBRAW_LIBRARY_BUILD
-      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_T;
-#endif
+  if (!strncasecmp(make, "LEICA", 5)) {
+
+int base_temp = base;
+
+    if (strncmp (buf,"LEICA", 5)) {
+      if (uptag == 0x3400) LeicaMakernoteSignature = 0x3400;
+      else LeicaMakernoteSignature = -2; // DMR
+    } else {
+      LeicaMakernoteSignature = ((uchar)buf[6] << 8) | (uchar)buf[7];
+      if (!LeicaMakernoteSignature &&
+          (!strncmp(model, "M8", 2) || !strncmp(model+6, "M8", 2)))
+        LeicaMakernoteSignature = -3;
+        if ((LeicaMakernoteSignature != 0x0000) &&
+            (LeicaMakernoteSignature != 0x0800) &&
+            (LeicaMakernoteSignature != 0x0900) &&
+            (LeicaMakernoteSignature != 0x02ff))
+        base = ftell(ifp)-8;
     }
 #ifdef LIBRAW_LIBRARY_BUILD
-    else if (!strncasecmp(model, "LEICA SL", 8))
-    {
-      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_SL;
-      imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
-    }
+    setLeicaBodyFeatures(LeicaMakernoteSignature);
 #endif
   }
 
@@ -10893,6 +11094,11 @@ void CLASS parse_makernote(int base, int uptag)
   {
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
+
+/*
+if (tag == 0x0311)
+  printf ("\tMnt tag: 0x%04x type: %d len %d pos: 0x%llx\n", tag, type, len, ftell(ifp));
+*/
     tag |= uptag << 16;
 
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -10972,62 +11178,8 @@ void CLASS parse_makernote(int base, int uptag)
       }
     }
 
-    else if (!strncasecmp(make, "LEICA", 5))
-    {
-      if (((tag == 0x035e) || (tag == 0x035f)) && (type == 10) && (len == 9))
-      {
-        int ind = tag == 0x035e ? 0 : 1;
-        for (int j = 0; j < 3; j++)
-          FORCC imgdata.color.dng_color[ind].forwardmatrix[j][c] = getreal(type);
-        imgdata.color.dng_color[ind].parsedfields |= LIBRAW_DNGFM_FORWARDMATRIX;
-      }
-
-      if (tag == 0x34003402)
-        imgdata.other.CameraTemperature = getreal(type);
-
-      if ((tag == 0x0320) && (type == 9) && (len == 1) && !strncasecmp(make, "Leica Camera AG", 15) &&
-          !strncmp(buf, "LEICA", 5) && (buf[5] == 0) && (buf[6] == 0) && (buf[7] == 0))
-        imgdata.other.CameraTemperature = getreal(type);
-
-      if ((tag == 0x0303) && (type != 4))
-      {
-        stmread(imgdata.lens.makernotes.Lens, len, ifp);
-      }
-
-      if ((tag == 0x3405) || (tag == 0x0310) || (tag == 0x34003405))
-      {
-        imgdata.lens.makernotes.LensID = get4();
-        imgdata.lens.makernotes.LensID =
-            ((imgdata.lens.makernotes.LensID >> 2) << 8) | (imgdata.lens.makernotes.LensID & 0x3);
-        if (imgdata.lens.makernotes.LensID != -1)
-        {
-          if ((model[0] == 'M') || !strncasecmp(model, "LEICA M", 7))
-          {
-            imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_M;
-            if (imgdata.lens.makernotes.LensID)
-              imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Leica_M;
-          }
-          else if ((model[0] == 'S') || !strncasecmp(model, "LEICA S", 7))
-          {
-            imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_S;
-            if (imgdata.lens.makernotes.Lens[0])
-              imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Leica_S;
-          }
-        }
-      }
-
-      else if (((tag == 0x0313) || (tag == 0x34003406)) && (fabs(imgdata.lens.makernotes.CurAp) < 0.17f) &&
-               ((type == 10) || (type == 5)))
-      {
-        imgdata.lens.makernotes.CurAp = getreal(type);
-        if (imgdata.lens.makernotes.CurAp > 126.3)
-          imgdata.lens.makernotes.CurAp = 0.0f;
-      }
-
-      else if (tag == 0x3400)
-      {
-        parse_makernote(base, 0x3400);
-      }
+    else if (LeicaMakernoteSignature != -1) {
+      parseLeicaMakernotes (base, tag, type, len, LeicaMakernoteSignature, is_0x927c);
     }
 
     else if (!strncmp(make, "NIKON", 5))
@@ -11039,12 +11191,11 @@ void CLASS parse_makernote(int base, int uptag)
       }
       else if (tag == 0x0012)
       {
-        char a, b, c;
-        a = fgetc(ifp);
-        b = fgetc(ifp);
-        c = fgetc(ifp);
-        if (c)
-          imgdata.other.FlashEC = (float)(a * b) / (float)c;
+        ci = fgetc(ifp);
+        cj = fgetc(ifp);
+        ck = fgetc(ifp);
+        if (ck)
+          imgdata.other.FlashEC = (float)(ci * cj) / (float)ck;
       }
       else if (tag == 0x003b) // all 1s for regular exposures
       {
@@ -11077,13 +11228,12 @@ void CLASS parse_makernote(int base, int uptag)
       }
       else if (tag == 0x008b) // lens f-stops
       {
-        uchar a, b, c;
-        a = fgetc(ifp);
-        b = fgetc(ifp);
-        c = fgetc(ifp);
-        if (c)
+        ci = fgetc(ifp);
+        cj = fgetc(ifp);
+        ck = fgetc(ifp);
+        if (ck)
         {
-          imgdata.lens.nikon.NikonLensFStops = a * b * (12 / c);
+          imgdata.lens.nikon.NikonLensFStops = ci * cj * (12 / ck);
           imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops / 12.0f;
         }
       }
@@ -11161,33 +11311,29 @@ void CLASS parse_makernote(int base, int uptag)
       }
       else if (tag == 0x00b9)
       {
-        uchar uc;
-        int8_t sc;
-        fread(&uc, 1, 1, ifp);
-        imgdata.makernotes.nikon.AFFineTune = uc;
-        fread(&uc, 1, 1, ifp);
-        imgdata.makernotes.nikon.AFFineTuneIndex = uc;
-        fread(&sc, 1, 1, ifp);
-        imgdata.makernotes.nikon.AFFineTuneAdj = sc;
+        imgdata.makernotes.nikon.AFFineTune = fgetc(ifp);
+        imgdata.makernotes.nikon.AFFineTuneIndex = fgetc(ifp);
+        imgdata.makernotes.nikon.AFFineTuneAdj = (int8_t)fgetc(ifp);
       }
     }
 
-    else if ((!strncmp(make, "PENTAX", 6) || !strncmp(make, "RICOH", 5)) &&
-             (!strncmp(model, "GR", 2) || !strncmp(model, "GXR", 3)))
+    else if (!strncmp(make, "PENTAX", 6) ||
+             !strncmp(make, "RICOH", 5)  ||
+             !strncmp(model, "PENTAX", 6))
     {
-      parseRicohMakernotes (base, tag, type, len, CameraDNG);
-    }
-
-    else if ((!strncmp(make, "PENTAX", 6) || !strncmp(model, "PENTAX", 6) ||
-              (!strncmp(make, "SAMSUNG", 7) && dng_version)) &&
-             strncmp(model, "GR", 2))
-    {
-      parsePentaxMakernotes(base, tag, type, len, nonDNG);
+      if (!strncmp(model, "GR", 2) ||
+          !strncmp(model, "GXR", 3))
+        parseRicohMakernotes (base, tag, type, len, CameraDNG);
+      else
+        parsePentaxMakernotes(base, tag, type, len, nonDNG);
     }
 
     else if (!strncmp(make, "SAMSUNG", 7))
     {
-      parseSamsungMakernotes(base, tag, type, len, nonDNG);
+      if (!dng_version)
+        parseSamsungMakernotes(base, tag, type, len, nonDNG);
+      else
+        parsePentaxMakernotes(base, tag, type, len, CameraDNG);
     }
 
     else if (!strncasecmp(make, "SONY", 4)    ||
@@ -11199,13 +11345,11 @@ void CLASS parse_makernote(int base, int uptag)
                !strncasecmp(model, "Lusso", 5)   ||
                !strncasecmp(model, "HV", 2))))
     {
-
       if ((tag == 0xb028) && (len == 1) && (type == 4)) // DSLR-A100
       {
-        unsigned a = get4();
-        if (a != 0)
+        if (c = get4() != 0)
         {
-          fseek (ifp, a, SEEK_SET);
+          fseek (ifp, c, SEEK_SET);
           parse_makernote(base, tag);
         }
       }
@@ -11232,9 +11376,7 @@ void CLASS parse_makernote(int base, int uptag)
       iso_speed = (get2(), get2());
     if (tag == 37 && strstr(make, "NIKON") && (!iso_speed || iso_speed == 65535))
     {
-      unsigned char cc;
-      fread(&cc, 1, 1, ifp);
-      iso_speed = int(100.0 * libraw_powf64l(2.0f, float(cc) / 12.0 - 5.0));
+      iso_speed = int(100.0 * libraw_powf64l(2.0f, double((uchar)fgetc(ifp)) / 12.0 - 5.0));
     }
     if (tag == 4 && len > 26 && len < 35)
     {
@@ -11771,6 +11913,8 @@ void CLASS parse_exif(int base)
       break;
     case 0xa435: // LensSerialNumber
       stmread(imgdata.lens.LensSerial, len, ifp);
+      if (!strncmp(imgdata.lens.LensSerial, "----", 4))
+        imgdata.lens.LensSerial[0] = '\0';
       break;
     case 0xc630: // DNG LensInfo, Lens Specification per EXIF standard
       imgdata.lens.dng.MinFocal = getreal(type);
@@ -11784,7 +11928,7 @@ void CLASS parse_exif(int base)
     case 0xa434: // LensModel
       stmread(imgdata.lens.Lens, len, ifp);
       if (!strncmp(imgdata.lens.Lens, "----", 4))
-        imgdata.lens.Lens[0] = 0;
+        imgdata.lens.Lens[0] = '\0';
       break;
     case 0x9205:
       imgdata.lens.EXIF_MaxAp = libraw_powf64l(2.0f, (getreal(type) / 2.0f));
@@ -12095,7 +12239,6 @@ void CLASS parse_mos(int offset)
     skip = get4();
     from = ftell(ifp);
 
-// IB start
 #ifdef LIBRAW_LIBRARY_BUILD
     if (!strcmp(data, "CameraObj_camera_type"))
     {
@@ -12120,7 +12263,7 @@ void CLASS parse_mos(int offset)
       strcpy(imgdata.shootinginfo.InternalBodySerial, words[0]);
     }
 #endif
-    // IB end
+
     if (!strcmp(data, "JPEG_preview_data"))
     {
       thumb_offset = from;
@@ -12543,16 +12686,18 @@ int CLASS parse_tiff_ifd(int base)
     }
     if (callbacks.exif_cb)
     {
-      callbacks.exif_cb(callbacks.exifparser_data, tag | (pana_raw ? 0x30000 : ((ifd + 1) << 20)), type, len, order,
-                        ifp);
+      callbacks.exif_cb(callbacks.exifparser_data, tag | (pana_raw ? 0x30000 : ((ifd + 1) << 20)),
+                        type, len, order, ifp);
       fseek(ifp, savepos, SEEK_SET);
     }
 #endif
 
 #ifdef LIBRAW_LIBRARY_BUILD
-    if (!strncasecmp(make, "SONY", 4) ||
+    if (!strncasecmp(make, "SONY", 4)         ||
         (!strncasecmp(make, "Hasselblad", 10) &&
-         (!strncasecmp(model, "Stellar", 7) || !strncasecmp(model, "Lunar", 5) || !strncasecmp(model, "HV", 2))))
+         (!strncasecmp(model, "Stellar", 7)   ||
+          !strncasecmp(model, "Lunar", 5)     ||
+          !strncasecmp(model, "HV", 2))))
     {
       switch (tag)
       {
@@ -12569,22 +12714,26 @@ int CLASS parse_tiff_ifd(int base)
       case 0x7480:
       case 0x7820:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1];
         break;
       case 0x7481:
       case 0x7821:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1];
         break;
       case 0x7482:
       case 0x7822:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1];
         break;
       case 0x7483:
       case 0x7823:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1];
         break;
       case 0x7484:
       case 0x7824:
@@ -12594,27 +12743,33 @@ int CLASS parse_tiff_ifd(int base)
         break;
       case 0x7486:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Fluorescent][1];
         break;
       case 0x7825:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1];
         break;
       case 0x7826:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][1];
         break;
       case 0x7827:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][1];
         break;
       case 0x7828:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][1];
         break;
       case 0x7829:
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][c] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][1];
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][3] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][1];
         break;
       case 0x782a:
         imgdata.color.WBCT_Coeffs[1][0] = 8500;
@@ -12628,9 +12783,11 @@ int CLASS parse_tiff_ifd(int base)
         break;
       case 0x782c:
         imgdata.color.WBCT_Coeffs[3][0] = 3200;
-        FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][c] = imgdata.color.WBCT_Coeffs[3][c + 1] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][3] = imgdata.color.WBCT_Coeffs[3][4] =
-            imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][1];
+        FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][c] =
+          imgdata.color.WBCT_Coeffs[3][c + 1] = get2();
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][3] =
+          imgdata.color.WBCT_Coeffs[3][4] =
+          imgdata.color.WB_Coeffs[LIBRAW_WBI_StudioTungsten][1];
         break;
       case 0x782d:
         imgdata.color.WBCT_Coeffs[4][0] = 2500;
@@ -15664,7 +15821,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 4716,603,-830,-7798,15474,2480,-1496,1937,6651 } },
     { "Canon EOS 5D", 0, 0xe6c,
       { 6347,-479,-972,-8297,15954,2480,-1968,2131,7649 } },
-    { "Canon EOS 6D Mark II", 0, 0x38de, 
+    { "Canon EOS 6D Mark II", 0, 0x38de,
       { 6875,-970,-932,-4691,12459,2501,-874,1953,5809 } },
     { "Canon EOS 6D", 0, 0x3c82,
       {7034, -804, -1014, -4420, 12564, 2058, -851, 1994, 5758 } },
@@ -16581,7 +16738,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8843,-2837,-625,-5025,12644,2668,-411,1234,7410 } },
     { "Pentax K-r", 0, 0,
       { 9895,-3077,-850,-5304,13035,2521,-883,1768,6936 } },
-    { "Pentax K-1 Mark II", 0, 0, 
+    { "Pentax K-1 Mark II", 0, 0,
       { 8966, -2874, -1258, -3612, 12204, 1550, -885, 1664, 6204, } },
     { "Pentax K-1", 0, 0, /* updated */
       { 8596,-2981,-639,-4202,12046,2431,-685,1424,6122 } },
