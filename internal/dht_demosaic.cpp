@@ -855,7 +855,9 @@ DHT::~DHT() {
 }
 
 void LibRaw::dht_interpolate() {
+#ifdef DCRAW_VERBOSE
 	printf("DHT interpolating\n");
+#endif
 	DHT dht(*this);
 	dht.hide_hots();
 	dht.make_hv_dirs();
