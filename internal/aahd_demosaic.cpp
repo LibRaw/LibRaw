@@ -691,7 +691,9 @@ AAHD::~AAHD() {
 }
 
 void LibRaw::aahd_interpolate() {
+#ifdef DCRAW_VERBOSE
 	printf("AAHD interpolating\n");
+#endif
 	AAHD aahd(*this);
 	aahd.hide_hots();
 	aahd.make_ahd_greens();
