@@ -7824,8 +7824,8 @@ void CLASS setLeicaBodyFeatures(int LeicaMakernoteSignature)
     imgdata.lens.makernotes.FocalType = LIBRAW_FT_ZOOM;
 
   } else if ((LeicaMakernoteSignature == 0x0200) || // M10, S (Typ 007)
-             (LeicaMakernoteSignature == 0x02ff) || // M (Typ 240), M Monochrom (Typ 246), S (Typ 006), S-E (Typ 006), S2, S3
-             (LeicaMakernoteSignature == 0x0300)) { // M9, M9 Monochrom, M Monochrom
+             (LeicaMakernoteSignature == 0x02ff) || // M (Typ 240), M (Typ 262), M-D (Typ 262), M Monochrom (Typ 246), S (Typ 006), S-E (Typ 006), S2, S3
+             (LeicaMakernoteSignature == 0x0300)) { // M9, M9 Monochrom, M Monochrom, M-E
     if ((model[0] == 'M') || (model[6] == 'M')) {
       imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Leica_M;
@@ -7863,7 +7863,7 @@ void CLASS parseLeicaLensID()
       ((imgdata.lens.makernotes.LensID >> 2) << 8) |
        (imgdata.lens.makernotes.LensID & 0x3);
     if ((imgdata.lens.makernotes.LensID > 0x00ff) &&
-        (imgdata.lens.makernotes.LensID < 0x3503)) {
+        (imgdata.lens.makernotes.LensID < 0x3b00)) {
       imgdata.lens.makernotes.LensMount = imgdata.lens.makernotes.CameraMount;
       imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FF;
     }
@@ -7978,7 +7978,7 @@ void CLASS parseLeicaMakernotes (int base, unsigned tag, unsigned type, unsigned
 
   } else if (LeicaMakernoteSignature == 0x0200) { // M10, S (Typ 007)
 
-  } else if (LeicaMakernoteSignature == 0x02ff) { // S2, S3 mule, M (Typ 240), S (Typ 006), M Monochrom (Typ 246)
+  } else if (LeicaMakernoteSignature == 0x02ff) { // M (Typ 240), M (Typ 262), M-D (Typ 262), M Monochrom (Typ 246), S (Typ 006), S-E (Typ 006), S2, S3
     if (tag == 0x0303) {
       if (parseLeicaLensName(len)) {
         imgdata.lens.makernotes.LensMount = imgdata.lens.makernotes.CameraMount;
@@ -7986,7 +7986,7 @@ void CLASS parseLeicaMakernotes (int base, unsigned tag, unsigned type, unsigned
       }
     }
 
-  } else if (LeicaMakernoteSignature == 0x0300) { // M9, M9 Monochrom, M Monochrom
+  } else if (LeicaMakernoteSignature == 0x0300) { // M9, M9 Monochrom, M Monochrom, M-E
     if (tag == 0x3400) {
       parse_makernote(base, 0x3400);
     }
