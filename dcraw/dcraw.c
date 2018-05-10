@@ -3507,6 +3507,7 @@ void CLASS kodak_radc_load_raw()
               for (rep = 0; rep < 8 && rep < nreps && col > 0; rep++)
               {
                 col -= 2;
+		if(col>=0)
                 FORYX buf[c][y][x] = PREDICTOR;
                 if (rep & 1)
                 {
