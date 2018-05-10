@@ -6699,7 +6699,7 @@ void CLASS pre_interpolate()
       for (row = FC(1, 0) >> 1; row < height; row += 2)
         for (col = FC(row, 1) & 1; col < width; col += 2)
           image[row * width + col][1] = image[row * width + col][3];
-      filters &= ~((filters & 0x55555555) << 1);
+      filters &= ~((filters & 0x55555555U) << 1);
     }
   }
   if (half_size)
@@ -13123,7 +13123,7 @@ void CLASS parse_exif(int base)
     case 41730:
       if (get4() == 0x20002)
         for (exif_cfa = c = 0; c < 8; c += 2)
-          exif_cfa |= fgetc(ifp) * 0x01010101 << c;
+          exif_cfa |= fgetc(ifp) * 0x01010101U << c;
     }
     fseek(ifp, save, SEEK_SET);
   }
@@ -13367,7 +13367,7 @@ void CLASS parse_mos(int offset)
     fseek(ifp, skip + from, SEEK_SET);
   }
   if (planes)
-    filters = (planes == 1) * 0x01010101 * (uchar) "\x94\x61\x16\x49"[(flip / 90 + frot) & 3];
+    filters = (planes == 1) * 0x01010101U * (uchar) "\x94\x61\x16\x49"[(flip / 90 + frot) & 3];
 }
 
 void CLASS linear_table(unsigned len)
@@ -19669,7 +19669,7 @@ void CLASS identify()
         mask[1][1] = canon[i][8];
         mask[1][3] = -canon[i][9];
         if (canon[i][10])
-          filters = canon[i][10] * 0x01010101;
+          filters = canon[i][10] * 0x01010101U;
       }
     if ((unique_id | 0x20000) == 0x2720000)
     {
@@ -20473,7 +20473,7 @@ void CLASS identify()
         width += pana[i][4];
         height += pana[i][5];
       }
-    filters = 0x01010101 * (uchar) "\x94\x61\x49\x16"[((filters - 1) ^ (left_margin & 1) ^ (top_margin << 1)) & 3];
+    filters = 0x01010101U * (uchar) "\x94\x61\x49\x16"[((filters - 1) ^ (left_margin & 1) ^ (top_margin << 1)) & 3];
   }
   else if (!strcmp(model, "C770UZ"))
   {
