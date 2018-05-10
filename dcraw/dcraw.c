@@ -3068,7 +3068,8 @@ void CLASS kodak_radc_load_raw()
 	      nreps = (col > 2) ? radc_token(9) + 1 : 1;
 	      for (rep=0; rep < 8 && rep < nreps && col > 0; rep++) {
 		col -= 2;
-		FORYX buf[c][y][x] = PREDICTOR;
+                if(col>=0)
+		  FORYX buf[c][y][x] = PREDICTOR;
 		if (rep & 1) {
 		  step = radc_token(10) << 4;
 		  FORYX buf[c][y][x] += step;
