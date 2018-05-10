@@ -713,6 +713,9 @@ static x3f_huffman_t *new_huffman(x3f_huffman_t **HUFP)
 	if (!infile) return NULL;
   	INT64 fsize = infile->size();
 	x3f_t *x3f = (x3f_t *)calloc(1, sizeof(x3f_t));
+        if(!x3f)
+           throw LIBRAW_EXCEPTION_ALLOC;
+  try {
 	x3f_info_t *I = NULL;
 	x3f_header_t *H = NULL;
 	x3f_directory_section_t *DS = NULL;
@@ -874,7 +877,13 @@ _err:
 	  free(x3f);
   }
   return NULL;
-
+ } catch (...) {
+   x3f_directory_section_t *DS = &x3f->directory_section;
+   if (DS && DS->directory_entry)
+     free(DS->directory_entry);
+   free(x3f);
+   return NULL;
+ }
 }
 
 /* --------------------------------------------------------------------- */
