@@ -5484,7 +5484,7 @@ void x3f_clear(void *p)
   x3f_delete((x3f_t*)p);
 }
 
-void utf2char(utf16_t *str, char *buffer, unsigned bufsz)
+static void utf2char(utf16_t *str, char *buffer, unsigned bufsz)
 {
  if(bufsz<1) return;
  buffer[bufsz-1] = 0;
