@@ -2945,6 +2945,7 @@ void CLASS packed_load_raw()
         fseek(ifp, ftell(ifp) >> 3 << 2, SEEK_SET);
       }
     }
+    if(feof(ifp)) throw LIBRAW_EXCEPTION_IO_EOF;
     for (col = 0; col < raw_width; col++)
     {
       for (vbits -= tiff_bps; vbits < 0; vbits += bite)
