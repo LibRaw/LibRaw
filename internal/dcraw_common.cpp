@@ -11921,7 +11921,11 @@ void CLASS parse_ciff (int offset, int length, int depth)
     if (type == 0x0032) {
       if (len == 768) {			/* EOS D30 */
 	fseek (ifp, 72, SEEK_CUR);
-	FORC4 cam_mul[c ^ (c >> 1)] = 1024.0 / get2();
+        FORC4
+        {
+          ushort q = get2();
+          cam_mul[c ^ (c >> 1)] = q? 1024.0 / get2() : 1024;
+        }
 	if (!wbi) cam_mul[0] = -1;	/* use my auto white balance */
       } else if (!cam_mul[0]) {
 	if (get2() == key[0])		/* Pro1, G6, S60, S70 */
