@@ -1,3 +1,12 @@
+2018-05-10  Alex Tutubalin <lexa@lexa.ru>
+ * Secunia Advisory SA83050: possible infinite loop in parse_minolta()
+ * Fixed stack overrun in kodak_radc_load_raw
+ * restored static for utf2char() lost in previous bugfix
+ * Fixed possible div by zero in EOS D30 WB data parse
+ * packed_load_raw(): EOF check on each row
+ * Exceptions was not caught in x3f_new_from_file resulting in x3f handle leak
+ * LibRaw 0.18.11
+
 2018-05-03  Alex Tutubalin <lexa@lexa.ru>
  * CVE-2018-10529 fixed: out of bounds read in X3F parser
  * CVE-2018-10528 fixed: possible stack overrun in X3F parser
