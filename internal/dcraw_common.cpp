@@ -10564,9 +10564,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   }
 
   if (!strncasecmp(make, "LEICA", 5)) {
-
-int base_temp = base;
-
     if (strncmp (buf,"LEICA", 5)) {
       if (uptag == 0x3400) LeicaMakernoteSignature = 0x3400;
       else LeicaMakernoteSignature = -2; // DMR
@@ -10581,7 +10578,6 @@ int base_temp = base;
             (LeicaMakernoteSignature != 0x02ff))
         base = ftell(ifp)-8;
     }
-
     setLeicaBodyFeatures(LeicaMakernoteSignature);
   }
 
@@ -11065,9 +11061,6 @@ void CLASS parse_makernote(int base, int uptag)
     imgdata.makernotes.kodak.MakerNoteKodak8a = 1;  // Kodak P712 / P850 / P880
 
   if (!strncasecmp(make, "LEICA", 5)) {
-
-int base_temp = base;
-
     if (strncmp (buf,"LEICA", 5)) {
       if (uptag == 0x3400) LeicaMakernoteSignature = 0x3400;
       else LeicaMakernoteSignature = -2; // DMR
@@ -11096,11 +11089,6 @@ int base_temp = base;
   {
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
-
-/*
-if (tag == 0x0311)
-  printf ("\tMnt tag: 0x%04x type: %d len %d pos: 0x%llx\n", tag, type, len, ftell(ifp));
-*/
     tag |= uptag << 16;
 
 #ifdef LIBRAW_LIBRARY_BUILD
