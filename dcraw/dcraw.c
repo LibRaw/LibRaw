@@ -21034,6 +21034,7 @@ if (!strcmp(model, "DBP for GX680") ||
       data_offset = 1152;
       load_raw = &CLASS kodak_radc_load_raw;
       tiff_bps = 12;
+      FORC4 cam_mul[c] = 1.0f;
     }
     else if (strstr(model, "DC50"))
     {
@@ -21043,6 +21044,7 @@ if (!strcmp(model, "DBP for GX680") ||
       iso_speed = 84;
       data_offset = 19712;
       load_raw = &CLASS kodak_radc_load_raw;
+      FORC4 cam_mul[c] = 1.0f;
     }
     else if (strstr(model, "DC120"))
     {
