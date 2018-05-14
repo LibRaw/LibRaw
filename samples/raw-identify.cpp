@@ -149,7 +149,7 @@ int main(int ac, char *av[])
     }
     else if (print_1)
     {
-      printf("%s=%s", P1.make, P1.model, C.model2);
+      printf("%s=%s", P1.make, P1.model);
       printf("\n");
     }
     else if (print_2)
