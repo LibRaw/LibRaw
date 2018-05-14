@@ -394,6 +394,10 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     uchar AFFineTune;
     uchar AFFineTuneIndex;
     int8_t AFFineTuneAdj;
+    unsigned LensDataVersion;
+    unsigned FlashInfoVersion;
+    unsigned ColorBalanceVersion;
+    uchar NikonKey;
   } libraw_nikon_makernotes_t;
 
   typedef struct

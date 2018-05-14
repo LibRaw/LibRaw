@@ -578,25 +578,25 @@ double CLASS getreal(int type)
 
   switch (type)
   {
-  case 3:
+  case 3: // ushort "SHORT" (int16u)
     return (unsigned short)get2();
-  case 4:
+  case 4: // unsigned "LONG" (int32u)
     return (unsigned int)get4();
-  case 5:
+  case 5: // (unsigned, unsigned) "RATIONAL" (rational64u)
     u.d = (unsigned int)get4();
     v.d = (unsigned int)get4();
     return u.d / (v.d ? v.d : 1);
-  case 8:
+  case 8: // short "SSHORT" (int16s)
     return (signed short)get2();
-  case 9:
+  case 9: // int "SLONG" (int32s)
     return (signed int)get4();
-  case 10:
+  case 10: // (int, int) "SRATIONAL" (rational64s)
     u.d = (signed int)get4();
     v.d = (signed int)get4();
     return u.d / (v.d ? v.d : 1);
-  case 11:
+  case 11: // float "FLOAT" (float)
     return int_to_float(get4());
-  case 12:
+  case 12: // double "DOUBLE" (double)
     rev = 7 * ((order == 0x4949) == (ntohs(0x1234) == 0x1234));
     for (i = 0; i < 8; i++)
       u.c[i ^ rev] = fgetc(ifp);
@@ -8206,51 +8206,46 @@ unsigned CLASS setCanonBodyFeatures(unsigned id)
       (id == 0x80000232) || // 1D2N
       (id == 0x80000169) || // 1D3
       (id == 0x80000281)    // 1D4
-  )
-  {
+  ) {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSH;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF;
-  }
-  else if ((id == 0x80000167) || // 1Ds
-           (id == 0x80000188) || // 1Ds2
-           (id == 0x80000215) || // 1Ds3
-           (id == 0x80000269) || // 1DX
-           (id == 0x80000328) || // 1DX2
-           (id == 0x80000324) || // 1DC
-           (id == 0x80000213) || // 5D
-           (id == 0x80000218) || // 5D2
-           (id == 0x80000285) || // 5D3
-           (id == 0x80000349) || // 5D4
-           (id == 0x80000382) || // 5DS
-           (id == 0x80000401) || // 5DS R
-           (id == 0x80000302)    // 6D
-  )
-  {
+
+  } else if ((id == 0x80000167) || // 1Ds
+             (id == 0x80000188) || // 1Ds2
+             (id == 0x80000215) || // 1Ds3
+             (id == 0x80000269) || // 1DX
+             (id == 0x80000328) || // 1DX2
+             (id == 0x80000324) || // 1DC
+             (id == 0x80000213) || // 5D
+             (id == 0x80000218) || // 5D2
+             (id == 0x80000285) || // 5D3
+             (id == 0x80000349) || // 5D4
+             (id == 0x80000382) || // 5DS
+             (id == 0x80000401) || // 5DS R
+             (id == 0x80000302)    // 6D
+  ) {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF;
-  }
-  else if ((id == 0x80000331) || // M
-           (id == 0x80000355) || // M2
-           (id == 0x80000374) || // M3
-           (id == 0x80000384) || // M10
-           (id == 0x80000394) || // M5
-           (id == 0x80000407) || // M6
-           (id == 0x80000398)    // M100
-  )
-  {
+
+  } else if ((id == 0x80000331) || // M
+             (id == 0x80000355) || // M2
+             (id == 0x80000374) || // M3
+             (id == 0x80000384) || // M10
+             (id == 0x80000394) || // M5
+             (id == 0x80000407) || // M6
+             (id == 0x80000398)    // M100
+  ) {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF_M;
-  }
-  else if ((id == 0x01140000) || // D30
-           (id == 0x01668000) || // D60
-           (id > 0x80000000))
-  {
+
+  } else if ((id == 0x01140000) || // D30
+             (id == 0x01668000) || // D60
+             (id > 0x80000000)) {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF;
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Unknown;
-  }
-  else
-  {
+
+  } else {
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
   }
@@ -8266,8 +8261,7 @@ void CLASS processCanonCameraInfo(unsigned id, uchar *CameraInfo, unsigned maxle
     return; // too short
   CameraInfo[0] = 0;
   CameraInfo[1] = 0;
-  if (type == 4)
-  {
+  if (type == 4) {
     if ((maxlen == 94) || (maxlen == 138) || (maxlen == 148) || (maxlen == 156) || (maxlen == 162) || (maxlen == 167) ||
         (maxlen == 171) || (maxlen == 264) || (maxlen > 400))
       imgdata.other.CameraTemperature = sget4(CameraInfo + ((maxlen - 3) << 2));
@@ -8279,8 +8273,7 @@ void CLASS processCanonCameraInfo(unsigned id, uchar *CameraInfo, unsigned maxle
       imgdata.other.CameraTemperature = sget4(CameraInfo + ((maxlen - 4) << 2));
   }
 
-  switch (id)
-  {
+  switch (id) {
   case 0x80000001: // 1D
   case 0x80000167: // 1DS
     iCanonCurFocal = 10;
@@ -8425,76 +8418,64 @@ void CLASS processCanonCameraInfo(unsigned id, uchar *CameraInfo, unsigned maxle
     iCanonLens = 2359;
     break;
   }
-  if (iCanonFocalType)
-  {
+  if (iCanonFocalType) {
     if (iCanonFocalType >= maxlen)
       return; // broken;
     imgdata.lens.makernotes.FocalType = CameraInfo[iCanonFocalType];
     if (!imgdata.lens.makernotes.FocalType) // zero means 'fixed' here, replacing with standard '1'
       imgdata.lens.makernotes.FocalType = 1;
   }
-  if (!imgdata.lens.makernotes.CurFocal)
-  {
+  if (!imgdata.lens.makernotes.CurFocal) {
     if (iCanonCurFocal >= maxlen)
       return; // broken;
     imgdata.lens.makernotes.CurFocal = sget2Rev(CameraInfo + iCanonCurFocal);
   }
-  if (!imgdata.lens.makernotes.LensID)
-  {
+  if (!imgdata.lens.makernotes.LensID) {
     if (iCanonLensID >= maxlen)
       return; // broken;
     imgdata.lens.makernotes.LensID = sget2Rev(CameraInfo + iCanonLensID);
   }
-  if (!imgdata.lens.makernotes.MinFocal)
-  {
+  if (!imgdata.lens.makernotes.MinFocal) {
     if (iCanonMinFocal >= maxlen)
       return; // broken;
     imgdata.lens.makernotes.MinFocal = sget2Rev(CameraInfo + iCanonMinFocal);
   }
-  if (!imgdata.lens.makernotes.MaxFocal)
-  {
+  if (!imgdata.lens.makernotes.MaxFocal) {
     if (iCanonMaxFocal >= maxlen)
       return; // broken;
     imgdata.lens.makernotes.MaxFocal = sget2Rev(CameraInfo + iCanonMaxFocal);
   }
-  if (!imgdata.lens.makernotes.Lens[0] && iCanonLens)
-  {
+  if (!imgdata.lens.makernotes.Lens[0] && iCanonLens) {
     if (iCanonLens + 64 >= maxlen)
       return;                        // broken;
-    if (CameraInfo[iCanonLens] < 65) // non-Canon lens
-    {
+    if (CameraInfo[iCanonLens] < 65) { // non-Canon lens
       memcpy(imgdata.lens.makernotes.Lens, CameraInfo + iCanonLens, 64);
-    }
-    else if (!strncmp((char *)CameraInfo + iCanonLens, "EF-S", 4))
-    {
+
+    } else if (!strncmp((char *)CameraInfo + iCanonLens, "EF-S", 4)) {
       memcpy(imgdata.lens.makernotes.Lens, "EF-S ", 5);
       memcpy(imgdata.lens.makernotes.LensFeatures_pre, "EF-E", 4);
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_S;
       memcpy(imgdata.lens.makernotes.Lens + 5, CameraInfo + iCanonLens + 4, 60);
-    }
-    else if (!strncmp((char *)CameraInfo + iCanonLens, "TS-E", 4))
-    {
+
+    } else if (!strncmp((char *)CameraInfo + iCanonLens, "TS-E", 4)) {
       memcpy(imgdata.lens.makernotes.Lens, "TS-E ", 5);
       memcpy(imgdata.lens.makernotes.LensFeatures_pre, "TS-E", 4);
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
       memcpy(imgdata.lens.makernotes.Lens + 5, CameraInfo + iCanonLens + 4, 60);
-    }
-    else if (!strncmp((char *)CameraInfo + iCanonLens, "MP-E", 4))
-    {
+
+    } else if (!strncmp((char *)CameraInfo + iCanonLens, "MP-E", 4)) {
       memcpy(imgdata.lens.makernotes.Lens, "MP-E ", 5);
       memcpy(imgdata.lens.makernotes.LensFeatures_pre, "MP-E", 4);
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
       memcpy(imgdata.lens.makernotes.Lens + 5, CameraInfo + iCanonLens + 4, 60);
-    }
-    else if (!strncmp((char *)CameraInfo + iCanonLens, "EF-M", 4))
-    {
+
+    } else if (!strncmp((char *)CameraInfo + iCanonLens, "EF-M", 4)) {
       memcpy(imgdata.lens.makernotes.Lens, "EF-M ", 5);
       memcpy(imgdata.lens.makernotes.LensFeatures_pre, "EF-M", 4);
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF_M;
       memcpy(imgdata.lens.makernotes.Lens + 5, CameraInfo + iCanonLens + 4, 60);
-    }
-    else
-    {
+
+    } else {
       memcpy(imgdata.lens.makernotes.Lens, CameraInfo + iCanonLens, 2);
       memcpy(imgdata.lens.makernotes.LensFeatures_pre, "EF", 2);
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
@@ -8521,8 +8502,7 @@ void CLASS Canon_CameraSettings()
   imgdata.lens.makernotes.MaxFocal = get2();
   imgdata.lens.makernotes.MinFocal = get2();
   imgdata.lens.makernotes.CanonFocalUnits = get2();
-  if (imgdata.lens.makernotes.CanonFocalUnits > 1)
-  {
+  if (imgdata.lens.makernotes.CanonFocalUnits > 1) {
     imgdata.lens.makernotes.MaxFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
     imgdata.lens.makernotes.MinFocal /= (float)imgdata.lens.makernotes.CanonFocalUnits;
   }
@@ -8612,19 +8592,16 @@ void CLASS Canon_WBCTpresets(short WBCTversion) {
 void CLASS processNikonLensData(uchar *LensData, unsigned len)
 {
   ushort i;
-  if (!(imgdata.lens.nikon.NikonLensType & 0x01))
-  {
+  if (!(imgdata.lens.nikon.NikonLensType & 0x01)) {
     imgdata.lens.makernotes.LensFeatures_pre[0] = 'A';
     imgdata.lens.makernotes.LensFeatures_pre[1] = 'F';
-  }
-  else
-  {
+
+  } else {
     imgdata.lens.makernotes.LensFeatures_pre[0] = 'M';
     imgdata.lens.makernotes.LensFeatures_pre[1] = 'F';
   }
 
-  if (imgdata.lens.nikon.NikonLensType & 0x02)
-  {
+  if (imgdata.lens.nikon.NikonLensType & 0x02) {
     if (imgdata.lens.nikon.NikonLensType & 0x04)
       imgdata.lens.makernotes.LensFeatures_suf[0] = 'G';
     else
@@ -8632,22 +8609,18 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
     imgdata.lens.makernotes.LensFeatures_suf[1] = ' ';
   }
 
-  if (imgdata.lens.nikon.NikonLensType & 0x08)
-  {
+  if (imgdata.lens.nikon.NikonLensType & 0x08) {
     imgdata.lens.makernotes.LensFeatures_suf[2] = 'V';
     imgdata.lens.makernotes.LensFeatures_suf[3] = 'R';
   }
 
-  if (imgdata.lens.nikon.NikonLensType & 0x10)
-  {
+  if (imgdata.lens.nikon.NikonLensType & 0x10) {
     imgdata.lens.makernotes.LensMount = imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Nikon_CX;
     imgdata.lens.makernotes.CameraFormat = imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_1INCH;
-  }
-  else
+  } else
     imgdata.lens.makernotes.LensMount = imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Nikon_F;
 
-  if (imgdata.lens.nikon.NikonLensType & 0x20)
-  {
+  if (imgdata.lens.nikon.NikonLensType & 0x20) {
     strcpy(imgdata.lens.makernotes.Adapter, "FT-1");
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Nikon_F;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Nikon_CX;
@@ -8656,10 +8629,8 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
 
   imgdata.lens.nikon.NikonLensType = imgdata.lens.nikon.NikonLensType & 0xdf;
 
-  if (len < 20)
-  {
-    switch (len)
-    {
+  if (len < 20) {
+    switch (len) {
     case 9:
       i = 2;
       break;
@@ -8673,8 +8644,7 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
     imgdata.lens.nikon.NikonLensIDNumber = LensData[i];
     imgdata.lens.nikon.NikonLensFStops = LensData[i + 1];
     imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops / 12.0f;
-    if (fabsf(imgdata.lens.makernotes.MinFocal) < 1.1f)
-    {
+    if (fabsf(imgdata.lens.makernotes.MinFocal) < 1.1f) {
       if ((imgdata.lens.nikon.NikonLensType ^ (uchar)0x01) || LensData[i + 2])
         imgdata.lens.makernotes.MinFocal = 5.0f * libraw_powf64l(2.0f, (float)LensData[i + 2] / 24.0f);
       if ((imgdata.lens.nikon.NikonLensType ^ (uchar)0x01) || LensData[i + 3])
@@ -8685,8 +8655,7 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
         imgdata.lens.makernotes.MaxAp4MaxFocal = libraw_powf64l(2.0f, (float)LensData[i + 5] / 24.0f);
     }
     imgdata.lens.nikon.NikonMCUVersion = LensData[i + 6];
-    if (i != 2)
-    {
+    if (i != 2) {
       if ((LensData[i - 1]) && (fabsf(imgdata.lens.makernotes.CurFocal) < 1.1f))
         imgdata.lens.makernotes.CurFocal = 5.0f * libraw_powf64l(2.0f, (float)LensData[i - 1] / 24.0f);
       if (LensData[i + 7])
@@ -8697,51 +8666,387 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
         (unsigned long long)LensData[i + 2] << 40 | (unsigned long long)LensData[i + 3] << 32 |
         (unsigned long long)LensData[i + 4] << 24 | (unsigned long long)LensData[i + 5] << 16 |
         (unsigned long long)LensData[i + 6] << 8 | (unsigned long long)imgdata.lens.nikon.NikonLensType;
-  }
-  else if ((len == 459) || (len == 590))
-  {
+
+  } else if ((len == 459) || (len == 590)) {
     memcpy(imgdata.lens.makernotes.Lens, LensData + 390, 64);
-  }
-  else if (len == 509)
-  {
+
+  } else if (len == 509) {
     memcpy(imgdata.lens.makernotes.Lens, LensData + 391, 64);
-  }
-  else if (len == 879)
-  {
+
+  } else if (len == 879) {
     memcpy(imgdata.lens.makernotes.Lens, LensData + 680, 64);
   }
   return;
 }
 
+
+void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
+{
+#define imn imgdata.makernotes.nikon
+#define ilm imgdata.lens.makernotes
+  unsigned offset = 0, entries, tag, type, len, save;
+
+  unsigned c, i;
+  uchar *LensData_buf;
+  uchar ColorBalanceData_buf[324];
+  int ColorBalanceData_ready = 0;
+  uchar ci, cj, ck;
+  unsigned serial = 0;
+  unsigned custom_serial = 0;
+  unsigned LensData_len = 0;
+
+  short morder, sorder = order;
+  char buf[10];
+  INT64 fsize = ifp->size();
+
+  fread(buf, 1, 10, ifp);
+
+  if (!strcmp(buf, "Nikon")) {
+    if (buf[6] != '\2')
+      goto quit;
+    base = ftell(ifp);
+    order = get2();
+    if (get2() != 42)
+      goto quit;
+    offset = get4();
+    fseek(ifp, offset - 8, SEEK_CUR);
+
+  } else
+    fseek(ifp, -10, SEEK_CUR);
+
+  entries = get2();
+  if (entries > 1000)
+    return;
+  morder = order;
+
+  while (entries--) {
+    order = morder;
+    tiff_get(base, &tag, &type, &len, &save);
+    INT64 pos = ifp->tell();
+    if (len > 8 && pos + len > 2 * fsize) {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
+      continue;
+    }
+    tag |= uptag << 16;
+    if (len > 100 * 1024 * 1024)
+      goto next; // 100Mb tag? No!
+
+    if (tag == 0x0002) {
+      if (!iso_speed) iso_speed = (get2(), get2());
+
+    } else if (tag == 0x000a) {
+/*
+  B700, P330, P340, P6000, P7000, P7700, P7800
+  E5000, E5400, E5700, E8700, E8800
+*/
+      ilm.LensMount = ilm.CameraMount = LIBRAW_MOUNT_FixedLens;
+      ilm.FocalType = LIBRAW_FT_ZOOM;
+
+    } else if (tag == 0x000c) {
+/*
+  1 AW1, 1 J1, 1 J2, 1 J3, 1 J4, 1 J5, 1 S1, 1 S2, 1 V1, 1 V2, 1 V3
+  D1, D1H, D1X, D2H, D2Xs, D3, D3S, D3X, D4, D4S, Df, D5
+  D600, D610, D700, D750, D800, D800E, D810, D850
+  D200, D300, D300S, D500
+  D40, D40X, D60, D80, D90
+  D3000, D3100, D3200, D3300, D3400
+  D5000, D5100, D5200, D5300, D5500, D5600
+  D7000, D7100, D7200, D7500
+  B700, COOLPIX A, P330, P340, P7700, P7800
+*/
+      cam_mul[0] = getreal(type);
+      cam_mul[2] = getreal(type);
+      cam_mul[1] = getreal(type);
+      cam_mul[3] = getreal(type);
+
+    } else if (tag == 0x11) {
+      if (is_raw) {
+        fseek(ifp, get4() + base, SEEK_SET);
+        parse_tiff_ifd(base);
+      }
+
+    } else if (tag == 0x0012) {
+      ci = fgetc(ifp);
+      cj = fgetc(ifp);
+      ck = fgetc(ifp);
+      if (ck)
+        imgdata.other.FlashEC = (float)(ci * cj) / (float)ck;
+
+    } else if (tag == 0x0014) {
+      if (type == 7) {
+        if (len == 2560) { // E8700, E8800, E5400
+          fseek(ifp, 1248, SEEK_CUR);
+          order = 0x4d4d;
+          cam_mul[0] = get2() / 256.0;
+          cam_mul[2] = get2() / 256.0;
+          cam_mul[1] = cam_mul[3] = 1.0;
+
+        } else if (len == 1280) { // E5000, E5700
+          cam_mul[0] = cam_mul[1] = cam_mul[2] = cam_mul[3] = 1.0;
+
+        } else {
+          fread(buf, 1, 10, ifp);
+          if (!strncmp(buf, "NRW ", 4)) { // P6000, P7000, P7100, B700
+            fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 1546, SEEK_CUR);
+            cam_mul[0] = get4() << 1;
+            cam_mul[1] = get4();
+            cam_mul[3] = get4();
+            cam_mul[2] = get4() << 1;
+          }
+        }
+      }
+
+    } else if (tag == 0x001d) { // serial number
+      if (len > 0) {
+        while ((c = fgetc(ifp)) && (len-- > 0) && (c != EOF)) {
+          if ((!custom_serial) && (!isdigit(c))) {
+            if ((strbuflen(model) == 3) && (!strcmp(model, "D50"))) {
+              custom_serial = 34;
+            } else {
+              custom_serial = 96;
+            }
+          }
+          serial = serial * 10 + (isdigit(c) ? c - '0' : c % 10);
+        }
+        if (!imgdata.shootinginfo.BodySerial[0])
+          sprintf(imgdata.shootinginfo.BodySerial, "%d", serial);
+      }
+
+    } else if (tag == 0x0025) {
+      if (!iso_speed || (iso_speed == 65535)) {
+        iso_speed = int(100.0 * libraw_powf64l(2.0f, double((uchar)fgetc(ifp)) / 12.0 - 5.0));
+      }
+
+    } else if (tag == 0x003b) { // all 1s for regular exposures
+        imn.ME_WB[0] = getreal(type);
+        imn.ME_WB[2] = getreal(type);
+        imn.ME_WB[1] = getreal(type);
+        imn.ME_WB[3] = getreal(type);
+
+    } else if (tag == 0x03d) { // not corrected for file bitcount, to be patched in open_datastream
+      FORC4 cblack[c ^ c >> 1] = get2();
+      i = cblack[3];
+      FORC3 if (i > cblack[c]) i = cblack[c];
+      FORC4 cblack[c] -= i;
+      black += i;
+
+    } else if (tag == 0x0045) {
+        imgdata.sizes.raw_crop.cleft = get2();
+        imgdata.sizes.raw_crop.ctop = get2();
+        imgdata.sizes.raw_crop.cwidth = get2();
+        imgdata.sizes.raw_crop.cheight = get2();
+
+    } else if (tag == 0x0082) { // lens attachment
+      stmread(ilm.Attachment, len, ifp);
+
+    } else if (tag == 0x0083) { // lens type
+      imgdata.lens.nikon.NikonLensType = fgetc(ifp);
+
+    } else if (tag == 0x0084) { // lens
+      ilm.MinFocal = getreal(type);
+      ilm.MaxFocal = getreal(type);
+      ilm.MaxAp4MinFocal = getreal(type);
+      ilm.MaxAp4MaxFocal = getreal(type);
+
+    } else if (tag == 0x008b) { // lens f-stops
+      ci = fgetc(ifp);
+      cj = fgetc(ifp);
+      ck = fgetc(ifp);
+      if (ck) {
+        imgdata.lens.nikon.NikonLensFStops = ci * cj * (12 / ck);
+        ilm.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops / 12.0f;
+      }
+
+    } else if ((tag == 0x008c) || (tag == 0x0096)) {
+      meta_offset = ftell(ifp);
+
+    } else if (tag == 0x0093) {
+      imn.NEFCompression = c = get2();
+      if ((c == 7) || (c == 9)) {
+        ilm.LensMount = LIBRAW_MOUNT_FixedLens;
+        ilm.CameraMount = LIBRAW_MOUNT_FixedLens;
+      }
+
+    } else if (tag == 0x0097) {
+      FORC4 imn.ColorBalanceVersion = imn.ColorBalanceVersion * 10 + fgetc(ifp) - '0';
+      switch (imn.ColorBalanceVersion) {
+      case 100:
+        fseek(ifp, 68, SEEK_CUR);
+        FORC4 cam_mul[(c >> 1) | ((c & 1) << 1)] = get2();
+        break;
+      case 102:
+        fseek(ifp, 6, SEEK_CUR);
+        FORC4 cam_mul[c ^ (c >> 1)] = get2();
+        break;
+      case 103:
+        fseek(ifp, 16, SEEK_CUR);
+        FORC4 cam_mul[c] = get2();
+      }
+      if (imn.ColorBalanceVersion >= 200) {
+        if (imn.ColorBalanceVersion != 205) {
+          fseek(ifp, 280, SEEK_CUR);
+        }
+        ColorBalanceData_ready = (fread(ColorBalanceData_buf, 324, 1, ifp) == 324);
+      }
+      if ((imn.ColorBalanceVersion >= 400) &&
+          (imn.ColorBalanceVersion <= 405)) { // 1 J1, 1 V1, 1 J2, 1 V2, 1 J3, 1 S1, 1 AW1, 1 S2, 1 J4, 1 V3, 1 J5
+        ilm.CameraFormat = LIBRAW_FORMAT_1INCH;
+        ilm.CameraMount = LIBRAW_MOUNT_Nikon_CX;
+      } else if ((imn.ColorBalanceVersion >= 500) &&
+                 (imn.ColorBalanceVersion <= 502)) { // P7700, P7800, P330, P340
+        ilm.CameraMount = ilm.LensMount = LIBRAW_MOUNT_FixedLens;
+        ilm.FocalType = LIBRAW_FT_ZOOM;
+      } else if (imn.ColorBalanceVersion == 601) { // Coolpix A
+        ilm.CameraFormat = ilm.LensFormat = LIBRAW_FORMAT_APSC;
+        ilm.CameraMount = ilm.LensMount = LIBRAW_MOUNT_FixedLens;
+        ilm.FocalType = LIBRAW_FT_FIXED;
+      }
+
+    } else if (tag == 0x0098) { // contains lens data
+      FORC4 imn.LensDataVersion = imn.LensDataVersion * 10 + fgetc(ifp) - '0';
+      switch (imn.LensDataVersion) {
+      case 100:
+        LensData_len = 9;
+        break;
+      case 101:
+      case 201: // encrypted, starting from v.201
+      case 202:
+      case 203:
+        LensData_len = 15;
+        break;
+      case 204:
+        LensData_len = 16;
+        break;
+      case 400:
+        LensData_len = 459;
+        break;
+      case 401:
+        LensData_len = 590;
+        break;
+      case 402:
+        LensData_len = 509;
+        break;
+      case 403:
+        LensData_len = 879;
+        break;
+      }
+      if (LensData_len) {
+        LensData_buf = (uchar *)malloc(LensData_len);
+        fread(LensData_buf, LensData_len, 1, ifp);
+      }
+
+    } else if (tag == 0x00a0) {
+        stmread(imgdata.shootinginfo.BodySerial, len, ifp);
+
+    } else if (tag == 0x00a7) { // shutter count
+      imn.NikonKey = fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp);
+      if (custom_serial) {
+        ci = xlat[0][custom_serial];
+      } else {
+        ci = xlat[0][serial & 0xff];
+      }
+      cj = xlat[1][imn.NikonKey];
+      ck = 0x60;
+      if (((unsigned)(imn.ColorBalanceVersion - 200) < 18) && ColorBalanceData_ready) {
+        for (i = 0; i < 324; i++)
+          ColorBalanceData_buf[i] ^= (cj += ci * ck++);
+        i = "66666>666;6A;:;555"[imn.ColorBalanceVersion - 200] - '0';
+        FORC4 cam_mul[c ^ (c >> 1) ^ (i & 1)] = sget2(ColorBalanceData_buf + (i & -2) + c * 2);
+      }
+      if (LensData_len) {
+        if (imn.LensDataVersion > 200) {
+          for (i = 0; i < LensData_len; i++) {
+            LensData_buf[i] ^= (cj += ci * ck++);
+          }
+        }
+        processNikonLensData(LensData_buf, LensData_len);
+        LensData_len = 0;
+        free(LensData_buf);
+      }
+
+    } else if (tag == 0x00a8) { // contains flash data
+      FORC4 imn.FlashInfoVersion = imn.FlashInfoVersion * 10 + fgetc(ifp) - '0';
+
+    } else if (tag == 0x00b0) {
+      get4(); // ME tag version, 4 symbols
+      imn.ExposureMode = get4();
+      imn.nMEshots = get4();
+      imn.MEgainOn = get4();
+
+    } else if (tag == 0x00b9) {
+      imn.AFFineTune = fgetc(ifp);
+      imn.AFFineTuneIndex = fgetc(ifp);
+      imn.AFFineTuneAdj = (int8_t)fgetc(ifp);
+
+    } else if (tag == 0x100) {
+      thumb_offset = ftell(ifp);
+      thumb_length = len;
+
+    } else if (tag == 0x0e01) { /* Nikon Capture / in-camera edit Note */
+      int loopc = 0;
+      int WhiteBalanceAdj_active = 0;
+      order = 0x4949;
+      fseek(ifp, 22, SEEK_CUR);
+      for (offset = 22; offset + 22 < len; offset += 22 + i) {
+        if (loopc++ > 1024)
+          throw LIBRAW_EXCEPTION_IO_CORRUPT;
+        tag = get4();
+        fseek(ifp, 14, SEEK_CUR);
+        i = get4() - 4;
+
+        if (tag == 0x76a43204) {
+          WhiteBalanceAdj_active = fgetc(ifp);
+
+        } else if (tag == 0xbf3c6c20) {
+          if (WhiteBalanceAdj_active) {
+            cam_mul[0] = getreal(12);
+            cam_mul[2] = getreal(12);
+            cam_mul[1] = cam_mul[3] = 1.0;
+          }
+
+        } else if (tag == 0x76a43207) {
+          flip = get2();
+
+        } else {
+          fseek(ifp, i, SEEK_CUR);
+        }
+      }
+    }
+next:
+    fseek(ifp, save, SEEK_SET);
+  }
+quit:
+  order = sorder;
+#undef ilm
+#undef imn
+}
+
+
 void CLASS setOlympusBodyFeatures(unsigned long long id)
 {
   imgdata.lens.makernotes.CamID = id;
   if (id == 0x5330303638ULL)
-  {
     strcpy(model, "E-M10MarkIII");
-  }
+
   if ((id == 0x4434303430ULL) || // E-1
       (id == 0x4434303431ULL) || // E-300
-      ((id & 0x00ffff0000ULL) == 0x0030300000ULL))
-  {
+      ((id & 0x00ffff0000ULL) == 0x0030300000ULL)) {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FT;
+
     if ((id == 0x4434303430ULL) ||                              // E-1
         (id == 0x4434303431ULL) ||                              // E-330
         ((id >= 0x5330303033ULL) && (id <= 0x5330303138ULL)) || // E-330 to E-520
         (id == 0x5330303233ULL) ||                              // E-620
         (id == 0x5330303239ULL) ||                              // E-450
         (id == 0x5330303330ULL) ||                              // E-600
-        (id == 0x5330303333ULL))                                // E-5
-    {
+        (id == 0x5330303333ULL)) {                              // E-5
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FT;
-    }
-    else
-    {
+
+    } else {
       imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_mFT;
     }
-  }
-  else
-  {
+
+  } else {
     imgdata.lens.makernotes.LensMount = imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
   }
   return;
@@ -8792,17 +9097,14 @@ void CLASS parseOlympus_Equipment (unsigned tag, unsigned type, unsigned len, un
   int i;
 
   switch (tag) {
-
   case 0x0100:
     getOlympus_CameraType2();
     break;
-
   case 0x0101:
     if ((!imgdata.shootinginfo.BodySerial[0]) &&
         (dng_writer == nonDNG))
       stmread(imgdata.shootinginfo.BodySerial, len, ifp);
     break;
-
   case 0x0102:
     stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
     break;
@@ -8818,7 +9120,6 @@ void CLASS parseOlympus_Equipment (unsigned tag, unsigned type, unsigned len, un
         (imgdata.lens.makernotes.LensID & 0x10))
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
     break;
-
   case 0x0202:
     if ((!imgdata.lens.LensSerial[0]))
       stmread(imgdata.lens.LensSerial, len, ifp);
@@ -8865,27 +9166,22 @@ void CLASS parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, u
   int c;
   uchar uc;
   switch (tag) {
-
   case 0x0101:
     if (dng_writer == nonDNG) {
       thumb_offset = get4() + base;
     }
     break;
-
   case 0x0102:
     if (dng_writer == nonDNG) {
       thumb_length = get4();
   }
     break;
-
   case 0x0200:
     imgdata.shootinginfo.ExposureMode = get2();
     break;
-
   case 0x0202:
     imgdata.shootinginfo.MeteringMode = get2();
     break;
-
   case 0x0301:
     imgdata.shootinginfo.FocusMode =
     imgdata.makernotes.olympus.FocusMode[0] = get2();
@@ -8893,36 +9189,29 @@ void CLASS parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, u
       imgdata.makernotes.olympus.FocusMode[1] = get2();
     }
     break;
-
   case 0x0304:
     for (c = 0; c < 64; c++) {
       imgdata.makernotes.olympus.AFAreas[c] = get4();
     }
     break;
-
   case 0x0305:
     for (c = 0; c < 5; c++) {
       imgdata.makernotes.olympus.AFPointSelected[c] = getreal(type);
     }
     break;
-
   case 0x0306:
     fread(&uc, 1, 1, ifp);
     imgdata.makernotes.olympus.AFFineTune = uc;
     break;
-
   case 0x0307:
     FORC3 imgdata.makernotes.olympus.AFFineTuneAdj[c] = get2();
     break;
-
   case 0x0401:
     imgdata.other.FlashEC = getreal(type);
     break;
-
   case 0x0507:
     imgdata.makernotes.olympus.ColorSpace = get2();
     break;
-
   case 0x0600:
     imgdata.shootinginfo.DriveMode =
     imgdata.makernotes.olympus.DriveMode[0] = get2();
@@ -8930,11 +9219,9 @@ void CLASS parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, u
       imgdata.makernotes.olympus.DriveMode[c] = get2();
     }
     break;
-
   case 0x0604:
     imgdata.shootinginfo.ImageStabilization = get4();
     break;
-
   }
 
   return;
@@ -11976,167 +12263,132 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
     else if (!strncmp(make, "NIKON", 5))
     {
-      if (tag == 0x1d) // serial number
-        while ((c = fgetc(ifp)) && c != EOF)
-        {
-          if ((!custom_serial) && (!isdigit(c)))
-          {
-            if ((strbuflen(model) == 3) && (!strcmp(model, "D50")))
-            {
-              custom_serial = 34;
-            }
-            else
-            {
-              custom_serial = 96;
-            }
-          }
-          serial = serial * 10 + (isdigit(c) ? c - '0' : c % 10);
-        }
-      else if (tag == 0x000a)
-      {
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-        imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-      }
-      else if (tag == 0x0082) // lens attachment
-      {
-        stmread(imgdata.lens.makernotes.Attachment, len, ifp);
-      }
-      else if (tag == 0x0083) // lens type
-      {
-        imgdata.lens.nikon.NikonLensType = fgetc(ifp);
-      }
-      else if (tag == 0x0084) // lens
-      {
-        imgdata.lens.makernotes.MinFocal = getreal(type);
-        imgdata.lens.makernotes.MaxFocal = getreal(type);
-        imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type);
-        imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type);
-      }
-      else if (tag == 0x008b) // lens f-stops
-      {
-        ci = fgetc(ifp);
-        cj = fgetc(ifp);
-        ck = fgetc(ifp);
-        if (ck)
-        {
-          imgdata.lens.nikon.NikonLensFStops = ci * cj * (12 / ck);
-          imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops / 12.0f;
+  if (tag == 0x001d) { // serial number
+    while ((c = fgetc(ifp)) && c != EOF) {
+      if ((!custom_serial) && (!isdigit(c))) {
+        if ((strbuflen(model) == 3) && (!strcmp(model, "D50"))) {
+          custom_serial = 34;
+        } else {
+          custom_serial = 96;
         }
       }
-      else if (tag == 0x0093)
-      {
-        imgdata.makernotes.nikon.NEFCompression = i = get2();
-        if ((i == 7) || (i == 9))
-        {
-          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-          imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-        }
-      }
-      else if (tag == 0x0097)
-      {
-        for (i = 0; i < 4; i++)
-          ver97 = ver97 * 10 + fgetc(ifp) - '0';
-        if (ver97 == 601) // Coolpix A
-        {
-          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-          imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-        }
-      }
-      else if (tag == 0x0098) // contains lens data
-      {
-        for (i = 0; i < 4; i++)
-        {
-          NikonLensDataVersion = NikonLensDataVersion * 10 + fgetc(ifp) - '0';
-        }
-        switch (NikonLensDataVersion)
-        {
-        case 100:
-          lenNikonLensData = 9;
-          break;
-        case 101:
-        case 201: // encrypted, starting from v.201
-        case 202:
-        case 203:
-          lenNikonLensData = 15;
-          break;
-        case 204:
-          lenNikonLensData = 16;
-          break;
-        case 400:
-          lenNikonLensData = 459;
-          break;
-        case 401:
-          lenNikonLensData = 590;
-          break;
-        case 402:
-          lenNikonLensData = 509;
-          break;
-        case 403:
-          lenNikonLensData = 879;
-          break;
-        }
-        if (lenNikonLensData)
-        {
-          table_buf = (uchar *)malloc(lenNikonLensData);
-          fread(table_buf, lenNikonLensData, 1, ifp);
-          if ((NikonLensDataVersion < 201) && lenNikonLensData)
-          {
-            processNikonLensData(table_buf, lenNikonLensData);
-            free(table_buf);
-            lenNikonLensData = 0;
-          }
-        }
-      }
+      serial = serial * 10 + (isdigit(c) ? c - '0' : c % 10);
+    }
 
-      else if (tag == 0x00a7) // shutter count
-      {
-        NikonKey = fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp);
-        if ((NikonLensDataVersion > 200) && lenNikonLensData)
-        {
-          if (custom_serial)
-          {
-            ci = xlat[0][custom_serial];
-          }
-          else
-          {
-            ci = xlat[0][serial & 0xff];
-          }
-          cj = xlat[1][NikonKey];
-          ck = 0x60;
-          for (i = 0; i < lenNikonLensData; i++)
-            table_buf[i] ^= (cj += ci * ck++);
-          processNikonLensData(table_buf, lenNikonLensData);
-          lenNikonLensData = 0;
-          free(table_buf);
-        }
-      }
-      else if (tag == 0x00a8) // contains flash data
-      {
-        for (i = 0; i < 4; i++)
-        {
-          NikonFlashInfoVersion = NikonFlashInfoVersion * 10 + fgetc(ifp) - '0';
-        }
-      }
+  } else if (tag == 0x000a) {
+    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+    imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
 
-      else if (tag == 0x00b0)
-      {
-        get4(); // ME tag version, 4 symbols
-        imgdata.makernotes.nikon.ExposureMode = get4();
-        imgdata.makernotes.nikon.nMEshots = get4();
-        imgdata.makernotes.nikon.MEgainOn = get4();
-      }
+  } else if (tag == 0x0082) { // lens attachment
+    stmread(imgdata.lens.makernotes.Attachment, len, ifp);
 
-      else if (tag == 0x00b9)
-      {
-        imgdata.makernotes.nikon.AFFineTune = fgetc(ifp);
-        imgdata.makernotes.nikon.AFFineTuneIndex = fgetc(ifp);
-        imgdata.makernotes.nikon.AFFineTuneAdj = (int8_t)fgetc(ifp);
-      }
+  } else if (tag == 0x0083) { // lens type
+    imgdata.lens.nikon.NikonLensType = fgetc(ifp);
 
-      else if (tag == 0x0025 && (!iso_speed || iso_speed == 65535))
-      {
-        iso_speed = int(100.0 * libraw_powf64l(2.0f, double((uchar)fgetc(ifp)) / 12.0 - 5.0));
+  } else if (tag == 0x0084) { // lens
+    imgdata.lens.makernotes.MinFocal = getreal(type);
+    imgdata.lens.makernotes.MaxFocal = getreal(type);
+    imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type);
+    imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type);
+
+  } else if (tag == 0x008b) { // lens f-stops
+    ci = fgetc(ifp);
+    cj = fgetc(ifp);
+    ck = fgetc(ifp);
+    if (ck) {
+      imgdata.lens.nikon.NikonLensFStops = ci * cj * (12 / ck);
+      imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops / 12.0f;
+    }
+
+  } else if (tag == 0x0093) {
+    imgdata.makernotes.nikon.NEFCompression = i = get2();
+    if ((i == 7) || (i == 9)) {
+      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+    }
+
+  } else if (tag == 0x0097) {
+    for (i = 0; i < 4; i++)
+      ver97 = ver97 * 10 + fgetc(ifp) - '0';
+    if (ver97 == 601) { // Coolpix A
+      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+    }
+
+  } else if (tag == 0x0098) { // contains lens data
+    FORC4 NikonLensDataVersion = NikonLensDataVersion * 10 + fgetc(ifp) - '0';
+    switch (NikonLensDataVersion) {
+    case 100:
+      lenNikonLensData = 9;
+      break;
+    case 101:
+    case 201: // encrypted, starting from v.201
+    case 202:
+    case 203:
+      lenNikonLensData = 15;
+      break;
+    case 204:
+      lenNikonLensData = 16;
+      break;
+    case 400:
+      lenNikonLensData = 459;
+      break;
+    case 401:
+      lenNikonLensData = 590;
+      break;
+    case 402:
+      lenNikonLensData = 509;
+      break;
+    case 403:
+      lenNikonLensData = 879;
+      break;
+    }
+    if (lenNikonLensData) {
+      table_buf = (uchar *)malloc(lenNikonLensData);
+      fread(table_buf, lenNikonLensData, 1, ifp);
+      if ((NikonLensDataVersion < 201) && lenNikonLensData) {
+        processNikonLensData(table_buf, lenNikonLensData);
+        free(table_buf);
+        lenNikonLensData = 0;
       }
+    }
+
+  } else if (tag == 0x00a7) { // shutter count
+    NikonKey = fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp);
+    if ((NikonLensDataVersion > 200) && lenNikonLensData) {
+      if (custom_serial) {
+        ci = xlat[0][custom_serial];
+      } else {
+        ci = xlat[0][serial & 0xff];
+      }
+      cj = xlat[1][NikonKey];
+      ck = 0x60;
+      for (i = 0; i < lenNikonLensData; i++) {
+        table_buf[i] ^= (cj += ci * ck++);
+      }
+      processNikonLensData(table_buf, lenNikonLensData);
+      lenNikonLensData = 0;
+      free(table_buf);
+    }
+
+  } else if (tag == 0x00a8) { // contains flash data
+    FORC4 NikonFlashInfoVersion = NikonFlashInfoVersion * 10 + fgetc(ifp) - '0';
+
+  } else if (tag == 0x00b0) {
+    get4(); // ME tag version, 4 symbols
+    imgdata.makernotes.nikon.ExposureMode = get4();
+    imgdata.makernotes.nikon.nMEshots = get4();
+    imgdata.makernotes.nikon.MEgainOn = get4();
+
+  } else if (tag == 0x00b9) {
+    imgdata.makernotes.nikon.AFFineTune = fgetc(ifp);
+    imgdata.makernotes.nikon.AFFineTuneIndex = fgetc(ifp);
+    imgdata.makernotes.nikon.AFFineTuneAdj = (int8_t)fgetc(ifp);
+
+  } else if (tag == 0x0025 && (!iso_speed || iso_speed == 65535)) {
+    iso_speed = int(100.0 * libraw_powf64l(2.0f, double((uchar)fgetc(ifp)) / 12.0 - 5.0));
+  }
+
     }
 
     else if (!strncmp(make, "OLYMPUS", 7)) {
@@ -12827,22 +13079,26 @@ void CLASS parse_makernote(int base, int uptag)
       fseek(ifp, get4() + base, SEEK_SET);
       parse_tiff_ifd(base);
     }
-    if (tag == 0x14 && type == 7)
-    {
-      if (len == 2560)
-      {
+
+    if (tag == 0x14 && type == 7) {
+      if (len == 2560) {
         fseek(ifp, 1248, SEEK_CUR);
         goto get2_256;
-      }
-      fread(buf, 1, 10, ifp);
-      if (!strncmp(buf, "NRW ", 4))
-      {
-        fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 1546, SEEK_CUR);
-        cam_mul[0] = get4() << 2;
-        cam_mul[1] = get4() + get4();
-        cam_mul[2] = get4() << 2;
+
+      } else if (len == 1280) {
+        cam_mul[0] = cam_mul[1] = cam_mul[2] = cam_mul[3] = 1.0;
+
+      } else {
+        fread(buf, 1, 10, ifp);
+        if (!strncmp(buf, "NRW ", 4)) {
+          fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 1546, SEEK_CUR);
+          cam_mul[0] = get4() << 2;
+          cam_mul[1] = get4() + get4();
+          cam_mul[2] = get4() << 2;
+        }
       }
     }
+
     if (tag == 0x15 && type == 2 && is_raw)
       fread(model, 64, 1, ifp);
     if (strstr(make, "PENTAX"))
@@ -12947,14 +13203,14 @@ void CLASS parse_makernote(int base, int uptag)
     if (tag == 0xa7)
     { // shutter count
       NikonKey = fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp);
-      if ((unsigned)(ver97 - 200) < 17)
+      if ((unsigned)(ver97 - 200) < 18)
       {
         ci = xlat[0][serial & 0xff];
         cj = xlat[1][NikonKey];
         ck = 0x60;
         for (i = 0; i < 324; i++)
           buf97[i] ^= (cj += ci * ck++);
-        i = "66666>666;6A;:;55"[ver97 - 200] - '0';
+        i = "66666>666;6A;:;555"[ver97 - 200] - '0';
         FORC4 cam_mul[c ^ (c >> 1) ^ (i & 1)] = sget2(buf97 + (i & -2) + c * 2);
       }
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -13011,6 +13267,7 @@ void CLASS parse_makernote(int base, int uptag)
 #endif
     if (tag == 0xe01)
     { /* Nikon Capture Note */
+      int NikonWhiteBalanceAdj = 0;
 #ifdef LIBRAW_LIBRARY_BUILD
       int loopc = 0;
 #endif
@@ -13025,8 +13282,20 @@ void CLASS parse_makernote(int base, int uptag)
         tag = get4();
         fseek(ifp, 14, SEEK_CUR);
         i = get4() - 4;
-        if (tag == 0x76a43207)
+
+        if (tag == 0x76a43204) {
+          NikonWhiteBalanceAdj = fgetc(ifp);
+
+        } else if (tag == 0xbf3c6c20) {
+          if (NikonWhiteBalanceAdj) {
+            cam_mul[0] = getreal(12);
+            cam_mul[2] = getreal(12);
+            cam_mul[1] = cam_mul[3] = 1.0;
+          }
+
+        } else if (tag == 0x76a43207)
           flip = get2();
+
         else
           fseek(ifp, i, SEEK_CUR);
       }

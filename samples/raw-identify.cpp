@@ -149,15 +149,7 @@ int main(int ac, char *av[])
     }
     else if (print_1)
     {
-      printf("%s=%s=%s", P1.make, P1.model, C.model2);
-      if (P1.filters)
-      {
-        printf("=");
-        if (!P1.cdesc[3])
-          P1.cdesc[3] = 'G';
-        for (int i = 0; i < 16; i++)
-          putchar(P1.cdesc[MyCoolRawProcessor.fcol(i >> 1, i & 1)]);
-      }
+      printf("%s=%s", P1.make, P1.model, C.model2);
       printf("\n");
     }
     else if (print_2)
