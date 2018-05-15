@@ -14568,17 +14568,17 @@ void CLASS apply_tiff()
     {
     case 32767:
 #ifdef LIBRAW_LIBRARY_BUILD
-      if (INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height))
+      if (!dng_version && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height))
 #else
       if (tiff_ifd[raw].bytes == raw_width * raw_height)
 #endif
       {
-        tiff_bps = 12;
+        tiff_bps = 14;
         load_raw = &CLASS sony_arw2_load_raw;
         break;
       }
 #ifdef LIBRAW_LIBRARY_BUILD
-      if (!strncasecmp(make, "Sony", 4) && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 2ULL)
+      if (!dng_version && !strncasecmp(make, "Sony", 4) && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 2ULL)
 #else
       if (!strncasecmp(make, "Sony", 4) && tiff_ifd[raw].bytes == raw_width * raw_height * 2)
 #endif
@@ -14621,7 +14621,7 @@ void CLASS apply_tiff()
         load_raw = &CLASS unpacked_load_raw;
         break;
       }
-      if (!strncasecmp(make, "Sony", 4) && tiff_ifd[raw].samples == 4 &&
+      if (!dng_version && !strncasecmp(make, "Sony", 4) && tiff_ifd[raw].samples == 4 &&
           INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 8ULL) // Sony ARQ
       {
         tiff_bps = 14;
@@ -14644,7 +14644,7 @@ void CLASS apply_tiff()
 #endif
         load_flags = 24;
 #ifdef LIBRAW_LIBRARY_BUILD
-      if (INT64(tiff_ifd[raw].bytes) * 5ULL == INT64(raw_width) * INT64(raw_height) * 8ULL)
+      if (!dng_version && INT64(tiff_ifd[raw].bytes) * 5ULL == INT64(raw_width) * INT64(raw_height) * 8ULL)
 #else
       if (tiff_ifd[raw].bytes * 5 == raw_width * raw_height * 8)
 #endif
