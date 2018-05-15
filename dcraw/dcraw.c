@@ -15462,7 +15462,7 @@ void CLASS apply_tiff()
     case 1:
 #ifdef LIBRAW_LIBRARY_BUILD
       // Sony 14-bit uncompressed
-      if (!strncasecmp(make, "Sony", 4) && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 2ULL)
+      if (!dng_version && !strncasecmp(make, "Sony", 4) && INT64(tiff_ifd[raw].bytes) == INT64(raw_width) * INT64(raw_height) * 2ULL)
       {
         tiff_bps = 14;
         load_raw = &CLASS unpacked_load_raw;
