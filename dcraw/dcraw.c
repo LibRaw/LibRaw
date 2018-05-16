@@ -8774,12 +8774,49 @@ void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
 
     } else if (tag == 0x0014) {
       if (type == 7) {
-        if (len == 2560) { // E8700, E8800, E5400
+        if (len == 2560) { // E5400, E8400, E8700, E8800
           fseek(ifp, 1248, SEEK_CUR);
           order = 0x4d4d;
           cam_mul[0] = get2() / 256.0;
           cam_mul[2] = get2() / 256.0;
           cam_mul[1] = cam_mul[3] = 1.0;
+#define icWB imgdata.color.WB_Coeffs
+          icWB[LIBRAW_WBI_Auto][0] = get2();
+          icWB[LIBRAW_WBI_Auto][2] = get2();
+          icWB[LIBRAW_WBI_Daylight][0] = get2();
+          icWB[LIBRAW_WBI_Daylight][2] = get2();
+          fseek (ifp, 24, SEEK_CUR);
+          icWB[LIBRAW_WBI_Tungsten][0] = get2();
+          icWB[LIBRAW_WBI_Tungsten][2] = get2();
+          fseek (ifp, 24, SEEK_CUR);
+          icWB[LIBRAW_WBI_FL_W][0] = get2();
+          icWB[LIBRAW_WBI_FL_W][2] = get2();
+          icWB[LIBRAW_WBI_FL_N][0] = get2();
+          icWB[LIBRAW_WBI_FL_N][2] = get2();
+          icWB[LIBRAW_WBI_FL_D][0] = get2();
+          icWB[LIBRAW_WBI_FL_D][2] = get2();
+          icWB[LIBRAW_WBI_Cloudy][0] = get2();
+          icWB[LIBRAW_WBI_Cloudy][2] = get2();
+          fseek (ifp, 24, SEEK_CUR);
+          icWB[LIBRAW_WBI_Flash][0] = get2();
+          icWB[LIBRAW_WBI_Flash][2] = get2();
+
+          icWB[LIBRAW_WBI_Auto][1] = icWB[LIBRAW_WBI_Auto][3] =
+            icWB[LIBRAW_WBI_Daylight][1] = icWB[LIBRAW_WBI_Daylight][3] =
+            icWB[LIBRAW_WBI_Tungsten][1] = icWB[LIBRAW_WBI_Tungsten][3] =
+            icWB[LIBRAW_WBI_FL_W][1] = icWB[LIBRAW_WBI_FL_W][3] =
+            icWB[LIBRAW_WBI_FL_N][1] = icWB[LIBRAW_WBI_FL_N][3] =
+            icWB[LIBRAW_WBI_FL_D][1] = icWB[LIBRAW_WBI_FL_D][3] =
+            icWB[LIBRAW_WBI_Cloudy][1] = icWB[LIBRAW_WBI_Cloudy][3] =
+            icWB[LIBRAW_WBI_Flash][1] = icWB[LIBRAW_WBI_Flash][3] = 256;
+
+          if (strncmp(model, "E8700", 5)) {
+            fseek (ifp, 24, SEEK_CUR);
+            icWB[LIBRAW_WBI_Shade][0] = get2();
+            icWB[LIBRAW_WBI_Shade][2] = get2();
+            icWB[LIBRAW_WBI_Shade][1] = icWB[LIBRAW_WBI_Shade][3] = 256;
+          }
+#undef icWB
 
         } else if (len == 1280) { // E5000, E5700
           cam_mul[0] = cam_mul[1] = cam_mul[2] = cam_mul[3] = 1.0;
@@ -13083,8 +13120,51 @@ void CLASS parse_makernote(int base, int uptag)
     if (tag == 0x14 && type == 7) {
       if (len == 2560) {
         fseek(ifp, 1248, SEEK_CUR);
-        goto get2_256;
+#ifdef LIBRAW_LIBRARY_BUILD
+#define icWB imgdata.color.WB_Coeffs
+        order = 0x4d4d;
+        cam_mul[0] = get2() / 256.0;
+        cam_mul[2] = get2() / 256.0;
+        cam_mul[1] = cam_mul[3] = 1.0;
+        icWB[LIBRAW_WBI_Auto][0] = get2();
+        icWB[LIBRAW_WBI_Auto][2] = get2();
+        icWB[LIBRAW_WBI_Daylight][0] = get2();
+        icWB[LIBRAW_WBI_Daylight][2] = get2();
+        fseek (ifp, 24, SEEK_CUR);
+        icWB[LIBRAW_WBI_Tungsten][0] = get2();
+        icWB[LIBRAW_WBI_Tungsten][2] = get2();
+        fseek (ifp, 24, SEEK_CUR);
+        icWB[LIBRAW_WBI_FL_W][0] = get2();
+        icWB[LIBRAW_WBI_FL_W][2] = get2();
+        icWB[LIBRAW_WBI_FL_N][0] = get2();
+        icWB[LIBRAW_WBI_FL_N][2] = get2();
+        icWB[LIBRAW_WBI_FL_D][0] = get2();
+        icWB[LIBRAW_WBI_FL_D][2] = get2();
+        icWB[LIBRAW_WBI_Cloudy][0] = get2();
+        icWB[LIBRAW_WBI_Cloudy][2] = get2();
+        fseek (ifp, 24, SEEK_CUR);
+        icWB[LIBRAW_WBI_Flash][0] = get2();
+        icWB[LIBRAW_WBI_Flash][2] = get2();
 
+        icWB[LIBRAW_WBI_Auto][1] = icWB[LIBRAW_WBI_Auto][3] =
+          icWB[LIBRAW_WBI_Daylight][1] = icWB[LIBRAW_WBI_Daylight][3] =
+          icWB[LIBRAW_WBI_Tungsten][1] = icWB[LIBRAW_WBI_Tungsten][3] =
+          icWB[LIBRAW_WBI_FL_W][1] = icWB[LIBRAW_WBI_FL_W][3] =
+          icWB[LIBRAW_WBI_FL_N][1] = icWB[LIBRAW_WBI_FL_N][3] =
+          icWB[LIBRAW_WBI_FL_D][1] = icWB[LIBRAW_WBI_FL_D][3] =
+          icWB[LIBRAW_WBI_Cloudy][1] = icWB[LIBRAW_WBI_Cloudy][3] =
+          icWB[LIBRAW_WBI_Flash][1] = icWB[LIBRAW_WBI_Flash][3] = 256;
+
+        if (strncmp(model, "E8700", 5)) {
+          fseek (ifp, 24, SEEK_CUR);
+          icWB[LIBRAW_WBI_Shade][0] = get2();
+          icWB[LIBRAW_WBI_Shade][2] = get2();
+          icWB[LIBRAW_WBI_Shade][1] = icWB[LIBRAW_WBI_Shade][3] = 256;
+        }
+#undef icWB
+#else
+        goto get2_256;
+#endif
       } else if (len == 1280) {
         cam_mul[0] = cam_mul[1] = cam_mul[2] = cam_mul[3] = 1.0;
 
