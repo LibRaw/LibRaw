@@ -3305,10 +3305,13 @@ void CLASS kodak_radc_load_raw()
           if ((tree = radc_token(tree)))
           {
             col -= 2;
+	    if(col>=0)
+	    {
             if (tree == 8)
               FORYX buf[c][y][x] = (uchar)radc_token(18) * mul[c];
             else
               FORYX buf[c][y][x] = radc_token(tree + 10) * 16 + PREDICTOR;
+	    }
           }
           else
             do
