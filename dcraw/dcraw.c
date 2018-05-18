@@ -8682,6 +8682,24 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
   return;
 }
 
+void CLASS Nikon_NRW_WBtag (int wb, int skip)
+{
+#define icWB imgdata.color.WB_Coeffs
+  int r, g0, g1, b;
+  if (skip) get4(); // skip wb "CCT", it is not unique
+  r = get4();
+  g0 = get4();
+  g1 = get4();
+  b = get4();
+  if  (r && g0 && g1 && b) {
+    icWB[wb][0] = r << 1;
+    icWB[wb][1] = g0;
+    icWB[wb][2] = b << 1;
+    icWB[wb][3] = g1;
+  }
+  return;
+#undef icWB
+}
 
 void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
 {
@@ -8827,11 +8845,35 @@ void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
         } else {
           fread(buf, 1, 10, ifp);
           if (!strncmp(buf, "NRW ", 4)) { // P6000, P7000, P7100, B700
-            fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 1546, SEEK_CUR);
+            fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 0x13de, SEEK_CUR);
             cam_mul[0] = get4() << 1;
             cam_mul[1] = get4();
             cam_mul[3] = get4();
             cam_mul[2] = get4() << 1;
+            if (!strcmp(buf + 4, "0100")) {
+              Nikon_NRW_WBtag (LIBRAW_WBI_Daylight, 0);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Cloudy, 0);
+              fseek(ifp, 16, SEEK_CUR);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Tungsten, 0);
+              Nikon_NRW_WBtag (LIBRAW_WBI_FL_W, 0);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Flash, 0);
+              fseek(ifp, 16, SEEK_CUR);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Custom, 0);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Auto, 0);
+
+            } else {
+              Nikon_NRW_WBtag (LIBRAW_WBI_Daylight, 1);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Cloudy, 1);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Shade, 1);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Tungsten, 1);
+              Nikon_NRW_WBtag (LIBRAW_WBI_FL_W, 1);
+              Nikon_NRW_WBtag (LIBRAW_WBI_FL_N, 1);
+              Nikon_NRW_WBtag (LIBRAW_WBI_FL_D, 1);
+              Nikon_NRW_WBtag (LIBRAW_WBI_HT_Mercury, 1);
+              fseek(ifp, 20, SEEK_CUR);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Custom, 1);
+              Nikon_NRW_WBtag (LIBRAW_WBI_Auto, 1);
+            }
           }
         }
       }
@@ -13174,10 +13216,37 @@ void CLASS parse_makernote(int base, int uptag)
       } else {
         fread(buf, 1, 10, ifp);
         if (!strncmp(buf, "NRW ", 4)) {
-          fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 1546, SEEK_CUR);
-          cam_mul[0] = get4() << 2;
-          cam_mul[1] = get4() + get4();
-          cam_mul[2] = get4() << 2;
+          fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 0x13de, SEEK_CUR);
+          cam_mul[0] = get4() << 1;
+          cam_mul[1] = get4();
+          cam_mul[3] = get4();
+          cam_mul[2] = get4() << 1;
+#ifdef LIBRAW_LIBRARY_BUILD
+          if (!strcmp(buf + 4, "0100")) {
+            Nikon_NRW_WBtag (LIBRAW_WBI_Daylight, 0);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Cloudy, 0);
+            fseek(ifp, 16, SEEK_CUR);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Tungsten, 0);
+            Nikon_NRW_WBtag (LIBRAW_WBI_FL_W, 0);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Flash, 0);
+            fseek(ifp, 16, SEEK_CUR);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Custom, 0);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Auto, 0);
+
+          } else {
+            Nikon_NRW_WBtag (LIBRAW_WBI_Daylight, 1);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Cloudy, 1);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Shade, 1);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Tungsten, 1);
+            Nikon_NRW_WBtag (LIBRAW_WBI_FL_W, 1);
+            Nikon_NRW_WBtag (LIBRAW_WBI_FL_N, 1);
+            Nikon_NRW_WBtag (LIBRAW_WBI_FL_D, 1);
+            Nikon_NRW_WBtag (LIBRAW_WBI_HT_Mercury, 1);
+            fseek(ifp, 20, SEEK_CUR);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Custom, 1);
+            Nikon_NRW_WBtag (LIBRAW_WBI_Auto, 1);
+          }
+#endif
         }
       }
     }

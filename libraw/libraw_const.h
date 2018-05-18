@@ -94,6 +94,7 @@ enum LibRaw_whitebalance_code
   LIBRAW_WBI_D50 = 23,
   LIBRAW_WBI_StudioTungsten = 24,
   LIBRAW_WBI_Sunset = 64,
+  LIBRAW_WBI_HT_Mercury = 67,
   LIBRAW_WBI_Auto = 82,
   LIBRAW_WBI_Custom = 83,
   LIBRAW_WBI_Auto1 = 85,

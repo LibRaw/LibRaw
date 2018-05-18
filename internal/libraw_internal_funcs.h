@@ -37,6 +37,7 @@ it under the terms of the one of two licenses as you choose:
     void	Canon_WBCTpresets (short WBCTversion);
     void	parseCanonMakernotes (unsigned tag, unsigned type, unsigned len);
     void	processNikonLensData (uchar *LensData, unsigned len);
+    void	Nikon_NRW_WBtag (int wb, int skip);
     void	parseNikonMakernotes (int base, int uptag, unsigned dng_writer);
     void	setOlympusBodyFeatures (unsigned long long id);
     void	getOlympus_CameraType2 ();
