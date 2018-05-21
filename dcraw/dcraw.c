@@ -16053,6 +16053,10 @@ void CLASS apply_tiff()
       raw = i;
     }
   }
+
+  if (is_NikonTransfer)
+    tiff_bps = tiff_ifd[raw].bps = 12;
+
   if (is_raw == 1 && ties)
     is_raw = ties;
   if (!tile_width)
