@@ -169,6 +169,7 @@ const float d65_white[3] = {0.950456, 1, 1.088754};
 int histogram[4][0x2000];
 void (*write_thumb)(), (*write_fun)();
 void (*load_raw)(), (*thumb_load_raw)();
+unsigned is_NikonTransfer = 0;
 jmp_buf failure;
 
 struct decode
@@ -9064,7 +9065,7 @@ void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
       thumb_offset = ftell(ifp);
       thumb_length = len;
 
-    } else if (tag == 0x0e01) { /* Nikon Capture / in-camera edit Note */
+    } else if (tag == 0x0e01) { /* Nikon Software / in-camera edit Note */
       int loopc = 0;
       int WhiteBalanceAdj_active = 0;
       order = 0x4949;
@@ -9093,6 +9094,9 @@ void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
           fseek(ifp, i, SEEK_CUR);
         }
       }
+
+    } else if (tag == 0x0e22) {
+      FORC4 imn.NEFBitDepth[c] = get2();
     }
 next:
     fseek(ifp, save, SEEK_SET);
@@ -13782,6 +13786,11 @@ void CLASS parse_exif(int base)
       else
 
 #endif
+        if ((len == 1) && !strncmp(make, "NIKON", 5)) {
+          c = get4();
+          if (c) fseek (ifp, c, SEEK_SET);
+          is_NikonTransfer = 1;
+        }
         parse_makernote(base, 0);
       break;
     case 40962:
@@ -19452,6 +19461,7 @@ void CLASS initdata()
   mix_green = profile_length = data_error = zero_is_bad = 0;
   pixel_aspect = is_raw = raw_color = 1;
   tile_width = tile_length = 0;
+  is_NikonTransfer = 0;
 }
 
 #endif
@@ -19793,6 +19803,7 @@ void CLASS identify()
   cdesc[0] = desc[0] = artist[0] = make[0] = model[0] = model2[0] = 0;
   iso_speed = shutter = aperture = focal_len = unique_id = 0;
   tiff_nifds = 0;
+  is_NikonTransfer = 0;
   memset(tiff_ifd, 0, sizeof tiff_ifd);
 
 #ifdef LIBRAW_LIBRARY_BUILD

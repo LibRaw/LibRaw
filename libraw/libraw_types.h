@@ -398,6 +398,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     unsigned FlashInfoVersion;
     unsigned ColorBalanceVersion;
     uchar NikonKey;
+    ushort NEFBitDepth[4];
   } libraw_nikon_makernotes_t;
 
   typedef struct
@@ -585,6 +586,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     float exifAcceleration;
     float exifCameraElevationAngle;
     float real_ISO;
+    unsigned is_NikonTransfer;
   } libraw_imgother_t;
 
   typedef struct

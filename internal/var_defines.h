@@ -95,6 +95,7 @@ it under the terms of the one of two licenses as you choose:
 #define gpsdata         (imgdata.other.gpsdata)
 #define desc            (imgdata.other.desc)
 #define artist          (imgdata.other.artist)
+#define is_NikonTransfer (imgdata.other.is_NikonTransfer)
 
 //imgdata.output
 #define greybox         (imgdata.params.greybox)
