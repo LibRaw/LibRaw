@@ -14715,8 +14715,15 @@ void CLASS apply_tiff()
     }
   }
 
-  if (is_NikonTransfer)
-    tiff_bps = tiff_ifd[raw].bps = 12;
+  if (is_NikonTransfer && (tiff_ifd[raw].bps == 16)) {
+    if (tiff_compress == 1) {
+      if ((raw_width * raw_height * 3) == (tiff_ifd[raw].bytes << 1)) {
+        tiff_bps = tiff_ifd[raw].bps = 12;
+      } else {
+        tiff_bps = tiff_ifd[raw].bps = 14;
+      }
+    }
+  }
 
   if (is_raw == 1 && ties)
     is_raw = ties;
