@@ -7373,6 +7373,8 @@ void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
 {
 #define imn imgdata.makernotes.nikon
 #define ilm imgdata.lens.makernotes
+#define icWB imgdata.color.WB_Coeffs
+
   unsigned offset = 0, entries, tag, type, len, save;
 
   unsigned c, i;
@@ -7469,7 +7471,6 @@ void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
           cam_mul[0] = get2() / 256.0;
           cam_mul[2] = get2() / 256.0;
           cam_mul[1] = cam_mul[3] = 1.0;
-#define icWB imgdata.color.WB_Coeffs
           icWB[LIBRAW_WBI_Auto][0] = get2();
           icWB[LIBRAW_WBI_Auto][2] = get2();
           icWB[LIBRAW_WBI_Daylight][0] = get2();
@@ -7505,7 +7506,6 @@ void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
             icWB[LIBRAW_WBI_Shade][2] = get2();
             icWB[LIBRAW_WBI_Shade][1] = icWB[LIBRAW_WBI_Shade][3] = 256;
           }
-#undef icWB
 
         } else if (len == 1280) { // E5000, E5700
           cam_mul[0] = cam_mul[1] = cam_mul[2] = cam_mul[3] = 1.0;
@@ -7611,13 +7611,13 @@ void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
       meta_offset = ftell(ifp);
 
     } else if (tag == 0x0093) {
-      imn.NEFCompression = c = get2();
-      if ((c == 7) || (c == 9)) {
+      imn.NEFCompression = i = get2();
+      if ((i == 7) || (i == 9)) {
         ilm.LensMount = LIBRAW_MOUNT_FixedLens;
         ilm.CameraMount = LIBRAW_MOUNT_FixedLens;
       }
 
-    } else if (tag == 0x0097) {
+    } else if (tag == 0x0097) { // ver97
       FORC4 imn.ColorBalanceVersion = imn.ColorBalanceVersion * 10 + fgetc(ifp) - '0';
       switch (imn.ColorBalanceVersion) {
       case 100:
@@ -7728,7 +7728,7 @@ void CLASS parseNikonMakernotes (int base, int uptag, unsigned dng_writer)
       imn.AFFineTuneIndex = fgetc(ifp);
       imn.AFFineTuneAdj = (int8_t)fgetc(ifp);
 
-    } else if (tag == 0x100) {
+    } else if ((tag == 0x100) && (type == 7 )) {
       thumb_offset = ftell(ifp);
       thumb_length = len;
 
@@ -7770,6 +7770,7 @@ next:
   }
 quit:
   order = sorder;
+#undef icWB
 #undef ilm
 #undef imn
 }
@@ -10836,12 +10837,14 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
 
 void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 {
-/*
-#ifdef LIBRAW_LIBRARY_BUILD
+
   if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES)
   	return;
-#endif
-*/
+  if (!strncmp(make, "NIKON", 5)) {
+    parseNikonMakernotes (base, uptag, AdobeDNG);
+    return;
+  }
+
   unsigned ver97 = 0, offset = 0, entries, tag, type, len, save, c;
   unsigned i;
 
@@ -11014,136 +11017,6 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
       parseLeicaMakernotes (base, tag, type, len, LeicaMakernoteSignature, is_0xc634);
     }
 
-    else if (!strncmp(make, "NIKON", 5))
-    {
-  if (tag == 0x001d) { // serial number
-    while ((c = fgetc(ifp)) && c != EOF) {
-      if ((!custom_serial) && (!isdigit(c))) {
-        if ((strbuflen(model) == 3) && (!strcmp(model, "D50"))) {
-          custom_serial = 34;
-        } else {
-          custom_serial = 96;
-        }
-      }
-      serial = serial * 10 + (isdigit(c) ? c - '0' : c % 10);
-    }
-
-  } else if (tag == 0x000a) {
-    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-    imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-
-  } else if (tag == 0x0082) { // lens attachment
-    stmread(imgdata.lens.makernotes.Attachment, len, ifp);
-
-  } else if (tag == 0x0083) { // lens type
-    imgdata.lens.nikon.NikonLensType = fgetc(ifp);
-
-  } else if (tag == 0x0084) { // lens
-    imgdata.lens.makernotes.MinFocal = getreal(type);
-    imgdata.lens.makernotes.MaxFocal = getreal(type);
-    imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type);
-    imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type);
-
-  } else if (tag == 0x008b) { // lens f-stops
-    ci = fgetc(ifp);
-    cj = fgetc(ifp);
-    ck = fgetc(ifp);
-    if (ck) {
-      imgdata.lens.nikon.NikonLensFStops = ci * cj * (12 / ck);
-      imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops / 12.0f;
-    }
-
-  } else if (tag == 0x0093) {
-    imgdata.makernotes.nikon.NEFCompression = i = get2();
-    if ((i == 7) || (i == 9)) {
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-    }
-
-  } else if (tag == 0x0097) {
-    for (i = 0; i < 4; i++)
-      ver97 = ver97 * 10 + fgetc(ifp) - '0';
-    if (ver97 == 601) { // Coolpix A
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-    }
-
-  } else if (tag == 0x0098) { // contains lens data
-    FORC4 NikonLensDataVersion = NikonLensDataVersion * 10 + fgetc(ifp) - '0';
-    switch (NikonLensDataVersion) {
-    case 100:
-      lenNikonLensData = 9;
-      break;
-    case 101:
-    case 201: // encrypted, starting from v.201
-    case 202:
-    case 203:
-      lenNikonLensData = 15;
-      break;
-    case 204:
-      lenNikonLensData = 16;
-      break;
-    case 400:
-      lenNikonLensData = 459;
-      break;
-    case 401:
-      lenNikonLensData = 590;
-      break;
-    case 402:
-      lenNikonLensData = 509;
-      break;
-    case 403:
-      lenNikonLensData = 879;
-      break;
-    }
-    if (lenNikonLensData) {
-      table_buf = (uchar *)malloc(lenNikonLensData);
-      fread(table_buf, lenNikonLensData, 1, ifp);
-      if ((NikonLensDataVersion < 201) && lenNikonLensData) {
-        processNikonLensData(table_buf, lenNikonLensData);
-        free(table_buf);
-        lenNikonLensData = 0;
-      }
-    }
-
-  } else if (tag == 0x00a7) { // shutter count
-    NikonKey = fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp);
-    if ((NikonLensDataVersion > 200) && lenNikonLensData) {
-      if (custom_serial) {
-        ci = xlat[0][custom_serial];
-      } else {
-        ci = xlat[0][serial & 0xff];
-      }
-      cj = xlat[1][NikonKey];
-      ck = 0x60;
-      for (i = 0; i < lenNikonLensData; i++) {
-        table_buf[i] ^= (cj += ci * ck++);
-      }
-      processNikonLensData(table_buf, lenNikonLensData);
-      lenNikonLensData = 0;
-      free(table_buf);
-    }
-
-  } else if (tag == 0x00a8) { // contains flash data
-    FORC4 NikonFlashInfoVersion = NikonFlashInfoVersion * 10 + fgetc(ifp) - '0';
-
-  } else if (tag == 0x00b0) {
-    get4(); // ME tag version, 4 symbols
-    imgdata.makernotes.nikon.ExposureMode = get4();
-    imgdata.makernotes.nikon.nMEshots = get4();
-    imgdata.makernotes.nikon.MEgainOn = get4();
-
-  } else if (tag == 0x00b9) {
-    imgdata.makernotes.nikon.AFFineTune = fgetc(ifp);
-    imgdata.makernotes.nikon.AFFineTuneIndex = fgetc(ifp);
-    imgdata.makernotes.nikon.AFFineTuneAdj = (int8_t)fgetc(ifp);
-
-  } else if (tag == 0x0025 && (!iso_speed || iso_speed == 65535)) {
-    iso_speed = int(100.0 * libraw_powf64l(2.0f, double((uchar)fgetc(ifp)) / 12.0 - 5.0));
-  }
-
-    }
-
     else if (!strncmp(make, "OLYMPUS", 7)) {
 
       int SubDirOffsetValid =
@@ -11259,25 +11132,35 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
 void CLASS parse_makernote(int base, int uptag)
 {
+
 #ifdef LIBRAW_LIBRARY_BUILD
   if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES)
   	return;
+  if (!strncmp(make, "NIKON", 5)) {
+    parseNikonMakernotes (base, uptag, nonDNG);
+    return;
+  }
 #endif
   unsigned offset = 0, entries, tag, type, len, save, c;
-  unsigned ver97 = 0, serial = 0, i, wbi = 0, wb[4] = {0, 0, 0, 0};
-  uchar buf97[324], ci, cj, ck;
+  unsigned serial = 0, i, wbi = 0, wb[4] = {0, 0, 0, 0};
+  uchar ci, cj, ck;
   short morder, sorder = order;
   char buf[10];
   unsigned SamsungKey[11];
+
   uchar NikonKey;
+  unsigned ver97 = 0;
+  uchar buf97[324];
+
 
 #ifdef LIBRAW_LIBRARY_BUILD
+/*
   unsigned custom_serial = 0;
   unsigned NikonLensDataVersion = 0;
   unsigned lenNikonLensData = 0;
 
   unsigned NikonFlashInfoVersion = 0;
-
+*/
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
   unsigned typeCanonCameraInfo = 0;
@@ -11509,141 +11392,6 @@ void CLASS parse_makernote(int base, int uptag)
       parseLeicaMakernotes (base, tag, type, len, LeicaMakernoteSignature, is_0x927c);
     }
 
-    else if (!strncmp(make, "NIKON", 5))
-    {
-      if (tag == 0x000a)
-      {
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-        imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-      }
-      else if (tag == 0x0012)
-      {
-        ci = fgetc(ifp);
-        cj = fgetc(ifp);
-        ck = fgetc(ifp);
-        if (ck)
-          imgdata.other.FlashEC = (float)(ci * cj) / (float)ck;
-      }
-      else if (tag == 0x003b) // all 1s for regular exposures
-      {
-        imgdata.makernotes.nikon.ME_WB[0] = getreal(type);
-        imgdata.makernotes.nikon.ME_WB[2] = getreal(type);
-        imgdata.makernotes.nikon.ME_WB[1] = getreal(type);
-        imgdata.makernotes.nikon.ME_WB[3] = getreal(type);
-      }
-      else if (tag == 0x0045)
-      {
-        imgdata.sizes.raw_crop.cleft = get2();
-        imgdata.sizes.raw_crop.ctop = get2();
-        imgdata.sizes.raw_crop.cwidth = get2();
-        imgdata.sizes.raw_crop.cheight = get2();
-      }
-      else if (tag == 0x0082) // lens attachment
-      {
-        stmread(imgdata.lens.makernotes.Attachment, len, ifp);
-      }
-      else if (tag == 0x0083) // lens type
-      {
-        imgdata.lens.nikon.NikonLensType = fgetc(ifp);
-      }
-      else if (tag == 0x0084) // lens
-      {
-        imgdata.lens.makernotes.MinFocal = getreal(type);
-        imgdata.lens.makernotes.MaxFocal = getreal(type);
-        imgdata.lens.makernotes.MaxAp4MinFocal = getreal(type);
-        imgdata.lens.makernotes.MaxAp4MaxFocal = getreal(type);
-      }
-      else if (tag == 0x008b) // lens f-stops
-      {
-        ci = fgetc(ifp);
-        cj = fgetc(ifp);
-        ck = fgetc(ifp);
-        if (ck)
-        {
-          imgdata.lens.nikon.NikonLensFStops = ci * cj * (12 / ck);
-          imgdata.lens.makernotes.LensFStops = (float)imgdata.lens.nikon.NikonLensFStops / 12.0f;
-        }
-      }
-      else if (tag == 0x0093) // Nikon compression
-      {
-        imgdata.makernotes.nikon.NEFCompression = i = get2();
-        if ((i == 7) || (i == 9))
-        {
-          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-          imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-        }
-      }
-      else if (tag == 0x0098) // contains lens data
-      {
-        for (i = 0; i < 4; i++)
-        {
-          NikonLensDataVersion = NikonLensDataVersion * 10 + fgetc(ifp) - '0';
-        }
-        switch (NikonLensDataVersion)
-        {
-        case 100:
-          lenNikonLensData = 9;
-          break;
-        case 101:
-        case 201: // encrypted, starting from v.201
-        case 202:
-        case 203:
-          lenNikonLensData = 15;
-          break;
-        case 204:
-          lenNikonLensData = 16;
-          break;
-        case 400:
-          lenNikonLensData = 459;
-          break;
-        case 401:
-          lenNikonLensData = 590;
-          break;
-        case 402:
-          lenNikonLensData = 509;
-          break;
-        case 403:
-          lenNikonLensData = 879;
-          break;
-        }
-        if (lenNikonLensData > 0)
-        {
-          table_buf = (uchar *)malloc(lenNikonLensData);
-          fread(table_buf, lenNikonLensData, 1, ifp);
-          if ((NikonLensDataVersion < 201) && lenNikonLensData)
-          {
-            processNikonLensData(table_buf, lenNikonLensData);
-            free(table_buf);
-            lenNikonLensData = 0;
-          }
-        }
-      }
-      else if (tag == 0x00a0)
-      {
-        stmread(imgdata.shootinginfo.BodySerial, len, ifp);
-      }
-      else if (tag == 0x00a8) // contains flash data
-      {
-        for (i = 0; i < 4; i++)
-        {
-          NikonFlashInfoVersion = NikonFlashInfoVersion * 10 + fgetc(ifp) - '0';
-        }
-      }
-      else if (tag == 0x00b0)
-      {
-        get4(); // ME tag version, 4 symbols
-        imgdata.makernotes.nikon.ExposureMode = get4();
-        imgdata.makernotes.nikon.nMEshots = get4();
-        imgdata.makernotes.nikon.MEgainOn = get4();
-      }
-      else if (tag == 0x00b9)
-      {
-        imgdata.makernotes.nikon.AFFineTune = fgetc(ifp);
-        imgdata.makernotes.nikon.AFFineTuneIndex = fgetc(ifp);
-        imgdata.makernotes.nikon.AFFineTuneAdj = (int8_t)fgetc(ifp);
-      }
-    }
-
     else if (!strncmp(make, "PENTAX", 6) ||
              !strncmp(make, "RICOH", 5)  ||
              !strncmp(model, "PENTAX", 6))
@@ -11836,88 +11584,17 @@ void CLASS parse_makernote(int base, int uptag)
     if (tag == 0x14 && type == 7) {
       if (len == 2560) {
         fseek(ifp, 1248, SEEK_CUR);
-#ifdef LIBRAW_LIBRARY_BUILD
-#define icWB imgdata.color.WB_Coeffs
-        order = 0x4d4d;
-        cam_mul[0] = get2() / 256.0;
-        cam_mul[2] = get2() / 256.0;
-        cam_mul[1] = cam_mul[3] = 1.0;
-        icWB[LIBRAW_WBI_Auto][0] = get2();
-        icWB[LIBRAW_WBI_Auto][2] = get2();
-        icWB[LIBRAW_WBI_Daylight][0] = get2();
-        icWB[LIBRAW_WBI_Daylight][2] = get2();
-        fseek (ifp, 24, SEEK_CUR);
-        icWB[LIBRAW_WBI_Tungsten][0] = get2();
-        icWB[LIBRAW_WBI_Tungsten][2] = get2();
-        fseek (ifp, 24, SEEK_CUR);
-        icWB[LIBRAW_WBI_FL_W][0] = get2();
-        icWB[LIBRAW_WBI_FL_W][2] = get2();
-        icWB[LIBRAW_WBI_FL_N][0] = get2();
-        icWB[LIBRAW_WBI_FL_N][2] = get2();
-        icWB[LIBRAW_WBI_FL_D][0] = get2();
-        icWB[LIBRAW_WBI_FL_D][2] = get2();
-        icWB[LIBRAW_WBI_Cloudy][0] = get2();
-        icWB[LIBRAW_WBI_Cloudy][2] = get2();
-        fseek (ifp, 24, SEEK_CUR);
-        icWB[LIBRAW_WBI_Flash][0] = get2();
-        icWB[LIBRAW_WBI_Flash][2] = get2();
-
-        icWB[LIBRAW_WBI_Auto][1] = icWB[LIBRAW_WBI_Auto][3] =
-          icWB[LIBRAW_WBI_Daylight][1] = icWB[LIBRAW_WBI_Daylight][3] =
-          icWB[LIBRAW_WBI_Tungsten][1] = icWB[LIBRAW_WBI_Tungsten][3] =
-          icWB[LIBRAW_WBI_FL_W][1] = icWB[LIBRAW_WBI_FL_W][3] =
-          icWB[LIBRAW_WBI_FL_N][1] = icWB[LIBRAW_WBI_FL_N][3] =
-          icWB[LIBRAW_WBI_FL_D][1] = icWB[LIBRAW_WBI_FL_D][3] =
-          icWB[LIBRAW_WBI_Cloudy][1] = icWB[LIBRAW_WBI_Cloudy][3] =
-          icWB[LIBRAW_WBI_Flash][1] = icWB[LIBRAW_WBI_Flash][3] = 256;
-
-        if (strncmp(model, "E8700", 5)) {
-          fseek (ifp, 24, SEEK_CUR);
-          icWB[LIBRAW_WBI_Shade][0] = get2();
-          icWB[LIBRAW_WBI_Shade][2] = get2();
-          icWB[LIBRAW_WBI_Shade][1] = icWB[LIBRAW_WBI_Shade][3] = 256;
-        }
-#undef icWB
-#else
         goto get2_256;
-#endif
       } else if (len == 1280) {
         cam_mul[0] = cam_mul[1] = cam_mul[2] = cam_mul[3] = 1.0;
 
       } else {
         fread(buf, 1, 10, ifp);
         if (!strncmp(buf, "NRW ", 4)) {
-          fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 0x13de, SEEK_CUR);
-          cam_mul[0] = get4() << 1;
-          cam_mul[1] = get4();
-          cam_mul[3] = get4();
-          cam_mul[2] = get4() << 1;
-#ifdef LIBRAW_LIBRARY_BUILD
-          if (!strcmp(buf + 4, "0100")) {
-            Nikon_NRW_WBtag (LIBRAW_WBI_Daylight, 0);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Cloudy, 0);
-            fseek(ifp, 16, SEEK_CUR);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Tungsten, 0);
-            Nikon_NRW_WBtag (LIBRAW_WBI_FL_W, 0);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Flash, 0);
-            fseek(ifp, 16, SEEK_CUR);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Custom, 0);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Auto, 0);
-
-          } else {
-            Nikon_NRW_WBtag (LIBRAW_WBI_Daylight, 1);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Cloudy, 1);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Shade, 1);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Tungsten, 1);
-            Nikon_NRW_WBtag (LIBRAW_WBI_FL_W, 1);
-            Nikon_NRW_WBtag (LIBRAW_WBI_FL_N, 1);
-            Nikon_NRW_WBtag (LIBRAW_WBI_FL_D, 1);
-            Nikon_NRW_WBtag (LIBRAW_WBI_HT_Mercury, 1);
-            fseek(ifp, 20, SEEK_CUR);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Custom, 1);
-            Nikon_NRW_WBtag (LIBRAW_WBI_Auto, 1);
-          }
-#endif
+          fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 1546, SEEK_CUR);
+          cam_mul[0] = get4() << 2;
+          cam_mul[1] = get4() + get4();
+          cam_mul[2] = get4() << 2;
         }
       }
     }
@@ -11934,26 +11611,7 @@ void CLASS parse_makernote(int base, int uptag)
     if ((tag == 0x1d) && (type == 2) && (len > 0))
     {
       while ((c = fgetc(ifp)) && (len-- > 0) && (c != EOF))
-#ifdef LIBRAW_LIBRARY_BUILD
-      {
-        if ((!custom_serial) && (!isdigit(c)))
-        {
-          if ((strbuflen(model) == 3) && (!strcmp(model, "D50")))
-          {
-            custom_serial = 34;
-          }
-          else
-          {
-            custom_serial = 96;
-          }
-        }
-#endif
         serial = serial * 10 + (isdigit(c) ? c - '0' : c % 10);
-#ifdef LIBRAW_LIBRARY_BUILD
-      }
-      if (!imgdata.shootinginfo.BodySerial[0])
-        sprintf(imgdata.shootinginfo.BodySerial, "%d", serial);
-#endif
     }
     if (tag == 0x29 && type == 1)
     { // Canon PowerShot G9
@@ -11961,10 +11619,8 @@ void CLASS parse_makernote(int base, int uptag)
       fseek(ifp, 8 + c * 32, SEEK_CUR);
       FORC4 cam_mul[c ^ (c >> 1) ^ 1] = get4();
     }
-#ifndef LIBRAW_LIBRARY_BUILD
     if (tag == 0x3d && type == 3 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get2() >> (14 - tiff_bps);
-#endif
     if (tag == 0x81 && type == 4)
     {
       data_offset = get4();
@@ -12036,31 +11692,6 @@ void CLASS parse_makernote(int base, int uptag)
         i = "66666>666;6A;:;555"[ver97 - 200] - '0';
         FORC4 cam_mul[c ^ (c >> 1) ^ (i & 1)] = sget2(buf97 + (i & -2) + c * 2);
       }
-#ifdef LIBRAW_LIBRARY_BUILD
-      if ((NikonLensDataVersion > 200) && lenNikonLensData)
-      {
-        if (custom_serial)
-        {
-          ci = xlat[0][custom_serial];
-        }
-        else
-        {
-          ci = xlat[0][serial & 0xff];
-        }
-        cj = xlat[1][NikonKey];
-        ck = 0x60;
-        for (i = 0; i < lenNikonLensData; i++)
-          table_buf[i] ^= (cj += ci * ck++);
-        processNikonLensData(table_buf, lenNikonLensData);
-        lenNikonLensData = 0;
-        free(table_buf);
-      }
-      if (ver97 == 601) // Coolpix A
-      {
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-        imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
-      }
-#endif
     }
 
     if (tag == 0xb001 && type == 3) // Sony ModelID
@@ -12077,48 +11708,17 @@ void CLASS parse_makernote(int base, int uptag)
       meta_offset = ftell(ifp);
     if (tag == 0x401 && type == 4 && len == 4)
       FORC4 cblack[c ^ c >> 1] = get4();
-#ifdef LIBRAW_LIBRARY_BUILD
-    // not corrected for file bitcount, to be patched in open_datastream
-    if (tag == 0x03d && strstr(make, "NIKON") && len == 4)
-    {
-      FORC4 cblack[c ^ c >> 1] = get2();
-      i = cblack[3];
-      FORC3 if (i > cblack[c]) i = cblack[c];
-      FORC4 cblack[c] -= i;
-      black += i;
-    }
-#endif
     if (tag == 0xe01)
     { /* Nikon Capture Note */
-      int NikonWhiteBalanceAdj = 0;
-#ifdef LIBRAW_LIBRARY_BUILD
-      int loopc = 0;
-#endif
       order = 0x4949;
       fseek(ifp, 22, SEEK_CUR);
       for (offset = 22; offset + 22 < len; offset += 22 + i)
       {
-#ifdef LIBRAW_LIBRARY_BUILD
-        if (loopc++ > 1024)
-          throw LIBRAW_EXCEPTION_IO_CORRUPT;
-#endif
         tag = get4();
         fseek(ifp, 14, SEEK_CUR);
         i = get4() - 4;
-
-        if (tag == 0x76a43204) {
-          NikonWhiteBalanceAdj = fgetc(ifp);
-
-        } else if (tag == 0xbf3c6c20) {
-          if (NikonWhiteBalanceAdj) {
-            cam_mul[0] = getreal(12);
-            cam_mul[2] = getreal(12);
-            cam_mul[1] = cam_mul[3] = 1.0;
-          }
-
-        } else if (tag == 0x76a43207)
+        if (tag == 0x76a43207)
           flip = get2();
-
         else
           fseek(ifp, i, SEEK_CUR);
       }
