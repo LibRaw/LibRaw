@@ -10845,15 +10845,18 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     return;
   }
 
-  unsigned ver97 = 0, offset = 0, entries, tag, type, len, save, c;
+  unsigned offset = 0, entries, tag, type, len, save, c;
   unsigned i;
 
+/*
   uchar NikonKey, ci, cj, ck;
   unsigned serial = 0;
   unsigned custom_serial = 0;
   unsigned NikonLensDataVersion = 0;
   unsigned lenNikonLensData = 0;
   unsigned NikonFlashInfoVersion = 0;
+  unsigned ver97 = 0;
+*/
 
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
@@ -10887,19 +10890,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
   fread(buf, 1, 10, ifp);
 
-  if (!strcmp(buf, "Nikon"))
-  {
-    base = ftell(ifp);
-    order = get2();
-    if (get2() != 42)
-      goto quit;
-    offset = get4();
-    fseek(ifp, offset - 8, SEEK_CUR);
-  }
-
-  else if (!strcmp(buf, "OLYMPUS") ||
-           !strcmp(buf, "PENTAX ") ||
-           (!strncmp(make, "SAMSUNG", 7) && (dng_writer == CameraDNG)))
+  if (!strcmp(buf, "OLYMPUS") ||
+      !strcmp(buf, "PENTAX ") ||
+      (!strncmp(make, "SAMSUNG", 7) && (dng_writer == CameraDNG)))
   {
     base = ftell(ifp) - 10;
     fseek(ifp, -2, SEEK_CUR);
@@ -11143,7 +11136,6 @@ void CLASS parse_makernote(int base, int uptag)
 #endif
   unsigned offset = 0, entries, tag, type, len, save, c;
   unsigned serial = 0, i, wbi = 0, wb[4] = {0, 0, 0, 0};
-  uchar ci, cj, ck;
   short morder, sorder = order;
   char buf[10];
   unsigned SamsungKey[11];
@@ -11151,16 +11143,10 @@ void CLASS parse_makernote(int base, int uptag)
   uchar NikonKey;
   unsigned ver97 = 0;
   uchar buf97[324];
+  uchar ci, cj, ck;
 
 
 #ifdef LIBRAW_LIBRARY_BUILD
-/*
-  unsigned custom_serial = 0;
-  unsigned NikonLensDataVersion = 0;
-  unsigned lenNikonLensData = 0;
-
-  unsigned NikonFlashInfoVersion = 0;
-*/
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
   unsigned typeCanonCameraInfo = 0;
