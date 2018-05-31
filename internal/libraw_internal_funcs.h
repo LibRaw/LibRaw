@@ -38,7 +38,7 @@ it under the terms of the one of two licenses as you choose:
     void	parseCanonMakernotes (unsigned tag, unsigned type, unsigned len);
     void	processNikonLensData (uchar *LensData, unsigned len);
     void	Nikon_NRW_WBtag (int wb, int skip);
-    void	parseNikonMakernotes (int base, int uptag, unsigned dng_writer);
+    void	parseNikonMakernote (int base, int uptag, unsigned dng_writer);
     void	setOlympusBodyFeatures (unsigned long long id);
     void	getOlympus_CameraType2 ();
     void	getOlympus_SensorTemperature (unsigned len);
@@ -75,6 +75,7 @@ it under the terms of the one of two licenses as you choose:
                                uchar *&table_buf_0x9406, ushort &table_buf_0x9406_len,
                                uchar *&table_buf_0x940c, ushort &table_buf_0x940c_len,
                                uchar *&table_buf_0x940e, ushort &table_buf_0x940e_len);
+    void	parseSonySR2 (uchar *cbuf_SR2, unsigned SR2SubIFDOffset, unsigned SR2SubIFDLength, unsigned dng_writer);
 
     void	parseFujiMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
 
@@ -82,8 +83,8 @@ it under the terms of the one of two licenses as you choose:
     void	parseLeicaLensID();
     int 	parseLeicaLensName(unsigned len);
     int 	parseLeicaInternalBodySerial(unsigned len);
-    void 	parseLeicaMakernotes(int base, unsigned tag, unsigned type, unsigned len,
-                                 int LeicaMakernoteSignature, unsigned MakernoteTagType);
+    void 	parseLeicaMakernote(int base, int uptag, unsigned MakernoteTagType);
+    void 	parseAdobePanoMakernote ();
 
     ushort      get2();
     unsigned    sget4 (uchar *s);
