@@ -11159,6 +11159,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
       {363, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
       {364, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
       {365, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {366, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
   };
   ilm.CamID = id;
 
@@ -11528,7 +11529,7 @@ void CLASS process_Sony_0x9400(uchar *buf, ushort len, unsigned id)
   if (((bufx == 0x23) || (bufx == 0x24) || (bufx == 0x26)) && (len >= 0x1f))
   { // 0x9400 'c' version
 
-    if ((id == 358) || (id == 362) || (id == 363) || (id == 365))
+    if ((id == 358) || (id == 362) || (id == 363) || (id == 365) || (id == 366))
     {
       imSony.ShotNumberSincePowerUp = SonySubstitution[buf[0x0a]];
     }
@@ -11719,6 +11720,9 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
   int LensDataValid = 0;
   unsigned uitemp;
 
+if (tag <= 0xffff) printf ("\t==>> tag: 0x%04x\n", tag);
+else printf ("\t==>> tag: 0x%08x\n", tag);
+
   if (tag == 0xb001) { // Sony ModelID
     unique_id = get2();
     setSonyBodyFeatures(unique_id);
@@ -11779,11 +11783,13 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
 
   } else if (tag == 0xb000) {
     FORC4 imSony.FileFormat = imSony.FileFormat*10 + fgetc(ifp);
+    printf ("==>> FileFormat %d\n", imSony.FileFormat);
 
   } else if (tag == 0xb026) {
     uitemp = get4();
     if (uitemp != 0xffffffff)
       imgdata.shootinginfo.ImageStabilization = uitemp;
+    printf ("==>> tag 0x%04x ImageStabilization %d\n", tag, imgdata.shootinginfo.ImageStabilization);
 
   } else if (((tag == 0x0001)  ||  // Minolta CameraSettings, big endian
               (tag == 0x0003)) &&
@@ -11840,6 +11846,8 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
     lid = 0x71<<1;
       imgdata.shootinginfo.ImageStabilization =
           (ushort)table_buf[lid] << 8 | (ushort)table_buf[lid + 1];
+       printf ("==>> tag 0x%04x lid %d ImageStabilization %d\n",tag, lid/2, imgdata.shootinginfo.ImageStabilization);
+
 
     free(table_buf);
 
@@ -11880,7 +11888,9 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
         }
 
         imSony.AFPointSelected = table_buf[21];
+        printf ("==>> AFPointSelected %d\n", imSony.AFPointSelected);
         imgdata.shootinginfo.AFPoint = (ushort)table_buf[25];
+        printf ("==>> AFPoint %d\n", imgdata.shootinginfo.AFPoint);
 
         if (len == 5478) {
           imSony.AFMicroAdjValue = table_buf[304] - 20;
@@ -11910,15 +11920,19 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
             !strncasecmp(model, "DSLR-A500", 9) ||
             !strncasecmp(model, "DSLR-A550", 9)) {
           imSony.AFPointSelected = table_buf[0x14];
+          printf ("==>> AFPointSelected %d\n", imSony.AFPointSelected);
           imgdata.shootinginfo.FocusMode = table_buf[0x15];
           imgdata.shootinginfo.AFPoint = (ushort)table_buf[0x18];
+          printf ("==>> AFPoint %d\n", imgdata.shootinginfo.AFPoint);
 
         } else if (!strncasecmp(model, "SLT-", 4) ||
             !strncasecmp(model, "DSLR-A560", 9) ||
             !strncasecmp(model, "DSLR-A580", 9)) {
           imSony.AFPointSelected = table_buf[0x1c];
+          printf ("==>> AFPointSelected %d\n", imSony.AFPointSelected);
           imgdata.shootinginfo.FocusMode = table_buf[0x1d];
           imgdata.shootinginfo.AFPoint = (ushort)table_buf[0x20];
+          printf ("==>> AFPoint %d\n", imgdata.shootinginfo.AFPoint);
         }
 
       }
@@ -11978,6 +11992,7 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
     if (uitemp == 1) imgdata.shootinginfo.ImageStabilization = 0;
     else if (uitemp == 5) imgdata.shootinginfo.ImageStabilization = 1;
     else imgdata.shootinginfo.ImageStabilization = uitemp;
+    printf ("==>> tag 0x%04x ImageStabilization %d\n",tag, imgdata.shootinginfo.ImageStabilization);
 
   } else if ((tag == 0xb0280088) && (dng_writer == nonDNG)) {
     thumb_offset = get4() + base;
@@ -12002,8 +12017,10 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
           ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
       lid = 0x0d<<1;
       imSony.AFPointSelected = table_buf[lid+1];
+      printf ("==>> AFPointSelected %d\n", imSony.AFPointSelected);
       lid = 0x0e<<1;
       imSony.AFAreaModeSetting = table_buf[lid+1];
+      printf ("==>> AFAreaModeSetting %d\n", imSony.AFAreaModeSetting);
       lid = 0x12<<1;
       imgdata.shootinginfo.MeteringMode =
           ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
@@ -12018,6 +12035,7 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
       lid = 0xbd<<1;
       imgdata.shootinginfo.ImageStabilization =
           ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      printf ("==>> tag 0x%04x lid %d ImageStabilization %d\n",tag, lid/2, imgdata.shootinginfo.ImageStabilization);
       break;
     case 280: // a200 a300 a350 a700
     case 364: // a850 a900
@@ -12080,13 +12098,17 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
 
   } else if (tag == 0x2008) {
     imSony.LongExposureNoiseReduction = get4();
+    printf ("==>> LongExposureNoiseReduction %u\n", imSony.LongExposureNoiseReduction);
 
   } else if (tag == 0x2009) {
     imSony.HighISONoiseReduction = get2();
+    printf ("==>> HighISONoiseReduction %d\n", imSony.HighISONoiseReduction);
 
   } else if (tag == 0x200a) {
     imSony.HDR[0] = get2();
     imSony.HDR[1] = get2();
+    printf ("==>> HDR %d %d\n",
+      imSony.HDR[0], imSony.HDR[1]);
 
   } else if (tag == 0x2010 && len < 256000) {
     table_buf_0x2010 = (uchar *)malloc(len);
@@ -12108,6 +12130,7 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
   } else if (tag == 0x201c) {
     if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
       imSony.AFAreaModeSetting = fgetc(ifp);
+      printf ("==>> AFAreaModeSetting %d\n", imSony.AFAreaModeSetting);
     }
 
   } else if (tag == 0x201d) {
@@ -12116,33 +12139,45 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
          (imSony.SonyCameraType == LIBRAW_SONY_NEX))) {
       imSony.FlexibleSpotPosition[0] = get2();
       imSony.FlexibleSpotPosition[1] = get2();
+      printf ("==>> FlexibleSpotPosition %d %d\n",
+        imSony.FlexibleSpotPosition[0], imSony.FlexibleSpotPosition[1]);
     }
 
   } else if (tag == 0x201e) {
     if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
       imSony.AFPointSelected = fgetc(ifp);
+      printf ("==>> AFPointSelected %d\n", imSony.AFPointSelected);
     }
 
   } else if (tag == 0x2020) {
     if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
       fread(imSony.AFPointsUsed, 1, 10, ifp);
     }
+    printf ("==>> AFPointsUsed");
+    for (c=0; c<10; c++) printf (" %d", imSony.AFPointsUsed[c]);
+    printf ("\n");
 
   } else if (tag == 0x2021) {
     if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
       imSony.AFTracking = fgetc(ifp);
+      printf ("==>> AFTracking %d\n", imSony.AFTracking);
     }
 
   } else if (tag == 0x2027) {
     FORC4 imSony.FocusLocation[c] = get2();
+    printf ("==>> FocusLocation");
+    FORC4 printf (" %d", imSony.FocusLocation[c]);
+    printf ("\n");
 
   } else if (tag == 0x2028) {
     if (get2()) {
       imSony.VariableLowPassFilter = get2();
     }
+    printf ("==>> VariableLowPassFilter %d\n", imSony.VariableLowPassFilter);
 
   } else if (tag == 0x2029) {
     imSony.RAWFileType = get2();
+    printf ("==>> compression RAWFileType %d\n", imSony.RAWFileType);
 
   } else if (tag == 0x202c) {
     imSony.MeteringMode2 = get2();
@@ -14648,6 +14683,7 @@ int CLASS parse_tiff_ifd(int base)
       break;
     case 0x7000:
       imgdata.makernotes.sony.SonyRawFileType = get2();
+      printf ("==>> SonyRawFileType %d\n", imgdata.makernotes.sony.SonyRawFileType);
       break;
 #endif
     case 28688:
@@ -18749,9 +18785,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8512,-2641,-694,-8042,15670,2526,-1821,2117,7414 } },
     { "Sony DSC-V3", 0, 0,
       { 7511,-2571,-692,-7894,15088,3060,-948,1111,8128 } },
-    {"Sony DSC-RX100M5", -800, 0,
-      { 6596,-2079,-562,-4782,13016,1933,-970,1581,5181 } },
-    { "Sony DSC-RX100M", -800, 0, /* used for M2/M3/M4 */
+    { "Sony DSC-RX100M", -800, 0, /* used for M2/M3/M4/M5/M6 */
       { 6596,-2079,-562,-4782,13016,1933,-970,1581,5181 } },
     { "Sony DSC-RX100", 0, 0,
       { 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
@@ -19198,7 +19232,7 @@ void CLASS identify()
         {0x15b, "ILCE-7RM2"},   {0x15e, "ILCE-7SM2"},   {0x161, "ILCA-68"},    {0x162, "ILCA-99M2"},
         {0x163, "DSC-RX10M3"},  {0x164, "DSC-RX100M5"}, {0x165, "ILCE-6300"},  {0x166, "ILCE-9"},
         {0x168, "ILCE-6500"},   {0x16a, "ILCE-7RM3"},   {0x16b, "ILCE-7M3"},   {0x16c, "DSC-RX0"},
-        {0x16d, "DSC-RX10M4"},
+        {0x16d, "DSC-RX10M4"},  {0x16e, "DSC-RX100M6"},
     };
 
 #ifdef LIBRAW_LIBRARY_BUILD
