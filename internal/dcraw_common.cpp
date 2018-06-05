@@ -9692,6 +9692,10 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
 
 }
 
+#define imSony imgdata.makernotes.sony
+#define icWBC imgdata.color.WB_Coeffs
+#define icWBCTC imgdata.color.WBCT_Coeffs
+#define ilm imgdata.lens.makernotes
 void CLASS setSonyBodyFeatures(unsigned id)
 {
   ushort idx;
@@ -9823,15 +9827,15 @@ void CLASS setSonyBodyFeatures(unsigned id)
       {364, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
       {365, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
   };
-  imgdata.lens.makernotes.CamID = id;
+  ilm.CamID = id;
 
   if (id == 2)
   {
-    imgdata.lens.makernotes.CameraMount = imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
-    imgdata.makernotes.sony.SonyCameraType = LIBRAW_SONY_DSC;
-    imgdata.makernotes.sony.group2010 = 0;
-    imgdata.makernotes.sony.real_iso_offset = 0xffff;
-    imgdata.makernotes.sony.ImageCount3_offset = 0xffff;
+    ilm.CameraMount = ilm.LensMount = LIBRAW_MOUNT_FixedLens;
+    imSony.SonyCameraType = LIBRAW_SONY_DSC;
+    imSony.group2010 = 0;
+    imSony.real_iso_offset = 0xffff;
+    imSony.ImageCount3_offset = 0xffff;
     return;
   }
   else
@@ -9841,45 +9845,45 @@ void CLASS setSonyBodyFeatures(unsigned id)
   {
     if (!SonyCamFeatures[idx].scf[2])
       return;
-    imgdata.lens.makernotes.CameraFormat = SonyCamFeatures[idx].scf[1];
-    imgdata.lens.makernotes.CameraMount = SonyCamFeatures[idx].scf[2];
-    imgdata.makernotes.sony.SonyCameraType = SonyCamFeatures[idx].scf[3];
+    ilm.CameraFormat = SonyCamFeatures[idx].scf[1];
+    ilm.CameraMount = SonyCamFeatures[idx].scf[2];
+    imSony.SonyCameraType = SonyCamFeatures[idx].scf[3];
     if (SonyCamFeatures[idx].scf[4])
-      imgdata.lens.makernotes.LensMount = SonyCamFeatures[idx].scf[4];
-    imgdata.makernotes.sony.group2010 = SonyCamFeatures[idx].scf[5];
-    imgdata.makernotes.sony.real_iso_offset = SonyCamFeatures[idx].scf[6];
-    imgdata.makernotes.sony.ImageCount3_offset = SonyCamFeatures[idx].scf[7];
-    imgdata.makernotes.sony.MeteringMode_offset = SonyCamFeatures[idx].scf[8];
-    imgdata.makernotes.sony.ExposureProgram_offset = SonyCamFeatures[idx].scf[9];
-    imgdata.makernotes.sony.ReleaseMode2_offset = SonyCamFeatures[idx].scf[10];
+      ilm.LensMount = SonyCamFeatures[idx].scf[4];
+    imSony.group2010 = SonyCamFeatures[idx].scf[5];
+    imSony.real_iso_offset = SonyCamFeatures[idx].scf[6];
+    imSony.ImageCount3_offset = SonyCamFeatures[idx].scf[7];
+    imSony.MeteringMode_offset = SonyCamFeatures[idx].scf[8];
+    imSony.ExposureProgram_offset = SonyCamFeatures[idx].scf[9];
+    imSony.ReleaseMode2_offset = SonyCamFeatures[idx].scf[10];
   }
 
   char *sbstr = strstr(software, " v");
   if (sbstr != NULL)
   {
     sbstr += 2;
-    imgdata.makernotes.sony.firmware = atof(sbstr);
+    imSony.firmware = atof(sbstr);
 
     if ((id == 306) || (id == 311))
     {
-      if (imgdata.makernotes.sony.firmware < 1.2f)
-        imgdata.makernotes.sony.ImageCount3_offset = 0x01aa;
+      if (imSony.firmware < 1.2f)
+        imSony.ImageCount3_offset = 0x01aa;
       else
-        imgdata.makernotes.sony.ImageCount3_offset = 0x01c0;
+        imSony.ImageCount3_offset = 0x01c0;
     }
     else if (id == 312)
     {
-      if (imgdata.makernotes.sony.firmware < 2.0f)
-        imgdata.makernotes.sony.ImageCount3_offset = 0x01aa;
+      if (imSony.firmware < 2.0f)
+        imSony.ImageCount3_offset = 0x01aa;
       else
-        imgdata.makernotes.sony.ImageCount3_offset = 0x01c0;
+        imSony.ImageCount3_offset = 0x01c0;
     }
     else if ((id == 318) || (id == 340))
     {
-      if (imgdata.makernotes.sony.firmware < 1.2f)
-        imgdata.makernotes.sony.ImageCount3_offset = 0x01a0;
+      if (imSony.firmware < 1.2f)
+        imSony.ImageCount3_offset = 0x01a0;
       else
-        imgdata.makernotes.sony.ImageCount3_offset = 0x01b6;
+        imSony.ImageCount3_offset = 0x01b6;
     }
   }
 }
@@ -9892,31 +9896,31 @@ void CLASS parseSonyLensType2(uchar a, uchar b)
     return;
   if (lid2 < 0x100)
   {
-    if ((imgdata.lens.makernotes.AdapterID != 0x4900) && (imgdata.lens.makernotes.AdapterID != 0xEF00))
+    if ((ilm.AdapterID != 0x4900) && (ilm.AdapterID != 0xEF00))
     {
-      imgdata.lens.makernotes.AdapterID = lid2;
+      ilm.AdapterID = lid2;
       switch (lid2)
       {
       case 1:
       case 2:
       case 3:
       case 6:
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
+        ilm.LensMount = LIBRAW_MOUNT_Minolta_A;
         break;
       case 44:
       case 78:
       case 239:
-        imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
+        ilm.LensMount = LIBRAW_MOUNT_Canon_EF;
         break;
       }
     }
   }
   else
-    imgdata.lens.makernotes.LensID = lid2;
+    ilm.LensID = lid2;
   if ((lid2 >= 50481) && (lid2 < 50500))
   {
-    strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
-    imgdata.lens.makernotes.AdapterID = 0x4900;
+    strcpy(ilm.Adapter, "MC-11");
+    ilm.AdapterID = 0x4900;
   }
   return;
 }
@@ -9929,73 +9933,73 @@ void CLASS parseSonyLensFeatures(uchar a, uchar b)
   ushort features;
   features = (((ushort)a) << 8) | ((ushort)b);
 
-  if ((imgdata.lens.makernotes.LensMount == LIBRAW_MOUNT_Canon_EF) ||
-      (imgdata.lens.makernotes.LensMount != LIBRAW_MOUNT_Sigma_X3F) || !features)
+  if ((ilm.LensMount == LIBRAW_MOUNT_Canon_EF) ||
+      (ilm.LensMount != LIBRAW_MOUNT_Sigma_X3F) || !features)
     return;
 
-  imgdata.lens.makernotes.LensFeatures_pre[0] = 0;
-  imgdata.lens.makernotes.LensFeatures_suf[0] = 0;
+  ilm.LensFeatures_pre[0] = 0;
+  ilm.LensFeatures_suf[0] = 0;
   if ((features & 0x0200) && (features & 0x0100))
-    strcpy(imgdata.lens.makernotes.LensFeatures_pre, "E");
+    strcpy(ilm.LensFeatures_pre, "E");
   else if (features & 0x0200)
-    strcpy(imgdata.lens.makernotes.LensFeatures_pre, "FE");
+    strcpy(ilm.LensFeatures_pre, "FE");
   else if (features & 0x0100)
-    strcpy(imgdata.lens.makernotes.LensFeatures_pre, "DT");
+    strcpy(ilm.LensFeatures_pre, "DT");
 
-  if (!imgdata.lens.makernotes.LensFormat && !imgdata.lens.makernotes.LensMount)
+  if (!ilm.LensFormat && !ilm.LensMount)
   {
-    imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FF;
-    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
+    ilm.LensFormat = LIBRAW_FORMAT_FF;
+    ilm.LensMount = LIBRAW_MOUNT_Minolta_A;
 
     if ((features & 0x0200) && (features & 0x0100))
     {
-      imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sony_E;
+      ilm.LensFormat = LIBRAW_FORMAT_APSC;
+      ilm.LensMount = LIBRAW_MOUNT_Sony_E;
     }
     else if (features & 0x0200)
     {
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sony_E;
+      ilm.LensMount = LIBRAW_MOUNT_Sony_E;
     }
     else if (features & 0x0100)
     {
-      imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
+      ilm.LensFormat = LIBRAW_FORMAT_APSC;
     }
   }
 
   if (features & 0x4000)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_pre, " PZ");
+    strnXcat(ilm.LensFeatures_pre, " PZ");
 
   if (features & 0x0008)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " G");
+    strnXcat(ilm.LensFeatures_suf, " G");
   else if (features & 0x0004)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " ZA");
+    strnXcat(ilm.LensFeatures_suf, " ZA");
 
   if ((features & 0x0020) && (features & 0x0040))
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " Macro");
+    strnXcat(ilm.LensFeatures_suf, " Macro");
   else if (features & 0x0020)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " STF");
+    strnXcat(ilm.LensFeatures_suf, " STF");
   else if (features & 0x0040)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " Reflex");
+    strnXcat(ilm.LensFeatures_suf, " Reflex");
   else if (features & 0x0080)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " Fisheye");
+    strnXcat(ilm.LensFeatures_suf, " Fisheye");
 
   if (features & 0x0001)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " SSM");
+    strnXcat(ilm.LensFeatures_suf, " SSM");
   else if (features & 0x0002)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " SAM");
+    strnXcat(ilm.LensFeatures_suf, " SAM");
 
   if (features & 0x8000)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " OSS");
+    strnXcat(ilm.LensFeatures_suf, " OSS");
 
   if (features & 0x2000)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " LE");
+    strnXcat(ilm.LensFeatures_suf, " LE");
 
   if (features & 0x0800)
-    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " II");
+    strnXcat(ilm.LensFeatures_suf, " II");
 
-  if (imgdata.lens.makernotes.LensFeatures_suf[0] == ' ')
-    memmove(imgdata.lens.makernotes.LensFeatures_suf, imgdata.lens.makernotes.LensFeatures_suf + 1,
-            strbuflen(imgdata.lens.makernotes.LensFeatures_suf) - 1);
+  if (ilm.LensFeatures_suf[0] == ' ')
+    memmove(ilm.LensFeatures_suf, ilm.LensFeatures_suf + 1,
+            strbuflen(ilm.LensFeatures_suf) - 1);
 
   return;
 }
@@ -10003,43 +10007,43 @@ void CLASS parseSonyLensFeatures(uchar a, uchar b)
 
 void CLASS process_Sony_0x0116(uchar *buf, ushort len, unsigned id)
 {
-  uchar bufx;
+  int i = 0;
 
   if (((id == 257) || (id == 262) || (id == 269) || (id == 270)) && (len >= 2))
-    bufx = buf[1];
+    i = 1;
   else if ((id >= 273) && (len >= 3))
-    bufx = buf[2];
+    i = 2;
   else
     return;
 
-  imgdata.other.BatteryTemperature = (float)(bufx - 32) / 1.8f;
+  imgdata.other.BatteryTemperature = (float)(buf[i] - 32) / 1.8f;
 }
 
 void CLASS process_Sony_0x2010(uchar *buf, ushort len)
 {
-  if (!imgdata.makernotes.sony.group2010)
+  if (!imSony.group2010)
     return;
 
-  if ((imgdata.makernotes.sony.real_iso_offset != 0xffff)    &&
-      (len >= (imgdata.makernotes.sony.real_iso_offset + 2)) &&
+  if ((imSony.real_iso_offset != 0xffff)    &&
+      (len >= (imSony.real_iso_offset + 2)) &&
       (imgdata.other.real_ISO < 0.1f)) {
     uchar s[2];
-    s[0] = SonySubstitution[buf[imgdata.makernotes.sony.real_iso_offset]];
-    s[1] = SonySubstitution[buf[imgdata.makernotes.sony.real_iso_offset + 1]];
+    s[0] = SonySubstitution[buf[imSony.real_iso_offset]];
+    s[1] = SonySubstitution[buf[imSony.real_iso_offset + 1]];
     imgdata.other.real_ISO =
        100.0f * libraw_powf64l(2.0f, (16 - ((float)sget2(s)) / 256.0f));
   }
 
-  if (len >= (imgdata.makernotes.sony.MeteringMode_offset + 2)) {
+  if (len >= (imSony.MeteringMode_offset + 2)) {
     imgdata.shootinginfo.MeteringMode =
-       SonySubstitution[buf[imgdata.makernotes.sony.MeteringMode_offset]];
+       SonySubstitution[buf[imSony.MeteringMode_offset]];
     imgdata.shootinginfo.ExposureProgram =
-      SonySubstitution[buf[imgdata.makernotes.sony.ExposureProgram_offset]];
+      SonySubstitution[buf[imSony.ExposureProgram_offset]];
   }
 
-  if (len >= (imgdata.makernotes.sony.ReleaseMode2_offset + 2)) {
+  if (len >= (imSony.ReleaseMode2_offset + 2)) {
     imgdata.shootinginfo.DriveMode =
-       SonySubstitution[buf[imgdata.makernotes.sony.ReleaseMode2_offset]];
+       SonySubstitution[buf[imSony.ReleaseMode2_offset]];
   }
 
 }
@@ -10050,37 +10054,37 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
   uchar s[4];
   int c;
 
-  if ((imgdata.lens.makernotes.CameraMount != LIBRAW_MOUNT_Sony_E) &&
-      (imgdata.lens.makernotes.CameraMount != LIBRAW_MOUNT_FixedLens))
+  if ((ilm.CameraMount != LIBRAW_MOUNT_Sony_E) &&
+      (ilm.CameraMount != LIBRAW_MOUNT_FixedLens))
   {
     if (len < 2)
       return;
     if (buf[0])
-      imgdata.lens.makernotes.MaxAp4CurFocal =
+      ilm.MaxAp4CurFocal =
           my_roundf(libraw_powf64l(2.0f, ((float)SonySubstitution[buf[0]] / 8.0 - 1.06f) / 2.0f) * 10.0f) / 10.0f;
 
     if (buf[1])
-      imgdata.lens.makernotes.MinAp4CurFocal =
+      ilm.MinAp4CurFocal =
           my_roundf(libraw_powf64l(2.0f, ((float)SonySubstitution[buf[1]] / 8.0 - 1.06f) / 2.0f) * 10.0f) / 10.0f;
   }
 
-  if (imgdata.lens.makernotes.CameraMount != LIBRAW_MOUNT_FixedLens)
+  if (ilm.CameraMount != LIBRAW_MOUNT_FixedLens)
   {
     if (len <= 0x106)
       return;
     if (buf[0x3d] | buf[0x3c])
     {
       lid = SonySubstitution[buf[0x3d]] << 8 | SonySubstitution[buf[0x3c]];
-      imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, ((float)lid / 256.0f - 16.0f) / 2.0f);
+      ilm.CurAp = libraw_powf64l(2.0f, ((float)lid / 256.0f - 16.0f) / 2.0f);
     }
-    if (buf[0x105] && (imgdata.lens.makernotes.LensMount != LIBRAW_MOUNT_Canon_EF) &&
-        (imgdata.lens.makernotes.LensMount != LIBRAW_MOUNT_Sigma_X3F))
-      imgdata.lens.makernotes.LensMount = SonySubstitution[buf[0x105]];
+    if (buf[0x105] && (ilm.LensMount != LIBRAW_MOUNT_Canon_EF) &&
+        (ilm.LensMount != LIBRAW_MOUNT_Sigma_X3F))
+      ilm.LensMount = SonySubstitution[buf[0x105]];
     if (buf[0x106])
-      imgdata.lens.makernotes.LensFormat = SonySubstitution[buf[0x106]];
+      ilm.LensFormat = SonySubstitution[buf[0x106]];
   }
 
-  if (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E)
+  if (ilm.CameraMount == LIBRAW_MOUNT_Sony_E)
   {
     if (len <= 0x108)
       return;
@@ -10090,26 +10094,26 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
 
   if (len <= 0x10a)
     return;
-  if ((imgdata.lens.makernotes.LensID == -1) && (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A) &&
+  if ((ilm.LensID == -1) && (ilm.CameraMount == LIBRAW_MOUNT_Minolta_A) &&
       (buf[0x010a] | buf[0x0109]))
   {
-    imgdata.lens.makernotes.LensID = // LensType - Minolta/Sony lens ids
+    ilm.LensID = // LensType - Minolta/Sony lens ids
         SonySubstitution[buf[0x010a]] << 8 | SonySubstitution[buf[0x0109]];
 
-    if ((imgdata.lens.makernotes.LensID > 0x4900) && (imgdata.lens.makernotes.LensID <= 0x5900))
+    if ((ilm.LensID > 0x4900) && (ilm.LensID <= 0x5900))
     {
-      imgdata.lens.makernotes.AdapterID = 0x4900;
-      imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sigma_X3F;
-      strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
+      ilm.AdapterID = 0x4900;
+      ilm.LensID -= ilm.AdapterID;
+      ilm.LensMount = LIBRAW_MOUNT_Sigma_X3F;
+      strcpy(ilm.Adapter, "MC-11");
     }
 
-    else if ((imgdata.lens.makernotes.LensID > 0xEF00) && (imgdata.lens.makernotes.LensID < 0xFFFF) &&
-             (imgdata.lens.makernotes.LensID != 0xFF00))
+    else if ((ilm.LensID > 0xEF00) && (ilm.LensID < 0xFFFF) &&
+             (ilm.LensID != 0xFF00))
     {
-      imgdata.lens.makernotes.AdapterID = 0xEF00;
-      imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
+      ilm.AdapterID = 0xEF00;
+      ilm.LensID -= ilm.AdapterID;
+      ilm.LensMount = LIBRAW_MOUNT_Canon_EF;
     }
   }
 
@@ -10121,7 +10125,7 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     // "SLT-A37", "SLT-A57", "NEX-F3", "Lunar"
     parseSonyLensFeatures(SonySubstitution[buf[0x115]], SonySubstitution[buf[0x116]]);
   }
-  else if (imgdata.lens.makernotes.CameraMount != LIBRAW_MOUNT_FixedLens)
+  else if (ilm.CameraMount != LIBRAW_MOUNT_FixedLens)
   {
     if (len <= 0x117)
       return;
@@ -10148,7 +10152,7 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     sprintf(imgdata.shootinginfo.InternalBodySerial, "%06llx",
             (b88 << 40) + (b89 << 32) + (b8a << 24) + (b8b << 16) + (b8c << 8) + b8d);
   }
-  else if (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Minolta_A)
+  else if (ilm.CameraMount == LIBRAW_MOUNT_Minolta_A)
   {
     if (len <= 0xf4)
       return;
@@ -10160,7 +10164,7 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     sprintf(imgdata.shootinginfo.InternalBodySerial, "%05llx",
             (bf0 << 32) + (bf1 << 24) + (bf2 << 16) + (bf3 << 8) + bf4);
   }
-  else if ((imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Sony_E) && (id != 288) && (id != 289) && (id != 290))
+  else if ((ilm.CameraMount == LIBRAW_MOUNT_Sony_E) && (id != 288) && (id != 289) && (id != 290))
   {
     if (len <= 0x7f)
       return;
@@ -10171,11 +10175,11 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
     sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x", (b7c << 24) + (b7d << 16) + (b7e << 8) + b7f);
   }
 
-  if ((imgdata.makernotes.sony.ImageCount3_offset != 0xffff) &&
-      (len >= (imgdata.makernotes.sony.ImageCount3_offset + 4)))
+  if ((imSony.ImageCount3_offset != 0xffff) &&
+      (len >= (imSony.ImageCount3_offset + 4)))
   {
-    FORC4 s[c] = SonySubstitution[buf[imgdata.makernotes.sony.ImageCount3_offset + c]];
-    imgdata.makernotes.sony.ImageCount3 = sget4(s);
+    FORC4 s[c] = SonySubstitution[buf[imSony.ImageCount3_offset + c]];
+    imSony.ImageCount3 = sget4(s);
   }
 
   return;
@@ -10193,57 +10197,57 @@ void CLASS process_Sony_0x9400(uchar *buf, ushort len, unsigned id)
 
     if ((id == 358) || (id == 362) || (id == 363) || (id == 365))
     {
-      imgdata.makernotes.sony.ShotNumberSincePowerUp = SonySubstitution[buf[0x0a]];
+      imSony.ShotNumberSincePowerUp = SonySubstitution[buf[0x0a]];
     }
     else
     {
       FORC4 s[c] = SonySubstitution[buf[0x0a + c]];
-      imgdata.makernotes.sony.ShotNumberSincePowerUp = sget4(s);
+      imSony.ShotNumberSincePowerUp = sget4(s);
     }
 
-    imgdata.makernotes.sony.Sony0x9400_version = 0xc;
+    imSony.Sony0x9400_version = 0xc;
 
-    imgdata.makernotes.sony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x09]];
+    imSony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x09]];
 
     FORC4 s[c] = SonySubstitution[buf[0x12 + c]];
-    imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber = sget4(s);
+    imSony.Sony0x9400_SequenceImageNumber = sget4(s);
 
-    imgdata.makernotes.sony.Sony0x9400_SequenceLength1 = SonySubstitution[buf[0x16]]; // shots
+    imSony.Sony0x9400_SequenceLength1 = SonySubstitution[buf[0x16]]; // shots
 
     FORC4 s[c] = SonySubstitution[buf[0x1a + c]];
-    imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber = sget4(s);
+    imSony.Sony0x9400_SequenceFileNumber = sget4(s);
 
-    imgdata.makernotes.sony.Sony0x9400_SequenceLength2 = SonySubstitution[buf[0x1e]]; // files
+    imSony.Sony0x9400_SequenceLength2 = SonySubstitution[buf[0x1e]]; // files
   }
 
   else if ((bufx == 0x0c) && (len >= 0x1f))
   { // 0x9400 'b' version
-    imgdata.makernotes.sony.Sony0x9400_version = 0xb;
+    imSony.Sony0x9400_version = 0xb;
 
     FORC4 s[c] = SonySubstitution[buf[0x08 + c]];
-    imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber = sget4(s);
+    imSony.Sony0x9400_SequenceImageNumber = sget4(s);
 
     FORC4 s[c] = SonySubstitution[buf[0x0c + c]];
-    imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber = sget4(s);
+    imSony.Sony0x9400_SequenceFileNumber = sget4(s);
 
-    imgdata.makernotes.sony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x10]];
+    imSony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x10]];
 
-    imgdata.makernotes.sony.Sony0x9400_SequenceLength1 = SonySubstitution[buf[0x1e]];
+    imSony.Sony0x9400_SequenceLength1 = SonySubstitution[buf[0x1e]];
   }
 
   else if ((bufx == 0x0a) && (len >= 0x23))
   { // 0x9400 'a' version
-    imgdata.makernotes.sony.Sony0x9400_version = 0xa;
+    imSony.Sony0x9400_version = 0xa;
 
     FORC4 s[c] = SonySubstitution[buf[0x08 + c]];
-    imgdata.makernotes.sony.Sony0x9400_SequenceImageNumber = sget4(s);
+    imSony.Sony0x9400_SequenceImageNumber = sget4(s);
 
     FORC4 s[c] = SonySubstitution[buf[0x0c + c]];
-    imgdata.makernotes.sony.Sony0x9400_SequenceFileNumber = sget4(s);
+    imSony.Sony0x9400_SequenceFileNumber = sget4(s);
 
-    imgdata.makernotes.sony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x10]];
+    imSony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x10]];
 
-    imgdata.makernotes.sony.Sony0x9400_SequenceLength1 = SonySubstitution[buf[0x22]];
+    imSony.Sony0x9400_SequenceLength1 = SonySubstitution[buf[0x22]];
   }
 
   else
@@ -10258,8 +10262,8 @@ void CLASS process_Sony_0x9402(uchar *buf, ushort len)
 
   imgdata.shootinginfo.FocusMode = SonySubstitution[buf[0x16]];
 
-  if ((imgdata.makernotes.sony.SonyCameraType == LIBRAW_SONY_SLT) ||
-      (imgdata.makernotes.sony.SonyCameraType == LIBRAW_SONY_ILCA))
+  if ((imSony.SonyCameraType == LIBRAW_SONY_SLT) ||
+      (imSony.SonyCameraType == LIBRAW_SONY_ILCA))
     return;
 
   uchar bufx = buf[0x00];
@@ -10302,24 +10306,24 @@ void CLASS process_Sony_0x9406(uchar *buf, ushort len)
 
 void CLASS process_Sony_0x940c(uchar *buf, ushort len)
 {
-  if ((imgdata.makernotes.sony.SonyCameraType != LIBRAW_SONY_ILCE) &&
-      (imgdata.makernotes.sony.SonyCameraType != LIBRAW_SONY_NEX))
+  if ((imSony.SonyCameraType != LIBRAW_SONY_ILCE) &&
+      (imSony.SonyCameraType != LIBRAW_SONY_NEX))
     return;
   if (len <= 0x000a)
     return;
 
   ushort lid2;
-  if ((imgdata.lens.makernotes.LensMount != LIBRAW_MOUNT_Canon_EF) &&
-      (imgdata.lens.makernotes.LensMount != LIBRAW_MOUNT_Sigma_X3F))
+  if ((ilm.LensMount != LIBRAW_MOUNT_Canon_EF) &&
+      (ilm.LensMount != LIBRAW_MOUNT_Sigma_X3F))
   {
     switch (SonySubstitution[buf[0x0008]])
     {
     case 1:
     case 5:
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
+      ilm.LensMount = LIBRAW_MOUNT_Minolta_A;
       break;
     case 4:
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sony_E;
+      ilm.LensMount = LIBRAW_MOUNT_Sony_E;
       break;
     }
   }
@@ -10332,38 +10336,35 @@ void CLASS process_Sony_0x940c(uchar *buf, ushort len)
 
 void CLASS process_Sony_0x940e(uchar *buf, ushort len, unsigned id)
 {
-  if (((imgdata.makernotes.sony.SonyCameraType != LIBRAW_SONY_SLT) &&
-       (imgdata.makernotes.sony.SonyCameraType != LIBRAW_SONY_ILCA)) ||
+  if (((imSony.SonyCameraType != LIBRAW_SONY_SLT) &&
+       (imSony.SonyCameraType != LIBRAW_SONY_ILCA)) ||
       (id == 280) ||
       (id == 281) ||
-      (id == 285))
+      (id == 285) ||
+      (len < 3))
     return;
 
-  if (imgdata.makernotes.sony.SonyCameraType == LIBRAW_SONY_ILCA)
-  {
-    if (len >= 0x06)
-    {
+  imSony.AFType = SonySubstitution[buf[0x02]];
+
+  if (imSony.SonyCameraType == LIBRAW_SONY_ILCA) {
+    if (len >= 0x06) {
       imgdata.shootinginfo.FocusMode = SonySubstitution[buf[0x05]];
     }
-    if (len >= 0x0051)
-    {
-      imgdata.makernotes.sony.AFMicroAdjValue = SonySubstitution[buf[0x0050]];
+    if (len >= 0x0051) {
+      imSony.AFMicroAdjValue = SonySubstitution[buf[0x0050]];
     }
-  }
-  else
-  {
-    if (len >= 0x0c)
-    {
+
+  } else {
+    if (len >= 0x0c) {
       imgdata.shootinginfo.FocusMode = SonySubstitution[buf[0x0b]];
     }
-    if (len >= 0x017e)
-    {
-      imgdata.makernotes.sony.AFMicroAdjValue = SonySubstitution[buf[0x017d]];
+    if (len >= 0x017e) {
+      imSony.AFMicroAdjValue = SonySubstitution[buf[0x017d]];
     }
   }
 
-  if (imgdata.makernotes.sony.AFMicroAdjValue != 0)
-    imgdata.makernotes.sony.AFMicroAdjOn = 1;
+  if (imSony.AFMicroAdjValue != 0)
+    imSony.AFMicroAdjOn = 1;
 }
 
 void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
@@ -10378,82 +10379,82 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
                                uchar *&table_buf_0x940e, ushort &table_buf_0x940e_len)
 {
 
-  ushort lid;
+  ushort lid, a, b, c, d;
   uchar *table_buf;
+  uchar uc;
+  uchar s[2];
+  int LensDataValid = 0;
+  unsigned uitemp;
 
-  if (tag == 0xb001) // Sony ModelID
-  {
+  if (tag == 0xb001) { // Sony ModelID
     unique_id = get2();
     setSonyBodyFeatures(unique_id);
 
-    if (table_buf_0x0116_len)
-    {
+    if (table_buf_0x0116_len) {
       process_Sony_0x0116(table_buf_0x0116, table_buf_0x0116_len, unique_id);
       free(table_buf_0x0116);
       table_buf_0x0116_len = 0;
     }
 
-    if (table_buf_0x2010_len)
-    {
+    if (table_buf_0x2010_len) {
       process_Sony_0x2010(table_buf_0x2010, table_buf_0x2010_len);
       free(table_buf_0x2010);
       table_buf_0x2010_len = 0;
     }
 
-    if (table_buf_0x9050_len)
-    {
+    if (table_buf_0x9050_len) {
       process_Sony_0x9050(table_buf_0x9050, table_buf_0x9050_len, unique_id);
       free(table_buf_0x9050);
       table_buf_0x9050_len = 0;
     }
 
-    if (table_buf_0x9400_len)
-    {
+    if (table_buf_0x9400_len) {
       process_Sony_0x9400(table_buf_0x9400, table_buf_0x9400_len, unique_id);
       free(table_buf_0x9400);
       table_buf_0x9400_len = 0;
     }
 
-    if (table_buf_0x9402_len)
-    {
+    if (table_buf_0x9402_len) {
       process_Sony_0x9402(table_buf_0x9402, table_buf_0x9402_len);
       free(table_buf_0x9402);
       table_buf_0x9402_len = 0;
     }
 
-    if (table_buf_0x9403_len)
-    {
+    if (table_buf_0x9403_len) {
       process_Sony_0x9403(table_buf_0x9403, table_buf_0x9403_len);
       free(table_buf_0x9403);
       table_buf_0x9403_len = 0;
     }
 
-    if (table_buf_0x9406_len)
-    {
+    if (table_buf_0x9406_len) {
       process_Sony_0x9406(table_buf_0x9406, table_buf_0x9406_len);
       free(table_buf_0x9406);
       table_buf_0x9406_len = 0;
     }
 
-    if (table_buf_0x940c_len)
-    {
+    if (table_buf_0x940c_len) {
       process_Sony_0x940c(table_buf_0x940c, table_buf_0x940c_len);
       free(table_buf_0x940c);
       table_buf_0x940c_len = 0;
     }
 
-    if (table_buf_0x940e_len)
-    {
+    if (table_buf_0x940e_len) {
       process_Sony_0x940e(table_buf_0x940e, table_buf_0x940e_len, unique_id);
       free(table_buf_0x940e);
       table_buf_0x940e_len = 0;
     }
-  }
 
-  else if (((tag == 0x0001)  ||  // Minolta CameraSettings, big endian
-            (tag == 0x0003)) &&
-           (len >= 196))
-  {
+  } else if (tag == 0xb000) {
+    FORC4 imSony.FileFormat = imSony.FileFormat*10 + fgetc(ifp);
+
+  } else if (tag == 0xb026) {
+    uitemp = get4();
+    if (uitemp != 0xffffffff)
+      imgdata.shootinginfo.ImageStabilization = uitemp;
+
+  } else if (((tag == 0x0001)  ||  // Minolta CameraSettings, big endian
+              (tag == 0x0003)) &&
+             (len >= 196)) {
     table_buf = (uchar *)malloc(len);
     fread(table_buf, len, 1, ifp);
 
@@ -10473,9 +10474,11 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
           (unsigned)table_buf[lid + 2] << 8 | (unsigned)table_buf[lid + 3];
 
     lid = 0x25<<2;
-      imgdata.makernotes.sony.MinoltaCamID =
+      imSony.MinoltaCamID =
           (unsigned)table_buf[lid] << 24 | (unsigned)table_buf[lid + 1] << 16 |
           (unsigned)table_buf[lid + 2] << 8 | (unsigned)table_buf[lid + 3];
+      if (imSony.MinoltaCamID != -1)
+        ilm.CamID = imSony.MinoltaCamID;
 
     lid = 0x30<<2;
       imgdata.shootinginfo.FocusMode =
@@ -10483,11 +10486,9 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
           (unsigned)table_buf[lid + 2] << 8 | (unsigned)table_buf[lid + 3];
 
     free(table_buf);
-  }
 
-  else if ((tag == 0x0004)  &&  // Minolta CameraSettings7D, big endian
-           (len >= 227))
-  {
+  } else if ((tag == 0x0004) && // Minolta CameraSettings7D, big endian
+             (len >= 227)) {
     table_buf = (uchar *)malloc(len);
     fread(table_buf, len, 1, ifp);
 
@@ -10505,107 +10506,115 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
 
     lid = 0x71<<1;
       imgdata.shootinginfo.ImageStabilization =
-          (ushort)table_buf[lid] << 24 | (ushort)table_buf[lid + 1];
+          (ushort)table_buf[lid] << 8 | (ushort)table_buf[lid + 1];
 
     free(table_buf);
-  }
 
-  else if ((tag == 0x0010) && // CameraInfo
+  } else if ((tag == 0x0010) && // CameraInfo
            strncasecmp(model, "DSLR-A100", 9) &&
-           strncasecmp(model, "NEX-5C", 6) &&
-           !strncasecmp(make, "SONY", 4) &&
-           ((len == 368)  || // a700
-            (len == 5478) || // a850, a900
-            (len == 5506) || // a200, a300, a350
-            (len == 6118) || // a230, a290, a330, a380, a390
-                             // a450, a500, a550, a560, a580
+           !strncasecmp(make, "SONY", 4)      &&
+           ((len == 368)  || // a700                         : CameraInfo
+            (len == 5478) || // a850, a900                   : CameraInfo
+            (len == 5506) || // a200, a300, a350             : CameraInfo2
+            (len == 6118) || // a230, a290, a330, a380, a390 : CameraInfo2
+            (len == 15360))  // a450, a500, a550, a560, a580 : CameraInfo3
                              // a33, a35, a55
-                             // NEX3, NEX5, NEX5C, NEXC3, VG10E
-            (len == 15360)))
-  {
+                             // NEX-3, NEX-5, NEX-5C, NEX-C3, NEX-VG10E
+
+            ) {
     table_buf = (uchar *)malloc(len);
     fread(table_buf, len, 1, ifp);
     if (memcmp(table_buf, "\xff\xff\xff\xff\xff\xff\xff\xff", 8) &&
-        memcmp(table_buf, "\x00\x00\x00\x00\x00\x00\x00\x00", 8))
-    {
-      switch (len)
+        memcmp(table_buf, "\x00\x00\x00\x00\x00\x00\x00\x00", 8)) {
+      LensDataValid = 1;
+    }
+    switch (len) {
+    case 368:  // a700: CameraInfo
+    case 5478: // a850, a900: CameraInfo
+      if ((!dng_writer) ||
+          (saneSonyCameraInfo(table_buf[0], table_buf[3], table_buf[2], table_buf[5], table_buf[4], table_buf[7])))
       {
-      case 368:
-      case 5478:
-        // a700, a850, a900: CameraInfo
-        if ((!dng_writer) ||
-            (saneSonyCameraInfo(table_buf[0], table_buf[3], table_buf[2], table_buf[5], table_buf[4], table_buf[7])))
-        {
+        if (LensDataValid) {
           if (table_buf[0] | table_buf[3])
-            imgdata.lens.makernotes.MinFocal = bcd2dec(table_buf[0]) * 100 + bcd2dec(table_buf[3]);
+            ilm.MinFocal = bcd2dec(table_buf[0]) * 100 + bcd2dec(table_buf[3]);
           if (table_buf[2] | table_buf[5])
-            imgdata.lens.makernotes.MaxFocal = bcd2dec(table_buf[2]) * 100 + bcd2dec(table_buf[5]);
+            ilm.MaxFocal = bcd2dec(table_buf[2]) * 100 + bcd2dec(table_buf[5]);
           if (table_buf[4])
-            imgdata.lens.makernotes.MaxAp4MinFocal = bcd2dec(table_buf[4]) / 10.0f;
+            ilm.MaxAp4MinFocal = bcd2dec(table_buf[4]) / 10.0f;
           if (table_buf[4])
-            imgdata.lens.makernotes.MaxAp4MaxFocal = bcd2dec(table_buf[7]) / 10.0f;
+            ilm.MaxAp4MaxFocal = bcd2dec(table_buf[7]) / 10.0f;
           parseSonyLensFeatures(table_buf[1], table_buf[6]);
-
-          if (len == 5478)
-          {
-            imgdata.makernotes.sony.AFMicroAdjValue = table_buf[304] - 20;
-            imgdata.makernotes.sony.AFMicroAdjOn = (((table_buf[305] & 0x80) == 0x80) ? 1 : 0);
-            imgdata.makernotes.sony.AFMicroAdjRegisteredLenses = table_buf[305] & 0x7f;
-          }
         }
-        break;
-      default:
-        // CameraInfo2 & 3
-        if ((!dng_writer) ||
-            (saneSonyCameraInfo(table_buf[1], table_buf[2], table_buf[3], table_buf[4], table_buf[5], table_buf[6])))
-        {
+
+        imSony.AFPointSelected = table_buf[21];
+        imgdata.shootinginfo.AFPoint = (ushort)table_buf[25];
+
+        if (len == 5478) {
+          imSony.AFMicroAdjValue = table_buf[304] - 20;
+          imSony.AFMicroAdjOn = (((table_buf[305] & 0x80) == 0x80) ? 1 : 0);
+          imSony.AFMicroAdjRegisteredLenses = table_buf[305] & 0x7f;
+        }
+      }
+      break;
+    default:
+      // CameraInfo2 & 3
+      if ((!dng_writer) ||
+          (saneSonyCameraInfo(table_buf[1], table_buf[2], table_buf[3], table_buf[4], table_buf[5], table_buf[6])))
+      {
+        if ((LensDataValid) && strncasecmp(model, "NEX-5C", 6)) {
           if (table_buf[1] | table_buf[2])
-            imgdata.lens.makernotes.MinFocal = bcd2dec(table_buf[1]) * 100 + bcd2dec(table_buf[2]);
+            ilm.MinFocal = bcd2dec(table_buf[1]) * 100 + bcd2dec(table_buf[2]);
           if (table_buf[3] | table_buf[4])
-            imgdata.lens.makernotes.MaxFocal = bcd2dec(table_buf[3]) * 100 + bcd2dec(table_buf[4]);
+            ilm.MaxFocal = bcd2dec(table_buf[3]) * 100 + bcd2dec(table_buf[4]);
           if (table_buf[5])
-            imgdata.lens.makernotes.MaxAp4MinFocal = bcd2dec(table_buf[5]) / 10.0f;
+            ilm.MaxAp4MinFocal = bcd2dec(table_buf[5]) / 10.0f;
           if (table_buf[6])
-            imgdata.lens.makernotes.MaxAp4MaxFocal = bcd2dec(table_buf[6]) / 10.0f;
+            ilm.MaxAp4MaxFocal = bcd2dec(table_buf[6]) / 10.0f;
           parseSonyLensFeatures(table_buf[0], table_buf[7]);
-
-          if (!strncasecmp(model, "DSLR-A450", 9) ||
-              !strncasecmp(model, "DSLR-A500", 9) ||
-              !strncasecmp(model, "DSLR-A550", 9))
-          imgdata.shootinginfo.FocusMode = table_buf[0x15];
         }
+
+        if (!strncasecmp(model, "DSLR-A450", 9) ||
+            !strncasecmp(model, "DSLR-A500", 9) ||
+            !strncasecmp(model, "DSLR-A550", 9)) {
+          imSony.AFPointSelected = table_buf[0x14];
+          imgdata.shootinginfo.FocusMode = table_buf[0x15];
+          imgdata.shootinginfo.AFPoint = (ushort)table_buf[0x18];
+
+        } else if (!strncasecmp(model, "SLT-", 4) ||
+            !strncasecmp(model, "DSLR-A560", 9) ||
+            !strncasecmp(model, "DSLR-A580", 9)) {
+          imSony.AFPointSelected = table_buf[0x1c];
+          imgdata.shootinginfo.FocusMode = table_buf[0x1d];
+          imgdata.shootinginfo.AFPoint = (ushort)table_buf[0x20];
+        }
+
       }
     }
     free(table_buf);
-  }
 
-  else if ((!dng_writer) &&
-           ((tag == 0x0020) ||
-            (tag == 0xb0280020)))
-  {
-    if (!strncasecmp(model, "DSLR-A100", 9))  // WBInfoA100
-    {
+  } else if ((!dng_writer) &&
+            ((tag == 0x0020) ||
+             (tag == 0xb0280020))) {
+    if (!strncasecmp(model, "DSLR-A100", 9)) { // WBInfoA100
       fseek(ifp, 0x49dc, SEEK_CUR);
       stmread(imgdata.shootinginfo.InternalBodySerial, 13, ifp);
-    }
-    else if ((len == 19154) ||
-             (len == 19148))
-    {
+
+    } else if ((len == 19154) || // a200 a230 a290 a300 a330 a350 a380 a390 : FocusInfo
+               (len == 19148)) { // a700 a850 a900                          : FocusInfo
       table_buf = (uchar *)malloc(128);
       fread(table_buf, 128, 1, ifp);
       imgdata.shootinginfo.DriveMode = table_buf[14];
-      imgdata.shootinginfo.ImageStabilization = table_buf[20];
       imgdata.shootinginfo.ExposureProgram = table_buf[63];
       free(table_buf);
-    }
-    else
+
+    } else if (len == 20480) // a450 a500 a550 a560 a580 a33 a35 a55 : MoreInfo
+                             // NEX-3 NEX-5 NEX-C3 NEX-VG10E         : MoreInfo
     {
-      ushort a = get2();
-      ushort b = get2();
-      ushort c = get2();
-      ushort d = get2();
-      if ((a) && (c == 1))
-      {
+      a = get2();
+      b = get2();
+      c = get2();
+      d = get2();
+      if ((a) && (c == 1)) {
         fseek(ifp, d-8, SEEK_CUR);
         table_buf = (uchar *)malloc(256);
         fread(table_buf, 256, 1, ifp);
@@ -10615,46 +10624,41 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
         if (strncasecmp(model, "DSLR-A450", 9) &&
             strncasecmp(model, "DSLR-A500", 9) &&
             strncasecmp(model, "DSLR-A550", 9))
-          imgdata.shootinginfo.FocusMode = table_buf[19];
+          imgdata.shootinginfo.FocusMode = table_buf[0x13];
+        else
+          imgdata.shootinginfo.FocusMode = table_buf[0x2c];
         free(table_buf);
       }
     }
-  }
 
-  else if (tag == 0x0104)
-  {
+  } else if (tag == 0x0102) {
+    imSony.Quality = get4();
+
+  } else if (tag == 0x0104) {
     imgdata.other.FlashEC = getreal(type);
-  }
 
-  else if (tag == 0x0105) // Teleconverter
-  {
-    imgdata.lens.makernotes.TeleconverterID = get4();
-  }
+  } else if (tag == 0x0105) { // Teleconverter
+    ilm.TeleconverterID = get4();
 
-  else if (tag == 0x0107)
-  {
-    imgdata.shootinginfo.ImageStabilization = get4();
-  }
+  } else if (tag == 0x0107) {
+    uitemp = get4();
+    if (uitemp == 1) imgdata.shootinginfo.ImageStabilization = 0;
+    else if (uitemp == 5) imgdata.shootinginfo.ImageStabilization = 1;
+    else imgdata.shootinginfo.ImageStabilization = uitemp;
 
-  else if ((tag == 0xb0280088) && (dng_writer == nonDNG))
-  {
+  } else if ((tag == 0xb0280088) && (dng_writer == nonDNG)) {
     thumb_offset = get4() + base;
-  }
 
-  else if ((tag == 0xb0280089) && (dng_writer == nonDNG))
-  {
+  } else if ((tag == 0xb0280089) && (dng_writer == nonDNG)) {
     thumb_length = get4();
-  }
 
-  else if (((tag == 0x0114) ||     // CameraSettings
+  } else if (((tag == 0x0114) || // CameraSettings
             (tag == 0xb0280114)) &&
-           (len < 256000))
-  {
+           (len < 256000)) {
     table_buf = (uchar *)malloc(len);
     fread(table_buf, len, 1, ifp);
-    switch (len)
-    {
-    case 260:  // Sony A100, big endian
+    switch (len) {
+    case 260:  // Sony a100, big endian
       imgdata.shootinginfo.ExposureMode =
           ((ushort)table_buf[0]) << 8 | ((ushort)table_buf[1]);
       lid = 0x0a<<1;
@@ -10664,13 +10668,11 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
       imgdata.shootinginfo.FocusMode =
           ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
       lid = 0x0d<<1;
-      imgdata.shootinginfo.AFPoint =
-          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
+      imSony.AFPointSelected = table_buf[lid+1];
+      lid = 0x0e<<1;
+      imSony.AFAreaModeSetting = table_buf[lid+1];
       lid = 0x12<<1;
       imgdata.shootinginfo.MeteringMode =
-          ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
-      lid = 0x57<<1;
-      imgdata.shootinginfo.ImageStabilization =
           ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
       break;
     case 448:  // Minolta "DYNAX 5D" / "MAXXUM 5D" / "ALPHA SWEET", big endian
@@ -10684,281 +10686,272 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
       imgdata.shootinginfo.ImageStabilization =
           ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
       break;
-    case 280:
-    case 364:
+    case 280: // a200 a300 a350 a700
+    case 364: // a850 a900
       // CameraSettings and CameraSettings2 are big endian
-      if (table_buf[2] | table_buf[3])
-      {
+      if (table_buf[2] | table_buf[3]) {
         lid = (((ushort)table_buf[2]) << 8) | ((ushort)table_buf[3]);
-        imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, ((float)lid / 8.0f - 1.0f) / 2.0f);
+        ilm.CurAp = libraw_powf64l(2.0f, ((float)lid / 8.0f - 1.0f) / 2.0f);
       }
       lid = 0x04<<1;
       imgdata.shootinginfo.DriveMode = table_buf[lid+1];
       lid = 0x4d<<1;
       imgdata.shootinginfo.FocusMode = ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
       break;
-    case 332:
+    case 332: // a230 a290 a330 a380 a390
       // CameraSettings and CameraSettings2 are big endian
-      if (table_buf[2] | table_buf[3])
-      {
+      if (table_buf[2] | table_buf[3]) {
         lid = (((ushort)table_buf[2]) << 8) | ((ushort)table_buf[3]);
-        imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, ((float)lid / 8.0f - 1.0f) / 2.0f);
+        ilm.CurAp = libraw_powf64l(2.0f, ((float)lid / 8.0f - 1.0f) / 2.0f);
       }
       lid = 0x4d<<1;
       imgdata.shootinginfo.FocusMode = ((ushort)table_buf[lid]) << 8 | ((ushort)table_buf[lid+1]);
       lid = 0x7e<<1;
       imgdata.shootinginfo.DriveMode = table_buf[lid+1];
       break;
-    case 1536:
-    case 2048:
+    case 1536: // a560 a580 a33 a35 a55 NEX-3 NEX-5 NEX-5C NEX-C3 NEX-VG10E
+    case 2048: // a450 a500 a550
       // CameraSettings3 are little endian
       imgdata.shootinginfo.DriveMode = table_buf[0x34];
       parseSonyLensType2(table_buf[1016], table_buf[1015]);
-      if (imgdata.lens.makernotes.LensMount != LIBRAW_MOUNT_Canon_EF)
-      {
-        switch (table_buf[153])
-        {
+      if (ilm.LensMount != LIBRAW_MOUNT_Canon_EF) {
+        switch (table_buf[153]) {
         case 16:
-          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Minolta_A;
+          ilm.LensMount = LIBRAW_MOUNT_Minolta_A;
           break;
         case 17:
-          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sony_E;
+          ilm.LensMount = LIBRAW_MOUNT_Sony_E;
           break;
         }
       }
       break;
     }
     free(table_buf);
-  }
 
-  else if ((tag == 0x3000) && (len < 256000))
-  {
-    uchar *table_buf_0x3000;
-    table_buf_0x3000 = (uchar *)malloc(len);
-    fread(table_buf_0x3000, len, 1, ifp);
+  } else if ((tag == 0x3000) && (len < 256000)) {
+    table_buf = (uchar *)malloc(len);
+    fread(table_buf, len, 1, ifp);
     for (int i = 0; i < 20; i++)
-      imgdata.makernotes.sony.SonyDateTime[i] = table_buf_0x3000[6 + i];
-  }
+      imSony.SonyDateTime[i] = table_buf[6 + i];
+    free(table_buf);
 
-  else if (tag == 0x0116 && len < 256000)
-  {
+  } else if (tag == 0x0116 && len < 256000) {
     table_buf_0x0116 = (uchar *)malloc(len);
     table_buf_0x0116_len = len;
     fread(table_buf_0x0116, len, 1, ifp);
-    if (imgdata.lens.makernotes.CamID)
-    {
-      process_Sony_0x0116(table_buf_0x0116, table_buf_0x0116_len, imgdata.lens.makernotes.CamID);
+    if (ilm.CamID) {
+      process_Sony_0x0116(table_buf_0x0116, table_buf_0x0116_len, ilm.CamID);
       free(table_buf_0x0116);
       table_buf_0x0116_len = 0;
     }
-  }
 
-  else if (tag == 0x2010 && len < 256000)
-  {
+  } else if (tag == 0x2008) {
+    imSony.LongExposureNoiseReduction = get4();
+
+  } else if (tag == 0x2009) {
+    imSony.HighISONoiseReduction = get2();
+
+  } else if (tag == 0x200a) {
+    imSony.HDR[0] = get2();
+    imSony.HDR[1] = get2();
+
+  } else if (tag == 0x2010 && len < 256000) {
     table_buf_0x2010 = (uchar *)malloc(len);
     table_buf_0x2010_len = len;
     fread(table_buf_0x2010, len, 1, ifp);
-    if (imgdata.lens.makernotes.CamID)
-    {
+    if (ilm.CamID) {
       process_Sony_0x2010(table_buf_0x2010, table_buf_0x2010_len);
       free(table_buf_0x2010);
       table_buf_0x2010_len = 0;
     }
-  }
 
-  else if (tag == 0x201a)
-  {
-    imgdata.makernotes.sony.ElectronicFrontCurtainShutter = get4();
-  }
+  } else if (tag == 0x201a) {
+    imSony.ElectronicFrontCurtainShutter = get4();
 
-  else if (tag == 0x201b)
-  {
-    uchar uc;
+  } else if (tag == 0x201b) {
     fread(&uc, 1, 1, ifp);
     imgdata.shootinginfo.FocusMode = (short)uc;
-  }
 
-  else if (tag == 0x202c)
-  {
-    imgdata.makernotes.sony.MeteringMode2 = get2();
-  }
+  } else if (tag == 0x201c) {
+    if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
+      imSony.AFAreaModeSetting = fgetc(ifp);
+    }
 
-  else if (tag == 0x202f)
-  {
-    imgdata.makernotes.sony.PixelShiftGroupID = get4();
-    imgdata.makernotes.sony.PixelShiftGroupPrefix = imgdata.makernotes.sony.PixelShiftGroupID >> 22;
-    imgdata.makernotes.sony.PixelShiftGroupID =
-      ((imgdata.makernotes.sony.PixelShiftGroupID >> 17) & (unsigned) 0x1f) * (unsigned) 1000000 +
-      ((imgdata.makernotes.sony.PixelShiftGroupID >> 12) & (unsigned) 0x1f) * (unsigned) 10000 +
-      ((imgdata.makernotes.sony.PixelShiftGroupID >>  6) & (unsigned) 0x3f) * (unsigned) 100 +
-      (imgdata.makernotes.sony.PixelShiftGroupID         & (unsigned) 0x3f);
+  } else if (tag == 0x201d) {
+    if ((imSony.AFAreaModeSetting == 3) &&
+        ((imSony.SonyCameraType == LIBRAW_SONY_ILCE) ||
+         (imSony.SonyCameraType == LIBRAW_SONY_NEX))) {
+      imSony.FlexibleSpotPosition[0] = get2();
+      imSony.FlexibleSpotPosition[1] = get2();
+    }
 
-    imgdata.makernotes.sony.numInPixelShiftGroup = fgetc(ifp);
-    imgdata.makernotes.sony.nShotsInPixelShiftGroup = fgetc(ifp);
-  }
+  } else if (tag == 0x201e) {
+    if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
+      imSony.AFPointSelected = fgetc(ifp);
+    }
 
-  else if (tag == 0x9050 && len < 256000) // little endian
-  {
+  } else if (tag == 0x2020) {
+    if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
+      fread(imSony.AFPointsUsed, 1, 10, ifp);
+    }
+
+  } else if (tag == 0x2021) {
+    if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
+      imSony.AFTracking = fgetc(ifp);
+    }
+
+  } else if (tag == 0x2027) {
+    FORC4 imSony.FocusLocation[c] = get2();
+
+  } else if (tag == 0x2028) {
+    if (get2()) {
+      imSony.VariableLowPassFilter = get2();
+    }
+
+  } else if (tag == 0x2029) {
+    imSony.RAWFileType = get2();
+
+  } else if (tag == 0x202c) {
+    imSony.MeteringMode2 = get2();
+
+  } else if (tag == 0x202f) {
+    imSony.PixelShiftGroupID = get4();
+    imSony.PixelShiftGroupPrefix = imSony.PixelShiftGroupID >> 22;
+    imSony.PixelShiftGroupID =
+      ((imSony.PixelShiftGroupID >> 17) & (unsigned) 0x1f) * (unsigned) 1000000 +
+      ((imSony.PixelShiftGroupID >> 12) & (unsigned) 0x1f) * (unsigned) 10000 +
+      ((imSony.PixelShiftGroupID >>  6) & (unsigned) 0x3f) * (unsigned) 100 +
+      (imSony.PixelShiftGroupID         & (unsigned) 0x3f);
+
+    imSony.numInPixelShiftGroup = fgetc(ifp);
+    imSony.nShotsInPixelShiftGroup = fgetc(ifp);
+
+  } else if (tag == 0x9050 && len < 256000) { // little endian
     table_buf_0x9050 = (uchar *)malloc(len);
     table_buf_0x9050_len = len;
     fread(table_buf_0x9050, len, 1, ifp);
 
-    if (imgdata.lens.makernotes.CamID)
-    {
-      process_Sony_0x9050(table_buf_0x9050, table_buf_0x9050_len, imgdata.lens.makernotes.CamID);
+    if (ilm.CamID) {
+      process_Sony_0x9050(table_buf_0x9050, table_buf_0x9050_len, ilm.CamID);
       free(table_buf_0x9050);
       table_buf_0x9050_len = 0;
     }
-  }
 
-  else if (tag == 0x9400 && len < 256000)
-  {
+  } else if (tag == 0x9400 && len < 256000) {
     table_buf_0x9400 = (uchar *)malloc(len);
     table_buf_0x9400_len = len;
     fread(table_buf_0x9400, len, 1, ifp);
-    if (imgdata.lens.makernotes.CamID)
-    {
+    if (ilm.CamID) {
       process_Sony_0x9400(table_buf_0x9400, table_buf_0x9400_len, unique_id);
       free(table_buf_0x9400);
       table_buf_0x9400_len = 0;
     }
-  }
 
-  else if (tag == 0x9402 && len < 256000)
-  {
+  } else if (tag == 0x9402 && len < 256000) {
     table_buf_0x9402 = (uchar *)malloc(len);
     table_buf_0x9402_len = len;
     fread(table_buf_0x9402, len, 1, ifp);
-    if (imgdata.lens.makernotes.CamID)
-    {
+    if (ilm.CamID) {
       process_Sony_0x9402(table_buf_0x9402, table_buf_0x9402_len);
       free(table_buf_0x9402);
       table_buf_0x9402_len = 0;
     }
-  }
 
-  else if (tag == 0x9403 && len < 256000)
-  {
+  } else if (tag == 0x9403 && len < 256000) {
     table_buf_0x9403 = (uchar *)malloc(len);
     table_buf_0x9403_len = len;
     fread(table_buf_0x9403, len, 1, ifp);
-    if (imgdata.lens.makernotes.CamID)
-    {
+    if (ilm.CamID) {
       process_Sony_0x9403(table_buf_0x9403, table_buf_0x9403_len);
       free(table_buf_0x9403);
       table_buf_0x9403_len = 0;
     }
-  }
 
-  else if ((tag == 0x9405) && (len < 256000) && (len > 0x64))
-  {
-    uchar *table_buf_0x9405;
-    table_buf_0x9405 = (uchar *)malloc(len);
-    fread(table_buf_0x9405, len, 1, ifp);
-    uchar bufx = table_buf_0x9405[0x0];
-    if (imgdata.other.real_ISO < 0.1f)
-    {
-      if ((bufx == 0x25) || (bufx == 0x3a) || (bufx == 0x76) || (bufx == 0x7e) || (bufx == 0x8b) || (bufx == 0x9a) ||
-          (bufx == 0xb3) || (bufx == 0xe1))
-      {
-        uchar s[2];
-        s[0] = SonySubstitution[table_buf_0x9405[0x04]];
-        s[1] = SonySubstitution[table_buf_0x9405[0x05]];
+  } else if ((tag == 0x9405) && (len < 256000) && (len > 0x64)) {
+    table_buf = (uchar *)malloc(len);
+    fread(table_buf, len, 1, ifp);
+    uc = table_buf[0x0];
+    if (imgdata.other.real_ISO < 0.1f) {
+      if ((uc == 0x25) || (uc == 0x3a) || (uc == 0x76) || (uc == 0x7e) ||
+          (uc == 0x8b) || (uc == 0x9a) || (uc == 0xb3) || (uc == 0xe1)) {
+        s[0] = SonySubstitution[table_buf[0x04]];
+        s[1] = SonySubstitution[table_buf[0x05]];
         imgdata.other.real_ISO = 100.0f * libraw_powf64l(2.0f, (16 - ((float)sget2(s)) / 256.0f));
       }
     }
-    free(table_buf_0x9405);
-  }
+    free(table_buf);
 
-  else if (tag == 0x9406 && len < 256000)
-  {
+  } else if (tag == 0x9406 && len < 256000) {
     table_buf_0x9406 = (uchar *)malloc(len);
     table_buf_0x9406_len = len;
     fread(table_buf_0x9406, len, 1, ifp);
-    if (imgdata.lens.makernotes.CamID)
-    {
+    if (ilm.CamID) {
       process_Sony_0x9406(table_buf_0x9406, table_buf_0x9406_len);
       free(table_buf_0x9406);
       table_buf_0x9406_len = 0;
     }
-  }
 
-  else if (tag == 0x940c && len < 256000)
-  {
+  } else if (tag == 0x940c && len < 256000) {
     table_buf_0x940c = (uchar *)malloc(len);
     table_buf_0x940c_len = len;
     fread(table_buf_0x940c, len, 1, ifp);
-    if (imgdata.lens.makernotes.CamID)
-    {
+    if (ilm.CamID) {
       process_Sony_0x940c(table_buf_0x940c, table_buf_0x940c_len);
       free(table_buf_0x940c);
       table_buf_0x940c_len = 0;
     }
-  }
 
-  else if (tag == 0x940e && len < 256000)
-  {
+  } else if (tag == 0x940e && len < 256000) {
     table_buf_0x940e = (uchar *)malloc(len);
     table_buf_0x940e_len = len;
     fread(table_buf_0x940e, len, 1, ifp);
-    if (imgdata.lens.makernotes.CamID)
-    {
-      process_Sony_0x940e(table_buf_0x940e, table_buf_0x940e_len, imgdata.lens.makernotes.CamID);
+    if (ilm.CamID) {
+      process_Sony_0x940e(table_buf_0x940e, table_buf_0x940e_len, ilm.CamID);
       free(table_buf_0x940e);
       table_buf_0x940e_len = 0;
     }
-  }
 
-  else if (((tag == 0xb027) || (tag == 0x010c)) && (imgdata.lens.makernotes.LensID == -1))
-  {
-    imgdata.lens.makernotes.LensID = get4();
-    if ((imgdata.lens.makernotes.LensID > 0x4900) && (imgdata.lens.makernotes.LensID <= 0x5900))
-    {
-      imgdata.lens.makernotes.AdapterID = 0x4900;
-      imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Sigma_X3F;
-      strcpy(imgdata.lens.makernotes.Adapter, "MC-11");
+  } else if (((tag == 0xb027) || (tag == 0x010c)) && (ilm.LensID == -1)) {
+    ilm.LensID = get4();
+    if ((ilm.LensID > 0x4900) && (ilm.LensID <= 0x5900)) {
+      ilm.AdapterID = 0x4900;
+      ilm.LensID -= ilm.AdapterID;
+      ilm.LensMount = LIBRAW_MOUNT_Sigma_X3F;
+      strcpy(ilm.Adapter, "MC-11");
     }
 
-    else if ((imgdata.lens.makernotes.LensID > 0xEF00) && (imgdata.lens.makernotes.LensID < 0xFFFF) &&
-             (imgdata.lens.makernotes.LensID != 0xFF00))
-    {
-      imgdata.lens.makernotes.AdapterID = 0xEF00;
-      imgdata.lens.makernotes.LensID -= imgdata.lens.makernotes.AdapterID;
-      imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Canon_EF;
+    else if ((ilm.LensID > 0xef00) && (ilm.LensID < 0xffff) &&
+             (ilm.LensID != 0xFF00)) {
+      ilm.AdapterID = 0xEF00;
+      ilm.LensID -= ilm.AdapterID;
+      ilm.LensMount = LIBRAW_MOUNT_Canon_EF;
     }
     if (tag == 0x010c)
-      imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Minolta_A;
-  }
+      ilm.CameraMount = LIBRAW_MOUNT_Minolta_A;
 
-  else if (tag == 0xb02a && len < 256000) // Sony LensSpec
-  {
+  } else if (tag == 0xb02a && len < 256000) { // Sony LensSpec
     table_buf = (uchar *)malloc(len);
     fread(table_buf, len, 1, ifp);
     if ((!dng_writer) ||
         (saneSonyCameraInfo(table_buf[1], table_buf[2], table_buf[3], table_buf[4], table_buf[5], table_buf[6])))
     {
       if (table_buf[1] | table_buf[2])
-        imgdata.lens.makernotes.MinFocal = bcd2dec(table_buf[1]) * 100 + bcd2dec(table_buf[2]);
+        ilm.MinFocal = bcd2dec(table_buf[1]) * 100 + bcd2dec(table_buf[2]);
       if (table_buf[3] | table_buf[4])
-        imgdata.lens.makernotes.MaxFocal = bcd2dec(table_buf[3]) * 100 + bcd2dec(table_buf[4]);
+        ilm.MaxFocal = bcd2dec(table_buf[3]) * 100 + bcd2dec(table_buf[4]);
       if (table_buf[5])
-        imgdata.lens.makernotes.MaxAp4MinFocal = bcd2dec(table_buf[5]) / 10.0f;
+        ilm.MaxAp4MinFocal = bcd2dec(table_buf[5]) / 10.0f;
       if (table_buf[6])
-        imgdata.lens.makernotes.MaxAp4MaxFocal = bcd2dec(table_buf[6]) / 10.0f;
+        ilm.MaxAp4MaxFocal = bcd2dec(table_buf[6]) / 10.0f;
       parseSonyLensFeatures(table_buf[0], table_buf[7]);
     }
     free(table_buf);
-  }
 
-  else if ((tag == 0xb02b) && !imgdata.sizes.raw_crop.cwidth && (len == 2))
-  {
+  } else if ((tag == 0xb02b) && !imgdata.sizes.raw_crop.cwidth && (len == 2)) {
     imgdata.sizes.raw_crop.cheight = get4();
     imgdata.sizes.raw_crop.cwidth = get4();
-  }
 
-  else if (tag == 0xb041)
-  {
+  } else if (tag == 0xb041) {
     imgdata.shootinginfo.ExposureMode = get2();
   }
 
@@ -10996,9 +10989,7 @@ void CLASS parseSonySR2 (uchar *cbuf_SR2, unsigned SR2SubIFDOffset, unsigned SR2
 
     icbuf_SR2 += 4;
     TagProcessed = 0;
-#define icWBC imgdata.color.WB_Coeffs
-#define icWBCTC imgdata.color.WBCT_Coeffs
-#define ilm imgdata.lens.makernotes
+
     if (dng_writer == nonDNG) {
       switch (tag) {
       case 0x7300:
@@ -11150,11 +11141,12 @@ void CLASS parseSonySR2 (uchar *cbuf_SR2, unsigned SR2SubIFDOffset, unsigned SR2
         break;
       }
     }
+  }
+}
 #undef ilm
 #undef icWBC
 #undef icWBCTC
-  }
-}
+#undef imSony
 
 void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 {
@@ -11176,6 +11168,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
   unsigned typeCanonCameraInfo = 0;
+
+  int isSony = 0;
 
   int LeicaMakernoteSignature = -1;
 
@@ -11240,10 +11234,20 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   }
 
   entries = get2();
-  if (entries > 1000)
-    return;
-  morder = order;
+  if (entries > 1000) return;
 
+  if (!strncasecmp(make, "SONY", 4)    ||
+      !strncasecmp(make, "Konica", 6)  ||
+      !strncasecmp(make, "Minolta", 7) ||
+      (!strncasecmp(make, "Hasselblad", 10) &&
+       (!strncasecmp(model, "Stellar", 7) ||
+        !strncasecmp(model, "Lunar", 5)   ||
+        !strncasecmp(model, "Lusso", 5)   ||
+        !strncasecmp(model, "HV", 2)))
+     )
+   isSony = 1;
+
+  morder = order;
   while (entries--) {
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
@@ -11363,14 +11367,7 @@ skip_Oly_broken_tags:;
       else
         parsePentaxMakernotes(base, tag, type, len, dng_writer);
 
-    } else if (!strncasecmp(make, "SONY", 4)    ||
-             !strncasecmp(make, "Konica", 6)  ||
-             !strncasecmp(make, "Minolta", 7) ||
-             (!strncasecmp(make, "Hasselblad", 10) &&
-              (!strncasecmp(model, "Stellar", 7) ||
-               !strncasecmp(model, "Lunar", 5)   ||
-               !strncasecmp(model, "Lusso", 5)   ||
-               !strncasecmp(model, "HV", 2)))) {
+    } else if (isSony) {
       parseSonyMakernotes(base, tag, type, len, AdobeDNG,
                           table_buf_0x0116, table_buf_0x0116_len,
                           table_buf_0x2010, table_buf_0x2010_len,
@@ -11427,6 +11424,8 @@ void CLASS parse_makernote(int base, int uptag)
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
   unsigned typeCanonCameraInfo = 0;
+
+  int isSony = 0;
 
   uchar *table_buf;
   uchar *table_buf_0x0116;
@@ -11520,6 +11519,18 @@ void CLASS parse_makernote(int base, int uptag)
       base = ftell(ifp);
   }
 
+#ifdef LIBRAW_LIBRARY_BUILD
+  if (!strncasecmp(make, "SONY", 4)    ||
+      !strncasecmp(make, "Konica", 6)  ||
+      !strncasecmp(make, "Minolta", 7) ||
+      (!strncasecmp(make, "Hasselblad", 10) &&
+       (!strncasecmp(model, "Stellar", 7) ||
+        !strncasecmp(model, "Lunar", 5)   ||
+        !strncasecmp(model, "Lusso", 5)   ||
+        !strncasecmp(model, "HV", 2)))
+     )
+   isSony = 1;
+
   if (strcasestr(make, "Kodak")       &&
       (sget2((uchar *)buf) > 1)       &&  // check number of entries
       (sget2((uchar *)buf) < 128)     &&
@@ -11527,13 +11538,13 @@ void CLASS parse_makernote(int base, int uptag)
       (sget2((uchar *)(buf+4)) < 13)  &&
       (sget4((uchar *)(buf+6)) < 256)     // check count
      )
-    imgdata.makernotes.kodak.MakerNoteKodak8a = 1;  // Kodak P712 / P850 / P880
+   imgdata.makernotes.kodak.MakerNoteKodak8a = 1;  // Kodak P712 / P850 / P880
+#endif
 
   entries = get2();
-  if (entries > 1000)
-    return;
-  morder = order;
+  if (entries > 1000) return;
 
+  morder = order;
   while (entries--)
   {
     order = morder;
@@ -11604,7 +11615,8 @@ void CLASS parse_makernote(int base, int uptag)
     else if (!strncmp(make, "FUJI", 4))
         parseFujiMakernotes(tag, type, len, nonDNG);
 
-    else if (!strncasecmp(model, "Hasselblad X1D", 14) || !strncasecmp(model, "Hasselblad H6D", 14) ||
+    else if (!strncasecmp(model, "Hasselblad X1D", 14) ||
+             !strncasecmp(model, "Hasselblad H6D", 14) ||
              !strncasecmp(model, "Hasselblad A6D", 14))
     {
       if (tag == 0x0045)
@@ -11636,24 +11648,13 @@ void CLASS parse_makernote(int base, int uptag)
         parsePentaxMakernotes(base, tag, type, len, CameraDNG);
     }
 
-    else if (!strncasecmp(make, "SONY", 4)    ||
-             !strncasecmp(make, "Konica", 6)  ||
-             !strncasecmp(make, "Minolta", 7) ||
-             (!strncasecmp(make, "Hasselblad", 10) &&
-              (!strncasecmp(model, "Stellar", 7) ||
-               !strncasecmp(model, "Lunar", 5)   ||
-               !strncasecmp(model, "Lusso", 5)   ||
-               !strncasecmp(model, "HV", 2))))
-    {
-      if ((tag == 0xb028) && (len == 1) && (type == 4)) // DSLR-A100
-      {
-        if (c = get4() != 0)
-        {
+    else if (isSony) {
+      if ((tag == 0xb028) && (len == 1) && (type == 4)) { // DSLR-A100
+        if (c = get4()) {
           fseek (ifp, c, SEEK_SET);
           parse_makernote(base, tag);
         }
-      }
-
+      } else {
       parseSonyMakernotes(base, tag, type, len, nonDNG,
                           table_buf_0x0116, table_buf_0x0116_len,
                           table_buf_0x2010, table_buf_0x2010_len,
@@ -11664,11 +11665,8 @@ void CLASS parse_makernote(int base, int uptag)
                           table_buf_0x9406, table_buf_0x9406_len,
                           table_buf_0x940c, table_buf_0x940c_len,
                           table_buf_0x940e, table_buf_0x940e_len);
-
-      if (imgdata.makernotes.sony.MinoltaCamID != -1)
-        imgdata.lens.makernotes.CamID = imgdata.makernotes.sony.MinoltaCamID;
+      }
     }
-
     fseek(ifp, _pos, SEEK_SET);
 #endif
 
@@ -11685,10 +11683,10 @@ void CLASS parse_makernote(int base, int uptag)
 #ifdef LIBRAW_LIBRARY_BUILD
       get4();
 #else
-      if ((i = (get2(), get2())) != 0x7fff && !aperture)
+      if (((i = (get2(), get2())) != 0x7fff) && !aperture)
         aperture = libraw_powf64l(2.0, i / 64.0);
 #endif
-      if ((i = get2()) != 0xffff && !shutter)
+      if (((i = get2()) != 0xffff) && !shutter)
         shutter = libraw_powf64l(2.0, (short)i / -32.0);
       wbi = (get2(), get2());
       shot_order = (get2(), get2());
@@ -13309,6 +13307,9 @@ int CLASS parse_tiff_ifd(int base)
         xmpdata[len] = 0;
       }
       break;
+    case 0x7000:
+      imgdata.makernotes.sony.SonyRawFileType = get2();
+      break;
 #endif
     case 28688:
       FORC4 sony_curve[c + 1] = get2() >> 2 & 0xfff;
@@ -13900,21 +13901,22 @@ int CLASS parse_tiff_ifd(int base)
         }
       }
       break;
+#define imSony imgdata.makernotes.sony
     case 0x74c7:
       if ((len == 2) && !strncasecmp(make, "SONY", 4))
       {
-        imgdata.makernotes.sony.raw_crop.cleft = get4();
-        imgdata.makernotes.sony.raw_crop.ctop = get4();
+        imSony.raw_crop.cleft = get4();
+        imSony.raw_crop.ctop = get4();
       }
       break;
     case 0x74c8:
       if ((len == 2) && !strncasecmp(make, "SONY", 4))
       {
-        imgdata.makernotes.sony.raw_crop.cwidth = get4();
-        imgdata.makernotes.sony.raw_crop.cheight = get4();
+        imSony.raw_crop.cwidth = get4();
+        imSony.raw_crop.cheight = get4();
       }
       break;
-
+#undef imSony
 #endif
 #ifdef LIBRAW_LIBRARY_BUILD
     case 50778:
@@ -14593,53 +14595,54 @@ void CLASS parse_minolta(int base)
       high = get2();
       wide = get2();
 #ifdef LIBRAW_LIBRARY_BUILD
-      imgdata.makernotes.sony.prd_ImageHeight = get2();
-      imgdata.makernotes.sony.prd_ImageWidth = get2();
+#define imSony imgdata.makernotes.sony
+      imSony.prd_ImageHeight = get2();
+      imSony.prd_ImageWidth = get2();
       fseek(ifp, 1L, SEEK_CUR);
-      imgdata.makernotes.sony.prd_RawBitDepth = (ushort)fgetc(ifp);
-      imgdata.makernotes.sony.prd_StorageMethod = (ushort)fgetc(ifp);
+      imSony.prd_RawBitDepth = (ushort)fgetc(ifp);
+      imSony.prd_StorageMethod = (ushort)fgetc(ifp);
       fseek(ifp, 4L, SEEK_CUR);
-      imgdata.makernotes.sony.prd_BayerPattern = (ushort)fgetc(ifp);
+      imSony.prd_BayerPattern = (ushort)fgetc(ifp);
+#undef imSony
 #endif
       break;
 #ifdef LIBRAW_LIBRARY_BUILD
+#define icWBC imgdata.color.WB_Coeffs
     case 0x524946: /* RIF */
       if (!strncasecmp(model, "DSLR-A100", 9))
       {
         fseek(ifp, 8, SEEK_CUR);
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][2] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][2] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][2] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][2] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][2] = get2();
+        icWBC[LIBRAW_WBI_Tungsten][0] = get2();
+        icWBC[LIBRAW_WBI_Tungsten][2] = get2();
+        icWBC[LIBRAW_WBI_Daylight][0] = get2();
+        icWBC[LIBRAW_WBI_Daylight][2] = get2();
+        icWBC[LIBRAW_WBI_Cloudy][0] = get2();
+        icWBC[LIBRAW_WBI_Cloudy][2] = get2();
+        icWBC[LIBRAW_WBI_FL_W][0] = get2();
+        icWBC[LIBRAW_WBI_FL_W][2] = get2();
+        icWBC[LIBRAW_WBI_Flash][0] = get2();
+        icWBC[LIBRAW_WBI_Flash][2] = get2();
         get4();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][2] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][2] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][2] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][2] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Daylight][3] =
-            imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][3] =
-                imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][3] =
-                    imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Cloudy][3] =
-                        imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][3] =
-                            imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][3] =
-                                imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][1] =
-                                    imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][3] =
-                                        imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][1] =
-                                            imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_W][3] =
-                                                imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][1] =
-                                                    imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][3] = 0x100;
+        icWBC[LIBRAW_WBI_Shade][0] = get2();
+        icWBC[LIBRAW_WBI_Shade][2] = get2();
+        icWBC[LIBRAW_WBI_FL_D][0] = get2();
+        icWBC[LIBRAW_WBI_FL_D][2] = get2();
+        icWBC[LIBRAW_WBI_FL_N][0] = get2();
+        icWBC[LIBRAW_WBI_FL_N][2] = get2();
+        icWBC[LIBRAW_WBI_FL_WW][0] = get2();
+        icWBC[LIBRAW_WBI_FL_WW][2] = get2();
+        icWBC[LIBRAW_WBI_Daylight][1]   = icWBC[LIBRAW_WBI_Daylight][3] =
+          icWBC[LIBRAW_WBI_Tungsten][1] = icWBC[LIBRAW_WBI_Tungsten][3] =
+          icWBC[LIBRAW_WBI_Flash][1]    = icWBC[LIBRAW_WBI_Flash][3] =
+          icWBC[LIBRAW_WBI_Cloudy][1]   = icWBC[LIBRAW_WBI_Cloudy][3] =
+          icWBC[LIBRAW_WBI_Shade][1]    = icWBC[LIBRAW_WBI_Shade][3] =
+          icWBC[LIBRAW_WBI_FL_D][1]     = icWBC[LIBRAW_WBI_FL_D][3] =
+          icWBC[LIBRAW_WBI_FL_N][1]     = icWBC[LIBRAW_WBI_FL_N][3] =
+          icWBC[LIBRAW_WBI_FL_W][1]     = icWBC[LIBRAW_WBI_FL_W][3] =
+          icWBC[LIBRAW_WBI_FL_WW][1]    = icWBC[LIBRAW_WBI_FL_WW][3] = 0x100;
       }
       break;
+#undef icWBC
 #endif
     case 0x574247: /* WBG */
       get4();

@@ -629,6 +629,15 @@ void LibRaw::recycle()
   imgdata.makernotes.sony.ImageCount3_offset = 0xffff;
   imgdata.makernotes.sony.ElectronicFrontCurtainShutter = 0xffff;
   imgdata.makernotes.sony.MinoltaCamID = -1;
+  imgdata.makernotes.sony.RAWFileType = 0xffff;
+  imgdata.makernotes.sony.AFAreaModeSetting = 0xff;
+  imgdata.makernotes.sony.FlexibleSpotPosition[0] =
+    imgdata.makernotes.sony.FlexibleSpotPosition[1] = 0xffff;
+  imgdata.makernotes.sony.AFPointSelected = 0xff;
+  imgdata.makernotes.sony.LongExposureNoiseReduction = 0xffffffff;
+  imgdata.makernotes.sony.Quality = 0xffffffff;
+  imgdata.makernotes.sony.HighISONoiseReduction = 0xffff;
+  imgdata.makernotes.sony.SonyRawFileType = 0xffff;
 
   imgdata.makernotes.kodak.BlackLevelTop = 0xffff;
   imgdata.makernotes.kodak.BlackLevelBottom = 0xffff;

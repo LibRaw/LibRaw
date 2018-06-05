@@ -481,9 +481,23 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     unsigned Sony0x9400_SequenceFileNumber;
     uchar Sony0x9400_SequenceLength2;
     libraw_raw_crop_t raw_crop;
+
+    uint8_t AFAreaModeSetting;
+    ushort FlexibleSpotPosition[2];
+    uint8_t AFPointSelected;
+    uint8_t AFPointsUsed[10];
+    uint8_t AFTracking;
+    uint8_t AFType;
+    ushort FocusLocation[4];
     int8_t AFMicroAdjValue;
     int8_t AFMicroAdjOn;
     uchar AFMicroAdjRegisteredLenses;
+
+    ushort VariableLowPassFilter;
+    unsigned LongExposureNoiseReduction;
+    ushort HighISONoiseReduction;
+    ushort HDR[2];
+
     ushort group2010;
     ushort real_iso_offset;
     ushort MeteringMode_offset;
@@ -505,6 +519,27 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     ushort prd_RawBitDepth;
     ushort prd_StorageMethod;  /* 82 -> Padded; 89 -> Linear */
     ushort prd_BayerPattern;  /* 0 -> not valid; 1 -> RGGB; 4 -> GBRG */
+
+    ushort SonyRawFileType; /* takes precedence over RAWFileType and Quality:
+                               0  for uncompressed 14-bit raw
+                               1  for uncompressed 12-bit raw
+                               2  for compressed raw
+                               3  for lossless compressed raw
+                            */
+    ushort RAWFileType; /* takes precedence over Quality
+                           0 for compressed raw, 1 for uncompressed;
+                        */
+    unsigned Quality;   /* 0 or 6 for raw, 7 or 8 for compressed raw */
+    ushort FileFormat;  /*  1000 SR2
+                            2000 ARW 1.0
+                            3000 ARW 2.0
+                            3100 ARW 2.1
+                            3200 ARW 2.2
+                            3300 ARW 2.3
+                            3310 ARW 2.3.1
+                            3320 ARW 2.3.2
+                            3330 ARW 2.3.3
+                         */
   } libraw_sony_info_t;
 
   typedef struct
