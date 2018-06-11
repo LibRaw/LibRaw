@@ -1,3 +1,13 @@
+2018-06-11  Alex Tutubalin <lexa@lexa.ru>
+ * Sony uncompressed/untiled DNGs: do not set bits-per-sample to 14 bit
+ * Do not change tiff_bps for DNG files
+ * Another possible stack overflow in kodak radc reader
+ * Secunia Advisory SA83507, credits Kasper Leigh Haabb,
+   Secunia Research at Flexera"
+   - parse_qt: possible integer overflow
+   - reject broken/crafted NOKIARAW files
+ * LibRaw 0.19-Beta6
+
 2018-05-10  Alex Tutubalin <lexa@lexa.ru>
  * Put rogue printf's behind #ifdef DCRAW_VERBOSE
  * Exceptions was not caught in x3f_new_from_file resulting in x3f handle leak
