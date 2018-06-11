@@ -11041,7 +11041,11 @@ void CLASS parse_exif (int base)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 savepos = ftell(ifp);
-    if(len > 8 && savepos + len > fsize*2) continue;
+    if (len > 8 && savepos + len > fsize * 2)
+    {
+        fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
+        continue;
+    }
     if(callbacks.exif_cb)
       {
         callbacks.exif_cb(callbacks.exifparser_data,tag,type,len,order,ifp);
@@ -11391,7 +11395,11 @@ void CLASS parse_kodak_ifd (int base)
   while (entries--) {
     tiff_get (base, &tag, &type, &len, &save);
     INT64 savepos = ftell(ifp);
-    if(len > 8 && len + savepos > 2*fsize) continue;
+    if (len > 8 && savepos + len > fsize * 2)
+    {
+        fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
+        continue;
+    }
     if(callbacks.exif_cb)
       {
         callbacks.exif_cb(callbacks.exifparser_data,tag | 0x20000,type,len,order,ifp);
@@ -11532,7 +11540,11 @@ int CLASS parse_tiff_ifd (int base)
     tiff_get (base, &tag, &type, &len, &save);
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 savepos = ftell(ifp);
-    if(len > 8 && len + savepos > fsize*2) continue; // skip tag pointing out of 2xfile
+    if (len > 8 && savepos + len > fsize * 2)
+    {
+        fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
+        continue;
+    }
     if(callbacks.exif_cb)
       {
         callbacks.exif_cb(callbacks.exifparser_data,tag|(pana_raw?0x30000:0),type,len,order,ifp);
