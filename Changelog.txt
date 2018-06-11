@@ -1,3 +1,11 @@
+2018-05-11  Alex Tutubalin <lexa@lexa.ru>
+ * Secunia Advisory SA83507, credits Kasper Leigh Haabb,
+   Secunia Research at Flexera
+   - parse_qt: possible integer overflow
+   - reject broken/crafted NOKIARAW files
+   - Backported 0.19-patch to recover read position if TIFF/EXIF tag is too long
+ * LibRaw 0.18.12
+
 2018-05-10  Alex Tutubalin <lexa@lexa.ru>
  * Secunia Advisory SA83050: possible infinite loop in parse_minolta()
  * Fixed stack overrun in kodak_radc_load_raw
