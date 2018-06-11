@@ -18125,6 +18125,10 @@ void CLASS identify()
       break;
     case 10:
       load_raw = &CLASS nokia_load_raw;
+      break;
+    case 0:
+      throw LIBRAW_EXCEPTION_IO_CORRUPT;
+      break;
     }
     raw_height = height + (top_margin = i / (width * tiff_bps / 8) - height);
     mask[0][3] = 1;
