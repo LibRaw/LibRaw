@@ -1,3 +1,47 @@
+2018-06-11  Alex Tutubalin <lexa@lexa.ru>
+ * Sony uncompressed/untiled DNGs: do not set bits-per-sample to 14 bit
+ * Do not change tiff_bps for DNG files
+ * Another possible stack overflow in kodak radc reader
+ * Secunia Advisory SA83507, credits Kasper Leigh Haabb,
+   Secunia Research at Flexera"
+   - parse_qt: possible integer overflow
+   - reject broken/crafted NOKIARAW files
+ * LibRaw 0.19-Beta6
+
+2018-05-10  Alex Tutubalin <lexa@lexa.ru>
+ * Put rogue printf's behind #ifdef DCRAW_VERBOSE
+ * Exceptions was not caught in x3f_new_from_file resulting in x3f handle leak
+ * packed_load_raw(): EOF check on each row
+ * define LIBRAW_USE_CALLOC_INSTEAD_OF_MALLOC to use ::calloc instead of 
+   ::malloc in LibRaw_mem_mgr malloc calls; 
+   Note: realloc is not changed, so only partial fix
+ * Fixed possible div by zero in EOS D30 WB data parse
+ * U-suffix for filter-var manipulation consts
+ * restored static specifier for utf2char() lost in previous bugfix
+ * Fixed stack overrun in kodak_radc_load_raw
+ * Secunia Advisory SA83050: possible infinite loop in parse_minolta()
+ * LibRaw 0.19-Beta5
+
+2018-05-03  Alex Tutubalin <lexa@lexa.ru>
+ * CVE-2018-10529 fixed: out of bounds read in X3F parser
+ * CVE-2018-10528 fixed: possible stack overrun in X3F parser
+ * LibRaw 0.19-Beta4
+
+2018-04-24 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.19-Beta3
+ * fixed lot of bugs reported by ImageMagic/oss-fuzz
+ * fixed several bugs reported by Secunia team (adv 81800,
+   Credit: Laurent Delosieres, Secunia Research at Flexera)
+ 
+2018-03-22 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.19-Beta2
+ * Better handling of broken JPEG thumbnails
+ * Panasonic GH5S/G9-hires decoder, thanks to Alexey Danilchenko
+   Note: ABI has changed due to this patch, so shlib version increased
+ * Fujifilm X-A5/A20 metadata parsing fix
+ * New error code LIBRAW_TOO_BIG: image data size excess LIBRAW_MAX_ALLOC_MB
+ * winsock2 included before windows.h to make MinGW happy
+ 
 2018-02-23 Alex Tutubalin <lexa@lexa.ru>
 
  * LibRaw 0.19-Beta1
