@@ -1790,26 +1790,31 @@ void CLASS nikon_coolscan_load_raw()
   fseek(ifp, data_offset, SEEK_SET);
   unsigned char *buf = (unsigned char *)malloc(bufsize);
   unsigned short *ubuf = (unsigned short *)buf;
-  for (int row = 0; row < raw_height; row++)
-  {
+  for (int row = 0; row < raw_height; row++) {
     int red = fread(buf, 1, bufsize, ifp);
     unsigned short(*ip)[4] = (unsigned short(*)[4])image + row * width;
-    if (tiff_bps <= 8)
-      for (int col = 0; col < width; col++)
-      {
+    if (is_NikonTransfer == 2) { // it is also (tiff_bps == 8)
+      for (int col = 0; col < width; col++) {
+        ip[col][0] = ((float)curve[buf[col * 3]    ]) / 255.0f;
+        ip[col][1] = ((float)curve[buf[col * 3 + 1]]) / 255.0f;
+        ip[col][2] = ((float)curve[buf[col * 3 + 2]]) / 255.0f;
+        ip[col][3] = 0;
+      }
+    } else if (tiff_bps <= 8) {
+      for (int col = 0; col < width; col++) {
         ip[col][0] = curve[buf[col * 3]];
         ip[col][1] = curve[buf[col * 3 + 1]];
         ip[col][2] = curve[buf[col * 3 + 2]];
         ip[col][3] = 0;
       }
-    else
-      for (int col = 0; col < width; col++)
-      {
+    } else {
+      for (int col = 0; col < width; col++) {
         ip[col][0] = curve[ubuf[col * 3]];
         ip[col][1] = curve[ubuf[col * 3 + 1]];
         ip[col][2] = curve[ubuf[col * 3 + 2]];
         ip[col][3] = 0;
       }
+    }
   }
   free(buf);
 }
@@ -15629,12 +15634,19 @@ void CLASS apply_tiff()
     }
   }
 
-  if (is_NikonTransfer && (tiff_ifd[raw].bps == 16)) {
-    if (tiff_compress == 1) {
-      if ((raw_width * raw_height * 3) == (tiff_ifd[raw].bytes << 1)) {
-        tiff_bps = tiff_ifd[raw].bps = 12;
-      } else {
-        tiff_bps = tiff_ifd[raw].bps = 14;
+  if (is_NikonTransfer) {
+    if (tiff_ifd[raw].bps == 16) {
+      if (tiff_compress == 1) {
+        if ((raw_width * raw_height * 3) == (tiff_ifd[raw].bytes << 1)) {
+          tiff_bps = tiff_ifd[raw].bps = 12;
+        } else {
+          tiff_bps = tiff_ifd[raw].bps = 14;
+        }
+      }
+    } else if (tiff_ifd[raw].bps == 8) {
+      if (tiff_compress == 1) {
+        is_NikonTransfer = 2; // 8-bit debayered TIFF, like CoolScan NEFs
+        imgdata.params.coolscan_nef_gamma = 2.2f;
       }
     }
   }
@@ -15716,7 +15728,9 @@ void CLASS apply_tiff()
         strcpy(cdesc, "RGBG");
         break;
       }
-      if (!strncasecmp(make, "Nikon", 5) && !strncmp(software, "Nikon Scan", 10))
+      if (!strncasecmp(make, "Nikon", 5) &&
+          (!strncmp(software, "Nikon Scan", 10) ||
+          is_NikonTransfer == 2))
       {
         load_raw = &CLASS nikon_coolscan_load_raw;
         raw_color = 1;
@@ -15863,11 +15877,19 @@ void CLASS apply_tiff()
       is_raw = 0;
     }
   if (!dng_version)
-    if (((tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 && (tiff_compress & -16) != 32768) ||
-         (tiff_bps == 8 && strncmp(make, "Phase", 5) && strncmp(make, "Leaf", 4) && !strcasestr(make, "Kodak") &&
-          !strstr(model2, "DEBUG RAW"))) &&
-        strncmp(software, "Nikon Scan", 10))
+    if (((tiff_samples == 3   &&
+          tiff_ifd[raw].bytes &&
+          tiff_bps != 14      &&
+          (tiff_compress & -16) != 32768) ||
+         (tiff_bps == 8              &&
+          strncmp(make, "Phase", 5)  &&
+          strncmp(make, "Leaf", 4)   &&
+          !strcasestr(make, "Kodak") &&
+          !strstr(model2, "DEBUG RAW")))    &&
+        strncmp(software, "Nikon Scan", 10) &&
+        is_NikonTransfer != 2)
       is_raw = 0;
+
   for (i = 0; i < tiff_nifds; i++)
     if (i != raw &&
         (tiff_ifd[i].samples == max_samp || (tiff_ifd[i].comp == 7 && tiff_ifd[i].samples == 1)) /* Allow 1-bps JPEGs */
@@ -16848,7 +16870,8 @@ void CLASS parse_fuji(int offset)
       if (!strcmp(model, "X-A3")  ||
           !strcmp(model, "X-A10") ||
           !strcmp(model, "X-A5")  ||
-          !strcmp(model, "X-A20"))
+          !strcmp(model, "X-A20") ||
+          !strcmp(model, "X-T100"))
       {
         int wb[4];
         int nWB, tWB, pWB;
@@ -16894,8 +16917,13 @@ void CLASS parse_fuji(int offset)
     }
     fseek(ifp, save + len, SEEK_SET);
   }
-  height <<= fuji_layout;
-  width >>= fuji_layout;
+  if (strcmp(model, "X-T100")) {
+    height <<= fuji_layout;
+    width >>= fuji_layout;
+  } else {
+    height = raw_height;
+    width = raw_width;
+  }
 }
 
 int CLASS parse_jpeg(int offset)
@@ -17677,20 +17705,16 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
     { "Fujifilm X-A10", 0, 0,
       { 11540,-4999,-991,-2949,10963,2278,-382,1049,5605} },
-
-    { "Fujifilm X-A20", 0, 0, /* temp */
+    { "Fujifilm X-A20", 0, 0,
       { 11540,-4999,-991,-2949,10963,2278,-382,1049,5605} },
-
     { "Fujifilm X-A1", 0, 0,
       { 11086,-4555,-839,-3512,11310,2517,-815,1341,5940 } },
     { "Fujifilm X-A2", 0, 0,
       { 10763,-4560,-917,-3346,11311,2322,-475,1135,5843 } },
     { "Fujifilm X-A3", 0, 0,
       { 12407,-5222,-1086,-2971,11116,2120,-294,1029,5284 } },
-
-    { "Fujifilm X-A5", 0, 0, /* temp */
-      { 12407,-5222,-1086,-2971,11116,2120,-294,1029,5284 } },
-
+    { "Fujifilm X-A5", 0, 0,
+      { 11673,-4760,-1041,-3988,12058,2166,-771,1417,5569 } },
     { "Fujifilm X-E1", 0, 0,
       { 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
     { "Fujifilm X-E2S", 0, 0,
@@ -17709,6 +17733,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
     { "Fujifilm X-T2", 0, 0,
       { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
+    { "Fujifilm X-T100", 0, 0,
+      { 11673,-4760,-1041,-3988,12058,2166,-771,1417,5569 } },
     { "Fujifilm X-T10", 0, 0, /* updated */
       { 8458,-2451,-855,-4597,12447,2407,-1475,2482,6526 } },
     { "Fujifilm X-T1", 0, 0,
