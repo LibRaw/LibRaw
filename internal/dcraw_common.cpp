@@ -9604,7 +9604,7 @@ void CLASS parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigne
      imgdata.lens.makernotes.CamID = unique_id = get4();
 
    } else if (tag == 0x0043) {
-     if (i = get4()) {
+     if ((i = get4())) {
        imgdata.other.CameraTemperature = (float)i;
        if (get4() == 10)
          imgdata.other.CameraTemperature /= 10.0f;
@@ -11656,7 +11656,7 @@ void CLASS parse_makernote(int base, int uptag)
 
     else if (isSony) {
       if ((tag == 0xb028) && (len == 1) && (type == 4)) { // DSLR-A100
-        if (c = get4()) {
+        if ((c = get4())) {
           fseek (ifp, c, SEEK_SET);
           parse_makernote(base, tag);
         }
@@ -16254,14 +16254,17 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "GITUP GIT2", 3200, 0,
       { 8489, -2583,-1036,-8051,15583,2643,-1307,1407,7354 } },
 
-    { "Hasselblad HV", 0, 0, /* added */
+    { "Hasselblad HV", 0, 0,                                /* Sony SLT-A99     */
       { 6344,-1612,-461,-4862,12476,2680,-864,1785,6898 } },
-    { "Hasselblad Lunar", 0, 0,
+    { "Hasselblad Lunar", 0, 0,                             /* Sony NEX-7       */
       { 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
-    { "Hasselblad Lusso", 0, 0, /* added */
+    { "Hasselblad Lusso", 0, 0,                             /* Sony ILCE-7R     */
       { 4912,-540,-201,-6129,13513,2906,-1563,2151,7182 } },
-    { "Hasselblad Stellar", -800, 0,
+    { "Hasselblad Stellar II", -800, 0,                     /* Sony DSC-RX100M2 */
+      { 6596,-2079,-562,-4782,13016,1933,-970,1581,5181 } },
+    { "Hasselblad Stellar", -800, 0,                        /* Sony DSC-RX100   */
       { 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
+
     { "Hasselblad 500 mech.", 0, 0, /* added */
       { 8519,-3260,-280,-5081,13459,1738,-1449,2960,7809 } },
     { "Hasselblad CFV", 0, 0,
@@ -17710,6 +17713,14 @@ void CLASS identify()
           {0x432, "EOS 2000D"},
       },
     sonique[] = {
+/*
+Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
+  id 0x121 (289dec) : NEX-7       / Hasselblad Lunar
+  id 0x126 (294dec) : SLT-A99     / Hasselblad HV
+  id 0x129 (297dec) : DSC-RX100   / Hasselblad Stellar
+  id 0x134 (308dec) : DSC-RX100M2 / Hasselblad Stellar II
+  id 0x137 (311dec) : ILCE-7R     / Hasselblad Lusso
+*/
         {0x002, "DSC-R1"},      {0x100, "DSLR-A100"},   {0x101, "DSLR-A900"},  {0x102, "DSLR-A700"},
         {0x103, "DSLR-A200"},   {0x104, "DSLR-A350"},   {0x105, "DSLR-A300"},  {0x106, "DSLR-A900"},
         {0x107, "DSLR-A380"},   {0x108, "DSLR-A330"},   {0x109, "DSLR-A230"},  {0x10a, "DSLR-A290"},
