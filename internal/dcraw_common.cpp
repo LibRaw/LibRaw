@@ -17055,17 +17055,19 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Panasonic DMC-TX1", -15, 0, /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
 
-    { "Panasonic DC-TX2", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 */
+    { "Panasonic DC-TX2", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-TZ220", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 */
+    { "Panasonic DC-TZ220", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-TZ202", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 */
+    { "Panasonic DC-TZ202", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-TZ200", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 */
+    { "Panasonic DC-TZ200", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-ZS220", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 */
+    { "Panasonic DC-ZS220", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-ZS200", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 */
+    { "Panasonic DC-ZS200", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
+      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
+    { "Leica C-Lux", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
 
     { "Phase One H 20", 0, 0, /* DJC */
