@@ -15041,7 +15041,8 @@ int CLASS parse_tiff_ifd(int base)
       if (strcmp(model, "X-A3")  &&
           strcmp(model, "X-A10") &&
           strcmp(model, "X-A5")  &&
-          strcmp(model, "X-A20"))
+          strcmp(model, "X-A20") &&
+          strcmp(model, "X-T100"))
       {
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
@@ -15051,7 +15052,8 @@ int CLASS parse_tiff_ifd(int base)
       if (strcmp(model, "X-A3")  &&
           strcmp(model, "X-A10") &&
           strcmp(model, "X-A5")  &&
-          strcmp(model, "X-A20"))
+          strcmp(model, "X-A20") &&
+          strcmp(model, "X-T100"))
       {
         unsigned fwb[4];
         FORC4 fwb[c] = get4();
