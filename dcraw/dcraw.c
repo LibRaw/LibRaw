@@ -11667,7 +11667,10 @@ void CLASS process_Sony_0x940c(uchar *buf, ushort len)
     }
   }
   lid2 = (((ushort)SonySubstitution[buf[0x000a]]) << 8) | ((ushort)SonySubstitution[buf[0x0009]]);
-  if ((lid2 > 0) && (lid2 < 32784))
+  if ((lid2 > 0) &&
+      ((lid2 < 32784)  ||
+       (ilm.LensID == 0x1999) ||
+       (ilm.LensID == 0xffff)))
     parseSonyLensType2(SonySubstitution[buf[0x000a]], // LensType2 - Sony lens ids
                        SonySubstitution[buf[0x0009]]);
   return;
