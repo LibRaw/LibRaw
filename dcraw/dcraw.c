@@ -379,9 +379,14 @@ static int nPentax_wb_list2 = sizeof(Pentax_wb_list2) / sizeof(int);
 
 static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
 {
-  int r = fp->read(buf, len, 1);
-  buf[len - 1] = 0;
-  return r;
+  if(len>0)
+  {
+    int r = fp->read(buf, len, 1);
+    buf[len - 1] = 0;
+    return r;
+  }
+  else
+    return 0;
 }
 #define stmread(buf, maxlen, fp) stread(buf, MIN(maxlen, sizeof(buf)), fp)
 #endif
