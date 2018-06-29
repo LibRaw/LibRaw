@@ -1,3 +1,9 @@
+2018-06-28  Alex Tutubalin <lexa@lexa.ru>
+ * changed wrong fix for Canon D30 white balance
+ * fixed possible stack overrun while reading zero-sized strings
+ * fixed possible integer overflow
+ * LibRaw 0.18.13
+
 2018-05-11  Alex Tutubalin <lexa@lexa.ru>
  * Secunia Advisory SA83507, credits Kasper Leigh Haabb,
    Secunia Research at Flexera
