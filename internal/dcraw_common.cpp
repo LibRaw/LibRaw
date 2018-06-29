@@ -4996,6 +4996,7 @@ void CLASS wavelet_denoise()
 #pragma omp parallel default(shared) private(i, col, row, thold, lev, lpass, hpass, temp, c) firstprivate(scale, size)
 #endif
   {
+#pragma omp critical
     temp = (float *)malloc((iheight + iwidth) * sizeof *fimg);
     FORC(nc)
     { /* denoise R,G1,B,G3 individually */
@@ -5049,6 +5050,7 @@ void CLASS wavelet_denoise()
       for (i = 0; i < size; i++)
         image[i][c] = CLIP(SQR(fimg[i] + fimg[lpass + i]) / 0x10000);
     }
+#pragma omp critical
     free(temp);
   } /* end omp parallel */
   /* the following loops are hard to parallize, no idea yes,
@@ -6322,6 +6324,7 @@ void CLASS ahd_interpolate()
 #endif
 #endif
   {
+#pragma omp critical
     buffer = (char *)malloc(26 * TS * TS); /* 1664 kB */
     merror(buffer, "ahd_interpolate()");
     rgb = (ushort(*)[TS][TS][3])buffer;
@@ -6355,6 +6358,7 @@ void CLASS ahd_interpolate()
         ahd_interpolate_combine_homogeneous_pixels(top, left, rgb, homo);
       }
     }
+#pragma omp critical
     free(buffer);
   }
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -17424,7 +17428,7 @@ void CLASS identify()
         {0x155, "DSC-RX100M4"}, {0x156, "DSC-RX10M2"},  {0x158, "DSC-RX1RM2"}, {0x15a, "ILCE-QX1"},
         {0x15b, "ILCE-7RM2"},   {0x15e, "ILCE-7SM2"},   {0x161, "ILCA-68"},    {0x162, "ILCA-99M2"},
         {0x163, "DSC-RX10M3"},  {0x164, "DSC-RX100M5"}, {0x165, "ILCE-6300"},  {0x166, "ILCE-9"},
-        {0x168, "ILCE-6500"},   {0x16a, "ILCE-7RM3"},   {0x16b, "ILCE-7M3"},   {0x16c, "DSC-RX0"},
+        {0x168, "ILCE-6500"},   {0x16a, "ILCE-7RM3"},   {0x16b, "ILCE-7M3"}, {0x16c, "DSC-RX0"},
         {0x16d, "DSC-RX10M4"},
     };
 
