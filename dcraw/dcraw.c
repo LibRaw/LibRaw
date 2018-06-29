@@ -19748,7 +19748,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
         top_margin = table[i].tm;
         width = raw_width - left_margin - table[i].rm;
         height = raw_height - top_margin - table[i].bm;
-        filters = 0x1010101 * table[i].cf;
+        filters = 0x1010101U * table[i].cf;
         colors = 4 - !((filters & filters >> 1) & 0x5555);
         load_flags = table[i].lf;
         switch (tiff_bps = (fsize - data_offset) * 8 / (raw_width * raw_height))
