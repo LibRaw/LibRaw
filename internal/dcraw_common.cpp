@@ -11943,7 +11943,7 @@ void CLASS parse_ciff (int offset, int length, int depth)
         FORC4
         {
           ushort q = get2();
-          cam_mul[c ^ (c >> 1)] = q? 1024.0 / get2() : 1024;
+          cam_mul[c ^ (c >> 1)] = 1024.0/ MAX(1,q);
         }
 	if (!wbi) cam_mul[0] = -1;	/* use my auto white balance */
       } else if (!cam_mul[0]) {
