@@ -16919,13 +16919,8 @@ void CLASS parse_fuji(int offset)
     }
     fseek(ifp, save + len, SEEK_SET);
   }
-  if (strcmp(model, "X-T100")) {
-    height <<= fuji_layout;
-    width >>= fuji_layout;
-  } else {
-    height = raw_height;
-    width = raw_width;
-  }
+  height <<= fuji_layout;
+  width >>= fuji_layout;
 }
 
 int CLASS parse_jpeg(int offset)
@@ -20391,8 +20386,11 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   }
   else if (!strncmp(make, "Fujifilm", 8))
   {
-    if (!strcmp(model, "X-A3") || !strcmp(model, "X-A10")
-    || !strcmp(model, "X-A5") || !strcmp(model, "X-A20"))
+    if (!strcmp(model, "X-A3")  ||
+        !strcmp(model, "X-A10") ||
+        !strcmp(model, "X-A5")  ||
+        !strcmp(model, "X-A20") ||
+        !strcmp(model, "X-T100"))
     {
       left_margin = 0;
       top_margin = 0;
