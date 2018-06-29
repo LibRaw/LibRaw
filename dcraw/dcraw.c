@@ -379,9 +379,14 @@ static int nPentax_wb_list2 = sizeof(Pentax_wb_list2) / sizeof(int);
 
 static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
 {
-  int r = fp->read(buf, len, 1);
-  buf[len - 1] = 0;
-  return r;
+  if(len>0)
+  {
+    int r = fp->read(buf, len, 1);
+    buf[len - 1] = 0;
+    return r;
+  }
+  else
+    return 0;
 }
 #define stmread(buf, maxlen, fp) stread(buf, MIN(maxlen, sizeof(buf)), fp)
 #endif
@@ -16302,7 +16307,7 @@ void CLASS parse_ciff(int offset, int length, int depth)
         FORC4
         {
           ushort q = get2();
-          cam_mul[c ^ (c >> 1)] = q? 1024.0 / get2() : 1024;
+          cam_mul[c ^ (c >> 1)] = 1024.0/ MAX(1,q);
         }
         if (!wbi)
           cam_mul[0] = -1; /* use my auto white balance */
@@ -19751,7 +19756,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
         top_margin = table[i].tm;
         width = raw_width - left_margin - table[i].rm;
         height = raw_height - top_margin - table[i].bm;
-        filters = 0x1010101 * table[i].cf;
+        filters = 0x1010101U * table[i].cf;
         colors = 4 - !((filters & filters >> 1) & 0x5555);
         load_flags = table[i].lf;
         switch (tiff_bps = (fsize - data_offset) * 8 / (raw_width * raw_height))
