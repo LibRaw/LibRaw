@@ -62,9 +62,14 @@ static size_t local_strnlen(const char *s, size_t n)
 #ifdef LIBRAW_LIBRARY_BUILD
 static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
 {
- int r = fp->read(buf,len,1);
- buf[len-1] = 0;
- return r;
+  if(len>0)
+  {
+    int r = fp->read(buf, len, 1);
+    buf[len - 1] = 0;
+    return r;
+  }
+  else
+    return 0;
 }
 #define stmread(buf,maxlen,fp) stread(buf,MIN(maxlen,sizeof(buf)),fp)
 #endif
