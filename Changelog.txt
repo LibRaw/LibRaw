@@ -1,3 +1,9 @@
+2018-06-28  Alex Tutubalin <lexa@lexa.ru>
+ * changed wrong fix for Canon D30 white balance
+ * fixed possible stack overrun while reading zero-sized strings
+ * fixed possible integer overflow
+ * LibRaw 0.19.0-Release
+
 2018-06-11  Alex Tutubalin <lexa@lexa.ru>
  * Sony uncompressed/untiled DNGs: do not set bits-per-sample to 14 bit
  * Do not change tiff_bps for DNG files
