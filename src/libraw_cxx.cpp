@@ -2840,7 +2840,7 @@ int LibRaw::unpack(void)
 		  if(imgdata.params.shot_select) // single image extract
 		  {
 			  if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) >
-				  INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+				  INT64(LIBRAW_MAX_ALLOC_MB) * INT64(1024 * 1024))
 				  throw LIBRAW_EXCEPTION_TOOBIG;
 			  imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
 			  imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
@@ -2850,7 +2850,7 @@ int LibRaw::unpack(void)
 		  else // Full image extract
 		  {
 			  if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 4 >
-				  INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+				  INT64(LIBRAW_MAX_ALLOC_MB) * INT64(1024 * 1024))
 				  throw LIBRAW_EXCEPTION_TOOBIG;
 			  S.raw_pitch = S.raw_width * 8;
 			  imgdata.rawdata.raw_alloc = 0;
