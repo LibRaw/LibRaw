@@ -170,6 +170,7 @@ int histogram[4][0x2000];
 void (*write_thumb)(), (*write_fun)();
 void (*load_raw)(), (*thumb_load_raw)();
 unsigned is_NikonTransfer = 0;
+unsigned is_4K_RAFdata = 0; /* =1 for Fuji X-A3, X-A5, X-A10, X-A20, X-T100 */
 jmp_buf failure;
 
 struct decode
@@ -14466,14 +14467,14 @@ int CLASS parse_tiff_ifd(int base)
     case 61442: /* ImageHeight */
       tiff_ifd[ifd].t_height = getint(type);
       break;
-    case 258: /* BitsPerSample */
-    case 61443:
+    case 258:   /* BitsPerSample */
+    case 61443: /* Fuji RAF IFD 0xf003 */
       tiff_ifd[ifd].samples = len & 7;
       tiff_ifd[ifd].bps = getint(type);
       if (tiff_bps < tiff_ifd[ifd].bps)
         tiff_bps = tiff_ifd[ifd].bps;
       break;
-    case 61446:
+    case 61446: /* Fuji RAF IFD 0xf006 */
       raw_height = 0;
       if (tiff_ifd[ifd].bps > 12)
         break;
@@ -15046,22 +15047,14 @@ int CLASS parse_tiff_ifd(int base)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     case 0xf00d:
-      if (strcmp(model, "X-A3")  &&
-          strcmp(model, "X-A10") &&
-          strcmp(model, "X-A5")  &&
-          strcmp(model, "X-A20") &&
-          strcmp(model, "X-T100"))
+      if (!is_4K_RAFdata)
       {
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
       }
       break;
     case 0xf00c:
-      if (strcmp(model, "X-A3")  &&
-          strcmp(model, "X-A10") &&
-          strcmp(model, "X-A5")  &&
-          strcmp(model, "X-A20") &&
-          strcmp(model, "X-T100"))
+      if (!is_4K_RAFdata)
       {
         unsigned fwb[4];
         FORC4 fwb[c] = get4();
@@ -16847,68 +16840,62 @@ void CLASS parse_fuji(int offset)
 
     else if (tag == 0xc000)
     /* 0xc000 tag versions, second ushort; valid if the first ushort is 0
-    X100F	0x0259
-    X100T	0x0153
-    X-E2	0x014f	0x024f depends on firmware
-    X-A1	0x014e
-    XQ2		0x0150
-    XQ1		0x0150
-    X100S	0x0149	0x0249 depends on firmware
-    X30		0x0152
-    X20		0x0146
-    X-T10	0x0154
-    X-T2	0x0258
-    X-M1	0x014d
-    X-E2s	0x0355
-    X-A2	0x014e
-    X-T20	0x025b
+    X100F	  0x0259
+    X100T	  0x0153
+    X-E2	  0x014f	0x024f depends on firmware
+    X-A1	  0x014e
+    XQ2		  0x0150
+    XQ1		  0x0150
+    X100S	  0x0149	0x0249 depends on firmware
+    X30	    0x0152
+    X20	    0x0146
+    X-T10	  0x0154
+    X-T2	  0x0258
+    X-M1	  0x014d
+    X-E2s	  0x0355
+    X-A2	  0x014e
+    X-T20	  0x025b
     GFX 50S	0x025a
-    X-T1	0x0151	0x0251 0x0351 depends on firmware
-    X70		0x0155
+    X-T1	  0x0151	0x0251 0x0351 depends on firmware
+    X-E3	  0x025c
+    X70	    0x0155
     X-Pro2	0x0255
     */
     {
       c = order;
       order = 0x4949;
-      if ((tag = get4()) > 10000)
-        tag = get4();
-      if (tag > 10000)
-        tag = get4();
-      width = tag;
-      height = get4();
+      if (len > 20000) {
+        if ((tag = get4()) > 10000)
+          tag = get4();
+        if (tag > 10000)
+          tag = get4();
+        width = tag;
+        height = get4();
+      }
 #ifdef LIBRAW_LIBRARY_BUILD
-      if (!strcmp(model, "X-A3")  ||
-          !strcmp(model, "X-A10") ||
-          !strcmp(model, "X-A5")  ||
-          !strcmp(model, "X-A20") ||
-          !strcmp(model, "X-T100"))
-      {
+      if (len == 4096) { /* X-A3, X-A5, X-A10, X-A20, X-T100 */
         int wb[4];
         int nWB, tWB, pWB;
         int iCCT = 0;
         int cnt;
+        is_4K_RAFdata = 1;
         fseek(ifp, save + 0x200, SEEK_SET);
-        for (int wb_ind = 0; wb_ind < 42; wb_ind++)
-        {
+        for (int wb_ind = 0; wb_ind < 42; wb_ind++) {
           nWB = get4();
           tWB = get4();
           wb[0] = get4() << 1;
           wb[1] = get4();
           wb[3] = get4();
           wb[2] = get4() << 1;
-          if (tWB && (iCCT < 255))
-          {
+          if (tWB && (iCCT < 255)) {
             imgdata.color.WBCT_Coeffs[iCCT][0] = tWB;
             for (cnt = 0; cnt < 4; cnt++)
               imgdata.color.WBCT_Coeffs[iCCT][cnt + 1] = wb[cnt];
             iCCT++;
           }
-          if (nWB != 70)
-          {
-            for (pWB = 1; pWB < nFuji_wb_list2; pWB += 2)
-            {
-              if (Fuji_wb_list2[pWB] == nWB)
-              {
+          if (nWB != 70) {
+            for (pWB = 1; pWB < nFuji_wb_list2; pWB += 2) {
+              if (Fuji_wb_list2[pWB] == nWB) {
                 for (cnt = 0; cnt < 4; cnt++)
                   imgdata.color.WB_Coeffs[Fuji_wb_list2[pWB - 1]][cnt] = wb[cnt];
                 break;
@@ -16916,9 +16903,7 @@ void CLASS parse_fuji(int offset)
             }
           }
         }
-      }
-      else
-      {
+      } else {
         libraw_internal_data.unpacker_data.posRAFData = save;
         libraw_internal_data.unpacker_data.lenRAFData = (len >> 1);
       }
@@ -17758,6 +17743,9 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "GITUP GIT2", 3200, 0,
       { 8489, -2583,-1036,-8051,15583,2643,-1307,1407,7354 } },
 
+    { "GoPro HERO5 Black", 0, 0,
+	    { 10344,-4210,-620,-2315,10625,1948,93,1058,5541 } },
+
     { "Hasselblad HV", 0, 0,                                /* Sony SLT-A99     */
       { 6344,-1612,-461,-4862,12476,2680,-864,1785,6898 } },
     { "Hasselblad Lunar", 0, 0,                             /* Sony NEX-7       */
@@ -18291,7 +18279,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Pentax K-r", 0, 0,
       { 9895,-3077,-850,-5304,13035,2521,-883,1768,6936 } },
     { "Pentax K-1 Mark II", 0, 0,
-      { 8966, -2874, -1258, -3612, 12204, 1550, -885, 1664, 6204, } },
+      { 8596,-2981,-639,-4202,12046,2431,-685,1424,6122 } },
     { "Pentax K-1", 0, 0, /* updated */
       { 8596,-2981,-639,-4202,12046,2431,-685,1424,6122 } },
     { "Pentax K-30", 0, 0, /* updated */
@@ -18912,6 +18900,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 5491,-1192,-363,-4951,12342,2948,-911,1722,7192 } },
     { "Sony SLT-A99", 0, 0,
       { 6344,-1612,-462,-4863,12477,2681,-865,1786,6899 } },
+    { "YI M1", 0, 0,
+	    { 7712,-2059,-653,-3882,11494,2726,-710,1332,5958 } },
   };
   // clang-format on
 
@@ -19085,6 +19075,7 @@ void CLASS initdata()
   pixel_aspect = is_raw = raw_color = 1;
   tile_width = tile_length = 0;
   is_NikonTransfer = 0;
+  is_4K_RAFdata = 0;
 }
 
 #endif
@@ -19410,9 +19401,9 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   libraw_custom_camera_t table[64 + sizeof(const_table) / sizeof(const_table[0])];
 #endif
 
-  static const char *corp[] = {"AgfaPhoto", "Canon",     "Casio",  "Epson",   "Fujifilm", "Mamiya", "Minolta",
-                               "Motorola",  "Kodak",     "Konica", "Leica",   "Nikon",    "Nokia",  "Olympus",
-                               "Pentax",    "Phase One", "Ricoh",  "Samsung", "Sigma",    "Sinar",  "Sony"};
+  static const char *corp[] = {"AgfaPhoto", "Canon", "Casio", "Epson", "Fujifilm", "Mamiya", "Minolta",
+                               "Motorola", "Kodak", "Konica", "Leica", "Nikon", "Nokia", "Olympus",
+                               "Pentax", "Phase One", "Ricoh", "Samsung", "Sigma", "Sinar", "Sony", "YI"};
 #ifdef LIBRAW_LIBRARY_BUILD
   char head[64], *cp;
 #else
@@ -19435,6 +19426,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   iso_speed = shutter = aperture = focal_len = unique_id = 0;
   tiff_nifds = 0;
   is_NikonTransfer = 0;
+  is_4K_RAFdata = 0;
   memset(tiff_ifd, 0, sizeof tiff_ifd);
 
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -20394,17 +20386,6 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   }
   else if (!strncmp(make, "Fujifilm", 8))
   {
-    if (!strcmp(model, "X-A3")  ||
-        !strcmp(model, "X-A10") ||
-        !strcmp(model, "X-A5")  ||
-        !strcmp(model, "X-A20") ||
-        !strcmp(model, "X-T100"))
-    {
-      left_margin = 0;
-      top_margin = 0;
-      width = raw_width;
-      height = raw_height;
-    }
     if (!strcmp(model + 7, "S2Pro"))
     {
       strcpy(model, "S2Pro");
@@ -20412,7 +20393,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
       width = 2880;
       flip = 6;
     }
-    else if (load_raw != &CLASS packed_load_raw && strncmp(model, "X-", 2) && filters >=1000) // Bayer and not X-models
+    else if (load_raw != &CLASS packed_load_raw && strncmp(model, "X-", 2) && filters >=1000) // Bayer and not an X-model
       maximum = (is_raw == 2 && shot_select) ? 0x2f00 : 0x3e00;
     top_margin = (raw_height - height) >> 2 << 1;
     left_margin = (raw_width - width) >> 2 << 1;
@@ -20427,7 +20408,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
     if (width == 6032)
       left_margin = 0;
 
-if (!strcmp(model, "DBP for GX680") ||
+  if (!strcmp(model, "DBP for GX680") ||
     !strcmp(model, "DX-2000")) {
 /*
 7712 2752 -> 5504 3856
