@@ -16251,6 +16251,9 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Fujifilm GFX 50S", 0, 0,
       { 11756,-4754,-874,-3056,11045,2305,-381,1457,6006 } },
 
+    { "GITUP G3DUO", 300, 62000,
+       { 8489, -2583,-1036,-8051,15583,2643,-1307,1407,7354 } },
+
     { "GITUP GIT2P", 4160, 0,
       { 8489, -2583,-1036,-8051,15583,2643,-1307,1407,7354 } },
     { "GITUP GIT2", 3200, 0,
@@ -17771,6 +17774,8 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
           {23887872, 4608, 2592, 0, 0, 0, 0, 0, 0x94, 0, 0, "GITUP", "GIT2 16:9"},
           {32257024, 4624, 3488, 8, 2, 16, 2, 0, 0x94, 0, 0, "GITUP", "GIT2P 4:3"},
           {24192768, 4624, 2616, 8, 2, 16, 2, 0, 0x94, 0, 0, "GITUP", "GIT2P 16:9"},
+	  {18016000, 4000, 2252, 0, 0, 0, 0, 0, 0x94, 0, 0, "GITUP", "G3DUO 16:9"},
+	  //{24000000, 4000, 3000, 0, 0, 0, 0, 0, 0x94, 0, 0, "GITUP", "G3DUO 4:3"}, // Conflict w Samsung WB550
 
           //   Android Raw dumps id start
           //   File Size in bytes Horizontal Res Vertical Flag then bayer order eg 0x16 bbgr 0x94 rggb

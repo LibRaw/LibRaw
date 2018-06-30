@@ -5470,6 +5470,7 @@ static const char *static_camera_list[] = {
 	"Gione E7",
 	"GITUP GIT2",
 	"GITUP GIT2P",
+	"GITUP G3 DUO (16:9 mode only)",
 	"Google Pixel",
 	"Google Pixel XL",
 	"Hasselblad H2D-22",
