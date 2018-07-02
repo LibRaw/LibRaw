@@ -101,7 +101,7 @@ it under the terms of the one of two licenses as you choose:
     void        canon_600_load_raw();
     void        canon_600_correct();
     int         canon_s2is();
-void        parse_ciff (int offset, int length, int);
+    void        parse_ciff (int offset, int length, int);
     void        ciff_block_1030();
 
 
@@ -113,11 +113,11 @@ void        parse_ciff (int offset, int length, int);
     void        ljpeg_end(struct jhead *jh);
     int         ljpeg_diff (ushort *huff);
     ushort *    ljpeg_row (int jrow, struct jhead *jh);
-    void	ljpeg_idct (struct jhead *jh);
+    void	    ljpeg_idct (struct jhead *jh);
     unsigned    ph1_bithuff (int nbits, ushort *huff);
 
 // Canon DSLRs
-void        crw_init_tables (unsigned table, ushort *huff[2]);
+    void        crw_init_tables (unsigned table, ushort *huff[2]);
     int         canon_has_lowbits();
     void        canon_load_raw();
     void        lossless_jpeg_load_raw();
@@ -141,12 +141,12 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        nikon_load_striped_packed_raw();
     void        nikon_load_sraw();
     void        nikon_yuv_load_raw();
-    void	nikon_coolscan_load_raw();
+    void        nikon_coolscan_load_raw();
     int         nikon_e995();
     int         nikon_e2100();
     void        nikon_3700();
     int         minolta_z2();
-    void        nikon_e2100_load_raw();
+//    void        nikon_e2100_load_raw();
 
 // Fuji
 //void        fuji_load_raw();
@@ -190,9 +190,9 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        canon_rmf_load_raw();
     unsigned    pana_data (int nb, unsigned *bytes);
     void        panasonic_load_raw();
-    void        panasonic_16x10_load_raw();
+//    void        panasonic_16x10_load_raw();
     void        olympus_load_raw();
-    void        olympus_cseries_load_raw();
+//    void        olympus_cseries_load_raw();
     void        minolta_rd175_load_raw();
     void        quicktake_100_load_raw();
     const int*  make_decoder_int (const int *source, int level);
@@ -251,7 +251,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
     void        tiff_get (unsigned base,unsigned *tag, unsigned *type, unsigned *len, unsigned *save);
     void        parse_thumb_note (int base, unsigned toff, unsigned tlen);
     void        parse_makernote (int base, int uptag);
-		void        parse_makernote_0xc634(int base, int uptag, unsigned dng_writer);
+    void        parse_makernote_0xc634(int base, int uptag, unsigned dng_writer);
     void        parse_exif (int base);
     void        linear_table (unsigned len);
     void        Kodak_DCR_WBtags(int wb, unsigned type, int wbi);
@@ -281,7 +281,7 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 
 // split AHD code
 #define TS 512
-    void        ahd_interpolate_green_h_and_v(int top, int left, ushort (*out_rgb)[TS][TS][3]);
+    void ahd_interpolate_green_h_and_v(int top, int left, ushort (*out_rgb)[TS][TS][3]);
     void ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[TS][3], short (*out_lab)[TS][3]);
     void ahd_interpolate_r_and_b_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[TS][TS][3], short (*out_lab)[TS][TS][3]);
     void ahd_interpolate_build_homogeneity_map(int top, int left, short (*lab)[TS][TS][3], char (*out_homogeneity_map)[TS][2]);
@@ -299,20 +299,20 @@ void        crw_init_tables (unsigned table, ushort *huff[2]);
 	void parse_fuji_compressed_header();
 
 // DCB
-    void        dcb_pp();
-    void        dcb_copy_to_buffer(float (*image2)[3]);
-    void        dcb_restore_from_buffer(float (*image2)[3]);
-    void        dcb_color();
-    void        dcb_color_full();
-    void        dcb_map();
-    void        dcb_correction();
-    void        dcb_correction2();
-    void        dcb_refinement();
-    void        rgb_to_lch(double (*image3)[3]);
-    void        lch_to_rgb(double (*image3)[3]);
-    void        fbdd_correction();
-    void        fbdd_correction2(double (*image3)[3]);
-    void        fbdd_green();
+    void  	dcb_pp();
+    void  	dcb_copy_to_buffer(float (*image2)[3]);
+    void  	dcb_restore_from_buffer(float (*image2)[3]);
+    void  	dcb_color();
+    void  	dcb_color_full();
+    void  	dcb_map();
+    void  	dcb_correction();
+    void  	dcb_correction2();
+    void  	dcb_refinement();
+    void  	rgb_to_lch(double (*image3)[3]);
+    void  	lch_to_rgb(double (*image3)[3]);
+    void  	fbdd_correction();
+    void  	fbdd_correction2(double (*image3)[3]);
+    void  	fbdd_green();
     void  	dcb_ver(float (*image3)[3]);
     void 	dcb_hor(float (*image2)[3]);
     void 	dcb_color2(float (*image2)[3]);

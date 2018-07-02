@@ -997,6 +997,16 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "nikon_load_striped_packed_raw()";
   }
+
+/* -- added 07/02/18 -- */
+  else if (load_raw == &LibRaw::unpacked_load_raw_fuji_f700s20)
+  {
+      d_info->decoder_name = "unpacked_load_raw_fuji_f700s20()";
+  }
+  else if (load_raw == &LibRaw::unpacked_load_raw_FujiDBP)
+  {
+      d_info->decoder_name = "unpacked_load_raw_FujiDBP()";
+  }
   else
   {
     d_info->decoder_name = "Unknown unpack function";
