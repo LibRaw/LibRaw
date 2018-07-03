@@ -2543,7 +2543,6 @@ for Fuji DBP for GX680, aka DX-2000
 {
   int scan_line, tile_n;
   int nTiles;
-  ushort tile_width;
 
   nTiles = 8;
   tile_width = raw_width / nTiles;
@@ -8450,7 +8449,6 @@ void CLASS parseAdobePanoMakernote ()
   unsigned PrivateOrder;
   unsigned PrivateEntries, PrivateTagID, PrivateTagType, PrivateTagCount;
   unsigned PrivateTagBytes;
-  short order;
   int truncated;
   order = 0x4d4d;
   truncated = 0;
