@@ -17738,7 +17738,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Fujifilm GFX 50S", 0, 0,
       { 11756,-4754,-874,-3056,11045,2305,-381,1457,6006 } },
 
-    { "GITUP G3DUO", 300, 62000,
+    { "GITUP G3DUO", 130, 62000,
        { 8489, -2583,-1036,-8051,15583,2643,-1307,1407,7354 } },
 
     { "GITUP GIT2P", 4160, 0,
