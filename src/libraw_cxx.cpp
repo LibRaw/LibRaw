@@ -795,6 +795,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     // UNTESTED
     d_info->decoder_name = "sinar_4shot_load_raw()";
+	d_info->decoder_flags = LIBRAW_DECODER_SINAR4SHOT;
   }
   else if (load_raw == &LibRaw::imacon_full_load_raw)
   {
@@ -2834,7 +2835,30 @@ int LibRaw::unpack(void)
         // x3f foveon decoder and DNG float
         // Do nothing! Decoder will allocate data internally
       }
-      if (decoder_info.decoder_flags & LIBRAW_DECODER_3CHANNEL)
+	  if (decoder_info.decoder_flags & LIBRAW_DECODER_SINAR4SHOT)
+	  {
+		  if(imgdata.params.shot_select) // single image extract
+		  {
+			  if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) >
+				  INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+				  throw LIBRAW_EXCEPTION_TOOBIG;
+			  imgdata.rawdata.raw_alloc = malloc(rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
+			  imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
+			  if (!S.raw_pitch)
+				  S.raw_pitch = S.raw_width * 2; // Bayer case, not set before
+		  }
+		  else // Full image extract
+		  {
+			  if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 4 >
+				  INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+				  throw LIBRAW_EXCEPTION_TOOBIG;
+			  S.raw_pitch = S.raw_width * 8;
+			  imgdata.rawdata.raw_alloc = 0;
+			  imgdata.image = (ushort(*)[4])calloc(
+				  unsigned(MAX(S.width, S.raw_width)) * unsigned(MAX(S.height, S.raw_height)+8), sizeof(*imgdata.image));
+		  }
+	  }
+	  else if (decoder_info.decoder_flags & LIBRAW_DECODER_3CHANNEL)
       {
         if (INT64(rwidth) * INT64(rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3 >
             LIBRAW_MAX_ALLOC_MB * INT64(1024 * 1024))
@@ -2899,7 +2923,13 @@ int LibRaw::unpack(void)
       {
         // x3f foveon decoder only: do nothing
       }
-      else if (!(imgdata.idata.filters || P1.colors == 1)) // legacy decoder, ownalloc handled above
+	  else if (decoder_info.decoder_flags & LIBRAW_DECODER_SINAR4SHOT && imgdata.params.shot_select == 0)
+	  {
+		  imgdata.rawdata.raw_alloc = imgdata.image;
+		  imgdata.rawdata.color4_image = (ushort(*)[4])imgdata.rawdata.raw_alloc;
+		  imgdata.image = 0;
+	  }
+	  else if (!(imgdata.idata.filters || P1.colors == 1)) // legacy decoder, ownalloc handled above
       {
         // successfully decoded legacy image, attach image to raw_alloc
         imgdata.rawdata.raw_alloc = imgdata.image;
