@@ -1,5 +1,5 @@
-======================   LibRaw ==============================
-== Library for reading and processing of RAW digicam images ==
+# LibRaw
+### Library for reading and processing of RAW digicam images
 
 LibRaw is a library for reading RAW files from digital photo cameras 
 (CRW/CR2, NEF, RAF, DNG, MOS, KDC, DCR, etc, virtually all RAW formats are 
@@ -11,7 +11,7 @@ RAW conversion.
 The library is intended for embedding in RAW converters, data analyzers, and 
 other programs using RAW files as the initial data.
 
-LibRaw library, Copyright (C) 2008-2018 LibRaw LLC (info@libraw.org)
+LibRaw library, Copyright &copy; 2008-2018 LibRaw LLC (info@libraw.org)
 The library includes source code from
       
      dcraw.c, Dave Coffin's raw photo decoder
