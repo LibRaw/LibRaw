@@ -150,9 +150,9 @@ int main(int ac, char *av[])
     else if (print_1)
     {
       char frame[64] = "";
-      snprintf(frame, 64, "rw:%d rh:%d lm:%d tm:%d",
+      snprintf(frame, 64, "rw %d rh %d lm %d tm %d",
                S.raw_width, S.raw_height, S.left_margin, S.top_margin);
-      printf("%s=%s=%s=%s", P1.make, P1.model, MyCoolRawProcessor.unpack_function_name(), frame);
+      printf("%s=%s=nFms %02d=%s=%s", P1.make, P1.model, P1.raw_count, MyCoolRawProcessor.unpack_function_name(), frame);
       printf("\n");
     }
     else if (print_2)

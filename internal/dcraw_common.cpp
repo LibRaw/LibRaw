@@ -8512,6 +8512,9 @@ void CLASS parseAdobePanoMakernote ()
           posPrivateMknBuf += 8;
         }
 #undef icWBC
+      } else if (PrivateTagID == 0x0121) {
+        imgdata.makernotes.panasonic.Multishot = get4();
+
       } else {
         if (PrivateTagBytes > 4) posPrivateMknBuf += PrivateTagBytes;
         else if (!truncated) posPrivateMknBuf += 4;
@@ -13027,7 +13030,12 @@ int CLASS parse_tiff_ifd(int base)
         order = sorder;
       }
     break;
-
+    case 0x0121:
+      if (pana_raw)
+      { /* 0 is Off, 65536 is Pixel Shift */
+        imgdata.makernotes.panasonic.Multishot = get4();
+      }
+    break;
     case 0x2009:
       if ((pana_encoding == 4) || (pana_encoding == 5))
       {
@@ -14047,7 +14055,7 @@ int CLASS parse_tiff_ifd(int base)
           fread(mbuf, 1, 4, ifp);
           curr_pos += 8;
 
-          if (!strncmp(mbuf, "Pano", 4)) {
+          if (!strncmp(mbuf, "Pano", 4)) { // PanasonicRaw, yes, they use "Pano" as signature
             parseAdobePanoMakernote();
           }
 
