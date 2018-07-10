@@ -575,6 +575,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     int WB_Coeffs[256][4];    /* R, G1, B, G2 coeffs */
     float WBCT_Coeffs[64][5]; /* CCT, than R, G1, B, G2 coeffs */
     libraw_P1_color_t P1_color[2];
+    unsigned raw_bps;
   } libraw_colordata_t;
 
   typedef struct

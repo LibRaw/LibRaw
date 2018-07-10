@@ -152,7 +152,7 @@ int main(int ac, char *av[])
       char frame[64] = "";
       snprintf(frame, 64, "rw %d rh %d lm %d tm %d",
                S.raw_width, S.raw_height, S.left_margin, S.top_margin);
-      printf("%s=%s=nFms %02d=%s=%s", P1.make, P1.model, P1.raw_count, MyCoolRawProcessor.unpack_function_name(), frame);
+      printf("%s=%s=nFms %02d=%s=bps %02d=%s", P1.make, P1.model, P1.raw_count, MyCoolRawProcessor.unpack_function_name(), C.raw_bps, frame);
       printf("\n");
     }
     else if (print_2)

@@ -21597,6 +21597,10 @@ notraw:
   }
 
 #ifdef LIBRAW_LIBRARY_BUILD
+
+  if (pana_bpp) imgdata.color.raw_bps = pana_bpp;
+  else imgdata.color.raw_bps = tiff_bps;
+
   RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY, 1, 2);
 #endif
 }
