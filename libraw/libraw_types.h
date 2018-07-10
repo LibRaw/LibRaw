@@ -430,6 +430,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     ushort Compression;
     ushort BlackLevelDim;
     float BlackLevel[8];
+    unsigned Multishot;  /* 0 is Off, 65536 is Pixel Shift */
   } libraw_panasonic_makernotes_t;
 
   typedef struct

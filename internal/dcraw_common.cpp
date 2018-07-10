@@ -2543,7 +2543,6 @@ for Fuji DBP for GX680, aka DX-2000
 {
   int scan_line, tile_n;
   int nTiles;
-  ushort tile_width;
 
   nTiles = 8;
   tile_width = raw_width / nTiles;
@@ -8450,7 +8449,6 @@ void CLASS parseAdobePanoMakernote ()
   unsigned PrivateOrder;
   unsigned PrivateEntries, PrivateTagID, PrivateTagType, PrivateTagCount;
   unsigned PrivateTagBytes;
-  short order;
   int truncated;
   order = 0x4d4d;
   truncated = 0;
@@ -8514,6 +8512,9 @@ void CLASS parseAdobePanoMakernote ()
           posPrivateMknBuf += 8;
         }
 #undef icWBC
+      } else if (PrivateTagID == 0x0121) {
+        imgdata.makernotes.panasonic.Multishot = get4();
+
       } else {
         if (PrivateTagBytes > 4) posPrivateMknBuf += PrivateTagBytes;
         else if (!truncated) posPrivateMknBuf += 4;
@@ -13029,7 +13030,12 @@ int CLASS parse_tiff_ifd(int base)
         order = sorder;
       }
     break;
-
+    case 0x0121:
+      if (pana_raw)
+      { /* 0 is Off, 65536 is Pixel Shift */
+        imgdata.makernotes.panasonic.Multishot = get4();
+      }
+    break;
     case 0x2009:
       if ((pana_encoding == 4) || (pana_encoding == 5))
       {
@@ -14049,7 +14055,7 @@ int CLASS parse_tiff_ifd(int base)
           fread(mbuf, 1, 4, ifp);
           curr_pos += 8;
 
-          if (!strncmp(mbuf, "Pano", 4)) {
+          if (!strncmp(mbuf, "Pano", 4)) { // PanasonicRaw, yes, they use "Pano" as signature
             parseAdobePanoMakernote();
           }
 
@@ -17118,7 +17124,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 6516,-2050,-507,-8217,16703,1479,-3492,4741,8489 } },
     { "Phase One P20", 0, 0, /* added */
       { 2905,732,-237,-8135,16626,1476,-3038,4253,7517 } },
-    { "Phase One P20", 0, 0, /* added */
+    { "Phase One P 20", 0, 0, /* added */
       { 2905,732,-237,-8135,16626,1476,-3038,4253,7517 } },
     { "Phase One P 2", 0, 0,
       { 2905,732,-237,-8134,16626,1476,-3038,4253,7517 } },
@@ -17134,6 +17140,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Phase One IQ3 50MP", 0, 0, /* added */
 //      { 3984,0,0,0,10000,0,0,0,7666 } },
       {10058,1079,-587,-4135,12903,944,-916,2726,7480}}, /* emb */
+
     { "Photron BC2-HD", 0, 0, /* DJC */
       { 14603,-4122,-528,-1810,9794,2017,-297,2763,5936 } },
 
