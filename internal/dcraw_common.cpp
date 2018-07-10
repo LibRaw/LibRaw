@@ -15128,8 +15128,11 @@ void CLASS parse_phase_one(int base)
   order = get4() & 0xffff;
   if (get4() >> 8 != 0x526177)
     return; /* "Raw" */
-  fseek(ifp, get4() + base, SEEK_SET);
+  unsigned offset = get4();
+  if(offset == 0xbad0bad) return;
+  fseek(ifp, offset + base, SEEK_SET);
   entries = get4();
+  if(entries > 8192) return; // too much??
   get4();
   while (entries--)
   {
