@@ -15682,8 +15682,13 @@ void CLASS apply_tiff()
 
 void CLASS parse_minolta(int base)
 {
-  int save, tag, len, offset, high = 0, wide = 0, i, c;
+  int tag, len, offset, high = 0, wide = 0, i, c;
   short sorder = order;
+#ifdef LIBRAW_LIBRARY_BUILD
+  INT64 save;
+#else
+  int save;
+#endif
 
   fseek(ifp, base, SEEK_SET);
   if (fgetc(ifp) || fgetc(ifp) - 'M' || fgetc(ifp) - 'R')
@@ -15691,8 +15696,9 @@ void CLASS parse_minolta(int base)
   order = fgetc(ifp) * 0x101;
   offset = base + get4() + 8;
 #ifdef LIBRAW_LIBRARY_BUILD
-  if(offset>ifp->size()-8) // At least 8 bytes for tag/len
-    offset = ifp->size()-8;
+  INT64 fsize = ifp->size();
+  if(offset>fsize-8) // At least 8 bytes for tag/len
+    offset = fsize-8;
 #endif
 
   while ((save = ftell(ifp)) < offset)
@@ -15702,6 +15708,10 @@ void CLASS parse_minolta(int base)
     len = get4();
     if(len < 0)
       return; // just ignore wrong len?? or raise bad file exception?
+#ifdef LIBRAW_LIBRARY_BUILD
+    if((INT64)len + save + 8ULL > save)
+      return; // just ignore out of file metadata, stop parse
+#endif
     switch (tag)
     {
     case 0x505244: /* PRD */
