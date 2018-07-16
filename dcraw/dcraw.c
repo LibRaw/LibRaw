@@ -16689,7 +16689,6 @@ void CLASS parse_phase_one(int base)
     }
   }
 #endif
-
   load_raw = ph1.format < 3 ? &CLASS phase_one_load_raw : &CLASS phase_one_load_raw_c;
   maximum = 0xffff;
   strcpy(make, "Phase One");
@@ -21596,8 +21595,13 @@ notraw:
 
 #ifdef LIBRAW_LIBRARY_BUILD
 
-  if (pana_bpp) imgdata.color.raw_bps = pana_bpp;
-  else imgdata.color.raw_bps = tiff_bps;
+  if (pana_bpp)
+    imgdata.color.raw_bps = pana_bpp;
+  else if ((load_raw == &CLASS phase_one_load_raw) ||
+           (load_raw == &CLASS phase_one_load_raw_c))
+    imgdata.color.raw_bps = ph1.format;
+  else
+    imgdata.color.raw_bps = tiff_bps;
 
   RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY, 1, 2);
 #endif
