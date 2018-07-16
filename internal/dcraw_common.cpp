@@ -8409,7 +8409,15 @@ void CLASS parseLeicaMakernote (int base, int uptag, unsigned MakernoteTagType)
 
     } else if ((LeicaMakernoteSignature == 0x0800) || // Q (Typ 116)
                (LeicaMakernoteSignature == 0x0900)) { // SL (Typ 601), CL
-      if (tag == 0x0500) {
+      if ((tag == 0x0304) &&
+          (len == 1) &&
+          ((c = fgetc(ifp)) != 0) &&
+          (imgdata.lens.makernotes.CameraMount == LIBRAW_MOUNT_Leica_L)) {
+        strcpy(imgdata.lens.makernotes.Adapter, "M-Adapter L");
+        imgdata.lens.makernotes.LensMount =  LIBRAW_MOUNT_Leica_M;
+        imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FF;
+        imgdata.lens.makernotes.LensID = c*256;
+      } else if (tag == 0x0500) {
         parseLeicaInternalBodySerial(len);
       }
 
