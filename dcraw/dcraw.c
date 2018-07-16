@@ -15932,8 +15932,13 @@ void CLASS apply_tiff()
 
 void CLASS parse_minolta(int base)
 {
-  int save, tag, len, offset, high = 0, wide = 0, i, c;
+  int tag, len, offset, high = 0, wide = 0, i, c;
   short sorder = order;
+#ifdef LIBRAW_LIBRARY_BUILD
+  INT64 save;
+#else
+  int save;
+#endif
 
   fseek(ifp, base, SEEK_SET);
   if (fgetc(ifp) || fgetc(ifp) - 'M' || fgetc(ifp) - 'R')
@@ -15941,8 +15946,9 @@ void CLASS parse_minolta(int base)
   order = fgetc(ifp) * 0x101;
   offset = base + get4() + 8;
 #ifdef LIBRAW_LIBRARY_BUILD
-  if(offset>ifp->size()-8) // At least 8 bytes for tag/len
-    offset = ifp->size()-8;
+  INT64 fsize = ifp->size();
+  if(offset>fsize-8) // At least 8 bytes for tag/len
+    offset = fsize-8;
 #endif
 
   while ((save = ftell(ifp)) < offset)
@@ -15952,6 +15958,10 @@ void CLASS parse_minolta(int base)
     len = get4();
     if(len < 0)
       return; // just ignore wrong len?? or raise bad file exception?
+#ifdef LIBRAW_LIBRARY_BUILD
+    if((INT64)len + save + 8ULL > save)
+      return; // just ignore out of file metadata, stop parse
+#endif
     switch (tag)
     {
     case 0x505244: /* PRD */
@@ -16177,19 +16187,36 @@ void CLASS parse_ciff(int offset, int length, int depth)
 {
   int tboff, nrecs, c, type, len, save, wbi = -1;
   ushort key[] = {0x410, 0x45f3};
+#ifdef LIBRAW_LIBRARY_BUILD
+  INT64 fsize = ifp->size();
+  if(offset+length >= fsize) return;
+#endif
 
   fseek(ifp, offset + length - 4, SEEK_SET);
   tboff = get4() + offset;
   fseek(ifp, tboff, SEEK_SET);
   nrecs = get2();
+  if (nrecs<1) return;
   if ((nrecs | depth) > 127)
     return;
+#ifdef LIBRAW_LIBRARY_BUILD
+  if(nrecs*10 + offset > fsize) return;
+#endif
+
   while (nrecs--)
   {
     type = get2();
     len = get4();
     save = ftell(ifp) + 4;
-    fseek(ifp, offset + get4(), SEEK_SET);
+    INT64 see = offset + get4();
+#ifdef LIBRAW_LIBRARY_BUILD
+	if(see >= fsize  ) // At least one byte
+	{
+		fseek(ifp, save, SEEK_SET);
+		continue;
+	}
+#endif
+    fseek(ifp, see, SEEK_SET);
     if ((((type >> 8) + 8) | 8) == 0x38)
     {
       parse_ciff(ftell(ifp), len, depth + 1); /* Parse a sub-table */
