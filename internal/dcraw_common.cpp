@@ -14849,7 +14849,6 @@ void CLASS parse_ciff(int offset, int length, int depth)
   ushort key[] = {0x410, 0x45f3};
 #ifdef LIBRAW_LIBRARY_BUILD
   INT64 fsize = ifp->size();
-  if(offset+length >= fsize) return;
 #endif
 
   fseek(ifp, offset + length - 4, SEEK_SET);
