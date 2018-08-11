@@ -15967,7 +15967,7 @@ void CLASS parse_minolta(int base)
     if(len < 0)
       return; // just ignore wrong len?? or raise bad file exception?
 #ifdef LIBRAW_LIBRARY_BUILD
-    if((INT64)len + save + 8ULL > save)
+    if((INT64)len + save + 8ULL > fsize)
       return; // just ignore out of file metadata, stop parse
 #endif
     switch (tag)
