@@ -572,6 +572,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     libraw_dng_color_t dng_color[2];
     libraw_dng_levels_t dng_levels;
     float baseline_exposure;
+    float LinearResponseLimit;
     int WB_Coeffs[256][4];    /* R, G1, B, G2 coeffs */
     float WBCT_Coeffs[64][5]; /* CCT, than R, G1, B, G2 coeffs */
     libraw_P1_color_t P1_color[2];

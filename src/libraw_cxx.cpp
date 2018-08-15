@@ -488,6 +488,7 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
   imgdata.color.baseline_exposure = -999.f;
+  imgdata.color.LinearResponseLimit = 1.0f;
   _exitflag = 0;
   tls = new LibRaw_TLS;
   tls->init();

@@ -138,11 +138,13 @@ int main(int ac, char *av[])
         print_2++;
       continue;
     }
+
     if ((ret = MyCoolRawProcessor.open_file(av[i])) != LIBRAW_SUCCESS)
     {
       printf("Cannot decode %s: %s\n", av[i], libraw_strerror(ret));
       continue; // no recycle, open_file will recycle
     }
+
     if (print_sz)
     {
       printf("%s\t%s\t%s\t%d\t%d\n", av[i], P1.make, P1.model, S.width, S.height);
@@ -928,5 +930,6 @@ int main(int ac, char *av[])
 
     MyCoolRawProcessor.recycle();
   } // endfor
+
   return 0;
 }

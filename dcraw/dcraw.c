@@ -9785,10 +9785,15 @@ void CLASS parseAdobePanoMakernote ()
   unsigned PrivateEntries, PrivateTagID, PrivateTagType, PrivateTagCount;
   unsigned PrivateTagBytes;
   int truncated;
+
+#define CHECKSPACE(s) if(posPrivateMknBuf+(s) > PrivateMknLength) { free (PrivateMknBuf); return; }
+#define icWBC imgdata.color.WB_Coeffs
+
   order = 0x4d4d;
   truncated = 0;
   PrivateMknLength = get4();
-  if (PrivateMknLength &&
+
+  if ((PrivateMknLength > 4) &&
       (PrivateMknLength < 10240000) &&
       (PrivateMknBuf = (uchar *)malloc(PrivateMknLength+1024))) { // 1024b for safety
     fread (PrivateMknBuf, PrivateMknLength, 1, ifp);
@@ -9801,29 +9806,37 @@ void CLASS parseAdobePanoMakernote ()
     posPrivateMknBuf = 4;
     while (PrivateEntries--) {
       order = 0x4d4d;
+      CHECKSPACE(8);
       PrivateTagID = sget2(PrivateMknBuf+posPrivateMknBuf);
       PrivateTagType = sget2(PrivateMknBuf+posPrivateMknBuf+2);
       PrivateTagCount = sget4(PrivateMknBuf+posPrivateMknBuf+4);
       posPrivateMknBuf += 8;
       order = PrivateOrder;
+
+      if (!PrivateTagCount) continue;
       PrivateTagBytes = PrivateTagCount * ("11124811248484"[PrivateTagType < 14 ? PrivateTagType : 0] - '0');
+
       if (PrivateTagID == 0x0002) {
         posPrivateMknBuf += 2;
+        CHECKSPACE(2);
         if (sget2(PrivateMknBuf+posPrivateMknBuf)) {
           truncated = 1;
         } else {
           posPrivateMknBuf += 2;
         }
-#define icWBC imgdata.color.WB_Coeffs
+
       } else if (PrivateTagID == 0x0013) {
         ushort nWB, cnt, tWB;
+        CHECKSPACE(2);
         nWB = sget2(PrivateMknBuf+posPrivateMknBuf);
         posPrivateMknBuf += 2;
         if (nWB > 0x100)
           break;
         for (cnt = 0; cnt < nWB; cnt++) {
+          CHECKSPACE(2);
           tWB = sget2(PrivateMknBuf+posPrivateMknBuf);
           if (tWB < 0x100) {
+            CHECKSPACE(4);
             icWBC[tWB][0] = sget2(PrivateMknBuf+posPrivateMknBuf+2);
             icWBC[tWB][2] = sget2(PrivateMknBuf+posPrivateMknBuf+4);
             icWBC[tWB][1] = icWBC[tWB][3] = 0x100;
@@ -9833,22 +9846,27 @@ void CLASS parseAdobePanoMakernote ()
 
       } else if (PrivateTagID == 0x0027) {
         ushort nWB, cnt, tWB;
+        CHECKSPACE(2);
         nWB = sget2(PrivateMknBuf+posPrivateMknBuf);
         posPrivateMknBuf += 2;
         if (nWB > 0x100)
           break;
         for (cnt = 0; cnt < nWB; cnt++) {
+          CHECKSPACE(2);
           tWB = sget2(PrivateMknBuf+posPrivateMknBuf);
           if (tWB < 0x100) {
+            CHECKSPACE(6);
             icWBC[tWB][0] = sget2(PrivateMknBuf+posPrivateMknBuf+2);
             icWBC[tWB][1] = icWBC[tWB][3] = sget2(PrivateMknBuf+posPrivateMknBuf+4);
             icWBC[tWB][2] = sget2(PrivateMknBuf+posPrivateMknBuf+6);
           }
           posPrivateMknBuf += 8;
         }
-#undef icWBC
+
       } else if (PrivateTagID == 0x0121) {
-        imgdata.makernotes.panasonic.Multishot = get4();
+        CHECKSPACE(4);
+        imgdata.makernotes.panasonic.Multishot = sget4(PrivateMknBuf+posPrivateMknBuf);
+        posPrivateMknBuf += 4;
 
       } else {
         if (PrivateTagBytes > 4) posPrivateMknBuf += PrivateTagBytes;
@@ -9861,6 +9879,8 @@ void CLASS parseAdobePanoMakernote ()
     }
     free (PrivateMknBuf);
   }
+#undef icWBC
+#undef CHECKSPACE
 }
 
 void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
@@ -15373,8 +15393,11 @@ int CLASS parse_tiff_ifd(int base)
       FORC3 xyz[c] /= d65_white[c];
       break;
 #ifdef LIBRAW_LIBRARY_BUILD
-    case 50730: /* DNG: Baseline Exposure */
+    case 50730: /* DNG: 0xc62a BaselineExposure */
       baseline_exposure = getreal(type);
+      break;
+    case 50734: /* DNG: 0xc62e LinearResponseLimit */
+      imgdata.color.LinearResponseLimit = getreal(type);
       break;
 #endif
     // IB start
