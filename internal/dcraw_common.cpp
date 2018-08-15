@@ -18783,7 +18783,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   {
     width -= 44;
   }
-  else if (!strcmp(model, "D3200") || !strncmp(model, "D6", 2) || !strncmp(model, "D800", 4))
+  else if (!strcmp(model, "D3200") || !strcmp(model, "D600") || !strcmp(model, "D610") || !strncmp(model, "D800", 4))
   {
     width -= 46;
   }
