@@ -487,8 +487,8 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
   imgdata.params.coolscan_nef_gamma = 1.0f;
   imgdata.parent_class = this;
   imgdata.progress_flags = 0;
-  imgdata.color.baseline_exposure = -999.f;
-  imgdata.color.LinearResponseLimit = 1.0f;
+  imgdata.color.dng_levels.baseline_exposure = -999.f;
+  imgdata.color.dng_levels.LinearResponseLimit = 1.0f;
   _exitflag = 0;
   tls = new LibRaw_TLS;
   tls->init();
@@ -608,7 +608,8 @@ void LibRaw::recycle()
   imgdata.makernotes.sony.raw_crop.cleft = 0xffff;
   imgdata.makernotes.sony.raw_crop.ctop = 0xffff;
   cleargps(&imgdata.other.parsed_gps);
-  imgdata.color.baseline_exposure = -999.f;
+  imgdata.color.dng_levels.baseline_exposure = -999.f;
+  imgdata.color.dng_levels.LinearResponseLimit = 1.f;
 
   imgdata.makernotes.fuji.FujiExpoMidPointShift = -999.f;
   imgdata.makernotes.fuji.FujiDynamicRange = 0xffff;
