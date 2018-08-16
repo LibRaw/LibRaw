@@ -9813,8 +9813,10 @@ void CLASS parseAdobePanoMakernote ()
       posPrivateMknBuf += 8;
       order = PrivateOrder;
 
-      if (!PrivateTagCount) continue;
-      PrivateTagBytes = PrivateTagCount * ("11124811248484"[PrivateTagType < 14 ? PrivateTagType : 0] - '0');
+      if (truncated && !PrivateTagCount) continue;
+
+      PrivateTagBytes =
+        PrivateTagCount * ("11124811248484"[PrivateTagType < 14 ? PrivateTagType : 0] - '0');
 
       if (PrivateTagID == 0x0002) {
         posPrivateMknBuf += 2;
