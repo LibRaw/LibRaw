@@ -126,7 +126,7 @@ typedef unsigned long long UINT64;
   } libraw_internal_output_params_t;
 
   typedef void (*memory_callback)(void *data, const char *file, const char *where);
-  typedef void (*exif_parser_callback)(void *context, int tag, int type, int len, unsigned int ord, void *ifp);
+  typedef void (*exif_parser_callback)(void *context, int tag, int type, int len, unsigned int ord, void *ifp, INT64 base);
 
   DllDef void default_memory_callback(void *data, const char *file, const char *where);
 

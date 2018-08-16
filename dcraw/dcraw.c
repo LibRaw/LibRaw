@@ -13477,7 +13477,7 @@ void CLASS parse_exif(int base)
     }
     if (callbacks.exif_cb)
     {
-      callbacks.exif_cb(callbacks.exifparser_data, tag, type, len, order, ifp);
+      callbacks.exif_cb(callbacks.exifparser_data, tag, type, len, order, ifp,base);
       fseek(ifp, savepos, SEEK_SET);
     }
 #endif
@@ -14046,7 +14046,7 @@ void CLASS parse_kodak_ifd(int base)
     }
     if (callbacks.exif_cb)
     {
-      callbacks.exif_cb(callbacks.exifparser_data, tag | 0x20000, type, len, order, ifp);
+      callbacks.exif_cb(callbacks.exifparser_data, tag | 0x20000, type, len, order, ifp,base);
       fseek(ifp, savepos, SEEK_SET);
     }
     if (tag == 1003)       // 1003
@@ -14305,7 +14305,7 @@ int CLASS parse_tiff_ifd(int base)
     if (callbacks.exif_cb)
     {
       callbacks.exif_cb(callbacks.exifparser_data, tag | (pana_raw ? 0x30000 : ((ifd + 1) << 20)),
-                        type, len, order, ifp);
+                        type, len, order, ifp,base);
       fseek(ifp, savepos, SEEK_SET);
     }
 #endif
