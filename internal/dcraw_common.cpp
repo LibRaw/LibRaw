@@ -14054,10 +14054,12 @@ int CLASS parse_tiff_ifd(int base)
       break;
 #ifdef LIBRAW_LIBRARY_BUILD
     case 50730: /* DNG: 0xc62a BaselineExposure */
-      baseline_exposure = getreal(type);
+		tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BASELINEEXPOSURE;
+		tiff_ifd[ifd].dng_levels.baseline_exposure = getreal(type);
       break;
     case 50734: /* DNG: 0xc62e LinearResponseLimit */
-      imgdata.color.LinearResponseLimit = getreal(type);
+		tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_LINEARRESPONSELIMIT;
+		tiff_ifd[ifd].dng_levels.LinearResponseLimit = getreal(type);
       break;
 #endif
     // IB start
@@ -19954,6 +19956,39 @@ dng_skip:
       sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_ANALOGBALANCE);
       if (sidx >= 0)
         COPYARR(imgdata.color.dng_levels.analogbalance, tiff_ifd[sidx].dng_levels.analogbalance);
+
+	  sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_BASELINEEXPOSURE);
+	  if (sidx >= 0)
+		  imgdata.color.dng_levels.baseline_exposure = tiff_ifd[sidx].dng_levels.baseline_exposure;
+
+	  sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_LINEARRESPONSELIMIT);
+	  if (sidx >= 0)
+	  {
+		  imgdata.color.dng_levels.LinearResponseLimit = tiff_ifd[sidx].dng_levels.LinearResponseLimit;
+		  if(imgdata.color.dng_levels.LinearResponseLimit>0.1 && imgdata.color.dng_levels.LinearResponseLimit <= 1.0)
+		  {
+			  // And approx promote it to linear_max:
+			  int bl4 = 0, bl64 = 0;
+			  for (int chan = 0; chan < colors && chan < 4; chan++)
+				  bl4 +=  cblack[chan];
+			  bl4 /= LIM(colors,1,4);
+
+			  if (cblack[4] * cblack[5]>0)
+			  {
+				  unsigned cnt = 0;
+				  for (unsigned c = 0; c < 4096 && c < cblack[4] * cblack[5]; c++)
+				  {
+					  bl64 += cblack[c + 6];
+					  cnt++;
+				  }
+				  bl64 /= LIM(cnt,1,4096);
+			  }
+			  int rblack = black + bl4 + bl64;
+			  for (int chan = 0; chan < colors && chan < 4; chan++)
+				  imgdata.color.linear_max[i] = (maximum-rblack)*imgdata.color.dng_levels.LinearResponseLimit + rblack;
+		  }
+	  }
+
       sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_WHITE);
       if (sidx >= 0)
         COPYARR(imgdata.color.dng_levels.dng_whitelevel, tiff_ifd[sidx].dng_levels.dng_whitelevel);

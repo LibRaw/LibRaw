@@ -542,8 +542,8 @@ int main(int ac, char *av[])
       else
         printf("Embedded ICC profile: no\n");
 
-      if (C.baseline_exposure > -999.f)
-        printf("Baseline exposure: %04.3f\n", C.baseline_exposure);
+      if (C.dng_levels.baseline_exposure > -999.f)
+        printf("Baseline exposure: %04.3f\n", C.dng_levels.baseline_exposure);
 
       printf("Number of raw images: %d\n", P1.raw_count);
       if (Fuji.FujiExpoMidPointShift > -999.f)
