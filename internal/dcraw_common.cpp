@@ -8465,7 +8465,8 @@ void CLASS parseAdobePanoMakernote ()
     fread (PrivateMknBuf, PrivateMknLength, 1, ifp);
     PrivateOrder = sget2(PrivateMknBuf);
     PrivateEntries = sget2(PrivateMknBuf+2);
-    if (PrivateEntries > 1000) {
+    if ((PrivateEntries > 1000) ||
+        ((PrivateOrder != 0x4d4d) && (PrivateOrder != 0x4949))) {
       free (PrivateMknBuf);
       return;
     }
@@ -9861,6 +9862,9 @@ void CLASS setSonyBodyFeatures(unsigned id)
       {364, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
       {365, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
       {366, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {367, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {368, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {369, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
   };
   ilm.CamID = id;
 
@@ -10230,7 +10234,7 @@ void CLASS process_Sony_0x9400(uchar *buf, ushort len, unsigned id)
   if (((bufx == 0x23) || (bufx == 0x24) || (bufx == 0x26)) && (len >= 0x1f))
   { // 0x9400 'c' version
 
-    if ((id == 358) || (id == 362) || (id == 363) || (id == 365) || (id == 366))
+    if ((id == 358) || (id == 362) || (id == 363) || (id == 365) || (id == 366) || (id == 369))
     {
       imSony.ShotNumberSincePowerUp = SonySubstitution[buf[0x0a]];
     }
@@ -10807,18 +10811,31 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
     imSony.ElectronicFrontCurtainShutter = get4();
 
   } else if (tag == 0x201b) {
-    fread(&uc, 1, 1, ifp);
-    imgdata.shootinginfo.FocusMode = (short)uc;
+    if ((imSony.SonyCameraType != LIBRAW_SONY_DSC) ||
+        (ilm.CamID == 365) ||
+        (ilm.CamID == 366) ||
+        (ilm.CamID == 369)) {
+      fread(&uc, 1, 1, ifp);
+      imgdata.shootinginfo.FocusMode = (short)uc;
+    }
 
   } else if (tag == 0x201c) {
-    if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
+    if ((imSony.SonyCameraType != LIBRAW_SONY_DSC) ||
+        (ilm.CamID == 365) ||
+        (ilm.CamID == 366) ||
+        (ilm.CamID == 369)) {
       imSony.AFAreaModeSetting = fgetc(ifp);
     }
 
   } else if (tag == 0x201d) {
-    if ((imSony.AFAreaModeSetting == 3) &&
+    if (((imSony.AFAreaModeSetting == 3) &&
         ((imSony.SonyCameraType == LIBRAW_SONY_ILCE) ||
-         (imSony.SonyCameraType == LIBRAW_SONY_NEX))) {
+         (imSony.SonyCameraType == LIBRAW_SONY_NEX)  ||
+         (ilm.CamID == 365) ||
+         (ilm.CamID == 366) ||
+         (ilm.CamID == 369))) ||
+        ((imSony.AFAreaModeSetting == 4) &&
+         (imSony.SonyCameraType == LIBRAW_SONY_ILCA))) {
       imSony.FlexibleSpotPosition[0] = get2();
       imSony.FlexibleSpotPosition[1] = get2();
     }
@@ -10834,7 +10851,10 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
     }
 
   } else if (tag == 0x2021) {
-    if (imSony.SonyCameraType != LIBRAW_SONY_DSC) {
+    if ((imSony.SonyCameraType != LIBRAW_SONY_DSC) ||
+        (ilm.CamID == 365) ||
+        (ilm.CamID == 366) ||
+        (ilm.CamID == 369)) {
       imSony.AFTracking = fgetc(ifp);
     }
 
@@ -17342,7 +17362,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8512,-2641,-694,-8042,15670,2526,-1821,2117,7414 } },
     { "Sony DSC-V3", 0, 0,
       { 7511,-2571,-692,-7894,15088,3060,-948,1111,8128 } },
-    { "Sony DSC-RX100M", -800, 0, /* used for M2/M3/M4/M5/M6 */
+    { "Sony DSC-RX100M", -800, 0, /* used for M2/M3/M4/M5/M5A/M6 */
       { 6596,-2079,-562,-4782,13016,1933,-970,1581,5181 } },
     { "Sony DSC-RX100", 0, 0,
       { 8651,-2754,-1057,-3464,12207,1373,-568,1398,4434 } },
@@ -17815,7 +17835,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
         {0x15b, "ILCE-7RM2"},   {0x15e, "ILCE-7SM2"},   {0x161, "ILCA-68"},    {0x162, "ILCA-99M2"},
         {0x163, "DSC-RX10M3"},  {0x164, "DSC-RX100M5"}, {0x165, "ILCE-6300"},  {0x166, "ILCE-9"},
         {0x168, "ILCE-6500"},   {0x16a, "ILCE-7RM3"},   {0x16b, "ILCE-7M3"},   {0x16c, "DSC-RX0"},
-        {0x16d, "DSC-RX10M4"},  {0x16e, "DSC-RX100M6"},
+        {0x16d, "DSC-RX10M4"},  {0x16e, "DSC-RX100M6"}, {0x171, "DSC-RX100M5A"},
     };
 
 #ifdef LIBRAW_LIBRARY_BUILD
