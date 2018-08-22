@@ -298,6 +298,8 @@ it under the terms of the one of two licenses as you choose:
 	void fuji_14bit_load_raw();
 	void parse_fuji_compressed_header();
 
+	void nikon_14bit_load_raw();
+
 // DCB
     void  	dcb_pp();
     void  	dcb_copy_to_buffer(float (*image2)[3]);

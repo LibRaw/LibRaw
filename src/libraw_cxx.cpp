@@ -1884,6 +1884,34 @@ static inline void swab32arr(unsigned *arr, unsigned len)
 }
 #undef swab32
 
+static inline void unpack7bytesto4x16_nikon(unsigned char *src, unsigned short *dest)
+{
+	dest[3] = (src[6] << 6) | (src[5] >> 2);
+	dest[2] = ((src[5] & 0x3) << 12) | (src[4] << 4) | (src[3] >> 4);
+	dest[1] = (src[3] & 0xf) << 10 | (src[2] << 2) | (src[1] >> 6);
+	dest[0] = ((src[1] & 0x3f) << 8) | src[0];
+}
+
+
+void LibRaw::nikon_14bit_load_raw()
+{
+	const unsigned linelen = 14512;// S.raw_width * 7 / 4;
+	const unsigned pitch = S.raw_pitch ? S.raw_pitch / 2 : S.raw_width;
+	unsigned char *buf = (unsigned char *)malloc(linelen);
+	merror(buf, "nikon_14bit_load_raw()");
+
+	for (int row = 0; row < S.raw_height; row++)
+	{
+		unsigned bytesread = libraw_internal_data.internal_data.input->read(buf, 1, linelen);
+		unsigned short *dest = &imgdata.rawdata.raw_image[pitch * row];
+		//swab32arr((unsigned *)buf, bytesread / 4);
+		for (int sp = 0, dp = 0; dp < pitch - 3 && sp < linelen - 6 && sp < bytesread - 6; sp += 7, dp += 4)
+			unpack7bytesto4x16_nikon(buf + sp, dest + dp);
+	}
+	free(buf);
+}
+
+
 void LibRaw::fuji_14bit_load_raw()
 {
   const unsigned linelen = S.raw_width * 7 / 4;
@@ -2055,6 +2083,9 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     if(callbacks.post_identify_cb)
 	(callbacks.post_identify_cb)(this);
 
+    // Ugly hack, replace with proper data/line size for different cameras/format when available
+    if( !strcasecmp(imgdata.idata.make, "Nikon") && !strcasecmp(imgdata.idata.model,"Z 7") && libraw_internal_data.unpacker_data.data_size == 80106240)
+		load_raw = &LibRaw::nikon_14bit_load_raw;
 
 	// Linear max from 14-bit camera, but on 12-bit data?
     if(( !strcasecmp(imgdata.idata.make, "Sony") /* || !strcasecmp(imgdata.idata.make, "Nikon") */)
