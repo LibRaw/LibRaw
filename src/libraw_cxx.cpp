@@ -91,6 +91,8 @@ extern "C"
       return "Unsupported thumbnail format";
     case LIBRAW_INPUT_CLOSED:
       return "No input stream, or input stream closed";
+    case LIBRAW_MEMPOOL_OVERFLOW:
+      return "Libraw internal mempool overflowed";
     case LIBRAW_UNSUFFICIENT_MEMORY:
       return "Unsufficient memory";
     case LIBRAW_DATA_ERROR:
@@ -131,6 +133,9 @@ const float LibRaw_constants::d65_white[3] = {0.95047f, 1.0f, 1.08883f};
     /* fprintf(stderr,"Exception %d caught\n",e);*/                                                                    \
     switch (e)                                                                                                         \
     {                                                                                                                  \
+    case LIBRAW_EXCEPTION_MEMPOOL:                                                                                       \
+      recycle();                                                                                                       \
+      return LIBRAW_MEMPOOL_OVERFLOW;                                                                               \
     case LIBRAW_EXCEPTION_ALLOC:                                                                                       \
       recycle();                                                                                                       \
       return LIBRAW_UNSUFFICIENT_MEMORY;                                                                               \
