@@ -35,7 +35,6 @@ public:
     size_t alloc_sz = LIBRAW_MSIZE * sizeof(void *);
     mems = (void **)::malloc(alloc_sz);
     memset(mems, 0, alloc_sz);
-    alloc_cnt = 0;
   }
   ~libraw_memmgr()
   {
@@ -44,10 +43,6 @@ public:
   }
   void *malloc(size_t sz)
   {
-#ifdef LIBRAW_MEMPOOL_CHECK
-    if(alloc_cnt >= LIBRAW_MSIZE)
-       throw LIBRAW_EXCEPTION_ALLOC;
-#endif
 #ifdef LIBRAW_USE_CALLOC_INSTEAD_OF_MALLOC
     void *ptr = ::calloc(sz + extra_bytes,1);
 #else
@@ -58,20 +53,12 @@ public:
   }
   void *calloc(size_t n, size_t sz)
   {
-#ifdef LIBRAW_MEMPOOL_CHECK
-    if(alloc_cnt >= LIBRAW_MSIZE)
-       throw LIBRAW_EXCEPTION_ALLOC;
-#endif
     void *ptr = ::calloc(n + (extra_bytes + sz - 1) / (sz ? sz : 1), sz);
     mem_ptr(ptr);
     return ptr;
   }
   void *realloc(void *ptr, size_t newsz)
   {
-#ifdef LIBRAW_MEMPOOL_CHECK
-    if(alloc_cnt >= LIBRAW_MSIZE)
-       throw LIBRAW_EXCEPTION_ALLOC;
-#endif
     void *ret = ::realloc(ptr, newsz + extra_bytes);
     forget_ptr(ptr);
     mem_ptr(ret);
@@ -88,25 +75,27 @@ public:
       if (mems[i])
       {
         ::free(mems[i]);
-        alloc_cnt--;
         mems[i] = NULL;
       }
   }
 
 private:
   void **mems;
-  unsigned alloc_cnt;
   unsigned extra_bytes;
   void mem_ptr(void *ptr)
   {
     if (ptr)
+    {
       for (int i = 0; i < LIBRAW_MSIZE; i++)
         if (!mems[i])
         {
           mems[i] = ptr;
-          alloc_cnt++;
-          break;
+          return;
         }
+#ifdef LIBRAW_MEMPOOL_CHECK
+      throw LIBRAW_EXCEPTION_MEMPOOL;
+#endif
+    }
   }
   void forget_ptr(void *ptr)
   {
@@ -115,7 +104,6 @@ private:
         if (mems[i] == ptr)
         {
           mems[i] = NULL;
-          alloc_cnt--;
           break;
         }
   }
