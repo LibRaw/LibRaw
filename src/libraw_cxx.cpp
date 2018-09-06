@@ -23,6 +23,7 @@ it under the terms of the one of two licenses as you choose:
 #include <exception>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <io.h>
 #if !defined(_WIN32) && !defined(__MINGW32__)
 #include <netinet/in.h>
 #else
@@ -3929,19 +3930,28 @@ libraw_processed_image_t *LibRaw::dcraw_make_mem_image(int *errcode)
 #undef SWAP
 #endif
 
-int LibRaw::dcraw_ppm_tiff_writer(const char *filename)
+int LibRaw::dcraw_ppm_tiff_writer(const char *filename, bool bStdOut)
 {
   CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
 
   if (!imgdata.image)
     return LIBRAW_OUT_OF_ORDER_CALL;
 
-  if (!filename)
+  if (!filename && !bStdOut)
     return ENOENT;
-  FILE *f = fopen(filename, "wb");
+ 
+  FILE *f;
+  if (!bStdOut)
+  {
+    f = fopen(filename, "wb");
 
-  if (!f)
-    return errno;
+    if (!f)
+      return errno;
+  }
+  else
+  {
+    _setmode(fileno(stdout), O_BINARY);
+  }
 
   try
   {
@@ -3951,16 +3961,18 @@ int LibRaw::dcraw_ppm_tiff_writer(const char *filename)
           (int(*)[LIBRAW_HISTOGRAM_SIZE])malloc(sizeof(*libraw_internal_data.output_data.histogram) * 4);
       merror(libraw_internal_data.output_data.histogram, "LibRaw::dcraw_ppm_tiff_writer()");
     }
-    libraw_internal_data.internal_data.output = f;
+    libraw_internal_data.internal_data.output = !bStdOut ? f : stdout;
     write_ppm_tiff();
     SET_PROC_FLAG(LIBRAW_PROGRESS_FLIP);
     libraw_internal_data.internal_data.output = NULL;
-    fclose(f);
+    if (!bStdOut)
+      fclose(f);
     return 0;
   }
   catch (LibRaw_exceptions err)
   {
-    fclose(f);
+    if (!bStdOut)
+      fclose(f);
     EXCEPTION_HANDLER(err);
   }
 }
