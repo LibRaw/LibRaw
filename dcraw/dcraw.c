@@ -16960,6 +16960,7 @@ void CLASS parse_fuji(int offset)
           tag = get4();
         width = tag;
         height = get4();
+        if (!strcmp(model, "X-T3")) width -= 155;
       }
 #ifdef LIBRAW_LIBRARY_BUILD
       if (len == 4096) { /* X-A3, X-A5, X-A10, X-A20, X-T100 */
