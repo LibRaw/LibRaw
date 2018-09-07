@@ -8846,13 +8846,13 @@ void CLASS parseNikonMakernote (int base, int uptag, unsigned dng_writer)
 
         } else {
           fread(buf, 1, 10, ifp);
-          if (!strncmp(buf, "NRW ", 4)) { // P6000, P7000, P7100, B700
-            fseek(ifp, strcmp(buf + 4, "0100") ? 46 : 0x13de, SEEK_CUR);
-            cam_mul[0] = get4() << 1;
-            cam_mul[1] = get4();
-            cam_mul[3] = get4();
-            cam_mul[2] = get4() << 1;
-            if (!strcmp(buf + 4, "0100")) {
+          if (!strncmp(buf, "NRW ", 4)) {   // P6000, P7000, P7100, B700, P1000
+            if (!strcmp(buf + 4, "0100")) { // P6000
+              fseek(ifp, 0x13de, SEEK_CUR);
+              cam_mul[0] = get4() << 1;
+              cam_mul[1] = get4();
+              cam_mul[3] = get4();
+              cam_mul[2] = get4() << 1;
               Nikon_NRW_WBtag (LIBRAW_WBI_Daylight, 0);
               Nikon_NRW_WBtag (LIBRAW_WBI_Cloudy, 0);
               fseek(ifp, 16, SEEK_CUR);
@@ -8863,7 +8863,14 @@ void CLASS parseNikonMakernote (int base, int uptag, unsigned dng_writer)
               Nikon_NRW_WBtag (LIBRAW_WBI_Custom, 0);
               Nikon_NRW_WBtag (LIBRAW_WBI_Auto, 0);
 
-            } else {
+            } else {                        // P7000, P7100, B700, P1000
+              fseek(ifp, 0x16, SEEK_CUR);
+              black = get2();
+              fseek(ifp, 0x16, SEEK_CUR);
+              cam_mul[0] = get4() << 1;
+              cam_mul[1] = get4();
+              cam_mul[3] = get4();
+              cam_mul[2] = get4() << 1;
               Nikon_NRW_WBtag (LIBRAW_WBI_Daylight, 1);
               Nikon_NRW_WBtag (LIBRAW_WBI_Cloudy, 1);
               Nikon_NRW_WBtag (LIBRAW_WBI_Shade, 1);
@@ -17801,6 +17808,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
     { "Fujifilm X-S1", 0, 0,
       { 13509,-6199,-1254,-4430,12733,1865,-331,1441,5022 } },
+    { "Fujifilm X-T3", 0, 0, /* temp */
+      { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
     { "Fujifilm X-T20", 0, 0,
       { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
     { "Fujifilm X-T2", 0, 0,
@@ -18180,6 +18189,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
     { "Nikon COOLPIX Deneb", 0, 0, /* added */
       { 10321,-3920,-931,-2750,11146,1824,-442,1545,5539 } },
+    { "Nikon COOLPIX P1000", 0, 0, /* temp */
+      { 14387,-6014,-1299,-1357,9975,1616,467,1047,4744 } },
     { "Nikon COOLPIX P6000", 0, 0,
       { 9698,-3367,-914,-4706,12584,2368,-837,968,5801 } },
     { "Nikon COOLPIX P7000", 0, 0,
@@ -20402,13 +20413,15 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   {
     load_flags = 24;
     filters = 0x94949494;
-    if (model[9] == '7' && (iso_speed >= 400 || iso_speed == 0) && !strstr(software, "V1.2"))
+/* the following 'if' is most probably obsolete, because we now read black level from metadata */
+    if ((model[9] == '7') &&  /* P7000, P7100 */
+        ((iso_speed >= 400) || (iso_speed == 0)) &&
+        !strstr(software, "V1.2")) /* v. 1.2 seen for P7000 only */
       black = 255;
   }
   else if (!strncmp(model, "COOLPIX B700", 12))
   {
     load_flags = 24;
-    black = 200;
   }
   else if (!strncmp(model, "1 ", 2))
   {
