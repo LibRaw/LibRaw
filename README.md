@@ -1,4 +1,4 @@
-# LibRaw
+# Fork of LibRaw, dcraw_emu supports new flag (-Z) to write to stdout instead of file
 ### Library for reading and processing of RAW digicam images
 
 LibRaw is a library for reading RAW files from digital photo cameras 
