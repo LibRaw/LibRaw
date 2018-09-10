@@ -7759,7 +7759,9 @@ void CLASS parseNikonMakernote (int base, int uptag, unsigned dng_writer)
             cam_mul[0] = getreal(12);
             cam_mul[2] = getreal(12);
             cam_mul[1] = cam_mul[3] = 1.0;
+            i -= 16;
           }
+          fseek(ifp, i, SEEK_CUR);
 
         } else if (tag == 0x76a43207) {
           flip = get2();
