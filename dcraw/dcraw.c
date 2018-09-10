@@ -170,7 +170,7 @@ int histogram[4][0x2000];
 void (*write_thumb)(), (*write_fun)();
 void (*load_raw)(), (*thumb_load_raw)();
 unsigned is_NikonTransfer = 0;
-unsigned is_4K_RAFdata = 0; /* =1 for Fuji X-A3, X-A5, X-A10, X-A20, X-T100 */
+unsigned is_4K_RAFdata = 0; /* =1 for Fuji X-A3, X-A5, X-A10, X-A20, X-T100, XF10 */
 jmp_buf failure;
 
 struct decode
@@ -16963,7 +16963,7 @@ void CLASS parse_fuji(int offset)
         if (!strcmp(model, "X-T3")) width -= 155;
       }
 #ifdef LIBRAW_LIBRARY_BUILD
-      if (len == 4096) { /* X-A3, X-A5, X-A10, X-A20, X-T100 */
+      if (len == 4096) { /* X-A3, X-A5, X-A10, X-A20, X-T100, XF10 */
         int wb[4];
         int nWB, tWB, pWB;
         int iCCT = 0;
@@ -17803,6 +17803,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8458,-2451,-855,-4597,12447,2407,-1475,2482,6526 } },
     { "Fujifilm X-E3", 0, 0,
       { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
+    { "Fujifilm XF10", 0, 0, /* temp */
+      { 11673,-4760,-1041,-3988,12058,2166,-771,1417,5569 } },
     { "Fujifilm XF1", 0, 0,
       { 13509,-6199,-1254,-4430,12733,1865,-331,1441,5022 } },
     { "Fujifilm X-M1", 0, 0,
