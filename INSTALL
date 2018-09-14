@@ -10,6 +10,7 @@ I. Installation steps
 2. Go to LibRaw folder and run ./configure and make:
 
  $ cd LibRaw-0.xx.yy
+ $ autoreconf --install
  $ ./configure  [...optional args...]
  $ make
 
