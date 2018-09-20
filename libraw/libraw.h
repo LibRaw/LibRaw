@@ -48,7 +48,7 @@ extern "C"
   DllDef libraw_data_t *libraw_init(unsigned int flags);
   DllDef int libraw_open_file(libraw_data_t *, const char *);
   DllDef int libraw_open_file_ex(libraw_data_t *, const char *, INT64 max_buff_sz);
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef (_WIN32)
   DllDef int libraw_open_wfile(libraw_data_t *, const wchar_t *);
   DllDef int libraw_open_wfile_ex(libraw_data_t *, const wchar_t *, INT64 max_buff_sz);
 #endif
