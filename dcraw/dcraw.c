@@ -15945,6 +15945,7 @@ void CLASS apply_tiff()
   if (!dng_version)
     if (((tiff_samples == 3   &&
           tiff_ifd[raw].bytes &&
+	  !(tiff_bps == 16 && !strncmp(make, "Leaf", 4)) && // Allow Leaf/16bit/3color files
           tiff_bps != 14      &&
           (tiff_compress & -16) != 32768) ||
          (tiff_bps == 8              &&
