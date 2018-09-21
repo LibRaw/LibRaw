@@ -15699,11 +15699,14 @@ void CLASS apply_tiff()
       is_raw = 0;
     }
   if (!dng_version)
-    if (((tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 && (tiff_compress & -16) != 32768) ||
+    if (((tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 &&
+      !(tiff_bps == 16 && !strncmp(make, "Leaf", 4)) && // Allow Leaf/16bit/3color files
+    (tiff_compress & -16) != 32768) ||
          (tiff_bps == 8 && strncmp(make, "Phase", 5) && strncmp(make, "Leaf", 4) && !strcasestr(make, "Kodak") &&
           !strstr(model2, "DEBUG RAW"))) &&
         strncmp(software, "Nikon Scan", 10))
       is_raw = 0;
+
   for (i = 0; i < tiff_nifds; i++)
     if (i != raw &&
         (tiff_ifd[i].samples == max_samp || (tiff_ifd[i].comp == 7 && tiff_ifd[i].samples == 1)) /* Allow 1-bps JPEGs */
