@@ -17832,7 +17832,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 9252,-2704,-1064,-5893,14265,1717,-1101,2341,4349 } },
     { "Fujifilm XQ2", 0, 0,
       { 9252,-2704,-1064,-5893,14265,1717,-1101,2341,4349 } },
-    { "Fujifilm GFX 50S", 0, 0,
+    { "Fujifilm GFX 50", 0, 0, /* 50S, 50R */
       { 11756,-4754,-874,-3056,11045,2305,-381,1457,6006 } },
 
     { "GITUP G3DUO", 130, 62000,
@@ -20572,7 +20572,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
       left_margin = 0;
       filters = 0x16161616;
     }
-    if (!strcmp(model, "GFX 50S"))
+    if (!strncmp(model, "GFX 50",6))
     {
       left_margin = 0;
       top_margin = 0;
