@@ -2937,7 +2937,7 @@ int LibRaw::unpack(void)
         rawspeed_enabled = 0;
 
       if (load_raw == &LibRaw::packed_load_raw && !strncasecmp(imgdata.idata.make, "Nikon", 5) &&
-          (!strncasecmp(imgdata.idata.model, "E", 1) || !strncasecmp(imgdata.idata.model, "COOLPIX B", 9) ||!!strncasecmp(imgdata.idata.model, "COOLPIX P1000", 13)))
+          (!strncasecmp(imgdata.idata.model, "E", 1) || !strncasecmp(imgdata.idata.model, "COOLPIX B", 9) ||!strncasecmp(imgdata.idata.model, "COOLPIX P1000", 13)))
         rawspeed_enabled = 0;
 
       // RawSpeed Supported,
@@ -5538,10 +5538,12 @@ static const char *static_camera_list[] = {
 	"FujiFilm X-E3",
 	"FujiFilm X-M1",
 	"FujiFilm XF1",
+	"FujiFilm XF10",
 	"FujiFilm X-H1",
 	"FujiFilm X-T1",
 	"FujiFilm X-T1 Graphite Silver",
 	"FujiFilm X-T2",
+	"FujiFilm X-T3",
 	"FujiFilm X-T10",
 	"FujiFilm X-T20",
 	"FujiFilm X-T100",
@@ -5851,6 +5853,7 @@ static const char *static_camera_list[] = {
 	"Nikon Coolpix P330",
 	"Nikon Coolpix P340",
 	"Nikon Coolpix P6000",
+	"Nikon Coolpix P1000",
 	"Nikon Coolpix P7000",
 	"Nikon Coolpix P7100",
 	"Nikon Coolpix P7700",
