@@ -14515,14 +14515,14 @@ int CLASS parse_tiff_ifd(int base)
       fseek(ifp, get4() + base, SEEK_SET);
       parse_tiff_ifd(base);
       break;
-    case 2:
+    case 2:  /* ImageWidth */
     case 256:
-    case 61441: /* ImageWidth */
+    case 61441: /* Fuji RAF IFD 0xf001 RawImageFullWidth */
       tiff_ifd[ifd].t_width = getint(type);
       break;
-    case 3:
+    case 3: /* ImageHeight */
     case 257:
-    case 61442: /* ImageHeight */
+    case 61442: /* Fuji RAF IFD 0xf002 RawImageFullHeight */
       tiff_ifd[ifd].t_height = getint(type);
       break;
     case 258:   /* BitsPerSample */
@@ -16819,23 +16819,23 @@ void CLASS parse_fuji(int offset)
     len = get2();
     save = ftell(ifp);
 
-    if (tag == 0x100)
+    if (tag == 0x0100)
     {
       raw_height = get2();
       raw_width = get2();
     }
-    else if (tag == 0x121)
+    else if (tag == 0x0121)
     {
       height = get2();
       if ((width = get2()) == 4284)
         width += 3;
     }
-    else if (tag == 0x130)
+    else if (tag == 0x0130)
     {
       fuji_layout = fgetc(ifp) >> 7;
       fuji_width = !(fgetc(ifp) & 8);
     }
-    else if (tag == 0x131)
+    else if (tag == 0x0131)
     {
       filters = 9;
       FORC(36)
@@ -16850,13 +16850,13 @@ void CLASS parse_fuji(int offset)
     }
 
 #ifdef LIBRAW_LIBRARY_BUILD
-    else if (tag == 0x110)
+    else if (tag == 0x0110)
     {
       imgdata.sizes.raw_crop.ctop = get2();
       imgdata.sizes.raw_crop.cleft = get2();
     }
 
-    else if (tag == 0x111)
+    else if (tag == 0x0111)
     {
       imgdata.sizes.raw_crop.cheight = get2();
       imgdata.sizes.raw_crop.cwidth = get2();
@@ -16963,7 +16963,6 @@ void CLASS parse_fuji(int offset)
           tag = get4();
         width = tag;
         height = get4();
-        if (!strcmp(model, "X-T3")) width -= 155;
       }
 #ifdef LIBRAW_LIBRARY_BUILD
       if (len == 4096) { /* X-A3, X-A5, X-A10, X-A20, X-T100, XF10 */
@@ -20528,6 +20527,29 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
       maximum = (is_raw == 2 && shot_select) ? 0x2f00 : 0x3e00;
     top_margin = (raw_height - height) >> 2 << 1;
     left_margin = (raw_width - width) >> 2 << 1;
+
+    if (!strcmp(model, "X-T3")) {
+      top_margin = 0;
+      if (((height == 1008)  ||  /* mechanical shutter, high speed mode */
+           (height == 4140)) &&  /* any shutter, single shot mode */
+          (width == 6276)) {
+        top_margin = 6;
+        height = 4174;
+        left_margin = 0;
+        width = 6251;
+      } else if (height == 3350) { /* electronic shutter, high speed mode (1.25x crop) */
+        height = raw_height;
+        left_margin = 624;
+        width = 5004;
+      }
+/*
+      width = raw_width;
+      height = raw_height;
+      top_margin = 0;
+      left_margin = 0;
+*/
+    }
+
     if (width == 2848 || width == 3664)
       filters = 0x16161616;
     if (width == 4032 || width == 4952)
