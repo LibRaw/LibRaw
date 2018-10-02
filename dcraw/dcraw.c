@@ -12549,6 +12549,8 @@ void CLASS parseSonySRF (unsigned len)
 {
   if (len > 0xfffff) return;
 
+  if ((0x9084+5) > len) return;
+
   INT64 save = ftell (ifp);
   INT64 ifd_offset;
   unsigned offset, key;
@@ -21669,7 +21671,7 @@ dng_skip:
    }
    if(!cmul_ok)
    {
-     if(cam_mul[0]>0) cam_mul[0] = 0;   
+     if(cam_mul[0]>0) cam_mul[0] = 0;
      cam_mul[3] = 0;
    }
   }

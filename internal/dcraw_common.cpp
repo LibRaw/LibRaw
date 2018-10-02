@@ -10437,11 +10437,6 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
   int LensDataValid = 0;
   unsigned uitemp;
 
-printf ("==>> parseSonyMakernotes tag: ");
-if (tag < 0x10000) printf ("0x%04x ", tag);
-else printf ("0x%08x ", tag);
-printf ("type: %u, len: %u\n", tag);
-
   if (tag == 0xb001) { // Sony ModelID
     unique_id = get2();
     setSonyBodyFeatures(unique_id);
@@ -11220,29 +11215,16 @@ void CLASS parseSonySRF (unsigned len)
 {
   if (len > 0xfffff) return;
 
+  if ((0x9084+5) > len) return;
+
   INT64 save = ftell (ifp);
   INT64 ifd_offset;
   unsigned offset, key;
-printf ("==>> start parseSonySRF save: 0x%llx len: %u\n", save, len);
   uchar *srf_buf;
   srf_buf = (uchar *)malloc(len);
   fread (srf_buf, len, 1, ifp);
   key = ((unsigned)srf_buf[0x9084] << 24) | ((unsigned)srf_buf[0x9085] << 16) | ((unsigned)srf_buf[0x9086] << 8) | (unsigned)srf_buf[0x9087];
-
-printf ("==>> IFD1 key: 0x%08x\n", key);
-
   ifd_offset = sget4(srf_buf+offset+14) - save;
-
-printf ("==>> save: 0x%08x ntags: 0x%04x tag: 0x%04x type: 0x%04x len: 0x%08x val: 0x%08x (%d) ifd_offset: 0x%08x\n",
-save, sget2(srf_buf+offset), sget2(srf_buf+offset+2), sget2(srf_buf+offset+4),
-sget4(srf_buf+offset+6), sget4(srf_buf+offset+10), sget4(srf_buf+offset+10), ifd_offset);
-
-//  s[0] = SonySubstitution[buf[imSony.real_iso_offset]];
-
-printf ("==>> ntags: 0x%04x (0x%04x)\n",
-sget2(srf_buf+ifd_offset), (SonySubstitution[srf_buf[ifd_offset+1]] << 8) + SonySubstitution[srf_buf[ifd_offset]]);
-
-
 
   free (srf_buf);
   fseek (ifp, save, SEEK_SET);
@@ -11647,12 +11629,10 @@ void CLASS parse_makernote(int base, int uptag)
 #endif
 
   entries = get2();
-printf ("==>> parse_makernote entries: %d\n", entries);
   if (entries > 1000) return;
 
   morder = order;
-  while (entries--)
-  {
+  while (entries--) {
     order = morder;
     tiff_get(base, &tag, &type, &len, &save);
     tag |= uptag << 16;
@@ -11761,12 +11741,6 @@ printf ("==>> parse_makernote entries: %d\n", entries);
           parse_makernote(base, tag);
         }
       } else {
-
-printf ("==>> before parseSonyMakernotes tag: ");
-if (tag < 0x10000) printf ("0x%04x ", tag);
-else printf ("0x%08x ", tag);
-printf ("type: %u, len: %u\n", tag);
-
       parseSonyMakernotes(base, tag, type, len, nonDNG,
                           table_buf_0x0116, table_buf_0x0116_len,
                           table_buf_0x2010, table_buf_0x2010_len,
@@ -12379,7 +12353,6 @@ void CLASS parse_exif(int base)
 
       } else if (!strncmp(make, "SONY", 4) &&
                (!strncmp(model, "DSC-V3", 6) || !strncmp(model, "DSC-F828", 8))) {
-printf ("==>> make: =%s= model: =%s= len: %u\n", make, model, len);
         parseSonySRF(len);
         break;
       } else
@@ -13043,7 +13016,6 @@ int CLASS parse_tiff_ifd(int base)
       fseek(ifp, savepos, SEEK_SET);
     }
 #endif
-printf ("==>> parse_tiff_ifd tag: 0x%04x\n", tag);
     switch (tag)
     {
     case 1:
@@ -20199,7 +20171,7 @@ dng_skip:
    }
    if(!cmul_ok)
    {
-     if(cam_mul[0]>0) cam_mul[0] = 0;   
+     if(cam_mul[0]>0) cam_mul[0] = 0;
      cam_mul[3] = 0;
    }
   }
