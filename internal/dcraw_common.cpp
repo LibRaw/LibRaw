@@ -20198,8 +20198,10 @@ dng_skip:
 		  cmul_ok = false;
    }
    if(!cmul_ok)
-	  cam_mul[0] = cam_mul[3] = 0;
-
+   {
+     if(cam_mul[0]>0) cam_mul[0] = 0;   
+     cam_mul[3] = 0;
+   }
   }
   if ((use_camera_matrix & ((use_camera_wb || dng_version) | 0x2)) && cmatrix[0][0] > 0.125)
   {
