@@ -10437,6 +10437,11 @@ void CLASS parseSonyMakernotes(int base, unsigned tag, unsigned type, unsigned l
   int LensDataValid = 0;
   unsigned uitemp;
 
+printf ("==>> parseSonyMakernotes tag: ");
+if (tag < 0x10000) printf ("0x%04x ", tag);
+else printf ("0x%08x ", tag);
+printf ("type: %u, len: %u\n", tag);
+
   if (tag == 0xb001) { // Sony ModelID
     unique_id = get2();
     setSonyBodyFeatures(unique_id);
@@ -11210,6 +11215,39 @@ void CLASS parseSonySR2 (uchar *cbuf_SR2, unsigned SR2SubIFDOffset, unsigned SR2
     }
   }
 }
+
+void CLASS parseSonySRF (unsigned len)
+{
+  if (len > 0xfffff) return;
+
+  INT64 save = ftell (ifp);
+  INT64 ifd_offset;
+  unsigned offset, key;
+printf ("==>> start parseSonySRF save: 0x%llx len: %u\n", save, len);
+  uchar *srf_buf;
+  srf_buf = (uchar *)malloc(len);
+  fread (srf_buf, len, 1, ifp);
+  key = ((unsigned)srf_buf[0x9084] << 24) | ((unsigned)srf_buf[0x9085] << 16) | ((unsigned)srf_buf[0x9086] << 8) | (unsigned)srf_buf[0x9087];
+
+printf ("==>> IFD1 key: 0x%08x\n", key);
+
+  ifd_offset = sget4(srf_buf+offset+14) - save;
+
+printf ("==>> save: 0x%08x ntags: 0x%04x tag: 0x%04x type: 0x%04x len: 0x%08x val: 0x%08x (%d) ifd_offset: 0x%08x\n",
+save, sget2(srf_buf+offset), sget2(srf_buf+offset+2), sget2(srf_buf+offset+4),
+sget4(srf_buf+offset+6), sget4(srf_buf+offset+10), sget4(srf_buf+offset+10), ifd_offset);
+
+//  s[0] = SonySubstitution[buf[imSony.real_iso_offset]];
+
+printf ("==>> ntags: 0x%04x (0x%04x)\n",
+sget2(srf_buf+ifd_offset), (SonySubstitution[srf_buf[ifd_offset+1]] << 8) + SonySubstitution[srf_buf[ifd_offset]]);
+
+
+
+  free (srf_buf);
+  fseek (ifp, save, SEEK_SET);
+}
+
 #undef ilm
 #undef icWBC
 #undef icWBCTC
@@ -11609,6 +11647,7 @@ void CLASS parse_makernote(int base, int uptag)
 #endif
 
   entries = get2();
+printf ("==>> parse_makernote entries: %d\n", entries);
   if (entries > 1000) return;
 
   morder = order;
@@ -11722,6 +11761,12 @@ void CLASS parse_makernote(int base, int uptag)
           parse_makernote(base, tag);
         }
       } else {
+
+printf ("==>> before parseSonyMakernotes tag: ");
+if (tag < 0x10000) printf ("0x%04x ", tag);
+else printf ("0x%08x ", tag);
+printf ("type: %u, len: %u\n", tag);
+
       parseSonyMakernotes(base, tag, type, len, nonDNG,
                           table_buf_0x0116, table_buf_0x0116_len,
                           table_buf_0x2010, table_buf_0x2010_len,
@@ -12277,35 +12322,30 @@ void CLASS parse_exif(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
       if (((make[0] == '\0') && (!strncmp(model, "ov5647", 6))) ||
           ((!strncmp(make, "RaspberryPi", 11)) && (!strncmp(model, "RP_OV5647", 9))) ||
-          ((!strncmp(make, "RaspberryPi", 11)) && (!strncmp(model, "RP_imx219", 9))))
-      {
+          ((!strncmp(make, "RaspberryPi", 11)) && (!strncmp(model, "RP_imx219", 9)))) {
         char mn_text[512];
         char *pos;
         char ccms[512];
         ushort l;
         float num;
 
-	fgets(mn_text, MIN(len,511), ifp);
+	      fgets(mn_text, MIN(len,511), ifp);
         mn_text[511] = 0;
 
         pos = strstr(mn_text, "gain_r=");
-        if (pos)
-          cam_mul[0] = atof(pos + 7);
+        if (pos) cam_mul[0] = atof(pos + 7);
         pos = strstr(mn_text, "gain_b=");
-        if (pos)
-          cam_mul[2] = atof(pos + 7);
+        if (pos) cam_mul[2] = atof(pos + 7);
         if ((cam_mul[0] > 0.001f) && (cam_mul[2] > 0.001f))
           cam_mul[1] = cam_mul[3] = 1.0f;
         else
           cam_mul[0] = cam_mul[2] = 0.0f;
 
         pos = strstr(mn_text, "ccm=");
-        if(pos)
-        {
+        if(pos) {
          pos +=4;
          char *pos2 = strstr(pos, " ");
-         if(pos2)
-         {
+         if(pos2) {
            l = pos2 - pos;
            memcpy(ccms, pos, l);
            ccms[l] = '\0';
@@ -12316,13 +12356,10 @@ void CLASS parse_exif(int base)
           char *last=0;
           pos = strtok_r(ccms, ",",&last);
 #endif
-          if(pos)
-          {
-            for (l = 0; l < 4; l++)
-            {
+          if(pos) {
+            for (l = 0; l < 4; l++) {
               num = 0.0;
-              for (c = 0; c < 3; c++)
-              {
+              for (c = 0; c < 3; c++) {
                 imgdata.color.ccm[l][c] = (float)atoi(pos);
                 num += imgdata.color.ccm[l][c];
 #if defined WIN32 || defined(__MINGW32__)
@@ -12339,8 +12376,13 @@ void CLASS parse_exif(int base)
         }
        }
       end:;
-      }
-      else
+
+      } else if (!strncmp(make, "SONY", 4) &&
+               (!strncmp(model, "DSC-V3", 6) || !strncmp(model, "DSC-F828", 8))) {
+printf ("==>> make: =%s= model: =%s= len: %u\n", make, model, len);
+        parseSonySRF(len);
+        break;
+      } else
 
 #endif
         if ((len == 1) && !strncmp(make, "NIKON", 5)) {
@@ -12983,6 +13025,7 @@ int CLASS parse_tiff_ifd(int base)
 #ifdef LIBRAW_LIBRARY_BUILD
   INT64 fsize = ifp->size();
 #endif
+
   while (entries--)
   {
     tiff_get(base, &tag, &type, &len, &save);
@@ -13000,7 +13043,7 @@ int CLASS parse_tiff_ifd(int base)
       fseek(ifp, savepos, SEEK_SET);
     }
 #endif
-
+printf ("==>> parse_tiff_ifd tag: 0x%04x\n", tag);
     switch (tag)
     {
     case 1:

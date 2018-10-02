@@ -76,7 +76,7 @@ it under the terms of the one of two licenses as you choose:
                                uchar *&table_buf_0x940c, ushort &table_buf_0x940c_len,
                                uchar *&table_buf_0x940e, ushort &table_buf_0x940e_len);
     void	parseSonySR2 (uchar *cbuf_SR2, unsigned SR2SubIFDOffset, unsigned SR2SubIFDLength, unsigned dng_writer);
-
+    void parseSonySRF (unsigned len);
     void	parseFujiMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
 
     void	setLeicaBodyFeatures(int LeicaMakernoteSignature);
