@@ -170,6 +170,7 @@ enum LibRaw_camera_mounts
   LIBRAW_MOUNT_Sigma_X3F = 22,
   LIBRAW_MOUNT_Leica_TL = 23,
   LIBRAW_MOUNT_Leica_SL = 24,
+  LIBRAW_MOUNT_Nikon_Z = 25,
   LIBRAW_MOUNT_FixedLens = 99
 };
 

@@ -1900,11 +1900,10 @@ static inline void unpack7bytesto4x16_nikon(unsigned char *src, unsigned short *
 
 void LibRaw::nikon_14bit_load_raw()
 {
-	const unsigned linelen = 14512;// S.raw_width * 7 / 4;
+	const unsigned linelen = (unsigned)(ceil((float)(S.raw_width * 7 / 4) / 16.0)) * 16; // 14512; // S.raw_width * 7 / 4;
 	const unsigned pitch = S.raw_pitch ? S.raw_pitch / 2 : S.raw_width;
 	unsigned char *buf = (unsigned char *)malloc(linelen);
 	merror(buf, "nikon_14bit_load_raw()");
-
 	for (int row = 0; row < S.raw_height; row++)
 	{
 		unsigned bytesread = libraw_internal_data.internal_data.input->read(buf, 1, linelen);
@@ -2089,7 +2088,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	(callbacks.post_identify_cb)(this);
 
     // Ugly hack, replace with proper data/line size for different cameras/format when available
-    if( !strcasecmp(imgdata.idata.make, "Nikon") && !strcasecmp(imgdata.idata.model,"Z 7") && libraw_internal_data.unpacker_data.data_size == 80106240)
+    if (!strcasecmp(imgdata.idata.make, "Nikon") && !strcasecmp(imgdata.idata.model,"Z 7") &&
+        ((libraw_internal_data.unpacker_data.data_size == 80106240) || /* FX   */
+         (libraw_internal_data.unpacker_data.data_size == 34424320) || /* DX   */
+         (libraw_internal_data.unpacker_data.data_size == 66769920) || /* 5:4  */
+         (libraw_internal_data.unpacker_data.data_size == 53345280) || /* 1:1  */
+         (libraw_internal_data.unpacker_data.data_size == 67567872)))  /* 16:9 */
 		load_raw = &LibRaw::nikon_14bit_load_raw;
 
 	// Linear max from 14-bit camera, but on 12-bit data?

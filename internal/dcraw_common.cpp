@@ -7657,6 +7657,9 @@ void CLASS parseNikonMakernote (int base, int uptag, unsigned dng_writer)
         ilm.CameraFormat = ilm.LensFormat = LIBRAW_FORMAT_APSC;
         ilm.CameraMount = ilm.LensMount = LIBRAW_MOUNT_FixedLens;
         ilm.FocalType = LIBRAW_FT_FIXED;
+      } else if (imn.ColorBalanceVersion == 800) { // "Z 7"
+        ilm.CameraFormat = LIBRAW_FORMAT_FF;
+        ilm.CameraMount = LIBRAW_MOUNT_Nikon_Z;
       }
 
     } else if (tag == 0x0098) { // contains lens data
@@ -11213,18 +11216,36 @@ void CLASS parseSonySR2 (uchar *cbuf_SR2, unsigned SR2SubIFDOffset, unsigned SR2
 
 void CLASS parseSonySRF (unsigned len)
 {
-  if (len > 0xfffff) return;
-
-  if ((0x9084+5) > len) return;
+  if ((len > 0xfffff) || (len == 0)) return;
 
   INT64 save = ftell (ifp);
+
+// printf ("==>> start parseSonySRF save: 0x%llx len: %u\n", save, len);
+
+  unsigned key, offset;
   INT64 ifd_offset;
-  unsigned offset, key;
   uchar *srf_buf;
+  offset = 0x0310c0 - save;
+  if (len < offset) return;
   srf_buf = (uchar *)malloc(len);
   fread (srf_buf, len, 1, ifp);
-  key = ((unsigned)srf_buf[0x9084] << 24) | ((unsigned)srf_buf[0x9085] << 16) | ((unsigned)srf_buf[0x9086] << 8) | (unsigned)srf_buf[0x9087];
+  offset += srf_buf[offset] << 2;
+  if (len < (offset+3)) return;
+  key = ((unsigned)srf_buf[offset]   << 24) |
+        ((unsigned)srf_buf[offset+1] << 16) |
+        ((unsigned)srf_buf[offset+2] << 8)  |
+         (unsigned)srf_buf[offset+3];
+
+// printf (" key offset in buffer: 0x%x; key from buffer: 0x%x\n", offset, key);
+
+  offset = 0;
   ifd_offset = sget4(srf_buf+offset+14) - save;
+
+/*
+printf ("==>> ntags: 0x%04x tag: 0x%04x type: 0x%04x len: 0x%08x val: 0x%08x (%d) ifd_offset: 0x%08x\n",
+sget2(srf_buf+offset), sget2(srf_buf+offset+2), sget2(srf_buf+offset+4),
+sget4(srf_buf+offset+6), sget4(srf_buf+offset+10), sget4(srf_buf+offset+10), ifd_offset);
+*/
 
   free (srf_buf);
   fseek (ifp, save, SEEK_SET);

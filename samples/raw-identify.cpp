@@ -342,6 +342,15 @@ int main(int ac, char *av[])
       case 22:
         printf ("Sigma X3F\n");
         break;
+      case 23:
+        printf ("Leica TL\n");
+        break;
+      case 24:
+        printf ("Leica SL\n");
+        break;
+      case 25:
+        printf ("Nikon Z\n");
+        break;
       case 99:
         printf("Fixed Lens\n");
         break;
