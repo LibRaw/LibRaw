@@ -273,6 +273,36 @@ int main(int ac, char *av[])
         printf("Unknown\n");
         break;
       }
+
+      if (!strncasecmp(P1.make, "Nikon", 5) && Nikon.CropData[0]) {
+        printf("\tNikon crop: %d, ", Nikon.CropFormat);
+        switch (Nikon.CropFormat) { /* 2 -> DX; 3 -> 5:4; 6 -> 16:9; 11 -> FX; 17 -> 1:1 */
+        case 0:
+          printf("Off\n");
+          break;
+        case 2:
+          printf("DX\n");
+          break;
+        case 3:
+          printf("5:4\n");
+          break;
+        case 6:
+          printf("16:9\n");
+          break;
+        case 11:
+          printf("FX\n");
+          break;
+        case 17:
+          printf("1:1\n");
+          break;
+        default:
+          printf("Unknown\n");
+          break;
+        }
+        printf("\tSensor %d x %d; crop: %d x %d; top left pixel: (%d, %d)\n",
+          Nikon.CropData[0], Nikon.CropData[1], Nikon.CropData[2], Nikon.CropData[3], Nikon.CropData[4], Nikon.CropData[5]);
+      }
+
       printf("\tCameraMount: %d, ", mnLens.CameraMount);
       switch (mnLens.CameraMount)
       {

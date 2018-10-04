@@ -7553,6 +7553,10 @@ void CLASS parseNikonMakernote (int base, int uptag, unsigned dng_writer)
         }
       }
 
+    } else if (tag == 0x001b) {
+      imn.CropFormat = get2();
+      FORC(6) imn.CropData[c] = get2();
+
     } else if (tag == 0x001d) { // serial number
       if (len > 0) {
         while ((c = fgetc(ifp)) && (len-- > 0) && (c != EOF)) {
