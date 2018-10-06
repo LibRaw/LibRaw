@@ -1562,8 +1562,9 @@ void CLASS nikon_load_raw()
   max = 1 << tiff_bps & 0x7fff;
   if ((csize = get2()) > 1)
     step = max / (csize - 1);
-  if (ver0 == 0x44 && ver1 == 0x20 && step > 0)
+  if (ver0 == 0x44 && (ver1 == 0x20 || (ver1 == 0x40 && step > 3)) && step > 0)
   {
+    if(ver1 == 0x40) { step /= 4; max /= 4; }
     for (i = 0; i < csize; i++)
       curve[i * step] = get2();
     for (i = 0; i < max; i++)

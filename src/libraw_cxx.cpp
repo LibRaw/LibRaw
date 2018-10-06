@@ -2943,6 +2943,9 @@ int LibRaw::unpack(void)
       if (load_raw == &LibRaw::packed_load_raw && !strncasecmp(imgdata.idata.make, "Nikon", 5) &&
           (!strncasecmp(imgdata.idata.model, "E", 1) || !strncasecmp(imgdata.idata.model, "COOLPIX B", 9) ||!strncasecmp(imgdata.idata.model, "COOLPIX P1000", 13)))
         rawspeed_enabled = 0;
+      
+      if (load_raw == &LibRaw::nikon_load_raw && !strncasecmp(imgdata.idata.make, "Nikon", 5) && !strncasecmp(imgdata.idata.model, "Z", 1))
+        rawspeed_enabled = 0;
 
       // RawSpeed Supported,
       if (O.use_rawspeed && rawspeed_enabled &&
