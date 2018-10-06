@@ -1005,7 +1005,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "nikon_load_striped_packed_raw()";
   }
-
+  else if (load_raw == &LibRaw::nikon_load_padded_packed_raw)
+  {
+    d_info->decoder_name = "nikon_load_padded_packed_raw()";
+  }
 /* -- added 07/02/18 -- */
   else if (load_raw == &LibRaw::unpacked_load_raw_fuji_f700s20)
   {
@@ -1939,6 +1942,24 @@ void LibRaw::fuji_14bit_load_raw()
   }
   free(buf);
 }
+void LibRaw::nikon_load_padded_packed_raw() // 12 bit per pixel, padded to 16 bytes
+{
+   // libraw_internal_data.unpacker_data.load_flags -> row byte count
+   if(libraw_internal_data.unpacker_data.load_flags < 2000 || libraw_internal_data.unpacker_data.load_flags > 64000) return;
+   unsigned char *buf = (unsigned char*)malloc(libraw_internal_data.unpacker_data.load_flags);
+   for (int row = 0; row < S.raw_height; row++)
+   {
+     checkCancel();
+     libraw_internal_data.internal_data.input->read(buf,libraw_internal_data.unpacker_data.load_flags,1);
+     for (int icol = 0; icol < S.raw_width/2; icol++)
+     {
+       imgdata.rawdata.raw_image[(row)*S.raw_width + (icol*2)] = ((buf[icol*3+1] & 0xf) << 8) | buf[icol*3];
+       imgdata.rawdata.raw_image[(row)*S.raw_width + (icol*2+1)] = buf[icol*3+2]  << 4 | ((buf[icol*3+1] & 0xf0)>>4);
+     }
+   }
+   free(buf);
+}
+
 
 void LibRaw::nikon_load_striped_packed_raw()
 {
@@ -2300,10 +2321,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           imgdata.color.rgb_cam[i][j] = float(i == j);
     }
     // Adjust BL for Nikon 12bit
-    if ((load_raw == &LibRaw::nikon_load_raw || load_raw == &LibRaw::packed_load_raw) &&
-        !strcasecmp(imgdata.idata.make, "Nikon") &&
-        strncmp(imgdata.idata.model, "COOLPIX", 7)
-        //	   && strncmp(imgdata.idata.model,"1 ",2)
+    if ((load_raw == &LibRaw::nikon_load_raw 
+         || load_raw == &LibRaw::packed_load_raw
+         || load_raw == &LibRaw::nikon_load_padded_packed_raw
+	 ) 
+	 && !strcasecmp(imgdata.idata.make, "Nikon") 
+	 && strncmp(imgdata.idata.model, "COOLPIX", 7)
         && libraw_internal_data.unpacker_data.tiff_bps == 12)
     {
       C.maximum = 4095;

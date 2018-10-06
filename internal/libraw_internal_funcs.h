@@ -139,6 +139,7 @@ it under the terms of the one of two licenses as you choose:
 // Nikon (and Minolta Z2)
     void        nikon_load_raw();
     void        nikon_load_striped_packed_raw();
+    void        nikon_load_padded_packed_raw();
     void        nikon_load_sraw();
     void        nikon_yuv_load_raw();
     void        nikon_coolscan_load_raw();

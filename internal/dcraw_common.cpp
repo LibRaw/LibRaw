@@ -14612,6 +14612,11 @@ void CLASS apply_tiff()
         else
           load_raw = &CLASS nikon_load_raw; // fallback
       }
+      else if((((INT64(raw_width) * 3ULL /2ULL) + 15ULL)/16ULL)*16ULL * INT64(raw_height) == INT64(tiff_ifd[raw].bytes))
+      {
+        load_raw = &CLASS nikon_load_padded_packed_raw;
+        load_flags = (((INT64(raw_width) * 3ULL /2ULL) + 15ULL)/16ULL)*16ULL; // bytes per row
+      }
       else
 #endif
         load_raw = &CLASS nikon_load_raw;
