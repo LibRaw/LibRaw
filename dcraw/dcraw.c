@@ -8890,7 +8890,7 @@ void CLASS parseNikonMakernote (int base, int uptag, unsigned dng_writer)
 
     } else if (tag == 0x001b) {
       imn.CropFormat = get2();
-      FORC(6) imn.CropData[c] = get2();
+      FORC(6) imn.CropData[c] = get2(); /* box inside CropData ([2], [3]): upper left pixel (x,y), size (width,height) */
 
     } else if (tag == 0x001d) { // serial number
       if (len > 0) {
@@ -8926,7 +8926,7 @@ void CLASS parseNikonMakernote (int base, int uptag, unsigned dng_writer)
       FORC4 cblack[c] -= i;
       black += i;
 
-    } else if (tag == 0x0045) {
+    } else if (tag == 0x0045) { /* box inside CropData ([2], [3]): upper left pixel (x,y), size (width,height) */
         imgdata.sizes.raw_crop.cleft = get2();
         imgdata.sizes.raw_crop.ctop = get2();
         imgdata.sizes.raw_crop.cwidth = get2();

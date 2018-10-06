@@ -401,7 +401,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     unsigned ColorBalanceVersion;
     uchar NikonKey;
     ushort NEFBitDepth[4];
-    ushort CropFormat;  /* 2 -> DX; 3 -> 5:4; 4 -> 3:2; 6 -> 16:9; 11 -> FX uncropped; 12 -> DX uncropped; 17 -> 1:1 */
+    ushort CropFormat;  /* 1 -> 1.3x; 2 -> DX; 3 -> 5:4; 4 -> 3:2; 6 -> 16:9; 11 -> FX uncropped; 12 -> DX uncropped; 17 -> 1:1 */
     ushort CropData[6]; /* sensor [0] x [1] cropped to [2] x [3] at pixel [4],[5] */
   } libraw_nikon_makernotes_t;
 
