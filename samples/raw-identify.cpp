@@ -276,9 +276,12 @@ int main(int ac, char *av[])
 
       if (!strncasecmp(P1.make, "Nikon", 5) && Nikon.CropData[0]) {
         printf("\tNikon crop: %d, ", Nikon.CropFormat);
-        switch (Nikon.CropFormat) { /* 2 -> DX; 3 -> 5:4; 4 -> 3:2; 6 -> 16:9; 11 -> FX uncropped; 12 -> DX uncropped; 17 -> 1:1 */
+        switch (Nikon.CropFormat) {
         case 0:
           printf("Off\n");
+          break;
+        case 1:
+          printf("1.3x\n");
           break;
         case 2:
           printf("DX\n");
