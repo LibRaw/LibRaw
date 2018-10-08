@@ -1010,6 +1010,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "nikon_load_padded_packed_raw()";
   }
+  else if (load_raw == &LibRaw::nikon_14bit_load_raw)
+  {
+    d_info->decoder_name = "nikon_14bit_load_raw()";
+  }
 /* -- added 07/02/18 -- */
   else if (load_raw == &LibRaw::unpacked_load_raw_fuji_f700s20)
   {
@@ -2322,11 +2326,11 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           imgdata.color.rgb_cam[i][j] = float(i == j);
     }
     // Adjust BL for Nikon 12bit
-    if ((load_raw == &LibRaw::nikon_load_raw 
+    if ((load_raw == &LibRaw::nikon_load_raw
          || load_raw == &LibRaw::packed_load_raw
          || load_raw == &LibRaw::nikon_load_padded_packed_raw
-	 ) 
-	 && !strcasecmp(imgdata.idata.make, "Nikon") 
+	 )
+	 && !strcasecmp(imgdata.idata.make, "Nikon")
 	 && strncmp(imgdata.idata.model, "COOLPIX", 7)
         && libraw_internal_data.unpacker_data.tiff_bps == 12)
     {
@@ -2967,7 +2971,7 @@ int LibRaw::unpack(void)
       if (load_raw == &LibRaw::packed_load_raw && !strncasecmp(imgdata.idata.make, "Nikon", 5) &&
           (!strncasecmp(imgdata.idata.model, "E", 1) || !strncasecmp(imgdata.idata.model, "COOLPIX B", 9) ||!strncasecmp(imgdata.idata.model, "COOLPIX P1000", 13)))
         rawspeed_enabled = 0;
-      
+
       if (load_raw == &LibRaw::nikon_load_raw && !strncasecmp(imgdata.idata.make, "Nikon", 5) && !strncasecmp(imgdata.idata.model, "Z", 1))
         rawspeed_enabled = 0;
 
