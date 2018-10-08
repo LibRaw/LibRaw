@@ -548,6 +548,8 @@ int main(int argc, char *argv[])
       {
 	if(*outext=='.') // append
 	  snprintf(outfn, sizeof(outfn), "%s%s", argv[arg],outext);
+	else if(strchr(outext,'.') && *outext !='.') // dot is not 1st char
+	    strncpy(outfn, outext, sizeof(outfn));
 	else
 	  {
 	    strncpy(outfn, argv[arg], sizeof(outfn));
