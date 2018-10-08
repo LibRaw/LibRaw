@@ -27,6 +27,7 @@ it under the terms of the one of two licenses as you choose:
 #include <netinet/in.h>
 #else
 #include <winsock2.h>
+#include <io.h>
 #endif
 #define LIBRAW_LIBRARY_BUILD
 #include "libraw/libraw.h"
