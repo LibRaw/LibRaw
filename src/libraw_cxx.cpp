@@ -4092,7 +4092,16 @@ int LibRaw::dcraw_ppm_tiff_writer(const char *filename)
 
   if (!filename)
     return ENOENT;
-  FILE *f = fopen(filename, "wb");
+  FILE *f = NULL;
+  if(!strcmp(filename,"-"))
+    {
+#ifdef WIN32
+      _setmode(_fileno(stdout),_O_BINARY);
+#endif
+      f = stdout;
+    }
+  else
+    f = fopen(filename, "wb");
 
   if (!f)
     return errno;
@@ -4109,12 +4118,14 @@ int LibRaw::dcraw_ppm_tiff_writer(const char *filename)
     write_ppm_tiff();
     SET_PROC_FLAG(LIBRAW_PROGRESS_FLIP);
     libraw_internal_data.internal_data.output = NULL;
-    fclose(f);
+    if(strcmp(filename,"-"))
+       fclose(f);
     return 0;
   }
   catch (LibRaw_exceptions err)
   {
-    fclose(f);
+    if(strcmp(filename,"-"))
+       fclose(f);
     EXCEPTION_HANDLER(err);
   }
 }

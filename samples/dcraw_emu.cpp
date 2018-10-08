@@ -94,6 +94,11 @@ void usage(const char *prog)
          "-G        Use green_matching() filter\n"
          "-B <x y w h> use cropbox\n"
          "-F        Use FILE I/O instead of streambuf API\n"
+	 "-Z <suf>  Output filename generation rules\n"
+	 "          .suf => append .suf to input name, keeping existing suffix too\n"
+	 "           suf => replace input filename last extension\n"
+	 "          - => output to stdout\n"
+	 "          filename.suf => output to filename.suf\n"
          "-timing   Detailed timing report\n"
          "-fbdd N   0 - disable FBDD noise reduction (default), 1 - light FBDD, 2 - full\n"
          "-dcbi N   Number of extra DCD iterations (default - 0)\n"
@@ -171,12 +176,12 @@ int main(int argc, char *argv[])
   int i, arg, c, ret;
   char opm, opt, *cp, *sp;
   int use_bigfile = 0, use_timing = 0, use_mem = 0;
+  char *outext = NULL;
 #ifdef USE_DNGSDK
   dng_host *dnghost = NULL;
 #endif
 #ifndef WIN32
   int msize = 0, use_mmap = 0;
-
 #endif
   void *iobuffer = 0;
 #ifdef OUT
@@ -355,6 +360,9 @@ int main(int argc, char *argv[])
     case 'F':
       use_bigfile = 1;
       break;
+    case 'Z':
+      outext = strdup(argv[arg++]);
+      break;
     case 'd':
       if (!strcmp(optstr, "-dcbi"))
         OUT.dcb_iterations = atoi(argv[arg++]);
@@ -403,6 +411,9 @@ int main(int argc, char *argv[])
 #define C RawProcessor.imgdata.color
 #define T RawProcessor.imgdata.thumbnail
 #define P2 RawProcessor.imgdata.other
+
+  if(outext && !strcmp(outext,"-"))
+      use_timing = verbosity = 0;
 
   if (verbosity > 1)
     RawProcessor.set_progress_handler(my_progress_callback, (void *)"Sample data passed");
@@ -529,7 +540,30 @@ int main(int argc, char *argv[])
     if (use_timing)
       timerprint("LibRaw::dcraw_process()", argv[arg]);
 
-    snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg], OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
+    if(!outext)
+      snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg], OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
+    else if(!strcmp(outext,"-"))
+      snprintf(outfn,sizeof(outfn),"-");
+    else
+      {
+	if(*outext=='.') // append
+	  snprintf(outfn, sizeof(outfn), "%s%s", argv[arg],outext);
+	else
+	  {
+	    strncpy(outfn, argv[arg], sizeof(outfn));
+	    if(strlen(outfn)>0)
+	      {
+		char *lastchar = outfn+strlen(outfn); // points to term 0
+		while(--lastchar > outfn)
+		  {
+		    if(*lastchar == '/' || *lastchar == '\\') break;
+		    if(*lastchar == '.') { *lastchar = 0; break;};
+		  }
+	      }
+	    strncat(outfn,".",sizeof(outfn));
+	    strncat(outfn,outext,sizeof(outfn));
+	  }
+      }
 
     if (verbosity)
     {

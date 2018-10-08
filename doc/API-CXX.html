@@ -410,6 +410,7 @@
     <p><a name="dcraw_ppm_tiff_writer"></a></p>
     <h3>int LibRaw::dcraw_ppm_tiff_writer(const char *outfile)</h3>
     <p>The function outputs the postprocessing results to a file in the PPM/PGM or TIFF format (the format is set via imgdata.params.output_tiff). The results are binary identical to those provided by dcraw.</p>
+    <p>If "-" is passed as outfile, the function will write to standard output (stdout).</p>
     <p>The function returns an integer number in accordance with the <a
         href="API-notes.html#errors">error code convention</a>: positive if any system call has returned an error, negative (from the <a
         href="API-datastruct.html#LibRaw_errors">LibRaw error list</a>) if there has been an error situation within LibRaw.</p>

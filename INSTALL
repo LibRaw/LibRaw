@@ -15,7 +15,15 @@ I. Installation steps
 
 3. install by run make install as root:
  
- $ sudo make install  
+ $ sudo make install
+
+If you're using Github snapshot, create ./configure script:
+    autoreconf --install
+before using it (you'll need autotools installed).
+
+Alternatively, you may use pre-created Makefiles (Makefile.dist for Unix,
+Makefile.msvc for Windows/VisualStudio) and add/remove options by editing
+these Makefiles
 
 
 II. ./configure options
