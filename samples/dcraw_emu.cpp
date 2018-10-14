@@ -562,8 +562,8 @@ int main(int argc, char *argv[])
 		    if(*lastchar == '.') { *lastchar = 0; break;};
 		  }
 	      }
-	    strncat(outfn,".",sizeof(outfn));
-	    strncat(outfn,outext,sizeof(outfn));
+	    strncat(outfn,".",sizeof(outfn)-strlen(outfn)-1);
+	    strncat(outfn,outext,sizeof(outfn)-strlen(outfn)-1);
 	  }
       }
 
