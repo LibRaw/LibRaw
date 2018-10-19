@@ -18706,7 +18706,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
       }
   }
 
-  if(!strncmp(make, "Canon", 5) && !tiff_flip && imgdata.makernotes.canon.MakernotesFlip )
+  if(!strncmp(make, "Canon", 5) && !tiff_flip && imgdata.makernotes.canon.MakernotesFlip && !dng_version )
      tiff_flip =  imgdata.makernotes.canon.MakernotesFlip ;
 
   if (!strncasecmp(make, "Sony", 4) && unique_id)

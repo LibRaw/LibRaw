@@ -2947,6 +2947,9 @@ int LibRaw::unpack(void)
       if (imgdata.idata.dng_version && libraw_internal_data.unpacker_data.tiff_samples == 2)
         rawspeed_enabled = 0;
 
+      if(imgdata.other.is_NikonTransfer)
+        rawspeed_enabled = 0;
+
       if(libraw_internal_data.unpacker_data.pana_encoding == 5)
         rawspeed_enabled = 0;
 
