@@ -2113,6 +2113,9 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     if(callbacks.post_identify_cb)
 	(callbacks.post_identify_cb)(this);
 
+     if (load_raw == &LibRaw::nikon_load_raw)
+       nikon_read_curve();
+
     // Ugly hack, replace with proper data/line size for different cameras/format when available
     if (!strcasecmp(imgdata.idata.make, "Nikon") && !strcasecmp(imgdata.idata.model,"Z 7") &&
         ((libraw_internal_data.unpacker_data.data_size == 80106240) || /* FX   */
