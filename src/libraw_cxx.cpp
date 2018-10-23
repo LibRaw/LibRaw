@@ -6345,6 +6345,12 @@ void LibRaw::parse_x3f()
     libraw_internal_data.internal_data.toffset = DE->input.offset;
     write_thumb = &LibRaw::x3f_thumb_loader;
   }
+  DE = x3f_get_camf(x3f);
+  if (DE && DE->input.size > 28)
+  {
+	  libraw_internal_data.unpacker_data.meta_offset = DE->input.offset + 8;
+	  libraw_internal_data.unpacker_data.meta_length = DE->input.size - 28;
+  } 
 }
 
 INT64 LibRaw::x3f_thumb_size()
@@ -6632,7 +6638,18 @@ void LibRaw::x3f_load_raw()
       throw LIBRAW_EXCEPTION_ALLOC;
 
     imgdata.rawdata.color3_image = (ushort(*)[3])imgdata.rawdata.raw_alloc;
-    if (HUF)
+	// swap R/B channels for known old cameras
+	if(!strcasecmp(P1.make,"Polaroid") && !strcasecmp(P1.model,"x530"))
+	{
+		ushort(*src)[3] = (ushort(*)[3])data;
+		for(int p = 0; p < S.raw_height * S.raw_width; p++)
+		{
+			imgdata.rawdata.color3_image[p][0] = src[p][2];
+			imgdata.rawdata.color3_image[p][1] = src[p][1];
+			imgdata.rawdata.color3_image[p][2] = src[p][0];
+		}
+	}
+    else if (HUF)
       memmove(imgdata.rawdata.raw_alloc, data, datasize);
     else if (TRU && (!Q || !Q->quattro_layout))
       memmove(imgdata.rawdata.raw_alloc, data, datasize);
