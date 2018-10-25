@@ -5765,6 +5765,7 @@ static const char *static_camera_list[] = {
 	"Leica M8.2",
 	"Leica M9",
 	"Leica M10",
+	"Leica M10-D",
 	"Leica M10-P",
 	"Leica M (Typ 240)",
 	"Leica M (Typ 262)",
