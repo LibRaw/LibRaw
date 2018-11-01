@@ -263,6 +263,9 @@ int main(int ac, char *av[])
       case 5:
         printf("1\"\n");
         break;
+      case 6:
+        printf("1/2.3\"\n");
+        break;
       case 8:
         printf("4/3\n");
         break;

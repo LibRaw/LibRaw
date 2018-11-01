@@ -11260,7 +11260,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
       {364, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
       {365, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
       {366, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
-      {367, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {367, LIBRAW_FORMAT_1div2p3INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
       {368, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {369, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
   };
@@ -12633,12 +12633,14 @@ void CLASS parseSonySRF (unsigned len)
 /* skip SRF0 */
   srf_offset = 0;
   entries = sget2(srf_buf+srf_offset);
+  if (entries > 1000) goto restore_after_parseSonySRF;
   offset = srf_offset + 2;
   srf_offset = sget4(srf_buf + offset + 12*entries) - save; /* SRF0 ends with SRF1 abs. position */
 
 /* get SRF1, it has fixed 40 bytes length and contains keys to decode metadata and raw data */
   sony_decrypt((unsigned *)(srf_buf+srf_offset), decrypt_len - srf_offset / 4, 1, MasterKey);
   entries = sget2(srf_buf+srf_offset);
+  if (entries > 1000) goto restore_after_parseSonySRF;
   offset = srf_offset + 2;
 
   while (entries--) {
@@ -12655,6 +12657,7 @@ void CLASS parseSonySRF (unsigned len)
   srf_offset = sget4(srf_buf+offset) - save; /* SRFn ends with SRFn+1 position */
   sony_decrypt((unsigned *)(srf_buf+srf_offset), decrypt_len - srf_offset / 4, 1, SRF2Key);
   entries = sget2(srf_buf+srf_offset);
+  if (entries > 1000) goto restore_after_parseSonySRF;
   offset = srf_offset + 2;
   while (entries--) {
     tag_id = sget2(srf_buf+offset);
@@ -12730,13 +12733,13 @@ void CLASS parseSonySRF (unsigned len)
     case 0x00ce:
       icWBC[LIBRAW_WBI_Flash][2] = tag_val;
       break;
-    case 0x00d2:
+    case 0x00d0:
        cam_mul[0] = tag_val;
       break;
     case 0x00d1:
        cam_mul[1] = cam_mul[3] = tag_val;
       break;
-    case 0x00d0:
+    case 0x00d2:
        cam_mul[2] = tag_val;
       break;
     }
@@ -19087,6 +19090,10 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8512,-2641,-694,-8042,15670,2526,-1821,2117,7414 } },
     { "Sony DSC-V3", 0, 0,
       { 7511,-2571,-692,-7894,15088,3060,-948,1111,8128 } },
+
+    { "Sony DSC-HX99", -800, 0, /* temp */
+      { 9847,-3091,-928,-8485,16345,2225,-715,595,7103 } },
+
     { "Sony DSC-RX100M6", -800, 0,
       { 7325,-2321,-596,-3494,11674,2055,-668,1562,5031 } },
     { "Sony DSC-RX100M5A", -800, 0,
@@ -19564,7 +19571,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
         {0x15b, "ILCE-7RM2"},   {0x15e, "ILCE-7SM2"},   {0x161, "ILCA-68"},    {0x162, "ILCA-99M2"},
         {0x163, "DSC-RX10M3"},  {0x164, "DSC-RX100M5"}, {0x165, "ILCE-6300"},  {0x166, "ILCE-9"},
         {0x168, "ILCE-6500"},   {0x16a, "ILCE-7RM3"},   {0x16b, "ILCE-7M3"},   {0x16c, "DSC-RX0"},
-        {0x16d, "DSC-RX10M4"},  {0x16e, "DSC-RX100M6"}, {0x171, "DSC-RX100M5A"},
+        {0x16d, "DSC-RX10M4"},  {0x16e, "DSC-RX100M6"}, {0x16f, "DSC-HX99"},   {0x171, "DSC-RX100M5A"},
     };
 
 #ifdef LIBRAW_LIBRARY_BUILD
