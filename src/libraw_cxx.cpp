@@ -6262,6 +6262,7 @@ static const char *static_camera_list[] = {
 	"Sony ILCE-6500",
 	"Sony ILCE-QX1",
 	"Sony DSC-F828",
+	"Sony DSC-HX99",
 	"Sony DSC-R1",
 	"Sony DSC-RX0",
 	"Sony DSC-RX1",
