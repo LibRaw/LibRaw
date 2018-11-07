@@ -2125,6 +2125,10 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
          (libraw_internal_data.unpacker_data.data_size == 67567872)))  /* 16:9 */
 		load_raw = &LibRaw::nikon_14bit_load_raw;
 
+		if (!strcasecmp(imgdata.idata.make, "Nikon") && !strcasecmp(imgdata.idata.model,"Z 6") &&
+        ((libraw_internal_data.unpacker_data.data_size == 42920960)))  /* FX   */
+    load_raw = &LibRaw::nikon_14bit_load_raw;
+
 	// Linear max from 14-bit camera, but on 12-bit data?
     if(( !strcasecmp(imgdata.idata.make, "Sony") /* || !strcasecmp(imgdata.idata.make, "Nikon") */)
        && imgdata.color.maximum > 0   && imgdata.color.linear_max[0] > imgdata.color.maximum
@@ -6624,7 +6628,7 @@ void LibRaw::parse_x3f()
   {
 	  libraw_internal_data.unpacker_data.meta_offset = DE->input.offset + 8;
 	  libraw_internal_data.unpacker_data.meta_length = DE->input.size - 28;
-  } 
+  }
 }
 
 INT64 LibRaw::x3f_thumb_size()

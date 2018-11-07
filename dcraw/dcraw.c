@@ -9596,7 +9596,7 @@ void CLASS setLeicaBodyFeatures(int LeicaMakernoteSignature)
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
     imgdata.lens.makernotes.FocalType = LIBRAW_FT_ZOOM;
 
-  } else if ((LeicaMakernoteSignature == 0x0200) || // M10, S (Typ 007)
+  } else if ((LeicaMakernoteSignature == 0x0200) || // M10, M10-D, S (Typ 007)
              (LeicaMakernoteSignature == 0x02ff) || // M (Typ 240), M (Typ 262), M-D (Typ 262), M Monochrom (Typ 246), S (Typ 006), S-E (Typ 006), S2, S3
              (LeicaMakernoteSignature == 0x0300)) { // M9, M9 Monochrom, M Monochrom, M-E
     if ((model[0] == 'M') || (model[6] == 'M')) {
@@ -9708,7 +9708,6 @@ void CLASS parseLeicaMakernote (int base, int uptag, unsigned MakernoteTagType)
   int LeicaMakernoteSignature = -1;
 
   INT64 fsize = ifp->size();
-
   fread(buf, 1, 10, ifp);
   if (strncmp (buf,"LEICA", 5)) {
     fseek(ifp, -10, SEEK_CUR);
@@ -9790,7 +9789,7 @@ void CLASS parseLeicaMakernote (int base, int uptag, unsigned MakernoteTagType)
         parseLeicaLensName(len);
       }
 
-    } else if (LeicaMakernoteSignature == 0x0200) { // M10, S (Typ 007)
+    } else if (LeicaMakernoteSignature == 0x0200) { // M10, M10-D, S (Typ 007)
 
     } else if (LeicaMakernoteSignature == 0x02ff) { // M (Typ 240), M (Typ 262), M-D (Typ 262), M Monochrom (Typ 246), S (Typ 006), S-E (Typ 006), S2, S3
       if (tag == 0x0303) {
@@ -18430,6 +18429,9 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Nikon 1 ", 0, 0, /* J1, J2, S1, V1 */
       { 8994,-2667,-865,-4594,12324,2552,-699,1786,6260 } },
 
+
+    { "Nikon Z 6", 0, 0, /* temp, D750 */
+      { 9020,-2890,-715,-4535,12436,2348,-934,1919,7086 } },
     { "Nikon Z 7", 0, 0,
       { 10405,-3755,-1270,-5461,13787,1793,-1040,2015,6785 } },
 
