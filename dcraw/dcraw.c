@@ -10961,6 +10961,9 @@ void CLASS parseFujiMakernotes(unsigned tag, unsigned type, unsigned len, unsign
   case 0x1034:
     imgdata.makernotes.fuji.ExrMode = get2();
     break;
+  case 0x104d:
+    imgdata.makernotes.fuji.CropMode = get2();
+    break;
   case 0x1050:
     imgdata.makernotes.fuji.ShutterType = get2();
     break;

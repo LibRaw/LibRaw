@@ -337,6 +337,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     ushort ExrMode;
     ushort Macro;
     unsigned Rating;
+    ushort CropMode; /* 2 - sports finder (mechanical shutter), 4 - 1.25x crop (electronic shutter, continuous high) */
     ushort FrameRate;
     ushort FrameWidth;
     ushort FrameHeight;
