@@ -6695,7 +6695,7 @@ void CLASS scale_colors()
         sum[c + 4]++;
       }
 #ifdef LIBRAW_LIBRARY_BUILD
-    if (load_raw == &LibRaw::nikon_load_sraw)
+    if (imgdata.color.as_shot_wb_applied)
     {
       // Nikon sRAW: camera WB already applied:
       pre_mul[0] = pre_mul[1] = pre_mul[2] = pre_mul[3] = 1.0;
@@ -6718,7 +6718,7 @@ void CLASS scale_colors()
   }
 #ifdef LIBRAW_LIBRARY_BUILD
   // Nikon sRAW, daylight
-  if (load_raw == &LibRaw::nikon_load_sraw && !use_camera_wb
+  if (imgdata.color.as_shot_wb_applied && !use_camera_wb
        && !use_auto_wb && cam_mul[0] > 0.001f &&
       cam_mul[1] > 0.001f && cam_mul[2] > 0.001f)
   {

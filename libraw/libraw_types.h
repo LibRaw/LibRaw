@@ -580,6 +580,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     libraw_dng_levels_t dng_levels;
     int WB_Coeffs[256][4];    /* R, G1, B, G2 coeffs */
     float WBCT_Coeffs[64][5]; /* CCT, than R, G1, B, G2 coeffs */
+    int  as_shot_wb_applied;
     libraw_P1_color_t P1_color[2];
     unsigned raw_bps;  /* for Phase One, raw format */
 /* Phase One raw format values, makernotes tag 0x010e:
