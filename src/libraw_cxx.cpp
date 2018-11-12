@@ -1908,7 +1908,7 @@ static inline void unpack7bytesto4x16_nikon(unsigned char *src, unsigned short *
 
 void LibRaw::nikon_14bit_load_raw()
 {
-	const unsigned linelen = (unsigned)(ceil((float)(S.raw_width * 7 / 4) / 16.0)) * 16; // 14512; // S.raw_width * 7 / 4;
+	const unsigned linelen = (unsigned)(ceilf((float)(S.raw_width * 7 / 4) / 16.0)) * 16; // 14512; // S.raw_width * 7 / 4;
 	const unsigned pitch = S.raw_pitch ? S.raw_pitch / 2 : S.raw_width;
 	unsigned char *buf = (unsigned char *)malloc(linelen);
 	merror(buf, "nikon_14bit_load_raw()");
@@ -2116,18 +2116,16 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
      if (load_raw == &LibRaw::nikon_load_raw)
        nikon_read_curve();
 
-    // Ugly hack, replace with proper data/line size for different cameras/format when available
-    if (!strcasecmp(imgdata.idata.make, "Nikon") && !strcasecmp(imgdata.idata.model,"Z 7") &&
-        ((libraw_internal_data.unpacker_data.data_size == 80106240) || /* FX   */
-         (libraw_internal_data.unpacker_data.data_size == 34424320) || /* DX   */
-         (libraw_internal_data.unpacker_data.data_size == 66769920) || /* 5:4  */
-         (libraw_internal_data.unpacker_data.data_size == 53345280) || /* 1:1  */
-         (libraw_internal_data.unpacker_data.data_size == 67567872)))  /* 16:9 */
-		load_raw = &LibRaw::nikon_14bit_load_raw;
 
-		if (!strcasecmp(imgdata.idata.make, "Nikon") && !strcasecmp(imgdata.idata.model,"Z 6") &&
-        ((libraw_internal_data.unpacker_data.data_size == 42920960)))  /* FX   */
-    load_raw = &LibRaw::nikon_14bit_load_raw;
+#define NIKON_14BIT_SIZE(rw,rh) (((unsigned)(ceilf((float)(rw * 7 / 4) / 16.0)) * 16)*rh)
+
+    // Ugly hack, replace with proper data/line size for different cameras/format when available
+    if (!strcasecmp(imgdata.idata.make, "Nikon") && !strncasecmp(imgdata.idata.model,"Z",1) &&
+		NIKON_14BIT_SIZE(imgdata.sizes.raw_width,imgdata.sizes.raw_height) == libraw_internal_data.unpacker_data.data_size)
+	{
+		load_raw = &LibRaw::nikon_14bit_load_raw;
+	}
+#undef NIKON_14BIT_SIZE
 
 	// Linear max from 14-bit camera, but on 12-bit data?
     if(( !strcasecmp(imgdata.idata.make, "Sony") /* || !strcasecmp(imgdata.idata.make, "Nikon") */)
