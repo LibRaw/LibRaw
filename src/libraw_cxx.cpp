@@ -2347,6 +2347,20 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         C.cblack[6 + c] /= 4;
     }
 
+    // Adjust wb_already_applied
+    if( load_raw == &LibRaw::nikon_load_sraw)
+    	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED;
+    else if(!strcasecmp(imgdata.idata.make,"Canon") && imgdata.makernotes.canon.multishot[0])
+    {
+    	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_CANON;
+    }
+    else if(!strcasecmp(imgdata.idata.make,"Nikon") && imgdata.makernotes.nikon.ExposureMode == 1)
+    {
+    	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_NIKON;
+    }
+    else
+    	imgdata.color.as_shot_wb_applied = 0;
+      
     // Adjust Highlight Linearity limit
     if (C.linear_max[0] < 0)
     {

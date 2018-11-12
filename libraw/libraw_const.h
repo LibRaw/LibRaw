@@ -64,6 +64,13 @@ enum LibRaw_dngfields_marks
   LIBRAW_DNGFM_LINEARRESPONSELIMIT = 1<<14
 };
 
+enum LibRaw_As_Shot_WB_Applied_codes
+{
+  LIBRAW_ASWB_APPLIED = 1,
+  LIBRAW_ASWB_CANON = 2,
+  LIBRAW_ASWB_NIKON = 4
+};
+
 enum LibRaw_whitebalance_code
 {
   /*
