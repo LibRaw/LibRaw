@@ -9254,6 +9254,11 @@ void CLASS parsePentaxMakernotes(int base, unsigned tag, unsigned type, unsigned
   } else if ((tag == 0x0203) && (dng_writer == nonDNG)) {
       for (int i = 0; i < 3; i++)
         FORC3 cmatrix[i][c] = ((short)get2()) / 8192.0;
+  } else if (tag == 0x0205) {
+      if (len < 25) {
+        fseek (ifp, 10, SEEK_CUR);
+        imgdata.makernotes.pentax.MultiExposure = (fgetc(ifp) & 0x0f);
+      }
   } else if (tag == 0x0207) {
       if (len < 65535) // Safety belt
         PentaxLensInfo(imgdata.lens.makernotes.CamID, len);

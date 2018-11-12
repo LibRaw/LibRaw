@@ -447,6 +447,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     ushort FocusPosition;
     uchar DriveMode[4];
     short AFAdjustment;
+    uchar MultiExposure; /* 0, if ME is not used */
     ushort Quality;  /* 4 is raw, 7 is raw w/ pixel shift, 8 is raw w/ dynamic pixel shift */
     /*    uchar AFPointMode;     */
     /*    uchar SRResult;        */
