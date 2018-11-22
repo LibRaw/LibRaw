@@ -1,4 +1,22 @@
 2018-06-28  Alex Tutubalin <lexa@lexa.ru>
+ * Finally: got Sinar 4shot sample, works fine now
+ * OpenMP critical sections for malloc/free; extra #ifdefs removed; bin/dcraw_dist could be built again using Makefile.devel
+ * additional checks in parse_phase_one()
+ * more checks on file offsets/tag len in parse_minolta
+ * more checks in parse_ciff
+ * Mempool check reworked
+ * Old Leaf (16bit/3color/TIFF) support
+ * Fix cameraWB->autoWB fallback
+ * Polaroid x530 channel swap; get metadata pointer for Foveon files
+ * Fixed Secunia Advisory SA86384
+   - possible infinite loop in unpacked_load_raw()
+   - possible infinite loop in parse_rollei()
+   - possible infinite loop in parse_sinar_ia()
+  Credits: Laurent Delosieres, Secunia Research at Flexera
+
+ * LibRaw 0.19.1-Release
+
+2018-06-28  Alex Tutubalin <lexa@lexa.ru>
  * changed wrong fix for Canon D30 white balance
  * fixed possible stack overrun while reading zero-sized strings
  * fixed possible integer overflow
