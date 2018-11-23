@@ -2349,15 +2349,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     // Adjust wb_already_applied
     if( load_raw == &LibRaw::nikon_load_sraw)
-    	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED;
+    	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_NIKON_SRAW;
     else if(!strcasecmp(imgdata.idata.make,"Canon") && imgdata.makernotes.canon.multishot[0])
-    {
     	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_CANON;
-    }
     else if(!strcasecmp(imgdata.idata.make,"Nikon") && imgdata.makernotes.nikon.ExposureMode == 1)
-    {
     	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_NIKON;
-    }
+    else if(!strcasecmp(imgdata.idata.make,"Pentax") && imgdata.makernotes.pentax.MultiExposure >0)
+    	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_PENTAX;
     else
     	imgdata.color.as_shot_wb_applied = 0;
       

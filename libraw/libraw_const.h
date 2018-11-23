@@ -68,7 +68,9 @@ enum LibRaw_As_Shot_WB_Applied_codes
 {
   LIBRAW_ASWB_APPLIED = 1,
   LIBRAW_ASWB_CANON = 2,
-  LIBRAW_ASWB_NIKON = 4
+  LIBRAW_ASWB_NIKON = 4,
+  LIBRAW_ASWB_NIKON_SRAW = 8,
+  LIBRAW_ASWB_PENTAX = 16
 };
 
 enum LibRaw_whitebalance_code
