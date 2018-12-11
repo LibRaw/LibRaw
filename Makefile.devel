@@ -2,11 +2,16 @@ all: sources library all_samples
 
 PP=./internal/preprocess.pl
 
-CC=gcc
-CXX=g++
+CC=clang
+CXX=clang++
+
+#CC=gcc
+#CXX=g++
+
 LDADD+=-lz
 
 CFLAGS=-DLIBRAW_USE_AUTOPTR
+CFLAGS+= -g -I. -pedantic -Wno-long-long -Wno-overflow -O3
 
 # RawSpeed Support
 # CFLAGS+=-DUSE_RAWSPEED -I../RawSpeed -I/opt/local/include/libxml2
@@ -18,15 +23,15 @@ CFLAGS=-DLIBRAW_USE_AUTOPTR
 # LDADDD+=-L../dng_sdk/release -ldng -ljpeg -lz
 
 
-CC=gcc
-CXX=g++
+#CC=gcc
+#CXX=g++
 # CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O4 -fopenmp
-CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O3
+# CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O3
 
 
 #CC=gcc
 #CXX=g++
-CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O2
+#CFLAGS+= -g -I. -pedantic  -Wno-long-long -Wno-overflow  -O2
 # Haswell:
 #CFLAGS+=-march=core-avx2 -mtune=core-avx2 -mavx2
 
