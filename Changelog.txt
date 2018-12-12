@@ -1,3 +1,104 @@
+2018-12-12 Alex Tutubalin <lexa@lexa.ru>
+ * Camera support:
+     Canon: PowerShot A480 (CHDK hack), EOS 2000D, EOS 4000D
+     Eyedeas E1
+     FujiFilm: GFX 50R, XF10, X-T3, X-T100, DBP680
+     GITUP G3 DUO (16:9 mode only, use custom camera for 4:3)
+     Kodak PIXPRO AZ901
+     Leica M10-D, M10-P
+     Nikon D3500, Z6, Z7, P1000
+     Panasonic LX100M2
+     Pentax K-1 II
+     Sony A7 III, HX95, HX99, RX100-VA, RX100-VI
+
+  * Fixed long standing bug in remove_zeroes: first two rows/cols was unprocessed
+  * Better parsing for NEF files modified (damaged) by NikonTransfer
+  * Better parsing for floating point DNG black levels (into color.dnglevels.fblack and dng_fcblack[], similar 
+    to color.black and color.cblack[] for other formats).
+  * More flexible limit for RAW decoding memory usage:
+      imgdata.params.max_raw_memory_mb (default is LIBRAW_MAX_ALLOC_MB_DEFAULT)
+
+  * New flags for imgdata.params.raw_processing_options:
+    LIBRAW_PROCESSING_CHECK_DNG_ILLUMINANT - will check DNG illuminant field when selecting color matrix 
+      (note: incompatibility with previous versions, so default is not set).
+    LIBRAW_PROCESSING_DNGSDK_ZEROCOPY - will not copy data from Adobe DNG SDK decoded buffer, but use it as is
+
+  * Swtiched from auto_ptr to unique_ptr, got get back define LIBRAW_USE_AUTOPTR
+
+  * dcraw_emu: it is now possible to more flexible create output filename via -Z switch:
+     -Z - will output to stdout
+     -Z ext will output into inputfilename.ext
+     -Z .ext will output into inputfilename.inputext.ext
+   
+
+2018-11-22  Alex Tutubalin <lexa@lexa.ru>
+ * Finally: got Sinar 4shot sample, works fine now
+ * OpenMP critical sections for malloc/free; extra #ifdefs removed; bin/dcraw_dist could be built again using Makefile.devel
+ * additional checks in parse_phase_one()
+ * more checks on file offsets/tag len in parse_minolta
+ * more checks in parse_ciff
+ * Mempool check reworked
+ * Old Leaf (16bit/3color/TIFF) support
+ * Fix cameraWB->autoWB fallback
+ * Polaroid x530 channel swap; get metadata pointer for Foveon files
+ * Fixed Secunia Advisory SA86384
+   - possible infinite loop in unpacked_load_raw()
+   - possible infinite loop in parse_rollei()
+   - possible infinite loop in parse_sinar_ia()
+  Credits: Laurent Delosieres, Secunia Research at Flexera
+
+ * LibRaw 0.19.1-Release
+
+2018-06-28  Alex Tutubalin <lexa@lexa.ru>
+ * changed wrong fix for Canon D30 white balance
+ * fixed possible stack overrun while reading zero-sized strings
+ * fixed possible integer overflow
+ * LibRaw 0.19.0-Release
+
+2018-06-11  Alex Tutubalin <lexa@lexa.ru>
+ * Sony uncompressed/untiled DNGs: do not set bits-per-sample to 14 bit
+ * Do not change tiff_bps for DNG files
+ * Another possible stack overflow in kodak radc reader
+ * Secunia Advisory SA83507, credits Kasper Leigh Haabb,
+   Secunia Research at Flexera"
+   - parse_qt: possible integer overflow
+   - reject broken/crafted NOKIARAW files
+ * LibRaw 0.19-Beta6
+
+2018-05-10  Alex Tutubalin <lexa@lexa.ru>
+ * Put rogue printf's behind #ifdef DCRAW_VERBOSE
+ * Exceptions was not caught in x3f_new_from_file resulting in x3f handle leak
+ * packed_load_raw(): EOF check on each row
+ * define LIBRAW_USE_CALLOC_INSTEAD_OF_MALLOC to use ::calloc instead of 
+   ::malloc in LibRaw_mem_mgr malloc calls; 
+   Note: realloc is not changed, so only partial fix
+ * Fixed possible div by zero in EOS D30 WB data parse
+ * U-suffix for filter-var manipulation consts
+ * restored static specifier for utf2char() lost in previous bugfix
+ * Fixed stack overrun in kodak_radc_load_raw
+ * Secunia Advisory SA83050: possible infinite loop in parse_minolta()
+ * LibRaw 0.19-Beta5
+
+2018-05-03  Alex Tutubalin <lexa@lexa.ru>
+ * CVE-2018-10529 fixed: out of bounds read in X3F parser
+ * CVE-2018-10528 fixed: possible stack overrun in X3F parser
+ * LibRaw 0.19-Beta4
+
+2018-04-24 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.19-Beta3
+ * fixed lot of bugs reported by ImageMagic/oss-fuzz
+ * fixed several bugs reported by Secunia team (adv 81800,
+   Credit: Laurent Delosieres, Secunia Research at Flexera)
+ 
+2018-03-22 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.19-Beta2
+ * Better handling of broken JPEG thumbnails
+ * Panasonic GH5S/G9-hires decoder, thanks to Alexey Danilchenko
+   Note: ABI has changed due to this patch, so shlib version increased
+ * Fujifilm X-A5/A20 metadata parsing fix
+ * New error code LIBRAW_TOO_BIG: image data size excess LIBRAW_MAX_ALLOC_MB
+ * winsock2 included before windows.h to make MinGW happy
+
 2018-02-23 Alex Tutubalin <lexa@lexa.ru>
 
  * LibRaw 0.19-Beta1
