@@ -10345,7 +10345,7 @@ void CLASS parse_makernote(int base, int uptag)
             else
               year += 1900;
 
-            ynum_len = (int)strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 18;
+            ynum_len = MIN((sizeof(ynum)-1), (int)strnlen(words[i], sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) - 18);
             strncpy(ynum, words[i], ynum_len);
             ynum[ynum_len] = 0;
             for (int j = 0; ynum[j] && ynum[j + 1] && sscanf(ynum + j, "%2x", &c); j += 2)
