@@ -14558,6 +14558,7 @@ int CLASS parse_tiff_ifd(int base)
     case 1:
       if (len == 4)
         pana_raw = get4();
+        if (!imgdata.makernotes.panasonic.is_pana_raw) imgdata.makernotes.panasonic.is_pana_raw = pana_raw;
       break;
     case 5:
       width = get2();
@@ -14632,6 +14633,19 @@ int CLASS parse_tiff_ifd(int base)
         parse_tiff_ifd (base);
         base = sbase;
         order = sorder;
+      }
+    break;
+    case 0x3420: // in 0x0120
+      if (imgdata.makernotes.panasonic.is_pana_raw)
+      {
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] = get2();
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = 1024.0f;
+      }
+    break;
+    case 0x3421: // in 0x0120
+      if (imgdata.makernotes.panasonic.is_pana_raw)
+      {
+        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][2] = get2();
       }
     break;
     case 0x0121:
