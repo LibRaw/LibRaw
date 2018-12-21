@@ -3374,7 +3374,8 @@ int LibRaw::raw2image(void)
     get_decoder_info(&decoder_info);
 
     // Move saved bitmap to imgdata.image
-    if ((imgdata.idata.filters || P1.colors == 1) && imgdata.rawdata.raw_image)
+    if ((imgdata.idata.filters || P1.colors == 1) 
+       && imgdata.rawdata.raw_image)
     {
       if (IO.fuji_width)
       {
@@ -3638,7 +3639,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     raw2image_start();
 
     // Compressed P1 files with bl data!
-    if (is_phaseone_compressed())
+    if (is_phaseone_compressed() && imgdata.rawdata.raw_image)
     {
       phase_one_allocate_tempbuffer();
       int rc = phase_one_subtract_black((ushort *)imgdata.rawdata.raw_alloc, imgdata.rawdata.raw_image);
@@ -3745,7 +3746,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     }
 
     // Move saved bitmap to imgdata.image
-    if (imgdata.idata.filters || P1.colors == 1)
+    if ((imgdata.idata.filters || P1.colors == 1) && imgdata.rawdata.raw_image)
     {
       if (IO.fuji_width)
       {
