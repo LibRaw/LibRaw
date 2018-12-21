@@ -19627,7 +19627,9 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   {
     unsigned fsize;
     ushort rw, rh;
-    uchar lm, tm, rm, bm, lf, cf, max, flags;
+    uchar lm, tm, rm, bm;
+    ushort lf;
+    uchar cf, max, flags;
     char t_make[10], t_model[20];
     ushort offset;
   } table[]
@@ -20137,7 +20139,12 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
         height = raw_height - top_margin - table[i].bm;
         filters = 0x1010101U * table[i].cf;
         colors = 4 - !((filters & filters >> 1) & 0x5555);
-        load_flags = table[i].lf;
+        load_flags = table[i].lf & 0xff;
+        if(table[i].lf & 0x100) /* Monochrome sensor dump */
+        {
+          colors = 1;
+          filters = 0;
+        }
         switch (tiff_bps = (fsize - data_offset) * 8 / (raw_width * raw_height))
         {
         case 6:

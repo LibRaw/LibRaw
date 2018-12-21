@@ -819,7 +819,9 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
   {
     unsigned fsize;
     ushort rw, rh;
-    uchar lm, tm, rm, bm, lf, cf, max, flags;
+    uchar lm, tm, rm, bm;
+    ushort lf;
+    uchar cf, max, flags;
     char t_make[10], t_model[20];
     ushort offset;
   } libraw_custom_camera_t;
