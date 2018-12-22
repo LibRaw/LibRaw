@@ -2350,7 +2350,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     // Adjust wb_already_applied
     if( load_raw == &LibRaw::nikon_load_sraw)
     	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_NIKON_SRAW;
-    else if(!strcasecmp(imgdata.idata.make,"Canon") && imgdata.makernotes.canon.multishot[0])
+    else if(!strcasecmp(imgdata.idata.make,"Canon") && imgdata.makernotes.canon.multishot[0] >= 8 
+            && imgdata.makernotes.canon.multishot[1] > 0)
     	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_CANON;
     else if(!strcasecmp(imgdata.idata.make,"Nikon") && imgdata.makernotes.nikon.ExposureMode == 1)
     	imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_NIKON;
