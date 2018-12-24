@@ -1,17 +1,14 @@
 2018-12-24  Alex Tutubalin <lexa@lexa.ru>
  * Fixed possible buffer overrun at Fuji makernotes parser
- * Fixed possible write to NULL pointer at raw2image/raw2image_ex
-   Notes:
-    a) For some unknown reasons, three CVE numbers was assigned
-    for one problem. CVEs are: CVE-2018-20363, CVE-2018-20364, CVE-2018-20365
-    b) Most likely, LibRaw 0.19 is not subject of the problem, because
-     the problem is switched by this combination of conditions:
-       - data is extracted into full-color buffer
-       - while raw2image tries to use bayer buffer because filters is set.
-    This combination is only present in Sinar4Shot files, but LibRaw 0.19
-    does not support these files, the support was introduced later.
-    
-    Meanwhile, additional check in raw2image[_ex] is not bad.
+ * Fixed possible write to NULL pointer at raw2image/raw2image_ex calls.
+   Details:
+    a) Three different CVE numbers was assigned for single problem:
+      CVE-2018-20363, CVE-2018-20364, CVE-2018-20365
+    b) The POCs exploits inconsistency in Sinar-4Shot files handling.
+     LibRaw 0.19 does not support this files format, so it is not
+     subject of exactly same problem
+    c) However, additional checks for bayer raw data presence are 
+     backported from LibRaw-master (development) branch.
 
  * LibRaw 0.19.2
  
