@@ -3195,7 +3195,7 @@ int LibRaw::raw2image(void)
     get_decoder_info(&decoder_info);
 
     // Move saved bitmap to imgdata.image
-    if (imgdata.idata.filters || P1.colors == 1)
+    if ((imgdata.idata.filters || P1.colors == 1) && imgdata.rawdata.raw_image)
     {
       if (IO.fuji_width)
       {
@@ -3566,7 +3566,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     }
 
     // Move saved bitmap to imgdata.image
-    if (imgdata.idata.filters || P1.colors == 1)
+    if ((imgdata.idata.filters || P1.colors == 1) && imgdata.rawdata.raw_image)
     {
       if (IO.fuji_width)
       {
