@@ -76,7 +76,7 @@ void CLASS bad_pixels(const char *cfname)
             tot += BAYER2(r, c);
             n++;
           }
-    BAYER2(row, col) = tot / n;
+    if(n>0) BAYER2(row, col) = tot / n;
 #ifdef DCRAW_VERBOSE
     if (verbose)
     {

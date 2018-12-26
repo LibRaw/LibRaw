@@ -5892,14 +5892,14 @@ mask_set:
       }
   if (load_raw == &CLASS canon_600_load_raw && width < raw_width)
   {
-    black = (mblack[0] + mblack[1] + mblack[2] + mblack[3]) / (mblack[4] + mblack[5] + mblack[6] + mblack[7]) - 4;
+    black = (mblack[0] + mblack[1] + mblack[2] + mblack[3]) / MAX(1,(mblack[4] + mblack[5] + mblack[6] + mblack[7])) - 4;
 #ifndef LIBRAW_LIBRARY_BUILD
     canon_600_correct();
 #endif
   }
   else if (zero < mblack[4] && mblack[5] && mblack[6] && mblack[7])
   {
-    FORC4 cblack[c] = mblack[c] / mblack[4 + c];
+    FORC4 cblack[c] = mblack[c] / MAX(1,mblack[4 + c]);
     black = cblack[4] = cblack[5] = cblack[6] = 0;
   }
 }
@@ -6033,7 +6033,7 @@ void CLASS bad_pixels(const char *cfname)
             tot += BAYER2(r, c);
             n++;
           }
-    BAYER2(row, col) = tot / n;
+    if(n>0) BAYER2(row, col) = tot / n;
 #ifdef DCRAW_VERBOSE
     if (verbose)
     {
@@ -8639,8 +8639,10 @@ void CLASS Canon_WBCTpresets(short WBCTversion) {
             norm = (signed short)get2();
             norm = 512.0f + norm / 8.0f;
             imgdata.color.WBCT_Coeffs[i][2] = imgdata.color.WBCT_Coeffs[i][4] = 1.0f;
-            imgdata.color.WBCT_Coeffs[i][1] = (float)get2() / norm;
-            imgdata.color.WBCT_Coeffs[i][3] = (float)get2() / norm;
+            imgdata.color.WBCT_Coeffs[i][1] = (float)get2();
+            if(norm>0.001f) imgdata.color.WBCT_Coeffs[i][1] /= norm;
+            imgdata.color.WBCT_Coeffs[i][3] = (float)get2();
+            if(norm>0.001f) imgdata.color.WBCT_Coeffs[i][3] /= norm;
             imgdata.color.WBCT_Coeffs[i][0] = get2();
           }
       }
@@ -9265,16 +9267,20 @@ void CLASS parseOlympus_Equipment (unsigned tag, unsigned type, unsigned len, un
     stmread(imgdata.shootinginfo.InternalBodySerial, len, ifp);
     break;
   case 0x0201:
+    {
+      unsigned char bits[4];
+      fread(bits,1,4,ifp);
     imgdata.lens.makernotes.LensID =
-      (unsigned long long)fgetc(ifp) << 16 |
-      (unsigned long long)(fgetc(ifp), fgetc(ifp)) << 8 |
-      (unsigned long long)fgetc(ifp);
+      (unsigned long long)bits[0] << 16 |
+      (unsigned long long)bits[2] << 8 |
+      (unsigned long long)bits[3];
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FT;
     imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FT;
     if (((imgdata.lens.makernotes.LensID < 0x20000) ||
          (imgdata.lens.makernotes.LensID > 0x4ffff)) &&
         (imgdata.lens.makernotes.LensID & 0x10))
       imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_mFT;
+    }
     break;
   case 0x0202:
     if ((!imgdata.lens.LensSerial[0]))
@@ -10076,7 +10082,8 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
   {
     get4();
     imgdata.makernotes.canon.AFMicroAdjMode = get4();
-    imgdata.makernotes.canon.AFMicroAdjValue = ((float)get4()) / ((float)get4());
+    float a = get4(); float b = get4();
+    if(fabsf(b)>0.001f) imgdata.makernotes.canon.AFMicroAdjValue = a/b;
   }
 
   else if (tag == 0x4001 && len > 500) {
@@ -10572,7 +10579,8 @@ void CLASS parsePentaxMakernotes(int base, unsigned tag, unsigned type, unsigned
       imgdata.sizes.raw_crop.cwidth = get2();
       imgdata.sizes.raw_crop.cheight = get2();
   } else if (tag == 0x003f) {
-      imgdata.lens.makernotes.LensID = fgetc(ifp) << 8 | fgetc(ifp);
+      unsigned a = fgetc(ifp) << 8;
+      imgdata.lens.makernotes.LensID = a | fgetc(ifp);
   } else if (tag == 0x0047) {
       imgdata.other.CameraTemperature = (float)fgetc(ifp);
   } else if (tag == 0x004d) {
@@ -16553,7 +16561,8 @@ void CLASS parse_ciff(int offset, int length, int depth)
     if (type == 0x102a)
     {
       //      iso_speed = pow (2.0, (get4(),get2())/32.0 - 4) * 50;
-      iso_speed = libraw_powf64l(2.0f, ((get2(), get2()) + get2()) / 32.0f - 5.0f) * 100.0f;
+      get2(); // skip one
+      iso_speed = libraw_powf64l(2.0f, (get2() + get2()) / 32.0f - 5.0f) * 100.0f;
 #ifdef LIBRAW_LIBRARY_BUILD
       aperture = _CanonConvertAperture((get2(), get2()));
       imgdata.lens.makernotes.CurAp = aperture;
