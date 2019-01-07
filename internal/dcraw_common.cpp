@@ -7316,9 +7316,10 @@ void CLASS Canon_WBCTpresets(short WBCTversion) {
   return;
 }
 
-void CLASS processNikonLensData(uchar *LensData, unsigned len)
-{
+void CLASS processNikonLensData(uchar *LensData, unsigned len) {
+
   ushort i;
+
   if (!(imgdata.lens.nikon.NikonLensType & 0x01)) {
     imgdata.lens.makernotes.LensFeatures_pre[0] = 'A';
     imgdata.lens.makernotes.LensFeatures_pre[1] = 'F';
@@ -7356,7 +7357,7 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
 
   imgdata.lens.nikon.NikonLensType = imgdata.lens.nikon.NikonLensType & 0xdf;
 
-  if (len < 20) {
+  if ((len < 20) || (len == 58)) {
     switch (len) {
     case 9:
       i = 2;
@@ -7366,6 +7367,20 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
       break;
     case 16:
       i = 8;
+      break;
+    case 58:
+      i = 1;
+      while ((LensData[i] == LensData[0]) && (i < 17)) i++;
+      if (i == 17) {
+        if (fabsf(imgdata.lens.makernotes.CurFocal) < 1.1f)
+          imgdata.lens.makernotes.CurFocal = sget2(LensData + 56);
+        if (imgdata.lens.makernotes.CurAp < 0.7f)
+          imgdata.lens.makernotes.CurAp = libraw_powf64l(2.0f, (float)sget2(LensData + 52) / 384.0f -1.0f);
+        if (imgdata.lens.makernotes.MaxAp4CurFocal < 0.7f)
+          imgdata.lens.makernotes.MaxAp4CurFocal = libraw_powf64l(2.0f, (float)sget2(LensData + 50) / 384.0f -1.0f);
+        return;
+      }
+      i = 9;
       break;
     }
     imgdata.lens.nikon.NikonLensIDNumber = LensData[i];
@@ -7389,10 +7404,10 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
         imgdata.lens.nikon.NikonEffectiveMaxAp = libraw_powf64l(2.0f, (float)LensData[i + 7] / 24.0f);
     }
     imgdata.lens.makernotes.LensID =
-        (unsigned long long)LensData[i] << 56 | (unsigned long long)LensData[i + 1] << 48 |
+        (unsigned long long)LensData[i] << 56     | (unsigned long long)LensData[i + 1] << 48 |
         (unsigned long long)LensData[i + 2] << 40 | (unsigned long long)LensData[i + 3] << 32 |
         (unsigned long long)LensData[i + 4] << 24 | (unsigned long long)LensData[i + 5] << 16 |
-        (unsigned long long)LensData[i + 6] << 8 | (unsigned long long)imgdata.lens.nikon.NikonLensType;
+        (unsigned long long)LensData[i + 6] << 8  | (unsigned long long)imgdata.lens.nikon.NikonLensType;
 
   } else if ((len == 459) || (len == 590)) {
     memcpy(imgdata.lens.makernotes.Lens, LensData + 390, 64);
@@ -7403,6 +7418,7 @@ void CLASS processNikonLensData(uchar *LensData, unsigned len)
   } else if (len == 879) {
     memcpy(imgdata.lens.makernotes.Lens, LensData + 680, 64);
   }
+
   return;
 }
 
@@ -7746,6 +7762,9 @@ void CLASS parseNikonMakernote (int base, int uptag, unsigned dng_writer)
         break;
       case 403:
         LensData_len = 879;
+        break;
+      case 800:
+        LensData_len = 58;
         break;
       }
       if (LensData_len) {
