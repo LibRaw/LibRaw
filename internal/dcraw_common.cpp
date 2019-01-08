@@ -15444,6 +15444,7 @@ void CLASS parse_sinar_ia()
     off = get4();
     get4();
     fread(str, 8, 1, ifp);
+    str[7] = 0; // Ensure end of string
     if (!strcmp(str, "META"))
       meta_offset = off;
     if (!strcmp(str, "THUMB"))
