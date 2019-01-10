@@ -21189,9 +21189,14 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   {
     if (!load_raw)
       load_raw = &CLASS unpacked_load_raw;
-    if (is_raw > 1 && !shot_select && !half_size)
+    if (is_raw > 1 && !shot_select)
       filters = 0;
     maximum = 0x3fff;
+  }
+  else if(load_raw == &LibRaw::sinar_4shot_load_raw)
+  {
+    if (is_raw > 1 && !shot_select)
+      filters = 0;
   }
   else if (!strncmp(make, "Leaf", 4))
   {
