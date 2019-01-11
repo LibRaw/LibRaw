@@ -12565,6 +12565,7 @@ int CLASS parse_tiff_ifd(int base)
   if (entries > 512)
     return 1;
 #ifdef LIBRAW_LIBRARY_BUILD
+  memmgr.mark_used();
   INT64 fsize = ifp->size();
 #endif
   while (entries--)
