@@ -25,7 +25,7 @@ it under the terms of the one of two licenses as you choose:
 
 #ifdef __cplusplus
 
-#define LIBRAW_MSIZE 640
+#define LIBRAW_MSIZE 512
 
 class DllDef libraw_memmgr
 {
@@ -35,14 +35,12 @@ public:
     size_t alloc_sz = LIBRAW_MSIZE * sizeof(void *);
     mems = (void **)::malloc(alloc_sz);
     memset(mems, 0, alloc_sz);
-    special_value = (void*)(-1);
   }
   ~libraw_memmgr()
   {
     cleanup();
     ::free(mems);
   }
-  void mark_used() { mem_ptr(special_value);}
   void *malloc(size_t sz)
   {
 #ifdef LIBRAW_USE_CALLOC_INSTEAD_OF_MALLOC
@@ -76,14 +74,13 @@ public:
     for (int i = 0; i < LIBRAW_MSIZE; i++)
       if (mems[i])
       {
-        if(mems[i] != special_value) ::free(mems[i]);
+        ::free(mems[i]);
         mems[i] = NULL;
       }
   }
 
 private:
   void **mems;
-  void *special_value;
   unsigned extra_bytes;
   void mem_ptr(void *ptr)
   {
