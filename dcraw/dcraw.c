@@ -14677,6 +14677,14 @@ int CLASS parse_tiff_ifd(int base)
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][2] = get2();
       }
     break;
+    case 0x011c:
+      if (pana_raw) {
+        int n = get2();
+        if (n >= 1024) imgdata.makernotes.panasonic.gamma = (float)n / 1024.0f;
+        else if (n >= 256) imgdata.makernotes.panasonic.gamma = (float)n / 256.0f;
+        else imgdata.makernotes.panasonic.gamma = (float)n / 100.0f;
+      }
+    break;
     case 0x0121:
       if (pana_raw)
       { /* 0 is Off, 65536 is Pixel Shift */
