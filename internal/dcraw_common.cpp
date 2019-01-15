@@ -7910,7 +7910,6 @@ void CLASS getOlympus_CameraType2 ()
        imgdata.makernotes.olympus.CameraType2[i+1] = '\0';
      i++;
   }
-
   setOlympusBodyFeatures(OlyID);
   return;
 }
@@ -11605,7 +11604,8 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     else if (!strncmp(make, "FUJI", 4))
       parseFujiMakernotes(tag, type, len, AdobeDNG);
 
-    else if (!strncmp(make, "OLYMPUS", 7)) {
+    else if (!strncmp(make, "OLYMPUS", 7) ||
+             (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7))) {
 
       int SubDirOffsetValid =
           strncmp(model, "E-300", 5) &&
@@ -12043,8 +12043,8 @@ void CLASS parse_makernote(int base, int uptag)
 
 #ifdef LIBRAW_LIBRARY_BUILD
     INT64 _pos2 = ftell(ifp);
-    if (!strncasecmp(make, "Olympus", 7)) {
-
+    if (!strncasecmp(make, "Olympus", 7) ||
+        (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7))) {
       if ((tag == 0x2010) ||
           (tag == 0x2020) ||
           (tag == 0x2030) ||
@@ -14721,9 +14721,13 @@ void CLASS apply_tiff()
         filters = 0;
         break;
       }
-      if (!strncmp(make, "OLYMPUS", 7) && INT64(tiff_ifd[raw].bytes) * 2ULL == INT64(raw_width) * INT64(raw_height) * 3ULL)
+      if ((!strncmp(make, "OLYMPUS", 7) ||
+          (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7))) &&
+          (INT64(tiff_ifd[raw].bytes) * 2ULL == INT64(raw_width) * INT64(raw_height) * 3ULL))
 #else
-      if (!strncmp(make, "OLYMPUS", 7) && tiff_ifd[raw].bytes * 2 == raw_width * raw_height * 3)
+      if ((!strncmp(make, "OLYMPUS", 7) ||
+          (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7))) &&
+          (tiff_ifd[raw].bytes * 2 == raw_width * raw_height * 3))
 #endif
         load_flags = 24;
 #ifdef LIBRAW_LIBRARY_BUILD
@@ -14751,9 +14755,13 @@ void CLASS apply_tiff()
       case 16:
         load_raw = &CLASS unpacked_load_raw;
 #ifdef LIBRAW_LIBRARY_BUILD
-        if (!strncmp(make, "OLYMPUS", 7) && INT64(tiff_ifd[raw].bytes) * 7ULL > INT64(raw_width) * INT64(raw_height))
+        if ((!strncmp(make, "OLYMPUS", 7) ||
+            (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7))) &&
+            (INT64(tiff_ifd[raw].bytes) * 7ULL > INT64(raw_width) * INT64(raw_height)))
 #else
-        if (!strncmp(make, "OLYMPUS", 7) && tiff_ifd[raw].bytes * 7 > raw_width * raw_height)
+        if ((!strncmp(make, "OLYMPUS", 7) ||
+            (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7))) &&
+            (tiff_ifd[raw].bytes * 7 > raw_width * raw_height))
 #endif
           load_raw = &CLASS olympus_load_raw;
       }
@@ -17082,6 +17090,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Olympus E-PM2", 0, 0,
       { 8380,-2630,-639,-2887,10725,2496,-627,1427,5438 } },
     { "Olympus E-M10", 0, 0, /* Same for E-M10MarkII, E-M10MarkIII */
+      { 8380,-2630,-639,-2887,10725,2496,-627,1427,5438 } },
+    { "CLAUSS piX 5oo",  0,  0, /* Oly ID 0x5330303539 (alphanum S0059), Olympus E-M10MarkII */
       { 8380,-2630,-639,-2887,10725,2496,-627,1427,5438 } },
     { "Olympus E-M1MarkII", 0, 0,
       { 9383,-3170,-763,-2457,10702,2020,-384,1236,5552 } },
@@ -19808,7 +19818,8 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
     load_raw = &CLASS packed_load_raw;
     load_flags = 30;
   }
-  else if (!strncmp(make, "Olympus", 7))
+  else if (!strncmp(make, "Olympus", 7) ||
+           (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7)))
   {
     height += height & 1;
     if (exif_cfa)
