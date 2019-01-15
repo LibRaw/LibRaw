@@ -5530,6 +5530,7 @@ static const char *static_camera_list[] = {
 	"Casio Exlim Pro 505",
 	"Casio Exlim Pro 600",
 	"Casio Exlim Pro 700",
+	"CLAUSS pix500",
 	"Contax N Digital",
 	"Creative PC-CAM 600",
 	"Digital Bolex D16",
