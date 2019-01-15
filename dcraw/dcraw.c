@@ -9734,7 +9734,6 @@ void CLASS parseLeicaMakernote (int base, int uptag, unsigned MakernoteTagType)
   short morder, sorder = order;
   char buf[10];
   int LeicaMakernoteSignature = -1;
-
   INT64 fsize = ifp->size();
   fread(buf, 1, 10, ifp);
   if (strncmp (buf,"LEICA", 5)) {
@@ -13045,7 +13044,6 @@ void CLASS parse_makernote(int base, int uptag)
 #ifdef LIBRAW_LIBRARY_BUILD
   if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES)
   	return;
-
   if (!strncmp(make, "NIKON", 5)) {
     parseNikonMakernote (base, uptag, nonDNG);
     return;
@@ -14662,6 +14660,10 @@ int CLASS parse_tiff_ifd(int base)
         order = sorder;
       }
     break;
+    case 0x1203: // in 0x0120
+      if (imgdata.lens.FocalLengthIn35mmFormat < 0.65f)
+        imgdata.lens.FocalLengthIn35mmFormat = get2();
+    break;
     case 0x3420: // in 0x0120
       if (imgdata.makernotes.panasonic.is_pana_raw)
       {
@@ -14815,6 +14817,12 @@ int CLASS parse_tiff_ifd(int base)
     case 280: /* Panasonic RW2 offset */
       if (type != 4)
         break;
+      if (!strncmp(model, "D-Lux 7", 7)) {
+        imgdata.lens.makernotes.CameraMount =
+          imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+        imgdata.lens.makernotes.CameraFormat =
+          imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_FT;
+      }
       load_raw = &CLASS panasonic_load_raw;
       load_flags = 0x2008;
     case 273: /* StripOffset */
