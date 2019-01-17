@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_const.h
- * Copyright 2008-2018 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  * LibRaw error codes
 LibRaw is free software; you can redistribute it and/or modify

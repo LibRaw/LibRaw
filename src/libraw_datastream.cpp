@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_datastream.cpp
- * Copyright 2008-2018 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
  *
  * LibRaw C++ interface (implementation)
 
