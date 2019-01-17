@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: multirender_test.cpp
- * Copyright 2008-2018 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
  * Created: Jul 10, 2011
  *
  * LibRaw simple C++ API:  creates 8 different renderings from 1 source file. The 1st and 4th one should be identical
