@@ -11180,7 +11180,7 @@ void CLASS setSonyBodyFeatures(unsigned id)
     scf[4]  lens mount
     scf[5]  tag 0x2010 group (0 if not used)
     scf[6]  offset of Sony ISO in 0x2010 table, 0xffff if not valid
-    scf[7]  offset of ImageCount3 in 0x9050 table, 0xffff if not valid
+    scf[7]  offset of ShutterCount3 in 0x9050 table, 0xffff if not valid
     scf[8]  offset of MeteringMode in 0x2010 table, 0xffff if not valid
     scf[9]  offset of ExposureProgram in 0x2010 table, 0xffff if not valid
     scf[10] offset of ReleaseMode2 in 0x2010 table, 0xffff if not valid
@@ -11300,6 +11300,8 @@ void CLASS setSonyBodyFeatures(unsigned id)
       {367, LIBRAW_FORMAT_1div2p3INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
       {368, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {369, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {370, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {371, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
   };
   ilm.CamID = id;
 
@@ -11613,7 +11615,8 @@ void CLASS process_Sony_0x9050(uchar *buf, ushort len, unsigned id)
       (id == 358) ||
       (id == 360) ||
       (id == 362) ||
-      (id == 363))
+      (id == 363) ||
+      (id == 371))
   {
     if (len <= 0x8d)
       return;
@@ -11669,7 +11672,7 @@ void CLASS process_Sony_0x9400(uchar *buf, ushort len, unsigned id)
   if (((bufx == 0x23) || (bufx == 0x24) || (bufx == 0x26)) && (len >= 0x1f))
   { // 0x9400 'c' version
 
-    if ((id == 358) || (id == 362) || (id == 363) || (id == 365) || (id == 366) || (id == 369))
+    if ((id == 358) || (id == 362) || (id == 363) || (id == 365) || (id == 366) || (id == 369) || (id == 371))
     {
       imSony.ShotNumberSincePowerUp = SonySubstitution[buf[0x0a]];
     }
@@ -19280,6 +19283,8 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 5271,-712,-347,-6153,13653,2763,-1601,2366,7242 } },
     { "Sony ILCE-6300", 0, 0,
       { 5973,-1695,-419,-3826,11797,2293,-639,1398,5789 } },
+    { "Sony ILCE-6400", 0, 0, /* temp */
+      { 7325,-2321,-596,-3494,11674,2055,-668,1562,5031 } },
     { "Sony ILCE-6500", 0, 0,
       { 5973,-1695,-419,-3826,11797,2293,-639,1398,5789 } },
     { "Sony ILCE", 0, 0, /* 3000, 5000, 5100, 6000, and QX1 */
@@ -19327,7 +19332,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
     { "Sony SLT-A99", 0, 0,
       { 6344,-1612,-462,-4863,12477,2681,-865,1786,6899 } },
     { "YI M1", 0, 0,
-	    { 7712,-2059,-653,-3882,11494,2726,-710,1332,5958 } },
+      { 7712,-2059,-653,-3882,11494,2726,-710,1332,5958 } },
   };
   // clang-format on
 
@@ -19678,6 +19683,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
         {0x163, "DSC-RX10M3"},  {0x164, "DSC-RX100M5"}, {0x165, "ILCE-6300"},  {0x166, "ILCE-9"},
         {0x168, "ILCE-6500"},   {0x16a, "ILCE-7RM3"},   {0x16b, "ILCE-7M3"},   {0x16c, "DSC-RX0"},
         {0x16d, "DSC-RX10M4"},  {0x16e, "DSC-RX100M6"}, {0x16f, "DSC-HX99"},   {0x171, "DSC-RX100M5A"},
+        {0x173, "ILCE-6400"},
     };
 
 #ifdef LIBRAW_LIBRARY_BUILD
