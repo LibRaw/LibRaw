@@ -9423,13 +9423,13 @@ void CLASS parseOlympus_ImageProcessing (unsigned tag, unsigned type, unsigned l
              (len == 2)      &&
              (!strncasecmp(model, "E-410", 5) ||
               !strncasecmp(model, "E-510", 5))) {
-      for (c = 0; i < 64; i++) {
+      for (i = 0; i < 64; i++) {
         imgdata.color.WBCT_Coeffs[i][2] =
           imgdata.color.WBCT_Coeffs[i][4] =
           imgdata.color.WB_Coeffs[i][1] =
           imgdata.color.WB_Coeffs[i][3] = 0x100;
       }
-      for (c = 64; i < 256; i++) {
+      for (i = 64; i < 256; i++) {
         imgdata.color.WB_Coeffs[i][1] =
           imgdata.color.WB_Coeffs[i][3] = 0x100;
       }
