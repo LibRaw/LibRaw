@@ -19852,6 +19852,8 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
       width -= 4;
     if (width == 4080)
       width -= 24;
+    if (width == 10400)
+      width -= 12;
     if (width == 9280)
     {
       width -= 6;
