@@ -14767,8 +14767,8 @@ void CLASS apply_tiff()
       case 12:
         if (tiff_ifd[raw].phint == 2)
           load_flags = 6;
-        if(!strncasecmp(make,"NIKON",5) 
-	    && !strncasecmp(model,"COOLPIX A1000",13) 
+        if(!strncasecmp(make,"NIKON",5)
+	    && !strncasecmp(model,"COOLPIX A1000",13)
 	    && data_size == raw_width * raw_height * 2 )
 	  load_raw = &CLASS unpacked_load_raw;
 	else
@@ -16991,6 +16991,10 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8489,-2583,-1036,-8051,15583,2643,-1307,1407,7354 } },
     { "Nikon E8800", 0, 0,
       { 7971,-2314,-913,-8451,15762,2894,-1442,1520,7610 } },
+
+    { "Nikon COOLPIX A1000", 0, 0, /* temp */
+      { 14294, -6116, -1333, -1628, 10219, 1637, -14, 1158, 5022 } },
+
     { "Nikon COOLPIX A", 0, 0,
       { 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181 } },
     { "Nikon COOLPIX B700", 0, 0,
