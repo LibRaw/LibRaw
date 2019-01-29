@@ -14767,7 +14767,12 @@ void CLASS apply_tiff()
       case 12:
         if (tiff_ifd[raw].phint == 2)
           load_flags = 6;
-        load_raw = &CLASS packed_load_raw;
+        if(!strncasecmp(make,"NIKON",5) 
+	    && !strncasecmp(model,"COOLPIX A1000",13) 
+	    && data_size == raw_width * raw_height * 2 )
+	  load_raw = &CLASS unpacked_load_raw;
+	else
+          load_raw = &CLASS packed_load_raw;
         break;
       case 14:
         load_flags = 0;
