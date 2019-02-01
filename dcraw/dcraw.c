@@ -14764,7 +14764,15 @@ int CLASS parse_tiff_ifd(int base)
       FORC3 cam_mul[c] = get2();
       break;
 #ifdef LIBRAW_LIBRARY_BUILD
-    case 45:
+    case 45:  /* pana_encoding:
+                 not used - DMC-LX1/FZ30/FZ50/L1/LX1/LX2
+                 2 - RAW DMC-FZ8/FZ18
+                 3 - RAW DMC-L10
+                 4 - RW2 for most other models, including G9 normal resolution and YUNEEC CGO4
+                     (must add 15 to black levels for RawFormat == 4)
+                 5 - RW2 DC-GH5s; G9 in HiRes mode
+                 6 - RW2 DC-S1, DC-S1r
+              */
       if (pana_raw && len == 1 && type == 3)
       {
         pana_encoding = get2();
