@@ -6429,6 +6429,10 @@ const char *LibRaw::strprogress(enum LibRaw_progress p)
 }
 
 #undef ID
+/* DS conflicts with a define in /usr/include/sys/regset.h on Solaris */
+#if defined __sun && defined DS
+#undef DS
+#endif
 
 #include "../internal/libraw_x3f.cpp"
 
@@ -6484,7 +6488,6 @@ void LibRaw::parse_x3f()
   _x3f_data = x3f;
 
   x3f_header_t *H = NULL;
-  x3f_directory_section_t *DS = NULL;
 
   H = &x3f->header;
   // Parse RAW size from RAW section
@@ -6758,6 +6761,9 @@ void LibRaw::x3f_dpq_interpolate_rg()
   }
 }
 
+#ifdef _ABS
+#undef _ABS
+#endif
 #define _ABS(a) ((a) < 0 ? -(a) : (a))
 
 #undef CLIP
