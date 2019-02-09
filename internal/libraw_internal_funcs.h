@@ -85,6 +85,7 @@ it under the terms of the one of two licenses as you choose:
     int 	parseLeicaInternalBodySerial(unsigned len);
     void 	parseLeicaMakernote(int base, int uptag, unsigned MakernoteTagType);
     void 	parseAdobePanoMakernote ();
+    void parseAdobeRAFMakernote ();
 
     ushort      get2();
     unsigned    sget4 (uchar *s);

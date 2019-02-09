@@ -341,6 +341,9 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     ushort FrameRate;
     ushort FrameWidth;
     ushort FrameHeight;
+    char SerialSignature[0x0c+1];
+    char RAFVersion[4+1];
+    ushort RAFDataVersion;
   } libraw_fuji_info_t;
 
   typedef struct
