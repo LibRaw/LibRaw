@@ -9876,6 +9876,7 @@ void CLASS parseAdobeRAFMakernote() {
   unsigned PrivateTagBytes;
   unsigned wb_section_offset = 0;
   int posWB;
+  int c;
 
 #define CHECKSPACE(s) if(posPrivateMknBuf+(s) > PrivateMknLength) { free (PrivateMknBuf); return; }
 #define isWB(posWB) sget2(posWB) != 0 && sget2(posWB+2) != 0 && sget2(posWB+4) != 0 && sget2(posWB+6) != 0 && sget2(posWB+8) != 0 && sget2(posWB+10) != 0 && sget2(posWB) != 0xff && sget2(posWB+2) != 0xff && sget2(posWB+4) != 0xff && sget2(posWB+6) != 0xff && sget2(posWB+8) != 0xff && sget2(posWB+10) != 0xff && sget2(posWB) == sget2(posWB+6) && sget2(posWB) < sget2(posWB+2) && sget2(posWB) < sget2(posWB+4) && sget2(posWB) < sget2(posWB+8) && sget2(posWB) < sget2(posWB+10)
@@ -9908,7 +9909,22 @@ void CLASS parseAdobeRAFMakernote() {
       return;
     }
     posPrivateMknBuf += 2;
-
+/*
+ * because Adobe DNG converter strips or misplaces 0xfnnn tags,
+ * Auto WB for following cameras is missing for now
+ * - F550EXR
+ * - F600EXR
+ * - F770EXR
+ * - F800EXR
+ * - F900EXR
+ * - HS10
+ * - HS11
+ * - HS20EXR
+ * - HS30EXR
+ * - HS50EXR
+ * - S1
+ * - SL1000
+**/
     while (PrivateEntries--) {
       order = 0x4d4d;
       CHECKSPACE(4);
@@ -9917,16 +9933,46 @@ void CLASS parseAdobeRAFMakernote() {
       posPrivateMknBuf += 4;
       order = PrivateOrder;
 
-      if (PrivateTagID == 0x9650) {
+      if (PrivateTagID == 0x2000) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      } else if (PrivateTagID == 0x2100) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FineWeather][c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      } else if (PrivateTagID == 0x2200) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Shade][c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      } else if (PrivateTagID == 0x2300) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_D][c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      } else if (PrivateTagID == 0x2301) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      } else if (PrivateTagID == 0x2302) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_WW][c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      } else if (PrivateTagID == 0x2310) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_L][c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      } else if (PrivateTagID == 0x2400) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      } else if (PrivateTagID == 0x2410) {
+        FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Flash][c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      } else if (PrivateTagID == 0x2f00) {
+        int nWBs = MIN(sget4(PrivateMknBuf+posPrivateMknBuf), 6);
+        posWB = posPrivateMknBuf+4;
+        for (int wb_ind = 0; wb_ind < nWBs; wb_ind++) {
+          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Custom1 + wb_ind][c ^ 1] = sget2(PrivateMknBuf+posWB+(c<<1));
+          posWB += 8;
+        }
+      } else if (PrivateTagID == 0x2ff0) {
+        FORC4 cam_mul[c ^ 1] = sget2(PrivateMknBuf+posPrivateMknBuf+(c<<1));
+      }
+
+      else if (PrivateTagID == 0x9650) {
         CHECKSPACE(4);
         short a = (short)sget2(PrivateMknBuf+posPrivateMknBuf);
         float b = fMAX(1.0f, sget2(PrivateMknBuf+posPrivateMknBuf+2));
         imgdata.makernotes.fuji.FujiExpoMidPointShift = a / b;
+
       } else if ((PrivateTagID == 0xc000) &&
                  (PrivateTagBytes > 3)    &&
                  (PrivateTagBytes < 10240000)) {
+        order = 0x4949;
         if (PrivateTagBytes != 4096) { // not Fuji X-A3, X-A5, X-A10, X-A20, X-T100, XF10
-          order = 0x4949;
           if (!sget2(PrivateMknBuf + posPrivateMknBuf))
             imfRAFDataVersion = sget2(PrivateMknBuf + posPrivateMknBuf + 2);
 
@@ -10128,6 +10174,34 @@ void CLASS parseAdobeRAFMakernote() {
                 imgdata.color.WBCT_Coeffs[iCCT][2] =
                   imgdata.color.WBCT_Coeffs[iCCT][4] = sget2(PrivateMknBuf+wb_section_offset+iCCT*6);
                 imgdata.color.WBCT_Coeffs[iCCT][3]   = sget2(PrivateMknBuf+wb_section_offset+iCCT*6+4);
+              }
+            }
+          }
+        } else { // process 4K raf data
+          int wb[4];
+          int nWB, tWB, pWB;
+          int iCCT = 0;
+          is_4K_RAFdata = 1; /* X-A3, X-A5, X-A10, X-A20, X-T100, XF10 */
+          posWB = posPrivateMknBuf + 0x200;
+          for (int wb_ind = 0; wb_ind < 42; wb_ind++) {
+            nWB = sget4(PrivateMknBuf+posWB); posWB += 4;
+            tWB = sget4(PrivateMknBuf+posWB); posWB += 4;
+            wb[0] = sget4(PrivateMknBuf+posWB) << 1; posWB += 4;
+            wb[1] = sget4(PrivateMknBuf+posWB); posWB += 4;
+            wb[3] = sget4(PrivateMknBuf+posWB); posWB += 4;
+            wb[2] = sget4(PrivateMknBuf+posWB) << 1; posWB += 4;
+
+            if (tWB && (iCCT < 255)) {
+              imgdata.color.WBCT_Coeffs[iCCT][0] = tWB;
+              FORC4 imgdata.color.WBCT_Coeffs[iCCT][c + 1] = wb[c];
+              iCCT++;
+            }
+            if (nWB != 0x46) {
+              for (pWB = 1; pWB < nFuji_wb_list2; pWB += 2) {
+                if (Fuji_wb_list2[pWB] == nWB) {
+                  FORC4 imgdata.color.WB_Coeffs[Fuji_wb_list2[pWB - 1]][c] = wb[c];
+                  break;
+                }
               }
             }
           }
