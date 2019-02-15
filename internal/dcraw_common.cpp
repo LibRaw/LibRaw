@@ -18391,6 +18391,7 @@ void CLASS identify()
           {0x422, "EOS 4000D"},
           {0x424, "EOS R"},
           {0x432, "EOS 2000D"},
+          {0x433, "EOS RP"},
       },
     sonique[] = {
 /*
