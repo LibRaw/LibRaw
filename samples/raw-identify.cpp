@@ -152,7 +152,10 @@ int main(int ac, char *av[])
       printf("%s\t%s\t%s\t%d\t%d\n", av[i], P1.make, P1.model, S.width, S.height);
     }
     else if (print_0) {
-      printf ("filename\t%s\n", av[i]);
+/*
+      printf ("filename\t%s\tmodel\t%s\tisTSNERDTS\t%d\tRAF version\t%s\tRAF data version\t0x%x\tis4K\t%d\n",
+        av[i], P1.model, Fuji.isTSNERDTS, Fuji.RAFVersion, Fuji.RAFDataVersion, P2.is_4K_RAFdata);
+*/
     }
     else if (print_1)
     {

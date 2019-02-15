@@ -344,6 +344,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     char SerialSignature[0x0c+1];
     char RAFVersion[4+1];
     ushort RAFDataVersion;
+    int isTSNERDTS;
   } libraw_fuji_info_t;
 
   typedef struct
@@ -648,7 +649,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     float exifCameraElevationAngle;
     float real_ISO;
     unsigned is_NikonTransfer;
-    unsigned is_4K_RAFdata; /* =1 for Fuji X-A3, X-A5, X-A10, X-A20, X-T100 */
+    unsigned is_4K_RAFdata; /* =1 for Fuji X-A3, X-A5, X-A10, X-A20, X-T100, XF10 */
   } libraw_imgother_t;
 
   typedef struct
