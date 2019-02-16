@@ -20521,10 +20521,18 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   if (!model[0])
     sprintf(model, "%dx%d", width, height);
 #ifdef LIBRAW_LIBRARY_BUILD
-  if (!(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_NOFILTERSDEFAULTS_FOR_MONOCHROMETIFFS) && (filters == UINT_MAX)) // Default dcraw behaviour
+  if (!(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_ZEROFILTERS_FOR_MONOCHROMETIFFS) && (filters == UINT_MAX)) // Default dcraw behaviour
     filters = 0x94949494;
-  else if(filters == UINT_MAX && !(tiff_nifds > 0 && tiff_samples>1)) // Only for non TIFF files, or for color tiffs
-    filters = 0x94949494;
+  else if(filters == UINT_MAX)
+  {
+    if(tiff_nifds > 0 && tiff_samples==1)
+    {
+       colors = 1;
+       filters = 0;
+    }
+    else
+    	filters = 0x94949494;
+  }
 #else
   if (filters == UINT_MAX)
     filters = 0x94949494;
