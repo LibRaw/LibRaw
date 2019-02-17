@@ -8556,7 +8556,6 @@ void CLASS parseAdobeRAFMakernote() {
   if ((PrivateMknLength > 4) &&
       (PrivateMknLength < 10240000) &&
       (PrivateMknBuf = (uchar *)malloc(PrivateMknLength+1024))) { // 1024b for safety
-    INT64 save = ftell(ifp);
     fread (PrivateMknBuf, PrivateMknLength, 1, ifp);
     PrivateOrder = sget2(PrivateMknBuf);
     posPrivateMknBuf = sget4(PrivateMknBuf+2) + 12;
@@ -16227,7 +16226,6 @@ void CLASS parse_fuji(int offset)
         int wb[4];
         int nWB, tWB, pWB;
         int iCCT = 0;
-        int cnt;
         is_4K_RAFdata = 1;
         fseek(ifp, save + 0x200, SEEK_SET);
         for (int wb_ind = 0; wb_ind < 42; wb_ind++) {
@@ -16239,15 +16237,13 @@ void CLASS parse_fuji(int offset)
           wb[2] = get4() << 1;
           if (tWB && (iCCT < 255)) {
             imgdata.color.WBCT_Coeffs[iCCT][0] = tWB;
-            for (cnt = 0; cnt < 4; cnt++)
-              imgdata.color.WBCT_Coeffs[iCCT][cnt + 1] = wb[cnt];
+            FORC4 imgdata.color.WBCT_Coeffs[iCCT][c + 1] = wb[c];
             iCCT++;
           }
           if (nWB != 70) {
             for (pWB = 1; pWB < nFuji_wb_list2; pWB += 2) {
               if (Fuji_wb_list2[pWB] == nWB) {
-                for (cnt = 0; cnt < 4; cnt++)
-                  imgdata.color.WB_Coeffs[Fuji_wb_list2[pWB - 1]][cnt] = wb[cnt];
+                FORC4 imgdata.color.WB_Coeffs[Fuji_wb_list2[pWB - 1]][c] = wb[c];
                 break;
               }
             }
