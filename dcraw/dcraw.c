@@ -15750,7 +15750,7 @@ int CLASS parse_tiff_ifd(int base)
                     imgdata.color.WBCT_Coeffs[iCCT][3] = rafdata[iCCT * 3 + 2 + fj];
                   }
                 }
- //               free(rafdata);
+                free(rafdata);
                 break;
               }
             }
@@ -15768,7 +15768,7 @@ int CLASS parse_tiff_ifd(int base)
       if (!is_4K_RAFdata) {
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
-        free(rafdata);
+//        free(rafdata);
       }
       break;
 #endif
