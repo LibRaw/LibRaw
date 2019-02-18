@@ -5620,6 +5620,7 @@ static const char *static_camera_list[] = {
 	"FujiFilm X-T3",
 	"FujiFilm X-T10",
 	"FujiFilm X-T20",
+	"FujiFilm X-T30",
 	"FujiFilm X-T100",
 	"FujiFilm IS-1",
 	"Gione E7",
@@ -5929,6 +5930,7 @@ static const char *static_camera_list[] = {
 	"Nikon E8700",
 	"Nikon E8800",
 	"Nikon Coolpix A",
+	"Nikon Coolpix A1000",
 	"Nikon Coolpix B700",
 	"Nikon Coolpix P330",
 	"Nikon Coolpix P340",
@@ -6369,6 +6371,7 @@ static const char *static_camera_list[] = {
 	"YUNEEC CGO4",
 	"Xiaomi MI3",
 	"Xiaomi RedMi Note3 Pro",
+	"Xiaomi FIMI X8SE",
 	"Xiaoyi YIAC3 (YI 4k)",
 	NULL
 };
