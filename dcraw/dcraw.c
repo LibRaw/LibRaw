@@ -9890,7 +9890,6 @@ void CLASS parseAdobeRAFMakernote() {
   if ((PrivateMknLength > 4) &&
       (PrivateMknLength < 10240000) &&
       (PrivateMknBuf = (uchar *)malloc(PrivateMknLength+1024))) { // 1024b for safety
-    INT64 save = ftell(ifp);
     fread (PrivateMknBuf, PrivateMknLength, 1, ifp);
     PrivateOrder = sget2(PrivateMknBuf);
     posPrivateMknBuf = sget4(PrivateMknBuf+2) + 12;
@@ -15751,7 +15750,7 @@ int CLASS parse_tiff_ifd(int base)
                     imgdata.color.WBCT_Coeffs[iCCT][3] = rafdata[iCCT * 3 + 2 + fj];
                   }
                 }
- //               free(rafdata);
+                free(rafdata);
                 break;
               }
             }
@@ -15769,7 +15768,7 @@ int CLASS parse_tiff_ifd(int base)
       if (!is_4K_RAFdata) {
         FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
         imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
-        free(rafdata);
+//        free(rafdata);
       }
       break;
 #endif
@@ -17567,7 +17566,6 @@ void CLASS parse_fuji(int offset)
         int wb[4];
         int nWB, tWB, pWB;
         int iCCT = 0;
-        int cnt;
         is_4K_RAFdata = 1;
         fseek(ifp, save + 0x200, SEEK_SET);
         for (int wb_ind = 0; wb_ind < 42; wb_ind++) {
@@ -17579,15 +17577,13 @@ void CLASS parse_fuji(int offset)
           wb[2] = get4() << 1;
           if (tWB && (iCCT < 255)) {
             imgdata.color.WBCT_Coeffs[iCCT][0] = tWB;
-            for (cnt = 0; cnt < 4; cnt++)
-              imgdata.color.WBCT_Coeffs[iCCT][cnt + 1] = wb[cnt];
+            FORC4 imgdata.color.WBCT_Coeffs[iCCT][c + 1] = wb[c];
             iCCT++;
           }
           if (nWB != 70) {
             for (pWB = 1; pWB < nFuji_wb_list2; pWB += 2) {
               if (Fuji_wb_list2[pWB] == nWB) {
-                for (cnt = 0; cnt < 4; cnt++)
-                  imgdata.color.WB_Coeffs[Fuji_wb_list2[pWB - 1]][cnt] = wb[cnt];
+                FORC4 imgdata.color.WB_Coeffs[Fuji_wb_list2[pWB - 1]][c] = wb[c];
                 break;
               }
             }
@@ -19048,9 +19044,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8770,-3194,-820,-2871,11281,1803,-513,1552,4434 } },
     { "Panasonic DMC-CM1", -15, 0,
       { 8770,-3194,-820,-2871,11281,1803,-513,1552,4434 } },
-    { "Panasonic DC-FZ82", -15, 0, /* markets: FZ80 FZ82 */
-      { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
-    { "Panasonic DC-FZ80", -15, 0, /* markets: FZ80 FZ82 */
+    { "Panasonic DC-FZ80", -15, 0,
       { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
     { "Panasonic DMC-FZ8", 0, 0xf7f,
       { 8986,-2755,-802,-6341,13575,3077,-1476,2144,6379 } },
@@ -19066,7 +19060,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 10976,-4029,-1141,-7918,15491,2600,-1670,2071,8246 } },
     { "Panasonic DMC-FZ3", -15, 0,
       { 9938,-2780,-890,-4604,12393,2480,-1117,2304,4620 } },
-    { "Panasonic DMC-FZ4", -15, 0, /* 40,42,45 */
+    { "Panasonic DMC-FZ40", -15, 0,
       { 13639,-5535,-1371,-1698,9633,2430,316,1152,4108 } },
     { "Panasonic DMC-FZ50", 0, 0,
       { 7906,-2709,-594,-6231,13351,3220,-1922,2631,6537 } },
@@ -19104,11 +19098,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
     { "Leica C (Typ 112)", -15, 0,
       { 9379,-3267,-816,-3227,11560,1881,-926,1928,5340 } },
-    { "Panasonic DMC-LX9", -15, 0, /* markets: LX9 LX10 LX15 */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-LX10", -15, 0, /* markets: LX9 LX10 LX15 */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-LX15", -15, 0, /* markets: LX9 LX10 LX15 */
+    { "Panasonic DMC-LX9", -15, 0,
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
     { "Panasonic DMC-LX1", 0, 0xf7f,
       { 10704,-4187,-1230,-8314,15952,2501,-920,945,8927 } },
@@ -19148,16 +19138,13 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 11904,-4541,-1189,-2355,10899,1662,-296,1586,4289 } },
     { "Leica V-LUX 3", -15, 0xfff,
       { 11904,-4541,-1189,-2355,10899,1662,-296,1586,4289 } },
-    { "Panasonic DMC-FZ2000", -15, 0, /* markets: DMC-FZ2000, DMC-FZ2500 ,FZH1 */
-      { 7386,-2443,-743,-3437,11864,1757,-608,1660,4766 } },
-    { "Panasonic DMC-FZ2500", -15, 0,
-      { 7386,-2443,-743,-3437,11864,1757,-608,1660,4766 } },
-    { "Panasonic DMC-FZH1", -15, 0,
-      { 7386,-2443,-743,-3437,11864,1757,-608,1660,4766 } },
     { "Panasonic DMC-FZ200", -15, 0xfff,
       { 8112,-2563,-740,-3730,11784,2197,-941,2075,4933 } },
     { "Leica V-LUX 4", -15, 0xfff,
       { 8112,-2563,-740,-3730,11784,2197,-941,2075,4933 } },
+    { "Panasonic DMC-FZ2500", -15, 0,
+      { 7386,-2443,-743,-3437,11864,1757,-608,1660,4766 } },
+
     { "Panasonic DMC-FX150", -15, 0xfff,
       { 9082,-2907,-925,-6119,13377,3058,-1797,2641,5609 } },
     { "Panasonic DMC-FX180", -15, 0xfff, /* added */
@@ -19176,24 +19163,11 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 8294,-2891,-651,-3869,11590,2595,-1183,2267,5352 } },
     { "Panasonic DMC-G7", -15, 0xfff,
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
-    { "Panasonic DMC-G8", -15, 0xfff, /* markets: DMC-G8, DMC-G80, DMC-G81, DMC-G85 */
+    { "Panasonic DMC-G8", -15, 0xfff,
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
     { "Panasonic DC-G9", -15, 0,
       { 7685,-2375,-634,-3687,11700,2249,-748,1546,5111 } },
-    { "Panasonic DMC-GF1", -15, 0xf92,
-      { 7888,-1902,-1011,-8106,16085,2099,-2353,2866,7330 } },
-    { "Panasonic DMC-GF2", -15, 0xfff,
-      { 7888,-1902,-1011,-8106,16085,2099,-2353,2866,7330 } },
-    { "Panasonic DMC-GF3", -15, 0xfff,
-      { 9051,-2468,-1204,-5212,13276,2121,-1197,2510,6890 } },
-    { "Panasonic DMC-GF5", -15, 0xfff,
-      { 8228,-2945,-660,-3938,11792,2430,-1094,2278,5793 } },
-    { "Panasonic DMC-GF6", -15, 0,
-      { 8130,-2801,-946,-3520,11289,2552,-1314,2511,5791 } },
-    { "Panasonic DMC-GF7", -15, 0,
-      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
-    { "Panasonic DMC-GF8", -15, 0,
-      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
+
     { "Panasonic DMC-GH1", -15, 0xf92,
       { 6299,-1466,-532,-6535,13852,2969,-2331,3112,5984 } },
     { "Panasonic DMC-GH2", -15, 0xf95,
@@ -19210,88 +19184,55 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 7641,-2336,-605,-3218,11299,2187,-485,1338,5121 } },
     { "Yuneec CGO4", -15, 0,
       { 7122,-2108,-512,-3155,11201,2231,-541,1423,5045 } },
+
     { "Panasonic DMC-GM1", -15, 0,
       { 6770,-1895,-744,-5232,13145,2303,-1664,2691,5703 } },
     { "Panasonic DMC-GM5", -15, 0,
       { 8238,-3244,-679,-3921,11814,2384,-836,2022,5852 } },
+
+    { "Panasonic DMC-GF1", -15, 0xf92,
+      { 7888,-1902,-1011,-8106,16085,2099,-2353,2866,7330 } },
+    { "Panasonic DMC-GF2", -15, 0xfff,
+      { 7888,-1902,-1011,-8106,16085,2099,-2353,2866,7330 } },
+    { "Panasonic DMC-GF3", -15, 0xfff,
+      { 9051,-2468,-1204,-5212,13276,2121,-1197,2510,6890 } },
+    { "Panasonic DMC-GF5", -15, 0xfff,
+      { 8228,-2945,-660,-3938,11792,2430,-1094,2278,5793 } },
+    { "Panasonic DMC-GF6", -15, 0,
+      { 8130,-2801,-946,-3520,11289,2552,-1314,2511,5791 } },
+    { "Panasonic DMC-GF7", -15, 0,
+      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
+    { "Panasonic DMC-GF8", -15, 0,
+      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
+    { "Panasonic DC-GF9", -15, 0,
+      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
+    { "Panasonic DC-GF10", -15, 0,
+      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
+
     { "Panasonic DMC-GX1", -15, 0,
       { 6763,-1919,-863,-3868,11515,2684,-1216,2387,5879 } },
-
-    { "Panasonic DC-GF10", -15, 0, /* markets: GF10, GF90 */
-      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
-    { "Panasonic DC-GF90", -15, 0, /* markets: GF10, GF90 */
-      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
-
-    { "Panasonic DC-GX850", -15, 0, /* markets: GX850 GX800 GF9 */
-      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
-    { "Panasonic DC-GX800", -15, 0, /* markets: GX850 GX800 GF9 */
-      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
-    { "Panasonic DC-GF9", -15, 0, /* markets: GX850 GX800 GF9 */
-      { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
-    { "Panasonic DMC-GX85", -15, 0, /* markets: GX85 GX80 GX7MK2 */
-      { 7771,-3020,-629,-4029,11950,2345,-821,1977,6119 } },
-    { "Panasonic DMC-GX80", -15, 0, /* markets: GX85 GX80 GX7MK2 */
-      { 7771,-3020,-629,-4029,11950,2345,-821,1977,6119 } },
-    { "Panasonic DMC-GX7MK2", -15, 0, /* markets: GX85 GX80 GX7MK2 */
-      { 7771,-3020,-629,-4029,11950,2345,-821,1977,6119 } },
     { "Panasonic DMC-GX7", -15,0,
       { 7610,-2780,-576,-4614,12195,2733,-1375,2393,6490 } },
+    { "Panasonic DMC-GX85", -15, 0,
+      { 7771,-3020,-629,-4029,11950,2345,-821,1977,6119 } },
     { "Panasonic DMC-GX8", -15,0,
       { 7564,-2263,-606,-3148,11239,2177,-540,1435,4853 } },
-
-    { "Panasonic DC-GX7MK3", -15, 0, /* markets: DC-GX7MK3 DC-GX9 */
-      { 7564,-2263,-606,-3148,11239,2177,-540,1435,4853 } },
-    { "Panasonic DC-GX9", -15, 0, /* markets: DC-GX7MK3 DC-GX9 */
+    { "Panasonic DC-GX9", -15, 0,
       { 7564,-2263,-606,-3148,11239,2177,-540,1435,4853 } },
 
-    { "Panasonic DMC-TZ6", -15, 0,  /* markets: ZS40 TZ60 TZ61 */
+    { "Panasonic DMC-ZS40", -15, 0,
       { 8607,-2822,-808,-3755,11930,2049,-820,2060,5224 } },
-    { "Panasonic DMC-TZ8", -15, 0, /* markets: ZS60 TZ80 TZ81 TZ82 TZ85 */
-      { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
-    { "Panasonic DC-TZ90", -15, 0, /* markets: ZS70  TZ90 TZ91 TZ92 T93 */
-      { 9052,-3117,-883,-3045,11346,1927,-205,1520,4730 } },
-    { "Panasonic DC-TZ91", -15, 0, /* markets: ZS70  TZ90 TZ91 TZ92 T93 */
-      { 9052,-3117,-883,-3045,11346,1927,-205,1520,4730 } },
-    { "Panasonic DC-TZ92", -15, 0, /* markets: ZS70  TZ90 TZ91 TZ92 T93 */
-      { 9052,-3117,-883,-3045,11346,1927,-205,1520,4730 } },
-    { "Panasonic DC-T93", -15, 0, /* markets: ZS70  TZ90 TZ91 TZ92 T93 */
-      { 9052,-3117,-883,-3045,11346,1927,-205,1520,4730 } },
-    { "Panasonic DMC-ZS4", -15, 0, /* markets: ZS40 TZ60 TZ61 */
-      { 8607,-2822,-808,-3755,11930,2049,-820,2060,5224 } },
-    { "Panasonic DMC-TZ7", -15, 0, /* markets: ZS50 TZ70 TZ71 */
+    { "Panasonic DMC-ZS50", -15, 0,
       { 8802,-3135,-789,-3151,11468,1904,-550,1745,4810 } },
-    { "Panasonic DMC-ZS5", -15, 0, /* markets: ZS50 TZ70 TZ71 */
-      { 8802,-3135,-789,-3151,11468,1904,-550,1745,4810 } },
-    { "Panasonic DMC-ZS6", -15, 0, /* markets: ZS60 TZ80 TZ81 TZ85 */
+    { "Panasonic DMC-ZS60", -15, 0,
       { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
-    { "Panasonic DC-ZS70", -15, 0, /* markets: ZS70  TZ90 TZ91 TZ92 T93 */
+    { "Panasonic DC-ZS70", -15, 0,
       { 9052,-3117,-883,-3045,11346,1927,-205,1520,4730 } },
-    { "Panasonic DMC-ZS100", -15, 0, /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
+    { "Panasonic DMC-ZS100", -15, 0,
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-ZS110", -15, 0, /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
+    { "Panasonic DC-ZS200", -15, 0,
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-TZ100", -15, 0, /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-TZ101", -15, 0, /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-TZ110", -15, 0, /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DMC-TX1", -15, 0, /* markets: ZS100 ZS110 TZ100 TZ101 TZ110 TX1 */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-
-    { "Panasonic DC-TX2", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-TZ220", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-TZ202", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-TZ200", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-ZS220", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Panasonic DC-ZS200", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
-      { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
-    { "Leica C-Lux", -15, 0, /* markets: DC-TX2 DC-TZ220 DC-TZ202 DC-TZ200 DC-ZS220 DC-ZS200 + Leica C-Lux */
+    { "Leica C-Lux", -15, 0,
       { 7790,-2736,-755,-3452,11870,1769,-628,1647,4898 } },
 
     { "Phase One H 20", 0, 0, /* DJC */
@@ -19997,6 +19938,24 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
         {0x16d, "DSC-RX10M4"},  {0x16e, "DSC-RX100M6"}, {0x16f, "DSC-HX99"},   {0x171, "DSC-RX100M5A"},
         {0x173, "ILCE-6400"},
     };
+
+  static const char *orig, panalias[][12] = {
+    "@DC-FZ80", "DC-FZ81", "DC-FZ82", "DC-FZ83", "DC-FZ85",
+    "@DC-GF9", "DC-GX850", "DC-GX800",
+    "@DC-GF10", "DC-GF90",
+    "@DC-GX9", "DC-GX7MK3",
+    "@DC-ZS70", "DC-TZ90", "DC-TZ91", "DC-TZ92", "DC-TZ93",
+    "@DMC-FZ40", "DMC-FZ42", "DMC-FZ45",
+    "@DMC-FZ2500", "DMC-FZ2000", "DMC-FZH1",
+    "@DMC-G8", "DMC-G80", "DMC-G81", "DMC-G85",
+    "@DMC-GX85", "DMC-GX80", "DMC-GX7MK2",
+    "@DMC-LX9", "DMC-LX10", "DMC-LX15",
+    "@DMC-ZS40", "DMC-TZ60", "DMC-TZ61",
+    "@DMC-ZS50", "DMC-TZ70", "DMC-TZ71",
+    "@DMC-ZS60", "DMC-TZ80", "DMC-TZ81", "DMC-TZ85",
+    "@DMC-ZS100", "DMC-ZS110", "DMC-TZ100", "DMC-TZ101", "DMC-TZ110", "DMC-TX1",
+    "@DC-ZS200", "DC-TX2", "DC-TZ200", "DC-TZ202", "DC-TZ220", "DC-ZS220",
+  };
 
 #ifdef LIBRAW_LIBRARY_BUILD
   static const libraw_custom_camera_t const_table[]
@@ -20816,6 +20775,13 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
         adobe_coeff("Sony", sonique[i].t_model);
         strcpy(model, sonique[i].t_model);
       }
+  }
+
+  if (!strncmp(make, "Panasonic", 9)) {
+    for (i=0; i < sizeof panalias / sizeof *panalias; i++)
+      if (panalias[i][0] == '@') orig = panalias[i]+1;
+      else if (!strcmp(model,panalias[i]))
+        adobe_coeff ("Panasonic", orig);
   }
 
   if (!strncmp(make, "Nikon", 5))
