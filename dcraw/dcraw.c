@@ -19955,6 +19955,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
     "@DMC-ZS60", "DMC-TZ80", "DMC-TZ81", "DMC-TZ85",
     "@DMC-ZS100", "DMC-ZS110", "DMC-TZ100", "DMC-TZ101", "DMC-TZ110", "DMC-TX1",
     "@DC-ZS200", "DC-TX2", "DC-TZ200", "DC-TZ202", "DC-TZ220", "DC-ZS220",
+    "@DC-ZS80", "DC-TZ96", "DC-TZ95",
   };
 
 #ifdef LIBRAW_LIBRARY_BUILD
