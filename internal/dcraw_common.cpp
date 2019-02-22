@@ -9401,6 +9401,14 @@ void CLASS setPentaxBodyFeatures(unsigned id)
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Pentax_Q;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Pentax_Q;
     break;
+  case 0x1320e:
+    imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
+    imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
+    imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
+    imgdata.lens.makernotes.LensFormat = LIBRAW_FORMAT_APSC;
+    imgdata.lens.makernotes.LensID = -1;
+    imgdata.lens.makernotes.FocalType = 1;
+    break;
   default:
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_FixedLens;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_FixedLens;
@@ -9527,8 +9535,15 @@ void CLASS PentaxLensInfo(unsigned id, unsigned len) // tag 0x0207
   return;
 }
 
-void CLASS parsePentaxMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
-{
+void CLASS parseRicohGRIIIMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer) {
+  if (tag == 0x0005) {
+      unique_id = get4();
+      setPentaxBodyFeatures(unique_id);
+  }
+}
+
+void CLASS parsePentaxMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer) {
+
   int c;
   if (tag == 0x0005) {
       unique_id = get4();
@@ -9630,8 +9645,8 @@ void CLASS parsePentaxMakernotes(int base, unsigned tag, unsigned type, unsigned
   }
 }
 
-void CLASS parseRicohMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
-{
+void CLASS parseRicohMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer) {
+
    if (tag == 0x0005) {
      char buffer[17];
      int c;
@@ -11765,8 +11780,7 @@ restore_after_parseSonySRF:
 #undef icWBCTC
 #undef imSony
 
-void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
-{
+void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer) {
 
   if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES)
   	return;
@@ -12247,13 +12261,16 @@ void CLASS parse_makernote(int base, int uptag)
 
     else if (!strncmp(make, "PENTAX", 6) ||
              !strncmp(make, "RICOH", 5)  ||
-             !strncmp(model, "PENTAX", 6))
-    {
-      if (!strncmp(model, "GR", 2) ||
-          !strncmp(model, "GXR", 3))
+             !strncmp(model, "PENTAX", 6)) {
+      if (!strncmp(model, "GR",  2) ||
+          !strncmp(model, "GXR", 3)) {
         parseRicohMakernotes (base, tag, type, len, CameraDNG);
-      else
+      } else if (!strncmp(model, "RICOH GR III", 12)) {
+// these are Pentax-type makernotes, but a lot of tags are different.
+        parseRicohGRIIIMakernotes(base, tag, type, len, CameraDNG);
+      } else {
         parsePentaxMakernotes(base, tag, type, len, nonDNG);
+      }
     }
 
     else if (!strncmp(make, "SAMSUNG", 7))
@@ -14777,7 +14794,10 @@ int CLASS parse_tiff_ifd(int base)
 
       } else {
         fread(mbuf + 6, 1, 2, ifp);
-        if (!strcmp(mbuf, "PENTAX ") || !strcmp(mbuf, "SAMSUNG")) {
+        if (!strcmp(mbuf, "RICOH") &&
+            !strncmp(model, "RICOH GR III", 12)) {
+          parse_makernote(base, 0);
+        } else if (!strcmp(mbuf, "PENTAX ") || !strcmp(mbuf, "SAMSUNG")) {
           makernote_found = 1;
           fseek(ifp, start_pos, SEEK_SET);
           parse_makernote_0xc634(base, 0, CameraDNG);
