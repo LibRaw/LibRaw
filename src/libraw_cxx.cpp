@@ -2241,10 +2241,19 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       else if (S.raw_width == 5504)
         S.width = S.raw_width - (S.height > 3664 ? 8 : 32);
     }
-	if (!strncasecmp(imgdata.idata.make, "Sony", 4) && !imgdata.idata.dng_version && !strncasecmp(imgdata.idata.model, "ILCE-7RM3", 9) &&
-		S.raw_width == 5216) // A7RM3 in APS mode
-		S.width = S.raw_width - 32;
-
+	if (!strncasecmp(imgdata.idata.make, "Sony", 4) && !imgdata.idata.dng_version)
+	{
+		if(	((!strncasecmp(imgdata.idata.model, "ILCE-7RM", 8) || !strcasecmp(imgdata.idata.model,"ILCA-99M2"))
+			&& S.raw_width == 5216) // A7RM2/M3/A99M2 in APS mode
+			|| (!strcasecmp(imgdata.idata.model, "ILCE-7R") && S.raw_width >= 4580 && S.raw_width < 5020) // A7R in crop mode, no samples, so size est.
+			|| (!strcasecmp(imgdata.idata.model, "ILCE-7") && S.raw_width== 3968) // A7 in crop mode
+			|| 	((!strncasecmp(imgdata.idata.model, "ILCE-7M", 7) || !strcasecmp(imgdata.idata.model,"ILCE-9")
+				|| !strcasecmp(imgdata.idata.model,"SLT-A99V")) // Is SLT-A99 also has APS-C mode??
+				&& S.raw_width > 3750 && S.raw_width < 4120) // A7M2, A7M3, AA9, most likely APS-C raw_width is 3968 (same w/ A7), but no samples, so guess
+			|| (!strncasecmp(imgdata.idata.model, "ILCE-7S",7) && S.raw_width == 2816) // A7S2=> exact, hope it works for A7S-I too
+		)
+			S.width = S.raw_width - 32;
+	}
 
     if (!strcasecmp(imgdata.idata.make, "Pentax") &&
         /*!strcasecmp(imgdata.idata.model,"K-3 II")  &&*/ imgdata.idata.raw_count == 4 &&
