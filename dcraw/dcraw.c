@@ -19511,7 +19511,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 6038,-1484,-579,-9145,16746,2512,-875,746,7218 } },
     { "Sony DSLR-A390", 0, 0,
       { 6038,-1484,-579,-9145,16746,2512,-875,746,7218 } },
-    { "Sony DSLR-A450", 0, 0xfeb,
+    { "Sony DSLR-A450", 0, 0, // close to 16596 if arw is 14-bit
       { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
     { "Sony DSLR-A580", 0, 16596,
       { 5932,-1492,-411,-4813,12285,2856,-741,1524,6739 } },
@@ -19521,7 +19521,7 @@ void CLASS adobe_coeff(const char *t_make, const char *t_model
       { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
     { "Sony DSLR-A560", 0, 16596,
       { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
-    { "Sony DSLR-A5", 0, 0xfeb, /* Is there any cameras not covered above? */
+    { "Sony DSLR-A5", 0, 0, /* Are there any cameras not covered w/above? */
       { 4950,-580,-103,-5228,12542,3029,-709,1435,7371 } },
     { "Sony DSLR-A700", 0, 0,
       { 5775,-805,-359,-8574,16295,2391,-1943,2341,7249 } },
