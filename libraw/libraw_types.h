@@ -650,6 +650,7 @@ E550, E900, F810, S5600, S6500fd, S9000, S9500, S100FS
     float real_ISO;
     unsigned is_NikonTransfer;
     unsigned is_4K_RAFdata; /* =1 for Fuji X-A3, X-A5, X-A10, X-A20, X-T100, XF10 */
+    unsigned is_PentaxRicohMakernotes; /* =1 for Ricoh software by Pentax, Camera DNG */
   } libraw_imgother_t;
 
   typedef struct

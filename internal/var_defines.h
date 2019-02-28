@@ -96,6 +96,7 @@ it under the terms of the one of two licenses as you choose:
 #define artist          (imgdata.other.artist)
 #define is_NikonTransfer (imgdata.other.is_NikonTransfer)
 #define is_4K_RAFdata    (imgdata.other.is_4K_RAFdata)
+#define is_PentaxRicohMakernotes    (imgdata.other.is_PentaxRicohMakernotes)
 
 //imgdata.output
 #define greybox         (imgdata.params.greybox)

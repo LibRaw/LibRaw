@@ -9477,6 +9477,8 @@ void CLASS PentaxLensInfo(unsigned id, unsigned len) // tag 0x0207
       if (imgdata.lens.makernotes.LensID == -1)
         imgdata.lens.makernotes.LensID = ((unsigned)((table_buf[1] & 0x0f) + table_buf[4]) << 8) + table_buf[5];
       break;
+    case 168: // Ricoh GR III, id 0x1320e
+      break;
     default:
       if (id >= 0x12b9c) // LensInfo2
       {
@@ -9533,13 +9535,6 @@ void CLASS PentaxLensInfo(unsigned id, unsigned len) // tag 0x0207
   }
   free(table_buf);
   return;
-}
-
-void CLASS parseRicohGRIIIMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer) {
-  if (tag == 0x0005) {
-      unique_id = get4();
-      setPentaxBodyFeatures(unique_id);
-  }
 }
 
 void CLASS parsePentaxMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer) {
@@ -11838,6 +11833,13 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer) {
     order = get2();
     if (buf[0] == 'O') get2();
 
+  } else if (is_PentaxRicohMakernotes &&
+             (dng_writer == CameraDNG)) {
+    base = ftell(ifp) - 10;
+    fseek(ifp, -4, SEEK_CUR);
+    order = get2();
+    is_PentaxRicohMakernotes = 1;
+
   } else if (!strncmp(buf, "SONY", 4) ||
              !strcmp(buf, "Panasonic")) {
     order = 0x4949;
@@ -11989,8 +11991,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer) {
 skip_Oly_broken_tags:;
     }
 
-    else if (!strncmp(make, "PENTAX", 6) ||
-             !strncmp(model, "PENTAX", 6)) {
+    else if (!strncmp(make, "PENTAX", 6)  ||
+             !strncmp(model, "PENTAX", 6) ||
+             is_PentaxRicohMakernotes) {
       parsePentaxMakernotes(base, tag, type, len, dng_writer);
 
     } else if (!strncmp(make, "SAMSUNG", 7)) {
@@ -12265,9 +12268,6 @@ void CLASS parse_makernote(int base, int uptag)
       if (!strncmp(model, "GR",  2) ||
           !strncmp(model, "GXR", 3)) {
         parseRicohMakernotes (base, tag, type, len, CameraDNG);
-      } else if (!strncmp(model, "RICOH GR III", 12)) {
-// these are Pentax-type makernotes, but a lot of tags are different.
-        parseRicohGRIIIMakernotes(base, tag, type, len, CameraDNG);
       } else {
         parsePentaxMakernotes(base, tag, type, len, nonDNG);
       }
@@ -14795,9 +14795,13 @@ int CLASS parse_tiff_ifd(int base)
       } else {
         fread(mbuf + 6, 1, 2, ifp);
         if (!strcmp(mbuf, "RICOH") &&
-            !strncmp(model, "RICOH GR III", 12)) {
-          parse_makernote(base, 0);
-        } else if (!strcmp(mbuf, "PENTAX ") || !strcmp(mbuf, "SAMSUNG")) {
+            ((sget2((uchar *)mbuf+6) == 0x4949) ||
+             (sget2((uchar *)mbuf+6) == 0x4d4d))) {
+          is_PentaxRicohMakernotes = 1;
+        }
+        if (!strcmp(mbuf, "PENTAX ") ||
+            !strcmp(mbuf, "SAMSUNG") ||
+            is_PentaxRicohMakernotes) {
           makernote_found = 1;
           fseek(ifp, start_pos, SEEK_SET);
           parse_makernote_0xc634(base, 0, CameraDNG);
@@ -18279,6 +18283,7 @@ void CLASS initdata()
   tile_width = tile_length = 0;
   is_NikonTransfer = 0;
   is_4K_RAFdata = 0;
+  is_PentaxRicohMakernotes = 0;
 }
 
 #endif
@@ -18672,6 +18677,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   tiff_nifds = 0;
   is_NikonTransfer = 0;
   is_4K_RAFdata = 0;
+  is_PentaxRicohMakernotes = 0;
   memset(tiff_ifd, 0, sizeof tiff_ifd);
 
 #ifdef LIBRAW_LIBRARY_BUILD
