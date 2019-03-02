@@ -6911,7 +6911,7 @@ static float _CanonConvertEV(short in)
 
 unsigned CLASS setCanonBodyFeatures(unsigned id)
 {
-  if (id == 0x03740000) // EOS M3
+  if (id == 0x03740000)      // EOS M3
     id = 0x80000374;
   else if (id == 0x03840000) // EOS M10
     id = 0x80000384;
@@ -6921,7 +6921,7 @@ unsigned CLASS setCanonBodyFeatures(unsigned id)
     id = 0x80000398;
   else if (id == 0x04070000) // EOS M6
     id = 0x80000407;
-  else if (id == 0x04120000) // EOS M50
+  else if (id == 0x00000412) // EOS M50
     id = 0x80000412;
 
   imgdata.lens.makernotes.CamID = id;
@@ -6963,9 +6963,15 @@ unsigned CLASS setCanonBodyFeatures(unsigned id)
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF_M;
 
+  } else if ((id == 0x80000424) || // EOS R
+             (id == 0x80000433)    // EOS RP
+  ) {
+    imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_FF;
+    imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_RF;
+
   } else if ((id == 0x01140000) || // D30
              (id == 0x01668000) || // D60
-             (id > 0x80000000)) {
+             (id >  0x80000000)) {
     imgdata.lens.makernotes.CameraFormat = LIBRAW_FORMAT_APSC;
     imgdata.lens.makernotes.CameraMount = LIBRAW_MOUNT_Canon_EF;
     imgdata.lens.makernotes.LensMount = LIBRAW_MOUNT_Unknown;
