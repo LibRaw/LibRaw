@@ -9300,6 +9300,7 @@ void CLASS parseCanonMakernotes(unsigned tag, unsigned type, unsigned len)
       }
       break;
 
+    case 1816:  // EOS RP, SX70
     case 1820:	// M50
     case 1824:	// EOS R
       imgdata.makernotes.canon.CanonColorDataVer = 9;
