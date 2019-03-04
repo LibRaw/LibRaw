@@ -302,6 +302,7 @@ typedef unsigned long long UINT64;
     int AFMicroAdjMode;
     float AFMicroAdjValue;
     short MakernotesFlip;
+    short SRAWQuality;
 
   } libraw_canon_makernotes_t;
 

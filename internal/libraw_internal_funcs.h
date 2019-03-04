@@ -32,7 +32,7 @@ it under the terms of the one of two licenses as you choose:
     ushort      sget2Rev(uchar *s);
     unsigned setCanonBodyFeatures (unsigned id);
     void 	processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxlen, unsigned type);
-    void	Canon_CameraSettings();
+    void	Canon_CameraSettings(unsigned len);
     void	Canon_WBpresets (int skip1, int skip2);
     void	Canon_WBCTpresets (short WBCTversion);
     void	parseCanonMakernotes (unsigned tag, unsigned type, unsigned len);
