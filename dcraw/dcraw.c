@@ -14031,14 +14031,6 @@ get2_256:
     }
 #endif
 
-    if (strncasecmp(make, "Samsung", 7))
-    {
-      // Somebody else use 0xa021 and 0xa028?
-      if (tag == 0xa021)
-        FORC4 cam_mul[c ^ (c >> 1)] = get4();
-      if (tag == 0xa028)
-        FORC4 cam_mul[c ^ (c >> 1)] -= get4();
-    }
 #ifdef LIBRAW_LIBRARY_BUILD
     if (tag == 0x4021 && (imgdata.makernotes.canon.multishot[0] = get4()) &&
         (imgdata.makernotes.canon.multishot[1] = get4()))
