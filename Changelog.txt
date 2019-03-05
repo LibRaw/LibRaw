@@ -1,3 +1,30 @@
+2019-03-05 Alex Tutubalin <lexa@lexa.ru>
+ * Camera support
+   Canon A560 (CHDK hack)
+   FujiFilm X-T30
+   Nikon Coolpix A1000
+   Olympus E-M1X
+   Sony ILCE-6400
+   Several dng files from phones and drones was tested
+   and added to built-in camera list too.
+
+ * Multiple names for same Panasonic cameras are processed via
+   aliaces mechanics, no multiple duplicate fields in adobe_coeffs() table
+
+ * Better makernotes parsing for many cameras
+
+ * Better parsing of makernotes embeded into DNG files created by
+   Adobe DNG Converter
+
+ * New imgdata.params.raw_processing_options value: LIBRAW_PROCESSING_ZEROFILTERS_FOR_MONOCHROMETIFFS
+    - If this bit is set
+    - and TIFF file contains SamplesPerPixel == 1
+    - and filters value was not guessed from metadata parsing
+   LibRaw will assume the file is monochrome, not bayer.
+ This option is needed for monochrome scan processing (Imacon X1 etc).
+ This option may broke old TIF-like RAW files processing (Kodak 760,etc)
+ use with care (it is better to let user choose).
+
 2018-12-12 Alex Tutubalin <lexa@lexa.ru>
  * Camera support:
      Canon: PowerShot A480 (CHDK hack), EOS 2000D, EOS 4000D
@@ -23,7 +50,7 @@
       (note: incompatibility with previous versions, so default is not set).
     LIBRAW_PROCESSING_DNGSDK_ZEROCOPY - will not copy data from Adobe DNG SDK decoded buffer, but use it as is
 
-  * Swtiched from auto_ptr to unique_ptr, got get back define LIBRAW_USE_AUTOPTR
+  * Swtiched from auto_ptr to unique_ptr, to get back define LIBRAW_USE_AUTOPTR
 
   * dcraw_emu: it is now possible to create output filename in a more flexible manner, via -Z switch:
      -Z - will output to stdout
