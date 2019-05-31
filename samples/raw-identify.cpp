@@ -25,7 +25,7 @@ it under the terms of the one of two licenses as you choose:
 
 #include "libraw/libraw.h"
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #define snprintf _snprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp

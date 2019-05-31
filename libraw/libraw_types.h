@@ -21,7 +21,7 @@ it under the terms of the one of two licenses as you choose:
 #define _LIBRAW_TYPES_H
 
 #include <sys/types.h>
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
 #include <sys/time.h>
 #endif
 
@@ -47,7 +47,7 @@ typedef unsigned __int64 uint64_t;
 
 #if defined(_OPENMP)
 
-#if defined(WIN32)
+#if defined(WIN32) || defined(_WIN32)
 #if defined(_MSC_VER) && (_MSC_VER >= 1600 || (_MSC_VER == 1500 && _MSC_FULL_VER >= 150030729))
 /* VS2010+ : OpenMP works OK, VS2008: have tested by cgilles */
 #define LIBRAW_USE_OPENMP
@@ -85,7 +85,7 @@ extern "C"
 #include "libraw_const.h"
 #include "libraw_version.h"
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
   typedef __int64 INT64;
   typedef unsigned __int64 UINT64;
 #else
@@ -96,7 +96,7 @@ typedef unsigned long long UINT64;
   typedef unsigned char uchar;
   typedef unsigned short ushort;
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #ifdef LIBRAW_NODLL
 #define DllDef
 #else

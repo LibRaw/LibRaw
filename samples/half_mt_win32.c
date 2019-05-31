@@ -24,7 +24,7 @@ it under the terms of the one of two licenses as you choose:
 #include <windows.h>
 #include "libraw/libraw.h"
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #define snprintf _snprintf
 #endif
 

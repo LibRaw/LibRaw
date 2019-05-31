@@ -20,7 +20,7 @@ it under the terms of the one of two licenses as you choose:
 #include <string.h>
 #include <math.h>
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -29,7 +29,7 @@ it under the terms of the one of two licenses as you choose:
 
 #include "libraw/libraw.h"
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #define snprintf _snprintf
 #endif
 

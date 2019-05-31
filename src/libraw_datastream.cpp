@@ -15,7 +15,7 @@
 
 */
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #ifdef __MINGW32__
 #define _WIN32_WINNT 0x0500
 #include <stdexcept>
@@ -63,7 +63,7 @@ LibRaw_file_datastream::~LibRaw_file_datastream()
 
 LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
     : filename(fname), _fsize(0)
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
       ,
       wfilename()
 #endif
@@ -72,7 +72,7 @@ LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
 {
   if (filename.size() > 0)
   {
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
     struct stat st;
     if (!stat(filename.c_str(), &st))
       _fsize = st.st_size;
@@ -524,14 +524,14 @@ int LibRaw_buffer_datastream::jpeg_src(void *jpegdata)
 // == LibRaw_bigfile_datastream
 LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname)
     : filename(fname)
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
       ,
       wfilename()
 #endif
 {
   if (filename.size() > 0)
   {
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
     struct stat st;
     if (!stat(filename.c_str(), &st))
       _fsize = st.st_size;
@@ -612,7 +612,7 @@ int LibRaw_bigfile_datastream::eof()
 int LibRaw_bigfile_datastream::seek(INT64 o, int whence)
 {
   LR_BF_CHK();
-#if defined(WIN32)
+#if defined(WIN32) || defined(_WIN32)
 #ifdef WIN32SECURECALLS
   return substream ? substream->seek(o, whence) : _fseeki64(f, o, whence);
 #else
@@ -626,7 +626,7 @@ int LibRaw_bigfile_datastream::seek(INT64 o, int whence)
 INT64 LibRaw_bigfile_datastream::tell()
 {
   LR_BF_CHK();
-#if defined(WIN32)
+#if defined(WIN32) || defined(_WIN32)
 #ifdef WIN32SECURECALLS
   return substream ? substream->tell() : _ftelli64(f);
 #else
@@ -730,7 +730,7 @@ int LibRaw_bigfile_datastream::jpeg_src(void *jpegdata)
 }
 
 // == LibRaw_windows_datastream
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 
 LibRaw_windows_datastream::LibRaw_windows_datastream(const TCHAR *sFile)
     : LibRaw_buffer_datastream(NULL, 0), hMap_(0), pView_(NULL)

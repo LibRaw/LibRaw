@@ -65,7 +65,7 @@
 #ifdef __CYGWIN__
 #include <io.h>
 #endif
-#if defined WIN32 || defined(__MINGW32__)
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
 #include <sys/utime.h>
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
@@ -5985,7 +5985,7 @@ void CLASS bad_pixels(const char *cfname)
       if (errno != ERANGE)
         return;
     }
-#if defined(WIN32) || defined(DJGPP)
+#if defined(WIN32) || defined(_WIN32) || defined(DJGPP)
     if (fname[1] == ':')
       memmove(fname, fname + 2, len - 2);
     for (cp = fname; *cp; cp++)
@@ -14234,7 +14234,7 @@ void CLASS parse_exif(int base)
            l = pos2 - pos;
            memcpy(ccms, pos, l);
            ccms[l] = '\0';
-#if defined WIN32 || defined(__MINGW32__)
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
            // Win32 strtok is already thread-safe
           pos = strtok(ccms, ",");
 #else
@@ -14247,7 +14247,7 @@ void CLASS parse_exif(int base)
               for (c = 0; c < 3; c++) {
                 imgdata.color.ccm[l][c] = (float)atoi(pos);
                 num += imgdata.color.ccm[l][c];
-#if defined WIN32 || defined(__MINGW32__)
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
                 pos = strtok(NULL, ",");
 #else
                 pos = strtok_r(NULL, ",",&last);
@@ -23255,7 +23255,7 @@ int CLASS main(int argc, const char **argv)
       fprintf(stderr, _("Will not write an image to the terminal!\n"));
       return 1;
     }
-#if defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
+#if defined(WIN32) || defined(_WIN32) || defined(DJGPP) || defined(__CYGWIN__)
     if (setmode(1, O_BINARY) < 0)
     {
       perror("setmode()");

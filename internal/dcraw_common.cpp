@@ -12899,7 +12899,7 @@ void CLASS parse_exif(int base)
            l = pos2 - pos;
            memcpy(ccms, pos, l);
            ccms[l] = '\0';
-#if defined WIN32 || defined(__MINGW32__)
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
            // Win32 strtok is already thread-safe
           pos = strtok(ccms, ",");
 #else
@@ -12912,7 +12912,7 @@ void CLASS parse_exif(int base)
               for (c = 0; c < 3; c++) {
                 imgdata.color.ccm[l][c] = (float)atoi(pos);
                 num += imgdata.color.ccm[l][c];
-#if defined WIN32 || defined(__MINGW32__)
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
                 pos = strtok(NULL, ",");
 #else
                 pos = strtok_r(NULL, ",",&last);

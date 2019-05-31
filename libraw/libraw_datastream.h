@@ -27,7 +27,7 @@ it under the terms of the one of two licenses as you choose:
 #ifndef __cplusplus
 
 #else /* __cplusplus */
-#if defined WIN32 || defined(__MINGW32__)
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
 #include <winsock2.h>
 #endif
 /* No unique_ptr on Apple ?? */
@@ -45,7 +45,7 @@ it under the terms of the one of two licenses as you choose:
 #include <fstream>
 #include <memory>
 
-#if defined WIN32 || defined(__MINGW32__)
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
 
 /* MSVS 2008 and above... */
 #if _MSC_VER >= 1500
@@ -55,7 +55,7 @@ it under the terms of the one of two licenses as you choose:
 
 #ifdef USE_DNGSDK
 
-#if defined WIN32 || defined(__MINGW32__)
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
 #define qWinOS 1
 #define qMacOS 0
 #elif defined(__APPLE__)
@@ -120,7 +120,7 @@ protected:
   LibRaw_abstract_datastream *substream;
 };
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #ifdef LIBRAW_USE_AUTOPTR
 template class DllDef std::auto_ptr<std::streambuf>;
 #else
@@ -140,7 +140,7 @@ protected:
 #endif
   std::string filename;
   INT64 _fsize;
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
   std::wstring wfilename;
 #endif
   FILE *jas_file;
@@ -244,12 +244,12 @@ protected:
   FILE *f, *sav;
   std::string filename;
   INT64 _fsize;
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
   std::wstring wfilename;
 #endif
 };
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 class DllDef LibRaw_windows_datastream : public LibRaw_buffer_datastream
 {
 public:

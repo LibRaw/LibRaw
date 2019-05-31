@@ -1064,7 +1064,7 @@ void LibRaw::merror(void *ptr, const char *where)
 
 int LibRaw::open_file(const char *fname, INT64 max_buf_size)
 {
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
   struct stat st;
   if (stat(fname, &st))
     return LIBRAW_IO_ERROR;
@@ -2536,7 +2536,7 @@ void LibRaw::fix_after_rawspeed(int) {}
 
 void LibRaw::clearCancelFlag()
 {
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
   InterlockedExchange(&_exitflag, 0);
 #else
   __sync_fetch_and_and(&_exitflag, 0);
@@ -2552,7 +2552,7 @@ void LibRaw::clearCancelFlag()
 
 void LibRaw::setCancelFlag()
 {
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
   InterlockedExchange(&_exitflag, 1);
 #else
   __sync_fetch_and_add(&_exitflag, 1);
@@ -2568,7 +2568,7 @@ void LibRaw::setCancelFlag()
 
 void LibRaw::checkCancel()
 {
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
   if (InterlockedExchange(&_exitflag, 0))
     throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
 #else
@@ -4131,7 +4131,7 @@ int LibRaw::dcraw_ppm_tiff_writer(const char *filename)
   FILE *f = NULL;
   if(!strcmp(filename,"-"))
     {
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
       _setmode(_fileno(stdout),_O_BINARY);
 #endif
       f = stdout;

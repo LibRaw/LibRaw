@@ -17,7 +17,7 @@ it under the terms of the one of two licenses as you choose:
 
 
  */
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 // suppress sprintf-related warning. sprintf() is permitted in sample code
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -27,7 +27,7 @@ it under the terms of the one of two licenses as you choose:
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
-#ifndef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -38,7 +38,7 @@ it under the terms of the one of two licenses as you choose:
 #include <sys/stat.h>
 
 #include "libraw/libraw.h"
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #define snprintf _snprintf
 #include <windows.h>
 #else
@@ -106,7 +106,7 @@ void usage(const char *prog)
          "-aexpo <e p> exposure correction\n"
          "-apentax4shot enables merge of 4-shot pentax files\n"
          "-apentax4shotorder 3102 sets pentax 4-shot alignment order\n"
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
          "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
 #endif
          "-mem	   Use memory buffer instead of FILE I/O\n"
@@ -143,7 +143,7 @@ int my_progress_callback(void *d, enum LibRaw_progress p, int iteration, int exp
 }
 
 // timer
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
 static struct timeval start, end;
 void timerstart(void) { gettimeofday(&start, NULL); }
 void timerprint(const char *msg, const char *filename)
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 #ifdef USE_DNGSDK
   dng_host *dnghost = NULL;
 #endif
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
   int msize = 0, use_mmap = 0;
 #endif
   void *iobuffer = 0;
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
       OUT.user_qual = atoi(argv[arg++]);
       break;
     case 'm':
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
       if (!strcmp(optstr, "-mmap"))
         use_mmap = 1;
       else
@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
       return 1;
     }
   }
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
   putenv((char *)"TZ=UTC"); // dcraw compatibility, affects TIFF datestamp field
 #else
   _putenv((char *)"TZ=UTC"); // dcraw compatibility, affects TIFF datestamp field
@@ -431,7 +431,7 @@ int main(int argc, char *argv[])
 
     timerstart();
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
     if (use_mmap)
     {
       int file = open(argv[arg], O_RDONLY);
@@ -575,7 +575,7 @@ int main(int argc, char *argv[])
     if (LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_ppm_tiff_writer(outfn)))
       fprintf(stderr, "Cannot write %s: %s\n", outfn, libraw_strerror(ret));
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN32)
     if (use_mmap && iobuffer)
     {
       munmap(iobuffer, msize);
