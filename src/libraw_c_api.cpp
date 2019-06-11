@@ -41,12 +41,12 @@ extern "C"
     return &(ret->imgdata);
   }
 
-  unsigned libraw_capabilities() { return LibRaw::capabilities(); }
-  const char *libraw_version() { return LibRaw::version(); }
+  unsigned libraw_capabilities(void) { return LibRaw::capabilities(); }
+  const char *libraw_version(void) { return LibRaw::version(); }
   const char *libraw_strprogress(enum LibRaw_progress p) { return LibRaw::strprogress(p); }
-  int libraw_versionNumber() { return LibRaw::versionNumber(); }
-  const char **libraw_cameraList() { return LibRaw::cameraList(); }
-  int libraw_cameraCount() { return LibRaw::cameraCount(); }
+  int libraw_versionNumber(void) { return LibRaw::versionNumber(); }
+  const char **libraw_cameraList(void) { return LibRaw::cameraList(); }
+  int libraw_cameraCount(void) { return LibRaw::cameraCount(); }
   const char *libraw_unpack_function_name(libraw_data_t *lr)
   {
     if (!lr)

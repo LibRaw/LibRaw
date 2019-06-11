@@ -62,11 +62,11 @@ extern "C"
   DllDef int libraw_raw2image(libraw_data_t *);
   DllDef void libraw_free_image(libraw_data_t *);
   /* version helpers */
-  DllDef const char *libraw_version();
-  DllDef int libraw_versionNumber();
+  DllDef const char *libraw_version(void);
+  DllDef int libraw_versionNumber(void);
   /* Camera list */
-  DllDef const char **libraw_cameraList();
-  DllDef int libraw_cameraCount();
+  DllDef const char **libraw_cameraList(void);
+  DllDef int libraw_cameraCount(void);
 
   /* helpers */
   DllDef void libraw_set_memerror_handler(libraw_data_t *, memory_callback cb, void *datap);
@@ -76,7 +76,7 @@ extern "C"
   DllDef const char *libraw_unpack_function_name(libraw_data_t *lr);
   DllDef int libraw_get_decoder_info(libraw_data_t *lr, libraw_decoder_info_t *d);
   DllDef int libraw_COLOR(libraw_data_t *, int row, int col);
-  DllDef unsigned libraw_capabilities();
+  DllDef unsigned libraw_capabilities(void);
 
   /* DCRAW compatibility */
   DllDef int libraw_adjust_sizes_info_only(libraw_data_t *);
