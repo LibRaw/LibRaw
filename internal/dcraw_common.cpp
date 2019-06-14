@@ -1551,7 +1551,7 @@ void CLASS nikon_read_curve()
     for (i = 0; i < csize; i++)
       curve[i * step] = get2();
     for (i = 0; i < max; i++)
-      curve[i] = (curve[i - i % step] * (step - i % step) + curve[i - i % step + step] * (i % step)) / step;
+      curve[i] = (curve[i - i % step] * (step - i % step) + curve[i - i % step + step] * (i % step) + (step / 2)) / step;
   }
   else if (ver0 != 0x46 && csize <= 0x4001)
     read_shorts(curve, max = csize);
