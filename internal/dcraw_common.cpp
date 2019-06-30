@@ -8071,7 +8071,7 @@ void CLASS parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, u
   case 0x0600:
     imgdata.shootinginfo.DriveMode =
     imgdata.makernotes.olympus.DriveMode[0] = get2();
-    for (c = 1; c < len; c++) {
+    for (c = 1; c < 5 && c < len ; c++) {
       imgdata.makernotes.olympus.DriveMode[c] = get2();
     }
     break;
