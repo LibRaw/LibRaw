@@ -1,3 +1,9 @@
+2019-07-02  Alex Tutubalin <lexa@lexa.ru>
+ * Several fixes inspired by OSS-Fuzz
+ * LibRaw 0.19.3
+ * Note: ABI slightly changed, new variable added at end of class LibRaw
+   Generally, all old code should run w/o recompile, but you're warned...
+
 2018-12-24  Alex Tutubalin <lexa@lexa.ru>
  * Fixed possible buffer overrun at Fuji makernotes parser
  * Fixed possible write to NULL pointer at raw2image/raw2image_ex calls.

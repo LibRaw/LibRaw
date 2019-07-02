@@ -38,6 +38,7 @@ LIBRAW_MEMPOOL_CHECK define will result in error on pool overflow */
 #endif
 
 #define LIBRAW_IFD_MAXCOUNT 10
+#define LIBRAW_MAX_METADATA_BLOCKS 1024
 
 enum LibRaw_openbayer_patterns
 {
