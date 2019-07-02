@@ -10318,6 +10318,7 @@ void CLASS parse_makernote(int base, int uptag)
         char yy[2], mm[3], dd[3], ystr[16], ynum[16];
         int year, nwords, ynum_len;
         unsigned c;
+        memset(FujiSerial,0,sizeof(imgdata.shootinginfo.InternalBodySerial));
         stmread(FujiSerial, len, ifp);
         nwords = getwords(FujiSerial, words, 4, sizeof(imgdata.shootinginfo.InternalBodySerial));
         for (int i = 0; i < nwords; i++)

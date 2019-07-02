@@ -103,7 +103,7 @@ enum LibRaw_whitebalance_code
   LIBRAW_WBI_Auto4 = 88,
   LIBRAW_WBI_Custom1 = 90,
   LIBRAW_WBI_Custom2 = 91,
-  LIBRAW_WBI_Custom3 = 93,
+  LIBRAW_WBI_Custom3 = 92,
   LIBRAW_WBI_Custom4 = 93,
   LIBRAW_WBI_Custom5 = 94,
   LIBRAW_WBI_Custom6 = 95,
