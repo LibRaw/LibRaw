@@ -9406,7 +9406,7 @@ void CLASS parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, u
   case 0x0600:
     imgdata.shootinginfo.DriveMode =
     imgdata.makernotes.olympus.DriveMode[0] = get2();
-    for (c = 1; c < len; c++) {
+    for (c = 1; c < len && c < 5; c++) {
       imgdata.makernotes.olympus.DriveMode[c] = get2();
     }
     break;
@@ -11269,6 +11269,7 @@ void CLASS parseFujiMakernotes(unsigned tag, unsigned type, unsigned len, unsign
     char yy[2], mm[3], dd[3], ystr[16], ynum[16];
     int year, nwords, ynum_len;
     unsigned c;
+    memset(FujiSerial,0,sizeof(imgdata.shootinginfo.InternalBodySerial));
     stmread(FujiSerial, len, ifp);
     nwords = getwords(FujiSerial, words, 4, sizeof(imgdata.shootinginfo.InternalBodySerial));
     for (int i = 0; i < nwords; i++) {
@@ -13151,6 +13152,9 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer) {
   if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES)
   	return;
 
+  if(metadata_blocks++ > LIBRAW_MAX_METADATA_BLOCKS)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   if (!strncmp(make, "NIKON", 5)) {
     parseNikonMakernote (base, uptag, AdobeDNG);
     return;
@@ -13404,6 +13408,10 @@ void CLASS parse_makernote(int base, int uptag)
 #ifdef LIBRAW_LIBRARY_BUILD
   if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SKIP_MAKERNOTES)
   	return;
+
+  if(metadata_blocks++ > LIBRAW_MAX_METADATA_BLOCKS)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   if (!strncmp(make, "NIKON", 5)) {
     parseNikonMakernote (base, uptag, nonDNG);
     return;
@@ -16926,6 +16934,8 @@ void CLASS parse_ciff(int offset, int length, int depth)
   ushort key[] = {0x410, 0x45f3};
 #ifdef LIBRAW_LIBRARY_BUILD
   INT64 fsize = ifp->size();
+  if(metadata_blocks++ > LIBRAW_MAX_METADATA_BLOCKS)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
 #endif
 
   fseek(ifp, offset + length - 4, SEEK_SET);
@@ -19770,6 +19780,7 @@ void CLASS initdata()
   mix_green = profile_length = data_error = zero_is_bad = 0;
   pixel_aspect = is_raw = raw_color = 1;
   tile_width = tile_length = 0;
+  metadata_blocks = 0;
   is_NikonTransfer = 0;
   is_4K_RAFdata = 0;
   is_PentaxRicohMakernotes = 0;
@@ -20209,6 +20220,7 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
   mix_green = profile_length = data_error = zero_is_bad = 0;
   pixel_aspect = is_raw = raw_color = 1;
   tile_width = tile_length = 0;
+  metadata_blocks = 0;
 
   for (i = 0; i < 4; i++)
   {

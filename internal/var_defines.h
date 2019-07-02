@@ -163,6 +163,7 @@ it under the terms of the one of two licenses as you choose:
 #define OlyID           (libraw_internal_data.identify_data.OlyID)
 #define tiff_nifds      (libraw_internal_data.identify_data.tiff_nifds)
 #define tiff_flip       (libraw_internal_data.identify_data.tiff_flip)
+#define metadata_blocks (libraw_internal_data.identify_data.metadata_blocks)
 
 //libraw_internal_data.unpacker_data
 #define order           (libraw_internal_data.unpacker_data.order)

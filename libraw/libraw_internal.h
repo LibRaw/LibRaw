@@ -115,6 +115,7 @@ typedef struct
   unsigned long long OlyID;
   unsigned tiff_nifds;
   int tiff_flip;
+  int metadata_blocks;
 } identify_data_t;
 
 typedef struct
