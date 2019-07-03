@@ -9,7 +9,7 @@ else
     rm -fr dcraw/*
     rm -f dcraw/.gdbinit
     cd dcraw
-    wget http://www.cybercom.net/~dcoffin/dcraw/dcraw.c
+    wget http://www.dechifro.org/dcraw/dcraw.c
     cd ..
     rm -f internal/preprocess.pl clist2c.pl
     rm -f Makefile.devel 
