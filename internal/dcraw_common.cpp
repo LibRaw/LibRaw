@@ -5328,7 +5328,10 @@ void CLASS scale_colors()
   }
   if (!highlight)
     dmax = dmin;
-  FORC4 scale_mul[c] = (pre_mul[c] /= dmax) * 65535.0 / maximum;
+  if(dmax >= 1.0 && maximum >= 1)
+     FORC4 scale_mul[c] = (pre_mul[c] /= dmax) * 65535.0 / maximum;
+  else
+     FORC4 scale_mul[c] = 1.0;
 #ifdef DCRAW_VERBOSE
   if (verbose)
   {
