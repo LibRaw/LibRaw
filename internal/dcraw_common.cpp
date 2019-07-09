@@ -5416,7 +5416,10 @@ void CLASS scale_colors()
   }
   if (!highlight)
     dmax = dmin;
-  FORC4 scale_mul[c] = (pre_mul[c] /= dmax) * 65535.0 / maximum;
+  if(dmax >= 1.0 && maximum >= 1)
+     FORC4 scale_mul[c] = (pre_mul[c] /= dmax) * 65535.0 / maximum;
+  else
+     FORC4 scale_mul[c] = 1.0;
 #ifdef DCRAW_VERBOSE
   if (verbose)
   {
@@ -18228,7 +18231,10 @@ float CLASS find_green(int bps, int bite, int off0, int off1)
     sum[c & 1] += ABS(img[0][c] - img[1][c + 1]);
     sum[~c & 1] += ABS(img[1][c] - img[0][c + 1]);
   }
-  return 100 * log(sum[0] / sum[1]);
+  if(sum[0]>=1.0 && sum[1] >= 1.0)
+    return 100 * log(sum[0] / sum[1]);
+  else
+    return 0.f;
 }
 
 #ifdef LIBRAW_LIBRARY_BUILD
