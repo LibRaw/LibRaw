@@ -16365,7 +16365,7 @@ void CLASS apply_tiff()
     }
   }
 
-  if (is_NikonTransfer) {
+  if (is_NikonTransfer && raw >= 0) {
     if (tiff_ifd[raw].bps == 16) {
       if (tiff_compress == 1) {
         if ((raw_width * raw_height * 3) == (tiff_ifd[raw].bytes << 1)) {
