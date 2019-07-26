@@ -21265,6 +21265,11 @@ Hasselblad re-badged SONY cameras, MakerNotes SonyModelID tag 0xb001 values:
     {
       left_margin = 0;
       top_margin = 0;
+      if(raw_width == 6912 && raw_height == 4530) // FF crop
+      {
+          width = raw_width;
+          height = raw_height;
+      }
     }
     if (!strcmp(model, "S5500"))
     {
