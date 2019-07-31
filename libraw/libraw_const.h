@@ -24,6 +24,12 @@ it under the terms of the one of two licenses as you choose:
 #define LIBRAW_MAX_ALLOC_MB 2048L
 #endif
 
+/* Change to non-zero to allow (broken) CRW (and other) files metadata 
+   loop prevention */
+#ifndef LIBRAW_METADATA_LOOP_PREVENTION
+#define LIBRAW_METADATA_LOOP_PREVENTION 0
+#endif
+
 /* Check if enough file space exists before tag read */
 #ifndef LIBRAW_NO_IOSPACE_CHECK
 #define LIBRAW_IOSPACE_CHECK

@@ -376,7 +376,9 @@ protected:
 #ifdef LIBRAW_LIBRARY_BUILD
 #include "internal/libraw_internal_funcs.h"
 #endif
+#if LIBRAW_METADATA_LOOP_PREVENTION
   unsigned metadata_blocks; /* This changes ABI, but offsets to prev.defined variables has not changed */
+#endif
 };
 
 #ifdef LIBRAW_LIBRARY_BUILD

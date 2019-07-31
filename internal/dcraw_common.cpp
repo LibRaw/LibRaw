@@ -9296,8 +9296,10 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   short morder, sorder = order;
   char buf[10];
   INT64 fsize = ifp->size();
+#if LIBRAW_METADATA_LOOP_PREVENTION
   if(metadata_blocks++ > LIBRAW_MAX_METADATA_BLOCKS)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
 
   fread(buf, 1, 10, ifp);
 
@@ -10134,8 +10136,10 @@ void CLASS parse_makernote(int base, int uptag)
   ushort table_buf_0x940e_len = 0;
 
   INT64 fsize = ifp->size();
+#if LIBRAW_METADATA_LOOP_PREVENTION
   if(metadata_blocks++ > LIBRAW_MAX_METADATA_BLOCKS)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
 #endif
   /*
      The MakerNote might have its own TIFF header (possibly with
@@ -14669,8 +14673,10 @@ void CLASS parse_ciff(int offset, int length, int depth)
   ushort key[] = {0x410, 0x45f3};
 #ifdef LIBRAW_LIBRARY_BUILD
   INT64 fsize = ifp->size();
+#if LIBRAW_METADATA_LOOP_PREVENTION
   if(metadata_blocks++ > LIBRAW_MAX_METADATA_BLOCKS)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
 #endif
 
   fseek(ifp, offset + length - 4, SEEK_SET);
@@ -17390,7 +17396,9 @@ void CLASS initdata()
   mix_green = profile_length = data_error = zero_is_bad = 0;
   pixel_aspect = is_raw = raw_color = 1;
   tile_width = tile_length = 0;
+#if LIBRAW_METADATA_LOOP_PREVENTION
   metadata_blocks = 0;
+#endif
 }
 
 #endif
@@ -17753,7 +17761,9 @@ void CLASS identify()
   mix_green = profile_length = data_error = zero_is_bad = 0;
   pixel_aspect = is_raw = raw_color = 1;
   tile_width = tile_length = 0;
+#if LIBRAW_METADATA_LOOP_PREVENTION
   metadata_blocks = 0;
+#endif
 
   for (i = 0; i < 4; i++)
   {
