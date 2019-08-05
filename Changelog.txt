@@ -1,3 +1,10 @@
+2019-08-05  Alex Tutubalin <lexa@lexa.ru>
+ * CRW/metadata loop prevention code is rolled back due to ABI
+   incompatibility. To enable, use -DLIBRAW_METADATA_LOOP_PREVENTION=1
+   compile flag for LibRaw and ALL APPS.
+ * Fixed possible buffer underflow
+ * LibRaw 0.19.4
+
 2019-07-02  Alex Tutubalin <lexa@lexa.ru>
  * Several fixes inspired by OSS-Fuzz
  * LibRaw 0.19.3

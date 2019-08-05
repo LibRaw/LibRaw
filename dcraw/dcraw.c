@@ -11333,7 +11333,7 @@ void CLASS parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         for (int wb_cnt = 0; wb_cnt < nPentax_wb_list2; wb_cnt++)
         {
           wb_ind = getc(ifp);
-          if (wb_ind < nPentax_wb_list2)
+          if (wb_ind >= 0 && wb_ind < nPentax_wb_list2)
             FORC4 imgdata.color.WB_Coeffs[Pentax_wb_list2[wb_ind]][c ^ (c >> 1)] = get2();
         }
       }
