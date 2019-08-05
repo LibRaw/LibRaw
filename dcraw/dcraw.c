@@ -11001,7 +11001,7 @@ void CLASS parsePentaxMakernotes(int base, unsigned tag, unsigned type, unsigned
       getc(ifp);
       for (int wb_cnt = 0; wb_cnt < nPentax_wb_list2; wb_cnt++) {
         wb_ind = getc(ifp);
-        if (wb_ind < nPentax_wb_list2)
+        if (wb_ind >= 0 && wb_ind < nPentax_wb_list2)
           FORC4 imgdata.color.WB_Coeffs[Pentax_wb_list2[wb_ind]][c ^ (c >> 1)] = get2();
       }
   } else if (tag == 0x0239) {  // Q-series lens info (LensInfoQ)
