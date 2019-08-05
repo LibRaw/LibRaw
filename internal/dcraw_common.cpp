@@ -11703,7 +11703,7 @@ void CLASS parseSonySRF (unsigned len)
   srf_offset = sget4(srf_buf + offset + 12*entries) - save; /* SRF0 ends with SRF1 abs. position */
 
 /* get SRF1, it has fixed 40 bytes length and contains keys to decode metadata and raw data */
-  /* Need to check len here too */
+  if(decrypt_len < srf_offset/4) goto restore_after_parseSonySRF;
   sony_decrypt((unsigned *)(srf_buf+srf_offset), decrypt_len - srf_offset / 4, 1, MasterKey);
   CHECKBUFFER_SGET2(srf_offset);
   entries = sget2(srf_buf+srf_offset);
@@ -11724,6 +11724,7 @@ void CLASS parseSonySRF (unsigned len)
 /* get SRF2 */
   CHECKBUFFER_SGET4(offset);
   srf_offset = sget4(srf_buf+offset) - save; /* SRFn ends with SRFn+1 position */
+  if(decrypt_len < srf_offset/4) goto restore_after_parseSonySRF;
   sony_decrypt((unsigned *)(srf_buf+srf_offset), decrypt_len - srf_offset / 4, 1, SRF2Key);
   CHECKBUFFER_SGET2(srf_offset);
   entries = sget2(srf_buf+srf_offset);
