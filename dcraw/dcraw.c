@@ -13016,8 +13016,8 @@ void CLASS parseSonySRF (unsigned len)
 
   offset += srf_buf[offset] << 2;
 
-#define CHECKBUFFER_SGET4(offset) do{ if((offset+4)>len) goto restore_after_parseSonySRF; }while(0)
-#define CHECKBUFFER_SGET2(offset) do{ if((offset+2)>len) goto restore_after_parseSonySRF; }while(0)
+#define CHECKBUFFER_SGET4(offset) do{ if((offset+4)>len || (offset)<0) goto restore_after_parseSonySRF; }while(0)
+#define CHECKBUFFER_SGET2(offset) do{ if((offset+2)>len || (offset)<0) goto restore_after_parseSonySRF; }while(0)
 
   CHECKBUFFER_SGET4(offset);
 
@@ -13042,7 +13042,7 @@ void CLASS parseSonySRF (unsigned len)
   sony_decrypt((unsigned *)(srf_buf+srf_offset), decrypt_len - srf_offset / 4, 1, MasterKey);
   CHECKBUFFER_SGET2(srf_offset);
   entries = sget2(srf_buf+srf_offset);
-  if (entries > 1000) goto restore_after_parseSonySRF;
+  if (entries > 1000 || entries < 1) goto restore_after_parseSonySRF;
   offset = srf_offset + 2;
 
   while (entries--) {
@@ -13063,7 +13063,7 @@ void CLASS parseSonySRF (unsigned len)
   sony_decrypt((unsigned *)(srf_buf+srf_offset), decrypt_len - srf_offset / 4, 1, SRF2Key);
   CHECKBUFFER_SGET2(srf_offset);
   entries = sget2(srf_buf+srf_offset);
-  if (entries > 1000) goto restore_after_parseSonySRF;
+  if (entries > 1000 || entries < 1) goto restore_after_parseSonySRF;
   offset = srf_offset + 2;
   while (entries--) {
     CHECKBUFFER_SGET4(srf_offset+8);
