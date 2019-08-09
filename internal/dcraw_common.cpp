@@ -11666,7 +11666,7 @@ void CLASS parseSonySRF (unsigned len)
 
   INT64 save = ftell (ifp);
   INT64 offset = 0x0310c0 - save; /* for non-DNG this value normally is 0x8ddc */
-  if (len < offset) return;
+  if (len < offset || offset < 0) return;
   INT64 decrypt_len = offset >>2; /* master key offset value is the next un-encrypted metadata field after SRF0 */
 
   unsigned i;
