@@ -4279,7 +4279,6 @@ void CLASS samsung3_load_raw()
 {
   int opt, init, mag, pmode, row, tab, col, pred, diff, i, c;
   ushort lent[3][2], len[4], *prow[2];
-
   order = 0x4949;
   fseek(ifp, 9, SEEK_CUR);
   opt = fgetc(ifp);
@@ -4313,6 +4312,9 @@ void CLASS samsung3_load_raw()
         FORC4
         {
           i = ((row & 1) << 1 | (c & 1)) % 3;
+#ifdef LIBRAW_LIBRARY_BUILD
+	  if(i<0) throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
           len[c] = len[c] < 3 ? lent[i][0] - '1' + "120"[len[c]] : ph1_bits(4);
           lent[i][0] = lent[i][1];
           lent[i][1] = len[c];
@@ -4321,6 +4323,12 @@ void CLASS samsung3_load_raw()
       FORC(16)
       {
         col = tab + (((c & 7) << 1) ^ (c >> 3) ^ (row & 1));
+#ifdef LIBRAW_LIBRARY_BUILD
+	if(col<0) throw LIBRAW_EXCEPTION_IO_CORRUPT;
+	if(pmode<0) throw LIBRAW_EXCEPTION_IO_CORRUPT;
+	if(pmode != 7 && row>=2 && (col - '4' + "0224468"[pmode]) < 0 ) 
+		throw LIBRAW_EXCEPTION_IO_CORRUPT;
+#endif
         pred =
             (pmode == 7 || row < 2)
                 ? (tab ? RAW(row, tab - 2 + (col & 1)) : init)
