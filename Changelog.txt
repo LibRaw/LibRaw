@@ -1,3 +1,8 @@
+2019-08-20  Alex Tutubalin <lexa@lexa.ru>
+ * WB coefficients check was too strong, weakened
+ * Fixed possible buffer underrun in modern Samsung loader
+ * LibRaw 0.19.5
+ 
 2019-08-05  Alex Tutubalin <lexa@lexa.ru>
  * CRW/metadata loop prevention code is rolled back due to ABI
    incompatibility. To enable, use -DLIBRAW_METADATA_LOOP_PREVENTION=1
