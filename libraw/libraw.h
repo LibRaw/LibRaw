@@ -48,7 +48,7 @@ extern "C"
   DllDef libraw_data_t *libraw_init(unsigned int flags);
   DllDef int libraw_open_file(libraw_data_t *, const char *);
   DllDef int libraw_open_file_ex(libraw_data_t *, const char *, INT64 max_buff_sz);
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   DllDef int libraw_open_wfile(libraw_data_t *, const wchar_t *);
   DllDef int libraw_open_wfile_ex(libraw_data_t *, const wchar_t *, INT64 max_buff_sz);
 #endif
@@ -124,7 +124,7 @@ public:
   LibRaw(unsigned int flags = LIBRAW_OPTIONS_NONE);
   libraw_output_params_t *output_params_ptr() { return &imgdata.params; }
   int open_file(const char *fname, INT64 max_buffered_sz = LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE);
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   int open_file(const wchar_t *fname, INT64 max_buffered_sz = LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE);
 #endif
   int open_buffer(void *buffer, size_t size);

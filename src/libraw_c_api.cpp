@@ -19,6 +19,7 @@ it under the terms of the one of two licenses as you choose:
 
 #include <math.h>
 #include <errno.h>
+#include "internal/defines.h"
 #include "libraw/libraw.h"
 
 #ifdef __cplusplus
@@ -99,7 +100,7 @@ extern "C"
     LibRaw *ip = (LibRaw *)lr->parent_class;
     return ip->open_file(file, sz);
   }
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   int libraw_open_wfile(libraw_data_t *lr, const wchar_t *file)
   {
     if (!lr)

@@ -150,7 +150,8 @@ enum LibRaw_dng_processing
 enum LibRaw_runtime_capabilities
 {
   LIBRAW_CAPS_RAWSPEED = 1,
-  LIBRAW_CAPS_DNGSDK = 2
+  LIBRAW_CAPS_DNGSDK = 2,
+  LIBRAW_CAPS_WCHAR = 4,
 };
 
 enum LibRaw_camera_mounts

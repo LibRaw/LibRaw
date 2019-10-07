@@ -23,6 +23,7 @@
 #endif
 
 #define LIBRAW_LIBRARY_BUILD
+#include "internal/defines.h"
 #include "libraw/libraw_types.h"
 #include "libraw/libraw.h"
 #include "libraw/libraw_datastream.h"
@@ -97,7 +98,7 @@ LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
     }
   }
 }
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
 LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname)
     : filename(), wfilename(fname), jas_file(NULL), _fsize(0)
 {
@@ -267,7 +268,7 @@ int LibRaw_file_datastream::subfile_open(const char *fn)
   return 0;
 }
 
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
 int LibRaw_file_datastream::subfile_open(const wchar_t *fn)
 {
   LR_STREAM_CHK();
@@ -322,7 +323,7 @@ void *LibRaw_file_datastream::make_jas_stream()
 #ifdef NO_JASPER
   return NULL;
 #else
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   if (wfname())
   {
     jas_file = _wfopen(wfname(), L"rb");
@@ -346,7 +347,7 @@ int LibRaw_file_datastream::jpeg_src(void *jpegdata)
     fclose(jas_file);
     jas_file = NULL;
   }
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   if (wfname())
   {
     jas_file = _wfopen(wfname(), L"rb");
@@ -556,7 +557,7 @@ LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname)
   sav = 0;
 }
 
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
 LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const wchar_t *fname) : filename(), wfilename(fname)
 {
   if (wfilename.size() > 0)
@@ -676,7 +677,7 @@ int LibRaw_bigfile_datastream::subfile_open(const char *fn)
   else
     return 0;
 }
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
 int LibRaw_bigfile_datastream::subfile_open(const wchar_t *fn)
 {
   if (sav)
