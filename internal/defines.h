@@ -30,6 +30,10 @@ it under the terms of the one of two licenses as you choose:
 #define USE_WCHAR
 #endif
 
+#if _GLIBCXX_HAVE__WFOPEN && _GLIBCXX_USE_WCHAR_T
+#define USE_WCHAR
+#endif
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
