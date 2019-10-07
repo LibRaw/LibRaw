@@ -180,6 +180,9 @@ unsigned LibRaw::capabilities()
 #ifdef USE_DNGSDK
   ret |= LIBRAW_CAPS_DNGSDK;
 #endif
+#ifdef USE_WCHAR
+  ret |= LIBRAW_CAPS_WCHAR;
+#endif
   return ret;
 }
 
