@@ -26,6 +26,10 @@ it under the terms of the one of two licenses as you choose:
 #endif
 #define DCRAW_VERSION "9.26"
 
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#define USE_WCHAR
+#endif
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif

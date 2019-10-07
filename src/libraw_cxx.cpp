@@ -30,8 +30,8 @@ it under the terms of the one of two licenses as you choose:
 #include <io.h>
 #endif
 #define LIBRAW_LIBRARY_BUILD
-#include "libraw/libraw.h"
 #include "internal/defines.h"
+#include "libraw/libraw.h"
 #ifdef USE_ZLIB
 #include <zlib.h>
 #endif
@@ -1109,7 +1109,7 @@ int LibRaw::open_file(const char *fname, INT64 max_buf_size)
   return ret;
 }
 
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
 int LibRaw::open_file(const wchar_t *fname, INT64 max_buf_size)
 {
   struct _stati64 st;

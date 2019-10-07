@@ -106,7 +106,7 @@ public:
   virtual void unlock() {}
   /* subfile parsing not implemented in base class */
   virtual const char *fname() { return NULL; };
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   virtual const wchar_t *wfname() { return NULL; };
   virtual int subfile_open(const wchar_t *) { return -1; }
 #endif
@@ -148,7 +148,7 @@ protected:
 public:
   virtual ~LibRaw_file_datastream();
   LibRaw_file_datastream(const char *fname);
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   LibRaw_file_datastream(const wchar_t *fname);
 #endif
   virtual void *make_jas_stream();
@@ -168,7 +168,7 @@ public:
   virtual char *gets(char *str, int sz);
   virtual int scanf_one(const char *fmt, void *val);
   virtual const char *fname();
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   virtual const wchar_t *wfname();
   virtual int subfile_open(const wchar_t *fn);
 #endif
@@ -209,7 +209,7 @@ class DllDef LibRaw_bigfile_datastream : public LibRaw_abstract_datastream
 {
 public:
   LibRaw_bigfile_datastream(const char *fname);
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   LibRaw_bigfile_datastream(const wchar_t *fname);
 #endif
   virtual ~LibRaw_bigfile_datastream();
@@ -225,7 +225,7 @@ public:
   virtual char *gets(char *str, int sz);
   virtual int scanf_one(const char *fmt, void *val);
   virtual const char *fname();
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#ifdef USE_WCHAR
   virtual const wchar_t *wfname();
   virtual int subfile_open(const wchar_t *fn);
 #endif
