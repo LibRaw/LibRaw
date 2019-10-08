@@ -115,11 +115,11 @@
       <dd>See <a href="API-CXX.html#libraw_strerror">LibRaw::strerror</a></dd>
       <dt>const char *libraw_strprogress(enum LibRaw_progress);</dt>
       <dd>See <a href="API-CXX.html#strprogress">LibRaw::strprogress</a></dd>
-      <dt>void libraw_set_memerror_handler(libraw_data_t*, memory_callback cb);</dt>
+      <dt>void libraw_set_memerror_handler(libraw_data_t*, memory_callback cb, void* data);</dt>
       <dd>See <a href="API-CXX.html#memerror">LibRaw::set_memerror_handler()</a></dd>
-      <dt>void libraw_set_dataerror_handler(libraw_data_t*,data_callback func);</dt>
+      <dt>void libraw_set_dataerror_handler(libraw_data_t*, data_callback func, void* data);</dt>
       <dd>See <a href="API-CXX.html#dataerror">LibRaw::set_dataerror_handler()</a></dd>
-      <dt>void libraw_set_progress_handler(libraw_data_t*,progress_callback func);</dt>
+      <dt>void libraw_set_progress_handler(libraw_data_t*, progress_callback func, void* data);</dt>
       <dd>See <a href="API-CXX.html#progress">LibRaw::set_progress_handler()</a></dd>
     </dl>
     <p><a name="dcrawemu"></a></p>
