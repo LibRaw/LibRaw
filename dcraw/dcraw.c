@@ -37,6 +37,14 @@
 //@out DEFINES
 #define DCRAW_VERSION "9.26"
 
+#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
+#define USE_WCHAR
+#endif
+
+#if _GLIBCXX_HAVE__WFOPEN && _GLIBCXX_USE_WCHAR_T
+#define USE_WCHAR
+#endif
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -309,7 +317,7 @@ int CLASS fcol(int row, int col)
   return FC(row, col);
 }
 
-#if !defined(__FreeBSD__)
+#if (!defined(__FreeBSD__) && !defined(__OpenBSD__))
 static size_t local_strnlen(const char *s, size_t n)
 {
   const char *p = (const char *)memchr(s, 0, n);
@@ -393,7 +401,7 @@ static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
 #define stmread(buf, maxlen, fp) stread(buf, MIN(maxlen, sizeof(buf)), fp)
 #endif
 
-#if !defined(__GLIBC__) && !defined(__FreeBSD__)
+#if !defined(__GLIBC__) && !defined(__FreeBSD__) && !defined(__OpenBSD__)
 char *my_memmem(char *haystack, size_t haystacklen, char *needle, size_t needlelen)
 {
   char *c;
@@ -13046,7 +13054,7 @@ void CLASS parseSonySRF (unsigned len)
   srf_offset = sget4(srf_buf + offset + 12*entries) - save; /* SRF0 ends with SRF1 abs. position */
 
 /* get SRF1, it has fixed 40 bytes length and contains keys to decode metadata and raw data */
-  if(decrypt_len < srf_offset/4) goto restore_after_parseSonySRF;
+  if(srf_offset < 0 || decrypt_len < srf_offset/4) goto restore_after_parseSonySRF;
   sony_decrypt((unsigned *)(srf_buf+srf_offset), decrypt_len - srf_offset / 4, 1, MasterKey);
   CHECKBUFFER_SGET2(srf_offset);
   entries = sget2(srf_buf+srf_offset);
@@ -13067,7 +13075,7 @@ void CLASS parseSonySRF (unsigned len)
 /* get SRF2 */
   CHECKBUFFER_SGET4(offset);
   srf_offset = sget4(srf_buf+offset) - save; /* SRFn ends with SRFn+1 position */
-  if(decrypt_len < srf_offset/4) goto restore_after_parseSonySRF;
+  if(srf_offset < 0 || decrypt_len < srf_offset/4) goto restore_after_parseSonySRF;
   sony_decrypt((unsigned *)(srf_buf+srf_offset), decrypt_len - srf_offset / 4, 1, SRF2Key);
   CHECKBUFFER_SGET2(srf_offset);
   entries = sget2(srf_buf+srf_offset);
