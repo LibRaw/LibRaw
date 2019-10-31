@@ -256,11 +256,11 @@ void LibRaw::copy_bayer(unsigned short cblack[4], unsigned short *dmaxp)
 {
   // Both cropped and uncropped
   int row;
-
+  int maxHeight = MIN(S.height,S.raw_height-S.top_margin);
 #if defined(LIBRAW_USE_OPENMP)
 #pragma omp parallel for default(shared)
 #endif
-  for (row = 0; row < S.height && row + S.top_margin < S.raw_height; row++)
+  for (row = 0; row < maxHeight ; row++)
   {
     int col;
     unsigned short ldmax = 0;

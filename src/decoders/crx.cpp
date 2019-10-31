@@ -2357,10 +2357,10 @@ void LibRaw::crxLoadDecodeLoop(void *img, int nPlanes)
   int results[4]; // nPlanes is always <= 4
 #pragma omp parallel for
   for (int32_t plane = 0; plane < nPlanes; ++plane)
-    results[i] = crxDecodePlane(img, plane);
+    results[plane] = crxDecodePlane(img, plane);
 
   for (int32_t plane = 0; plane < nPlanes; ++plane)
-    if (results[i])
+    if (results[plane])
       derror();
 #else
   for (int32_t plane = 0; plane < nPlanes; ++plane)
