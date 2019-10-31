@@ -15193,7 +15193,7 @@ int CLASS parse_tiff_ifd(int base)
                 fseek(ifp, save, SEEK_SET);
               }
 
-              if (SR2SubIFDLength && (SR2SubIFDLength < 10240000) && (buf_SR2 = (unsigned *)malloc(SR2SubIFDLength+1024))) // 1024b for safety
+              if (SR2SubIFDLength>0 && (SR2SubIFDLength < 10240000) && (buf_SR2 = (unsigned *)malloc(SR2SubIFDLength+1024))) // 1024b for safety
               {
                 fseek(ifp, SR2SubIFDOffset + base, SEEK_SET);
                 fread(buf_SR2, SR2SubIFDLength, 1, ifp);
@@ -15385,7 +15385,7 @@ int CLASS parse_tiff_ifd(int base)
     }
     fseek(ifp, save, SEEK_SET);
   }
-  if (sony_length && sony_length < 10240000 && (buf = (unsigned *)malloc(sony_length)))
+  if (sony_length > 0 && sony_length < 10240000 && (buf = (unsigned *)malloc(sony_length)))
   {
     fseek(ifp, sony_offset, SEEK_SET);
     fread(buf, sony_length, 1, ifp);
