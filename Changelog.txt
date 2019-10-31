@@ -1,3 +1,141 @@
+2019-10-25 Alex Tutubalin <lexa@lexa.ru>
+
+ * Libraw public snapshot 201910:
+
+== Camera Format support ==
+  Canon CR3
+  GoPro (via GPR SDK)
+  Panasonic 14-bit
+  Fujifilm compressed/16bit
+
+== Camera support (+41, 1113 total) ==
+  Canon: PowerShot G5 X Mark II, G7 X Mark III, SX70 HS,
+         EOS R, EOS RP, EOS 90D, EOS 250D,  EOS M6 Mark II, EOS M50, EOS M200
+  DJI Mavic Air, Osmo Action
+  FujiFilm GFX 100, X-A7, X-Pro3
+  GoPro Fusion, HERO5, HERO6, HERO7
+  Hasselblad L1D-20c, X1D II 50C
+  Leica D-LUX7, Q-P, Q2, V-LUX5, C-Lux / CAM-DC25
+  Olympus TG-6, E-M5 Mark III.
+  Panasonic DC-FZ1000 II, DC-G90, DC-S1, DC-S1R, DC-TZ95
+  PhaseOne IQ4 150MP
+  Ricoh GR III
+  Sony A7R IV, ILCE-6100, ILCE-6600, RX0 II, RX100 VII
+  Zenit M
+and multiple smartphones (the tested ones are listed in LibRaw::cameraList)
+
+== Source code re-arranged ==
+ * dcraw.c is not used in the generation and build processes
+ * dcraw_common.cpp and libraw_cxx.cpp are split into multiple code chunks
+   placed in separate subfolders (decoders/ for raw data decoders,
+   metadata/ for metadata parsers, etc)
+ * dcraw_common.cpp and libraw_cxx.cpp remain to preserve existing
+   build environments (these files are now just a bunch of #include directives).
+ * It is possible to build LibRaw 
+    a) without postprocessing functions (dcraw_process() and  called function) 
+    b) without postprocessing and LibRaw::raw2image() call (and called function).
+   It may be useful to reduce library memory/code footprint.
+   See Makefile.devel.nopp and Makefile.devel.noppr2i for the list of source
+   files needed to build reduced/stripped library.
+
+== Normalized make/model ==
+
+There is a huge number of identical cameras sold under different names, depending on the market
+(e.g. multiple Panasonic or Canon models)
+and even some identical cameras sold under different brands (Panasonic -> Leica, Sony -> Hasselblad).
+
+To reduce clutter, a normalization mechanism has been implemented in LibRaw:
+
+In imgdata.idata:
+    char normalized_make[64]; - primary vendor name (e.g. Panasonic for Leica re-branded cameras)
+    char normalized_model[64]; - primary camera model name
+    unsigned maker_index; - primary vendor name in indexed form (enum
+       LibRaw_cameramaker_index, LIBRAW_CAMERAMAKER_* constant).
+These fields are always filled upon LibRaw::open_file()/open_buffer() calls.
+
+const char* LibRaw::cameramakeridx2maker(int index): converts maker_index to normalized_make.
+
+We recommend that you use these normalized names in a variety of data tables
+(color profiles, etc.) to reduce the number of duplicate entries.
+
+New vendor index values will be added strictly to the end of the
+LibRaw_cameramaker_index table, ensuring that the numbers assigned to vendors that 
+are already known to LibRaw will not change.
+
+== DNG frame selection  ==
+
+ DNG frames selection code re-worked:
+  - by default all frames w/ the NewSubfileType tag equal to 0 (high-res image) are added
+    to the list of available images (selection performed via imgdata.params.shot_select field, as usual)
+  - the special case for Fuju SuperCCD (SamplesPerPixel == 2) works as before: shot_select=1 will
+    extract second sub-image.
+  - Additional flags to imgdata.params.raw_processing_options:
+     LIBRAW_PROCESSING_DNG_ADD_ENHANCED - will add Enhanced DNG frame (NewSubfileType == 16)
+                                          to the list of available frames
+     LIBRAW_PROCESSING_DNG_ADD_PREVIEWS - will add previews (NewSubfileType == 1) to the list.
+
+  - By default, DNG frames are not reordered and are available in same order as in DNG
+    (LibRaw traverses IFD/Sub-IFD trees in deep-first order).
+    To prioritize the largest image, set LIBRAW_PROCESSING_DNG_PREFER_LARGEST_IMAGE bit
+    in imgdata.params.raw_processing_options.
+
+== GoPro .gpr format support ==
+ GoPro  format supported via open-source GPR SDK
+ See README.GoPro.txt for details.
+
+== Windows support/Windows unicode (wchar_t*) filenames support ==
+
+* (old) LibRaw's WIN32 external define split into 3 defines to fine tune
+  compiler/api compatibility:
+  LIBRAW_WIN32_DLLDEFS - use to compile DLLs (__dllimport/__dllexport attributes)
+  LIBRAW_WIN32_UNICODEPATHS - indicates that runtime has calls/datatypes for wchar_t filenames
+  LIBRAW_WIN32_CALLS - use Win32 calls where appropriative (binary mode for files, LibRaw_windows_datastream, _snprintf instead of snprintf, etc).
+
+  If the (old) WIN32 macro is defined at compile time, all three new defines are defined in libraw.h
+  If not, these defines are defined based on compiler version/libc++ defines
+
+* LibRaw::open_file(wchar_t*) is always compiled in under Windows, but
+  if LIBRAW_WIN32_UNICODEPATHS (see above) is not defined, this call will return LIBRAW_NOT_IMPLEMENTED.
+  Use (LibRaw::capabilities() & LIBRAW_CAPS_UNICODEPATHS) on runtime
+  to check that this call was really implemented (or check for #ifdef LIBRAW_WIN32_UNICODEPATHS after #include <libraw.h>)
+
+== LibRaw*datastream simplified ==
+
+  * tempbuffer_open, subfile_open are not used, so removed from LibRaw_abstract_datastream
+    and derived classes.
+
+== minor/unsorted changes ==
+   * new flag LIBRAW_WARN_DNGSDK_PROCESSED to indicate decoder used
+   * Add support for zlib during configure
+   * Fixed multiple problems found by OSS-Fuzz
+   * Lots of changes in imgdata.makernotes (hope someone will document it)
+   * DNG SDK could be used (if enabled) to unpack multi-image DNG files.
+   * DNG whitelevel calculated via BitsPerSample if not set via tags.
+   * DNG: support for LinearDNG w/ BlackLevelRepeat.. pattern
+   * Generic Arri camera format replaced w/ list of specific camera models in supported cameras list.
+   * new samples/rawtextdump sample: allows one to dump (small selection) of RAW data in text format.
+   * samples/raw-identify:
+     * +M/-M params (same as in dcraw_emu)
+     * -L <file-w-filelist> parameter to get file list from a file
+     * -m paramerer to use mmap'ed IO.
+     * -t parameter for timing
+   * samples/dcraw_emu: fixed +M handling
+   * better support for Nikon Coolscan 16-bit NEF files.
+   * Visual Studio project files: re-generated to .vcxproj (Visual Studio 2013+), different
+     intermediate folders for different sub-projects to allow 1-step rebuild.
+   * imgdata.makernotes...cameraspecific: removed the vendor name prefix from variables.
+   * Bayer images: ensure that even margins have the same COLOR() for both the active sensor area and the full sensor area.
+   * raw processing flag bit LIBRAW_PROCESSING_CHECK_DNG_ILLUMINANT inverted and renamed to
+     LIBRAW_PROCESSING_DONT_CHECK_DNG_ILLUMINANT. If not set, DNG illuminant will be checked.
+   * New libraw_decoder_t flags:
+      LIBRAW_DECODER_FLATDATA - in-file data could be used as is (if byte order matches), e.g. via mmap()
+      LIBRAW_DECODER_FLAT_BG2_SWAPPED - special flag for Sony ARQ: indicates R-G-G2-B channel
+                                        order in 4-color data
+   * Camera-recorded image crop data is parsed into imgdata.sizes.raw_inset_crop structure:
+	ctop,cleft,cwidth,cheight - crop size.
+	aspect - LibRawImageAspects enum (3to2, 4to3, etc)
+   * New define LIBRAW_NO_WINSOCK2 to not include winsock2.h on compile
+
 2019-03-05 Alex Tutubalin <lexa@lexa.ru>
  * Camera support
    Canon A560 (CHDK hack)

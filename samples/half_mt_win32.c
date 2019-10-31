@@ -3,7 +3,8 @@
  * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8, 2008
  *
- * LibRaw  C API mutithreaded sample:  emulates call to "dcraw  -h [-w] [-a] [-v]"
+ * LibRaw  C API mutithreaded sample:  emulates call to "dcraw  -h [-w] [-a]
+[-v]"
  * Win32 version
 
 LibRaw is free software; you can redistribute it and/or modify
@@ -24,22 +25,22 @@ it under the terms of the one of two licenses as you choose:
 #include <windows.h>
 #include "libraw/libraw.h"
 
-#ifdef WIN32
+#ifdef LIBRAW_WIN32_CALLS
 #define snprintf _snprintf
 #endif
 
-#define HANDLE_ERRORS(ret)                                                                                             \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    if (ret)                                                                                                           \
-    {                                                                                                                  \
-      fprintf(stderr, "%s: %s\n", fn, libraw_strerror(ret));                                                           \
-      if (LIBRAW_FATAL_ERROR(ret))                                                                                     \
-      {                                                                                                                \
-        libraw_close(iprc);                                                                                            \
-        return -1;                                                                                                     \
-      }                                                                                                                \
-    }                                                                                                                  \
+#define HANDLE_ERRORS(ret)                                                     \
+  do                                                                           \
+  {                                                                            \
+    if (ret)                                                                   \
+    {                                                                          \
+      fprintf(stderr, "%s: %s\n", fn, libraw_strerror(ret));                   \
+      if (LIBRAW_FATAL_ERROR(ret))                                             \
+      {                                                                        \
+        libraw_close(iprc);                                                    \
+        return -1;                                                             \
+      }                                                                        \
+    }                                                                          \
   } while (0)
 
 // global settings
@@ -184,13 +185,14 @@ int main(int ac, char *av[])
   for (i = 0; i < max_threads; i++)
   {
 
-    if (NULL == (threads[i] = CreateThread(NULL, // default security attributes
-                                           0,    // default stack size
-                                           (LPTHREAD_START_ROUTINE)process_files,
-                                           NULL,      // no thread function arguments
-                                           0,         // default creation flags
-                                           &ThreadID) // receive thread identifier
-                 ))
+    if (NULL ==
+        (threads[i] = CreateThread(NULL, // default security attributes
+                                   0,    // default stack size
+                                   (LPTHREAD_START_ROUTINE)process_files,
+                                   NULL,      // no thread function arguments
+                                   0,         // default creation flags
+                                   &ThreadID) // receive thread identifier
+         ))
     {
       printf("CreateThread error: %d\n", GetLastError());
       return 1;

@@ -167,7 +167,7 @@ index 0000000..c806451
 +#ifndef DLLDEF_H
 +#define DLLDEF_H
 +
-+#ifdef WIN32
++#ifdef _WIN32
 +#ifdef _MSC_VER
 +#pragma warning( disable: 4251 )
 +#endif

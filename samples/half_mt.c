@@ -3,7 +3,8 @@
  * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8, 2008
  *
- * LibRaw  C API mutithreaded sample: emulates call to "dcraw  -h [-w] [-a] [-v]"
+ * LibRaw  C API mutithreaded sample: emulates call to "dcraw  -h [-w] [-a]
+[-v]"
  *
 
 LibRaw is free software; you can redistribute it and/or modify
@@ -25,18 +26,18 @@ it under the terms of the one of two licenses as you choose:
 
 #include "libraw/libraw.h"
 
-#define HANDLE_ERRORS(ret)                                                                                             \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    if (ret)                                                                                                           \
-    {                                                                                                                  \
-      fprintf(stderr, "%s: %s\n", fn, libraw_strerror(ret));                                                           \
-      if (LIBRAW_FATAL_ERROR(ret))                                                                                     \
-      {                                                                                                                \
-        libraw_close(iprc);                                                                                            \
-        return NULL;                                                                                                   \
-      }                                                                                                                \
-    }                                                                                                                  \
+#define HANDLE_ERRORS(ret)                                                     \
+  do                                                                           \
+  {                                                                            \
+    if (ret)                                                                   \
+    {                                                                          \
+      fprintf(stderr, "%s: %s\n", fn, libraw_strerror(ret));                   \
+      if (LIBRAW_FATAL_ERROR(ret))                                             \
+      {                                                                        \
+        libraw_close(iprc);                                                    \
+        return NULL;                                                           \
+      }                                                                        \
+    }                                                                          \
   } while (0)
 
 int verbose = 0, use_camera_wb = 0, use_auto_wb = 0, tiff_mode = 0;
@@ -104,7 +105,8 @@ void *process_files(void *q)
 
 void usage(const char *p)
 {
-  printf("%s: Multi-threaded LibRaw sample app. Emulates dcraw -h [-w] [-a]\n", p);
+  printf("%s: Multi-threaded LibRaw sample app. Emulates dcraw -h [-w] [-a]\n",
+         p);
   printf("Options:\n"
          "-J n  - set parallel job count (default 2)\n"
          "-v    - verbose\n"

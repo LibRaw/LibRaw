@@ -20,25 +20,43 @@ it under the terms of the one of two licenses as you choose:
 #ifndef LIBRAW_LIBRARY_BUILD
 #error "This file should be used only for libraw library build"
 #else
-    /* WF */
-    void        wf_bayer4_igauss_filter(int radius,void* src_image, int src_imgmode, void* dst_image, int dst_imgmode);
-    void			wf_bayer4_green_blur   (int mode,void* src_image, int src_imgmode, void* dst_image, int dst_imgmode);
-    void        wf_bayer4_block_filter (int* radius_list, void* src_image, int src_imgmode, void* dst_image, int dst_imgmode);
-    double	wf_filter_energy       (int r1_greenmode, int r1, int r2_greenmode, int r2);
-
 
 /* inline functions */
-    ushort      sget2 (uchar *s);
-    ushort      sget2Rev(uchar *s);
-    unsigned setCanonBodyFeatures (unsigned id);
-    void 	processCanonCameraInfo (unsigned id, uchar *CameraInfo, unsigned maxlen, unsigned type);
+    static int stread(char *buf, size_t len, LibRaw_abstract_datastream *fp);
+    static int getwords(char *line, char *words[], int maxwords, int maxlen);
+    static void remove_trailing_spaces(char *string, size_t len);
+    static void remove_caseSubstr(char *string, char *remove);
+    static void removeExcessiveSpaces(char *string);
+    static void trimSpaces(char *s);
+/* static tables/variables */
+    static const uchar xlat[2][256];
+    static const int Fuji_wb_list1[];
+    static const int nFuji_wb_list1;
+    static const int FujiCCT_K[31];
+    static const int Fuji_wb_list2[];
+    static const int nFuji_wb_list2;
+    static const int Pentax_wb_list1[];
+    static const int Pentax_wb_list2[];
+    static const int nPentax_wb_list2;
+    static const int Oly_wb_list1[];
+    static const int Oly_wb_list2[];
+/*  */
+    int     find_ifd_by_offset(int );
+    ushort	sget2 (uchar *s);
+    ushort	sget2Rev(uchar *s);
+    int 	parseCR3(unsigned long long oAtomList, unsigned long long szAtomList, short &nesting, char *AtomNameStack, short& nTrack, short &TrackType);
+    void	selectCRXTrack(short maxTrack);
+    void	setCanonBodyFeatures (unsigned long long id);
+    void	processCanonCameraInfo (unsigned long long id, uchar *CameraInfo, unsigned maxlen, unsigned type, unsigned dng_writer);
+    static float _CanonConvertAperture(ushort in);
     void	Canon_CameraSettings(unsigned len);
     void	Canon_WBpresets (int skip1, int skip2);
     void	Canon_WBCTpresets (short WBCTversion);
-    void	parseCanonMakernotes (unsigned tag, unsigned type, unsigned len);
+    void	parseCanonMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	processNikonLensData (uchar *LensData, unsigned len);
     void	Nikon_NRW_WBtag (int wb, int skip);
     void	parseNikonMakernote (int base, int uptag, unsigned dng_writer);
+    void	parseEpsonMakernote (int base, int uptag, unsigned dng_writer);
     void	setOlympusBodyFeatures (unsigned long long id);
     void	getOlympus_CameraType2 ();
     void	getOlympus_SensorTemperature (unsigned len);
@@ -46,25 +64,26 @@ it under the terms of the one of two licenses as you choose:
     void	parseOlympus_CameraSettings (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseOlympus_ImageProcessing (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseOlympus_RawInfo (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
-    void	setPhaseOneFeatures (unsigned id);
-    void	setPentaxBodyFeatures (unsigned id);
+    void	setPhaseOneFeatures (unsigned long long id);
+    void	setPentaxBodyFeatures (unsigned long long id);
     void	PentaxISO (ushort c);
-    void	PentaxLensInfo (unsigned id, unsigned len);
+    void	PentaxLensInfo (unsigned long long id, unsigned len);
     void	parsePentaxMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseRicohMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
     void	parseSamsungMakernotes(int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
-    void	setSonyBodyFeatures (unsigned id);
+    void	setSonyBodyFeatures (unsigned long long id);
+    void    fixupArri();
     void	parseSonyLensType2 (uchar a, uchar b);
-    void 	parseSonyLensFeatures (uchar a, uchar b);
-    void	process_Sony_0x0116 (uchar * buf, ushort, unsigned id);
+    void	parseSonyLensFeatures (uchar a, uchar b);
+    void	process_Sony_0x0116 (uchar * buf, ushort, unsigned long long id);
     void	process_Sony_0x2010 (uchar * buf, ushort);
-    void	process_Sony_0x9050 (uchar * buf, ushort, unsigned id);
-    void	process_Sony_0x9400 (uchar * buf, ushort, unsigned id);
+    void	process_Sony_0x9050 (uchar * buf, ushort, unsigned long long id);
+    void	process_Sony_0x9400 (uchar * buf, ushort, unsigned long long id);
     void	process_Sony_0x9402 (uchar * buf, ushort);
     void	process_Sony_0x9403 (uchar * buf, ushort);
     void	process_Sony_0x9406 (uchar * buf, ushort);
     void	process_Sony_0x940c (uchar * buf, ushort);
-    void	process_Sony_0x940e (uchar * buf, ushort, unsigned id);
+    void	process_Sony_0x940e (uchar * buf, ushort, unsigned long long id);
     void	parseSonyMakernotes (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer,
                                uchar *&table_buf_0x0116, ushort &table_buf_0x0116_len,
                                uchar *&table_buf_0x2010, ushort &table_buf_0x2010_len,
@@ -76,16 +95,21 @@ it under the terms of the one of two licenses as you choose:
                                uchar *&table_buf_0x940c, ushort &table_buf_0x940c_len,
                                uchar *&table_buf_0x940e, ushort &table_buf_0x940e_len);
     void	parseSonySR2 (uchar *cbuf_SR2, unsigned SR2SubIFDOffset, unsigned SR2SubIFDLength, unsigned dng_writer);
-    void parseSonySRF (unsigned len);
+    void	parseSonySRF (unsigned len);
     void	parseFujiMakernotes (unsigned tag, unsigned type, unsigned len, unsigned dng_writer);
+    const char* HassyRawFormat_idx2HR(unsigned idx);
+    void	process_Hassy_Lens (int LensMount);
+    void parseHassyModel ();
 
     void	setLeicaBodyFeatures(int LeicaMakernoteSignature);
     void	parseLeicaLensID();
     int 	parseLeicaLensName(unsigned len);
     int 	parseLeicaInternalBodySerial(unsigned len);
-    void 	parseLeicaMakernote(int base, int uptag, unsigned MakernoteTagType);
-    void 	parseAdobePanoMakernote ();
-    void parseAdobeRAFMakernote ();
+    void	parseLeicaMakernote(int base, int uptag, unsigned MakernoteTagType);
+    void	parseAdobePanoMakernote ();
+    void	parseAdobeRAFMakernote ();
+    void	GetNormalizedModel ();
+    void	SetStandardIlluminants (unsigned, const char* );
 
     ushort      get2();
     unsigned    sget4 (uchar *s);
@@ -163,9 +187,12 @@ it under the terms of the one of two licenses as you choose:
     void        rollei_load_raw();
     void        parse_rollei();
 
+// Contax
+    void        parse_kyocera ();
+
 // MF backs
 //int         bayer (unsigned row, unsigned col);
-    int         raw(unsigned,unsigned);
+    int         p1raw(unsigned,unsigned);
     void        phase_one_flat_field (int is_float, int nc);
     void        phase_one_load_raw();
     unsigned    ph1_bits (int nbits);
@@ -226,6 +253,7 @@ it under the terms of the one of two licenses as you choose:
     void        kodak_rgb_load_thumb();
     void        kodak_ycbcr_load_thumb();
     void        float_dng_load_raw_placeholder();
+    void        vc5_dng_load_raw_placeholder();
 // It's a Sony (and K&M)
     void        sony_decrypt (unsigned *data, int len, int start, int key);
     void        sony_load_raw();
@@ -272,9 +300,6 @@ it under the terms of the one of two licenses as you choose:
     void        parse_qt (int end);
     void        get_timestamp (int reversed);
 
-// External JPEGs, what cameras uses it ?
-    void        parse_external_jpeg();
-
 // The identify
     short       guess_byte_order (int words);
 
@@ -283,14 +308,12 @@ it under the terms of the one of two licenses as you choose:
     void        tiff_head (struct tiff_hdr *th, int full);
 
 // split AHD code
-#define TS 512
-    void ahd_interpolate_green_h_and_v(int top, int left, ushort (*out_rgb)[TS][TS][3]);
-    void ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[TS][3], short (*out_lab)[TS][3]);
-    void ahd_interpolate_r_and_b_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[TS][TS][3], short (*out_lab)[TS][TS][3]);
-    void ahd_interpolate_build_homogeneity_map(int top, int left, short (*lab)[TS][TS][3], char (*out_homogeneity_map)[TS][2]);
-    void ahd_interpolate_combine_homogeneous_pixels(int top, int left, ushort (*rgb)[TS][TS][3], char (*homogeneity_map)[TS][2]);
+    void ahd_interpolate_green_h_and_v(int top, int left, ushort (*out_rgb)[LIBRAW_AHD_TILE][LIBRAW_AHD_TILE][3]);
+    void ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[LIBRAW_AHD_TILE][3], short (*out_lab)[LIBRAW_AHD_TILE][3]);
+    void ahd_interpolate_r_and_b_and_convert_to_cielab(int top, int left, ushort (*inout_rgb)[LIBRAW_AHD_TILE][LIBRAW_AHD_TILE][3], short (*out_lab)[LIBRAW_AHD_TILE][LIBRAW_AHD_TILE][3]);
+    void ahd_interpolate_build_homogeneity_map(int top, int left, short (*lab)[LIBRAW_AHD_TILE][LIBRAW_AHD_TILE][3], char (*out_homogeneity_map)[LIBRAW_AHD_TILE][2]);
+    void ahd_interpolate_combine_homogeneous_pixels(int top, int left, ushort (*rgb)[LIBRAW_AHD_TILE][LIBRAW_AHD_TILE][3], char (*homogeneity_map)[LIBRAW_AHD_TILE][2]);
 
-#undef TS
 	void init_fuji_compr(struct fuji_compressed_params* info);
 	void init_fuji_block(struct fuji_compressed_block* info, const struct fuji_compressed_params *params, INT64 raw_offset, unsigned dsize);
 	void copy_line_to_xtrans(struct fuji_compressed_block* info, int cur_line, int cur_block, int cur_block_width);
@@ -300,6 +323,10 @@ it under the terms of the one of two licenses as you choose:
 	void fuji_compressed_load_raw();
 	void fuji_14bit_load_raw();
 	void parse_fuji_compressed_header();
+    void crxLoadRaw();
+    int  crxParseImageHeader(uchar *cmp1TagData, int nTrack);
+	void panasonicC6_load_raw();
+	void panasonicC7_load_raw();
 
 	void nikon_14bit_load_raw();
 

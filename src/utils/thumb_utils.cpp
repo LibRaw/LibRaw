@@ -1,0 +1,305 @@
+/* -*- C++ -*-
+ * Copyright 2019 LibRaw LLC (info@libraw.org)
+ *
+
+ LibRaw is free software; you can redistribute it and/or modify
+ it under the terms of the one of two licenses as you choose:
+
+1. GNU LESSER GENERAL PUBLIC LICENSE version 2.1
+   (See file LICENSE.LGPL provided in LibRaw distribution archive for details).
+
+2. COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
+   (See file LICENSE.CDDL provided in LibRaw distribution archive for details).
+
+ */
+
+#include "../../internal/libraw_cxx_defs.h"
+
+void LibRaw::kodak_thumb_loader()
+{
+  INT64 est_datasize =
+      T.theight * T.twidth / 3; // is 0.3 bytes per pixel good estimate?
+  if (ID.toffset < 0)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+  if (ID.toffset + est_datasize > ID.input->size() + THUMB_READ_BEYOND)
+    throw LIBRAW_EXCEPTION_IO_EOF;
+
+  // some kodak cameras
+  ushort s_height = S.height, s_width = S.width, s_iwidth = S.iwidth,
+         s_iheight = S.iheight;
+  ushort s_flags = libraw_internal_data.unpacker_data.load_flags;
+  libraw_internal_data.unpacker_data.load_flags = 12;
+  int s_colors = P1.colors;
+  unsigned s_filters = P1.filters;
+  ushort(*s_image)[4] = imgdata.image;
+
+  S.height = T.theight;
+  S.width = T.twidth;
+  P1.filters = 0;
+
+  if (thumb_load_raw == &LibRaw::kodak_ycbcr_load_raw)
+  {
+    S.height += S.height & 1;
+    S.width += S.width & 1;
+  }
+
+  imgdata.image =
+      (ushort(*)[4])calloc(S.iheight * S.iwidth, sizeof(*imgdata.image));
+  merror(imgdata.image, "LibRaw::kodak_thumb_loader()");
+
+  ID.input->seek(ID.toffset, SEEK_SET);
+  // read kodak thumbnail into T.image[]
+  try
+  {
+    (this->*thumb_load_raw)();
+  }
+  catch (...)
+  {
+    free(imgdata.image);
+    imgdata.image = s_image;
+
+    T.twidth = 0;
+    S.width = s_width;
+
+    S.iwidth = s_iwidth;
+    S.iheight = s_iheight;
+
+    T.theight = 0;
+    S.height = s_height;
+
+    T.tcolors = 0;
+    P1.colors = s_colors;
+
+    P1.filters = s_filters;
+    T.tlength = 0;
+    libraw_internal_data.unpacker_data.load_flags = s_flags;
+    return;
+  }
+
+  // from scale_colors
+  {
+    double dmax;
+    float scale_mul[4];
+    int c, val;
+    for (dmax = DBL_MAX, c = 0; c < 3; c++)
+      if (dmax > C.pre_mul[c])
+        dmax = C.pre_mul[c];
+
+    for (c = 0; c < 3; c++)
+      scale_mul[c] = (C.pre_mul[c] / dmax) * 65535.0 / C.maximum;
+    scale_mul[3] = scale_mul[1];
+
+    size_t size = S.height * S.width;
+    for (unsigned i = 0; i < size * 4; i++)
+    {
+      val = imgdata.image[0][i];
+      if (!val)
+        continue;
+      val *= scale_mul[i & 3];
+      imgdata.image[0][i] = CLIP(val);
+    }
+  }
+
+  // from convert_to_rgb
+  ushort *img;
+  int row, col;
+
+  int(*t_hist)[LIBRAW_HISTOGRAM_SIZE] =
+      (int(*)[LIBRAW_HISTOGRAM_SIZE])calloc(sizeof(*t_hist), 4);
+  merror(t_hist, "LibRaw::kodak_thumb_loader()");
+
+  float out[3], out_cam[3][4] = {{2.81761312, -1.98369181, 0.166078627, 0},
+                                 {-0.111855984, 1.73688626, -0.625030339, 0},
+                                 {-0.0379119813, -0.891268849, 1.92918086, 0}};
+
+  for (img = imgdata.image[0], row = 0; row < S.height; row++)
+    for (col = 0; col < S.width; col++, img += 4)
+    {
+      out[0] = out[1] = out[2] = 0;
+      int c;
+      for (c = 0; c < 3; c++)
+      {
+        out[0] += out_cam[0][c] * img[c];
+        out[1] += out_cam[1][c] * img[c];
+        out[2] += out_cam[2][c] * img[c];
+      }
+      for (c = 0; c < 3; c++)
+        img[c] = CLIP((int)out[c]);
+      for (c = 0; c < P1.colors; c++)
+        t_hist[c][img[c] >> 3]++;
+    }
+
+  // from gamma_lut
+  int(*save_hist)[LIBRAW_HISTOGRAM_SIZE] =
+      libraw_internal_data.output_data.histogram;
+  libraw_internal_data.output_data.histogram = t_hist;
+
+  // make curve output curve!
+  ushort(*t_curve) = (ushort *)calloc(sizeof(C.curve), 1);
+  merror(t_curve, "LibRaw::kodak_thumb_loader()");
+  memmove(t_curve, C.curve, sizeof(C.curve));
+  memset(C.curve, 0, sizeof(C.curve));
+  {
+    int perc, val, total, t_white = 0x2000, c;
+
+    perc = S.width * S.height * 0.01; /* 99th percentile white level */
+    if (IO.fuji_width)
+      perc /= 2;
+    if (!((O.highlight & ~2) || O.no_auto_bright))
+      for (t_white = c = 0; c < P1.colors; c++)
+      {
+        for (val = 0x2000, total = 0; --val > 32;)
+          if ((total += libraw_internal_data.output_data.histogram[c][val]) >
+              perc)
+            break;
+        if (t_white < val)
+          t_white = val;
+      }
+    gamma_curve(O.gamm[0], O.gamm[1], 2, (t_white << 3) / O.bright);
+  }
+
+  libraw_internal_data.output_data.histogram = save_hist;
+  free(t_hist);
+
+  // from write_ppm_tiff - copy pixels into bitmap
+
+  int s_flip = imgdata.sizes.flip;
+  if (imgdata.params.raw_processing_options &
+      LIBRAW_PROCESSING_NO_ROTATE_FOR_KODAK_THUMBNAILS)
+    imgdata.sizes.flip = 0;
+
+  S.iheight = S.height;
+  S.iwidth = S.width;
+  if (S.flip & 4)
+    SWAP(S.height, S.width);
+
+  if (T.thumb)
+    free(T.thumb);
+  T.thumb = (char *)calloc(S.width * S.height, P1.colors);
+  merror(T.thumb, "LibRaw::kodak_thumb_loader()");
+  T.tlength = S.width * S.height * P1.colors;
+
+  // from write_tiff_ppm
+  {
+    int soff = flip_index(0, 0);
+    int cstep = flip_index(0, 1) - soff;
+    int rstep = flip_index(1, 0) - flip_index(0, S.width);
+
+    for (int row = 0; row < S.height; row++, soff += rstep)
+    {
+      char *ppm = T.thumb + row * S.width * P1.colors;
+      for (int col = 0; col < S.width; col++, soff += cstep)
+        for (int c = 0; c < P1.colors; c++)
+          ppm[col * P1.colors + c] =
+              imgdata.color.curve[imgdata.image[soff][c]] >> 8;
+    }
+  }
+
+  memmove(C.curve, t_curve, sizeof(C.curve));
+  free(t_curve);
+
+  // restore variables
+  free(imgdata.image);
+  imgdata.image = s_image;
+
+  if (imgdata.params.raw_processing_options &
+      LIBRAW_PROCESSING_NO_ROTATE_FOR_KODAK_THUMBNAILS)
+    imgdata.sizes.flip = s_flip;
+
+  T.twidth = S.width;
+  S.width = s_width;
+
+  S.iwidth = s_iwidth;
+  S.iheight = s_iheight;
+
+  T.theight = S.height;
+  S.height = s_height;
+
+  T.tcolors = P1.colors;
+  P1.colors = s_colors;
+
+  P1.filters = s_filters;
+  libraw_internal_data.unpacker_data.load_flags = s_flags;
+}
+
+// ������� thumbnail �� �����, ������ thumb_format � ������������ � ��������
+
+int LibRaw::thumbOK(INT64 maxsz)
+{
+  if (!ID.input)
+    return 0;
+  if (!ID.toffset && !(imgdata.thumbnail.tlength > 0 &&
+                       load_raw == &LibRaw::broadcom_load_raw) // RPi
+  )
+    return 0;
+  INT64 fsize = ID.input->size();
+  if (fsize > 0x7fffffffU)
+    return 0; // No thumb for raw > 2Gb
+  int tsize = 0;
+  int tcol = (T.tcolors > 0 && T.tcolors < 4) ? T.tcolors : 3;
+  if (write_thumb == &LibRaw::jpeg_thumb)
+    tsize = T.tlength;
+  else if (write_thumb == &LibRaw::ppm_thumb)
+    tsize = tcol * T.twidth * T.theight;
+  else if (write_thumb == &LibRaw::ppm16_thumb)
+    tsize = tcol * T.twidth * T.theight *
+            ((imgdata.params.raw_processing_options &
+              LIBRAW_PROCESSING_USE_PPM16_THUMBS)
+                 ? 2
+                 : 1);
+  else if (write_thumb == &LibRaw::x3f_thumb_loader)
+  {
+    tsize = x3f_thumb_size();
+  }
+  else // Kodak => no check
+    tsize = 1;
+  if (tsize < 0)
+    return 0;
+  if (maxsz > 0 && tsize > maxsz)
+    return 0;
+  return (tsize + ID.toffset <= fsize) ? 1 : 0;
+}
+
+int LibRaw::dcraw_thumb_writer(const char *fname)
+{
+  //    CHECK_ORDER_LOW(LIBRAW_PROGRESS_THUMB_LOAD);
+
+  if (!fname)
+    return ENOENT;
+
+  FILE *tfp = fopen(fname, "wb");
+
+  if (!tfp)
+    return errno;
+
+  if (!T.thumb)
+  {
+    fclose(tfp);
+    return LIBRAW_OUT_OF_ORDER_CALL;
+  }
+
+  try
+  {
+    switch (T.tformat)
+    {
+    case LIBRAW_THUMBNAIL_JPEG:
+      jpeg_thumb_writer(tfp, T.thumb, T.tlength);
+      break;
+    case LIBRAW_THUMBNAIL_BITMAP:
+      fprintf(tfp, "P6\n%d %d\n255\n", T.twidth, T.theight);
+      fwrite(T.thumb, 1, T.tlength, tfp);
+      break;
+    default:
+      fclose(tfp);
+      return LIBRAW_UNSUPPORTED_THUMBNAIL;
+    }
+    fclose(tfp);
+    return 0;
+  }
+  catch (LibRaw_exceptions err)
+  {
+    fclose(tfp);
+    EXCEPTION_HANDLER(err);
+  }
+}

@@ -4,7 +4,8 @@
  * Created: Fri Jan 02, 2009
  *
  * LibRaw sample
- * Generates unprocessed raw image: with masked pixels and without black subtraction
+ * Generates unprocessed raw image: with masked pixels and without black
+subtraction
  *
 
 LibRaw is free software; you can redistribute it and/or modify
@@ -21,16 +22,17 @@ it under the terms of the one of two licenses as you choose:
 #include <string.h>
 #include <math.h>
 #include <time.h>
-#ifndef WIN32
+
+#include "libraw/libraw.h"
+
+#ifndef LIBRAW_WIN32_CALLS
 #include <netinet/in.h>
 #else
 #include <sys/utime.h>
 #include <winsock2.h>
 #endif
 
-#include "libraw/libraw.h"
-
-#ifdef WIN32
+#ifdef LIBRAW_WIN32_CALLS
 #define snprintf _snprintf
 #endif
 
@@ -39,8 +41,10 @@ it under the terms of the one of two licenses as you choose:
 #endif
 
 void gamma_curve(unsigned short curve[]);
-void write_ppm(unsigned width, unsigned height, unsigned short *bitmap, const char *basename);
-void write_tiff(int width, int height, unsigned short *bitmap, const char *basename);
+void write_ppm(unsigned width, unsigned height, unsigned short *bitmap,
+               const char *basename);
+void write_tiff(int width, int height, unsigned short *bitmap,
+                const char *basename);
 
 int main(int ac, char *av[])
 {
@@ -56,7 +60,8 @@ int main(int ac, char *av[])
            "Usage: %s [-q] [-A] [-g] [-s N] raw-files....\n"
            "\t-q - be quiet\n"
            "\t-s N - select Nth image in file (default=0)\n"
-           "\t-g - use gamma correction with gamma 2.2 (not precise,use for visual inspection only)\n"
+           "\t-g - use gamma correction with gamma 2.2 (not precise,use for "
+           "visual inspection only)\n"
            "\t-A - autoscaling (by integer factor)\n"
            "\t-T - write tiff instead of pgm\n",
            LibRaw::version(), LibRaw::cameraCount(), av[0]);
@@ -97,7 +102,8 @@ int main(int ac, char *av[])
     }
     if (verbose)
     {
-      printf("Image size: %dx%d\nRaw size: %dx%d\n", S.width, S.height, S.raw_width, S.raw_height);
+      printf("Image size: %dx%d\nRaw size: %dx%d\n", S.width, S.height,
+             S.raw_width, S.raw_height);
       printf("Margins: top=%d, left=%d\n", S.top_margin, S.left_margin);
     }
 
@@ -110,7 +116,8 @@ int main(int ac, char *av[])
     if (verbose)
       printf("Unpacked....\n");
 
-    if (!(RawProcessor.imgdata.idata.filters || RawProcessor.imgdata.idata.colors == 1))
+    if (!(RawProcessor.imgdata.idata.filters ||
+          RawProcessor.imgdata.idata.colors == 1))
     {
       printf("Only Bayer-pattern RAW files supported, sorry....\n");
       continue;
@@ -137,20 +144,24 @@ int main(int ac, char *av[])
       unsigned short curve[0x10000];
       gamma_curve(curve);
       for (int j = 0; j < S.raw_height * S.raw_width; j++)
-        RawProcessor.imgdata.rawdata.raw_image[j] = curve[RawProcessor.imgdata.rawdata.raw_image[j]];
+        RawProcessor.imgdata.rawdata.raw_image[j] =
+            curve[RawProcessor.imgdata.rawdata.raw_image[j]];
       if (verbose)
         printf("Gamma-corrected....\n");
     }
 
     if (OUT.shot_select)
-      snprintf(outfn, sizeof(outfn), "%s-%d.%s", av[i], OUT.shot_select, out_tiff ? "tiff" : "pgm");
+      snprintf(outfn, sizeof(outfn), "%s-%d.%s", av[i], OUT.shot_select,
+               out_tiff ? "tiff" : "pgm");
     else
       snprintf(outfn, sizeof(outfn), "%s.%s", av[i], out_tiff ? "tiff" : "pgm");
 
     if (out_tiff)
-      write_tiff(S.raw_width, S.raw_height, RawProcessor.imgdata.rawdata.raw_image, outfn);
+      write_tiff(S.raw_width, S.raw_height,
+                 RawProcessor.imgdata.rawdata.raw_image, outfn);
     else
-      write_ppm(S.raw_width, S.raw_height, RawProcessor.imgdata.rawdata.raw_image, outfn);
+      write_ppm(S.raw_width, S.raw_height,
+                RawProcessor.imgdata.rawdata.raw_image, outfn);
 
     if (verbose)
       printf("Stored to file %s\n", outfn);
@@ -158,7 +169,8 @@ int main(int ac, char *av[])
   return 0;
 }
 
-void write_ppm(unsigned width, unsigned height, unsigned short *bitmap, const char *fname)
+void write_ppm(unsigned width, unsigned height, unsigned short *bitmap,
+               const char *fname)
 {
   if (!bitmap)
     return;
@@ -170,10 +182,10 @@ void write_ppm(unsigned width, unsigned height, unsigned short *bitmap, const ch
   fprintf(f, "P5\n%d %d\n%d\n", width, height, (1 << bits) - 1);
   unsigned char *data = (unsigned char *)bitmap;
   unsigned data_size = width * height * 2;
-#define SWAP(a, b)                                                                                                     \
-  {                                                                                                                    \
-    a ^= b;                                                                                                            \
-    a ^= (b ^= a);                                                                                                     \
+#define SWAP(a, b)                                                             \
+  {                                                                            \
+    a ^= b;                                                                    \
+    a ^= (b ^= a);                                                             \
   }
   for (unsigned i = 0; i < data_size; i += 2)
     SWAP(data[i], data[i + 1]);
@@ -215,16 +227,25 @@ void gamma_curve(unsigned short *curve)
       g[4] = g[2] * (1 / g[0] - 1);
   }
   if (g[0])
-    g[5] = 1 / (g[1] * SQR(g[3]) / 2 - g[4] * (1 - g[3]) + (1 - pow(g[3], 1 + g[0])) * (1 + g[4]) / (1 + g[0])) - 1;
+    g[5] = 1 / (g[1] * SQR(g[3]) / 2 - g[4] * (1 - g[3]) +
+                (1 - pow(g[3], 1 + g[0])) * (1 + g[4]) / (1 + g[0])) -
+           1;
   else
-    g[5] = 1 / (g[1] * SQR(g[3]) / 2 + 1 - g[2] - g[3] - g[2] * g[3] * (log(g[3]) - 1)) - 1;
+    g[5] = 1 / (g[1] * SQR(g[3]) / 2 + 1 - g[2] - g[3] -
+                g[2] * g[3] * (log(g[3]) - 1)) -
+           1;
   for (i = 0; i < 0x10000; i++)
   {
     curve[i] = 0xffff;
     if ((r = (double)i / imax) < 1)
-      curve[i] = 0x10000 *
-                 (mode ? (r < g[3] ? r * g[1] : (g[0] ? pow(r, g[0]) * (1 + g[4]) - g[4] : log(r) * g[2] + 1))
-                       : (r < g[2] ? r / g[1] : (g[0] ? pow((r + g[4]) / (1 + g[4]), 1 / g[0]) : exp((r - 1) / g[2]))));
+      curve[i] =
+          0x10000 *
+          (mode ? (r < g[3] ? r * g[1]
+                            : (g[0] ? pow(r, g[0]) * (1 + g[4]) - g[4]
+                                    : log(r) * g[2] + 1))
+                : (r < g[2] ? r / g[1]
+                            : (g[0] ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
+                                    : exp((r - 1) / g[2]))));
   }
 }
 
@@ -279,8 +300,8 @@ void tiff_head(int width, int height, struct tiff_hdr *th)
   th->rat[1] = th->rat[3] = 1;
   t = localtime(&timestamp);
   if (t)
-    sprintf(th->date, "%04d:%02d:%02d %02d:%02d:%02d", t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour,
-            t->tm_min, t->tm_sec);
+    sprintf(th->date, "%04d:%02d:%02d %02d:%02d:%02d", t->tm_year + 1900,
+            t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
 }
 
 void write_tiff(int width, int height, unsigned short *bitmap, const char *fn)

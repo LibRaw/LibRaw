@@ -17,7 +17,7 @@ it under the terms of the one of two licenses as you choose:
 
 
  */
-#ifdef WIN32
+#ifdef _MSC_VER
 // suppress sprintf-related warning. sprintf() is permitted in sample code
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -27,7 +27,10 @@ it under the terms of the one of two licenses as you choose:
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
-#ifndef WIN32
+
+#include "libraw/libraw.h"
+
+#ifndef LIBRAW_WIN32_CALLS
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -37,8 +40,7 @@ it under the terms of the one of two licenses as you choose:
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include "libraw/libraw.h"
-#ifdef WIN32
+#ifdef LIBRAW_WIN32_CALLS
 #define snprintf _snprintf
 #include <windows.h>
 #else
@@ -57,7 +59,8 @@ void usage(const char *prog)
   printf("dcraw_emu: almost complete dcraw emulator\n");
   printf("Usage:  %s [OPTION]... [FILE]...\n", prog);
   printf("-c float-num       Set adjust maximum threshold (default 0.75)\n"
-         "-v        Verbose: print progress messages (repeated -v will add verbosity)\n"
+         "-v        Verbose: print progress messages (repeated -v will add "
+         "verbosity)\n"
          "-w        Use camera white balance, if possible\n"
          "-a        Average the whole image for white balance\n"
          "-A <x y w h> Average a grey box for white balance\n"
@@ -89,31 +92,34 @@ void usage(const char *prog)
          "-s [0..N-1] Select one raw image from input file\n"
          "-4        Linear 16-bit, same as \"-6 -W -g 1 1\n"
          "-6        Write 16-bit linear instead of 8-bit with gamma\n"
-         "-g pow ts Set gamma curve to gamma pow and toe slope ts (default = 2.222 4.5)\n"
+         "-g pow ts Set gamma curve to gamma pow and toe slope ts (default = "
+         "2.222 4.5)\n"
          "-T        Write TIFF instead of PPM\n"
          "-G        Use green_matching() filter\n"
          "-B <x y w h> use cropbox\n"
          "-F        Use FILE I/O instead of streambuf API\n"
-	 "-Z <suf>  Output filename generation rules\n"
-	 "          .suf => append .suf to input name, keeping existing suffix too\n"
-	 "           suf => replace input filename last extension\n"
-	 "          - => output to stdout\n"
-	 "          filename.suf => output to filename.suf\n"
+         "-Z <suf>  Output filename generation rules\n"
+         "          .suf => append .suf to input name, keeping existing suffix "
+         "too\n"
+         "           suf => replace input filename last extension\n"
+         "          - => output to stdout\n"
+         "          filename.suf => output to filename.suf\n"
          "-timing   Detailed timing report\n"
-         "-fbdd N   0 - disable FBDD noise reduction (default), 1 - light FBDD, 2 - full\n"
+         "-fbdd N   0 - disable FBDD noise reduction (default), 1 - light "
+         "FBDD, 2 - full\n"
          "-dcbi N   Number of extra DCD iterations (default - 0)\n"
          "-dcbe     DCB color enhance\n"
          "-aexpo <e p> exposure correction\n"
          "-apentax4shot enables merge of 4-shot pentax files\n"
          "-apentax4shotorder 3102 sets pentax 4-shot alignment order\n"
-#ifndef WIN32
-         "-mmap     Use mmap()-ed buffer instead of plain FILE I/O\n"
-#endif
+         "-mmap     Use memory mmaped buffer instead of plain FILE I/O\n"
          "-mem	   Use memory buffer instead of FILE I/O\n"
          "-disars   Do not use RawSpeed library\n"
          "-disinterp Do not run interpolation step\n"
-         "-dsrawrgb1 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation enabled)\n"
-         "-dsrawrgb2 Disable YCbCr to RGB conversion for sRAW (Cb/Cr interpolation disabled)\n"
+         "-dsrawrgb1 Disable YCbCr to RGB conversion for sRAW (Cb/Cr "
+         "interpolation enabled)\n"
+         "-dsrawrgb2 Disable YCbCr to RGB conversion for sRAW (Cb/Cr "
+         "interpolation disabled)\n"
 #ifdef USE_DNGSDK
          "-dngsdk   Use Adobe DNG SDK for DNG decode\n"
          "-dngflags N set DNG decoding options to value N\n"
@@ -124,32 +130,38 @@ void usage(const char *prog)
 
 static int verbosity = 0;
 int cnt = 0;
-int my_progress_callback(void *d, enum LibRaw_progress p, int iteration, int expected)
+int my_progress_callback(void *d, enum LibRaw_progress p, int iteration,
+                         int expected)
 {
-  char *passed = (char *)(d ? d : "default string"); // data passed to callback at set_callback stage
+  char *passed = (char *)(d ? d : "default string"); // data passed to callback
+                                                     // at set_callback stage
 
   if (verbosity > 2) // verbosity set by repeat -v switches
   {
-    printf("CB: %s  pass %d of %d (data passed=%s)\n", libraw_strprogress(p), iteration, expected, passed);
+    printf("CB: %s  pass %d of %d (data passed=%s)\n", libraw_strprogress(p),
+           iteration, expected, passed);
   }
   else if (iteration == 0) // 1st iteration of each step
-    printf("Starting %s (expecting %d iterations)\n", libraw_strprogress(p), expected);
+    printf("Starting %s (expecting %d iterations)\n", libraw_strprogress(p),
+           expected);
   else if (iteration == expected - 1)
     printf("%s finished\n", libraw_strprogress(p));
 
-  ///    if(++cnt>10) return 1; // emulate user termination on 10-th callback call
+  ///    if(++cnt>10) return 1; // emulate user termination on 10-th callback
+  ///    call
 
   return 0; // always return 0 to continue processing
 }
 
 // timer
-#ifndef WIN32
+#ifndef LIBRAW_WIN32_CALLS
 static struct timeval start, end;
 void timerstart(void) { gettimeofday(&start, NULL); }
 void timerprint(const char *msg, const char *filename)
 {
   gettimeofday(&end, NULL);
-  float msec = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f;
+  float msec = (end.tv_sec - start.tv_sec) * 1000.0f +
+               (end.tv_usec - start.tv_usec) / 1000.0f;
   printf("Timing: %s/%s: %6.3f msec\n", filename, msg, msec);
 }
 #else
@@ -167,6 +179,60 @@ void timerprint(const char *msg, const char *filename)
 
 #endif
 
+struct file_mapping
+{
+	void *map;
+	INT64 fsize;
+#ifdef LIBRAW_WIN32_CALLS
+	HANDLE fd, fd_map;
+	file_mapping() : map(0), fsize(0), fd(INVALID_HANDLE_VALUE), fd_map(INVALID_HANDLE_VALUE){}
+#else
+	int  fd;
+	file_mapping() : map(0), fsize(0), fd(-1){}
+#endif
+};
+
+void create_mapping(struct file_mapping& data, const std::string& fn)
+{
+#ifdef LIBRAW_WIN32_CALLS
+	std::wstring fpath(fn.begin(), fn.end());
+	if ((data.fd = CreateFileW(fpath.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0)) == INVALID_HANDLE_VALUE) return;
+	LARGE_INTEGER fs;
+	if (!GetFileSizeEx(data.fd, &fs)) return;
+	data.fsize = fs.QuadPart;
+	if ((data.fd_map = ::CreateFileMapping(data.fd, 0, PAGE_READONLY, fs.HighPart, fs.LowPart, 0)) == INVALID_HANDLE_VALUE) return;
+	data.map = MapViewOfFile(data.fd_map, FILE_MAP_READ, 0, 0, data.fsize);
+#else
+	struct stat stt;
+	if ((data.fd = open(fn.c_str(), O_RDONLY)) < 0) return;
+	if (fstat(data.fd, &stt) != 0) return;
+	data.fsize = stt.st_size;
+	data.map = mmap(0, data.fsize, PROT_READ | PROT_WRITE, MAP_PRIVATE, data.fd, 0);
+	return;
+#endif
+}
+
+void close_mapping(struct file_mapping& data)
+{
+#ifdef LIBRAW_WIN32_CALLS
+	if (data.map) UnmapViewOfFile(data.map);
+	if (data.fd_map != INVALID_HANDLE_VALUE) CloseHandle(data.fd_map);
+	if (data.fd != INVALID_HANDLE_VALUE) CloseHandle(data.fd);
+	data.map = 0;
+	data.fsize = 0;
+	data.fd = data.fd_map = INVALID_HANDLE_VALUE;
+#else
+	if (data.map)
+		munmap(data.map, data.fsize);
+	if (data.fd >= 0)
+		close(data.fd);
+	data.map = 0;
+	data.fsize = 0;
+	data.fd = -1;
+#endif
+}
+
+
 int main(int argc, char *argv[])
 {
   if (argc == 1)
@@ -175,19 +241,16 @@ int main(int argc, char *argv[])
   LibRaw RawProcessor;
   int i, arg, c, ret;
   char opm, opt, *cp, *sp;
-  int use_bigfile = 0, use_timing = 0, use_mem = 0;
+  int use_bigfile = 0, use_timing = 0, use_mem = 0, use_mmap = 0;
   char *outext = NULL;
 #ifdef USE_DNGSDK
   dng_host *dnghost = NULL;
 #endif
-#ifndef WIN32
-  int msize = 0, use_mmap = 0;
-#endif
+  struct file_mapping mapping;
   void *iobuffer = 0;
 #ifdef OUT
 #undef OUT
 #endif
-
 #define OUT RawProcessor.imgdata.params
 
   argv[argc] = (char *)"";
@@ -263,11 +326,9 @@ int main(int argc, char *argv[])
       OUT.user_qual = atoi(argv[arg++]);
       break;
     case 'm':
-#ifndef WIN32
       if (!strcmp(optstr, "-mmap"))
         use_mmap = 1;
       else
-#endif
           if (!strcmp(optstr, "-mem"))
         use_mem = 1;
       else
@@ -341,7 +402,7 @@ int main(int argc, char *argv[])
       OUT.use_camera_wb = 1;
       break;
     case 'M':
-      OUT.use_camera_matrix = (opm == '+');
+      OUT.use_camera_matrix = (opm == '+')?3:0;
       break;
     case 'j':
       OUT.use_fuji_rotate = 0;
@@ -401,10 +462,11 @@ int main(int argc, char *argv[])
       return 1;
     }
   }
-#ifndef WIN32
+#ifndef LIBRAW_WIN32_CALLS
   putenv((char *)"TZ=UTC"); // dcraw compatibility, affects TIFF datestamp field
 #else
-  _putenv((char *)"TZ=UTC"); // dcraw compatibility, affects TIFF datestamp field
+  _putenv(
+      (char *)"TZ=UTC"); // dcraw compatibility, affects TIFF datestamp field
 #endif
 #define P1 RawProcessor.imgdata.idata
 #define S RawProcessor.imgdata.sizes
@@ -412,11 +474,12 @@ int main(int argc, char *argv[])
 #define T RawProcessor.imgdata.thumbnail
 #define P2 RawProcessor.imgdata.other
 
-  if(outext && !strcmp(outext,"-"))
-      use_timing = verbosity = 0;
+  if (outext && !strcmp(outext, "-"))
+    use_timing = verbosity = 0;
 
   if (verbosity > 1)
-    RawProcessor.set_progress_handler(my_progress_callback, (void *)"Sample data passed");
+    RawProcessor.set_progress_handler(my_progress_callback,
+                                      (void *)"Sample data passed");
 #ifdef LIBRAW_USE_OPENMP
   if (verbosity)
     printf("Using %d threads\n", omp_get_max_threads());
@@ -431,41 +494,24 @@ int main(int argc, char *argv[])
 
     timerstart();
 
-#ifndef WIN32
-    if (use_mmap)
-    {
-      int file = open(argv[arg], O_RDONLY);
-      struct stat st;
-      if (file < 0)
-      {
-        fprintf(stderr, "Cannot open %s: %s\n", argv[arg], strerror(errno));
-        continue;
-      }
-      if (fstat(file, &st))
-      {
-        fprintf(stderr, "Cannot stat %s: %s\n", argv[arg], strerror(errno));
-        close(file);
-        continue;
-      }
-      int pgsz = getpagesize();
-      msize = ((st.st_size + pgsz - 1) / pgsz) * pgsz;
-      iobuffer = mmap(NULL, msize, PROT_READ, MAP_PRIVATE, file, 0);
-      if (!iobuffer)
-      {
-        fprintf(stderr, "Cannot mmap %s: %s\n", argv[arg], strerror(errno));
-        close(file);
-        continue;
-      }
-      close(file);
-      if ((ret = RawProcessor.open_buffer(iobuffer, st.st_size) != LIBRAW_SUCCESS))
+	if (use_mmap)
+	{
+		create_mapping(mapping, argv[arg]);
+		if (!mapping.map)
+		{
+			fprintf(stderr, "Cannot map %s\n", argv[arg]);
+			close_mapping(mapping);
+			continue;
+		}
+      if ((ret = RawProcessor.open_buffer(mapping.map,mapping.fsize) !=
+                 LIBRAW_SUCCESS))
       {
         fprintf(stderr, "Cannot open_buffer %s: %s\n", argv[arg], libraw_strerror(ret));
+		close_mapping(mapping);
         continue; // no recycle b/c open file will recycle itself
       }
     }
-    else
-#endif
-        if (use_mem)
+    else  if (use_mem)
     {
       int file = open(argv[arg], O_RDONLY | O_BINARY);
       struct stat st;
@@ -482,22 +528,27 @@ int main(int argc, char *argv[])
       }
       if (!(iobuffer = malloc(st.st_size)))
       {
-        fprintf(stderr, "Cannot allocate %d kbytes for memory buffer\n", (int)(st.st_size / 1024));
+        fprintf(stderr, "Cannot allocate %d kbytes for memory buffer\n",
+                (int)(st.st_size / 1024));
         close(file);
         continue;
       }
       int rd;
       if (st.st_size != (rd = read(file, iobuffer, st.st_size)))
       {
-        fprintf(stderr, "Cannot read %d bytes instead of  %d to memory buffer\n", (int)rd, (int)st.st_size);
+        fprintf(stderr,
+                "Cannot read %d bytes instead of  %d to memory buffer\n",
+                (int)rd, (int)st.st_size);
         close(file);
         free(iobuffer);
         continue;
       }
       close(file);
-      if ((ret = RawProcessor.open_buffer(iobuffer, st.st_size)) != LIBRAW_SUCCESS)
+      if ((ret = RawProcessor.open_buffer(iobuffer, st.st_size)) !=
+          LIBRAW_SUCCESS)
       {
-        fprintf(stderr, "Cannot open_buffer %s: %s\n", argv[arg], libraw_strerror(ret));
+        fprintf(stderr, "Cannot open_buffer %s: %s\n", argv[arg],
+                libraw_strerror(ret));
         free(iobuffer);
         continue; // no recycle b/c open file will recycle itself
       }
@@ -512,7 +563,8 @@ int main(int argc, char *argv[])
 
       if (ret != LIBRAW_SUCCESS)
       {
-        fprintf(stderr, "Cannot open %s: %s\n", argv[arg], libraw_strerror(ret));
+        fprintf(stderr, "Cannot open %s: %s\n", argv[arg],
+                libraw_strerror(ret));
         continue; // no recycle b/c open_file will recycle itself
       }
     }
@@ -523,7 +575,8 @@ int main(int argc, char *argv[])
     timerstart();
     if ((ret = RawProcessor.unpack()) != LIBRAW_SUCCESS)
     {
-      fprintf(stderr, "Cannot unpack %s: %s\n", argv[arg], libraw_strerror(ret));
+      fprintf(stderr, "Cannot unpack %s: %s\n", argv[arg],
+              libraw_strerror(ret));
       continue;
     }
 
@@ -533,39 +586,46 @@ int main(int argc, char *argv[])
     timerstart();
     if (LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_process()))
     {
-      fprintf(stderr, "Cannot do postpocessing on %s: %s\n", argv[arg], libraw_strerror(ret));
+      fprintf(stderr, "Cannot do postpocessing on %s: %s\n", argv[arg],
+              libraw_strerror(ret));
       if (LIBRAW_FATAL_ERROR(ret))
         continue;
     }
     if (use_timing)
       timerprint("LibRaw::dcraw_process()", argv[arg]);
 
-    if(!outext)
-      snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg], OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
-    else if(!strcmp(outext,"-"))
-      snprintf(outfn,sizeof(outfn),"-");
+    if (!outext)
+      snprintf(outfn, sizeof(outfn), "%s.%s", argv[arg],
+               OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
+    else if (!strcmp(outext, "-"))
+      snprintf(outfn, sizeof(outfn), "-");
     else
+    {
+      if (*outext == '.') // append
+        snprintf(outfn, sizeof(outfn), "%s%s", argv[arg], outext);
+      else if (strchr(outext, '.') && *outext != '.') // dot is not 1st char
+        strncpy(outfn, outext, sizeof(outfn));
+      else
       {
-	if(*outext=='.') // append
-	  snprintf(outfn, sizeof(outfn), "%s%s", argv[arg],outext);
-	else if(strchr(outext,'.') && *outext !='.') // dot is not 1st char
-	    strncpy(outfn, outext, sizeof(outfn));
-	else
-	  {
-	    strncpy(outfn, argv[arg], sizeof(outfn));
-	    if(strlen(outfn)>0)
-	      {
-		char *lastchar = outfn+strlen(outfn); // points to term 0
-		while(--lastchar > outfn)
-		  {
-		    if(*lastchar == '/' || *lastchar == '\\') break;
-		    if(*lastchar == '.') { *lastchar = 0; break;};
-		  }
-	      }
-	    strncat(outfn,".",sizeof(outfn)-strlen(outfn)-1);
-	    strncat(outfn,outext,sizeof(outfn)-strlen(outfn)-1);
-	  }
+        strncpy(outfn, argv[arg], sizeof(outfn));
+        if (strlen(outfn) > 0)
+        {
+          char *lastchar = outfn + strlen(outfn); // points to term 0
+          while (--lastchar > outfn)
+          {
+            if (*lastchar == '/' || *lastchar == '\\')
+              break;
+            if (*lastchar == '.')
+            {
+              *lastchar = 0;
+              break;
+            };
+          }
+        }
+        strncat(outfn, ".", sizeof(outfn) - strlen(outfn) - 1);
+        strncat(outfn, outext, sizeof(outfn) - strlen(outfn) - 1);
       }
+    }
 
     if (verbosity)
     {
@@ -575,20 +635,15 @@ int main(int argc, char *argv[])
     if (LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_ppm_tiff_writer(outfn)))
       fprintf(stderr, "Cannot write %s: %s\n", outfn, libraw_strerror(ret));
 
-#ifndef WIN32
-    if (use_mmap && iobuffer)
-    {
-      munmap(iobuffer, msize);
-      iobuffer = 0;
-    }
-#endif
+	RawProcessor.recycle(); // just for show this call
+
+	if (use_mmap && mapping.map)
+		close_mapping(mapping);
     else if (use_mem && iobuffer)
     {
       free(iobuffer);
       iobuffer = 0;
     }
-
-    RawProcessor.recycle(); // just for show this call
   }
 #ifdef USE_DNGSDK
   if (dnghost)

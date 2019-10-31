@@ -1,4 +1,4 @@
-/* 
+/*
   Copyright 2008-2019 LibRaw LLC (info@libraw.org)
 
 LibRaw is free software; you can redistribute it and/or modify
@@ -18,6 +18,8 @@ it under the terms of the one of two licenses as you choose:
    for more information
 */
 
+#ifndef LIBRAW_INT_DEFINES_H
+#define LIBRAW_INT_DEFINES_H
 #ifndef USE_JPEG
 #define NO_JPEG
 #endif
@@ -25,14 +27,6 @@ it under the terms of the one of two licenses as you choose:
 #define NO_JASPER
 #endif
 #define DCRAW_VERSION "9.26"
-
-#if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) && (_MSC_VER > 1310)
-#define USE_WCHAR
-#endif
-
-#if _GLIBCXX_HAVE__WFOPEN && _GLIBCXX_USE_WCHAR_T
-#define USE_WCHAR
-#endif
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -53,10 +47,12 @@ it under the terms of the one of two licenses as you choose:
 #ifdef __CYGWIN__
 #include <io.h>
 #endif
-#if defined WIN32 || defined(__MINGW32__)
+#if defined LIBRAW_WIN32_CALLS
 #include <sys/utime.h>
+#ifndef LIBRAW_NO_WINSOCK2
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
+#endif
 #define snprintf _snprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
@@ -114,18 +110,18 @@ typedef unsigned long long UINT64;
 #define ULIM(x, y, z) ((y) < (z) ? LIM(x, y, z) : LIM(x, z, y))
 #define CLIP(x) LIM((int)(x), 0, 65535)
 #define CLIP15(x) LIM((int)(x), 0, 32767)
-#define SWAP(a, b)                                                                                                     \
-  {                                                                                                                    \
-    a = a + b;                                                                                                         \
-    b = a - b;                                                                                                         \
-    a = a - b;                                                                                                         \
+#define SWAP(a, b)                                                             \
+  {                                                                            \
+    a = a + b;                                                                 \
+    b = a - b;                                                                 \
+    a = a - b;                                                                 \
   }
 
-#define my_swap(type, i, j)                                                                                            \
-  {                                                                                                                    \
-    type t = i;                                                                                                        \
-    i = j;                                                                                                             \
-    j = t;                                                                                                             \
+#define my_swap(type, i, j)                                                    \
+  {                                                                            \
+    type t = i;                                                                \
+    i = j;                                                                     \
+    j = t;                                                                     \
   }
 
 static float fMAX(float a, float b) { return MAX(a, b); }
@@ -171,6 +167,12 @@ static float fMAX(float a, float b) { return MAX(a, b); }
 
 #define RAWINDEX(row, col) ((row)*raw_width + (col))
 #define RAW(row, col) raw_image[(row)*raw_width + (col)]
-#define BAYER(row, col) image[((row) >> shrink) * iwidth + ((col) >> shrink)][FC(row, col)]
+#define BAYER(row, col)                                                        \
+  image[((row) >> shrink) * iwidth + ((col) >> shrink)][FC(row, col)]
 
-#define BAYER2(row, col) image[((row) >> shrink) * iwidth + ((col) >> shrink)][fcol(row, col)]
+#define BAYER2(row, col)                                                       \
+  image[((row) >> shrink) * iwidth + ((col) >> shrink)][fcol(row, col)]
+#define BAYERC(row, col, c)                                                    \
+  imgdata.image[((row) >> IO.shrink) * S.iwidth + ((col) >> IO.shrink)][c]
+
+#endif

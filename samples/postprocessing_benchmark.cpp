@@ -3,7 +3,8 @@
  * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
  * Created: Jul 13, 2011
  *
- * LibRaw simple C++ API:  creates 8 different renderings from 1 source file. The 1st and 4th one should be identical
+ * LibRaw simple C++ API:  creates 8 different renderings from 1 source file.
+The 1st and 4th one should be identical
 
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of two licenses as you choose:
@@ -19,7 +20,9 @@ it under the terms of the one of two licenses as you choose:
 #include <string.h>
 #include <math.h>
 
-#ifndef WIN32
+#include "libraw/libraw.h"
+
+#ifndef LIBRAW_WIN32_CALLS
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -44,20 +47,23 @@ int main(int argc, char *argv[])
 
   if (argc < 2)
   {
-    printf("postprocessing benchmark: LibRaw %s sample, %d cameras supported\n"
-           "Measures postprocessing speed with different options\n"
-           "Usage: %s [-a] [-H N] [-q N] [-h] [-m N] [-n N] [-s N] [-B x y w h] [-R N]\n"
-           "-a             average image for white balance\n"
-           "-H <num>       Highlight mode (0=clip, 1=unclip, 2=blend, 3+=rebuild)\n"
-           "-q <num>       Set the interpolation quality\n"
-           "-h             Half-size color image\n"
-           "-m <num>       Apply a num-passes 3x3 median filter to R-G and B-G\n"
-           "-n <num>       Set threshold for wavelet denoising\n"
-           "-s <num>       Select one raw image from input file\n"
-           "-B <x y w h>   Crop output image\n"
-           "-R <num>       Number of repetitions\n"
-           "-c             Do not use rawspeed\n",
-           LibRaw::version(), LibRaw::cameraCount(), argv[0]);
+    printf(
+        "postprocessing benchmark: LibRaw %s sample, %d cameras supported\n"
+        "Measures postprocessing speed with different options\n"
+        "Usage: %s [-a] [-H N] [-q N] [-h] [-m N] [-n N] [-s N] [-B x y w h] "
+        "[-R N]\n"
+        "-a             average image for white balance\n"
+        "-H <num>       Highlight mode (0=clip, 1=unclip, 2=blend, "
+        "3+=rebuild)\n"
+        "-q <num>       Set the interpolation quality\n"
+        "-h             Half-size color image\n"
+        "-m <num>       Apply a num-passes 3x3 median filter to R-G and B-G\n"
+        "-n <num>       Set threshold for wavelet denoising\n"
+        "-s <num>       Select one raw image from input file\n"
+        "-B <x y w h>   Crop output image\n"
+        "-R <num>       Number of repetitions\n"
+        "-c             Do not use rawspeed\n",
+        LibRaw::version(), LibRaw::cameraCount(), argv[0]);
     return 0;
   }
   char opm, opt, *cp, *sp;
@@ -124,13 +130,15 @@ int main(int argc, char *argv[])
     timerstart();
     if ((ret = RawProcessor.open_file(argv[arg])) != LIBRAW_SUCCESS)
     {
-      fprintf(stderr, "Cannot open_file %s: %s\n", argv[arg], libraw_strerror(ret));
+      fprintf(stderr, "Cannot open_file %s: %s\n", argv[arg],
+              libraw_strerror(ret));
       continue; // no recycle b/c open file will recycle itself
     }
 
     if ((ret = RawProcessor.unpack()) != LIBRAW_SUCCESS)
     {
-      fprintf(stderr, "Cannot unpack %s: %s\n", argv[arg], libraw_strerror(ret));
+      fprintf(stderr, "Cannot unpack %s: %s\n", argv[arg],
+              libraw_strerror(ret));
       continue;
     }
     float qsec = timerend();
@@ -141,7 +149,8 @@ int main(int argc, char *argv[])
     {
       if ((ret = RawProcessor.dcraw_process()) != LIBRAW_SUCCESS)
       {
-        fprintf(stderr, "Cannot postprocess %s: %s\n", argv[arg], libraw_strerror(ret));
+        fprintf(stderr, "Cannot postprocess %s: %s\n", argv[arg],
+                libraw_strerror(ret));
         break;
       }
       libraw_processed_image_t *p = RawProcessor.dcraw_make_mem_image();
@@ -153,7 +162,8 @@ int main(int argc, char *argv[])
 
     if ((ret = RawProcessor.adjust_sizes_info_only()) != LIBRAW_SUCCESS)
     {
-      fprintf(stderr, "Cannot adjust sizes for %s: %s\n", argv[arg], libraw_strerror(ret));
+      fprintf(stderr, "Cannot adjust sizes for %s: %s\n", argv[arg],
+              libraw_strerror(ret));
       break;
     }
     rmpix = (S.iwidth * S.iheight) / 1000000.0f;
@@ -173,24 +183,27 @@ int main(int argc, char *argv[])
 
       printf("Performance: %.2f Mpix/sec\n"
              "File: %s, Frame: %d %.1f total Mpix, %.1f msec\n"
-             "Params:      WB=%s Highlight=%d Qual=%d HalfSize=%s Median=%d Wavelet=%.0f\n"
+             "Params:      WB=%s Highlight=%d Qual=%d HalfSize=%s Median=%d "
+             "Wavelet=%.0f\n"
              "Crop:        %u-%u:%ux%u, active Mpix: %.2f, %.1f frames/sec\n",
-             mpixsec, argv[arg], OUT.shot_select, rmpix, msec, OUT.use_auto_wb ? "auto" : "default", OUT.highlight,
-             OUT.user_qual, OUT.half_size ? "YES" : "No", OUT.med_passes, OUT.threshold, crop[0], crop[1], crop[2],
-             crop[3], mpix, 1000.0f / msec);
+             mpixsec, argv[arg], OUT.shot_select, rmpix, msec,
+             OUT.use_auto_wb ? "auto" : "default", OUT.highlight, OUT.user_qual,
+             OUT.half_size ? "YES" : "No", OUT.med_passes, OUT.threshold,
+             crop[0], crop[1], crop[2], crop[3], mpix, 1000.0f / msec);
     }
   }
 
   return 0;
 }
 
-#ifndef WIN32
+#ifndef LIBRAW_WIN32_CALLS
 static struct timeval start, end;
 void timerstart(void) { gettimeofday(&start, NULL); }
 float timerend(void)
 {
   gettimeofday(&end, NULL);
-  float msec = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f;
+  float msec = (end.tv_sec - start.tv_sec) * 1000.0f +
+               (end.tv_usec - start.tv_usec) / 1000.0f;
   return msec;
 }
 #else

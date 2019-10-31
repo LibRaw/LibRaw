@@ -4,16 +4,13 @@ if [ -d CVS ] ; then
   echo 'Use mkdist script in cvs export-ed dirs'
 else
   if [ -f Makefile.devel ] ; then
-    make -f Makefile.devel regenerate  
     autoreconf --install
-    rm -fr dcraw/*
-    rm -f dcraw/.gdbinit
+    mkdir dcraw
     cd dcraw
     wget http://www.cybercom.net/~dcoffin/dcraw/dcraw.c
     cd ..
-    rm -f internal/preprocess.pl clist2c.pl
+    rm -f clist2c.pl clist2html.pl
     rm -f Makefile.devel 
-    rm DEVELOPER-NOTES
     rm mkdist.sh export-dist.sh
   else
    echo 'Wrong directory or mkdist.sh already executed'

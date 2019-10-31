@@ -23,19 +23,19 @@ it under the terms of the one of two licenses as you choose:
 
 #include "libraw/libraw.h"
 
-#define HANDLE_FATAL_ERROR(ret)                                                                                        \
-  if (ret)                                                                                                             \
-  {                                                                                                                    \
-    fprintf(stderr, "%s: libraw  %s\n", av[i], libraw_strerror(ret));                                                  \
-    if (LIBRAW_FATAL_ERROR(ret))                                                                                       \
-      exit(1);                                                                                                         \
+#define HANDLE_FATAL_ERROR(ret)                                                \
+  if (ret)                                                                     \
+  {                                                                            \
+    fprintf(stderr, "%s: libraw  %s\n", av[i], libraw_strerror(ret));          \
+    if (LIBRAW_FATAL_ERROR(ret))                                               \
+      exit(1);                                                                 \
   }
 
-#define HANDLE_ALL_ERRORS(ret)                                                                                         \
-  if (ret)                                                                                                             \
-  {                                                                                                                    \
-    fprintf(stderr, "%s: libraw  %s\n", av[i], libraw_strerror(ret));                                                  \
-    continue;                                                                                                          \
+#define HANDLE_ALL_ERRORS(ret)                                                 \
+  if (ret)                                                                     \
+  {                                                                            \
+    fprintf(stderr, "%s: libraw  %s\n", av[i], libraw_strerror(ret));          \
+    continue;                                                                  \
   }
 
 int main(int ac, char *av[])
@@ -57,7 +57,8 @@ int main(int ac, char *av[])
     int ret = libraw_open_file(iprc, av[i]);
     HANDLE_ALL_ERRORS(ret);
 
-    printf("Processing %s (%s %s)\n", av[i], iprc->idata.make, iprc->idata.model);
+    printf("Processing %s (%s %s)\n", av[i], iprc->idata.make,
+           iprc->idata.model);
 
     ret = libraw_unpack(iprc);
     HANDLE_ALL_ERRORS(ret);

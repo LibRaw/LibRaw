@@ -1,8 +1,12 @@
-/* 
+/*
   Copyright 2008-2013 LibRaw LLC (info@libraw.org)
 
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of two licenses as you choose:
+
+ * This file is provided for compatibility w/ old build scripts/tools:
+ * It includes multiple separate files that should be built separately
+ * if new build tools are used
 
 1. GNU LESSER GENERAL PUBLIC LICENSE version 2.1
    (See file LICENSE.LGPL provided in LibRaw distribution archive for details).
@@ -14,9 +18,6 @@ it under the terms of the one of two licenses as you choose:
 
 #include <math.h>
 
-#define CLASS LibRaw::
-
-#include "libraw/libraw_types.h"
 #define LIBRAW_LIBRARY_BUILD
 #define LIBRAW_IO_REDEFINED
 #include "libraw/libraw.h"
@@ -26,10 +27,9 @@ it under the terms of the one of two licenses as you choose:
 #define SRC_USES_CURVE
 
 /* DHT and AAHD are LGPL licensed, so include them */
-#include "./dht_demosaic.cpp"
-#include "./aahd_demosaic.cpp"
+#include "../src/demosaic/dht_demosaic.cpp"
+#include "../src/demosaic/aahd_demosaic.cpp"
 #include "internal/var_defines.h"
 
 /* DCB is BSD licensed, so include it */
-#include "./dcb_demosaicing.c"
-
+#include "../src/demosaic/dcb_demosaic.cpp"

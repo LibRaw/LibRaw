@@ -20,19 +20,6 @@ it under the terms of the one of two licenses as you choose:
 #define _LIBRAW_INTERNAL_TYPES_H
 
 #include <stdio.h>
-#ifdef __cplusplus
-
-#ifdef LIBRAW_LIBRARY_BUILD
-#ifndef CLASS
-#define CLASS LibRaw::
-#endif
-#endif
-
-#else
-#ifndef CLASS
-#define CLASS
-#endif
-#endif
 
 #ifdef __cplusplus
 
@@ -83,6 +70,12 @@ class LibRaw_constants
 public:
   static const float d65_white[3];
   static const double xyz_rgb[3][3];
+  static const double xyzd50_srgb[3][3];
+  static const double rgb_rgb[3][3];
+  static const double adobe_rgb[3][3];
+  static const double wide_rgb[3][3];
+  static const double prophoto_rgb[3][3];
+  static const double aces_rgb[3][3];
 };
 #endif /* __cplusplus */
 
@@ -111,12 +104,34 @@ typedef struct
 typedef struct
 {
   unsigned olympus_exif_cfa;
-  unsigned unique_id;
+  unsigned long long unique_id;
   unsigned long long OlyID;
   unsigned tiff_nifds;
   int tiff_flip;
   int metadata_blocks;
 } identify_data_t;
+
+// contents of tag CMP1 for relevant track in CR3 file
+typedef struct
+{
+  int32_t version;
+  int32_t f_width;
+  int32_t f_height;
+  int32_t tileWidth;
+  int32_t tileHeight;
+  int32_t nBits;
+  int32_t nPlanes;
+  int32_t cfaLayout;
+  int32_t encType;
+  int32_t imageLevels;
+  int32_t hasTileCols;
+  int32_t hasTileRows;
+  int32_t mdatHdrSize;
+  // Not from header, but from datastream
+  uint32_t MediaSize;
+  INT64 MediaOffset;
+  uint32_t MediaType; /* 1 -> /C/RAW, 2-> JPEG */
+} crx_data_header_t;
 
 typedef struct
 {
@@ -139,8 +154,21 @@ typedef struct
   int hasselblad_parser_flag;
   long long posRAFData;
   unsigned lenRAFData;
-  int fuji_total_lines, fuji_total_blocks, fuji_block_width, fuji_bits, fuji_raw_type;
+  int fuji_total_lines, fuji_total_blocks, fuji_block_width, fuji_bits,
+      fuji_raw_type;
   int pana_encoding, pana_bpp;
+  crx_data_header_t crx_header[LIBRAW_CRXTRACKS_MAXCOUNT];
+  int crx_track_selected;
+  short CR3_CTMDtag;
+  int CM_found;
+  unsigned is_NikonTransfer;
+  unsigned is_Sony;
+  unsigned is_pana_raw;
+  unsigned
+      is_4K_RAFdata; /* =1 for Fuji X-A3, X-A5, X-A7, X-A10, X-A20, X-T100, XF10 */
+  unsigned is_PentaxRicohMakernotes; /* =1 for Ricoh software by Pentax, Camera DNG */
+
+  unsigned dng_frames[LIBRAW_IFD_MAXCOUNT*2]; /* bits: 0-7: shot_select, 8-15: IFD#, 16-31: low 16 bit of newsubfile type */
 } unpacker_data_t;
 
 typedef struct
@@ -165,6 +193,9 @@ struct tiff_ifd_t
   int rows_per_strip;
   int *strip_offsets, strip_offsets_count;
   int *strip_byte_counts, strip_byte_counts_count;
+  unsigned t_filters;
+  int t_vwidth, t_vheight, t_lm,t_tm;
+  int t_fuji_width;
   float t_shutter;
   /* Per-IFD DNG fields */
   INT64 opcode2_offset;
@@ -172,6 +203,7 @@ struct tiff_ifd_t
   int lineartable_len;
   libraw_dng_color_t dng_color[2];
   libraw_dng_levels_t dng_levels;
+  int newsubfiletype;
 };
 
 struct jhead
@@ -209,71 +241,76 @@ struct tiff_hdr
 };
 
 #ifdef DEBUG_STAGE_CHECKS
-#define CHECK_ORDER_HIGH(expected_stage)                                                                               \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    if ((imgdata.progress_flags & LIBRAW_PROGRESS_THUMB_MASK) >= expected_stage)                                       \
-    {                                                                                                                  \
-      fprintf(stderr, "CHECK_HIGH: check %d >=  %d\n", imgdata.progress_flags &LIBRAW_PROGRESS_THUMB_MASK,             \
-              expected_stage);                                                                                         \
-      return LIBRAW_OUT_OF_ORDER_CALL;                                                                                 \
-    }                                                                                                                  \
+#define CHECK_ORDER_HIGH(expected_stage)                                       \
+  do                                                                           \
+  {                                                                            \
+    if ((imgdata.progress_flags & LIBRAW_PROGRESS_THUMB_MASK) >=               \
+        expected_stage)                                                        \
+    {                                                                          \
+      fprintf(stderr, "CHECK_HIGH: check %d >=  %d\n",                         \
+              imgdata.progress_flags &LIBRAW_PROGRESS_THUMB_MASK,              \
+              expected_stage);                                                 \
+      return LIBRAW_OUT_OF_ORDER_CALL;                                         \
+    }                                                                          \
   } while (0)
 
-#define CHECK_ORDER_LOW(expected_stage)                                                                                \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    printf("Checking LOW %d/%d : %d\n", imgdata.progress_flags, expected_stage,                                        \
-           imgdata.progress_flags < expected_stage);                                                                   \
-    if ((imgdata.progress_flags & LIBRAW_PROGRESS_THUMB_MASK) < expected_stage)                                        \
-    {                                                                                                                  \
-      printf("failed!\n");                                                                                             \
-      return LIBRAW_OUT_OF_ORDER_CALL;                                                                                 \
-    }                                                                                                                  \
+#define CHECK_ORDER_LOW(expected_stage)                                        \
+  do                                                                           \
+  {                                                                            \
+    printf("Checking LOW %d/%d : %d\n", imgdata.progress_flags,                \
+           expected_stage, imgdata.progress_flags < expected_stage);           \
+    if ((imgdata.progress_flags & LIBRAW_PROGRESS_THUMB_MASK) <                \
+        expected_stage)                                                        \
+    {                                                                          \
+      printf("failed!\n");                                                     \
+      return LIBRAW_OUT_OF_ORDER_CALL;                                         \
+    }                                                                          \
   } while (0)
-#define CHECK_ORDER_BIT(expected_stage)                                                                                \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    if (imgdata.progress_flags & expected_stage)                                                                       \
-      return LIBRAW_OUT_OF_ORDER_CALL;                                                                                 \
+#define CHECK_ORDER_BIT(expected_stage)                                        \
+  do                                                                           \
+  {                                                                            \
+    if (imgdata.progress_flags & expected_stage)                               \
+      return LIBRAW_OUT_OF_ORDER_CALL;                                         \
   } while (0)
 
-#define SET_PROC_FLAG(stage)                                                                                           \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    imgdata.progress_flags |= stage;                                                                                   \
-    fprintf(stderr, "SET_FLAG: %d\n", stage);                                                                          \
+#define SET_PROC_FLAG(stage)                                                   \
+  do                                                                           \
+  {                                                                            \
+    imgdata.progress_flags |= stage;                                           \
+    fprintf(stderr, "SET_FLAG: %d\n", stage);                                  \
   } while (0)
 
 #else
 
-#define CHECK_ORDER_HIGH(expected_stage)                                                                               \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    if ((imgdata.progress_flags & LIBRAW_PROGRESS_THUMB_MASK) >= expected_stage)                                       \
-    {                                                                                                                  \
-      return LIBRAW_OUT_OF_ORDER_CALL;                                                                                 \
-    }                                                                                                                  \
+#define CHECK_ORDER_HIGH(expected_stage)                                       \
+  do                                                                           \
+  {                                                                            \
+    if ((imgdata.progress_flags & LIBRAW_PROGRESS_THUMB_MASK) >=               \
+        expected_stage)                                                        \
+    {                                                                          \
+      return LIBRAW_OUT_OF_ORDER_CALL;                                         \
+    }                                                                          \
   } while (0)
 
-#define CHECK_ORDER_LOW(expected_stage)                                                                                \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    if ((imgdata.progress_flags & LIBRAW_PROGRESS_THUMB_MASK) < expected_stage)                                        \
-      return LIBRAW_OUT_OF_ORDER_CALL;                                                                                 \
+#define CHECK_ORDER_LOW(expected_stage)                                        \
+  do                                                                           \
+  {                                                                            \
+    if ((imgdata.progress_flags & LIBRAW_PROGRESS_THUMB_MASK) <                \
+        expected_stage)                                                        \
+      return LIBRAW_OUT_OF_ORDER_CALL;                                         \
   } while (0)
 
-#define CHECK_ORDER_BIT(expected_stage)                                                                                \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    if (imgdata.progress_flags & expected_stage)                                                                       \
-      return LIBRAW_OUT_OF_ORDER_CALL;                                                                                 \
+#define CHECK_ORDER_BIT(expected_stage)                                        \
+  do                                                                           \
+  {                                                                            \
+    if (imgdata.progress_flags & expected_stage)                               \
+      return LIBRAW_OUT_OF_ORDER_CALL;                                         \
   } while (0)
 
-#define SET_PROC_FLAG(stage)                                                                                           \
-  do                                                                                                                   \
-  {                                                                                                                    \
-    imgdata.progress_flags |= stage;                                                                                   \
+#define SET_PROC_FLAG(stage)                                                   \
+  do                                                                           \
+  {                                                                            \
+    imgdata.progress_flags |= stage;                                           \
   } while (0)
 
 #endif

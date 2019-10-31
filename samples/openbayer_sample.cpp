@@ -3,7 +3,8 @@
  * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
  * Created: Feb 11, 2019
  *
- * LibRaw simple C++ API:  opens bayer data (Kodak KAI-0340 sensor) from buffer, dump as 8-bit tiff
+ * LibRaw simple C++ API:  opens bayer data (Kodak KAI-0340 sensor) from buffer,
+dump as 8-bit tiff
 
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of two licenses as you choose:
@@ -20,14 +21,14 @@ it under the terms of the one of two licenses as you choose:
 #include <string.h>
 #include <math.h>
 
-#ifndef WIN32
+#include "libraw/libraw.h"
+
+#ifndef LIBRAW_WIN32_CALLS
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #endif
-
-#include "libraw/libraw.h"
 
 int main(int ac, char *av[])
 {
@@ -45,7 +46,8 @@ int main(int ac, char *av[])
     return 3;
   LibRaw rp;
   rp.imgdata.params.output_tiff = 1;
-  int ret = rp.open_bayer(buffer, fsz, 640, 480, 0, 0, 0, 0, 0, LIBRAW_OPENBAYER_RGGB, 0, 0, 1400);
+  int ret = rp.open_bayer(buffer, fsz, 640, 480, 0, 0, 0, 0, 0,
+                          LIBRAW_OPENBAYER_RGGB, 0, 0, 1400);
   if (ret != LIBRAW_SUCCESS)
     return 4;
   if ((ret = rp.unpack()) != LIBRAW_SUCCESS)

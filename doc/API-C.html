@@ -72,7 +72,6 @@
       <li>void libraw_set_user_mul(libraw_data_t *lr,int index, float val);</li>
       <li>void libraw_set_demosaic(libraw_data_t *lr,int value); </li>
       <li>void libraw_set_output_color(libraw_data_t *lr,int value); </li>
-      <li>void libraw_set_user_mul(libraw_data_t *lr,int index, float val);</li>
       <li>void libraw_set_output_bps(libraw_data_t *lr,int value);</li>
       <li>void libraw_set_gamma(libraw_data_t *lr,int index, float value);</li>
       <li>void libraw_set_no_auto_bright(libraw_data_t *lr,int value);</li>
@@ -86,7 +85,7 @@
       <dt>const char* libraw_version()</dt>
       <dd>See <a href="API-CXX.html#version">LibRaw::version()</a></dd>
       <dt>int libraw_versionNumber()</dt>
-      <dt><br>
+      <dt>See <a href="API-CXX.html#versionNumber">LibRaw::versionNumber()</a><br>
       </dt>
       <dd>See <a href="API-CXX.html#versionNumber">LibRaw::versionNumber()</a></dd>
       <dt>bool LIBRAW_CHECK_VERSION(major,minor,patch)</dt>
@@ -95,13 +94,13 @@
       <dd>See <a href="API-CXX.html#capabilities">LibRaw::capabilities()</a></dd>
       <dt>int libraw_cameraCount()</dt>
       <dd>See <a href="API-CXX.html#cameraCount">LibRaw::cameraCount()</a></dd>
-      <dt>const char** libraw_cameraList()</dt>
+      <dt>const char* libraw_cameraList()</dt>
       <dd>See <a href="API-CXX.html#cameraList">LibRaw::cameraList()</a></dd>
-      <dt>int libraw_get_decoder_info(libraw_data_t*, libraw_decoder_info_t *);</dt>
+      <dt>int libraw_get_decoder_info(libraw_data_t*,libraw_decoder_info_t *);</dt>
       <dd>See <a href="API-CXX.html#get_decoder_info">LibRaw::get_decoder_info()</a></dd>
       <dt>const char* libraw_unpack_function_name(libraw_data_t*);</dt>
       <dd>See <a href="API-CXX.html#unpack_function_name">LibRaw::unpack_function_name()</a></dd>
-      <dt>int libraw_COLOR(libraw_data_t*, int row, int col);</dt>
+      <dt>int libraw_COLOR(libraw_data_t*,int row,int col);</dt>
       <dd>See <a href="API-CXX.html#COLOR">LibRaw::COLOR()</a></dd>
       <dt>void libraw_subtract_black(libraw_data_t*);</dt>
       <dd>See <a href="API-CXX.html#add_subtract_black">LibRaw::subtract_black()</a></dd>
@@ -109,17 +108,15 @@
       <dd>See <a href="API-CXX.html#recycle_datastream">LibRaw::recycle_datastream()</a></dd>
       <dt>void libraw_recycle(libraw_data_t*);</dt>
       <dd>See <a href="API-CXX.html#recycle">LibRaw::recycle()</a></dd>
-      <dt>void libraw_close(libraw_data_t*);</dt>
-      <dd>See <a href="API-CXX.html#%7ELibRaw">LibRaw::~LibRaw()</a></dd>
       <dt>const char *libraw_strerror(int errorcode);</dt>
       <dd>See <a href="API-CXX.html#libraw_strerror">LibRaw::strerror</a></dd>
       <dt>const char *libraw_strprogress(enum LibRaw_progress);</dt>
       <dd>See <a href="API-CXX.html#strprogress">LibRaw::strprogress</a></dd>
-      <dt>void libraw_set_memerror_handler(libraw_data_t*, memory_callback cb, void* data);</dt>
+      <dt>void libraw_set_memerror_handler(libraw_data_t*, memory_callback cb,void *);</dt>
       <dd>See <a href="API-CXX.html#memerror">LibRaw::set_memerror_handler()</a></dd>
-      <dt>void libraw_set_dataerror_handler(libraw_data_t*, data_callback func, void* data);</dt>
+      <dt>void libraw_set_dataerror_handler(libraw_data_t*,data_callback func, void *);</dt>
       <dd>See <a href="API-CXX.html#dataerror">LibRaw::set_dataerror_handler()</a></dd>
-      <dt>void libraw_set_progress_handler(libraw_data_t*, progress_callback func, void* data);</dt>
+      <dt>void libraw_set_progress_handler(libraw_data_t*,progress_callback func, void *);</dt>
       <dd>See <a href="API-CXX.html#progress">LibRaw::set_progress_handler()</a></dd>
     </dl>
     <p><a name="dcrawemu"></a></p>

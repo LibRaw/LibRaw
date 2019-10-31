@@ -21,15 +21,15 @@ it under the terms of the one of two licenses as you choose:
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#ifndef WIN32
+#include "libraw/libraw.h"
+
+#ifndef LIBRAW_WIN32_CALLS
 #include <netinet/in.h>
 #else
 #include <winsock2.h>
 #endif
 
-#include "libraw/libraw.h"
-
-#ifdef WIN32
+#ifdef LIBRAW_WIN32_CALLS
 #define snprintf _snprintf
 #endif
 
@@ -46,7 +46,8 @@ int main(int ac, char *av[])
     printf("4channels - LibRaw %s sample. %d cameras supported\n"
            "Usage: %s [-s N] [-g] [-A] [-B] [-N] raw-files....\n"
            "\t-s N - select Nth image in file (default=0)\n"
-           "\t-g - use gamma correction with gamma 2.2 (not precise,use for visual inspection only)\n"
+           "\t-g - use gamma correction with gamma 2.2 (not precise,use for "
+           "visual inspection only)\n"
            "\t-A - autoscaling (by integer factor)\n"
            "\t-B - no black subtraction\n",
            LibRaw::version(), LibRaw::cameraCount(), av[0]);
@@ -144,7 +145,8 @@ int main(int ac, char *av[])
       if (layer > 0)
       {
         for (int rc = 0; rc < S.iheight * S.iwidth; rc++)
-          RawProcessor.imgdata.image[rc][0] = RawProcessor.imgdata.image[rc][layer];
+          RawProcessor.imgdata.image[rc][0] =
+              RawProcessor.imgdata.image[rc][layer];
       }
       char lname[8];
       if (isrgb)
@@ -157,7 +159,8 @@ int main(int ac, char *av[])
         snprintf(lname, 7, "%c", ((char *)("GCMY"))[layer]);
 
       if (OUT.shot_select)
-        snprintf(outfn, sizeof(outfn), "%s-%d.%s.tiff", av[i], OUT.shot_select, lname);
+        snprintf(outfn, sizeof(outfn), "%s-%d.%s.tiff", av[i], OUT.shot_select,
+                 lname);
       else
         snprintf(outfn, sizeof(outfn), "%s.%s.tiff", av[i], lname);
 

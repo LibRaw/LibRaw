@@ -21,23 +21,26 @@ it under the terms of the one of two licenses as you choose:
 
 
 // imgdata.idata
-#define make            (imgdata.idata.make)
-#define model           (imgdata.idata.model)
-#define software        (imgdata.idata.software)
-#define is_raw          (imgdata.idata.raw_count)
-#define dng_version     (imgdata.idata.dng_version)
-#define is_foveon       (imgdata.idata.is_foveon)
-#define colors          (imgdata.idata.colors)
-#define cdesc           (imgdata.idata.cdesc)
-#define filters         (imgdata.idata.filters)
-#define xtrans          (imgdata.idata.xtrans)
-#define xtrans_abs      (imgdata.idata.xtrans_abs)
-#define xmpdata			(imgdata.idata.xmpdata)
-#define xmplen			(imgdata.idata.xmplen)
+#define make             (imgdata.idata.make)
+#define model            (imgdata.idata.model)
+#define software         (imgdata.idata.software)
+#define is_raw           (imgdata.idata.raw_count)
+#define dng_version      (imgdata.idata.dng_version)
+#define is_foveon        (imgdata.idata.is_foveon)
+#define colors           (imgdata.idata.colors)
+#define cdesc            (imgdata.idata.cdesc)
+#define filters          (imgdata.idata.filters)
+#define xtrans           (imgdata.idata.xtrans)
+#define xtrans_abs       (imgdata.idata.xtrans_abs)
+#define xmpdata          (imgdata.idata.xmpdata)
+#define xmplen           (imgdata.idata.xmplen)
 //imgdata image
-#define image           (imgdata.image)
-#define raw_image       (imgdata.rawdata.raw_image)
-#define color_image       (imgdata.rawdata.color_image)
+#define image            (imgdata.image)
+#define raw_image        (imgdata.rawdata.raw_image)
+#define color_image      (imgdata.rawdata.color_image)
+#define normalized_make  (imgdata.idata.normalized_make)
+#define normalized_model (imgdata.idata.normalized_model)
+#define maker_index      (imgdata.idata.maker_index)
 
 // imgdata.sizes
 #define raw_height      (imgdata.sizes.raw_height)
@@ -78,25 +81,23 @@ it under the terms of the one of two licenses as you choose:
 #define model2          (imgdata.color.model2)
 
 //imgdata.thumbnail
-
 #define thumb_width     (imgdata.thumbnail.twidth)
 #define thumb_height    (imgdata.thumbnail.theight)
 #define thumb_length    (imgdata.thumbnail.tlength)
 
 
 //imgdata.others
-#define iso_speed       (imgdata.other.iso_speed)
-#define shutter         (imgdata.other.shutter)
-#define aperture        (imgdata.other.aperture)
-#define focal_len       (imgdata.other.focal_len)
-#define timestamp       (imgdata.other.timestamp)
-#define shot_order      (imgdata.other.shot_order)
-#define gpsdata         (imgdata.other.gpsdata)
-#define desc            (imgdata.other.desc)
-#define artist          (imgdata.other.artist)
-#define is_NikonTransfer (imgdata.other.is_NikonTransfer)
-#define is_4K_RAFdata    (imgdata.other.is_4K_RAFdata)
-#define is_PentaxRicohMakernotes    (imgdata.other.is_PentaxRicohMakernotes)
+#define iso_speed        (imgdata.other.iso_speed)
+#define shutter          (imgdata.other.shutter)
+#define aperture         (imgdata.other.aperture)
+#define focal_len        (imgdata.other.focal_len)
+#define timestamp        (imgdata.other.timestamp)
+#define shot_order       (imgdata.other.shot_order)
+#define gpsdata          (imgdata.other.gpsdata)
+#define desc             (imgdata.other.desc)
+#define artist           (imgdata.other.artist)
+
+#define FujiCropMode     (imgdata.makernotes.fuji.CropMode)
 
 //imgdata.output
 #define greybox         (imgdata.params.greybox)
@@ -110,7 +111,6 @@ it under the terms of the one of two licenses as you choose:
 #define half_size       (imgdata.params.half_size)
 #define four_color_rgb  (imgdata.params.four_color_rgb)
 #define highlight       (imgdata.params.highlight)
-//#define verbose         (imgdata.params.verbose)
 #define use_auto_wb     (imgdata.params.use_auto_wb)
 #define use_camera_wb   (imgdata.params.use_camera_wb)
 #define use_camera_matrix (imgdata.params.use_camera_matrix)
@@ -128,10 +128,6 @@ it under the terms of the one of two licenses as you choose:
 #define dcb_iterations   (imgdata.params.iterations)
 #define dcb_enhance_fl   (imgdata.params.dcb_enhance)
 #define fbdd_noiserd     (imgdata.params.fbdd_noiserd)
-
-//rgb_constants
-#define xyz_rgb         (rgb_constants.xyz_rgb)
-#define d65_white       (rgb_constants.d65_white)
 
 //libraw_internal_data.internal_data
 #define meta_data       (libraw_internal_data.internal_data.meta_data)
@@ -188,6 +184,14 @@ it under the terms of the one of two licenses as you choose:
 #define load_flags      (libraw_internal_data.unpacker_data.load_flags)
 #define pana_encoding   (libraw_internal_data.unpacker_data.pana_encoding)
 #define pana_bpp        (libraw_internal_data.unpacker_data.pana_bpp)
+#define CM_found        (libraw_internal_data.unpacker_data.CM_found)
+
+#define is_NikonTransfer (libraw_internal_data.unpacker_data.is_NikonTransfer)
+#define is_Sony          (libraw_internal_data.unpacker_data.is_Sony)
+#define is_4K_RAFdata    (libraw_internal_data.unpacker_data.is_4K_RAFdata)
+#define is_PentaxRicohMakernotes    (libraw_internal_data.unpacker_data.is_PentaxRicohMakernotes)
+#define is_pana_raw      (libraw_internal_data.unpacker_data.is_pana_raw)
+
 
 #ifdef LIBRAW_IO_REDEFINED
 #define fread(ptr,size,n,stream) stream->read(ptr,size,n)

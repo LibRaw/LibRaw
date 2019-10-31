@@ -3,7 +3,8 @@
  * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
  * Created: Jul 10, 2011
  *
- * LibRaw simple C++ API:  creates 8 different renderings from 1 source file. The 1st and 4th one should be identical
+ * LibRaw simple C++ API:  creates 8 different renderings from 1 source file.
+The 1st and 4th one should be identical
 
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of two licenses as you choose:
@@ -19,22 +20,21 @@ it under the terms of the one of two licenses as you choose:
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "libraw/libraw.h"
 
-#ifndef WIN32
+#ifndef LIBRAW_WIN32_CALLS
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #endif
 
-#include "libraw/libraw.h"
-
-#ifdef WIN32
+#ifdef LIBRAW_WIN32_CALLS
 #define snprintf _snprintf
 #endif
 
-int process_once(LibRaw &RawProcessor, int half_mode, int camera_wb, int auto_wb, int suffix, int user_flip,
-                 char *fname)
+int process_once(LibRaw &RawProcessor, int half_mode, int camera_wb,
+                 int auto_wb, int suffix, int user_flip, char *fname)
 {
   char outfn[1024];
   RawProcessor.imgdata.params.half_size = half_mode;
@@ -46,10 +46,12 @@ int process_once(LibRaw &RawProcessor, int half_mode, int camera_wb, int auto_wb
 
   if (LIBRAW_SUCCESS != ret)
   {
-    fprintf(stderr, "Cannot do postpocessing on %s: %s\n", fname, libraw_strerror(ret));
+    fprintf(stderr, "Cannot do postpocessing on %s: %s\n", fname,
+            libraw_strerror(ret));
     return ret;
   }
-  snprintf(outfn, sizeof(outfn), "%s.%d.%s", fname, suffix, (RawProcessor.imgdata.idata.colors > 1 ? "ppm" : "pgm"));
+  snprintf(outfn, sizeof(outfn), "%s.%d.%s", fname, suffix,
+           (RawProcessor.imgdata.idata.colors > 1 ? "ppm" : "pgm"));
 
   printf("Writing file %s\n", outfn);
 
@@ -65,7 +67,8 @@ int main(int ac, char *av[])
   LibRaw RawProcessor;
   if (ac < 2)
   {
-    printf("multirender_test - LibRaw %s sample. Performs 4 different renderings of one file\n"
+    printf("multirender_test - LibRaw %s sample. Performs 4 different "
+           "renderings of one file\n"
            " %d cameras supported\n"
            "Usage: %s raw-files....\n",
            LibRaw::version(), LibRaw::cameraCount(), av[0]);
@@ -94,7 +97,8 @@ int main(int ac, char *av[])
     process_once(RawProcessor, 1, 1, 0, 4, 1, av[i]);  // flip 1
     process_once(RawProcessor, 1, 1, 0, 5, 3, av[i]);  // flip 3
     process_once(RawProcessor, 1, 1, 0, 6, 1, av[i]);  // 1 again same as 4
-    process_once(RawProcessor, 1, 1, 0, 7, -1, av[i]); // default again, same as 3
+    process_once(RawProcessor, 1, 1, 0, 7, -1,
+                 av[i]); // default again, same as 3
     process_once(RawProcessor, 0, 0, 0, 8, -1, av[i]); // same as 1
 
     RawProcessor.recycle(); // just for show this call

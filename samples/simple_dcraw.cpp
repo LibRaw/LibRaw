@@ -20,37 +20,39 @@ it under the terms of the one of two licenses as you choose:
 #include <string.h>
 #include <math.h>
 
-#ifndef WIN32
+#include "libraw/libraw.h"
+
+#ifndef LIBRAW_WIN32_CALLS
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #endif
 
-#include "libraw/libraw.h"
-
-#ifdef WIN32
+#ifdef LIBRAW_WIN32_CALLS
 #define snprintf _snprintf
 #endif
 
-int my_progress_callback(void *unused_data, enum LibRaw_progress state, int iter, int expected)
+int my_progress_callback(void *unused_data, enum LibRaw_progress state,
+                         int iter, int expected)
 {
   if (iter == 0)
     printf("CB: state=%x, expected %d iterations\n", state, expected);
   return 0;
 }
 
-char *customCameras[] = {(char *)"43704960,4080,5356, 0, 0, 0, 0,0,148,0,0, Dalsa, FTF4052C Full,0",
-                         (char *)"42837504,4008,5344, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF4052C 3:4",
-                         (char *)"32128128,4008,4008, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF4052C 1:1",
-                         (char *)"24096096,4008,3006, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF4052C 4:3",
-                         (char *)"18068064,4008,2254, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF4052C 16:9",
-                         (char *)"67686894,5049,6703, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C Full",
-                         (char *)"66573312,4992,6668, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C 3:4",
-                         (char *)"49840128,4992,4992, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C 1:1",
-                         (char *)"37400064,4992,3746, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C 4:3",
-                         (char *)"28035072,4992,2808, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C 16:9",
-                         NULL};
+char *customCameras[] = {
+    (char *)"43704960,4080,5356, 0, 0, 0, 0,0,148,0,0, Dalsa, FTF4052C Full,0",
+    (char *)"42837504,4008,5344, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF4052C 3:4",
+    (char *)"32128128,4008,4008, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF4052C 1:1",
+    (char *)"24096096,4008,3006, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF4052C 4:3",
+    (char *)"18068064,4008,2254, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF4052C 16:9",
+    (char *)"67686894,5049,6703, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C Full",
+    (char *)"66573312,4992,6668, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C 3:4",
+    (char *)"49840128,4992,4992, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C 1:1",
+    (char *)"37400064,4992,3746, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C 4:3",
+    (char *)"28035072,4992,2808, 0, 0, 0, 0,0,148,0,0,Dalsa, FTF5066C 16:9",
+    NULL};
 
 int main(int ac, char *av[])
 {
@@ -63,7 +65,8 @@ int main(int ac, char *av[])
   RawProcessor.imgdata.params.custom_camera_strings = customCameras;
   if (ac < 2)
   {
-    printf("simple_dcraw - LibRaw %s sample. Emulates dcraw [-D] [-T] [-v] [-e] [-E]\n"
+    printf("simple_dcraw - LibRaw %s sample. Emulates dcraw [-D] [-T] [-v] "
+           "[-e] [-E]\n"
            " %d cameras supported\n"
            "Usage: %s [-D] [-T] [-v] [-e] raw-files....\n"
            "\t-4 - 16-bit mode\n"
@@ -135,20 +138,23 @@ int main(int ac, char *av[])
     {
       if ((ret = RawProcessor.unpack_thumb()) != LIBRAW_SUCCESS)
       {
-        fprintf(stderr, "Cannot unpack_thumb %s: %s\n", av[i], libraw_strerror(ret));
+        fprintf(stderr, "Cannot unpack_thumb %s: %s\n", av[i],
+                libraw_strerror(ret));
         if (LIBRAW_FATAL_ERROR(ret))
           continue; // skip to next file
       }
       else
       {
         snprintf(thumbfn, sizeof(thumbfn), "%s.%s", av[i],
-                 T.tformat == LIBRAW_THUMBNAIL_JPEG ? "thumb.jpg" : "thumb.ppm");
+                 T.tformat == LIBRAW_THUMBNAIL_JPEG ? "thumb.jpg"
+                                                    : "thumb.ppm");
 
         if (verbose)
           printf("Writing thumbnail file %s\n", thumbfn);
         if (LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_thumb_writer(thumbfn)))
         {
-          fprintf(stderr, "Cannot write %s: %s\n", thumbfn, libraw_strerror(ret));
+          fprintf(stderr, "Cannot write %s: %s\n", thumbfn,
+                  libraw_strerror(ret));
           if (LIBRAW_FATAL_ERROR(ret))
             continue;
         }
@@ -160,11 +166,13 @@ int main(int ac, char *av[])
 
     if (LIBRAW_SUCCESS != ret)
     {
-      fprintf(stderr, "Cannot do postpocessing on %s: %s\n", av[i], libraw_strerror(ret));
+      fprintf(stderr, "Cannot do postpocessing on %s: %s\n", av[i],
+              libraw_strerror(ret));
       if (LIBRAW_FATAL_ERROR(ret))
         continue;
     }
-    snprintf(outfn, sizeof(outfn), "%s.%s", av[i], OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
+    snprintf(outfn, sizeof(outfn), "%s.%s", av[i],
+             OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
 
     if (verbose)
       printf("Writing file %s\n", outfn);
