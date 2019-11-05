@@ -37,9 +37,6 @@ it under the terms of the one of two licenses as you choose:
 
 /* WIN32 defined: compatibility w/ old versions */
 #ifdef WIN32 /* old way: compatibility */
-#  ifndef LIBRAW_WIN32_UNICODEPATHS
-#   define LIBRAW_WIN32_UNICODEPATHS
-#  endif
 #  ifndef LIBRAW_WIN32_DLLDEFS
 #   define LIBRAW_WIN32_DLLDEFS
 #  endif
@@ -47,11 +44,6 @@ it under the terms of the one of two licenses as you choose:
 #   define LIBRAW_WIN32_CALLS
 #  endif
 #elif defined(_WIN32) && defined(_MSC_VER) /* MSVC, WIN32 is not defined */
-# if (_MSC_VER > 1310) /* MSVC 2003+ */
-#  ifndef LIBRAW_WIN32_UNICODEPATHS
-#   define LIBRAW_WIN32_UNICODEPATHS
-#  endif
-# endif
 # ifndef LIBRAW_WIN32_DLLDEFS
 #  define LIBRAW_WIN32_DLLDEFS
 # endif
@@ -64,12 +56,19 @@ it under the terms of the one of two licenses as you choose:
 #  ifndef LIBRAW_WIN32_CALLS
 #   define LIBRAW_WIN32_CALLS
 #  endif 
-#  ifndef LIBRAW_WIN32_UNICODEPATHS
-#   if _GLIBCXX_HAVE__WFOPEN && _GLIBCXX_USE_WCHAR_T
-#    define LIBRAW_WIN32_UNICODEPATHS
-#   endif
-#  endif
+# endif
 #endif
+
+#if (defined(_WIN32) || defined(WIN32))
+# if defined(_MSC_VER)  && (_MSC_VER > 1310) /* MSVC 2003+ */
+#  ifndef LIBRAW_WIN32_UNICODEPATHS
+#   define LIBRAW_WIN32_UNICODEPATHS
+#  endif
+# elif _GLIBCXX_HAVE__WFOPEN && _GLIBCXX_USE_WCHAR_T
+#  ifndef LIBRAW_WIN32_UNICODEPATHS
+#    define LIBRAW_WIN32_UNICODEPATHS
+#  endif
+# endif
 #endif
 
 #include "libraw_datastream.h"
