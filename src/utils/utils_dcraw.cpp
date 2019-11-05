@@ -242,7 +242,6 @@ mask_set:
     black = (mblack[0] + mblack[1] + mblack[2] + mblack[3]) /
                 MAX(1, (mblack[4] + mblack[5] + mblack[6] + mblack[7])) -
             4;
-    canon_600_correct();
   }
   else if (zero < mblack[4] && mblack[5] && mblack[6] && mblack[7])
   {
