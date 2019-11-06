@@ -35,32 +35,24 @@ it under the terms of the one of two licenses as you choose:
 
 /* better WIN32 defines */
 
-/* WIN32 defined: compatibility w/ old versions */
-#ifdef WIN32 /* old way: compatibility */
-#  ifndef LIBRAW_WIN32_DLLDEFS
-#   define LIBRAW_WIN32_DLLDEFS
-#  endif
+/* better WIN32 defines */
+
+#if defined(WIN32) || defined(_WIN32)
+
+/* Win32 API */
 #  ifndef LIBRAW_WIN32_CALLS
 #   define LIBRAW_WIN32_CALLS
 #  endif
-#elif defined(_WIN32) && defined(_MSC_VER) /* MSVC, WIN32 is not defined */
+
+/* DLLs: Microsoft or Intel compiler */
+# if defined(_MSC_VER) || defined(__INTEL_COMPILER)
 # ifndef LIBRAW_WIN32_DLLDEFS
 #  define LIBRAW_WIN32_DLLDEFS
 # endif
-# ifndef LIBRAW_WIN32_CALLS
-#  define LIBRAW_WIN32_CALLS
-# endif
-#else
-/* Windows, any not-MSVC compiler */
-# if defined(_WIN32) && !defined(WIN32) && !defined(_MSC_VER) /* any compiler but MSVC */
-#  ifndef LIBRAW_WIN32_CALLS
-#   define LIBRAW_WIN32_CALLS
-#  endif 
-# endif
 #endif
 
-#if (defined(_WIN32) || defined(WIN32))
-# if defined(_MSC_VER)  && (_MSC_VER > 1310) /* MSVC 2003+ */
+/* wchar_t* API for std::filebuf */
+# if (defined(_MSC_VER)  && (_MSC_VER > 1310)) || (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 910))
 #  ifndef LIBRAW_WIN32_UNICODEPATHS
 #   define LIBRAW_WIN32_UNICODEPATHS
 #  endif
@@ -69,6 +61,7 @@ it under the terms of the one of two licenses as you choose:
 #    define LIBRAW_WIN32_UNICODEPATHS
 #  endif
 # endif
+
 #endif
 
 #include "libraw_datastream.h"
