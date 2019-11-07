@@ -37,7 +37,7 @@ it under the terms of the one of two licenses as you choose:
 
 // this should be divisible by 4
 #define CRX_BUF_SIZE 0x10000
-#ifndef _WIN32
+#if !defined(_WIN32) || defined (__GNUC__) /* old versions of MinGW does not have _BitScanReverse */
 typedef uint32_t DWORD;
 typedef uint8_t byte;
 libraw_inline void _BitScanReverse(DWORD *Index, unsigned long Mask)
