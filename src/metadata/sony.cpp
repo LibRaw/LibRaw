@@ -1904,13 +1904,13 @@ void LibRaw::parseSonySRF(unsigned len)
 #define CHECKBUFFER_SGET4(offset)                                              \
   do                                                                           \
   {                                                                            \
-    if ((offset + 4) > len)                                                    \
+    if (((offset + 4) > len) || ((offset) < 0))                                \
       goto restore_after_parseSonySRF;                                         \
   } while (0)
 #define CHECKBUFFER_SGET2(offset)                                              \
   do                                                                           \
   {                                                                            \
-    if ((offset + 2) > len)                                                    \
+    if ( ((offset + 2) > len) || ((offset) < 0))                               \
       goto restore_after_parseSonySRF;                                         \
   } while (0)
 
