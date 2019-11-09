@@ -24,6 +24,14 @@ II. If Adobe's version is used:
      If newer Adobe SDK is used, please apply patches LibRaw/GoPro/gpr_read_image.cpp.diff 
      and  LibRaw/GoPro/gpr_read_image.h.diff to your GPR SDK code
 
+   c) GPR SDK's gpr_sdk/private/gpr.cpp uses own (added) dng_host method GetGPMFPayload
+      so it will not compile with Adobes (not patched) dng_host.h
+      LibRaw does not use high-level interface provided by gpr.cpp, so
+      possible problem solutions are:
+       - either compile GPR SDK without gpr_sdk/private/gpr.cpp file
+       - or provide GPR's dng_host.h while building GPR SDK.
+     (in our software we use 1st method).       
+
 III. LibRaw uses private gpr_read_image() interface
     So you'll need to add PATH_TO/gpr_sdk/gpr_sdk/private to -I compiler flags.
 
