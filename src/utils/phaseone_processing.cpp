@@ -41,7 +41,7 @@ int LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
     {
       if (!imgdata.rawdata.ph1_cblack || !imgdata.rawdata.ph1_rblack)
       {
-        register int bl = imgdata.color.phase_one_data.t_black;
+        int bl = imgdata.color.phase_one_data.t_black;
         for (int row = 0; row < S.raw_height; row++)
         {
           checkCancel();
@@ -55,7 +55,7 @@ int LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
       }
       else
       {
-        register int bl = imgdata.color.phase_one_data.t_black;
+        int bl = imgdata.color.phase_one_data.t_black;
         for (int row = 0; row < S.raw_height; row++)
         {
           checkCancel();

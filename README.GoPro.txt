@@ -32,6 +32,8 @@ II. If Adobe's version is used:
        - or provide GPR's dng_host.h while building GPR SDK.
      (in our software we use 1st method).       
 
+   See Note VII below for detailed GPR SDK build instructions w/ Cmake
+
 III. LibRaw uses private gpr_read_image() interface
     So you'll need to add PATH_TO/gpr_sdk/gpr_sdk/private to -I compiler flags.
 
@@ -41,5 +43,52 @@ IV.  -DUSE_GPRSDK LibRaw build flag requires -DUSE_DNGSDK. LibRaw will not compi
 V.  LibRaw will use DNG SDK to unpack GoPro files even if imgdata.params.use_dng_sdk is set to 0.
 
 VI. If LibRaw is built with -DUSE_GPRSDK, LibRaw::capabilities will return LIBRAW_CAPS_GPRSDK flag.
+
+VII. GPR SDK build using cmake (contributed by our user, great thanks)
+
+1. replace gopro's toplevel CMakeLists.txt with this one (this builds only a subset of the libraries):
+------------------------------------
+# minimum required cmake version
+cmake_minimum_required( VERSION 3.5 FATAL_ERROR )
+
+set(CMAKE_SUPPRESS_REGENERATION true)
+set(CMAKE_C_FLAGS "-std=c99")
+
+# project name
+project( gpr )
+
+option(DNGINCLUDEDIR "Adobe DNG toolkit include directory")
+INCLUDE_DIRECTORIES( ${DNGINCLUDEDIR} )
+
+# DNG toolkit requires C++11 minimum:
+set_property(GLOBAL PROPERTY CXX_STANDARD 17)
+
+# add needed subdirectories
+add_subdirectory( "source/lib/common" )
+add_subdirectory( "source/lib/vc5_common" )
+add_subdirectory( "source/lib/vc5_decoder" )
+add_subdirectory( "source/lib/gpr_sdk" )
+
+set_property(TARGET gpr_sdk PROPERTY CXX_STANDARD 17)
+
+IF (WIN32)
+TARGET_COMPILE_DEFINITIONS( gpr_sdk PUBLIC -DqWinOS=1 -DqMacOS=0 -DqLinux=0)
+ELSEIF (APPLE)
+TARGET_COMPILE_DEFINITIONS( gpr_sdk PUBLIC -DqWinOS=0 -DqMacOS=1 -DqLinux=0)
+ELSE()
+TARGET_COMPILE_DEFINITIONS( gpr_sdk PUBLIC -DqWinOS=0 -DqMacOS=0 -DqLinux=1)
+ENDIF()
+----------------------------------------
+
+2. apply the two patches of README.GoPro.txt section II b.
+the patch of section IIa is not needed with libdng1.5.
+
+3. delete these two files:
+/source/lib/gpr_sdk/private/gpr.cpp
+/source/lib/gpr_sdk/private/gpr_image_writer.cpp
+
+4. run CMAKE with -DDNGINCLUDEDIR, pointing to the headers from Adobe dng 1.5.
+
+5. build. You get 4 libraries "gpr_sdk", "vc5_common", "vc5_decoder", "common", the rest is ignored.
 
 
