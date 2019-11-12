@@ -791,7 +791,7 @@ void LibRaw::nikon_load_raw()
     split = get2();
   }
 
-  while (curve[max - 2] == curve[max - 1])
+  while (max > 2 && (curve[max - 2] == curve[max - 1]))
     max--;
   huff = make_decoder(nikon_tree[tree]);
   fseek(ifp, data_offset, SEEK_SET);

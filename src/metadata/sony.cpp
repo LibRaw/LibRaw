@@ -1904,9 +1904,10 @@ void LibRaw::parseSonySRF(unsigned len)
 #define CHECKBUFFER_SGET4(offset)                                              \
   do                                                                           \
   {                                                                            \
-    if (((offset + 4) > len) || ((offset) < 0))                                \
+    if ((((offset) + 4) > len) || ((offset) < 0))                              \
       goto restore_after_parseSonySRF;                                         \
   } while (0)
+
 #define CHECKBUFFER_SGET2(offset)                                              \
   do                                                                           \
   {                                                                            \
@@ -1947,7 +1948,7 @@ void LibRaw::parseSonySRF(unsigned len)
 
   while (entries--)
   {
-    CHECKBUFFER_SGET4(srf_offset + 8);
+    CHECKBUFFER_SGET4(offset + 8);
     tag_id = sget2(srf_buf + offset);
     tag_type = sget2(srf_buf + offset + 2);
     tag_datalen = sget4(srf_buf + offset + 4);
