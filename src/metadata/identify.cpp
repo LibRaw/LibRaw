@@ -2774,7 +2774,7 @@ dng_skip:
     is_raw = 0;
 
   if (raw_width < 22 || raw_width > 64000 || raw_height < 22 ||
-      raw_height > 64000)
+      raw_height > 64000 || pixel_aspect < 0.1 || pixel_aspect > 10)
     is_raw = 0;
 
 #ifdef NO_JASPER
