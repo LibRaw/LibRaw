@@ -45,7 +45,11 @@ libraw_inline void _BitScanReverse(DWORD *Index, unsigned long Mask)
 {
   *Index = sizeof(unsigned long) * 8 - 1 - __builtin_clzl(Mask);
 }
+#if LibRawBigEndian
+#define _byteswap_ulong(x) (x)
+#else
 #define _byteswap_ulong(x) __builtin_bswap32(x)
+#endif
 #endif
 
 struct CrxBitstream
