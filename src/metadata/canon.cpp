@@ -703,6 +703,10 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
     Canon_WBpresets(0, 0);
     fseek(ifp, save1, SEEK_SET);
   }
+  else if (tag == 0x00b4)
+  {
+    imCanon.ColorSpace = get2(); // 1 = sRGB, 2 = Adobe RGB
+  }
   else if (tag == 0x00e0)
   { // SensorInfo
     imCanon.SensorWidth = (get2(), get2());
