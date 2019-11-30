@@ -317,6 +317,7 @@ typedef unsigned long long UINT64;
     short MakernotesFlip;
     short SRAWQuality;
     unsigned wbi;
+    short ColorSpace;
   } libraw_canon_makernotes_t;
 
   typedef struct
