@@ -301,6 +301,8 @@ typedef unsigned long long UINT64;
     short FlashGuideNumber;
     /* drive */
     short ContinuousDrive;
+    /* colorspace */
+    ushort ColorSpace;
     /* sensor */
     short SensorWidth;
     short SensorHeight;
