@@ -487,6 +487,7 @@ typedef unsigned long long UINT64;
     libraw_sensor_highspeed_crop_t SensorHighSpeedCrop;
     ushort SensorWidth;
     ushort SensorHeight;
+    short ColorSpace;
   } libraw_nikon_makernotes_t;
 
   typedef struct
