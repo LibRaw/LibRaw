@@ -452,7 +452,19 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
     }
     else if (tag == 0x001e)
     { // ColorSpace
-      imNikon.ColorSpace = get2(); // 1 = sRGB, 2 = Adobe RGB
+      imNikon.ColorSpace = get2();
+      switch (imNikon.ColorSpace)
+      {
+      case 1:
+        imgdata.color.MakernoteColorSpace = LIBRAW_COLORSPACE_sRGB;
+        break;
+      case 2:
+        imgdata.color.MakernoteColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
+        break;
+      default:
+        imgdata.color.MakernoteColorSpace = LIBRAW_COLORSPACE_Unknown;
+        break;
+      }
     }
     else if (tag == 0x0025)
     {

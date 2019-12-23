@@ -692,6 +692,7 @@ typedef unsigned long long UINT64;
                       7    Never seen
                       8    Name unknown
                       */
+    short MakernoteColorSpace;
   } libraw_colordata_t;
 
   typedef struct

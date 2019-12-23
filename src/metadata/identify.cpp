@@ -2832,5 +2832,7 @@ notraw:
   else
     imgdata.color.raw_bps = tiff_bps;
 
+  imgdata.color.MakernoteColorSpace = LIBRAW_COLORSPACE_Unknown;
+
   RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY, 1, 2);
 }

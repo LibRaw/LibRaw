@@ -705,7 +705,19 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
   }
   else if (tag == 0x00b4)
   {
-    imCanon.ColorSpace = get2(); // 1 = sRGB, 2 = Adobe RGB
+    imCanon.ColorSpace = get2();
+    switch (imCanon.ColorSpace)
+    {
+    case 1:
+      imgdata.color.MakernoteColorSpace = LIBRAW_COLORSPACE_sRGB;
+      break;
+    case 2:
+      imgdata.color.MakernoteColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
+      break;
+    default:
+      imgdata.color.MakernoteColorSpace = LIBRAW_COLORSPACE_Unknown;
+      break;
+    }
   }
   else if (tag == 0x00e0)
   { // SensorInfo
