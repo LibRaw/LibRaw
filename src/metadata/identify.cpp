@@ -474,6 +474,9 @@ void LibRaw::identify()
           imgdata.makernotes.common.AmbientTemperature = imgdata.makernotes.common.BatteryTemperature =
               imgdata.makernotes.common.exifAmbientTemperature = -1000.0f;
 
+  imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_Unknown;
+  imgdata.makernotes.common.ColorSpace = LIBRAW_COLORSPACE_Unknown;
+
   for (i = 0; i < LIBRAW_IFD_MAXCOUNT; i++)
   {
     tiff_ifd[i].dng_color[0].illuminant = tiff_ifd[i].dng_color[1].illuminant =

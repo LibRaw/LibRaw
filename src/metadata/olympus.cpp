@@ -217,6 +217,20 @@ void LibRaw::parseOlympus_CameraSettings(int base, unsigned tag, unsigned type,
     break;
   case 0x0507:
     imOly.ColorSpace = get2();
+    switch (imOly.ColorSpace)
+    {
+    case 0:
+      imCommon.ColorSpace = LIBRAW_COLORSPACE_sRGB;
+      break;
+    case 1:
+      imCommon.ColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
+      break;
+    case 2:
+      imCommon.ColorSpace = LIBRAW_COLORSPACE_ProPhotoRGB;
+      break;
+    default:
+      imCommon.ColorSpace = LIBRAW_COLORSPACE_Unknown;
+    }
     break;
   case 0x0600:
     imgdata.shootinginfo.DriveMode = imOly.DriveMode[0] = get2();

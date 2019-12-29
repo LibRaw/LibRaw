@@ -49,6 +49,7 @@
 #define imPentax imgdata.makernotes.pentax
 #define imSamsung imgdata.makernotes.samsung
 #define imSony imgdata.makernotes.sony
+#define imCommon imgdata.makernotes.common
 
 #define ph1_bits(n) ph1_bithuff(n, 0)
 #define ph1_huff(h) ph1_bithuff(*h, h + 1)

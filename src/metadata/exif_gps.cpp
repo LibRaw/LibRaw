@@ -18,6 +18,41 @@
 
 #include "../../internal/dcraw_defs.h"
 
+void LibRaw::parse_interop(int base)
+{
+  unsigned entries, tag, type, len, save;
+  unsigned value;
+  entries = get2();
+  INT64 fsize = ifp->size();
+  while (entries--)
+  {
+    tiff_get(base, &tag, &type, &len, &save);
+
+    INT64 savepos = ftell(ifp);
+    if (len > 8 && savepos + len > fsize * 2)
+    {
+      fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
+      continue;
+    }
+
+    switch (tag)
+    {
+    case 0x0001: // InteropIndex
+      value = get4();
+      if (value == 0x383952 && // "R98"
+                               // Canon bug, when [Canon].ColorSpace = AdobeRGB,
+                               // but [ExifIFD].ColorSpace = Uncalibrated and
+                               // [InteropIFD].InteropIndex = "R98"
+          imgdata.color.ExifColorSpace == LIBRAW_COLORSPACE_Unknown)
+        imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_sRGB;
+      else if (value == 0x333052) // "R03"
+        imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
+      break;
+    }
+    fseek(ifp, save, SEEK_SET);
+  }
+}
+
 void LibRaw::parse_exif(int base)
 {
   unsigned entries, tag, type, len, save, c;
@@ -48,7 +83,17 @@ void LibRaw::parse_exif(int base)
 
     switch (tag)
     {
-
+    case 0xA005: // Interoperability IFD
+      fseek(ifp, get4() + base, SEEK_SET);
+      parse_interop(base);
+      break;
+    case 0xA001: // ExifIFD.ColorSpace
+      c = get2();
+      if (c == 1 && imgdata.color.ExifColorSpace == LIBRAW_COLORSPACE_Unknown)
+        imgdata.color.ExifColorSpace == LIBRAW_COLORSPACE_sRGB;
+      else if (c == 2)
+        imgdata.color.ExifColorSpace == LIBRAW_COLORSPACE_AdobeRGB;
+      break;
     case 0x9400:
       imgdata.makernotes.common.exifAmbientTemperature = getreal(type);
       if ((imgdata.makernotes.common.CameraTemperature > -273.15f) &&

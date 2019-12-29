@@ -307,6 +307,10 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
     {
       timestamp = get4();
     }
+    else if (type == 0x00b4)
+    {
+      imCommon.ColorSpace = get2();
+    }
 
 #ifdef LOCALTIME
     if ((type | 0x4000) == 0x580e)

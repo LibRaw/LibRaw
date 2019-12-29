@@ -283,6 +283,7 @@ it under the terms of the one of two licenses as you choose:
     void        parse_thumb_note (int base, unsigned toff, unsigned tlen);
     void        parse_makernote (int base, int uptag);
     void        parse_makernote_0xc634(int base, int uptag, unsigned dng_writer);
+    void        parse_interop(int base);
     void        parse_exif (int base);
     void        linear_table (unsigned len);
     void        Kodak_DCR_WBtags(int wb, unsigned type, int wbi);

@@ -450,6 +450,10 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
           sprintf(imgdata.shootinginfo.BodySerial, "%d", serial);
       }
     }
+    else if (tag == 0x001e)
+    { // ColorSpace
+      imCommon.ColorSpace = get2();
+    }
     else if (tag == 0x0025)
     {
       if (!iso_speed || (iso_speed == 65535))

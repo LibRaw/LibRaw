@@ -293,6 +293,10 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
     }
     imgdata.shootinginfo.DriveMode = imPentax.DriveMode[0];
   }
+  else if (tag == 0x0037)
+  { // ColorSpace
+    imCommon.ColorSpace = get2()+1;
+  }
   else if (tag == 0x0038)
   {
     imgdata.sizes.raw_inset_crop.cleft = get2();
