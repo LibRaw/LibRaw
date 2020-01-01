@@ -21,7 +21,7 @@
 void LibRaw::parse_interop(int base)
 {
   unsigned entries, tag, type, len, save;
-  unsigned value;
+  char value[4];
   entries = get2();
   INT64 fsize = ifp->size();
   while (entries--)
@@ -38,14 +38,15 @@ void LibRaw::parse_interop(int base)
     switch (tag)
     {
     case 0x0001: // InteropIndex
-      value = get4();
-      if (value == 0x383952 && // "R98"
+      memset(value, 0, sizeof(value));
+      fread(value, 1, MIN(4,len), ifp);
+      if (strncmp(value, "R98", 3) == 0 &&
                                // Canon bug, when [Canon].ColorSpace = AdobeRGB,
                                // but [ExifIFD].ColorSpace = Uncalibrated and
                                // [InteropIFD].InteropIndex = "R98"
           imgdata.color.ExifColorSpace == LIBRAW_COLORSPACE_Unknown)
         imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_sRGB;
-      else if (value == 0x333052) // "R03"
+      else if (strncmp(value, "R03", 3) == 0)
         imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
       break;
     }
