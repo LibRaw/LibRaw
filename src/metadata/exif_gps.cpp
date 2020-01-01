@@ -23,6 +23,8 @@ void LibRaw::parse_interop(int base)
   unsigned entries, tag, type, len, save;
   unsigned value;
   entries = get2();
+  const unsigned int kR98 = order == 0x4949 ? 0x383952 : 0x52393800;
+  const unsigned int kR03 = order == 0x4949 ? 0x333052 : 0x33305200;
   INT64 fsize = ifp->size();
   while (entries--)
   {
@@ -39,13 +41,12 @@ void LibRaw::parse_interop(int base)
     {
     case 0x0001: // InteropIndex
       value = get4();
-      if (value == 0x383952 && // "R98"
-                               // Canon bug, when [Canon].ColorSpace = AdobeRGB,
-                               // but [ExifIFD].ColorSpace = Uncalibrated and
-                               // [InteropIFD].InteropIndex = "R98"
+      if (value == kR98 && // Canon bug, when [Canon].ColorSpace = AdobeRGB,
+                           // but [ExifIFD].ColorSpace = Uncalibrated and
+                           // [InteropIFD].InteropIndex = "R98"
           imgdata.color.ExifColorSpace == LIBRAW_COLORSPACE_Unknown)
         imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_sRGB;
-      else if (value == 0x333052) // "R03"
+      else if (value == kR03)
         imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
       break;
     }
