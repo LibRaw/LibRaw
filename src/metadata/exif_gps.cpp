@@ -38,7 +38,7 @@ void LibRaw::parse_interop(int base)
     switch (tag)
     {
     case 0x0001: // InteropIndex
-      value = get4();
+      fread(&value, 1, 4, ifp);
       if (value == 0x383952 && // "R98"
                                // Canon bug, when [Canon].ColorSpace = AdobeRGB,
                                // but [ExifIFD].ColorSpace = Uncalibrated and
