@@ -115,6 +115,8 @@ extern "C"
                                unsigned char bayer_battern,
                                unsigned unused_bits, unsigned otherflags,
                                unsigned black_level);
+  DllDef int libraw_open_datastream(libraw_data_t *lr, libraw_abstract_datastream_t *stream);
+  DllDef void libraw_wrap_ifp_stream(void *ifp, libraw_abstract_datastream_t *dst);
   DllDef int libraw_unpack(libraw_data_t *);
   DllDef int libraw_unpack_thumb(libraw_data_t *);
   DllDef void libraw_recycle_datastream(libraw_data_t *);

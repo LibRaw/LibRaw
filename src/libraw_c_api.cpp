@@ -74,6 +74,132 @@ extern "C"
     return ip->open_file(file);
   }
 
+  class CWrapperDataStream : public LibRaw_abstract_datastream {
+    libraw_abstract_datastream_t stream;
+
+  public:
+    CWrapperDataStream(libraw_abstract_datastream_t* s) : stream(*s) {}
+
+    int valid()
+    {
+      return stream.valid ? stream.valid(stream.userptr) : true;
+    }
+
+    int read(void *dst, size_t len, size_t cnt)
+    {
+      if (!stream.read) return -1;
+      return stream.read(dst, len, cnt, stream.userptr);
+    }
+
+    int seek(INT64 pos, int whence)
+    {
+      if (!stream.seek) return -1;
+      return stream.seek(pos, whence, stream.userptr);
+    }
+
+    INT64 tell()
+    {
+      if (!stream.tell) return -1;
+      return stream.tell(stream.userptr);
+    }
+
+    INT64 size()
+    {
+      if (!stream.size) return -1;
+      return stream.size(stream.userptr);
+    }
+
+    int get_char()
+    {
+      if (!stream.get_char) return -1;
+      return stream.get_char(stream.userptr);
+    }
+
+    char *gets(char *s, int sz)
+    {
+      if (!stream.gets) return NULL;
+      return stream.gets(s, sz, stream.userptr);
+    }
+
+    int scanf_one(const char *fmt, void *arg)
+    {
+      if (!stream.scanf_one) return -1;
+      return stream.scanf_one(fmt, arg, stream.userptr);
+    }
+
+    int eof()
+    {
+      if (!stream.size) return -1;
+      return stream.eof(stream.userptr);
+    }
+
+#ifdef LIBRAW_OLD_VIDEO_SUPPORT
+	void *make_jas_stream()
+    {
+      if (!stream.make_jas_stream) return NULL;
+      return stream.make_jas_stream(stream.userptr);
+    }
+#endif
+  };
+
+
+  int libraw_open_datastream(libraw_data_t *lr, libraw_abstract_datastream_t *stream)
+  {
+    auto s = new CWrapperDataStream(stream);
+    return ((LibRaw*)lr->parent_class)->open_datastream(s);
+  }
+
+
+  static int ifp_wrap_valid(void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->valid();
+  }
+  static int ifp_wrap_read(void *dst, size_t sz, size_t cnt, void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->read(dst, sz, cnt);
+  }
+  static int ifp_wrap_seek(INT64 pos, int whence, void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->seek(pos, whence);
+  }
+  static INT64 ifp_wrap_tell(void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->tell();
+  }
+  static INT64 ifp_wrap_size(void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->size();
+  }
+  static int ifp_wrap_get_char(void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->get_char();
+  }
+  static char *ifp_wrap_gets(char *s, int sz, void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->gets(s, sz);
+  }
+  static int ifp_wrap_scanf_one(const char *fmt, void *arg, void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->scanf_one(fmt, arg);
+  }
+  static int ifp_wrap_eof(void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->eof();
+  }
+#ifdef LIBRAW_OLD_VIDEO_SUPPORT
+  static void *ifp_wrap_make_jas_stream(void *userptr){
+    return ((LibRaw_abstract_datastream*)userptr)->make_jas_stream();
+  }
+#endif
+
+  void libraw_wrap_ifp_stream(void *ifp, libraw_abstract_datastream_t *dst)
+  {
+    dst->userptr = ifp;
+    dst->valid = &ifp_wrap_valid;
+    dst->read = &ifp_wrap_read;
+    dst->seek = &ifp_wrap_seek;
+    dst->tell = &ifp_wrap_tell;
+    dst->size = &ifp_wrap_size;
+    dst->get_char = &ifp_wrap_get_char;
+    dst->gets = &ifp_wrap_gets;
+    dst->scanf_one = &ifp_wrap_scanf_one;
+    dst->eof = &ifp_wrap_eof;
+#ifdef LIBRAW_OLD_VIDEO_SUPPORT
+	dst->make_jas_stream = &ifp_wrap_make_jas_stream;
+#endif
+  }
+
   libraw_iparams_t *libraw_get_iparams(libraw_data_t *lr)
   {
     if (!lr)

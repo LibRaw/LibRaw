@@ -175,6 +175,22 @@ typedef unsigned long long UINT64;
 
   typedef struct
   {
+    int (*valid)(void *userptr);
+    int (*read)(void *, size_t, size_t, void *userptr);
+    int (*seek)(INT64, int, void *userptr);
+    INT64 (*tell)(void *userptr);
+    INT64 (*size)(void *userptr);
+    int (*get_char)(void *userptr);
+    char *(*gets)(char *, int, void *userptr);
+    int (*scanf_one)(const char *, void *, void *userptr);
+    int (*eof)(void *userptr);
+    void *(*make_jas_stream)(void *userptr);
+
+    void* userptr;
+  } libraw_abstract_datastream_t;
+
+  typedef struct
+  {
     enum LibRaw_image_formats type;
     ushort height, width, colors, bits;
     unsigned int data_size;
