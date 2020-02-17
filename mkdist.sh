@@ -7,7 +7,7 @@ else
     autoreconf --install
     mkdir dcraw
     cd dcraw
-    wget http://www.cybercom.net/~dcoffin/dcraw/dcraw.c
+    wget https://www.dechifro.org/dcraw/dcraw.c
     cd ..
     rm -f clist2c.pl clist2html.pl
     rm -f Makefile.devel 
