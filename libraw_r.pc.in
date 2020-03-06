@@ -8,4 +8,4 @@ Description: Raw image decoder library (thread-safe)
 Requires: @PACKAGE_REQUIRES@
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -lraw_r -lstdc++@PC_OPENMP@
-Cflags: -I${includedir}/libraw
+Cflags: -I${includedir}/libraw -I${includedir}
