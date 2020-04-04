@@ -1122,6 +1122,8 @@ static void simple_decode_row(x3f_info_t *I, x3f_directory_entry_t *DE,
   x3f_image_data_t *ID = &DEH->data_subsection.image_data;
   x3f_huffman_t *HUF = ID->huffman;
 
+  if (row*row_stride > ID->data_size - (ID->columns*sizeof(uint32_t)))
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
   uint32_t *data = (uint32_t *)((unsigned char *)ID->data + row * row_stride);
 
   uint16_t c[3] = {0, 0, 0};
