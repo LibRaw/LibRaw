@@ -1042,6 +1042,8 @@ static void huffman_decode_row(x3f_info_t *I, x3f_directory_entry_t *DE,
   int col;
   bit_state_t BS;
 
+  if (HUF->row_offsets.element[row] > ID->data_size - 1)
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
   set_bit_state(&BS, (uint8_t *)ID->data + HUF->row_offsets.element[row]);
 
   for (col = 0; col < ID->columns; col++)
