@@ -261,7 +261,7 @@ void LibRaw::pseudoinverse(double (*in)[3], double (*out)[3], int size)
     for (j = 0; j < 6; j++)
       work[i][j] = j == i + 3;
     for (j = 0; j < 3; j++)
-      for (k = 0; k < size; k++)
+      for (k = 0; k < size && k < 4; k++)
         work[i][j] += in[k][i] * in[k][j];
   }
   for (i = 0; i < 3; i++)
@@ -279,7 +279,7 @@ void LibRaw::pseudoinverse(double (*in)[3], double (*out)[3], int size)
         work[k][j] -= work[i][j] * num;
     }
   }
-  for (i = 0; i < size; i++)
+  for (i = 0; i < size && i < 4; i++)
     for (j = 0; j < 3; j++)
       for (out[i][j] = k = 0; k < 3; k++)
         out[i][j] += work[j][k + 3] * in[i][k];
@@ -290,12 +290,12 @@ void LibRaw::cam_xyz_coeff(float _rgb_cam[3][4], double cam_xyz[4][3])
   double cam_rgb[4][3], inverse[4][3], num;
   int i, j, k;
 
-  for (i = 0; i < colors; i++) /* Multiply out XYZ colorspace */
+  for (i = 0; i < colors && i < 4; i++) /* Multiply out XYZ colorspace */
     for (j = 0; j < 3; j++)
       for (cam_rgb[i][j] = k = 0; k < 3; k++)
         cam_rgb[i][j] += cam_xyz[i][k] * LibRaw_constants::xyz_rgb[k][j];
 
-  for (i = 0; i < colors; i++)
+  for (i = 0; i < colors && i < 4; i++)
   {                               /* Normalize cam_rgb so that */
     for (num = j = 0; j < 3; j++) /* cam_rgb * (1,1,1) is (1,1,1,1) */
       num += cam_rgb[i][j];
@@ -314,7 +314,7 @@ void LibRaw::cam_xyz_coeff(float _rgb_cam[3][4], double cam_xyz[4][3])
   }
   pseudoinverse(cam_rgb, inverse, colors);
   for (i = 0; i < 3; i++)
-    for (j = 0; j < colors; j++)
+    for (j = 0; j < colors && j < 4; j++)
       _rgb_cam[i][j] = inverse[j][i];
 }
 

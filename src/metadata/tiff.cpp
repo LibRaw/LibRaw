@@ -1434,7 +1434,7 @@ int LibRaw::parse_tiff_ifd(int base)
     parseSonySR2((uchar *)buf, sony_offset, sony_length, nonDNG);
     free(buf);
   }
-  for (i = 0; i < colors; i++)
+  for (i = 0; i < colors && i < 4; i++)
     FORCC cc[i][c] *= ab[i];
   if (use_cm)
   {

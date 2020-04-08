@@ -1724,5 +1724,5 @@ void LibRaw::simple_coeff(int index)
   int i, c;
 
   for (raw_color = i = 0; i < 3; i++)
-    FORCC rgb_cam[i][c] = table[index][i * colors + c];
+    FORCC rgb_cam[i][c] = table[index][i * MIN(colors,4) + c];
 }
