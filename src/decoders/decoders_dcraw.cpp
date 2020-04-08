@@ -344,7 +344,7 @@ int LibRaw::ljpeg_start(struct jhead *jh, int info_only)
     FORC(4) jh->huff[2 + c] = jh->huff[1];
     FORC(jh->sraw) jh->huff[1 + c] = jh->huff[0];
   }
-  jh->row = (ushort *)calloc(jh->wide * jh->clrs, 4);
+  jh->row = (ushort *)calloc(jh->wide * jh->clrs, 16);
   merror(jh->row, "ljpeg_start()");
   return zero_after_ff = 1;
 }
