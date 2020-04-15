@@ -664,6 +664,8 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
       {
         if (imNikon.LensDataVersion > 200)
         {
+          cj = xlat[1][imNikon.key];
+          ck = 0x60;
           for (i = 0; i < LensData_len; i++)
           {
             LensData_buf[i] ^= (cj += ci * ck++);
