@@ -1927,6 +1927,10 @@ void LibRaw::identify()
         width += pana[i][4];
         height += pana[i][5];
       }
+
+    if (!tiff_bps && pana_bpp >= 12 && pana_bpp <= 14)
+	tiff_bps = pana_bpp;
+
     filters = 0x01010101U *
               (uchar) "\x94\x61\x49\x16"[((filters - 1) ^ (left_margin & 1) ^
                                           (top_margin << 1)) &
