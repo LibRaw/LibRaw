@@ -153,6 +153,10 @@ struct CrxImage
   int16_t *outBufs[4]; // one per plane
   int16_t *planeBuf;
   LibRaw_abstract_datastream *input;
+#ifdef LIBRAW_CR3_MEMPOOL
+  libraw_memmgr memmgr;
+  CrxImage() : memmgr(0){}
+#endif
 };
 
 enum TileFlags
@@ -1737,14 +1741,22 @@ void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0,
   }
 }
 
-int crxParamInit(CrxBandParam **param, uint64_t subbandMdatOffset,
+int crxParamInit(
+#ifdef LIBRAW_CR3_MEMPOOL
+	libraw_memmgr&  mm,
+#endif	
+	CrxBandParam **param, uint64_t subbandMdatOffset,
                  uint64_t subbandDataSize, uint32_t subbandWidth,
                  uint32_t subbandHeight, int32_t supportsPartial,
                  uint32_t roundedBitsMask, LibRaw_abstract_datastream *input)
 {
   int32_t progrDataSize = supportsPartial ? 0 : sizeof(int32_t) * subbandWidth;
   int32_t paramLength = 2 * subbandWidth + 4;
-  uint8_t *paramBuf = (uint8_t *)calloc(
+  uint8_t *paramBuf = (uint8_t *)
+#ifdef LIBRAW_CR3_MEMPOOL
+	  mm.
+#endif
+	  calloc(
       1, sizeof(CrxBandParam) + sizeof(int32_t) * paramLength + progrDataSize);
 
   if (!paramBuf)
@@ -1813,7 +1825,11 @@ int crxSetupSubbandData(CrxImage *img, CrxPlaneComp *planeComp,
   }
 
   // buffer allocation
-  planeComp->compBuf = (uint8_t *)malloc(compDataSize);
+  planeComp->compBuf = (uint8_t *)
+#ifdef LIBRAW_CR3_MEMPOOL
+	  img->memmgr.
+#endif
+	  malloc(compDataSize);
   if (!planeComp->compBuf)
     return -1;
 
@@ -1895,7 +1911,11 @@ int crxSetupSubbandData(CrxImage *img, CrxPlaneComp *planeComp,
         roundedBitsMask = planeComp->roundedBitsMask;
         supportsPartial = 1;
       }
-      if (crxParamInit(&subbands[subbandNum].bandParam,
+      if (crxParamInit(
+#ifdef LIBRAW_CR3_MEMPOOL
+		  img->memmgr,
+#endif
+		  &subbands[subbandNum].bandParam,
                        subbands[subbandNum].mdatOffset,
                        subbands[subbandNum].dataSize,
                        subbands[subbandNum].width, subbands[subbandNum].height,
@@ -2087,10 +2107,14 @@ int crxReadImageHeaders(crx_data_header_t *hdr, CrxImage *img, uint8_t *mdatPtr,
 
   if (!img->tiles)
   {
-    img->tiles = (CrxTile *)malloc(
+    img->tiles = (CrxTile *)
+#ifdef LIBRAW_CR3_MEMPOOL
+		img->memmgr.
+#endif
+		calloc(
         sizeof(CrxTile) * nTiles +
         sizeof(CrxPlaneComp) * nTiles * img->nPlanes +
-        sizeof(CrxSubband) * nTiles * img->nPlanes * img->subbandCount);
+        sizeof(CrxSubband) * nTiles * img->nPlanes * img->subbandCount,1);
     if (!img->tiles)
       return -1;
 
@@ -2282,7 +2306,11 @@ int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf,
   if (img->encType == 3 && img->nPlanes == 4 && img->nBits > 8)
   {
     img->planeBuf =
-        (int16_t *)malloc(img->planeHeight * img->planeWidth * img->nPlanes *
+        (int16_t *)
+#ifdef LIBRAW_CR3_MEMPOOL
+		img->memmgr.
+#endif
+		malloc(img->planeHeight * img->planeWidth * img->nPlanes *
                           ((img->samplePrecision + 7) >> 3));
     if (!img->planeBuf)
       return -1;
@@ -2335,6 +2363,9 @@ int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf,
 
 int crxFreeImageData(CrxImage *img)
 {
+#ifdef LIBRAW_CR3_MEMPOOL
+	img->memmgr.cleanup();
+#else
   CrxTile *tile = img->tiles;
   int nTiles = img->tileRows * img->tileCols;
 
@@ -2353,9 +2384,10 @@ int crxFreeImageData(CrxImage *img)
     free(img->planeBuf);
     img->planeBuf = 0;
   }
-
+#endif
   return 0;
 }
+
 void LibRaw::crxLoadDecodeLoop(void *img, int nPlanes)
 {
 #ifdef LIBRAW_USE_OPENMP

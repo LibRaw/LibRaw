@@ -26,6 +26,11 @@ it under the terms of the one of two licenses as you choose:
 #ifndef LIBRAW_NO_IOSPACE_CHECK
 #define LIBRAW_IOSPACE_CHECK
 #endif
+#ifndef LIBRAW_NO_CR3_MEMPOOL
+#define LIBRAW_CR3_MEMPOOL
+#endif
+
+
 /* LibRaw uses own memory pool management, with LIBRAW_MSIZE (512)
 entries. It is enough for parsing/decoding non-damaged files, but
 may overflow on specially crafted files (eg. with many string values
