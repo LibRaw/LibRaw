@@ -1,1 +1,5 @@
 samples/lens-identify.cpp
+/.vs
+/Debug
+/buildfiles/Debug
+/buildfiles/debug-x86_64
