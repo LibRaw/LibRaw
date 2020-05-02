@@ -310,6 +310,14 @@ extern "C"
     ip->imgdata.params.output_bps = value;
   }
 
+  	DllDef void libraw_set_output_tif(libraw_data_t *lr, int value)
+  {
+    if (!lr)
+      return;
+    LibRaw *ip = (LibRaw *)lr->parent_class;
+    ip->imgdata.params.output_tiff = value;
+  }
+
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define LIM(x, min, max) MAX(min, MIN(x, max))
