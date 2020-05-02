@@ -40,7 +40,6 @@ it under the terms of the one of two licenses as you choose:
 #if !defined(_WIN32) || (defined (__GNUC__) && !defined(__INTRINSIC_SPECIAL__BitScanReverse))  
 /* __INTRINSIC_SPECIAL__BitScanReverse found in MinGW32-W64 v7.30 headers, may be there is a better solution? */
 typedef uint32_t DWORD;
-typedef uint8_t byte;
 libraw_inline void _BitScanReverse(DWORD *Index, unsigned long Mask)
 {
   *Index = sizeof(unsigned long) * 8 - 1 - __builtin_clzl(Mask);
@@ -113,7 +112,7 @@ struct CrxSubband
 
 struct CrxPlaneComp
 {
-  byte *compBuf;
+  uint8_t *compBuf;
   CrxSubband *subBands;
   CrxWaveletTransform *waveletTransform;
   int8_t compNumber;
