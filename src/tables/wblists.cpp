@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -60,68 +60,180 @@ const uchar LibRaw::xlat[2][256] = {
      0xc6, 0x67, 0x4a, 0xf5, 0xa5, 0x12, 0x65, 0x7e, 0xb0, 0xdf, 0xaf, 0x4e,
      0xb3, 0x61, 0x7f, 0x2f}};
 
+const int LibRaw:: tagtype_dataunit_bytes [19] = {
+    1, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8, 4, 2, 8, 8, 8, 8
+};
+
+const int LibRaw::Canon_wbi2std[] = { // Canon WB index to standard indexes
+//      std. number                wbi - Canon number
+    LIBRAW_WBI_Auto,             // 0
+    LIBRAW_WBI_Daylight,         // 1
+    LIBRAW_WBI_Cloudy,           // 2
+    LIBRAW_WBI_Tungsten,         // 3
+    LIBRAW_WBI_Fluorescent,      // 4
+    LIBRAW_WBI_Flash,            // 5
+    LIBRAW_WBI_Custom,           // 6
+    LIBRAW_WBI_BW,               // 7
+    LIBRAW_WBI_Shade,            // 8
+    LIBRAW_WBI_Kelvin,           // 9
+    LIBRAW_WBI_PC_Set1,          // 10
+    LIBRAW_WBI_PC_Set2,          // 11
+    LIBRAW_WBI_PC_Set3,          // 12
+    LIBRAW_WBI_Unknown,          // 13, unlucky number "13", not used
+    LIBRAW_WBI_FluorescentHigh,  // 14
+    LIBRAW_WBI_Custom1,          // 15
+    LIBRAW_WBI_Custom2,          // 16
+    LIBRAW_WBI_Underwater,       // 17, last one for older PowerShot models
+    LIBRAW_WBI_Custom3,          // 18
+    LIBRAW_WBI_Custom4,          // 19
+    LIBRAW_WBI_PC_Set4,          // 20
+    LIBRAW_WBI_PC_Set5,          // 21
+    LIBRAW_WBI_Unknown,          // 22
+    LIBRAW_WBI_Auto1             // 23
+};
+const int LibRaw::nCanon_wbi2std = sizeof(Canon_wbi2std) / sizeof(int);
+
+int LibRaw::Canon_KeyIsZero_Len2048_linenums_2_StdWBi[] = { // Appendix A: G2, S30, S40; G3, G5, S45, S50
+  LIBRAW_WBI_Custom1,
+  LIBRAW_WBI_Custom2,
+  LIBRAW_WBI_Daylight,
+  LIBRAW_WBI_Cloudy,
+  LIBRAW_WBI_Tungsten,
+  LIBRAW_WBI_Fluorescent,
+  LIBRAW_WBI_Unknown, // ? FluorescentHigh, Shade, Custom, Kelvin
+  LIBRAW_WBI_Flash
+};
+const int LibRaw::nCanon_KeyIsZero_Len2048_linenums_2_StdWBi =
+      sizeof(Canon_KeyIsZero_Len2048_linenums_2_StdWBi) / sizeof(int);
+
+int LibRaw::Canon_KeyIs0x0410_Len3072_linenums_2_StdWBi[] = { // G6, S60, S70; offset +16
+  LIBRAW_WBI_Custom1,
+  LIBRAW_WBI_Custom2,
+  LIBRAW_WBI_Daylight,
+  LIBRAW_WBI_Cloudy,
+  LIBRAW_WBI_Tungsten,
+  LIBRAW_WBI_Fluorescent,
+  LIBRAW_WBI_FluorescentHigh, // LIBRAW_WBI_Unknown, // ? FluorescentHigh, Shade, Custom, Kelvin
+  LIBRAW_WBI_Unknown,
+  LIBRAW_WBI_Underwater, // LIBRAW_WBI_Unknown,
+  LIBRAW_WBI_Unknown,
+  LIBRAW_WBI_Flash
+};
+const int LibRaw::nCanon_KeyIs0x0410_Len3072_linenums_2_StdWBi =
+      sizeof(Canon_KeyIs0x0410_Len3072_linenums_2_StdWBi) / sizeof(int);
+
+int LibRaw::Canon_KeyIs0x0410_Len2048_linenums_2_StdWBi[] = { // Pro1; offset +8
+  LIBRAW_WBI_Custom1,
+  LIBRAW_WBI_Custom2,
+  LIBRAW_WBI_Daylight,
+  LIBRAW_WBI_Cloudy,
+  LIBRAW_WBI_Tungsten,
+  LIBRAW_WBI_Fluorescent,
+  LIBRAW_WBI_Unknown,
+  LIBRAW_WBI_Flash, // LIBRAW_WBI_Unknown,
+  LIBRAW_WBI_Unknown,
+  LIBRAW_WBI_Unknown,
+  LIBRAW_WBI_Unknown // LIBRAW_WBI_Flash
+};
+const int LibRaw::nCanon_KeyIs0x0410_Len2048_linenums_2_StdWBi =
+      sizeof(Canon_KeyIs0x0410_Len2048_linenums_2_StdWBi) / sizeof(int);
+
+const int LibRaw::Canon_G9_linenums_2_StdWBi[] = {
+    LIBRAW_WBI_Auto,
+    LIBRAW_WBI_Daylight,
+    LIBRAW_WBI_Cloudy,
+    LIBRAW_WBI_Tungsten,
+    LIBRAW_WBI_Fluorescent,
+    LIBRAW_WBI_FluorescentHigh,
+    LIBRAW_WBI_Flash,
+    LIBRAW_WBI_Underwater,
+    LIBRAW_WBI_Custom1,
+    LIBRAW_WBI_Custom2
+};
+const int LibRaw::nCanon_G9_linenums_2_StdWBi = sizeof(Canon_G9_linenums_2_StdWBi) / sizeof(int);
+
+const int LibRaw::Canon_D30_linenums_2_StdWBi[] = {
+    LIBRAW_WBI_Daylight,
+    LIBRAW_WBI_Cloudy,
+    LIBRAW_WBI_Tungsten,
+    LIBRAW_WBI_Fluorescent,
+    LIBRAW_WBI_Flash,
+    LIBRAW_WBI_Custom
+};
+const int LibRaw::nCanon_D30_linenums_2_StdWBi = sizeof(Canon_D30_linenums_2_StdWBi) / sizeof(int);
+
 const int LibRaw::Fuji_wb_list1[] = {
     LIBRAW_WBI_FineWeather, LIBRAW_WBI_Shade, LIBRAW_WBI_FL_D,
-    LIBRAW_WBI_FL_L,        LIBRAW_WBI_FL_W,  LIBRAW_WBI_Tungsten};
+    LIBRAW_WBI_FL_L,        LIBRAW_WBI_FL_W,  LIBRAW_WBI_Tungsten
+};
 const int LibRaw::nFuji_wb_list1 = sizeof(Fuji_wb_list1) / sizeof(int);
+
 const int LibRaw::FujiCCT_K[31] = {
     2500, 2550, 2650, 2700, 2800, 2850, 2950, 3000, 3100, 3200, 3300,
     3400, 3600, 3700, 3800, 4000, 4200, 4300, 4500, 4800, 5000, 5300,
-    5600, 5900, 6300, 6700, 7100, 7700, 8300, 9100, 10000};
+    5600, 5900, 6300, 6700, 7100, 7700, 8300, 9100, 10000
+};
+
 const int LibRaw::Fuji_wb_list2[] = {
     LIBRAW_WBI_Auto,  0,  LIBRAW_WBI_Custom,   6,  LIBRAW_WBI_FineWeather, 1,
     LIBRAW_WBI_Shade, 8,  LIBRAW_WBI_FL_D,     10, LIBRAW_WBI_FL_L,        11,
     LIBRAW_WBI_FL_W,  12, LIBRAW_WBI_Tungsten, 2,  LIBRAW_WBI_Underwater,  35,
-    LIBRAW_WBI_Ill_A, 82, LIBRAW_WBI_D65,      83};
+    LIBRAW_WBI_Ill_A, 82, LIBRAW_WBI_D65,      83
+};
 const int LibRaw::nFuji_wb_list2 = sizeof(Fuji_wb_list2) / sizeof(int);
 
-const int LibRaw::Pentax_wb_list1[] = {LIBRAW_WBI_Daylight, LIBRAW_WBI_Shade,
-                                       LIBRAW_WBI_Cloudy,   LIBRAW_WBI_Tungsten,
-                                       LIBRAW_WBI_FL_D,     LIBRAW_WBI_FL_N,
-                                       LIBRAW_WBI_FL_W,     LIBRAW_WBI_Flash};
+const int LibRaw::Pentax_wb_list1[] = {
+    LIBRAW_WBI_Daylight, LIBRAW_WBI_Shade,
+    LIBRAW_WBI_Cloudy,   LIBRAW_WBI_Tungsten,
+    LIBRAW_WBI_FL_D,     LIBRAW_WBI_FL_N,
+    LIBRAW_WBI_FL_W,     LIBRAW_WBI_Flash
+};
 
 const int LibRaw::Pentax_wb_list2[] = {
     LIBRAW_WBI_Daylight, LIBRAW_WBI_Shade, LIBRAW_WBI_Cloudy,
     LIBRAW_WBI_Tungsten, LIBRAW_WBI_FL_D,  LIBRAW_WBI_FL_N,
-    LIBRAW_WBI_FL_W,     LIBRAW_WBI_Flash, LIBRAW_WBI_FL_L};
+    LIBRAW_WBI_FL_W,     LIBRAW_WBI_Flash, LIBRAW_WBI_FL_L
+};
 const int LibRaw::nPentax_wb_list2 = sizeof(Pentax_wb_list2) / sizeof(int);
 
 const int LibRaw::Oly_wb_list1[] = {
     LIBRAW_WBI_Shade,    LIBRAW_WBI_Cloudy, LIBRAW_WBI_FineWeather,
     LIBRAW_WBI_Tungsten, LIBRAW_WBI_Sunset, LIBRAW_WBI_FL_D,
-    LIBRAW_WBI_FL_N,     LIBRAW_WBI_FL_W,   LIBRAW_WBI_FL_WW};
+    LIBRAW_WBI_FL_N,     LIBRAW_WBI_FL_W,   LIBRAW_WBI_FL_WW
+};
 
-const int LibRaw::Oly_wb_list2[] = {LIBRAW_WBI_Auto,
-                                    0,
-                                    LIBRAW_WBI_Tungsten,
-                                    3000,
-                                    0x100,
-                                    3300,
-                                    0x100,
-                                    3600,
-                                    0x100,
-                                    3900,
-                                    LIBRAW_WBI_FL_W,
-                                    4000,
-                                    0x100,
-                                    4300,
-                                    LIBRAW_WBI_FL_D,
-                                    4500,
-                                    0x100,
-                                    4800,
-                                    LIBRAW_WBI_FineWeather,
-                                    5300,
-                                    LIBRAW_WBI_Cloudy,
-                                    6000,
-                                    LIBRAW_WBI_FL_N,
-                                    6600,
-                                    LIBRAW_WBI_Shade,
-                                    7500,
-                                    LIBRAW_WBI_Custom1,
-                                    0,
-                                    LIBRAW_WBI_Custom2,
-                                    0,
-                                    LIBRAW_WBI_Custom3,
-                                    0,
-                                    LIBRAW_WBI_Custom4,
-                                    0};
+const int LibRaw::Oly_wb_list2[] = {
+    LIBRAW_WBI_Auto, 0,
+    LIBRAW_WBI_Tungsten, 3000,
+    0x100, 3300,
+    0x100, 3600,
+    0x100, 3900,
+    LIBRAW_WBI_FL_W, 4000,
+    0x100, 4300,
+    LIBRAW_WBI_FL_D, 4500,
+    0x100, 4800,
+    LIBRAW_WBI_FineWeather, 5300,
+    LIBRAW_WBI_Cloudy, 6000,
+    LIBRAW_WBI_FL_N, 6600,
+    LIBRAW_WBI_Shade, 7500,
+    LIBRAW_WBI_Custom1, 0,
+    LIBRAW_WBI_Custom2, 0,
+    LIBRAW_WBI_Custom3, 0,
+    LIBRAW_WBI_Custom4, 0
+};
+
+const int LibRaw::Sony_SRF_wb_list[] = {
+    LIBRAW_WBI_Daylight, LIBRAW_WBI_Cloudy, LIBRAW_WBI_Fluorescent,
+    LIBRAW_WBI_Tungsten, LIBRAW_WBI_Flash
+};
+
+const int LibRaw::Sony_SR2_wb_list[] = {
+    LIBRAW_WBI_Daylight, LIBRAW_WBI_Cloudy, LIBRAW_WBI_Tungsten, LIBRAW_WBI_Flash,
+    4500, LIBRAW_WBI_Unknown, LIBRAW_WBI_Fluorescent
+};
+
+const int LibRaw::Sony_SR2_wb_list1[] = {
+    LIBRAW_WBI_Daylight, LIBRAW_WBI_Cloudy, LIBRAW_WBI_Tungsten, LIBRAW_WBI_Flash,
+    4500, LIBRAW_WBI_Shade, LIBRAW_WBI_FL_W, LIBRAW_WBI_FL_N, LIBRAW_WBI_FL_D,
+    LIBRAW_WBI_FL_L, 8500, 6000, 3200, 2500
+};

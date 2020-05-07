@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -37,15 +37,15 @@ void LibRaw::tiff_set(struct tiff_hdr *th, ushort *ntag, ushort tag,
 
   tt = (struct libraw_tiff_tag *)(ntag + 1) + (*ntag)++;
   tt->val.i = val;
-  if (type == 1 && count <= 4)
+  if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_BYTE) && count <= 4)
     FORC(4) tt->val.c[c] = val >> (c << 3);
-  else if (type == 2)
+  else if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_ASCII))
   {
     count = strnlen((char *)th + val, count - 1) + 1;
     if (count <= 4)
       FORC(4) tt->val.c[c] = ((char *)th)[val + c];
   }
-  else if (type == 3 && count <= 2)
+  else if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT) && count <= 2)
     FORC(2) tt->val.s[c] = val >> (c << 4);
   tt->count = count;
   tt->type = type;

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -48,16 +48,16 @@ void LibRaw::parseEpsonMakernote(int base, int uptag, unsigned dng_writer)
 
     if (tag == 0x020b)
     {
-      if (type == 4)
+      if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         isRIC.cwidth = get4();
-      else if (type == 3)
+      else if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT))
         isRIC.cwidth = get2();
     }
     else if (tag == 0x020c)
     {
-      if (type == 4)
+      if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         isRIC.cheight = get4();
-      else if (type == 3)
+      else if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT))
         isRIC.cheight = get2();
     }
     else if (tag == 0x0400)
@@ -78,7 +78,7 @@ void LibRaw::parseEpsonMakernote(int base, int uptag, unsigned dng_writer)
       }
       else if (tag == 0x0401)
       {
-        FORC4 cblack[c ^ c >> 1] = get4();
+        FORC4 cblack[RGGB_2_RGBG(c)] = get4();
       }
       else if (tag == 0x0e80)
       {

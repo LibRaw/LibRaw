@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -11,7 +11,7 @@
    (See file LICENSE.CDDL provided in LibRaw distribution archive for details).
 
  */
-
+#include "../../internal/libraw_cameraids.h"
 #include "../../internal/libraw_cxx_defs.h"
 
 int LibRaw::unpack(void)
@@ -75,7 +75,7 @@ int LibRaw::unpack(void)
     imgdata.rawdata.float3_image = 0;
 
 #ifdef USE_DNGSDK
-    if (imgdata.idata.dng_version && dnghost 
+    if (imgdata.idata.dng_version && dnghost
         && libraw_internal_data.unpacker_data.tiff_samples != 2  // Fuji SuperCCD; it is better to detect is more rigid way
         && valid_for_dngsdk() && load_raw != &LibRaw::pentax_4shot_load_raw)
     {
@@ -115,17 +115,14 @@ int LibRaw::unpack(void)
       if (!strncasecmp(imgdata.idata.software, "Magic", 5))
         rawspeed_enabled = 0;
       // Disable rawspeed for double-sized Oly files
-      if (!strncasecmp(imgdata.idata.make, "Olympus", 7) &&
+      if (makeIs(LIBRAW_CAMERAMAKER_Olympus) &&
           ((imgdata.sizes.raw_width > 6000) ||
-           !strncasecmp(imgdata.idata.model, "SH-2", 4) ||
-           !strncasecmp(imgdata.idata.model, "SH-3", 4) ||
-           !strncasecmp(imgdata.idata.model, "TG-4", 4) ||
-           !strncasecmp(imgdata.idata.model, "TG-5", 4) ||
-           !strncasecmp(imgdata.idata.model, "TG-6", 4)))
+           !strncasecmp(imgdata.idata.model, "SH-", 3) ||
+           !strncasecmp(imgdata.idata.model, "TG-", 3) ))
         rawspeed_enabled = 0;
 
-      if (!strncasecmp(imgdata.idata.make, "Canon", 5) &&
-          !strcasecmp(imgdata.idata.model, "EOS 6D Mark II"))
+      if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
+          (libraw_internal_data.identify_data.unique_id == CanonID_EOS_6D_Mark_II)) 
         rawspeed_enabled = 0;
 
       if (imgdata.idata.dng_version && imgdata.idata.filters == 0 &&
@@ -133,15 +130,23 @@ int LibRaw::unpack(void)
         rawspeed_enabled = 0;
 
       if (load_raw == &LibRaw::packed_load_raw &&
-          !strncasecmp(imgdata.idata.make, "Nikon", 5) &&
+        makeIs(LIBRAW_CAMERAMAKER_Nikon) &&
           (!strncasecmp(imgdata.idata.model, "E", 1) ||
            !strncasecmp(imgdata.idata.model, "COOLPIX B", 9) ||
+		   !strncasecmp(imgdata.idata.model, "COOLPIX P9", 10) ||
            !strncasecmp(imgdata.idata.model, "COOLPIX P1000", 13)))
         rawspeed_enabled = 0;
 
+	if (load_raw == &LibRaw::lossless_jpeg_load_raw &&
+		imgdata.makernotes.canon.RecordMode && makeIs(LIBRAW_CAMERAMAKER_Kodak) &&
+		/* Not normalized models here, it is intentional */
+		(!strncasecmp(imgdata.idata.model, "EOS D2000", 9) ||
+		 !strncasecmp(imgdata.idata.model, "EOS D6000", 9)))
+	  rawspeed_enabled = 0;
+
       if (load_raw == &LibRaw::nikon_load_raw &&
-          !strncasecmp(imgdata.idata.make, "Nikon", 5) &&
-          !strncasecmp(imgdata.idata.model, "Z", 1))
+        makeIs(LIBRAW_CAMERAMAKER_Nikon) &&
+          (!strncasecmp(imgdata.idata.model, "Z", 1) || !strncasecmp(imgdata.idata.model,"D780",4)))
         rawspeed_enabled = 0;
 
       if (load_raw == &LibRaw::panasonic_load_raw &&

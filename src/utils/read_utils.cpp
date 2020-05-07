@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -51,7 +51,7 @@ unsigned LibRaw::get4()
   return sget4(str);
 }
 
-unsigned LibRaw::getint(int type) { return type == 3 ? get2() : get4(); }
+unsigned LibRaw::getint(int type) { return tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT) ? get2() : get4(); }
 
 float LibRaw::int_to_float(int i)
 {
@@ -73,25 +73,25 @@ double LibRaw::getreal(int type)
 
   switch (type)
   {
-  case 3: // ushort "SHORT" (int16u)
+  case LIBRAW_EXIFTAG_TYPE_SHORT:
     return (unsigned short)get2();
-  case 4: // unsigned "LONG" (int32u)
+  case LIBRAW_EXIFTAG_TYPE_LONG:
     return (unsigned int)get4();
-  case 5: // (unsigned, unsigned) "RATIONAL" (rational64u)
+  case LIBRAW_EXIFTAG_TYPE_RATIONAL: // (unsigned, unsigned)
     u.d = (unsigned int)get4();
     v.d = (unsigned int)get4();
     return u.d / (v.d ? v.d : 1);
-  case 8: // short "SSHORT" (int16s)
+  case LIBRAW_EXIFTAG_TYPE_SSHORT:
     return (signed short)get2();
-  case 9: // int "SLONG" (int32s)
+  case LIBRAW_EXIFTAG_TYPE_SLONG:
     return (signed int)get4();
-  case 10: // (int, int) "SRATIONAL" (rational64s)
+  case LIBRAW_EXIFTAG_TYPE_SRATIONAL: // (int, int)
     u.d = (signed int)get4();
     v.d = (signed int)get4();
     return u.d / (v.d ? v.d : 1);
-  case 11: // float "FLOAT" (float)
+  case LIBRAW_EXIFTAG_TYPE_FLOAT:
     return int_to_float(get4());
-  case 12: // double "DOUBLE" (double)
+  case LIBRAW_EXIFTAG_TYPE_DOUBLE:
     rev = 7 * ((order == 0x4949) == (ntohs(0x1234) == 0x1234));
     for (i = 0; i < 8; i++)
       u.c[i ^ rev] = fgetc(ifp);
@@ -100,6 +100,45 @@ double LibRaw::getreal(int type)
     return fgetc(ifp);
   }
 }
+
+double LibRaw::sgetreal(int type, uchar *s)
+{
+  union {
+    char c[8];
+    double d;
+  } u, v;
+  int i, rev;
+
+  switch (type)
+  {
+  case LIBRAW_EXIFTAG_TYPE_SHORT:
+    return (unsigned short)sget2(s);
+  case LIBRAW_EXIFTAG_TYPE_LONG:
+    return (unsigned int)sget4(s);
+  case LIBRAW_EXIFTAG_TYPE_RATIONAL: // (unsigned, unsigned)
+    u.d = (unsigned int)sget4(s);
+    v.d = (unsigned int)sget4(s+4);
+    return u.d / (v.d ? v.d : 1);
+  case LIBRAW_EXIFTAG_TYPE_SSHORT:
+    return (signed short)sget2(s);
+  case LIBRAW_EXIFTAG_TYPE_SLONG:
+    return (signed int)sget4(s);
+  case LIBRAW_EXIFTAG_TYPE_SRATIONAL: // (int, int)
+    u.d = (signed int)sget4(s);
+    v.d = (signed int)sget4(s+4);
+    return u.d / (v.d ? v.d : 1);
+  case LIBRAW_EXIFTAG_TYPE_FLOAT:
+    return int_to_float(sget4(s));
+  case LIBRAW_EXIFTAG_TYPE_DOUBLE:
+    rev = 7 * ((order == 0x4949) == (ntohs(0x1234) == 0x1234));
+    for (i = 0; i < 8; i++)
+      u.c[i ^ rev] = *(s+1);
+    return u.d;
+  default:
+    return *(s+1);
+  }
+}
+
 
 void LibRaw::read_shorts(ushort *pixel, unsigned count)
 {

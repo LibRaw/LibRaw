@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -363,6 +363,24 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "unpacked_load_raw_FujiDBP()";
   }
+#ifdef USE_6BY9RPI
+  else if (load_raw == &LibRaw::rpi_load_raw8)
+  {
+	d_info->decoder_name = "rpi_load_raw8";
+  }
+  else if (load_raw == &LibRaw::rpi_load_raw12)
+  {
+	d_info->decoder_name = "rpi_load_raw12";
+  }
+  else if (load_raw == &LibRaw::rpi_load_raw14)
+  {
+	d_info->decoder_name = "rpi_load_raw14";
+  }
+  else if (load_raw == &LibRaw::rpi_load_raw16)
+  {
+	d_info->decoder_name = "rpi_load_raw16";
+  }
+#endif
   else
   {
     d_info->decoder_name = "Unknown unpack function";

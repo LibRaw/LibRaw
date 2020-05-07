@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -14,77 +14,77 @@
  */
 
 #include "../../internal/dcraw_defs.h"
+#include "../../internal/libraw_cameraids.h"
 
 void LibRaw::setPentaxBodyFeatures(unsigned long long id)
 {
 
   ilm.CamID = id;
 
-  switch (id)
-  {
-  case 0x12994:
-  case 0x12aa2:
-  case 0x12b1a:
-  case 0x12b60:
-  case 0x12b62:
-  case 0x12b7e:
-  case 0x12b80:
-  case 0x12b9c:
-  case 0x12b9d:
-  case 0x12ba2:
-  case 0x12c1e:
-  case 0x12c20:
-  case 0x12cd2:
-  case 0x12cd4:
-  case 0x12cfa:
-  case 0x12d72:
-  case 0x12d73:
-  case 0x12db8:
-  case 0x12dfe:
-  case 0x12e6c:
-  case 0x12e76:
-  case 0x12ef8:
-  case 0x12f52:
-  case 0x12f70:
-  case 0x12f71:
-  case 0x12fb6:
-  case 0x12fc0:
-  case 0x12fca:
-  case 0x1301a:
-  case 0x13024:
-  case 0x1309c:
-  case 0x13222:
-  case 0x1322c:
+  switch (id) {
+  case PentaxID_staristD:
+  case PentaxID_staristDS:
+  case PentaxID_staristDL:
+  case PentaxID_staristDS2:
+  case PentaxID_GX_1S:
+  case PentaxID_staristDL2:
+  case PentaxID_GX_1L:
+  case PentaxID_K100D:
+  case PentaxID_K110D:
+  case PentaxID_K100D_Super:
+  case PentaxID_K10D:
+  case PentaxID_GX10:
+  case PentaxID_K20D:
+  case PentaxID_GX20:
+  case PentaxID_K200D:
+  case PentaxID_K2000:
+  case PentaxID_K_m:
+  case PentaxID_K_7:
+  case PentaxID_K_x:
+  case PentaxID_K_r:
+  case PentaxID_K_5:
+  case PentaxID_K_01:
+  case PentaxID_K_30:
+  case PentaxID_K_5_II:
+  case PentaxID_K_5_II_s:
+  case PentaxID_K_50:
+  case PentaxID_K_3:
+  case PentaxID_K_500:
+  case PentaxID_K_S1:
+  case PentaxID_K_S2:
+  case PentaxID_K_3_II:
+  case PentaxID_K_70:
+  case PentaxID_KP:
     ilm.CameraMount = LIBRAW_MOUNT_Pentax_K;
     ilm.CameraFormat = LIBRAW_FORMAT_APSC;
     break;
-  case 0x13092: // K-1
-  case 0x13240: // K-1 Mark II
+  case PentaxID_K_1:
+  case PentaxID_K_1_Mark_II:
     ilm.CameraMount = LIBRAW_MOUNT_Pentax_K;
     ilm.CameraFormat = LIBRAW_FORMAT_FF;
     break;
-  case 0x12e08: // 645D
-  case 0x13010: // 645Z
+  case PentaxID_645D:
+  case PentaxID_645Z:
     ilm.CameraMount = LIBRAW_MOUNT_Pentax_645;
     ilm.CameraFormat = LIBRAW_FORMAT_CROP645;
     break;
-  case 0x12ee4: // Q
-  case 0x12f66: // Q10
+  case PentaxID_Q:
+  case PentaxID_Q10:
     ilm.CameraMount = LIBRAW_MOUNT_Pentax_Q;
     ilm.CameraFormat = LIBRAW_FORMAT_1div2p3INCH;
     break;
-  case 0x12f7a: // Q7
-  case 0x1302e: // Q-S1
+  case PentaxID_Q7:
+  case PentaxID_Q_S1:
     ilm.CameraMount = LIBRAW_MOUNT_Pentax_Q;
     ilm.CameraFormat = LIBRAW_FORMAT_1div1p7INCH;
     break;
-  case 0x12f84: // MX-1
+  case PentaxID_MX_1:
     ilm.LensMount = LIBRAW_MOUNT_FixedLens;
     ilm.CameraMount = LIBRAW_MOUNT_FixedLens;
     ilm.CameraFormat = LIBRAW_FORMAT_1div1p7INCH;
     ilm.FocalType = LIBRAW_FT_ZOOM_LENS;
     break;
-  case 0x1320e: // GR III
+  case PentaxID_GR_III:
     ilm.CameraMount = LIBRAW_MOUNT_FixedLens;
     ilm.LensMount = LIBRAW_MOUNT_FixedLens;
     ilm.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -136,10 +136,12 @@ void LibRaw::PentaxLensInfo(unsigned long long id, unsigned len) // tag 0x0207
   uchar *table_buf;
   table_buf = (uchar *)malloc(MAX(len, 128));
   fread(table_buf, len, 1, ifp);
-  if ((id < 0x12b9c) || (((id == 0x12b9cULL) ||  // K100D
-                          (id == 0x12b9dULL) ||  // K110D
-                          (id == 0x12ba2ULL)) && // K100D Super
-                         ((!table_buf[20] || (table_buf[20] == 0xff)))))
+  if ((id < PentaxID_K100D) ||
+      (((id == PentaxID_K100D) ||
+        (id == PentaxID_K110D) ||
+        (id == PentaxID_K100D_Super)) &&
+       ((!table_buf[20] ||
+        (table_buf[20] == 0xff)))))
   {
     iLensData = 3;
     if (ilm.LensID == -1)
@@ -293,6 +295,19 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
     }
     imgdata.shootinginfo.DriveMode = imPentax.DriveMode[0];
   }
+  else if (tag == 0x0037) {
+    switch (get2()) {
+    case 0:
+      imCommon.ColorSpace = LIBRAW_COLORSPACE_sRGB;
+      break;
+    case 1:
+      imCommon.ColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
+      break;
+    default:
+      imCommon.ColorSpace = LIBRAW_COLORSPACE_Unknown;
+      break;
+    }
+  }
   else if (tag == 0x0038)
   {
     imgdata.sizes.raw_inset_crop.cleft = get2();
@@ -310,14 +325,14 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   }
   else if (tag == 0x0047)
   {
-    imgdata.makernotes.common.CameraTemperature = (float)fgetc(ifp);
+    imCommon.CameraTemperature = (float)fgetc(ifp);
   }
   else if (tag == 0x004d)
   {
-    if (type == 9)
-      imgdata.makernotes.common.FlashEC = getreal(type) / 256.0f;
+    if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_SLONG))
+      imCommon.FlashEC = getreal(type) / 256.0f;
     else
-      imgdata.makernotes.common.FlashEC = (float)((signed short)fgetc(ifp)) / 6.0f;
+      imCommon.FlashEC = (float)((signed short)fgetc(ifp)) / 6.0f;
   }
   else if (tag == 0x005c)
   {
@@ -355,11 +370,11 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   }
 
   else if ((tag == 0x0200) && (dng_writer == nonDNG)) { // Pentax black level
-    FORC4 cblack[c ^ c >> 1] = get2();
+    FORC4 cblack[RGGB_2_RGBG(c)] = get2();
   }
 
   else if ((tag == 0x0201) && (dng_writer == nonDNG)) { // Pentax As Shot WB
-    FORC4 cam_mul[c ^ (c >> 1)] = get2();
+    FORC4 cam_mul[RGGB_2_RGBG(c)] = get2();
   }
 
   else if ((tag == 0x0203) && (dng_writer == nonDNG))
@@ -382,8 +397,7 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   }
   else if ((tag >= 0x020d) && (tag <= 0x0214))
   {
-    FORC4 imgdata.color.WB_Coeffs[Pentax_wb_list1[tag - 0x020d]][c ^ (c >> 1)] =
-        get2();
+    FORC4 icWBC[Pentax_wb_list1[tag - 0x020d]][RGGB_2_RGBG(c)] = get2();
   }
 
   else if ((tag == 0x0220) && (dng_writer == nonDNG)) {
@@ -393,16 +407,14 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   else if (tag == 0x0221)
   {
     int nWB = get2();
-    if (nWB <= sizeof(imgdata.color.WBCT_Coeffs) /
-                   sizeof(imgdata.color.WBCT_Coeffs[0]))
+    if (nWB <= sizeof(icWBCCTC) / sizeof(icWBCCTC[0]))
       FORC(nWB)
       {
-        imgdata.color.WBCT_Coeffs[c][0] = (unsigned)0xcfc6 - get2();
+        icWBCCTC[c][0] = (unsigned)0xcfc6 - get2();
         fseek(ifp, 2, SEEK_CUR);
-        imgdata.color.WBCT_Coeffs[c][1] = get2();
-        imgdata.color.WBCT_Coeffs[c][2] = imgdata.color.WBCT_Coeffs[c][4] =
-            0x2000;
-        imgdata.color.WBCT_Coeffs[c][3] = get2();
+        icWBCCTC[c][1] = get2();
+        icWBCCTC[c][2] = icWBCCTC[c][4] = 0x2000;
+        icWBCCTC[c][3] = get2();
       }
   }
   else if (tag == 0x0215)
@@ -422,8 +434,7 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
     {
       wb_ind = getc(ifp);
       if (wb_ind >= 0 && wb_ind < nPentax_wb_list2)
-        FORC4 imgdata.color.WB_Coeffs[Pentax_wb_list2[wb_ind]][c ^ (c >> 1)] =
-            get2();
+        FORC4 icWBC[Pentax_wb_list2[wb_ind]][RGGB_2_RGBG(c)] = get2();
     }
   }
   else if (tag == 0x0239)
@@ -471,7 +482,7 @@ void LibRaw::parseRicohMakernotes(int base, unsigned tag, unsigned type,
               buffer[8], buffer[9], buffer[10], buffer[11]);
     }
   }
-  else if ((tag == 0x1001) && (type == 3))
+  else if ((tag == 0x1001) && tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT))
   {
     ilm.CameraMount = LIBRAW_MOUNT_FixedLens;
     ilm.LensMount = LIBRAW_MOUNT_FixedLens;
@@ -488,9 +499,9 @@ void LibRaw::parseRicohMakernotes(int base, unsigned tag, unsigned type,
   {
     imgdata.shootinginfo.FocusMode = get2();
   }
-  else if ((tag == 0x100b) && (type == 10))
+  else if ((tag == 0x100b) && tagtypeIs(LIBRAW_EXIFTAG_TYPE_SRATIONAL))
   {
-    imgdata.makernotes.common.FlashEC = getreal(type);
+    imCommon.FlashEC = getreal(type);
   }
   else if ((tag == 0x1017) && (get2() == 2))
   {
@@ -516,11 +527,11 @@ void LibRaw::parseRicohMakernotes(int base, unsigned tag, unsigned type,
     for (int i=0; i<4; i++) {
       stread(buffer, 16, ifp);
       if ((buffer[0] == 'S') && (buffer[1] == 'I') && (buffer[2] == 'D'))
-			  memcpy(imgdata.shootinginfo.BodySerial, buffer+4, 12);
+        memcpy(imgdata.shootinginfo.BodySerial, buffer+4, 12);
       else if ((buffer[0] == 'R') && (buffer[1] == 'L'))
-			  ilm.LensID = buffer[2] - '0';
+        ilm.LensID = buffer[2] - '0';
       else if ((buffer[0] == 'L') && (buffer[1] == 'I') && (buffer[2] == 'D'))
-			  memcpy(imgdata.lens.LensSerial, buffer+4, 12);
+        memcpy(imgdata.lens.LensSerial, buffer+4, 12);
     }
   }
 }

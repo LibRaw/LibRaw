@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: unprocessed_raw.cpp
- * Copyright 2009-2016 LibRaw LLC (info@libraw.org)
+ * Copyright 2009-2020 LibRaw LLC (info@libraw.org)
  * Created: Fri Jan 02, 2009
  *
  * LibRaw sample
@@ -258,10 +258,10 @@ void tiff_set(ushort *ntag, ushort tag, ushort type, int count, int val)
   tt->tag = tag;
   tt->type = type;
   tt->count = count;
-  if (type < 3 && count <= 4)
+  if ((type < LIBRAW_EXIFTAG_TYPE_SHORT) && (count <= 4))
     for (c = 0; c < 4; c++)
       tt->val.c[c] = val >> (c << 3);
-  else if (type == 3 && count <= 2)
+  else if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT) && (count <= 2))
     for (c = 0; c < 2; c++)
       tt->val.s[c] = val >> (c << 4);
   else

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -207,7 +207,7 @@ void LibRaw::lossy_dng_load_raw()
       if ((deg = get4()) > 8)
         break;
       for (i = 0; i <= deg && i < 9; i++)
-        coeff[i] = getreal(12);
+        coeff[i] = getreal(LIBRAW_EXIFTAG_TYPE_DOUBLE);
       for (i = 0; i < 256; i++)
       {
         for (tot = j = 0; j <= deg; j++)

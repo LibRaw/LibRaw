@@ -121,7 +121,8 @@
         when raw2image() or dcraw_process() is called.</dd>
       <dt><strong> libraw_output_params_t params; </strong></dt>
       <dd>Data structure intended for management of image postprocessing (using
-        the dcraw emulator). Fields of this structure are described in detail <a
+        the dcraw emulator). Fields of this structure are described in detail <a
+
           href="#libraw_iparams_t"> below </a> .</dd>
       <dt>libraw_callbacks_t callbacks;</dt>
       <dd><a href="#libraw_callbacks_t">user-settable callbacks</a> </dd>
@@ -286,9 +287,21 @@
         values, than 4 pixel counts (per channel).</dd>
       <dt><strong> libraw_dng_color_t dng_color[2]; </strong></dt>
       <dd>Color data read from DNG: illuminant, calbiration matrix and color
-        matrix for two light sources. (see DNG specs for details).</dd>
-      <dt><strong> float baseline_exposure; </strong></dt>
-      <dd>DNG-files: value of BaselineExposure tag.</dd>
+        matrix for two light sources. (see DNG specs for details).</dd>  
+      <dt>libraw_dng_levels_t dng_levels</dt>
+      <dd>DNG black/white levels,  analog balance, WB for active IFD. See DNG specs for details.</dd>
+    <dt>int WB_Coeffs[256][4]</dt>
+      <dd>Index: EXIF color source value, [i][0..3] WB Coeffs</dd>
+    <dt>float WBCT_Coeffs[64][5]</dt>
+      <dd>Color temperature in [i][0], WB coeffs in [i][1..4]</dd>
+    <dt>int as_shot_wb_applied</dt>
+      <dd>Set to 1 if WB already applied in camera (multishot modes; small raw)</dd>
+    <dt>libraw_P1_color_t P1_color[2]</dt>
+      <dd>Phase-one specific color data</dd>
+    <dt>unsigned raw_bps</dt>
+      <dd>RAW bits per pixel (PhaseOne: Raw format used)</dd>
+    <dt>int ExifColorSpace</dt>
+      <dd>EXIF color space parsed from EXIF tags: LIBRAW_COLORSPACE_Unknown, LIBRAW_COLORSPACE_sRGB, or LIBRAW_COLORSPACE_Adobe</dd>
     </dl>
     <p><a name="libraw_imgother_t"></a></p>
     <h3>Structure libraw_imgother_t: Other Parameters of the Image</h3>
@@ -548,7 +561,7 @@
       </dd>
       <dt><strong> int output_color; </strong></dt>
       <dd><strong> dcraw keys: </strong> -o <br>
-        [0-5] Output colorspace (raw, sRGB, Adobe, Wide, ProPhoto, XYZ).</dd>
+        [0-6] Output colorspace (raw, sRGB, Adobe, Wide, ProPhoto, XYZ, ACES).</dd>
       <dt><strong> char* output_profile; </strong></dt>
       <dd><strong> dcraw keys: </strong> -o filename <br>
         Path to output profile ICC file (used only if LibRaw compiled with LCMS
@@ -674,13 +687,21 @@
       </dd>
       <dt><strong> int no_auto_scale; </strong></dt>
       <dd>Disables pixel values scaling (call to LibRaw::scale_colors()) in
-        LibRaw::dcraw_process()</dd>
+        LibRaw::dcraw_process().<br>
+        This is <strong>special use value</strong> because white balance is
+        performed in scale_colors(), so skipping it will result in non-balanced
+        image.<br>
+        This setting is targeted to use with no_interpolation, or with own
+        interpolation callback call.</dd>
       <dt><strong> int no_interpolation; </strong></dt>
       <dd>Disables call to demosaic code in LibRaw::dcraw_process()</dd>
       <dt><strong> int raw_processing_options </strong></dt>
       <dd>Processing options used on unpack() phase for specific image formats,
         see below for possible values:<a href="#LibRaw_processing_options">
           LibRaw_processing_options</a></dd>
+      <dt><strong>int max_raw_memory_mb</strong></dt>
+      <dd>Stop processing if raw buffer size grows larger than that value (in
+        megabytes). Default is LIBRAW_MAX_ALLOC_MB_DEFAULT (2048Mb)</dd>
       <dt><strong> int sony_arw2_posterization_thr </strong></dt>
       <dd>If LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE used for
         raw_processing_options, sets the level to suppress posterization display
@@ -701,7 +722,8 @@
       <dd>Called on data error, settable via set_dataerror_handler. See <a href="API-CXX.html#callbacks">C++
           API</a> for details.</dd>
       <dt>progress_callback progress_cb</dt>
-      <dd>Called on process callback, settable via set_progress_handler. See <a
+      <dd>Called on process callback, settable via set_progress_handler. See <a
+
           href="API-CXX.html#callbacks">C++ API</a> for details.</dd>
       <dt>exif_parser_callback exif_cb, params: (void *context, int tag, int
         type, int len, unsigned int ord, void *ifp)</dt>
@@ -875,7 +897,8 @@
       <dt><strong> LIBRAW_BAD_CROP </strong></dt>
       <dd>The incorrect cropping coordinates are set via params.cropbox[]: the
         left-top corner of cropping rectangle is outside the image. The
-        processing will be cancelled, all allocated resources will be freed, <a
+        processing will be cancelled, all allocated resources will be freed, <a
+
           <dt=""><strong> LIBRAW_TOO_BIG</strong> </a></dd>
       <dd><a <dt="">Raw data size exceeds data limit.</a></dd>
       <a <dt=""> </a>
@@ -897,10 +920,12 @@
           file (only for formats supporting storage of several images in a
           file).</dd>
         <dt><strong> LIBRAW_OUT_OF_ORDER_CALL </strong></dt>
-      </a><dd><a <dt="">API functions have been called in wrong order (e.g., </a><a
+      </a><dd><a <dt="">API functions have been called in wrong order (e.g., </a><a
+
           href="API-CXX.html#unpack"> unpack() </a> before <a href="API-CXX.html#open_file">
           open_file() </a> ) or the previous stage has ended with an error
-        (e.g., <a href="API-CXX.html#unpack"> unpack() </a> is called after <a
+        (e.g., <a href="API-CXX.html#unpack"> unpack() </a> is called after <a
+
           href="API-CXX.html#open_file"> open_file() </a> has returned an
         error).</dd>
       <dt><strong> LIBRAW_NO_THUMBNAIL </strong></dt>
@@ -1089,6 +1114,14 @@
       <dd>Incorrect/unsupported user_qual was set, AHD demosaic used instead.</dd>
       <dt><strong> LIBRAW_WARN_PARSEFUJI_PROCESSED</strong></dt>
       <dd>Not really a warning, but flag that fuji parser was used.</dd>
+      <dt><strong>LIBRAW_DNGSDK_PROCESSED</strong></dt>
+      <dd>Not really a warning: image was decoded by DNG SDK</dd>
+      <dt><strong> LIBRAW_DNG_IMAGES_REORDERED</strong></dt>
+      <dd>DNG sub0images was reordered </dd>
+      <dt><strong>LIBRAW_DNG_STAGE2_APPLIED</strong></dt>
+      <dd>DNG Stage2 conversion was performed</dd>
+      <dt><strong> LIBRAW_DNG_STAGE3_APPLIED</strong></dt>
+      <dd>DNG Stage3 conversion was performed</dd>
     </dl>
     <dl>
     </dl>
@@ -1162,6 +1195,17 @@
         frames are not reordered and are available in same order as in DNG&nbsp;
         (LibRaw traverses IFD/Sub-IFD trees in deep-first order).This bit will
         prioritize the largest image</li>
+      <li><strong>LIBRAW_PROCESSING_DNG_STAGE2</strong> - request DNG Stage2
+        processing (by DNG SDK)</li>
+      <li><strong>LIBRAW_PROCESSING_DNG_STAGE3</strong> - request DNG Stage3
+        processing</li>
+      <li><strong>LIBRAW_PROCESSING_DNG_ALLOWSIZECHANGE</strong> - by default,
+        if image size parsed by DNG SDK does not match image dimensions parsed
+        by LibRaw, processing will stop with LIBRAW_DATA_ERROR code. This flags
+        allows size change in LibRaw::unpack() stage.</li>
+      <li><strong>LIBRAW_PROCESSING_DNG_DISABLEWBADJUST</strong> - by default,
+        for DNG images with different per-channel maximums WB adjustment
+        procedure is performed. This flag disables such adjustment.</li>
     </ul>
     Other flags
     <ul>

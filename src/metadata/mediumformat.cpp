@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -70,16 +70,16 @@ void LibRaw::parse_phase_one(int base)
     case 0x0204:
       stmread(imgdata.makernotes.phaseone.SystemType, len, ifp);
     case 0x0211:
-      imgdata.makernotes.common.SensorTemperature2 = int_to_float(data);
+      imCommon.SensorTemperature2 = int_to_float(data);
       break;
     case 0x0401:
-      if (type == 4)
+      if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         ilm.CurAp = libraw_powf64l(2.0f, (int_to_float(data) / 2.0f));
       else
         ilm.CurAp = libraw_powf64l(2.0f, (getreal(type) / 2.0f));
       break;
     case 0x0403:
-      if (type == 4)
+      if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         ilm.CurFocal = int_to_float(data);
       else
         ilm.CurFocal = getreal(type);
@@ -95,7 +95,7 @@ void LibRaw::parse_phase_one(int base)
         ilm.Lens[0] = 0;
       break;
     case 0x0414:
-      if (type == 4)
+      if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
       {
         ilm.MaxAp4CurFocal = libraw_powf64l(2.0f, (int_to_float(data) / 2.0f));
       }
@@ -105,7 +105,7 @@ void LibRaw::parse_phase_one(int base)
       }
       break;
     case 0x0415:
-      if (type == 4)
+      if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
       {
         ilm.MinAp4CurFocal = libraw_powf64l(2.0f, (int_to_float(data) / 2.0f));
       }
@@ -115,7 +115,7 @@ void LibRaw::parse_phase_one(int base)
       }
       break;
     case 0x0416:
-      if (type == 4)
+      if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
       {
         ilm.MinFocal = int_to_float(data);
       }
@@ -129,7 +129,7 @@ void LibRaw::parse_phase_one(int base)
       }
       break;
     case 0x0417:
-      if (type == 4)
+      if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
       {
         ilm.MaxFocal = int_to_float(data);
       }
@@ -145,11 +145,11 @@ void LibRaw::parse_phase_one(int base)
     case 0x0106:
       for (i = 0; i < 9; i++)
         imgdata.color.P1_color[0].romm_cam[i] = ((float *)romm_cam)[i] =
-            getreal(11);
+            getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
       romm_coeff(romm_cam);
       break;
     case 0x0107:
-      FORC3 cam_mul[c] = getreal(11);
+      FORC3 cam_mul[c] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
       break;
     case 0x0108:
       raw_width = data;
@@ -184,7 +184,7 @@ void LibRaw::parse_phase_one(int base)
       break;
     case 0x0210:
       ph1.tag_210 = int_to_float(data);
-      imgdata.makernotes.common.SensorTemperature = ph1.tag_210;
+      imCommon.SensorTemperature = ph1.tag_210;
       break;
     case 0x021a:
       ph1.tag_21a = data;
@@ -209,7 +209,7 @@ void LibRaw::parse_phase_one(int base)
       break;
     case 0x0226:
       for (i = 0; i < 9; i++)
-        imgdata.color.P1_color[1].romm_cam[i] = getreal(11);
+        imgdata.color.P1_color[1].romm_cam[i] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
       break;
     case 0x0301:
       model[63] = 0;
@@ -477,7 +477,7 @@ void LibRaw::parse_mos(int offset)
       {
         fscanf(ifp, "%d", &i);
         if (i == 1)
-          frot = c ^ (c >> 1);
+          frot = c ^ (c >> 1); // 0123 -> 0132
       }
     if (!strcmp(data, "ImgProf_rotation_angle"))
     {

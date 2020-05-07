@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2020 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -39,6 +39,8 @@
 #define is_0x927c 0 /* most cameras */
 #define is_0xc634 2 /* Adobe DNG, Sony SR2, Pentax */
 #define ilm imgdata.lens.makernotes
+#define icWBC imgdata.color.WB_Coeffs
+#define icWBCCTC imgdata.color.WBCT_Coeffs
 #define imCanon imgdata.makernotes.canon
 #define imFuji imgdata.makernotes.fuji
 #define imHassy imgdata.makernotes.hasselblad
@@ -49,6 +51,8 @@
 #define imPentax imgdata.makernotes.pentax
 #define imSamsung imgdata.makernotes.samsung
 #define imSony imgdata.makernotes.sony
+#define imCommon imgdata.makernotes.common
+
 
 #define ph1_bits(n) ph1_bithuff(n, 0)
 #define ph1_huff(h) ph1_bithuff(*h, h + 1)

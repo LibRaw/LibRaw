@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -17,6 +17,7 @@
  */
 
 #include "../../internal/dcraw_defs.h"
+#include "../../internal/libraw_cameraids.h"
 
 unsigned LibRaw::getbithuff(int nbits, ushort *huff)
 {
@@ -426,7 +427,8 @@ ushort *LibRaw::ljpeg_row(int jrow, struct jhead *jh)
           pred = 0;
         }
       if ((**row = pred + diff) >> jh->bits)
-        derror();
+		  if(!(load_flags & 512))
+			derror();
       if (c <= jh->sraw)
         spred = **row;
       row[0]++;
@@ -615,9 +617,11 @@ void LibRaw::canon_sraw_load_raw()
       for (; rp < ip[0]; rp += 4)
       {
         checkCancel();
-        if (unique_id == 0x80000218ULL || unique_id == 0x80000250ULL ||
-            unique_id == 0x80000261ULL || unique_id == 0x80000281ULL ||
-            unique_id == 0x80000287ULL)
+        if ((unique_id == CanonID_EOS_5D_Mark_II) ||
+            (unique_id == CanonID_EOS_7D)         ||
+            (unique_id == CanonID_EOS_50D)        ||
+            (unique_id == CanonID_EOS_1D_Mark_IV) ||
+            (unique_id == CanonID_EOS_60D))
         {
           rp[1] = (rp[1] << 2) + hue;
           rp[2] = (rp[2] << 2) + hue;
@@ -627,7 +631,7 @@ void LibRaw::canon_sraw_load_raw()
         }
         else
         {
-          if (unique_id < 0x80000218ULL)
+          if (unique_id < CanonID_EOS_5D_Mark_II)
             rp[0] -= 512;
           pix[0] = rp[0] + rp[2];
           pix[2] = rp[0] + rp[1];
@@ -902,6 +906,10 @@ void LibRaw::nokia_load_raw()
 
   rev = 3 * (order == 0x4949);
   dwide = (raw_width * 5 + 1) / 4;
+#ifdef USE_6BY9RPI
+  if (raw_stride)
+	  dwide = raw_stride;
+#endif
   data = (uchar *)malloc(dwide * 2);
   merror(data, "nokia_load_raw()");
   try
@@ -923,8 +931,14 @@ void LibRaw::nokia_load_raw()
   }
   free(data);
   maximum = 0x3ff;
+#ifdef USE_6BY9RPI
+  if (!strcmp(make, "OmniVision") ||
+	  !strcmp(make, "Sony") ||
+	  !strcmp(make, "RaspberryPi")) return;
+#else
   if (strncmp(make, "OmniVision", 10))
-    return;
+	  return;
+#endif
   row = raw_height / 2;
   FORC(width - 1)
   {

@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_datastream.cpp
- * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
  *
  * LibRaw C++ interface (implementation)
 
@@ -34,9 +34,120 @@
 #endif
 #ifdef USE_JPEG
 #include <jpeglib.h>
+#include <jerror.h>
 #else
 #define NO_JPEG
 #endif
+
+#ifdef USE_JPEG
+
+typedef struct
+{
+    struct jpeg_source_mgr pub; /* public fields */
+    LibRaw_abstract_datastream *instream;            /* source stream */
+    JOCTET *buffer;             /* start of buffer */
+    boolean start_of_file;      /* have we gotten any data yet? */
+} lr_jpg_source_mgr;
+
+typedef lr_jpg_source_mgr *lr_jpg_src_ptr;
+
+#define LR_JPEG_INPUT_BUF_SIZE 16384 
+
+static void f_init_source(j_decompress_ptr cinfo)
+{
+    lr_jpg_src_ptr src = (lr_jpg_src_ptr)cinfo->src;
+    src->start_of_file = TRUE;
+}
+
+#define ERREXIT(cinfo, code)                                                   \
+  ((cinfo)->err->msg_code = (code),                                            \
+   (*(cinfo)->err->error_exit)((j_common_ptr)(cinfo)))
+
+static boolean lr_fill_input_buffer(j_decompress_ptr cinfo)
+{
+    lr_jpg_src_ptr src = (lr_jpg_src_ptr)cinfo->src;
+    size_t nbytes;
+
+    nbytes = src->instream->read((void*)src->buffer, 1, LR_JPEG_INPUT_BUF_SIZE);
+
+    if (nbytes <= 0)
+    {
+        if (src->start_of_file) /* Treat empty input file as fatal error */
+            ERREXIT(cinfo, JERR_INPUT_EMPTY);
+        WARNMS(cinfo, JWRN_JPEG_EOF);
+        /* Insert a fake EOI marker */
+        src->buffer[0] = (JOCTET)0xFF;
+        src->buffer[1] = (JOCTET)JPEG_EOI;
+        nbytes = 2;
+    }
+
+    src->pub.next_input_byte = src->buffer;
+    src->pub.bytes_in_buffer = nbytes;
+    src->start_of_file = FALSE;
+    return TRUE;
+}
+
+static void lr_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
+{
+    struct jpeg_source_mgr *src = cinfo->src;
+    if (num_bytes > 0)
+    {
+        while (num_bytes > (long)src->bytes_in_buffer)
+        {
+            num_bytes -= (long)src->bytes_in_buffer;
+            (void)(*src->fill_input_buffer)(cinfo);
+            /* note we assume that fill_input_buffer will never return FALSE,
+             * so suspension need not be handled.
+             */
+        }
+        src->next_input_byte += (size_t)num_bytes;
+        src->bytes_in_buffer -= (size_t)num_bytes;
+    }
+}
+
+static void lr_term_source(j_decompress_ptr cinfo) {}
+
+static void lr_jpeg_src(j_decompress_ptr cinfo, LibRaw_abstract_datastream *inf)
+{
+    lr_jpg_src_ptr src;
+    if (cinfo->src == NULL)
+    { /* first time for this JPEG object? */
+        cinfo->src = (struct jpeg_source_mgr *)(*cinfo->mem->alloc_small)(
+            (j_common_ptr)cinfo, JPOOL_PERMANENT, sizeof(lr_jpg_source_mgr));
+        src = (lr_jpg_src_ptr)cinfo->src;
+        src->buffer = (JOCTET *)(*cinfo->mem->alloc_small)(
+            (j_common_ptr)cinfo, JPOOL_PERMANENT,
+            LR_JPEG_INPUT_BUF_SIZE * sizeof(JOCTET));
+    }
+    else if (cinfo->src->init_source != f_init_source)
+    {
+        ERREXIT(cinfo, JERR_BUFFER_SIZE);
+    }
+
+    src = (lr_jpg_src_ptr)cinfo->src;
+    src->pub.init_source = f_init_source;
+    src->pub.fill_input_buffer = lr_fill_input_buffer;
+    src->pub.skip_input_data = lr_skip_input_data;
+    src->pub.resync_to_restart = jpeg_resync_to_restart; /* use default method */
+    src->pub.term_source = lr_term_source;
+    src->instream = inf;
+    src->pub.bytes_in_buffer = 0;    /* forces fill_input_buffer on first read */
+    src->pub.next_input_byte = NULL; /* until buffer loaded */
+}
+#endif
+
+int LibRaw_abstract_datastream::jpeg_src(void *jpegdata)
+{
+#ifdef NO_JPEG
+    return -1;
+#else
+    j_decompress_ptr cinfo = (j_decompress_ptr)jpegdata;
+    buffering_off();
+    lr_jpeg_src(cinfo, this);
+    return 0; // OK
+#endif
+}
+
 
 // == LibRaw_file_datastream ==
 
@@ -229,37 +340,6 @@ void *LibRaw_file_datastream::make_jas_stream()
   {
     return jas_stream_fopen(fname(), "rb");
   }
-#endif
-}
-
-int LibRaw_file_datastream::jpeg_src(void *jpegdata)
-{
-#ifdef NO_JPEG
-  return -1; // not supported
-#else
-  if (jas_file)
-  {
-    fclose(jas_file);
-    jas_file = NULL;
-  }
-#ifdef LIBRAW_WIN32_UNICODEPATHS
-  if (wfname())
-  {
-    jas_file = _wfopen(wfname(), L"rb");
-  }
-  else
-#endif
-  {
-    jas_file = fopen(fname(), "rb");
-  }
-  if (jas_file)
-  {
-    fseek(jas_file, tell(), SEEK_SET);
-    j_decompress_ptr cinfo = (j_decompress_ptr)jpegdata;
-    jpeg_stdio_src(cinfo, jas_file);
-    return 0; // OK
-  }
-  return -1;
 #endif
 }
 
@@ -556,18 +636,6 @@ void *LibRaw_bigfile_datastream::make_jas_stream()
 #endif
 }
 
-int LibRaw_bigfile_datastream::jpeg_src(void *jpegdata)
-{
-#ifdef NO_JPEG
-  return -1;
-#else
-  if (!f)
-    return -1;
-  j_decompress_ptr cinfo = (j_decompress_ptr)jpegdata;
-  jpeg_stdio_src(cinfo, f);
-  return 0; // OK
-#endif
-}
 
 // == LibRaw_windows_datastream
 #ifdef LIBRAW_WIN32_CALLS

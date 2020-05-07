@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -56,7 +56,8 @@ int LibRaw::unpack_thumb(void)
     }
     else
     {
-      if (write_thumb == &LibRaw::x3f_thumb_loader)
+#ifdef USE_X3FTOOLS
+	if (write_thumb == &LibRaw::x3f_thumb_loader)
       {
         INT64 tsize = x3f_thumb_size();
         if (tsize < 2048 || INT64(ID.toffset) + tsize < 1)
@@ -65,6 +66,9 @@ int LibRaw::unpack_thumb(void)
         if (INT64(ID.toffset) + tsize > ID.input->size() + THUMB_READ_BEYOND)
           throw LIBRAW_EXCEPTION_IO_EOF;
       }
+#else
+	if (0) {}
+#endif
       else
       {
         if (INT64(ID.toffset) + INT64(T.tlength) < 1)
@@ -300,12 +304,14 @@ int LibRaw::unpack_thumb(void)
         SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
         return 0;
       }
-      else if (write_thumb == &LibRaw::x3f_thumb_loader)
+#ifdef USE_X3FTOOLS
+	  else if (write_thumb == &LibRaw::x3f_thumb_loader)
       {
         x3f_thumb_loader();
         SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
         return 0;
       }
+#endif
       else
       {
         return LIBRAW_UNSUPPORTED_THUMBNAIL;

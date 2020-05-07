@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -46,9 +46,9 @@ void LibRaw::parseSamsungMakernotes(int base, unsigned tag, unsigned type,
   {
     if ((i = get4()))
     {
-      imgdata.makernotes.common.CameraTemperature = (float)i;
+      imCommon.CameraTemperature = (float)i;
       if (get4() == 10)
-        imgdata.makernotes.common.CameraTemperature /= 10.0f;
+        imCommon.CameraTemperature /= 10.0f;
     }
   }
   else if ((tag == 0xa002) && (dng_writer != AdobeDNG))
@@ -74,9 +74,20 @@ void LibRaw::parseSamsungMakernotes(int base, unsigned tag, unsigned type,
     FORC4 imSamsung.ImageSizeFull[c] = get4();
     FORC4 imSamsung.ImageSizeCrop[c] = get4();
   }
-  else if ((tag == 0xa011) && ((len == 1) || (len == 2)) && (type == 3))
+  else if ((tag == 0xa011) && ((len == 1) || (len == 2)) && tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT))
   {
     imSamsung.ColorSpace[0] = (int)get2();
+		switch (imSamsung.ColorSpace[0]) {
+		case 0:
+			imCommon.ColorSpace = LIBRAW_COLORSPACE_sRGB;
+			break;
+		case 1:
+			imCommon.ColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
+			break;
+		default:
+			imCommon.ColorSpace = LIBRAW_COLORSPACE_Unknown;
+			break;
+		}
     if (len == 2)
       imSamsung.ColorSpace[1] = (int)get2();
   }
@@ -100,51 +111,46 @@ void LibRaw::parseSamsungMakernotes(int base, unsigned tag, unsigned type,
   }
   else if ((tag == 0xa021) && (dng_writer == nonDNG))
   {
-    FORC4 cam_mul[c ^ (c >> 1)] = get4() - imSamsung.key[c];
+    FORC4 cam_mul[RGGB_2_RGBG(c)] = get4() - imSamsung.key[c];
   }
   else if (tag == 0xa022)
   {
-    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][c ^ (c >> 1)] =
+    FORC4 icWBC[LIBRAW_WBI_Auto][RGGB_2_RGBG(c)] =
         get4() - imSamsung.key[c + 4];
-    if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] <
-        (imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] >> 1))
+    if (icWBC[LIBRAW_WBI_Auto][0] <
+        (icWBC[LIBRAW_WBI_Auto][1] >> 1))
     {
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] =
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] >> 4;
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] =
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] >> 4;
+      icWBC[LIBRAW_WBI_Auto][1] =
+          icWBC[LIBRAW_WBI_Auto][1] >> 4;
+      icWBC[LIBRAW_WBI_Auto][3] =
+          icWBC[LIBRAW_WBI_Auto][3] >> 4;
     }
   }
   else if (tag == 0xa023)
   {
-    imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] =
-        get4() - imSamsung.key[8];
-    imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] =
-        get4() - imSamsung.key[9];
-    imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] =
-        get4() - imSamsung.key[10];
-    imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][2] =
-        get4() - imSamsung.key[0];
-    if (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] <
-        (imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] >> 1))
+    ushort ki[4] = {8, 9, 10, 0};
+    FORC4 icWBC[LIBRAW_WBI_Ill_A][RGGB_2_RGBG(c)] =
+        get4() - imSamsung.key[ki[c]];
+    if (icWBC[LIBRAW_WBI_Ill_A][0] <
+        (icWBC[LIBRAW_WBI_Ill_A][1] >> 1))
     {
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] =
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][1] >> 4;
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] =
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][3] >> 4;
+      icWBC[LIBRAW_WBI_Ill_A][1] =
+          icWBC[LIBRAW_WBI_Ill_A][1] >> 4;
+      icWBC[LIBRAW_WBI_Ill_A][3] =
+          icWBC[LIBRAW_WBI_Ill_A][3] >> 4;
     }
   }
   else if (tag == 0xa024)
   {
-    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][c ^ (c >> 1)] =
+    FORC4 icWBC[LIBRAW_WBI_D65][RGGB_2_RGBG(c)] =
         get4() - imSamsung.key[c + 1];
-    if (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][0] <
-        (imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] >> 1))
+    if (icWBC[LIBRAW_WBI_D65][0] <
+        (icWBC[LIBRAW_WBI_D65][1] >> 1))
     {
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] =
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][1] >> 4;
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] =
-          imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][3] >> 4;
+      icWBC[LIBRAW_WBI_D65][1] =
+          icWBC[LIBRAW_WBI_D65][1] >> 4;
+      icWBC[LIBRAW_WBI_D65][3] =
+          icWBC[LIBRAW_WBI_D65][3] >> 4;
     }
   }
   else if (tag == 0xa025)
@@ -157,7 +163,7 @@ void LibRaw::parseSamsungMakernotes(int base, unsigned tag, unsigned type,
   }
   else if ((tag == 0xa028) && (dng_writer == nonDNG))
   {
-    FORC4 cblack[c ^ (c >> 1)] = get4() - imSamsung.key[c];
+    FORC4 cblack[RGGB_2_RGBG(c)] = get4() - imSamsung.key[c];
   }
   else if ((tag == 0xa030) && (len == 9))
   {

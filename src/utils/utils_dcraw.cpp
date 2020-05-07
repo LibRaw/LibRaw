@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -331,6 +331,6 @@ void LibRaw::tiff_get(unsigned base, unsigned *tag, unsigned *type,
   *type = get2();
   *len = get4();
   *save = ftell(ifp) + 4;
-  if (*len * ("11124811248484"[*type < 14 ? *type : 0] - '0') > 4)
+  if (*len * tagtype_dataunit_bytes[(*type <= LIBRAW_EXIFTAG_TYPE_IFD8) ? *type : 0] > 4)
     fseek(ifp, get4() + base, SEEK_SET);
 }

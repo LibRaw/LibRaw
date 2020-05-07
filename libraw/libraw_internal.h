@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_internal.h
- * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  *
  * LibRaw internal data structures (not visible outside)
@@ -160,6 +160,7 @@ typedef struct
   crx_data_header_t crx_header[LIBRAW_CRXTRACKS_MAXCOUNT];
   int crx_track_selected;
   short CR3_CTMDtag;
+  short CR3_Version;
   int CM_found;
   unsigned is_NikonTransfer;
   unsigned is_Sony;
@@ -169,6 +170,7 @@ typedef struct
   unsigned is_PentaxRicohMakernotes; /* =1 for Ricoh software by Pentax, Camera DNG */
 
   unsigned dng_frames[LIBRAW_IFD_MAXCOUNT*2]; /* bits: 0-7: shot_select, 8-15: IFD#, 16-31: low 16 bit of newsubfile type */
+  unsigned short raw_stride;
 } unpacker_data_t;
 
 typedef struct
@@ -188,7 +190,7 @@ struct decode
 
 struct tiff_ifd_t
 {
-  int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes;
+  int t_width, t_height, bps, comp, phint, offset, t_flip, samples, bytes, extrasamples;
   int t_tile_width, t_tile_length, sample_format, predictor;
   int rows_per_strip;
   int *strip_offsets, strip_offsets_count;

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -14,20 +14,29 @@
  */
 
 #include "../../internal/libraw_cxx_defs.h"
+#include "../../internal/libraw_cameraids.h"
 
 int LibRaw::open_file(const char *fname, INT64 max_buf_size)
 {
+	int big = 0;
+	if (max_buf_size == LIBRAW_OPEN_BIGFILE)
+		big = 1;
+	else if (max_buf_size == LIBRAW_OPEN_FILE)
+		big = 0;
+	else
+	{
 #ifndef LIBRAW_WIN32_CALLS
-  struct stat st;
-  if (stat(fname, &st))
-    return LIBRAW_IO_ERROR;
-  int big = (st.st_size > max_buf_size) ? 1 : 0;
+		struct stat st;
+		if (stat(fname, &st))
+			return LIBRAW_IO_ERROR;
+		big = (st.st_size > max_buf_size) ? 1 : 0;
 #else
-  struct _stati64 st;
-  if (_stati64(fname, &st))
-    return LIBRAW_IO_ERROR;
-  int big = (st.st_size > max_buf_size) ? 1 : 0;
+		struct _stati64 st;
+		if (_stati64(fname, &st))
+			return LIBRAW_IO_ERROR;
+		big = (st.st_size > max_buf_size) ? 1 : 0;
 #endif
+	}
 
   LibRaw_abstract_datastream *stream;
   try
@@ -71,10 +80,18 @@ int LibRaw::open_file(const wchar_t *, INT64)
 #else
 int LibRaw::open_file(const wchar_t *fname, INT64 max_buf_size)
 {
-  struct _stati64 st;
-  if (_wstati64(fname, &st))
-    return LIBRAW_IO_ERROR;
-  int big = (st.st_size > max_buf_size) ? 1 : 0;
+	int big = 0;
+	if (max_buf_size == LIBRAW_OPEN_BIGFILE)
+		big = 1;
+	else if (max_buf_size == LIBRAW_OPEN_FILE)
+		big = 0;
+	else
+	{
+		struct _stati64 st;
+		if (_wstati64(fname, &st))
+			return LIBRAW_IO_ERROR;
+		big = (st.st_size > max_buf_size) ? 1 : 0;
+	}
 
   LibRaw_abstract_datastream *stream;
   try
@@ -350,9 +367,6 @@ struct foveon_data_t
 };
 const int foveon_count = sizeof(foveon_data) / sizeof(foveon_data[0]);
 
-#define makeIs(idx) (imgdata.idata.maker_index == idx)
-
-
 int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 {
 
@@ -370,241 +384,287 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
   try
   {
-    ID.input = stream;
-    SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
+	  ID.input = stream;
+	  SET_PROC_FLAG(LIBRAW_PROGRESS_OPEN);
 
-    identify();
-    if (callbacks.post_identify_cb)
-      (callbacks.post_identify_cb)(this);
+	  identify();
 
-    if (load_raw == &LibRaw::nikon_load_raw)
-      nikon_read_curve();
+	  imgdata.lens.Lens[sizeof(imgdata.lens.Lens) - 1] = 0; // make sure lens is 0-terminated
 
-    if (load_raw == &LibRaw::panasonic_load_raw)
-    {
-      if (libraw_internal_data.unpacker_data.pana_encoding == 6 ||
-          libraw_internal_data.unpacker_data.pana_encoding == 7)
-      {
-        for (int i = 0; i < 3; i++)
-          imgdata.color.cblack[i] =
-              libraw_internal_data.internal_data.pana_black[i];
-        imgdata.color.cblack[3] = imgdata.color.cblack[1];
-        imgdata.color.cblack[4] = imgdata.color.cblack[5] = 0;
-        imgdata.color.black = 0;
-        imgdata.color.maximum =
-            MAX(imgdata.color.linear_max[0],
-                MAX(imgdata.color.linear_max[1], imgdata.color.linear_max[2]));
-      }
+	  if (callbacks.post_identify_cb)
+		  (callbacks.post_identify_cb)(this);
 
-      if (libraw_internal_data.unpacker_data.pana_encoding == 6)
-      {
-        int rowbytes = imgdata.sizes.raw_width / 11 * 16;
-        if ((imgdata.sizes.raw_width % 11) == 0 &&
-            (imgdata.sizes.raw_height * rowbytes ==
-             libraw_internal_data.unpacker_data.data_size))
-          load_raw = &LibRaw::panasonicC6_load_raw;
-        else
-          imgdata.idata.raw_count = 0; // incorrect size
-      }
-      else if (libraw_internal_data.unpacker_data.pana_encoding == 7)
-      {
-        int pixperblock =
-            libraw_internal_data.unpacker_data.pana_bpp == 14 ? 9 : 10;
-        int rowbytes = imgdata.sizes.raw_width / pixperblock * 16;
-        if ((imgdata.sizes.raw_width % pixperblock) == 0 &&
-            (imgdata.sizes.raw_height * rowbytes ==
-             libraw_internal_data.unpacker_data.data_size))
-          load_raw = &LibRaw::panasonicC7_load_raw;
-        else
-          imgdata.idata.raw_count = 0; // incorrect size
-      }
-    }
+#define isRIC imgdata.sizes.raw_inset_crop
+
+	  if (!imgdata.idata.dng_version && makeIs(LIBRAW_CAMERAMAKER_Fujifilm)
+		  && (!strcmp(imgdata.idata.normalized_model, "S3Pro")
+			  || !strcmp(imgdata.idata.normalized_model, "S5Pro")
+			  || !strcmp(imgdata.idata.normalized_model, "S2Pro")))
+	  {
+		  isRIC.cleft = isRIC.ctop = 0xffff;
+		  isRIC.cwidth = isRIC.cheight = 0;
+	  }
+
+	  if (load_raw == &LibRaw::nikon_load_raw)
+		  nikon_read_curve();
+
+	  if (load_raw == &LibRaw::lossless_jpeg_load_raw &&
+		  imgdata.makernotes.canon.RecordMode && makeIs(LIBRAW_CAMERAMAKER_Kodak) &&
+		  /* Not normalized models here, it is intentional */
+		  (!strncasecmp(imgdata.idata.model, "EOS D2000", 9) || // if we want something different for B&W cameras,
+			  !strncasecmp(imgdata.idata.model, "EOS D6000", 9)))  // it's better to compare with CamIDs
+	  {
+		  imgdata.color.black = 0;
+		  imgdata.color.maximum = 4501;
+		  memset(imgdata.color.cblack, 0, sizeof(imgdata.color.cblack));
+		  memset(imgdata.sizes.mask, 0, sizeof(imgdata.sizes.mask));
+		  imgdata.sizes.mask[0][3] = 1; // to skip mask re-calc
+		  libraw_internal_data.unpacker_data.load_flags |= 512;
+	  }
+
+	  if (load_raw == &LibRaw::panasonic_load_raw)
+	  {
+		  if (libraw_internal_data.unpacker_data.pana_encoding == 6 ||
+			  libraw_internal_data.unpacker_data.pana_encoding == 7)
+		  {
+			  for (int i = 0; i < 3; i++)
+				  imgdata.color.cblack[i] =
+				  libraw_internal_data.internal_data.pana_black[i];
+			  imgdata.color.cblack[3] = imgdata.color.cblack[1];
+			  imgdata.color.cblack[4] = imgdata.color.cblack[5] = 0;
+			  imgdata.color.black = 0;
+			  imgdata.color.maximum =
+				  MAX(imgdata.color.linear_max[0],
+					  MAX(imgdata.color.linear_max[1], imgdata.color.linear_max[2]));
+		  }
+
+		  if (libraw_internal_data.unpacker_data.pana_encoding == 6)
+		  {
+			  int rowbytes = imgdata.sizes.raw_width / 11 * 16;
+			  if ((imgdata.sizes.raw_width % 11) == 0 &&
+				  (imgdata.sizes.raw_height * rowbytes ==
+					  libraw_internal_data.unpacker_data.data_size))
+				  load_raw = &LibRaw::panasonicC6_load_raw;
+			  else
+				  imgdata.idata.raw_count = 0; // incorrect size
+		  }
+		  else if (libraw_internal_data.unpacker_data.pana_encoding == 7)
+		  {
+			  int pixperblock =
+				  libraw_internal_data.unpacker_data.pana_bpp == 14 ? 9 : 10;
+			  int rowbytes = imgdata.sizes.raw_width / pixperblock * 16;
+			  if ((imgdata.sizes.raw_width % pixperblock) == 0 &&
+				  (imgdata.sizes.raw_height * rowbytes ==
+					  libraw_internal_data.unpacker_data.data_size))
+				  load_raw = &LibRaw::panasonicC7_load_raw;
+			  else
+				  imgdata.idata.raw_count = 0; // incorrect size
+		  }
+	  }
 
 #define NIKON_14BIT_SIZE(rw, rh)                                               \
   (((unsigned)(ceilf((float)(rw * 7 / 4) / 16.0)) * 16) * rh)
 
-    // Ugly hack, replace with proper data/line size for different
-    // cameras/format when available
-    if (makeIs(LIBRAW_CAMERAMAKER_Nikon)
-		&& !strncasecmp(imgdata.idata.model, "Z", 1) &&
-        NIKON_14BIT_SIZE(imgdata.sizes.raw_width, imgdata.sizes.raw_height) ==
-            libraw_internal_data.unpacker_data.data_size)
-    {
-      load_raw = &LibRaw::nikon_14bit_load_raw;
-    }
+	  // Ugly hack, replace with proper data/line size for different
+	  // cameras/format when available
+	  if (makeIs(LIBRAW_CAMERAMAKER_Nikon)
+		  && !strncasecmp(imgdata.idata.model, "Z", 1) &&
+		  NIKON_14BIT_SIZE(imgdata.sizes.raw_width, imgdata.sizes.raw_height) ==
+		  libraw_internal_data.unpacker_data.data_size)
+	  {
+		  load_raw = &LibRaw::nikon_14bit_load_raw;
+	  }
 #undef NIKON_14BIT_SIZE
 
-    // Linear max from 14-bit camera, but on 12-bit data?
-	if (makeIs(LIBRAW_CAMERAMAKER_Sony) &&
-        imgdata.color.maximum > 0 &&
-        imgdata.color.linear_max[0] > imgdata.color.maximum &&
-        imgdata.color.linear_max[0] <= imgdata.color.maximum * 4)
-      for (int c = 0; c < 4; c++)
-        imgdata.color.linear_max[c] /= 4;
+	  // Linear max from 14-bit camera, but on 12-bit data?
+	  if (makeIs(LIBRAW_CAMERAMAKER_Sony) &&
+		  imgdata.color.maximum > 0 &&
+		  imgdata.color.linear_max[0] > imgdata.color.maximum &&
+		  imgdata.color.linear_max[0] <= imgdata.color.maximum * 4)
+		  for (int c = 0; c < 4; c++)
+			  imgdata.color.linear_max[c] /= 4;
 
-	if (makeIs(LIBRAW_CAMERAMAKER_Canon) )
-    {
+	  if (makeIs(LIBRAW_CAMERAMAKER_Canon))
+	  {
 #define imC imgdata.makernotes.canon
-#define isRIC imgdata.sizes.raw_inset_crop
-      if (imC.SensorLeftBorder != -1)
-      { // tag 0x00e0 SensorInfo was parsed
-        if (isRIC.aspect != LIBRAW_IMAGE_ASPECT_UNKNOWN)
-        { // tag 0x009a AspectInfo was parsed
-          isRIC.cleft += imC.SensorLeftBorder;
-          isRIC.ctop += imC.SensorTopBorder;
-        }
-        else
-        {
-          isRIC.cleft = imC.SensorLeftBorder;
-          isRIC.ctop = imC.SensorTopBorder;
-          isRIC.cwidth = imC.SensorRightBorder - imC.SensorLeftBorder + 1;
-          isRIC.cheight = imC.SensorBottomBorder - imC.SensorTopBorder + 1;
-        }
-      }
-      else
-      {
-        if (isRIC.aspect != LIBRAW_IMAGE_ASPECT_UNKNOWN)
-        {
-        }
-        else
-        { // Canon PowerShot S2 IS
-        }
-      }
+		  if (imC.SensorLeftBorder != -1)
+		  { // tag 0x00e0 SensorInfo was parsed
+			  if (isRIC.aspect != LIBRAW_IMAGE_ASPECT_UNKNOWN)
+			  { // tag 0x009a AspectInfo was parsed
+				  isRIC.cleft += imC.SensorLeftBorder;
+				  isRIC.ctop += imC.SensorTopBorder;
+			  }
+			  else
+			  {
+				  isRIC.cleft = imC.SensorLeftBorder;
+				  isRIC.ctop = imC.SensorTopBorder;
+				  isRIC.cwidth = imC.SensorRightBorder - imC.SensorLeftBorder + 1;
+				  isRIC.cheight = imC.SensorBottomBorder - imC.SensorTopBorder + 1;
+			  }
+		  }
+		  else
+		  {
+			  if (isRIC.aspect != LIBRAW_IMAGE_ASPECT_UNKNOWN)
+			  {
+			  }
+			  else
+			  { // Canon PowerShot S2 IS
+			  }
+		  }
 #undef isRIC
 #undef imC
-    }
+	  }
 
-	if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
-        (load_raw == &LibRaw::canon_sraw_load_raw) &&
-        imgdata.sizes.raw_width > 0)
-    {
-      float ratio =
-          float(imgdata.sizes.raw_height) / float(imgdata.sizes.raw_width);
-      if ((ratio < 0.57 || ratio > 0.75) &&
-          imgdata.makernotes.canon.SensorHeight > 1 &&
-          imgdata.makernotes.canon.SensorWidth > 1)
-      {
-        imgdata.sizes.raw_width = imgdata.makernotes.canon.SensorWidth;
-        imgdata.sizes.left_margin = imgdata.makernotes.canon.SensorLeftBorder;
-        imgdata.sizes.iwidth = imgdata.sizes.width =
-            imgdata.makernotes.canon.SensorRightBorder -
-            imgdata.makernotes.canon.SensorLeftBorder + 1;
-        imgdata.sizes.raw_height = imgdata.makernotes.canon.SensorHeight;
-        imgdata.sizes.top_margin = imgdata.makernotes.canon.SensorTopBorder;
-        imgdata.sizes.iheight = imgdata.sizes.height =
-            imgdata.makernotes.canon.SensorBottomBorder -
-            imgdata.makernotes.canon.SensorTopBorder + 1;
-        libraw_internal_data.unpacker_data.load_flags |=
-            256; // reset width/height in canon_sraw_load_raw()
-        imgdata.sizes.raw_pitch = 8 * imgdata.sizes.raw_width;
-      }
-      else if (imgdata.sizes.raw_width == 4032 &&
-               imgdata.sizes.raw_height == 3402 &&
-               !strcasecmp(imgdata.idata.model, "EOS 80D")) // 80D hardcoded
-      {
-        imgdata.sizes.raw_width = 4536;
-        imgdata.sizes.left_margin = 28;
-        imgdata.sizes.iwidth = imgdata.sizes.width =
-            imgdata.sizes.raw_width - imgdata.sizes.left_margin;
-        imgdata.sizes.raw_height = 3024;
-        imgdata.sizes.top_margin = 8;
-        imgdata.sizes.iheight = imgdata.sizes.height =
-            imgdata.sizes.raw_height - imgdata.sizes.top_margin;
-        libraw_internal_data.unpacker_data.load_flags |= 256;
-        imgdata.sizes.raw_pitch = 8 * imgdata.sizes.raw_width;
-      }
-    }
+	  if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
+		  (load_raw == &LibRaw::canon_sraw_load_raw) &&
+		  imgdata.sizes.raw_width > 0)
+	  {
+		  float ratio =
+			  float(imgdata.sizes.raw_height) / float(imgdata.sizes.raw_width);
+		  if ((ratio < 0.57 || ratio > 0.75) &&
+			  imgdata.makernotes.canon.SensorHeight > 1 &&
+			  imgdata.makernotes.canon.SensorWidth > 1)
+		  {
+			  imgdata.sizes.raw_width = imgdata.makernotes.canon.SensorWidth;
+			  imgdata.sizes.left_margin = imgdata.makernotes.canon.SensorLeftBorder;
+			  imgdata.sizes.iwidth = imgdata.sizes.width =
+				  imgdata.makernotes.canon.SensorRightBorder -
+				  imgdata.makernotes.canon.SensorLeftBorder + 1;
+			  imgdata.sizes.raw_height = imgdata.makernotes.canon.SensorHeight;
+			  imgdata.sizes.top_margin = imgdata.makernotes.canon.SensorTopBorder;
+			  imgdata.sizes.iheight = imgdata.sizes.height =
+				  imgdata.makernotes.canon.SensorBottomBorder -
+				  imgdata.makernotes.canon.SensorTopBorder + 1;
+			  libraw_internal_data.unpacker_data.load_flags |=
+				  256; // reset width/height in canon_sraw_load_raw()
+			  imgdata.sizes.raw_pitch = 8 * imgdata.sizes.raw_width;
+		  }
+		  else if (imgdata.sizes.raw_width == 4032 &&
+			  imgdata.sizes.raw_height == 3402 &&
+			  !strcasecmp(imgdata.idata.model, "EOS 80D")) // 80D hardcoded
+		  {
+			  imgdata.sizes.raw_width = 4536;
+			  imgdata.sizes.left_margin = 28;
+			  imgdata.sizes.iwidth = imgdata.sizes.width =
+				  imgdata.sizes.raw_width - imgdata.sizes.left_margin;
+			  imgdata.sizes.raw_height = 3024;
+			  imgdata.sizes.top_margin = 8;
+			  imgdata.sizes.iheight = imgdata.sizes.height =
+				  imgdata.sizes.raw_height - imgdata.sizes.top_margin;
+			  libraw_internal_data.unpacker_data.load_flags |= 256;
+			  imgdata.sizes.raw_pitch = 8 * imgdata.sizes.raw_width;
+		  }
+	  }
 
-    // XTrans Compressed?
-    if (!imgdata.idata.dng_version &&
-		makeIs(LIBRAW_CAMERAMAKER_Fujifilm) &&
-        (load_raw == &LibRaw::unpacked_load_raw))
-    {
-      if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 2 !=
-          libraw_internal_data.unpacker_data.data_size)
-      {
-        if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 7 / 4 ==
-            libraw_internal_data.unpacker_data.data_size)
-          load_raw = &LibRaw::fuji_14bit_load_raw;
-        else
-          parse_fuji_compressed_header();
-      }
-      if (imgdata.idata.filters == 9)
-      {
-        // Adjust top/left margins for X-Trans
-        int newtm = imgdata.sizes.top_margin % 6
-                        ? (imgdata.sizes.top_margin / 6 + 1) * 6
-                        : imgdata.sizes.top_margin;
-        int newlm = imgdata.sizes.left_margin % 6
-                        ? (imgdata.sizes.left_margin / 6 + 1) * 6
-                        : imgdata.sizes.left_margin;
-        if (newtm != imgdata.sizes.top_margin ||
-            newlm != imgdata.sizes.left_margin)
-        {
-          imgdata.sizes.height -= (newtm - imgdata.sizes.top_margin);
-          imgdata.sizes.top_margin = newtm;
-          imgdata.sizes.width -= (newlm - imgdata.sizes.left_margin);
-          imgdata.sizes.left_margin = newlm;
-          for (int c1 = 0; c1 < 6; c1++)
-            for (int c2 = 0; c2 < 6; c2++)
-              imgdata.idata.xtrans[c1][c2] = imgdata.idata.xtrans_abs[c1][c2];
-        }
-      }
-    }
-    if (!libraw_internal_data.internal_output_params.fuji_width
-        && imgdata.idata.filters >= 1000
-        && ((imgdata.sizes.top_margin % 2) || (imgdata.sizes.left_margin%2)))
-    {
-        int crop[2] = {0,0};
-        unsigned filt;
-        int c;
-        if(imgdata.sizes.top_margin % 2)
-        {
-            imgdata.sizes.top_margin+=1;
-            imgdata.sizes.height-=1;
-            crop[1] = 1;
-        }
-        if(imgdata.sizes.left_margin % 2)
-        {
-            imgdata.sizes.left_margin+=1;
-            imgdata.sizes.width-=1;
-            crop[0] = 1;
-        }
-        for (filt = c = 0; c < 16; c++)
-            filt |= FC((c >> 1) + (crop[1]), (c & 1) + (crop[0])) << c * 2;
-        imgdata.idata.filters = filt;
-    }
+#ifdef USE_DNGSDK
+	  if (imgdata.idata.dng_version
+		  &&libraw_internal_data.unpacker_data.tiff_compress == 34892
+		  && libraw_internal_data.unpacker_data.tiff_bps == 8
+		  && libraw_internal_data.unpacker_data.tiff_samples == 3
+		  && load_raw == &LibRaw::lossy_dng_load_raw)
+	  {
+		  // Data should be linearized by DNG SDK
+		  C.black = 0;
+		  memset(C.cblack, 0, sizeof(C.cblack));
+	  }
+#endif
 
+	  // XTrans Compressed?
+	  if (!imgdata.idata.dng_version &&
+		  makeIs(LIBRAW_CAMERAMAKER_Fujifilm) &&
+		  (load_raw == &LibRaw::unpacked_load_raw))
+	  {
+		  if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 2 !=
+			  libraw_internal_data.unpacker_data.data_size)
+		  {
+			  if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 7 / 4 ==
+				  libraw_internal_data.unpacker_data.data_size)
+				  load_raw = &LibRaw::fuji_14bit_load_raw;
+			  else
+				  parse_fuji_compressed_header();
+		  }
+		  if (imgdata.idata.filters == 9)
+		  {
+			  // Adjust top/left margins for X-Trans
+			  int newtm = imgdata.sizes.top_margin % 6
+				  ? (imgdata.sizes.top_margin / 6 + 1) * 6
+				  : imgdata.sizes.top_margin;
+			  int newlm = imgdata.sizes.left_margin % 6
+				  ? (imgdata.sizes.left_margin / 6 + 1) * 6
+				  : imgdata.sizes.left_margin;
+			  if (newtm != imgdata.sizes.top_margin ||
+				  newlm != imgdata.sizes.left_margin)
+			  {
+				  imgdata.sizes.height -= (newtm - imgdata.sizes.top_margin);
+				  imgdata.sizes.top_margin = newtm;
+				  imgdata.sizes.width -= (newlm - imgdata.sizes.left_margin);
+				  imgdata.sizes.left_margin = newlm;
+				  for (int c1 = 0; c1 < 6; c1++)
+					  for (int c2 = 0; c2 < 6; c2++)
+						  imgdata.idata.xtrans[c1][c2] = imgdata.idata.xtrans_abs[c1][c2];
+			  }
+		  }
+	  }
+	  if (!libraw_internal_data.internal_output_params.fuji_width
+		  && imgdata.idata.filters >= 1000
+		  && ((imgdata.sizes.top_margin % 2) || (imgdata.sizes.left_margin % 2)))
+	  {
+		  int crop[2] = { 0,0 };
+		  unsigned filt;
+		  int c;
+		  if (imgdata.sizes.top_margin % 2)
+		  {
+			  imgdata.sizes.top_margin += 1;
+			  imgdata.sizes.height -= 1;
+			  crop[1] = 1;
+		  }
+		  if (imgdata.sizes.left_margin % 2)
+		  {
+			  imgdata.sizes.left_margin += 1;
+			  imgdata.sizes.width -= 1;
+			  crop[0] = 1;
+		  }
+		  for (filt = c = 0; c < 16; c++)
+			  filt |= FC((c >> 1) + (crop[1]), (c & 1) + (crop[0])) << c * 2;
+		  imgdata.idata.filters = filt;
+	  }
 
-    // Fix DNG white balance if needed
-    if (imgdata.idata.dng_version && (imgdata.idata.filters == 0) &&
-        imgdata.idata.colors > 1 && imgdata.idata.colors < 5)
-    {
-      float delta[4] = {0.f, 0.f, 0.f, 0.f};
-      int black[4];
-      for (int c = 0; c < 4; c++)
-        black[c] = imgdata.color.dng_levels.dng_black +
-                   imgdata.color.dng_levels.dng_cblack[c];
-      for (int c = 0; c < imgdata.idata.colors; c++)
-        delta[c] = imgdata.color.dng_levels.dng_whitelevel[c] - black[c];
-      float mindelta = delta[0], maxdelta = delta[0];
-      for (int c = 1; c < imgdata.idata.colors; c++)
-      {
-        if (mindelta > delta[c])
-          mindelta = delta[c];
-        if (maxdelta < delta[c])
-          maxdelta = delta[c];
-      }
-      if (mindelta > 1 && maxdelta < (mindelta * 20)) // safety
-      {
-        for (int c = 0; c < imgdata.idata.colors; c++)
-        {
-          imgdata.color.cam_mul[c] /= (delta[c] / maxdelta);
-          imgdata.color.pre_mul[c] /= (delta[c] / maxdelta);
-        }
-        imgdata.color.maximum = imgdata.color.cblack[0] + maxdelta;
-      }
-    }
+#ifdef USE_DNGSDK
+	  if (
+		  imgdata.params.use_dngsdk &&
+		  !(imgdata.params.raw_processing_options & (LIBRAW_PROCESSING_DNG_STAGE2 | LIBRAW_PROCESSING_DNG_STAGE3 | LIBRAW_PROCESSING_DNG_DISABLEWBADJUST)))
+#endif
+	  {
+		  // Fix DNG white balance if needed: observed only for Kalpanika X3F tools produced DNGs
+		  if (imgdata.idata.dng_version && (imgdata.idata.filters == 0) &&
+			  imgdata.idata.colors > 1 && imgdata.idata.colors < 5)
+		  {
+			  float delta[4] = { 0.f, 0.f, 0.f, 0.f };
+			  int black[4];
+			  for (int c = 0; c < 4; c++)
+				  black[c] = imgdata.color.dng_levels.dng_black +
+				  imgdata.color.dng_levels.dng_cblack[c];
+			  for (int c = 0; c < imgdata.idata.colors; c++)
+				  delta[c] = imgdata.color.dng_levels.dng_whitelevel[c] - black[c];
+			  float mindelta = delta[0], maxdelta = delta[0];
+			  for (int c = 1; c < imgdata.idata.colors; c++)
+			  {
+				  if (mindelta > delta[c])
+					  mindelta = delta[c];
+				  if (maxdelta < delta[c])
+					  maxdelta = delta[c];
+			  }
+			  if (mindelta > 1 && maxdelta < (mindelta * 20)) // safety
+			  {
+				  for (int c = 0; c < imgdata.idata.colors; c++)
+				  {
+					  imgdata.color.cam_mul[c] /= (delta[c] / maxdelta);
+					  imgdata.color.pre_mul[c] /= (delta[c] / maxdelta);
+				  }
+				  imgdata.color.maximum = imgdata.color.cblack[0] + maxdelta;
+			  }
+		  }
+	  }
 
     if (imgdata.idata.dng_version &&
         !(imgdata.params.raw_processing_options &
@@ -612,6 +672,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		makeIs(LIBRAW_CAMERAMAKER_Panasonic)
           && !strcasecmp(imgdata.idata.normalized_model, "DMC-LX100"))
       imgdata.sizes.width = 4288;
+
+    if (imgdata.idata.dng_version &&
+        !(imgdata.params.raw_processing_options &
+            LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP) &&
+        makeIs(LIBRAW_CAMERAMAKER_Leica)
+        && !strcasecmp(imgdata.idata.normalized_model, "SL2"))
+        imgdata.sizes.height -= 16;
 
 	if (makeIs(LIBRAW_CAMERAMAKER_Sony) &&
         imgdata.idata.dng_version &&
@@ -650,8 +717,11 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           ||
           ((!strncasecmp(imgdata.idata.model, "ILCE-7M", 7) ||
             !strcasecmp(imgdata.idata.model, "ILCE-9") ||
+#if 0
             !strcasecmp(imgdata.idata.model,
-                        "SLT-A99V")) // Is SLT-A99 also has APS-C mode??
+                        "SLT-A99V")) // Does SLT-A99 also have APS-C mode??
+#endif
+           (mnCamID == SonyID_SLT_A99)) // 2 reasons: some cameras are SLT-A99, no 'V'; some are Hasselblad HV
            && S.raw_width > 3750 &&
            S.raw_width < 4120) // A7M2, A7M3, AA9, most likely APS-C raw_width
                                // is 3968 (same w/ A7), but no samples, so guess
@@ -688,18 +758,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       imgdata.color.pre_mul[2] = 1.f / 0.7666f;
       imgdata.color.pre_mul[1] = imgdata.color.pre_mul[3] = 1.0;
     }
-
-    // S5/S3Pro DNG patch
-	if (imgdata.idata.dng_version &&  makeIs(LIBRAW_CAMERAMAKER_Fujifilm))
-
-	{
-		if ((!strcmp(imgdata.idata.model, "S3Pro") || !strcmp(imgdata.idata.model, "S5Pro")) &&
-			imgdata.sizes.raw_width == 4288)
-		{
-			imgdata.sizes.left_margin++;
-			imgdata.sizes.width--;
-		}
-	}
 
 	if (!imgdata.idata.dng_version && makeIs(LIBRAW_CAMERAMAKER_Fujifilm) &&
         (!strncmp(imgdata.idata.model, "S20Pro", 6) ||
@@ -825,22 +883,24 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         makeIs(LIBRAW_CAMERAMAKER_Pentax) &&
 		!strcasecmp(imgdata.idata.normalized_model, "K20D")
 #endif
+#if 0
 		!strcasecmp(imgdata.idata.make, "Samsung") &&
         !strcasecmp(imgdata.idata.model, "GX20")
+#endif
+    makeIs(LIBRAW_CAMERAMAKER_Pentax) &&
+    (mnCamID == PentaxID_GX20) // Samsung rebranding
 		)
     {
       for (int cnt = LIBRAW_WBI_Unknown; cnt <= LIBRAW_WBI_StudioTungsten; cnt++) {
         if (C.WB_Coeffs[cnt][1]) {
-          C.WB_Coeffs[cnt][0] =
-            (int)((float)(C.WB_Coeffs[cnt][0]) * 1.0503f);
-          C.WB_Coeffs[cnt][2] =
-            (int)((float)(C.WB_Coeffs[cnt][2]) * 2.2867f);
+          C.WB_Coeffs[cnt][0] = (int)((float)(C.WB_Coeffs[cnt][0]) * 1.0503f);
+          C.WB_Coeffs[cnt][2] = (int)((float)(C.WB_Coeffs[cnt][2]) * 2.2867f);
         }
       }
       for (int cnt = 0; cnt < 64; cnt++) {
-        if (imgdata.color.WBCT_Coeffs[cnt][0] > 0.0f) {
-          imgdata.color.WBCT_Coeffs[cnt][1] *= 1.0503f;
-          imgdata.color.WBCT_Coeffs[cnt][3] *= 2.2867f;
+        if (C.WBCT_Coeffs[cnt][0] > 0.0f) {
+          C.WBCT_Coeffs[cnt][1] *= 1.0503f;
+          C.WBCT_Coeffs[cnt][3] *= 2.2867f;
         }
       }
       for(int cnt = 0; cnt < 4; cnt++)
@@ -870,7 +930,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     }
 
     // Adjust sizes for X3F processing
-    if (load_raw == &LibRaw::x3f_load_raw)
+#ifdef USE_X3FTOOLS
+	if (load_raw == &LibRaw::x3f_load_raw)
     {
       for (int i = 0; i < foveon_count; i++)
         if (!strcasecmp(imgdata.idata.make, foveon_data[i].make) &&
@@ -886,6 +947,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
           break;
         }
     }
+#endif
 #if 0
     size_t bytes = ID.input->size()-libraw_internal_data.unpacker_data.data_offset;
     float bpp = float(bytes)/float(S.raw_width)/float(S.raw_height);

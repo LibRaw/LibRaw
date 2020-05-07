@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: identify.cpp
- * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8, 2008
  *
  * LibRaw C++ demo: emulates dcraw -i [-v]
@@ -44,6 +44,16 @@ it under the terms of the one of two licenses as you choose:
 #endif
 #endif
 
+#ifdef _MSC_VER
+#if _MSC_VER < 1800 /* below MSVC 2013 */
+float roundf(float f)
+{
+ return floorf(f + 0.5);
+}
+
+#endif
+#endif
+
 struct starttime_t
 {
 #ifdef LIBRAW_WIN32_CALLS
@@ -52,6 +62,8 @@ struct starttime_t
 	struct timeval started;
 #endif
 };
+
+// clang-format off
 
 #define P1 MyCoolRawProcessor.imgdata.idata
 #define P2 MyCoolRawProcessor.imgdata.other
@@ -75,7 +87,10 @@ struct starttime_t
 
 void print_verbose(FILE*, LibRaw& MyCoolRawProcessor, std::string& fn);
 void print_wbfun(FILE*, LibRaw& MyCoolRawProcessor, std::string& fn);
+void print_jsonfun(FILE*, LibRaw& MyCoolRawProcessor,
+                   std::string& fn, int fnum, int nfiles);
 void print_compactfun(FILE*, LibRaw& MyCoolRawProcessor, std::string& fn);
+void print_normfun(FILE*, LibRaw& MyCoolRawProcessor, std::string& fn);
 void print_szfun(FILE*, LibRaw& MyCoolRawProcessor, std::string& fn);
 void print_0fun(FILE*, LibRaw& MyCoolRawProcessor, std::string& fn);
 void print_1fun(FILE*, LibRaw& MyCoolRawProcessor, std::string& fn);
@@ -83,36 +98,6 @@ void print_2fun(FILE*, LibRaw& MyCoolRawProcessor, std::string& fn);
 void print_unpackfun(FILE*, LibRaw& MyCoolRawProcessor, int print_frame, std::string& fn);
 void print_timer(FILE*, const starttime_t&, int c);
 
-const char *EXIF_LightSources[] = {
-    "Unknown",
-    "Daylight",
-    "Fluorescent",
-    "Tungsten (Incandescent)",
-    "Flash",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Fine Weather",
-    "Cloudy",
-    "Shade",
-    "Daylight Fluorescent D",
-    "Day White Fluorescent N",
-    "Cool White Fluorescent W",
-    "White Fluorescent WW",
-    "Warm White Fluorescent L",
-    "Illuminant A",
-    "Illuminant B",
-    "Illuminant C",
-    "D55",
-    "D65",
-    "D75",
-    "D50",
-    "ISO Studio Tungsten"
-};
-const int nEXIF_LightSources = sizeof(EXIF_LightSources) / sizeof(EXIF_LightSources[0]);
-
-// clang-format off
 /*
 table of fluorescents:
 12 = FL-D; Daylight fluorescent (D 5700K – 7100K) (F1,F5)
@@ -121,7 +106,62 @@ table of fluorescents:
 15 = FL-WW; White fluorescent (WW 3200K – 3700K) (F3, residential)
 16 = FL-L; Soft/Warm white fluorescent (L 2600K - 3250K) (F4, kitchen, bath)
 */
-//clang-format on
+
+static const struct {
+    const int NumId;
+    const char *StrId;
+    const char *hrStrId; // human-readable
+    const int aux_setting;
+} WBToStr[] = {
+    {LIBRAW_WBI_Unknown,         "WBI_Unknown",         "Unknown",                 0},
+    {LIBRAW_WBI_Daylight,        "WBI_Daylight",        "Daylight",                0},
+    {LIBRAW_WBI_Fluorescent,     "WBI_Fluorescent",     "Fluorescent",             0},
+    {LIBRAW_WBI_Tungsten,        "WBI_Tungsten",        "Tungsten (Incandescent)", 0},
+    {LIBRAW_WBI_Flash,           "WBI_Flash",           "Flash",                   0},
+    {LIBRAW_WBI_FineWeather,     "WBI_FineWeather",     "Fine Weather",            0},
+    {LIBRAW_WBI_Cloudy,          "WBI_Cloudy",          "Cloudy",                  0},
+    {LIBRAW_WBI_Shade,           "WBI_Shade",           "Shade",                   0},
+    {LIBRAW_WBI_FL_D,            "WBI_FL_D",            "Daylight Fluorescent",    0},
+    {LIBRAW_WBI_FL_N,            "WBI_FL_N",            "Day White Fluorescent",   0},
+    {LIBRAW_WBI_FL_W,            "WBI_FL_W",            "Cool White Fluorescent",  0},
+    {LIBRAW_WBI_FL_WW,           "WBI_FL_WW",           "White Fluorescent",       0},
+    {LIBRAW_WBI_FL_L,            "WBI_FL_L",            "Warm White Fluorescent",  0},
+    {LIBRAW_WBI_Ill_A,           "WBI_Ill_A",           "Illuminant A",            0},
+    {LIBRAW_WBI_Ill_B,           "WBI_Ill_B",           "Illuminant B",            0},
+    {LIBRAW_WBI_Ill_C,           "WBI_Ill_C",           "Illuminant C",            0},
+    {LIBRAW_WBI_D55,             "WBI_D55",             "D55",                     0},
+    {LIBRAW_WBI_D65,             "WBI_D65",             "D65",                     0},
+    {LIBRAW_WBI_D75,             "WBI_D75",             "D75",                     0},
+    {LIBRAW_WBI_D50,             "WBI_D50",             "D50",                     0},
+    {LIBRAW_WBI_StudioTungsten,  "WBI_StudioTungsten",  "ISO Studio Tungsten",     0},
+    {LIBRAW_WBI_BW,              "WBI_BW",              "BW",                      0},
+    {LIBRAW_WBI_Other,           "WBI_Other",           "Other",                   0},
+    {LIBRAW_WBI_Sunset,          "WBI_Sunset",          "Sunset",                  1},
+    {LIBRAW_WBI_Underwater,      "WBI_Underwater",      "Underwater",              1},
+    {LIBRAW_WBI_FluorescentHigh, "WBI_FluorescentHigh", "Fluorescent High",        1},
+    {LIBRAW_WBI_HT_Mercury,      "WBI_HT_Mercury",      "HT Mercury",              1},
+    {LIBRAW_WBI_AsShot,          "WBI_AsShot",          "As Shot",                 1},
+    {LIBRAW_WBI_Measured,        "WBI_Measured",        "Camera Measured",         1},
+    {LIBRAW_WBI_Auto,            "WBI_Auto",            "Camera Auto",             1},
+    {LIBRAW_WBI_Auto1,           "WBI_Auto1",           "Camera Auto 1",           1},
+    {LIBRAW_WBI_Auto2,           "WBI_Auto2",           "Camera Auto 2",           1},
+    {LIBRAW_WBI_Auto3,           "WBI_Auto3",           "Camera Auto 3",           1},
+    {LIBRAW_WBI_Auto4,           "WBI_Auto4",           "Camera Auto 4",           1},
+    {LIBRAW_WBI_Custom,          "WBI_Custom",          "Custom",                  1},
+    {LIBRAW_WBI_Custom1,         "WBI_Custom1",         "Custom 1",                1},
+    {LIBRAW_WBI_Custom2,         "WBI_Custom2",         "Custom 2",                1},
+    {LIBRAW_WBI_Custom3,         "WBI_Custom3",         "Custom 3",                1},
+    {LIBRAW_WBI_Custom4,         "WBI_Custom4",         "Custom 4",                1},
+    {LIBRAW_WBI_Custom5,         "WBI_Custom5",         "Custom 5",                1},
+    {LIBRAW_WBI_Custom6,         "WBI_Custom6",         "Custom 6",                1},
+    {LIBRAW_WBI_PC_Set1,         "WBI_PC_Set1",         "PC Set 1",                1},
+    {LIBRAW_WBI_PC_Set2,         "WBI_PC_Set2",         "PC Set 2",                1},
+    {LIBRAW_WBI_PC_Set3,         "WBI_PC_Set3",         "PC Set 3",                1},
+    {LIBRAW_WBI_PC_Set4,         "WBI_PC_Set4",         "PC Set 4",                1},
+    {LIBRAW_WBI_PC_Set5,         "WBI_PC_Set5",         "PC Set 5",                1},
+    {LIBRAW_WBI_Kelvin,          "WBI_Kelvin",          "Kelvin",                  1},
+    {LIBRAW_WBI_None,            "WBI_None",            "None",                    1},
+};
 
 typedef struct
 {
@@ -129,78 +169,78 @@ typedef struct
   char const *name;
 } id2hr_t; // id to human readable
 
-// clang-format off
 static id2hr_t MountNames[] = {
-    {LIBRAW_MOUNT_Unknown, "Undefined Mount or Fixed Lens"},
-    {LIBRAW_MOUNT_IL_UM, "Interchangeable lens, mount unknown"},
-    {LIBRAW_MOUNT_Alpa, "Alpa"},
-    {LIBRAW_MOUNT_C, "C-mount"},
-    {LIBRAW_MOUNT_Canon_EF_M, "Canon EF-M"},
-    {LIBRAW_MOUNT_Canon_EF_S, "Canon EF-S"},
-    {LIBRAW_MOUNT_Canon_EF, "Canon EF"},
-    {LIBRAW_MOUNT_Canon_RF, "Canon RF"},
-    {LIBRAW_MOUNT_Contax_N, "Contax N"},
-    {LIBRAW_MOUNT_Contax645, "Contax 645"},
-    {LIBRAW_MOUNT_DigitalBack, "Digital Back"},
-    {LIBRAW_MOUNT_FixedLens, "Fixed Lens"},
-    {LIBRAW_MOUNT_FT, "4/3"},
-    {LIBRAW_MOUNT_Fuji_GF, "Fuji G"},  // Fujifilm G lenses, GFX cameras
-    {LIBRAW_MOUNT_Fuji_GX, "Fuji GX"}, // Fujifilm GX680
-    {LIBRAW_MOUNT_Fuji_X, "Fuji X"},
-    {LIBRAW_MOUNT_Hasselblad_H, "Hasselblad H"}, // Hasselblad Hn cameras, HC & HCD lenses
-    {LIBRAW_MOUNT_Hasselblad_V, "Hasselblad V"},
-    {LIBRAW_MOUNT_Hasselblad_XCD, "Hasselblad XCD"},  // Hasselblad Xn cameras, XCD lenses
-    {LIBRAW_MOUNT_Leica_L, "Leica L"}, // throat
-    {LIBRAW_MOUNT_Leica_M, "Leica M"},
-    {LIBRAW_MOUNT_Leica_R, "Leica R"},
-    {LIBRAW_MOUNT_Leica_S, "Leica S"},
-    {LIBRAW_MOUNT_Leica_SL, "Leica SL"}, // mounts on "L" throat
-    {LIBRAW_MOUNT_Leica_TL, "Leica TL"}, // mounts on "L" throat
-    {LIBRAW_MOUNT_LF, "Large format"},
-    {LIBRAW_MOUNT_Mamiya67, "Mamiya RZ/RB"},
-    {LIBRAW_MOUNT_Mamiya645, "Mamiya 645"},
-    {LIBRAW_MOUNT_mFT, "m4/3"},
-    {LIBRAW_MOUNT_Minolta_A, "Sony/Minolta A"},
-    {LIBRAW_MOUNT_Nikon_CX, "Nikkor 1"},
-    {LIBRAW_MOUNT_Nikon_F, "Nikkor F"},
-    {LIBRAW_MOUNT_Nikon_Z, "Nikkor Z"},
-    {LIBRAW_MOUNT_Pentax_645, "Pentax 645"},
-    {LIBRAW_MOUNT_Pentax_K, "Pentax K"},
-    {LIBRAW_MOUNT_Pentax_Q, "Pentax Q"},
-    {LIBRAW_MOUNT_RicohModule, "Ricoh module"},
-    {LIBRAW_MOUNT_Rollei_bayonet, "Rollei bayonet"}, // Leaf AFi, Sinar Hy-6 models
-    {LIBRAW_MOUNT_Samsung_NX_M, "Samsung NX-M"},
-    {LIBRAW_MOUNT_Samsung_NX, "Samsung NX"},
-    {LIBRAW_MOUNT_Sigma_X3F, "Sigma SA/X3F"},
-    {LIBRAW_MOUNT_Sony_E, "Sony E"},
+  {LIBRAW_MOUNT_Alpa,           "Alpa"},
+  {LIBRAW_MOUNT_C,              "C-mount"},
+  {LIBRAW_MOUNT_Canon_EF_M,     "Canon EF-M"},
+  {LIBRAW_MOUNT_Canon_EF_S,     "Canon EF-S"},
+  {LIBRAW_MOUNT_Canon_EF,       "Canon EF"},
+  {LIBRAW_MOUNT_Canon_RF,       "Canon RF"},
+  {LIBRAW_MOUNT_Contax_N,       "Contax N"},
+  {LIBRAW_MOUNT_Contax645,      "Contax 645"},
+  {LIBRAW_MOUNT_FT,             "4/3"},
+  {LIBRAW_MOUNT_mFT,            "m4/3"},
+  {LIBRAW_MOUNT_Fuji_GF,        "Fuji G"},  // Fujifilm G lenses, GFX cameras
+  {LIBRAW_MOUNT_Fuji_GX,        "Fuji GX"}, // GX680
+  {LIBRAW_MOUNT_Fuji_X,         "Fuji X"},
+  {LIBRAW_MOUNT_Hasselblad_H,   "Hasselblad H"},    // Hn cameras, HC & HCD lenses
+  {LIBRAW_MOUNT_Hasselblad_V,   "Hasselblad V"},
+  {LIBRAW_MOUNT_Hasselblad_XCD, "Hasselblad XCD"}, // Xn cameras, XCD lenses
+  {LIBRAW_MOUNT_Leica_M,        "Leica M"},
+  {LIBRAW_MOUNT_Leica_R,        "Leica R"},
+  {LIBRAW_MOUNT_Leica_S,        "Leica S"},
+  {LIBRAW_MOUNT_Leica_SL,       "Leica SL"},     // mounts on "L" throat
+  {LIBRAW_MOUNT_Leica_TL,       "Leica TL"},     // mounts on "L" throat
+  {LIBRAW_MOUNT_LPS_L,          "LPS L-mount"},  // throat, Leica / Panasonic / Sigma
+  {LIBRAW_MOUNT_Mamiya67,       "Mamiya RZ/RB"}, // Mamiya RB67, RZ67
+  {LIBRAW_MOUNT_Mamiya645,      "Mamiya 645"},
+  {LIBRAW_MOUNT_Minolta_A,      "Sony/Minolta A"},
+  {LIBRAW_MOUNT_Nikon_CX,       "Nikkor 1"},
+  {LIBRAW_MOUNT_Nikon_F,        "Nikkor F"},
+  {LIBRAW_MOUNT_Nikon_Z,        "Nikkor Z"},
+  {LIBRAW_MOUNT_Pentax_645,     "Pentax 645"},
+  {LIBRAW_MOUNT_Pentax_K,       "Pentax K"},
+  {LIBRAW_MOUNT_Pentax_Q,       "Pentax Q"},
+  {LIBRAW_MOUNT_RicohModule,    "Ricoh module"},
+  {LIBRAW_MOUNT_Rollei_bayonet, "Rollei bayonet"}, // Rollei Hy-6: Leaf AFi, Sinar Hy6- models
+  {LIBRAW_MOUNT_Samsung_NX_M,   "Samsung NX-M"},
+  {LIBRAW_MOUNT_Samsung_NX,     "Samsung NX"},
+  {LIBRAW_MOUNT_Sigma_X3F,      "Sigma SA/X3F"},
+  {LIBRAW_MOUNT_Sony_E,         "Sony E"},
+// generic formats:
+  {LIBRAW_MOUNT_LF,             "Large format"},
+  {LIBRAW_MOUNT_DigitalBack,    "Digital Back"},
+  {LIBRAW_MOUNT_FixedLens,      "Fixed Lens"},
+  {LIBRAW_MOUNT_IL_UM,          "Interchangeable lens, mount unknown"},
+  {LIBRAW_MOUNT_Unknown,        "Undefined Mount or Fixed Lens"},
+  {LIBRAW_MOUNT_TheLastOne,     "The Last One"},
 };
-#define nMounts (sizeof(MountNames) / sizeof(id2hr_t))
 
 static id2hr_t FormatNames[] = {
-    {LIBRAW_FORMAT_Unknown, "Unknown"},
-    {LIBRAW_FORMAT_1div2p3INCH, "1/2.3\""},
-    {LIBRAW_FORMAT_1div1p7INCH, "1/1.7\""},
-    {LIBRAW_FORMAT_1INCH, "1\""},
-    {LIBRAW_FORMAT_FT, "4/3"},
-    {LIBRAW_FORMAT_APSC, "APS-C"}, // Canon: 22.3x14.9mm; Sony et al: 23.6-23.7x15.6mm
-    {LIBRAW_FORMAT_Leica_DMR, "Leica DMR"}, // 26.4x 17.6mm
-    {LIBRAW_FORMAT_APSH, "APS-H"},          // Canon: 27.9x18.6mm
-    {LIBRAW_FORMAT_FF, "FF 35mm"},
-    {LIBRAW_FORMAT_CROP645, "645 crop 44x33mm"},
-    {LIBRAW_FORMAT_LeicaS, "Leica S 45x30mm"},
-    {LIBRAW_FORMAT_3648, "48x36mm"},
-    {LIBRAW_FORMAT_645, "6x4.5"},
-    {LIBRAW_FORMAT_66, "6x6"},
-    {LIBRAW_FORMAT_67, "6x7"},
-    {LIBRAW_FORMAT_68, "6x8"},
-    {LIBRAW_FORMAT_69, "6x9"},
-    {LIBRAW_FORMAT_MF, "Medium Format"},
-    {LIBRAW_FORMAT_LF, "Large format"},
-    {LIBRAW_FORMAT_SigmaAPSC, "Sigma APS-C"}, //  Sigma Foveon X3 orig: 20.7x13.8mm
-    {LIBRAW_FORMAT_SigmaMerrill, "Sigma Merrill"},
-    {LIBRAW_FORMAT_SigmaAPSH, "Sigma APS-H"}, // Sigma "H" 26.7 x 17.9mm
+  {LIBRAW_FORMAT_1div2p3INCH,  "1/2.3\""},
+  {LIBRAW_FORMAT_1div1p7INCH,  "1/1.7\""},
+  {LIBRAW_FORMAT_1INCH,        "1\""},
+  {LIBRAW_FORMAT_FT,           "4/3"},
+  {LIBRAW_FORMAT_APSC,         "APS-C"},     // Canon: 22.3x14.9mm; Sony et al: 23.6-23.7x15.6mm
+  {LIBRAW_FORMAT_Leica_DMR,    "Leica DMR"}, // 26.4x 17.6mm
+  {LIBRAW_FORMAT_APSH,         "APS-H"},     // Canon: 27.9x18.6mm
+  {LIBRAW_FORMAT_FF,           "FF 35mm"},
+  {LIBRAW_FORMAT_CROP645,      "645 crop 44x33mm"},
+  {LIBRAW_FORMAT_LeicaS,       "Leica S 45x30mm"},
+  {LIBRAW_FORMAT_3648,         "48x36mm"},
+  {LIBRAW_FORMAT_645,          "6x4.5"},
+  {LIBRAW_FORMAT_66,           "6x6"},
+  {LIBRAW_FORMAT_67,           "6x7"},
+  {LIBRAW_FORMAT_68,           "6x8"},
+  {LIBRAW_FORMAT_69,           "6x9"},
+  {LIBRAW_FORMAT_SigmaAPSC,    "Sigma APS-C"}, //  Sigma Foveon X3 orig: 20.7x13.8mm
+  {LIBRAW_FORMAT_SigmaMerrill, "Sigma Merrill"},
+  {LIBRAW_FORMAT_SigmaAPSH,    "Sigma APS-H"}, // Sigma "H" 26.7 x 17.9mm
+  {LIBRAW_FORMAT_MF,           "Medium Format"},
+  {LIBRAW_FORMAT_LF,           "Large format"},
+  {LIBRAW_FORMAT_Unknown,      "Unknown"},
+  {LIBRAW_FORMAT_TheLastOne,   "The Last One"},
 };
-#define nFormats (sizeof(FormatNames) / sizeof(id2hr_t))
 
 static id2hr_t NikonCrops[] = {
     {0, "Uncropped"},     {1, "1.3x"},          {2, "DX"},
@@ -233,6 +273,176 @@ static id2hr_t AspectRatios[] = {
     {LIBRAW_IMAGE_ASPECT_OTHER, "Other"},
 };
 #define nAspectRatios (sizeof(AspectRatios) / sizeof(id2hr_t))
+
+static id2hr_t CanonRecordModes[] = {
+    {LIBRAW_Canon_RecordMode_JPEG, "JPEG"},
+    {LIBRAW_Canon_RecordMode_CRW_THM, "CRW+THM"},
+    {LIBRAW_Canon_RecordMode_AVI_THM, "AVI+THM"},
+    {LIBRAW_Canon_RecordMode_TIF, "TIF"},
+    {LIBRAW_Canon_RecordMode_TIF_JPEG, "TIF+JPEG"},
+    {LIBRAW_Canon_RecordMode_CR2, "CR2"},
+    {LIBRAW_Canon_RecordMode_CR2_JPEG, "CR2+JPEG"},
+    {LIBRAW_Canon_RecordMode_UNKNOWN, "Unknown"},
+    {LIBRAW_Canon_RecordMode_MOV, "MOV"},
+    {LIBRAW_Canon_RecordMode_MP4, "MP4"},
+    {LIBRAW_Canon_RecordMode_CRM, "CRM"},
+    {LIBRAW_Canon_RecordMode_CR3, "CR3"},
+    {LIBRAW_Canon_RecordMode_CR3_JPEG, "CR3+JPEG"},
+    {LIBRAW_Canon_RecordMode_HEIF, "HEIF"},
+    {LIBRAW_Canon_RecordMode_CR3_HEIF, "CR3+HEIF"},
+};
+#define nCanonRecordModes LIBRAW_Canon_RecordMode_TheLastOne
+
+static const struct {
+    const int NumId;
+    const char *StrId;
+} CorpToStr[] = {
+    {LIBRAW_CAMERAMAKER_Agfa,           "LIBRAW_CAMERAMAKER_Agfa"},
+    {LIBRAW_CAMERAMAKER_Alcatel,        "LIBRAW_CAMERAMAKER_Alcatel"},
+    {LIBRAW_CAMERAMAKER_Apple,          "LIBRAW_CAMERAMAKER_Apple"},
+    {LIBRAW_CAMERAMAKER_Aptina,         "LIBRAW_CAMERAMAKER_Aptina"},
+    {LIBRAW_CAMERAMAKER_AVT,            "LIBRAW_CAMERAMAKER_AVT"},
+    {LIBRAW_CAMERAMAKER_Baumer,         "LIBRAW_CAMERAMAKER_Baumer"},
+    {LIBRAW_CAMERAMAKER_Broadcom,       "LIBRAW_CAMERAMAKER_Broadcom"},
+    {LIBRAW_CAMERAMAKER_Canon,          "LIBRAW_CAMERAMAKER_Canon"},
+    {LIBRAW_CAMERAMAKER_Casio,          "LIBRAW_CAMERAMAKER_Casio"},
+    {LIBRAW_CAMERAMAKER_CINE,           "LIBRAW_CAMERAMAKER_CINE"},
+    {LIBRAW_CAMERAMAKER_Clauss,         "LIBRAW_CAMERAMAKER_Clauss"},
+    {LIBRAW_CAMERAMAKER_Contax,         "LIBRAW_CAMERAMAKER_Contax"},
+    {LIBRAW_CAMERAMAKER_Creative,       "LIBRAW_CAMERAMAKER_Creative"},
+    {LIBRAW_CAMERAMAKER_DJI,            "LIBRAW_CAMERAMAKER_DJI"},
+    {LIBRAW_CAMERAMAKER_DXO,            "LIBRAW_CAMERAMAKER_DXO"},
+    {LIBRAW_CAMERAMAKER_Epson,          "LIBRAW_CAMERAMAKER_Epson"},
+    {LIBRAW_CAMERAMAKER_Foculus,        "LIBRAW_CAMERAMAKER_Foculus"},
+    {LIBRAW_CAMERAMAKER_Fujifilm,       "LIBRAW_CAMERAMAKER_Fujifilm"},
+    {LIBRAW_CAMERAMAKER_Generic,        "LIBRAW_CAMERAMAKER_Generic"},
+    {LIBRAW_CAMERAMAKER_Gione,          "LIBRAW_CAMERAMAKER_Gione"},
+    {LIBRAW_CAMERAMAKER_GITUP,          "LIBRAW_CAMERAMAKER_GITUP"},
+    {LIBRAW_CAMERAMAKER_Google,         "LIBRAW_CAMERAMAKER_Google"},
+    {LIBRAW_CAMERAMAKER_GoPro,          "LIBRAW_CAMERAMAKER_GoPro"},
+    {LIBRAW_CAMERAMAKER_Hasselblad,     "LIBRAW_CAMERAMAKER_Hasselblad"},
+    {LIBRAW_CAMERAMAKER_HTC,            "LIBRAW_CAMERAMAKER_HTC"},
+    {LIBRAW_CAMERAMAKER_I_Mobile,       "LIBRAW_CAMERAMAKER_I_Mobile"},
+    {LIBRAW_CAMERAMAKER_Imacon,         "LIBRAW_CAMERAMAKER_Imacon"},
+    {LIBRAW_CAMERAMAKER_Kodak,          "LIBRAW_CAMERAMAKER_Kodak"},
+    {LIBRAW_CAMERAMAKER_Konica,         "LIBRAW_CAMERAMAKER_Konica"},
+    {LIBRAW_CAMERAMAKER_Leaf,           "LIBRAW_CAMERAMAKER_Leaf"},
+    {LIBRAW_CAMERAMAKER_Leica,          "LIBRAW_CAMERAMAKER_Leica"},
+    {LIBRAW_CAMERAMAKER_Lenovo,         "LIBRAW_CAMERAMAKER_Lenovo"},
+    {LIBRAW_CAMERAMAKER_LG,             "LIBRAW_CAMERAMAKER_LG"},
+    {LIBRAW_CAMERAMAKER_Logitech,       "LIBRAW_CAMERAMAKER_Logitech"},
+    {LIBRAW_CAMERAMAKER_Mamiya,         "LIBRAW_CAMERAMAKER_Mamiya"},
+    {LIBRAW_CAMERAMAKER_Matrix,         "LIBRAW_CAMERAMAKER_Matrix"},
+    {LIBRAW_CAMERAMAKER_Meizu,          "LIBRAW_CAMERAMAKER_Meizu"},
+    {LIBRAW_CAMERAMAKER_Micron,         "LIBRAW_CAMERAMAKER_Micron"},
+    {LIBRAW_CAMERAMAKER_Minolta,        "LIBRAW_CAMERAMAKER_Minolta"},
+    {LIBRAW_CAMERAMAKER_Motorola,       "LIBRAW_CAMERAMAKER_Motorola"},
+    {LIBRAW_CAMERAMAKER_NGM,            "LIBRAW_CAMERAMAKER_NGM"},
+    {LIBRAW_CAMERAMAKER_Nikon,          "LIBRAW_CAMERAMAKER_Nikon"},
+    {LIBRAW_CAMERAMAKER_Nokia,          "LIBRAW_CAMERAMAKER_Nokia"},
+    {LIBRAW_CAMERAMAKER_Olympus,        "LIBRAW_CAMERAMAKER_Olympus"},
+    {LIBRAW_CAMERAMAKER_OmniVison,      "LIBRAW_CAMERAMAKER_OmniVison"},
+    {LIBRAW_CAMERAMAKER_Panasonic,      "LIBRAW_CAMERAMAKER_Panasonic"},
+    {LIBRAW_CAMERAMAKER_Parrot,         "LIBRAW_CAMERAMAKER_Parrot"},
+    {LIBRAW_CAMERAMAKER_Pentax,         "LIBRAW_CAMERAMAKER_Pentax"},
+    {LIBRAW_CAMERAMAKER_PhaseOne,       "LIBRAW_CAMERAMAKER_PhaseOne"},
+    {LIBRAW_CAMERAMAKER_PhotoControl,   "LIBRAW_CAMERAMAKER_PhotoControl"},
+    {LIBRAW_CAMERAMAKER_Photron,        "LIBRAW_CAMERAMAKER_Photron"},
+    {LIBRAW_CAMERAMAKER_Pixelink,       "LIBRAW_CAMERAMAKER_Pixelink"},
+    {LIBRAW_CAMERAMAKER_Polaroid,       "LIBRAW_CAMERAMAKER_Polaroid"},
+    {LIBRAW_CAMERAMAKER_RED,            "LIBRAW_CAMERAMAKER_RED"},
+    {LIBRAW_CAMERAMAKER_Ricoh,          "LIBRAW_CAMERAMAKER_Ricoh"},
+    {LIBRAW_CAMERAMAKER_Rollei,         "LIBRAW_CAMERAMAKER_Rollei"},
+    {LIBRAW_CAMERAMAKER_RoverShot,      "LIBRAW_CAMERAMAKER_RoverShot"},
+    {LIBRAW_CAMERAMAKER_Samsung,        "LIBRAW_CAMERAMAKER_Samsung"},
+    {LIBRAW_CAMERAMAKER_Sigma,          "LIBRAW_CAMERAMAKER_Sigma"},
+    {LIBRAW_CAMERAMAKER_Sinar,          "LIBRAW_CAMERAMAKER_Sinar"},
+    {LIBRAW_CAMERAMAKER_SMaL,           "LIBRAW_CAMERAMAKER_SMaL"},
+    {LIBRAW_CAMERAMAKER_Sony,           "LIBRAW_CAMERAMAKER_Sony"},
+    {LIBRAW_CAMERAMAKER_ST_Micro,       "LIBRAW_CAMERAMAKER_ST_Micro"},
+    {LIBRAW_CAMERAMAKER_THL,            "LIBRAW_CAMERAMAKER_THL"},
+    {LIBRAW_CAMERAMAKER_Xiaomi,         "LIBRAW_CAMERAMAKER_Xiaomi"},
+    {LIBRAW_CAMERAMAKER_XIAOYI,         "LIBRAW_CAMERAMAKER_XIAOYI"},
+    {LIBRAW_CAMERAMAKER_YI,             "LIBRAW_CAMERAMAKER_YI"},
+    {LIBRAW_CAMERAMAKER_Yuneec,         "LIBRAW_CAMERAMAKER_Yuneec"},
+    {LIBRAW_CAMERAMAKER_Zeiss,          "LIBRAW_CAMERAMAKER_Zeiss"},
+};
+
+static const struct {
+    const int NumId;
+    const char *StrId;
+} ColorSpaceToStr[] = {
+    {LIBRAW_COLORSPACE_NotFound, "Not Found"},
+    {LIBRAW_COLORSPACE_sRGB, "sRGB"},
+    {LIBRAW_COLORSPACE_AdobeRGB, "Adobe RGB"},
+    {LIBRAW_COLORSPACE_WideGamutRGB, "Wide Gamut RGB"},
+    {LIBRAW_COLORSPACE_ProPhotoRGB, "ProPhoto RGB"},
+    {LIBRAW_COLORSPACE_ICC, "ICC profile (embedded)"},
+    {LIBRAW_COLORSPACE_Uncalibrated, "Uncalibrated"},
+    {LIBRAW_COLORSPACE_CameraLinearUniWB, "Camera Linear, no WB"},
+    {LIBRAW_COLORSPACE_CameraLinear, "Camera Linear"},
+    {LIBRAW_COLORSPACE_CameraGammaUniWB, "Camera non-Linear, no WB"},
+    {LIBRAW_COLORSPACE_CameraGamma, "Camera non-Linear"},
+    {LIBRAW_COLORSPACE_MonochromeLinear, "Monochrome Linear"},
+    {LIBRAW_COLORSPACE_MonochromeGamma, "Monochrome non-Linear"},
+    {LIBRAW_COLORSPACE_Unknown, "Unknown"},
+};
+
+static const struct {
+    const int NumId;
+    const int LibRawId;
+    const char *StrId;
+} Fujifilm_WhiteBalance2Str[] = {
+    {0x000, LIBRAW_WBI_Auto,       "Auto"},
+    {0x100, LIBRAW_WBI_Daylight,   "Daylight"},
+    {0x200, LIBRAW_WBI_Cloudy,     "Cloudy"},
+    {0x300, LIBRAW_WBI_FL_D,       "Daylight Fluorescent"},
+    {0x301, LIBRAW_WBI_FL_N,       "Day White Fluorescent"},
+    {0x302, LIBRAW_WBI_FL_W,       "White Fluorescent"},
+    {0x303, LIBRAW_WBI_FL_WW,      "Warm White Fluorescent"},
+    {0x304, LIBRAW_WBI_FL_L,       "Living Room Warm White Fluorescent"},
+    {0x400, LIBRAW_WBI_Tungsten,   "Incandescent"},
+    {0x500, LIBRAW_WBI_Flash,      "Flash"},
+    {0x600, LIBRAW_WBI_Underwater, "Underwater"},
+    {0xf00, LIBRAW_WBI_Custom,     "Custom"},
+    {0xf01, LIBRAW_WBI_Custom2,    "Custom2"},
+    {0xf02, LIBRAW_WBI_Custom3,    "Custom3"},
+    {0xf03, LIBRAW_WBI_Custom4,    "Custom4"},
+    {0xf04, LIBRAW_WBI_Custom5,    "Custom5"},
+    {0xff0, LIBRAW_WBI_Kelvin,     "Kelvin"},
+};
+
+static const struct {
+    const int NumId;
+    const char *StrId;
+} Fujifilm_FilmModeToStr[] = {
+    {0x000, "F0/Standard (Provia)"},
+    {0x100, "F1/Studio Portrait"},
+    {0x110, "F1a/Studio Portrait Enhanced Saturation"},
+    {0x120, "F1b/Studio Portrait Smooth Skin Tone (Astia)"},
+    {0x130, "F1c/Studio Portrait Increased Sharpness"},
+    {0x200, "F2/Fujichrome (Velvia)"},
+    {0x300, "F3/Studio Portrait Ex"},
+    {0x400, "F4/Velvia"},
+    {0x500, "Pro Neg. Std"},
+    {0x501, "Pro Neg. Hi"},
+    {0x600, "Classic Chrome"},
+    {0x700, "Eterna"},
+    {0x800, "Classic Negative"},
+};
+
+static const struct {
+    const int NumId;
+    const char *StrId;
+} Fujifilm_DynamicRangeSettingToStr[] = {
+    {0x0000, "Auto (100-400%)"},
+    {0x0001, "Manual"},
+    {0x0100, "Standard (100%)"},
+    {0x0200, "Wide1 (230%)"},
+    {0x0201, "Wide2 (400%)"},
+    {0x8000, "Film Simulation"},
+};
+
 //clang-format on
 
 id2hr_t *lookup_id2hr(unsigned long long id, id2hr_t *table, ushort nEntries)
@@ -240,6 +450,55 @@ id2hr_t *lookup_id2hr(unsigned long long id, id2hr_t *table, ushort nEntries)
   for (int k = 0; k < nEntries; k++)
     if (id == table[k].id)
       return &table[k];
+  return 0;
+}
+
+const char *ColorSpace_idx2str(ushort ColorSpace) {
+  for (int i = 0; i < (sizeof ColorSpaceToStr / sizeof *ColorSpaceToStr); i++)
+    if(ColorSpaceToStr[i].NumId == ColorSpace)
+      return ColorSpaceToStr[i].StrId;
+  return 0;
+}
+
+const char *CameraMaker_idx2str(unsigned maker) {
+  for (int i = 0; i < (sizeof CorpToStr / sizeof *CorpToStr); i++)
+    if(CorpToStr[i].NumId == maker)
+      return CorpToStr[i].StrId;
+  return 0;
+}
+
+const char *WB_idx2str(unsigned WBi) {
+  for (int i = 0; i < (sizeof WBToStr / sizeof *WBToStr); i++)
+    if(WBToStr[i].NumId == WBi)
+      return WBToStr[i].StrId;
+  return 0;
+}
+
+const char *WB_idx2hrstr(unsigned WBi) {
+  for (int i = 0; i < (sizeof WBToStr / sizeof *WBToStr); i++)
+    if(WBToStr[i].NumId == WBi)
+      return WBToStr[i].hrStrId;
+  return 0;
+}
+
+const char *Fujifilm_WhiteBalance_idx2str(ushort WB) {
+  for (int i = 0; i < (sizeof Fujifilm_WhiteBalance2Str / sizeof *Fujifilm_WhiteBalance2Str); i++)
+    if(Fujifilm_WhiteBalance2Str[i].NumId == WB)
+      return Fujifilm_WhiteBalance2Str[i].StrId;
+  return 0;
+}
+
+const char *Fujifilm_FilmMode_idx2str(ushort FilmMode) {
+  for (int i = 0; i < (sizeof Fujifilm_FilmModeToStr / sizeof *Fujifilm_FilmModeToStr); i++)
+    if(Fujifilm_FilmModeToStr[i].NumId == FilmMode)
+      return Fujifilm_FilmModeToStr[i].StrId;
+  return 0;
+}
+
+const char *Fujifilm_DynamicRangeSetting_idx2str(ushort DynamicRangeSetting) {
+  for (int i = 0; i < (sizeof Fujifilm_DynamicRangeSettingToStr / sizeof *Fujifilm_DynamicRangeSettingToStr); i++)
+    if(Fujifilm_DynamicRangeSettingToStr[i].NumId == DynamicRangeSetting)
+      return Fujifilm_DynamicRangeSettingToStr[i].StrId;
   return 0;
 }
 
@@ -342,8 +601,10 @@ void print_usage(const char *pname)
 	printf("Usage: %s [options] inputfiles\n", pname);
 	printf("Options:\n"
 		"\t-c\tcompact output\n"
+		"\t-n\tprint make/model and norm. make/model\n"
 		"\t-v\tverbose output\n"
 		"\t-w\tprint white balance\n"
+		"\t-j\tprint JSON\n"
 		"\t-u\tprint unpack function\n"
 		"\t-f\tprint frame size (only w/ -u)\n"
 		"\t-s\tprint output image size\n"
@@ -358,9 +619,9 @@ int main(int ac, char *av[])
 {
   int ret;
   int verbose = 0, print_sz = 0, print_unpack = 0, print_frame = 0,
-	  print_wb = 0, use_map = 0, use_timing = 0;
+	  print_wb = 0, print_json = 0, use_map = 0, use_timing = 0;
   struct file_mapping mapping;
-  int compact = 0, print_0 = 0, print_1 = 0, print_2 = 0;
+  int compact = 0, normalized = 0, print_0 = 0, print_1 = 0, print_2 = 0;
   LibRaw MyCoolRawProcessor;
   char *filelistfile = NULL;
   char *outputfilename = NULL;
@@ -375,12 +636,14 @@ int main(int ac, char *av[])
 	  if (av[i][0] == '-')
 	  {
 		  if (!strcmp(av[i], "-c"))	compact++;
+		  if (!strcmp(av[i], "-n"))	normalized++;
 		  if (!strcmp(av[i], "-v"))	verbose++;
-		  if (!strcmp(av[i], "-w"))  print_wb++;
-		  if (!strcmp(av[i], "-u"))  print_unpack++;
-		  if (!strcmp(av[i], "-m"))  use_map++;
-		  if (!strcmp(av[i], "-t"))  use_timing++;
-		  if (!strcmp(av[i], "-s"))  print_sz++;
+		  if (!strcmp(av[i], "-w")) print_wb++;
+		  if (!strcmp(av[i], "-j")) print_json++;
+		  if (!strcmp(av[i], "-u")) print_unpack++;
+		  if (!strcmp(av[i], "-m")) use_map++;
+		  if (!strcmp(av[i], "-t")) use_timing++;
+		  if (!strcmp(av[i], "-s")) print_sz++;
 		  if (!strcmp(av[i], "-h"))	O.half_size = 1;
 		  if (!strcmp(av[i], "-f"))	print_frame++;
 		  if (!strcmp(av[i], "-0")) print_0++;
@@ -431,7 +694,7 @@ int main(int ac, char *av[])
 	  outfile = fopen(outputfilename, "wt");
 
   timer_start(started);
-  for (int i = 0; i < filelist.size();i++)
+  for (int i = 0; i < filelist.size(); i++)
   {
 	  if (use_map)
 	  {
@@ -477,6 +740,10 @@ int main(int ac, char *av[])
 		  print_wbfun(outfile, MyCoolRawProcessor, filelist[i]);
 	  else if (compact)
 		  print_compactfun(outfile, MyCoolRawProcessor, filelist[i]);
+	  else if (normalized)
+		  print_normfun(outfile, MyCoolRawProcessor, filelist[i]);
+	  else if (print_json)
+	    print_jsonfun(outfile, MyCoolRawProcessor, filelist[i], i, filelist.size());
 	  else
 		  fprintf(outfile, "%s is a %s %s image.\n", filelist[i].c_str(), P1.make, P1.model);
 
@@ -509,9 +776,183 @@ void print_timer(FILE* outfile, const starttime_t& started, int files)
 		fprintf(outfile, "%d files processed, time too small to estimate\n", files);
 }
 
+void print_jsonfun(FILE* outfile, LibRaw& MyCoolRawProcessor,
+                   std::string& fn, int fnum, int nfiles) {
+
+  const int tab_width = 4;
+  int n_tabs;
+  const char tab_char = ' ';
+  const char *CamMakerName = CameraMaker_idx2str(P1.maker_index);
+  int WBi;
+  int data_present = 0;
+
+  if (fnum == 0) fprintf (outfile, "{\n");
+  n_tabs = 1;
+  fprintf (outfile, "%*c\"file_%05d\":{\n",
+    n_tabs*tab_width, tab_char, fnum);
+  n_tabs++;
+
+  fprintf (outfile, "%*c\"file_name\":", n_tabs*tab_width, tab_char);
+  if (fn.c_str()[0]) fprintf (outfile, "\"%s\",\n", fn.c_str());
+  else fprintf (outfile, "null,\n");
+
+  fprintf (outfile, "%*c\"cam_maker\":", n_tabs*tab_width, tab_char);
+  if (CamMakerName[0]) fprintf (outfile, "\"%s\",\n", CamMakerName);
+  else fprintf (outfile, "null,\n");
+
+  fprintf (outfile, "%*c\"norm_model\":", n_tabs*tab_width, tab_char);
+  if (P1.normalized_model[0]) fprintf (outfile, "\"%s\",\n", P1.normalized_model);
+  else fprintf (outfile, "null,\n");
+
+  fprintf (outfile, "%*c\"body_serial\":", n_tabs*tab_width, tab_char);
+  if (ShootingInfo.BodySerial[0] &&
+      strcmp(ShootingInfo.BodySerial, "0")) {
+    trimSpaces(ShootingInfo.BodySerial);
+    fprintf (outfile, "\"%s\",\n", ShootingInfo.BodySerial);
+  } else if (C.model2[0] &&
+             (!strncasecmp(P1.normalized_make, "Kodak", 5))) {
+    trimSpaces(C.model2);
+    fprintf (outfile, "\"%s\",\n", C.model2);
+  } else fprintf (outfile, "null,\n");
+
+  fprintf (outfile, "%*c\"int_serial\":", n_tabs*tab_width, tab_char);
+  if (ShootingInfo.InternalBodySerial[0]) {
+    trimSpaces(ShootingInfo.InternalBodySerial);
+    fprintf (outfile, "\"%s\",\n", ShootingInfo.InternalBodySerial);
+  } else fprintf (outfile, "null,\n");
+
+  fprintf (outfile, "%*c\"dng\":%s,\n",
+    n_tabs*tab_width, tab_char, P1.dng_version?"true":"false");
+
+  fprintf (outfile, "%*c\"ISO\":", n_tabs*tab_width, tab_char);
+  if (P2.iso_speed > 0.1f) fprintf (outfile, "%d,\n", int(P2.iso_speed));
+  else fprintf (outfile, "null,\n");
+
+  fprintf (outfile, "%*c\"BLE\":", n_tabs*tab_width, tab_char);
+  if (int(C.dng_levels.baseline_exposure) != -999)
+    fprintf (outfile, "%g,\n", C.dng_levels.baseline_exposure);
+  else fprintf (outfile, "null,\n");
+
+  fprintf (outfile, "%*c\"CameraCalibration\":", n_tabs*tab_width, tab_char);
+	for (int n = 0; n < 2; n++) {
+		if (fabsf(C.dng_color[n].calibration[0][0]) > 0) {
+			int numel = 3;
+			if (fabsf(C.dng_color[n].calibration[3][3]) > 0) numel = 4;
+			if (!data_present) {
+			  fprintf (outfile, "{");
+			  n_tabs++;
+			} else fprintf (outfile, ",");
+			fprintf (outfile, "\n%*c\"%s\":",
+			  n_tabs*tab_width, tab_char, WB_idx2str(C.dng_color[n].illuminant));
+			for (int cnt = 0; cnt < numel; cnt++) {
+				fprintf (outfile, "%s%g%s", (!cnt)?"[":"",
+				  C.dng_color[n].calibration[cnt][cnt], (cnt < (numel - 1))?",":"]");
+			}
+			data_present++;
+		}
+	}
+	if (data_present) {
+	  data_present = 0;
+	  n_tabs--;
+	  fprintf (outfile, "\n%*c},\n", n_tabs*tab_width, tab_char);
+	} else fprintf (outfile, "null,\n");
+
+  fprintf (outfile, "%*c\"ColorMatrix\":", n_tabs*tab_width, tab_char);
+	for (int n = 0; n < 2; n++) {
+		if (fabsf(C.dng_color[n].colormatrix[0][0]) > 0) {
+			int numel = 3;
+			if (!data_present) {
+			  fprintf (outfile, "{");
+			  n_tabs++;
+			} else fprintf (outfile, ",");
+			fprintf (outfile, "\n%*c\"%s\":",
+			  n_tabs*tab_width, tab_char, WB_idx2str(C.dng_color[n].illuminant));
+			for (int i = 0; i < P1.colors; i++) {
+				for (int cnt = 0; cnt < numel; cnt++) {
+					fprintf (outfile, "%s%g%s", (!i&&!cnt)?"[":"",
+					  C.dng_color[n].colormatrix[i][cnt],
+					  ((i<(P1.colors-1)) || (cnt < (numel - 1)))?",":"]");
+				}
+			}
+			data_present++;
+		}
+	}
+	if (data_present) {
+	  data_present = 0;
+	  n_tabs--;
+	  fprintf (outfile, "\n%*c},\n", n_tabs*tab_width, tab_char);
+	} else fprintf (outfile, "null,\n");
+
+  fprintf (outfile, "%*c\"WB data\":",
+    n_tabs*tab_width, tab_char);
+
+  if (C.cam_mul[0]) {
+    if (!data_present) {
+      fprintf (outfile, "{");
+      n_tabs++;
+    } else fprintf (outfile, ",");
+    fprintf (outfile, "\n%*c\"%s\":",
+      n_tabs*tab_width, tab_char, WB_idx2str(LIBRAW_WBI_AsShot));
+    for (int i = 0; i < 4; i++) {
+      fprintf (outfile, "%s%g%s", (!i)?"[":"",
+        C.cam_mul[i], (i < 3)?",":"]");
+    }
+    data_present++;
+  }
+
+  for (int cnt = 0; cnt < (sizeof WBToStr / sizeof *WBToStr); cnt++) {
+    WBi = WBToStr[cnt].NumId;
+    if (C.WB_Coeffs[WBi][0]) {
+			if (!data_present) {
+			  fprintf (outfile, "{");
+			  n_tabs++;
+			} else fprintf (outfile, ",");
+      fprintf (outfile, "\n%*c\"%s\":",
+        n_tabs*tab_width, tab_char, WBToStr[cnt].StrId);
+      for (int i = 0; i < 4; i++) {
+				fprintf (outfile, "%s%d%s", (!i)?"[":"",
+				  C.WB_Coeffs[WBi][i], (i < 3)?",":"]");
+      }
+      data_present++;
+    }
+  }
+
+  for (int cnt = 0; cnt < 64; cnt++) {
+    if (C.WBCT_Coeffs[cnt][0]) {
+			if (!data_present) {
+			  fprintf (outfile, "{");
+			  n_tabs++;
+			} else fprintf (outfile, ",");
+      fprintf (outfile, "\n%*c\"%g\":",
+        n_tabs*tab_width, tab_char, C.WBCT_Coeffs[cnt][0]);
+      for (int i = 1; i < 5; i++) {
+				fprintf (outfile, "%s%g%s", (i == 1)?"[":"",
+				  C.WBCT_Coeffs[cnt][i], (i < 4)?",":"]");
+      }
+      data_present++;
+    }
+  }
+
+	if (data_present) {
+	  data_present = 0;
+	  n_tabs--;
+	  fprintf (outfile, "\n%*c}\n", n_tabs*tab_width, tab_char);
+	} else fprintf (outfile, "null\n");
+
+  n_tabs--;
+  fprintf (outfile, "%*c}\n", n_tabs*tab_width, tab_char);
+
+  if ((fnum+1) == nfiles) fprintf (outfile, "}\n");
+  else fprintf (outfile, ",");
+}
+
 void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 {
 	id2hr_t *MountName, *FormatName, *Aspect, *Crop, *DriveMode;
+	const char *CamMakerName = LibRaw::cameramakeridx2maker(P1.maker_index);
+	const char *ColorSpaceName = ColorSpace_idx2str(P3.ColorSpace);
+	int WBi;
+	float denom;
 	int ret;
 
 	if ((ret = MyCoolRawProcessor.adjust_sizes_info_only()))
@@ -528,7 +969,6 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 	fprintf(outfile, "Normalized Make/Model: =%s/%s= ", P1.normalized_make,
 		P1.normalized_model);
 	fprintf(outfile, "CamMaker ID: %d, ", P1.maker_index);
-	const char *CamMakerName = LibRaw::cameramakeridx2maker(P1.maker_index);
 	if (CamMakerName)
 		fprintf(outfile, "%s\n", CamMakerName);
 	else
@@ -630,7 +1070,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 		fprintf(outfile, "\tSU Connector: %s\n", Hasselblad.SensorUnitConnector);
 	}
 	fprintf(outfile, "\tCameraFormat: %d, ", mnLens.CameraFormat);
-	FormatName = lookup_id2hr(mnLens.CameraFormat, FormatNames, nFormats);
+	FormatName = lookup_id2hr(mnLens.CameraFormat, FormatNames, LIBRAW_FORMAT_TheLastOne);
 	if (FormatName)
 		fprintf(outfile, "%s\n", FormatName->name);
 	else
@@ -653,7 +1093,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 	}
 
 	fprintf(outfile, "\tCameraMount: %d, ", mnLens.CameraMount);
-	MountName = lookup_id2hr(mnLens.CameraMount, MountNames, nMounts);
+	MountName = lookup_id2hr(mnLens.CameraMount, MountNames, LIBRAW_MOUNT_TheLastOne);
 	if (MountName)
 		fprintf(outfile, "%s\n", MountName->name);
 	else
@@ -666,14 +1106,14 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 
 	fprintf(outfile, "\tLens: %s\n", mnLens.Lens);
 	fprintf(outfile, "\tLensFormat: %d, ", mnLens.LensFormat);
-	FormatName = lookup_id2hr(mnLens.LensFormat, FormatNames, nFormats);
+	FormatName = lookup_id2hr(mnLens.LensFormat, FormatNames, LIBRAW_FORMAT_TheLastOne);
 	if (FormatName)
 		fprintf(outfile, "%s\n", FormatName->name);
 	else
 		fprintf(outfile, "Unknown\n");
 
 	fprintf(outfile, "\tLensMount: %d, ", mnLens.LensMount);
-	MountName = lookup_id2hr(mnLens.LensMount, MountNames, nMounts);
+	MountName = lookup_id2hr(mnLens.LensMount, MountNames, LIBRAW_MOUNT_TheLastOne);
 	if (MountName)
 		fprintf(outfile, "%s\n", MountName->name);
 	else
@@ -791,21 +1231,32 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 			fprintf(outfile, "Unknown\n");
 	}
 
-	if (Fuji.ExpoMidPointShift > -999.f)
+  if (Fuji.WB_Preset != 0xffff)
+    fprintf(outfile, "Fuji WB preset: 0x%03x, %s\n", Fuji.WB_Preset, Fujifilm_WhiteBalance_idx2str(Fuji.WB_Preset));
+	if (Fuji.ExpoMidPointShift > -999.f) // tag 0x9650
 		fprintf(outfile, "Fuji Exposure shift: %04.3f\n", Fuji.ExpoMidPointShift);
-
 	if (Fuji.DynamicRange != 0xffff)
-		fprintf(outfile, "Fuji Dynamic Range: %d\n", Fuji.DynamicRange);
+		fprintf(outfile, "Fuji Dynamic Range (0x1400): %d, %s\n",
+		  Fuji.DynamicRange, Fuji.DynamicRange==1?"Standard":"Wide");
 	if (Fuji.FilmMode != 0xffff)
-		fprintf(outfile, "Fuji Film Mode: %d\n", Fuji.FilmMode);
+		fprintf(outfile, "Fuji Film Mode (0x1401): 0x%03x, %s\n", Fuji.FilmMode, Fujifilm_FilmMode_idx2str(Fuji.FilmMode));
 	if (Fuji.DynamicRangeSetting != 0xffff)
-		fprintf(outfile, "Fuji Dynamic Range Setting: %d\n",
-		Fuji.DynamicRangeSetting);
+		fprintf(outfile, "Fuji Dynamic Range Setting (0x1402): 0x%04x, %s\n",
+		Fuji.DynamicRangeSetting, Fujifilm_DynamicRangeSetting_idx2str(Fuji.DynamicRangeSetting));
 	if (Fuji.DevelopmentDynamicRange != 0xffff)
-		fprintf(outfile, "Fuji Development Dynamic Range: %d\n",
+		fprintf(outfile, "Fuji Development Dynamic Range (0x1403): %d\n",
 		Fuji.DevelopmentDynamicRange);
 	if (Fuji.AutoDynamicRange != 0xffff)
-		fprintf(outfile, "Fuji Auto Dynamic Range: %d\n", Fuji.AutoDynamicRange);
+		fprintf(outfile, "Fuji Auto Dynamic Range (0x140b): %d\n", Fuji.AutoDynamicRange);
+	if (Fuji.DRangePriority != 0xffff)
+		fprintf(outfile, "Fuji Dynamic Range priority (0x1443): %d, %s\n",
+		   Fuji.DRangePriority, Fuji.DRangePriority?"Fixed":"Auto");
+	if (Fuji.DRangePriorityAuto)
+		fprintf(outfile, "Fuji Dynamic Range priority Auto (0x1444): %d, %s\n",
+		   Fuji.DRangePriorityAuto, Fuji.DRangePriorityAuto==1?"Weak":"Strong");
+	if (Fuji.DRangePriorityFixed)
+		fprintf(outfile, "Fuji Dynamic Range priority Fixed (0x1445): %d, %s\n",
+		   Fuji.DRangePriorityFixed, Fuji.DRangePriorityFixed==1?"Weak":"Strong");
 
 	if (S.pixel_aspect != 1)
 		fprintf(outfile, "Pixel Aspect Ratio: %0.6f\n", S.pixel_aspect);
@@ -836,6 +1287,11 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 	fprintf(outfile, "Output size: %4d x %d\n", S.iwidth, S.iheight);
 	fprintf(outfile, "Image flip: %d\n", S.flip);
 
+	if (Canon.RecordMode) {
+	  id2hr_t *RecordMode =
+	    lookup_id2hr(Canon.RecordMode, CanonRecordModes, nCanonRecordModes);
+	  fprintf(outfile, "Canon record mode: %d, %s\n", Canon.RecordMode, RecordMode->name);
+	}
 	if (Canon.SensorWidth)
 		fprintf(outfile, "SensorWidth          = %d\n", Canon.SensorWidth);
 	if (Canon.SensorHeight)
@@ -873,7 +1329,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 	}
 
 	if (Canon.ChannelBlackLevel[0])
-		fprintf(outfile, "\nCanon makernotes, ChannelBlackLevel: %d %d %d %d\n",
+		fprintf(outfile, "\nCanon makernotes, ChannelBlackLevel: %d %d %d %d",
 		Canon.ChannelBlackLevel[0], Canon.ChannelBlackLevel[1],
 		Canon.ChannelBlackLevel[2], Canon.ChannelBlackLevel[3]);
 
@@ -905,97 +1361,36 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 
 	if (P1.colors > 1)
 	{
-		if (C.cam_mul[0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'As shot' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %f", C.cam_mul[c]);
+		fprintf(outfile, "\nMakernotes WB data:               coeffs                  EVs");
+		if ((C.cam_mul[0] > 0) && (C.cam_mul[1] > 0)) {
+      fprintf(outfile, "\n  %-23s   %g %g %g %g   %5.2f %5.2f %5.2f %5.2f",
+		          "As shot",
+		          C.cam_mul[0], C.cam_mul[1], C.cam_mul[2], C.cam_mul[3],
+		          roundf(log2(C.cam_mul[0] / C.cam_mul[1])*100.0f)/100.0f,
+		          0.0f,
+		          roundf(log2(C.cam_mul[2] / C.cam_mul[1])*100.0f)/100.0f,
+		          C.cam_mul[3]?roundf(log2(C.cam_mul[3] / C.cam_mul[1])*100.0f)/100.0f:0.0f);
 		}
 
-		for (int cnt = 0; cnt < nEXIF_LightSources; cnt++)
-		{
-			if (C.WB_Coeffs[cnt][0] > 0)
-			{
-				fprintf(outfile, "\nMakernotes '%s' WB multipliers:", EXIF_LightSources[cnt]);
-				for (int c = 0; c < 4; c++)
-					fprintf(outfile, " %d", C.WB_Coeffs[cnt][c]);
+		for (int cnt = 0; cnt < (sizeof WBToStr / sizeof *WBToStr); cnt++) {
+			WBi = WBToStr[cnt].NumId;
+			if ((C.WB_Coeffs[WBi][0] > 0) && (C.WB_Coeffs[WBi][1] > 0)) {
+        denom = (float)C.WB_Coeffs[WBi][1];
+        fprintf(outfile, "\n  %-23s   %4d %4d %4d %4d   %5.2f %5.2f %5.2f %5.2f",
+		            WBToStr[cnt].hrStrId,
+		            C.WB_Coeffs[WBi][0], C.WB_Coeffs[WBi][1], C.WB_Coeffs[WBi][2], C.WB_Coeffs[WBi][3],
+		            roundf(log2((float)C.WB_Coeffs[WBi][0] / denom)*100.0f)/100.0f,
+		            0.0f,
+		            roundf(log2((float)C.WB_Coeffs[WBi][2] / denom)*100.0f)/100.0f,
+		            C.WB_Coeffs[3]?roundf(log2((float)C.WB_Coeffs[WBi][3] / denom)*100.0f)/100.0f:0.0f);
 			}
-		}
-		if (C.WB_Coeffs[LIBRAW_WBI_Sunset][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Sunset' multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Sunset][c]);
-		}
-
-		if (C.WB_Coeffs[LIBRAW_WBI_Other][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Other' multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Other][c]);
-		}
-
-		if (C.WB_Coeffs[LIBRAW_WBI_Auto][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Camera Auto' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Auto][c]);
-		}
-		if (C.WB_Coeffs[LIBRAW_WBI_Measured][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Camera Measured' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Measured][c]);
-		}
-
-		if (C.WB_Coeffs[LIBRAW_WBI_Custom][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Custom' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Custom][c]);
-		}
-		if (C.WB_Coeffs[LIBRAW_WBI_Custom1][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Custom1' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Custom1][c]);
-		}
-		if (C.WB_Coeffs[LIBRAW_WBI_Custom2][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Custom2' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Custom2][c]);
-		}
-		if (C.WB_Coeffs[LIBRAW_WBI_Custom3][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Custom3' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Custom3][c]);
-		}
-		if (C.WB_Coeffs[LIBRAW_WBI_Custom4][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Custom4' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Custom4][c]);
-		}
-		if (C.WB_Coeffs[LIBRAW_WBI_Custom5][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Custom5' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Custom5][c]);
-		}
-		if (C.WB_Coeffs[LIBRAW_WBI_Custom6][0] > 0)
-		{
-			fprintf(outfile, "\nMakernotes 'Custom6' WB multipliers:");
-			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %d", C.WB_Coeffs[LIBRAW_WBI_Custom6][c]);
 		}
 
 		if ((Nikon.ME_WB[0] != 0.0f) && (Nikon.ME_WB[0] != 1.0f))
 		{
 			fprintf(outfile, "\nNikon multi-exposure WB multipliers:");
 			for (int c = 0; c < 4; c++)
-				fprintf(outfile, " %f", Nikon.ME_WB[c]);
+				fprintf(outfile, " %g", Nikon.ME_WB[c]);
 		}
 
 		if (C.rgb_cam[0][0] > 0.0001)
@@ -1046,9 +1441,9 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 
     for (int cnt = 0; cnt < 2; cnt++) {
       if (C.dng_color[cnt].illuminant != LIBRAW_WBI_None) {
-        if (C.dng_color[cnt].illuminant < nEXIF_LightSources) {
+        if (C.dng_color[cnt].illuminant <= LIBRAW_WBI_StudioTungsten) {
           fprintf(outfile, "\nDNG Illuminant %d: %s",
-            cnt + 1, EXIF_LightSources[C.dng_color[cnt].illuminant]);
+            cnt + 1, WB_idx2hrstr(C.dng_color[cnt].illuminant));
         }
         else if (C.dng_color[cnt].illuminant == LIBRAW_WBI_Other) {
           fprintf(outfile, "\nDNG Illuminant %d: Other", cnt + 1);
@@ -1099,6 +1494,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 		for (int c = 0; c < P1.colors; c++)
 			fprintf(outfile, " %f", C.pre_mul[c]);
 	}
+	fprintf(outfile, "\nColor space (makernotes) : %d, %s", P3.ColorSpace, ColorSpaceName);
 	fprintf(outfile, "\n");
 
 	if (Sony.PixelShiftGroupID)
@@ -1133,41 +1529,30 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 
 void print_wbfun(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 {
-	const char *CamMakerName = LibRaw::cameramakeridx2maker(P1.maker_index);
+	int WBi;
+	float denom;
+	const char *CamMakerName = CameraMaker_idx2str(P1.maker_index);
 	fprintf(outfile, "// %s %s\n", P1.make, P1.model);
-	for (int cnt = 0; cnt < nEXIF_LightSources; cnt++)
-		if (C.WB_Coeffs[cnt][0])
-		{
-			fprintf(outfile, "{LIBRAW_CAMERAMAKER_%s, \"%s\", %d, {%6.5ff, 1.0f, %6.5ff, ", CamMakerName,
-				P1.normalized_model, cnt,
-				C.WB_Coeffs[cnt][0] / (float)C.WB_Coeffs[cnt][1],
-				C.WB_Coeffs[cnt][2] / (float)C.WB_Coeffs[cnt][1]);
-			if (C.WB_Coeffs[cnt][1] == C.WB_Coeffs[cnt][3])
-				fprintf(outfile, "1.0f}},\n");
-			else
-				fprintf(outfile, "%6.5ff}},\n",
-				C.WB_Coeffs[cnt][3] / (float)C.WB_Coeffs[cnt][1]);
-		}
-	if (C.WB_Coeffs[LIBRAW_WBI_Sunset][0])
-	{
-		fprintf(outfile, "{LIBRAW_CAMERAMAKER_%s, \"%s\", %d, {%6.5ff, 1.0f, %6.5ff, ", CamMakerName,
-			P1.normalized_model, LIBRAW_WBI_Sunset,
-			C.WB_Coeffs[LIBRAW_WBI_Sunset][0] /
-			(float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1],
-			C.WB_Coeffs[LIBRAW_WBI_Sunset][2] /
-			(float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1]);
-		if (C.WB_Coeffs[LIBRAW_WBI_Sunset][1] ==
-			C.WB_Coeffs[LIBRAW_WBI_Sunset][3])
-			fprintf(outfile, "1.0f}},\n");
-		else
-			fprintf(outfile, "%6.5ff}},\n", C.WB_Coeffs[LIBRAW_WBI_Sunset][3] /
-			(float)C.WB_Coeffs[LIBRAW_WBI_Sunset][1]);
-	}
+	for (int cnt = 0; cnt < (sizeof WBToStr / sizeof *WBToStr); cnt++) {
+		WBi = WBToStr[cnt].NumId;
+		if (C.WB_Coeffs[WBi][0] && C.WB_Coeffs[WBi][1] && !WBToStr[cnt].aux_setting) {
+      denom = (float) C.WB_Coeffs[WBi][1];
+      fprintf(outfile, "{%s, \"%s\", %s, {%6.5ff, 1.0f, %6.5ff, ", CamMakerName,
+        P1.normalized_model, WBToStr[cnt].StrId,
+        C.WB_Coeffs[WBi][0] / denom,
+        C.WB_Coeffs[WBi][2] / denom);
+      if (C.WB_Coeffs[WBi][1] == C.WB_Coeffs[WBi][3])
+        fprintf(outfile, "1.0f}},\n");
+      else
+        fprintf(outfile, "%6.5ff}},\n",
+        C.WB_Coeffs[WBi][3] / denom);
+    }
+  }
 
 	for (int cnt = 0; cnt < 64; cnt++)
 		if (C.WBCT_Coeffs[cnt][0])
 		{
-			fprintf(outfile, "{LIBRAW_CAMERAMAKER_%s, \"%s\", %d, {%6.5ff, 1.0f, %6.5ff, ", CamMakerName,
+			fprintf(outfile, "{%s, \"%s\", %d, {%6.5ff, 1.0f, %6.5ff, ", CamMakerName,
 				P1.normalized_model, (int)C.WBCT_Coeffs[cnt][0],
 				C.WBCT_Coeffs[cnt][1] / C.WBCT_Coeffs[cnt][2],
 				C.WBCT_Coeffs[cnt][3] / C.WBCT_Coeffs[cnt][2]);
@@ -1189,25 +1574,27 @@ void print_szfun(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 		S.height);
 	/*
 	fprintf(outfile, "\n%s\t%s\t%s\n", filelist[i].c_str(), P1.make, P1.model);
-	fprintf(outfile, "\tCoffin:\traw %dx%d mrg %d %d img %dx%d\n", S.raw_width,
-	S.raw_height, S.left_margin, S.top_margin, S.width, S.height); printf
-	("\tmnote: \t"); if (Canon.SensorWidth) printf ("sensor %dx%d ",
-	Canon.SensorWidth, Canon.SensorHeight); if (Nikon.SensorWidth) printf
-	("sensor %dx%d ", Nikon.SensorWidth, Nikon.SensorHeight);
-	fprintf(outfile, "inset: start %d %d img %dx%d aspect calc: %f Aspect in file:
-	", S.raw_inset_crop.cleft, S.raw_inset_crop.ctop,
-	S.raw_inset_crop.cwidth, S.raw_inset_crop.cheight,
-	((float)S.raw_inset_crop.cwidth /
-	(float)S.raw_inset_crop.cheight)); Aspect =
-	lookup_id2hr(S.raw_inset_crop.aspect, AspectRatios, nAspectRatios); if
-	(Aspect) printf ("%s\n", Aspect->name); else printf ("Other %d\n",
-	S.raw_inset_crop.aspect);
+	fprintf(outfile, "\tCoffin:\traw %dx%d mrg %d %d img %dx%d\n",
+	  S.raw_width, S.raw_height, S.left_margin, S.top_margin, S.width, S.height);
+	fprintf (outfile, "\tmnote: \t");
+	if (Canon.SensorWidth)
+	  fprintf (outfile, "sensor %dx%d ", Canon.SensorWidth, Canon.SensorHeight);
+	if (Nikon.SensorWidth)
+	  fprintf (outfile, "sensor %dx%d ", Nikon.SensorWidth, Nikon.SensorHeight);
+	fprintf(outfile, "inset: start %d %d img %dx%d aspect calc: %f Aspect in file:",
+	  S.raw_inset_crop.cleft, S.raw_inset_crop.ctop,
+	  S.raw_inset_crop.cwidth, S.raw_inset_crop.cheight,
+	  ((float)S.raw_inset_crop.cwidth /
+	  (float)S.raw_inset_crop.cheight));
+	Aspect =
+	  lookup_id2hr(S.raw_inset_crop.aspect, AspectRatios, nAspectRatios);
+	if (Aspect) fprintf (outfile, "%s\n", Aspect->name);
+	else fprintf (outfile, "Other %d\n", S.raw_inset_crop.aspect);
 
 	if (Nikon.SensorHighSpeedCrop.cwidth) {
-	fprintf(outfile, "\tHighSpeed crop from: %d x %d at top left pixel: (%d,
-	%d)\n", Nikon.SensorHighSpeedCrop.cwidth,
-	Nikon.SensorHighSpeedCrop.cheight, Nikon.SensorHighSpeedCrop.cleft,
-	Nikon.SensorHighSpeedCrop.ctop);
+	  fprintf(outfile, "\tHighSpeed crop from: %d x %d at top left pixel: (%d, %d)\n",
+	    Nikon.SensorHighSpeedCrop.cwidth, Nikon.SensorHighSpeedCrop.cheight,
+	    Nikon.SensorHighSpeedCrop.cleft, Nikon.SensorHighSpeedCrop.ctop);
 	}
 	*/
 }
@@ -1276,6 +1663,15 @@ void print_compactfun(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn
 	if (exifLens.InternalLensSerial[0])
 		fprintf(outfile, "=LensAssy#: %s", exifLens.InternalLensSerial);
 	fprintf(outfile, "=\n");
+}
+
+void print_normfun(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
+{
+	trimSpaces(P1.make);
+	trimSpaces(P1.model);
+	fprintf(outfile, "\nFilename: %s\n", fn.c_str());
+	fprintf(outfile, "make/model: =%s/%s= ID: 0x%llx   norm. make/model: =%s/%s=\n",
+	        P1.make, P1.model, mnLens.CamID, P1.normalized_make, P1.normalized_model);
 }
 
 void print_unpackfun(FILE* outfile, LibRaw& MyCoolRawProcessor, int print_frame, std::string& fn)

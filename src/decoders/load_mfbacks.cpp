@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -42,7 +42,7 @@ void LibRaw::phase_one_flat_field(int is_float, int nc)
     for (x = 0; x < wide; x++)
       for (c = 0; c < nc; c += 2)
       {
-        num = is_float ? getreal(11) : get2() / 32768.0;
+        num = is_float ? getreal(LIBRAW_EXIFTAG_TYPE_FLOAT) : get2() / 32768.0;
         if (y == 0)
           mrow[c * wide + x] = num;
         else
@@ -119,7 +119,7 @@ int LibRaw::phase_one_correct()
       if (tag == 0x0419)
       { /* Polynomial curve */
         for (get4(), i = 0; i < 8; i++)
-          poly[i] = getreal(11);
+          poly[i] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
         poly[3] += (ph1.tag_210 - poly[7]) * poly[6] + 1;
         for (i = 0; i < 0x10000; i++)
         {
@@ -131,7 +131,7 @@ int LibRaw::phase_one_correct()
       else if (tag == 0x041a)
       { /* Polynomial curve */
         for (i = 0; i < 4; i++)
-          poly[i] = getreal(11);
+          poly[i] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
         for (i = 0; i < 0x10000; i++)
         {
           for (num = 0, j = 4; j--;)
@@ -261,21 +261,21 @@ int LibRaw::phase_one_correct()
         get4();
         get4();
         get4();
-        qmult[0][0] = 1.0 + getreal(11);
+        qmult[0][0] = 1.0 + getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
         get4();
         get4();
         get4();
         get4();
         get4();
-        qmult[0][1] = 1.0 + getreal(11);
+        qmult[0][1] = 1.0 + getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
         get4();
         get4();
         get4();
-        qmult[1][0] = 1.0 + getreal(11);
+        qmult[1][0] = 1.0 + getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
         get4();
         get4();
         get4();
-        qmult[1][1] = 1.0 + getreal(11);
+        qmult[1][1] = 1.0 + getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
         for (row = 0; row < raw_height; row++)
         {
           checkCancel();
@@ -339,7 +339,7 @@ int LibRaw::phase_one_correct()
       get2();
       for (i = 0; i < 2; i++)
         for (j = 0; j < head[i + 1] * head[i + 3]; j++)
-          yval[i][j] = getreal(11);
+          yval[i][j] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
       for (i = 0; i < 2; i++)
         for (j = 0; j < head[i + 1] * head[i + 3]; j++)
           xval[i][j] = get2();

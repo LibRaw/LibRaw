@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -97,9 +97,9 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
   imgdata.progress_flags = 0;
   imgdata.color.dng_levels.baseline_exposure = -999.f;
   imgdata.color.dng_levels.LinearResponseLimit = 1.0f;
-  imgdata.makernotes.hasselblad.nIFD_CM[0] =
-    imgdata.makernotes.hasselblad.nIFD_CM[1] = -1;
-  imgdata.makernotes.kodak.ISOCalibrationGain = 1.0f;
+  MN.hasselblad.nIFD_CM[0] =
+    MN.hasselblad.nIFD_CM[1] = -1;
+  MN.kodak.ISOCalibrationGain = 1.0f;
   _exitflag = 0;
   tls = new LibRaw_TLS;
   tls->init();
@@ -154,7 +154,7 @@ void LibRaw::recycle()
   imgdata.sizes.raw_inset_crop.ctop = 0xffff;
 
   ZERO(imgdata.idata);
-  ZERO(imgdata.makernotes);
+  ZERO(MN);
   ZERO(imgdata.color);
   ZERO(imgdata.other);
   ZERO(imgdata.thumbnail);
@@ -163,51 +163,50 @@ void LibRaw::recycle()
   imgdata.color.dng_levels.baseline_exposure = -999.f;
   imgdata.color.dng_levels.LinearResponseLimit = 1.f;
 
-  imgdata.makernotes.canon.SensorLeftBorder = -1;
-  imgdata.makernotes.canon.SensorTopBorder = -1;
+  MN.canon.SensorLeftBorder = -1;
+  MN.canon.SensorTopBorder = -1;
 
-  imgdata.makernotes.nikon.SensorHighSpeedCrop.cleft = 0xffff;
-  imgdata.makernotes.nikon.SensorHighSpeedCrop.ctop = 0xffff;
+  MN.nikon.SensorHighSpeedCrop.cleft = 0xffff;
+  MN.nikon.SensorHighSpeedCrop.ctop = 0xffff;
 
-  imgdata.makernotes.fuji.ExpoMidPointShift = -999.f;
-  imgdata.makernotes.fuji.DynamicRange = 0xffff;
-  imgdata.makernotes.fuji.FilmMode = 0xffff;
-  imgdata.makernotes.fuji.DynamicRangeSetting = 0xffff;
-  imgdata.makernotes.fuji.DevelopmentDynamicRange = 0xffff;
-  imgdata.makernotes.fuji.AutoDynamicRange = 0xffff;
-  imgdata.makernotes.fuji.FocusMode = 0xffff;
-  imgdata.makernotes.fuji.DriveMode = -1;
-  imgdata.makernotes.fuji.AFMode = 0xffff;
-  imgdata.makernotes.fuji.FocusPixel[0] =
-      imgdata.makernotes.fuji.FocusPixel[1] = 0xffff;
-  imgdata.makernotes.fuji.ImageStabilization[0] =
-      imgdata.makernotes.fuji.ImageStabilization[1] =
-          imgdata.makernotes.fuji.ImageStabilization[2] = 0xffff;
+  MN.fuji.WB_Preset = 0xffff;
+  MN.fuji.ExpoMidPointShift = -999.f;
+  MN.fuji.DynamicRange = 0xffff;
+  MN.fuji.FilmMode = 0xffff;
+  MN.fuji.DynamicRangeSetting = 0xffff;
+  MN.fuji.DevelopmentDynamicRange = 0xffff;
+  MN.fuji.AutoDynamicRange = 0xffff;
+  MN.fuji.DRangePriority = 0xffff;
+  MN.fuji.FocusMode = 0xffff;
+  MN.fuji.DriveMode = -1;
+  MN.fuji.AFMode = 0xffff;
+  MN.fuji.FocusPixel[0] = MN.fuji.FocusPixel[1] = 0xffff;
+  MN.fuji.ImageStabilization[0] =
+      MN.fuji.ImageStabilization[1] =
+      MN.fuji.ImageStabilization[2] = 0xffff;
 
-  imgdata.makernotes.samsung.ColorSpace[0] =
-      imgdata.makernotes.samsung.ColorSpace[1] = -1;
+  MN.samsung.ColorSpace[0] = MN.samsung.ColorSpace[1] = -1;
 
-  imgdata.makernotes.sony.CameraType = 0xffff;
-  imgdata.makernotes.sony.real_iso_offset = 0xffff;
-  imgdata.makernotes.sony.ImageCount3_offset = 0xffff;
-  imgdata.makernotes.sony.ElectronicFrontCurtainShutter = 0xffff;
-  imgdata.makernotes.sony.MinoltaCamID = -1;
-  imgdata.makernotes.sony.RAWFileType = 0xffff;
-  imgdata.makernotes.sony.AFAreaModeSetting = 0xff;
-  imgdata.makernotes.sony.FlexibleSpotPosition[0] =
-      imgdata.makernotes.sony.FlexibleSpotPosition[1] = 0xffff;
-  imgdata.makernotes.sony.AFPointSelected = 0xff;
-  imgdata.makernotes.sony.LongExposureNoiseReduction = 0xffffffff;
-  imgdata.makernotes.sony.Quality = 0xffffffff;
-  imgdata.makernotes.sony.HighISONoiseReduction = 0xffff;
-  imgdata.makernotes.sony.SonyRawFileType = 0xffff;
+  MN.sony.CameraType = 0xffff;
+  MN.sony.real_iso_offset = 0xffff;
+  MN.sony.ImageCount3_offset = 0xffff;
+  MN.sony.ElectronicFrontCurtainShutter = 0xffff;
+  MN.sony.MinoltaCamID = -1;
+  MN.sony.RAWFileType = 0xffff;
+  MN.sony.AFAreaModeSetting = 0xff;
+  MN.sony.FlexibleSpotPosition[0] =
+      MN.sony.FlexibleSpotPosition[1] = 0xffff;
+  MN.sony.AFPointSelected = 0xff;
+  MN.sony.LongExposureNoiseReduction = 0xffffffff;
+  MN.sony.Quality = 0xffffffff;
+  MN.sony.HighISONoiseReduction = 0xffff;
+  MN.sony.SonyRawFileType = 0xffff;
 
-  imgdata.makernotes.kodak.BlackLevelTop = 0xffff;
-  imgdata.makernotes.kodak.BlackLevelBottom = 0xffff;
-  imgdata.makernotes.kodak.ISOCalibrationGain = 1.0f;
+  MN.kodak.BlackLevelTop = 0xffff;
+  MN.kodak.BlackLevelBottom = 0xffff;
+  MN.kodak.ISOCalibrationGain = 1.0f;
 
-  imgdata.makernotes.hasselblad.nIFD_CM[0] =
-    imgdata.makernotes.hasselblad.nIFD_CM[1] = -1;
+  MN.hasselblad.nIFD_CM[0] = MN.hasselblad.nIFD_CM[1] = -1;
 
   imgdata.color.dng_color[0].illuminant =
       imgdata.color.dng_color[1].illuminant = LIBRAW_WBI_None;
@@ -252,12 +251,13 @@ void LibRaw::recycle()
       dngimage = 0;
   }
 #endif
+#ifdef USE_X3FTOOLS
   if (_x3f_data)
   {
     x3f_clear(_x3f_data);
     _x3f_data = 0;
   }
-
+#endif
   memmgr.cleanup();
 
   imgdata.thumbnail.tformat = LIBRAW_THUMBNAIL_UNKNOWN;

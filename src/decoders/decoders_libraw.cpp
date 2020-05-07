@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -21,6 +21,10 @@ void LibRaw::sony_arq_load_raw()
               imgdata.sizes.raw_width * imgdata.sizes.raw_height * 4);
   libraw_internal_data.internal_data.input->seek(
       -2, SEEK_CUR); // avoid wrong eof error
+
+  if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_ARQ_SKIP_CHANNEL_SWAP)
+    return;
+
   for (row = 0; row < imgdata.sizes.raw_height; row++)
   {
     unsigned short(*rowp)[4] =

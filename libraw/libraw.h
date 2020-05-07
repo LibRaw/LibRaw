@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw.h
- * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8, 2008
  *
  * LibRaw C++ interface
@@ -382,8 +382,10 @@ protected:
 
   void kodak_thumb_loader();
   void write_thumb_ppm_tiff(FILE *);
+#ifdef USE_X3FTOOLS
   void x3f_thumb_loader();
   INT64 x3f_thumb_size();
+#endif
 
   int own_filtering_supported() { return 0; }
   void identify();
@@ -453,7 +455,7 @@ protected:
   int valid_for_dngsdk();
   int try_dngsdk();
   /* X3F data */
-  void *_x3f_data;
+  void *_x3f_data; /* keep it even if USE_X3FTOOLS is not defined to do not change sizeof(LibRaw)*/
 
   int raw_was_read()
   {

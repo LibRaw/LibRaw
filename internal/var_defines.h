@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: var_defines.h
- * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8, 2008
  *
  * LibRaw redefinitions of dcraw internal variables
@@ -57,6 +57,7 @@ it under the terms of the one of two licenses as you choose:
 #define pixel_aspect    (imgdata.sizes.pixel_aspect)
 #define flip            (imgdata.sizes.flip)
 #define mask            (imgdata.sizes.mask)
+#define raw_stride		(libraw_internal_data.unpacker_data.raw_stride)
 
 //imgdata.color
 #define white           (imgdata.color.white)

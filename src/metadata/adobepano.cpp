@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -31,7 +31,6 @@ void LibRaw::parseAdobePanoMakernote()
     free(PrivateMknBuf);                                                       \
     return;                                                                    \
   }
-#define icWBC imgdata.color.WB_Coeffs
 
   order = 0x4d4d;
   truncated = 0;
@@ -63,10 +62,8 @@ void LibRaw::parseAdobePanoMakernote()
       if (truncated && !PrivateTagCount)
         continue;
 
-      PrivateTagBytes =
-          PrivateTagCount *
-          ("11124811248484"[PrivateTagType < 14 ? PrivateTagType : 0] - '0');
-
+      PrivateTagBytes = PrivateTagCount *
+          tagtype_dataunit_bytes[(PrivateTagType <= LIBRAW_EXIFTAG_TYPE_IFD8) ? PrivateTagType : 0];
       if (PrivateTagID == 0x0002)
       {
         posPrivateMknBuf += 2;
@@ -148,6 +145,5 @@ void LibRaw::parseAdobePanoMakernote()
     }
     free(PrivateMknBuf);
   }
-#undef icWBC
 #undef CHECKSPACE
 }

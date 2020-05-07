@@ -1,28 +1,34 @@
-2019-10-25 Alex Tutubalin <lexa@lexa.ru>
+2020-05-07 Alex Tutubalin <lexa@lexa.ru>
 
- * Libraw public snapshot 201910:
+ * LibRaw 0.20-Beta1
 
 == Camera Format support ==
   Canon CR3
   GoPro (via GPR SDK)
   Panasonic 14-bit
   Fujifilm compressed/16bit
+  Rapsberry Pi RAW+JPEG format (if USE_6BY9RPI defined)
+  Foveon X3F support changed: it is supported only if USE_X3FTOOLS defined 
+  at build (see below for 'Imported code policy changed')
 
-== Camera support (+41, 1113 total) ==
+== Camera support (+59, 1131 total) ==
   Canon: PowerShot G5 X Mark II, G7 X Mark III, SX70 HS,
          EOS R, EOS RP, EOS 90D, EOS 250D,  EOS M6 Mark II, EOS M50, EOS M200
+         EOS 1DX Mark III (lossless files only)
   DJI Mavic Air, Osmo Action
-  FujiFilm GFX 100, X-A7, X-Pro3
-  GoPro Fusion, HERO5, HERO6, HERO7
+  FujiFilm GFX 100, X-A7, X-Pro3, X100V, X-T4, X-T200
+  GoPro Fusion, HERO5, HERO6, HERO7, HERO8
   Hasselblad L1D-20c, X1D II 50C
-  Leica D-LUX7, Q-P, Q2, V-LUX5, C-Lux / CAM-DC25
-  Olympus TG-6, E-M5 Mark III.
-  Panasonic DC-FZ1000 II, DC-G90, DC-S1, DC-S1R, DC-TZ95
+  Leica D-LUX7, Q-P, Q2, V-LUX5, C-Lux / CAM-DC25, SL2, M10 Monochrom
+  Nikon D780, Z50, P950
+  Olympus TG-6, E-M5 Mark III, E-PL10, E-M1 Mark III,
+  Panasonic DC-FZ1000 II, DC-G90, DC-S1, DC-S1R, DC-S1H, DC-TZ95
   PhaseOne IQ4 150MP
   Ricoh GR III
-  Sony A7R IV, ILCE-6100, ILCE-6600, RX0 II, RX100 VII
+  Sony A7R IV, A9 II, ILCE-6100, ILCE-6600, RX0 II, RX100 VII
   Zenit M
-and multiple smartphones (the tested ones are listed in LibRaw::cameraList)
+
+also multiple smartphones (the tested ones are listed in LibRaw::cameraList)
 
 == Source code re-arranged ==
  * dcraw.c is not used in the generation and build processes
@@ -31,53 +37,97 @@ and multiple smartphones (the tested ones are listed in LibRaw::cameraList)
    metadata/ for metadata parsers, etc)
  * dcraw_common.cpp and libraw_cxx.cpp remain to preserve existing
    build environments (these files are now just a bunch of #include directives).
- * It is possible to build LibRaw 
-    a) without postprocessing functions (dcraw_process() and  called function) 
-    b) without postprocessing and LibRaw::raw2image() call (and called function).
+ * It is possible to build LibRaw
+    a)without postprocessing functions (dcraw_process() and  called function)
+    b)without postprocessing and LibRaw::raw2image() call (and called function).
    It may be useful to reduce library memory/code footprint.
    See Makefile.devel.nopp and Makefile.devel.noppr2i for the list of source
    files needed to build reduced/stripped library.
 
 == Normalized make/model ==
 
-There is a huge number of identical cameras sold under different names, depending on the market
-(e.g. multiple Panasonic or Canon models)
-and even some identical cameras sold under different brands (Panasonic -> Leica, Sony -> Hasselblad).
+There is a huge number of identical cameras sold under different names,
+depending on the market (e.g. multiple Panasonic or Canon models)
+and even some identical cameras sold under different brands 
+(Panasonic -> Leica, Sony -> Hasselblad).
 
 To reduce clutter, a normalization mechanism has been implemented in LibRaw:
 
 In imgdata.idata:
-    char normalized_make[64]; - primary vendor name (e.g. Panasonic for Leica re-branded cameras)
+    char normalized_make[64]; - primary vendor name (e.g. Panasonic for 
+    Leica re-branded cameras)
     char normalized_model[64]; - primary camera model name
     unsigned maker_index; - primary vendor name in indexed form (enum
        LibRaw_cameramaker_index, LIBRAW_CAMERAMAKER_* constant).
 These fields are always filled upon LibRaw::open_file()/open_buffer() calls.
 
-const char* LibRaw::cameramakeridx2maker(int index): converts maker_index to normalized_make.
+const char* LibRaw::cameramakeridx2maker(int index): converts maker_index 
+to normalized_make.
 
 We recommend that you use these normalized names in a variety of data tables
 (color profiles, etc.) to reduce the number of duplicate entries.
 
 New vendor index values will be added strictly to the end of the
-LibRaw_cameramaker_index table, ensuring that the numbers assigned to vendors that 
-are already known to LibRaw will not change.
+LibRaw_cameramaker_index table, ensuring that the numbers assigned to
+vendors that are already known to LibRaw will not change.
 
 == DNG frame selection  ==
 
  DNG frames selection code re-worked:
-  - by default all frames w/ the NewSubfileType tag equal to 0 (high-res image) are added
-    to the list of available images (selection performed via imgdata.params.shot_select field, as usual)
-  - the special case for Fuju SuperCCD (SamplesPerPixel == 2) works as before: shot_select=1 will
-    extract second sub-image.
+  - by default all frames w/ the NewSubfileType tag equal to 0 
+  (high-res image) are added to the list of available images (selection 
+  performed via imgdata.params.shot_select field, as usual)
+  - the special case for Fuju SuperCCD (SamplesPerPixel == 2) works as
+  before: shot_select=1 will extract second sub-image.
   - Additional flags to imgdata.params.raw_processing_options:
-     LIBRAW_PROCESSING_DNG_ADD_ENHANCED - will add Enhanced DNG frame (NewSubfileType == 16)
-                                          to the list of available frames
-     LIBRAW_PROCESSING_DNG_ADD_PREVIEWS - will add previews (NewSubfileType == 1) to the list.
+     LIBRAW_PROCESSING_DNG_ADD_ENHANCED - will add Enhanced DNG frame 
+     (NewSubfileType == 16) to the list of available frames
+     LIBRAW_PROCESSING_DNG_ADD_PREVIEWS - will add previews 
+     (NewSubfileType == 1) to the list.
 
-  - By default, DNG frames are not reordered and are available in same order as in DNG
-    (LibRaw traverses IFD/Sub-IFD trees in deep-first order).
-    To prioritize the largest image, set LIBRAW_PROCESSING_DNG_PREFER_LARGEST_IMAGE bit
-    in imgdata.params.raw_processing_options.
+  - By default, DNG frames are not reordered and are available in same order
+  as in DNG (LibRaw traverses IFD/Sub-IFD trees in deep-first order).
+  To prioritize the largest image, set LIBRAW_PROCESSING_DNG_PREFER_LARGEST_IMAGE
+  bit in imgdata.params.raw_processing_options.
+
+ - DNG Stage2/Stage3 processing via DNG SDK (request via flags in 
+ raw_processing_options)
+
+== Imported code policy disclaimer ==
+
+  We've changed the policy regarding 3rd party code imported into LibRaw.
+
+  We (like other authors of open-source RAW parsers) gladly import support 
+  code for various RAW formats from other projects (if the license allows it).
+  This is done to expand camera support.
+  Unfortunately, not all imported code can tolerate truncated or otherwise 
+  damaged raw files, as well as arbitrary conditions or arbitrary data;
+  not all authors handle rejecting unexpected input well.
+
+  LibRaw is now widely used in various projects, including ImageMagick, which,
+  in turn, is often used on web sites to process any input images, including 
+  arbitrary data from unknown users.
+  This opens up wide possibilities for exploiting the various vulnerabilities 
+  present in the code borrowed from other projects into LibRaw. In order to
+  avoid such security risks, - the borrowed code will no longer compile 
+  by default.
+  We are not able to support it in general case, and the authors refuse 
+  to add code to reject unexpected input.
+
+  Thus, if you use some kind of camera for which the support is disabled 
+  by default, you need to recompile LibRaw for your specific case.
+
+  Formats currently affected:
+   X3F (Foveon) file format.
+    Code is imported from Kalpanika X3F tools: https://github.com/Kalpanika/x3f
+    To turn the support on, define USE_X3FTOOLS
+
+   Rapsberry Pi RAW+JPEG format.
+     Code is imported from https://github.com/6by9/dcraw/,
+     To turn the support on, define USE_6BY9RPI
+  Format support is indicated via LibRaw::capabilities() call with flags:
+    LIBRAW_CAPS_X3FTOOLS - Foveon support
+    LIBRAW_CAPS_RPI6BY9 - RPi RAW+JPEG support
 
 == GoPro .gpr format support ==
  GoPro  format supported via open-source GPR SDK
@@ -95,17 +145,26 @@ are already known to LibRaw will not change.
   If not, these defines are defined based on compiler version/libc++ defines
 
 * LibRaw::open_file(wchar_t*) is always compiled in under Windows, but
-  if LIBRAW_WIN32_UNICODEPATHS (see above) is not defined, this call will return LIBRAW_NOT_IMPLEMENTED.
+  if LIBRAW_WIN32_UNICODEPATHS (see above) is not defined, this call will
+  return LIBRAW_NOT_IMPLEMENTED.
   Use (LibRaw::capabilities() & LIBRAW_CAPS_UNICODEPATHS) on runtime
   to check that this call was really implemented (or check for #ifdef LIBRAW_WIN32_UNICODEPATHS after #include <libraw.h>)
 
 == LibRaw*datastream simplified ==
 
-  * tempbuffer_open, subfile_open are not used, so removed from LibRaw_abstract_datastream
-    and derived classes.
+  * tempbuffer_open, subfile_open are not used, so removed from 
+  LibRaw_abstract_datastream and derived classes.
+
+  * jpeg_src() call implemented using ->read() call and own buffering  
+  (16k buffer).
+  * buffering_off() call added. It should be used in derived classes
+    to switch from buffered reads to unbuffered.
 
 == minor/unsorted changes ==
    * new flag LIBRAW_WARN_DNGSDK_PROCESSED to indicate decoder used
+   *  LibRaw::open() call, max_buf_size special meaning:
+       == 1 => open using bigfile_datastream
+       == 2 => open using file_datastream
    * Add support for zlib during configure
    * Fixed multiple problems found by OSS-Fuzz
    * Lots of changes in imgdata.makernotes (hope someone will document it)

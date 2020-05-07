@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  */
 
 #include "../../internal/dcraw_defs.h"
-#include "../../internal/libraw_const.h"
+#include "../../internal/libraw_cameraids.h"
 
 void LibRaw::GetNormalizedModel()
 {
@@ -28,114 +28,325 @@ void LibRaw::GetNormalizedModel()
     char t_model[20];
   } unique[] =
 // clang-format off
-      {
-      { CanonID_EOS_M50, "EOS M50" }, // Kiss M
-      { CanonID_EOS_M3, "EOS M3" },
-      { CanonID_EOS_M10, "EOS M10" },
-      { CanonID_EOS_M5, "EOS M5" },
-      { CanonID_EOS_M100, "EOS M100" },
-      { CanonID_EOS_M200, "EOS M200" },
-      { CanonID_EOS_1D, "EOS-1D" },
-      { CanonID_EOS_1DS, "EOS-1DS" },
-      { CanonID_EOS_10D, "EOS 10D" },
-      { CanonID_EOS_1D_Mark_III, "EOS-1D Mark III" },
-      { CanonID_EOS_300D, "EOS 300D" }, // Digital Rebel / Kiss Digital
-      { CanonID_EOS_1D_Mark_II, "EOS-1D Mark II" },
-      { CanonID_EOS_20D, "EOS 20D" },
-      { CanonID_EOS_450D, "EOS 450D" }, // Digital Rebel XSi / Kiss X2
-      { CanonID_EOS_1Ds_Mark_II, "EOS-1Ds Mark II" },
-      { CanonID_EOS_350D, "EOS 350D" }, // Digital Rebel XT / Kiss Digital N
-      { CanonID_EOS_40D, "EOS 40D" },
-      { CanonID_EOS_5D, "EOS 5D" },
-      { CanonID_EOS_1Ds_Mark_III, "EOS-1Ds Mark III" },
-      { CanonID_EOS_5D_Mark_II, "EOS 5D Mark II" },
-      { CanonID_EOS_1D_Mark_II_N, "EOS-1D Mark II N" },
-      { CanonID_EOS_30D, "EOS 30D" },
-      { CanonID_EOS_400D, "EOS 400D" }, // Digital Rebel XTi / Kiss Digital X
-      { CanonID_EOS_7D, "EOS 7D" },
-      { CanonID_EOS_500D, "EOS 500D" },   // Rebel T1i / Kiss X3
-      { CanonID_EOS_1000D, "EOS 1000D" }, // Digital Rebel XS / Kiss F
-      { CanonID_EOS_50D, "EOS 50D" },
-      { CanonID_EOS_1D_X, "EOS-1D X" },
-      { CanonID_EOS_550D, "EOS 550D" }, // Rebel T2i / Kiss X4
-      { CanonID_EOS_1D_Mark_IV, "EOS-1D Mark IV" },
-      { CanonID_EOS_5D_Mark_III, "EOS 5D Mark III" },
-      { CanonID_EOS_600D, "EOS 600D" }, // Rebel T3i / Kiss X5
-      { CanonID_EOS_60D, "EOS 60D" },
-      { CanonID_EOS_1100D, "EOS 1100D" }, // Rebel T3 / Kiss X50
-      { CanonID_EOS_7D_Mark_II, "EOS 7D Mark II" },
-      { CanonID_EOS_650D, "EOS 650D" }, // Rebel T4i / Kiss X6i
-      { CanonID_EOS_6D, "EOS 6D" },
-      { CanonID_EOS_1D_C, "EOS-1D C" },
-      { CanonID_EOS_70D, "EOS 70D" },
-      { CanonID_EOS_700D, "EOS 700D" },   // Rebel T5i / Kiss X7i
-      { CanonID_EOS_1200D, "EOS 1200D" }, // Rebel T5 / Kiss X70 / Hi
-      { CanonID_EOS_1D_X_Mark_II, "EOS-1D X Mark II" },
-      { CanonID_EOS_M, "EOS M" },
-      { CanonID_EOS_M2, "EOS M2" },
-      { CanonID_EOS_100D, "EOS 100D" }, // Rebel SL1 / Kiss X7
-      { CanonID_EOS_760D, "EOS 760D" }, // Rebel T6s / 8000D
-      { CanonID_EOS_5D_Mark_IV, "EOS 5D Mark IV" },
-      { CanonID_EOS_80D, "EOS 80D" },
-      { CanonID_EOS_5DS, "EOS 5DS" },
-      { CanonID_EOS_750D, "EOS 750D" }, // Rebel T6i / Kiss X8i
-      { CanonID_EOS_5DS_R, "EOS 5DS R" },
-      { CanonID_EOS_1300D, "EOS 1300D" }, // Rebel T6 / Kiss X80
-      { CanonID_EOS_800D, "EOS 800D" },   // Rebel T7i / Kiss X9i
-      { CanonID_EOS_6D_Mark_II, "EOS 6D Mark II" },
-      { CanonID_EOS_M6, "EOS M6" },
-      { CanonID_EOS_77D, "EOS 77D" },     // 9000D
-      { CanonID_EOS_200D, "EOS 200D" },   // Rebel SL2 / Kiss X9
-      { CanonID_EOS_3000D, "EOS 3000D" }, // Rebel T100 / 4000D
-      { CanonID_EOS_R, "EOS R" },
-      { CanonID_EOS_1500D, "EOS 1500D" }, // Rebel T7 / 2000D / Kiss X90
-      { CanonID_EOS_RP, "EOS RP" },
-      { CanonID_EOS_250D, "EOS 250D" }, // Rebel SL3 / 200D II / Kiss X10
-      { CanonID_EOS_90D, "EOS 90D" },
-      { CanonID_EOS_M6_Mark_II, "EOS M6 Mark II" },
-      },
+    {
+      { CanonID_EOS_M50,           "EOS M50"}, // Kiss M
+      { CanonID_EOS_M6_Mark_II,    "EOS M6 Mark II"},
+      { CanonID_EOS_M200,          "EOS M200"},
+      { CanonID_EOS_D30,           "EOS D30"},
+      { CanonID_EOS_D60,           "EOS D60"},
+      { CanonID_EOS_M3,            "EOS M3"},
+      { CanonID_EOS_M10,           "EOS M10"},
+      { CanonID_EOS_M5,            "EOS M5"},
+      { CanonID_EOS_M100,          "EOS M100"},
+      { CanonID_EOS_M6,            "EOS M6"},
+      { CanonID_EOS_1D,            "EOS-1D"},
+      { CanonID_EOS_1DS,           "EOS-1DS"},
+      { CanonID_EOS_10D,           "EOS 10D"},
+      { CanonID_EOS_1D_Mark_III,   "EOS-1D Mark III"},
+      { CanonID_EOS_300D,          "EOS 300D"}, // Digital Rebel / Kiss Digital
+      { CanonID_EOS_1D_Mark_II,    "EOS-1D Mark II"},
+      { CanonID_EOS_20D,           "EOS 20D"},
+      { CanonID_EOS_450D,          "EOS 450D"}, // Digital Rebel XSi / Kiss X2
+      { CanonID_EOS_1Ds_Mark_II,   "EOS-1Ds Mark II"},
+      { CanonID_EOS_350D,          "EOS 350D"}, // Digital Rebel XT / Kiss Digital N
+      { CanonID_EOS_40D,           "EOS 40D"},
+      { CanonID_EOS_5D,            "EOS 5D"},
+      { CanonID_EOS_1Ds_Mark_III,  "EOS-1Ds Mark III"},
+      { CanonID_EOS_5D_Mark_II,    "EOS 5D Mark II"},
+      { CanonID_EOS_1D_Mark_II_N,  "EOS-1D Mark II N"},
+      { CanonID_EOS_30D,           "EOS 30D"},
+      { CanonID_EOS_400D,          "EOS 400D"}, // Digital Rebel XTi / Kiss Digital X
+      { CanonID_EOS_7D,            "EOS 7D"},
+      { CanonID_EOS_500D,          "EOS 500D"},   // Rebel T1i / Kiss X3
+      { CanonID_EOS_1000D,         "EOS 1000D"}, // Digital Rebel XS / Kiss F
+      { CanonID_EOS_50D,           "EOS 50D"},
+      { CanonID_EOS_1D_X,          "EOS-1D X"},
+      { CanonID_EOS_550D,          "EOS 550D"}, // Rebel T2i / Kiss X4
+      { CanonID_EOS_1D_Mark_IV,    "EOS-1D Mark IV"},
+      { CanonID_EOS_5D_Mark_III,   "EOS 5D Mark III"},
+      { CanonID_EOS_600D,          "EOS 600D"}, // Rebel T3i / Kiss X5
+      { CanonID_EOS_60D,           "EOS 60D"},
+      { CanonID_EOS_1100D,         "EOS 1100D"}, // Rebel T3 / Kiss X50
+      { CanonID_EOS_7D_Mark_II,    "EOS 7D Mark II"},
+      { CanonID_EOS_650D,          "EOS 650D"}, // Rebel T4i / Kiss X6i
+      { CanonID_EOS_6D,            "EOS 6D"},
+      { CanonID_EOS_1D_C,          "EOS-1D C"},
+      { CanonID_EOS_70D,           "EOS 70D"},
+      { CanonID_EOS_700D,          "EOS 700D"},   // Rebel T5i / Kiss X7i
+      { CanonID_EOS_1200D,         "EOS 1200D"}, // Rebel T5 / Kiss X70 / Hi
+      { CanonID_EOS_1D_X_Mark_II,  "EOS-1D X Mark II"},
+      { CanonID_EOS_M,             "EOS M"},
+      { CanonID_EOS_100D,          "EOS 100D"}, // Rebel SL1 / Kiss X7
+      { CanonID_EOS_760D,          "EOS 760D"}, // Rebel T6s / 8000D
+      { CanonID_EOS_5D_Mark_IV,    "EOS 5D Mark IV"},
+      { CanonID_EOS_80D,           "EOS 80D"},
+      { CanonID_EOS_M2,            "EOS M2"},
+      { CanonID_EOS_5DS,           "EOS 5DS"},
+      { CanonID_EOS_750D,          "EOS 750D"}, // Rebel T6i / Kiss X8i
+      { CanonID_EOS_5DS_R,         "EOS 5DS R"},
+      { CanonID_EOS_1300D,         "EOS 1300D"}, // Rebel T6 / Kiss X80
+      { CanonID_EOS_800D,          "EOS 800D"},   // Rebel T7i / Kiss X9i
+      { CanonID_EOS_6D_Mark_II,    "EOS 6D Mark II"},
+      { CanonID_EOS_77D,           "EOS 77D"},     // 9000D
+      { CanonID_EOS_200D,          "EOS 200D"},   // Rebel SL2 / Kiss X9
+      { CanonID_EOS_3000D,         "EOS 3000D"}, // Rebel T100 / 4000D
+      { CanonID_EOS_1D_X_Mark_III, "EOS-1D X Mark III"},
+      { CanonID_EOS_R,             "EOS R"},
+      { CanonID_EOS_1500D,         "EOS 1500D"}, // Rebel T7 / 2000D / Kiss X90
+      { CanonID_EOS_RP,            "EOS RP"},
+      { CanonID_EOS_250D,          "EOS 250D"}, // Rebel SL3 / 200D II / Kiss X10
+      { CanonID_EOS_90D,           "EOS 90D"},
+    },
+
+    olyque[] = {
+      { OlyID_E_20,            "E-20"},
+      { OlyID_E_20,            "E-20,E-20N,E-20P"},
+      { OlyID_E_1,             "E-1"},
+      { OlyID_E_300,           "E-300"},
+      { OlyID_SP_550UZ,        "SP-550UZ"},
+      { OlyID_SP_550UZ,        "SP550UZ"},
+      { OlyID_SP_510UZ,        "SP-510UZ"},
+      { OlyID_SP_510UZ,        "SP510UZ"},
+      { OlyID_SP_560UZ,        "SP-560UZ"},
+      { OlyID_SP_560UZ,        "SP560UZ"},
+      { OlyID_SP_570UZ,        "SP-570UZ"},
+      { OlyID_SP_570UZ,        "SP570UZ"},
+      { OlyID_SP_565UZ,        "SP-565UZ"},
+      { OlyID_SP_565UZ,        "SP565UZ"},
+      { OlyID_XZ_1,            "XZ-1"},
+      { OlyID_XZ_2,            "XZ-2"},
+      { OlyID_XZ_10,           "XZ-10"},
+      { OlyID_STYLUS_1,        "Stylus 1"},
+      { OlyID_STYLUS_1,        "STYLUS1"},
+      { OlyID_STYLUS_1,        "STYLUS1,1s"},
+      { OlyID_SH_2,            "SH-2"},
+      { OlyID_TG_4,            "TG-4"},
+      { OlyID_TG_5,            "TG-5"},
+      { OlyID_TG_6,            "TG-6"},
+      { OlyID_E_10,            "E-10"},
+      { OlyID_AIR_A01,         "AIR A01"},
+      { OlyID_AIR_A01,         "AIR-A01"},
+      { OlyID_E_330,           "E-330"},
+      { OlyID_E_500,           "E-500"},
+      { OlyID_E_400,           "E-400"},
+      { OlyID_E_510,           "E-510"},
+      { OlyID_E_3,             "E-3"},
+      { OlyID_E_410,           "E-410"},
+      { OlyID_E_420,           "E-420"},
+      { OlyID_E_30,            "E-30"},
+      { OlyID_E_520,           "E-520"},
+      { OlyID_E_P1,            "E-P1"},
+      { OlyID_E_620,           "E-620"},
+      { OlyID_E_P2,            "E-P2"},
+      { OlyID_E_PL1,           "E-PL1"},
+      { OlyID_E_450,           "E-450"},
+      { OlyID_E_600,           "E-600"},
+      { OlyID_E_P3,            "E-P3"},
+      { OlyID_E_5,             "E-5"},
+      { OlyID_E_PL2,           "E-PL2"},
+      { OlyID_E_M5,            "E-M5"},
+      { OlyID_E_PL3,           "E-PL3"},
+      { OlyID_E_PM1,           "E-PM1"},
+      { OlyID_E_PL1s,          "E-PL1s"},
+      { OlyID_E_PL5,           "E-PL5"},
+      { OlyID_E_PM2,           "E-PM2"},
+      { OlyID_E_P5,            "E-P5"},
+      { OlyID_E_PL6,           "E-PL6"},
+      { OlyID_E_PL7,           "E-PL7"},
+      { OlyID_E_M1,            "E-M1"},
+      { OlyID_E_M10,           "E-M10"},
+      { OlyID_E_M5_Mark_II,    "E-M5 Mark II"},
+      { OlyID_E_M5_Mark_II,    "E-M5MarkII"},
+      { OlyID_E_M5_Mark_II,    "E-M5_M2"},
+      { OlyID_E_M10_Mark_II,   "E-M10 Mark II"}, // Clauss piX 5oo
+      { OlyID_E_M10_Mark_II,   "E-M10MarkII"},
+      { OlyID_E_M10_Mark_II,   "E-M10_M2"},
+      { OlyID_PEN_F,           "PEN-F"},
+      { OlyID_E_PL8,           "E-PL8"},
+      { OlyID_E_M1_Mark_II,    "E-M1 Mark II"},
+      { OlyID_E_M1_Mark_II,    "E-M1MarkII"},
+      { OlyID_E_M1_Mark_II,    "E-M1_M2"},
+      { OlyID_E_M10_Mark_III,  "E-M10 Mark III"},
+      { OlyID_E_M10_Mark_III,  "E-M10_M3"},
+      { OlyID_E_PL9,           "E-PL9"},
+      { OlyID_E_M1X,           "E-M1X"},
+      { OlyID_E_PL10,          "E-PL10"},
+      { OlyID_E_M5_Mark_III,   "E-M5 Mark III"},
+      { OlyID_E_M5_Mark_III,   "E-M5MarkIII"},
+      { OlyID_E_M5_Mark_III,   "E-M5_M3"},
+      { OlyID_E_M1_Mark_III,   "E-M1 Mark III"},
+      { OlyID_E_M1_Mark_III,   "E-M1MarkIII"},
+      { OlyID_E_M1_Mark_III,   "E-M1_M3"},
+      { OlyID_C_3030Z,         "C-3030Z"},
+      { OlyID_C_3030Z,         "C3030Z"},
+      { OlyID_C_5050Z,         "C-5050Z"},
+      { OlyID_C_5050Z,         "C5050Z"},
+      { OlyID_C_350Z,          "C-350Z"},
+      { OlyID_C_350Z,          "X200,D560Z,C350Z"},
+      { OlyID_C_740UZ,         "C-740UZ"},
+      { OlyID_C_740UZ,         "C740UZ"},
+      { OlyID_C_5060WZ,        "C-5060WZ"},
+      { OlyID_C_5060WZ,        "C5060WZ"},
+      { OlyID_C_8080WZ,        "C-8080WZ"},
+      { OlyID_C_8080WZ,        "C8080WZ"},
+      { OlyID_C_770UZ,         "C-770UZ"},
+      { OlyID_C_770UZ,         "C770UZ"},
+      { OlyID_C_7070WZ,        "C-7070WZ"},
+      { OlyID_C_7070WZ,        "C7070WZ"},
+      { OlyID_C_7000Z,         "C-7000Z"},
+      { OlyID_C_7000Z,         "C70Z,C7000Z"},
+      { OlyID_SP_500UZ,        "SP-500UZ"},
+      { OlyID_SP_500UZ,        "SP500UZ"},
+      { OlyID_SP_310,          "SP-310"},
+      { OlyID_SP_310,          "SP310"},
+      { OlyID_SP_350,          "SP-350"},
+      { OlyID_SP_350,          "SP350"},
+      { OlyID_SP_320,          "SP-320"},
+      { OlyID_SP_320,          "SP320"},
+    },
+
+    penique[] = {
+      { PentaxID_Optio_S,      "Optio S"},
+      { PentaxID_Optio_S_V101, "Optio S V1.01"},
+      { PentaxID_staristD,     "*istD"},
+      { PentaxID_staristD,     "*ist D"},
+      { PentaxID_Optio_33WR,   "Optio 33WR"},
+      { PentaxID_Optio_S4,     "Optio S4"},
+      { PentaxID_Optio_750Z,   "Optio 750Z"},
+      { PentaxID_staristDS,    "*istDS"},
+      { PentaxID_staristDS,    "*ist DS"},
+      { PentaxID_staristDL,    "*istDL"},
+      { PentaxID_staristDL,    "*ist DL"},
+      { PentaxID_staristDS2,   "*istDS2"},
+      { PentaxID_staristDS2,   "*ist DS2"},
+      { PentaxID_GX_1S,        "GX-1S"},       // Samsung
+      { PentaxID_staristDL2,   "*istDL2"},
+      { PentaxID_staristDL2,   "*ist DL2"},
+      { PentaxID_GX_1L,        "GX-1L"},       // Samsung
+      { PentaxID_K100D,        "K100D"},
+      { PentaxID_K110D,        "K110D"},
+      { PentaxID_K100D_Super,  "K100D Super"},
+      { PentaxID_K10D,         "K10D"},
+      { PentaxID_GX10,         "GX10"},        // Samsung
+      { PentaxID_GX10,         "GX-10"},       // Samsung
+      { PentaxID_K20D,         "K20D"},
+      { PentaxID_GX20,         "GX20"},        // Samsung
+      { PentaxID_GX10,         "GX-20"},       // Samsung
+      { PentaxID_K200D,        "K200D"},
+      { PentaxID_K2000,        "K2000"},
+      { PentaxID_K_m,          "K-m"},
+      { PentaxID_K_7,          "K-7"},
+      { PentaxID_K_x,          "K-x"},
+      { PentaxID_645D,         "645D"},
+      { PentaxID_K_r,          "K-r"},
+      { PentaxID_K_5,          "K-5"},
+      { PentaxID_Q,            "Q"},
+      { PentaxID_K_01,         "K-01"},
+      { PentaxID_K_30,         "K-30"},
+      { PentaxID_Q10,          "Q10"},
+      { PentaxID_K_5_II,       "K-5 II"},
+      { PentaxID_K_5_II_s,     "K-5 II s"},
+      { PentaxID_Q7,           "Q7"},
+      { PentaxID_MX_1,         "MX-1"},
+      { PentaxID_K_50,         "K-50"},
+      { PentaxID_K_3,          "K-3"},
+      { PentaxID_K_500,        "K-500"},
+      { PentaxID_645Z,         "645Z"},
+      { PentaxID_K_S1,         "K-S1"},
+      { PentaxID_K_S2,         "K-S2"},        // Ricoh
+      { PentaxID_Q_S1,         "Q-S1"},
+      { PentaxID_K_1,          "K-1"},         // Ricoh
+      { PentaxID_K_3_II,       "K-3 II"},      // Ricoh
+      { PentaxID_GR_III,       "GR III"},      // Ricoh
+      { PentaxID_K_70,         "K-70"},        // Ricoh
+      { PentaxID_KP,           "KP"},          // Ricoh
+      { PentaxID_K_1_Mark_II,  "K-1 Mark II"}, // Ricoh
+    },
+
     sonique[] = {
-        {0x002ULL, "DSC-R1"},      {0x100ULL, "DSLR-A100"},
-        {0x101ULL, "DSLR-A900"},   {0x102ULL, "DSLR-A700"},
-        {0x103ULL, "DSLR-A200"},   {0x104ULL, "DSLR-A350"},
-        {0x105ULL, "DSLR-A300"},   {0x106ULL, "DSLR-A900"},
-        {0x107ULL, "DSLR-A380"},   {0x108ULL, "DSLR-A330"},
-        {0x109ULL, "DSLR-A230"},   {0x10aULL, "DSLR-A290"},
-        {0x10dULL, "DSLR-A850"},   {0x10eULL, "DSLR-A850"},
-        {0x111ULL, "DSLR-A550"},   {0x112ULL, "DSLR-A500"},
-        {0x113ULL, "DSLR-A450"},   {0x116ULL, "NEX-5"},
-        {0x117ULL, "NEX-3"},       {0x118ULL, "SLT-A33"},
-        {0x119ULL, "SLT-A55V"},    {0x11aULL, "DSLR-A560"},
-        {0x11bULL, "DSLR-A580"},   {0x11cULL, "NEX-C3"},
-        {0x11dULL, "SLT-A35"},     {0x11eULL, "SLT-A65"},
-        {0x11fULL, "SLT-A77"},     {0x120ULL, "NEX-5N"},
-        {0x121ULL, "NEX-7"},       {0x122ULL, "NEX-VG20"},
-        {0x123ULL, "SLT-A37"},     {0x124ULL, "SLT-A57"},
-        {0x125ULL, "NEX-F3"},      {0x126ULL, "SLT-A99V"},
-        {0x127ULL, "NEX-6"},       {0x128ULL, "NEX-5R"},
-        {0x129ULL, "DSC-RX100"},   {0x12aULL, "DSC-RX1"},
-        {0x12bULL, "NEX-VG900"},   {0x12cULL, "NEX-VG30"},
-        {0x12eULL, "ILCE-3000"},   {0x12fULL, "SLT-A58"},
-        {0x131ULL, "NEX-3N"},      {0x132ULL, "ILCE-7"},
-        {0x133ULL, "NEX-5T"},      {0x134ULL, "DSC-RX100M2"},
-        {0x135ULL, "DSC-RX10"},    {0x136ULL, "DSC-RX1R"},
-        {0x137ULL, "ILCE-7R"},     {0x138ULL, "ILCE-6000"},
-        {0x139ULL, "ILCE-5000"},   {0x13dULL, "DSC-RX100M3"},
-        {0x13eULL, "ILCE-7S"},     {0x13fULL, "ILCA-77M2"},
-        {0x153ULL, "ILCE-5100"},   {0x154ULL, "ILCE-7M2"},
-        {0x155ULL, "DSC-RX100M4"}, {0x156ULL, "DSC-RX10M2"},
-        {0x158ULL, "DSC-RX1RM2"},  {0x15aULL, "ILCE-QX1"},
-        {0x15bULL, "ILCE-7RM2"},   {0x15eULL, "ILCE-7SM2"},
-        {0x161ULL, "ILCA-68"},     {0x162ULL, "ILCA-99M2"},
-        {0x163ULL, "DSC-RX10M3"},  {0x164ULL, "DSC-RX100M5"},
-        {0x165ULL, "ILCE-6300"},   {0x166ULL, "ILCE-9"},
-        {0x168ULL, "ILCE-6500"},   {0x16aULL, "ILCE-7RM3"},
-        {0x16bULL, "ILCE-7M3"},    {0x16cULL, "DSC-RX0"},
-        {0x16dULL, "DSC-RX10M4"},  {0x16eULL, "DSC-RX100M6"},
-        {0x16fULL, "DSC-HX99"},    {0x171ULL, "DSC-RX100M5A"},
-        {0x173ULL, "ILCE-6400"},   {0x174ULL, "DSC-RX0M2"},
-        {0x176ULL, "DSC-RX100M7"}, {0x177ULL, "ILCE-7RM4"},
-        {0x17aULL, "ILCE-6600"},   {0x17bULL, "ILCE-6100"},
+      { SonyID_DSC_R1,         "DSC-R1"},
+      { SonyID_DSLR_A100,      "DSLR-A100"},
+      { SonyID_DSLR_A900,      "DSLR-A900"},
+      { SonyID_DSLR_A700,      "DSLR-A700"},
+      { SonyID_DSLR_A200,      "DSLR-A200"},
+      { SonyID_DSLR_A350,      "DSLR-A350"},
+      { SonyID_DSLR_A300,      "DSLR-A300"},
+      { SonyID_DSLR_A900_APSC, "DSLR-A900"},
+      { SonyID_DSLR_A380,      "DSLR-A380"},    // DSLR-A390
+      { SonyID_DSLR_A330,      "DSLR-A330"},
+      { SonyID_DSLR_A230,      "DSLR-A230"},
+      { SonyID_DSLR_A290,      "DSLR-A290"},
+      { SonyID_DSLR_A850,      "DSLR-A850"},
+      { SonyID_DSLR_A850_APSC, "DSLR-A850"},
+      { SonyID_DSLR_A550,      "DSLR-A550"},
+      { SonyID_DSLR_A500,      "DSLR-A500"},
+      { SonyID_DSLR_A450,      "DSLR-A450"},
+      { SonyID_NEX_5,          "NEX-5"},
+      { SonyID_NEX_3,          "NEX-3"},
+      { SonyID_SLT_A33,        "SLT-A33"},
+      { SonyID_SLT_A55,        "SLT-A55"},      // SLT-A55V
+      { SonyID_DSLR_A560,      "DSLR-A560"},
+      { SonyID_DSLR_A580,      "DSLR-A580"},
+      { SonyID_NEX_C3,         "NEX-C3"},
+      { SonyID_SLT_A35,        "SLT-A35"},
+      { SonyID_SLT_A65,        "SLT-A65"},      // SLT-A65V
+      { SonyID_SLT_A77,        "SLT-A77"},      // SLT-A77V
+      { SonyID_NEX_5N,         "NEX-5N"},
+      { SonyID_NEX_7,          "NEX-7"},        // Hasselblad Lunar
+      { SonyID_NEX_VG20,       "NEX-VG20"},
+      { SonyID_SLT_A37,        "SLT-A37"},
+      { SonyID_SLT_A57,        "SLT-A57"},
+      { SonyID_NEX_F3,         "NEX-F3"},
+      { SonyID_SLT_A99,        "SLT-A99"},      // SLT-A99V / Hasselblad HV
+      { SonyID_NEX_6,          "NEX-6"},
+      { SonyID_NEX_5R,         "NEX-5R"},
+      { SonyID_DSC_RX100,      "DSC-RX100"},    // Hasselblad Stellar
+      { SonyID_DSC_RX1,        "DSC-RX1"},
+      { SonyID_NEX_VG900,      "NEX-VG900"},
+      { SonyID_NEX_VG30,       "NEX-VG30"},
+      { SonyID_ILCE_3000,      "ILCE-3000"},    // ILCE-3500
+      { SonyID_SLT_A58,        "SLT-A58"},
+      { SonyID_NEX_3N,         "NEX-3N"},
+      { SonyID_ILCE_7,         "ILCE-7"},
+      { SonyID_NEX_5T,         "NEX-5T"},
+      { SonyID_DSC_RX100M2,    "DSC-RX100M2"},  // Hasselblad Stellar II
+      { SonyID_DSC_RX10,       "DSC-RX10"},
+      { SonyID_DSC_RX1R,       "DSC-RX1R"},
+      { SonyID_ILCE_7R,        "ILCE-7R"},      // Hasselblad Lusso
+      { SonyID_ILCE_6000,      "ILCE-6000"},
+      { SonyID_ILCE_5000,      "ILCE-5000"},
+      { SonyID_DSC_RX100M3,    "DSC-RX100M3"},
+      { SonyID_ILCE_7S,        "ILCE-7S"},
+      { SonyID_ILCA_77M2,      "ILCA-77M2"},
+      { SonyID_ILCE_5100,      "ILCE-5100"},
+      { SonyID_ILCE_7M2,       "ILCE-7M2"},
+      { SonyID_DSC_RX100M4,    "DSC-RX100M4"},
+      { SonyID_DSC_RX10M2,     "DSC-RX10M2"},
+      { SonyID_DSC_RX1RM2,     "DSC-RX1RM2"},
+      { SonyID_ILCE_QX1,       "ILCE-QX1"},
+      { SonyID_ILCE_7RM2,      "ILCE-7RM2"},
+      { SonyID_ILCE_7SM2,      "ILCE-7SM2"},
+      { SonyID_ILCA_68,        "ILCA-68"},
+      { SonyID_ILCA_99M2,      "ILCA-99M2"},
+      { SonyID_DSC_RX10M3,     "DSC-RX10M3"},
+      { SonyID_DSC_RX100M5,    "DSC-RX100M5"},
+      { SonyID_ILCE_6300,      "ILCE-6300"},
+      { SonyID_ILCE_9,         "ILCE-9"},
+      { SonyID_ILCE_6500,      "ILCE-6500"},
+      { SonyID_ILCE_7RM3,      "ILCE-7RM3"},
+      { SonyID_ILCE_7M3,       "ILCE-7M3"},
+      { SonyID_DSC_RX0,        "DSC-RX0"},
+      { SonyID_DSC_RX10M4,     "DSC-RX10M4"},
+      { SonyID_DSC_RX100M6,    "DSC-RX100M6"},
+      { SonyID_DSC_HX99,       "DSC-HX99"},
+      { SonyID_DSC_RX100M5A,   "DSC-RX100M5A"},
+      { SonyID_ILCE_6400,      "ILCE-6400"},
+      { SonyID_DSC_RX0M2,      "DSC-RX0M2"},
+      { SonyID_DSC_RX100M7,    "DSC-RX100M7"},
+      { SonyID_ILCE_7RM4,      "ILCE-7RM4"},
+      { SonyID_ILCE_9M2,       "ILCE-9M2"},
+      { SonyID_ILCE_6600,      "ILCE-6600"},
+      { SonyID_ILCE_6100,      "ILCE-6100"},
     };
 
   static const char *orig;
@@ -226,16 +437,20 @@ void LibRaw::GetNormalizedModel()
 
   static const char olyalias[][32] = { // Olympus
     "@AIR A01", "AIR-A01",
+    "@C-3030Z", "C3030Z",
     "@C-5050Z", "C5050Z",
     "@C-5060WZ", "C5060WZ",
     "@C-7000Z", "C7000Z", "C70Z,C7000Z", "C70Z",
     "@C-7070WZ", "C7070WZ",
     "@C-8080WZ", "C8080WZ",
-    "@C350Z", "X200,D560Z,C350Z", "X200", "D560Z",
+    "@C-350Z", "C350Z", "X200,D560Z,C350Z", "X200", "D560Z",
+    "@C-740UZ", "C740UZ",
+    "@C-770UZ", "C770UZ",
     "@E-20", "E-20,E-20N,E-20P", "E-20N", "E-20P",
     "@E-M10 Mark II", "E-M10MarkII", "E-M10_M2", "piX 5oo",
     "@E-M10 Mark III", "E-M10MarkIII", "E-M10_M3",
     "@E-M1 Mark II", "E-M1MarkII", "E-M1_M2",
+    "@E-M1 Mark III", "E-M1MarkIII", "E-M1_M3",
     "@E-M5 Mark III", "E-M5MarkIII", "E-M5_M3",
     "@E-M5 Mark II", "E-M5MarkII", "E-M5_M2",
     "@SH-2", "SH-3",
@@ -248,8 +463,7 @@ void LibRaw::GetNormalizedModel()
     "@SP-560UZ", "SP560UZ",
     "@SP-565UZ", "SP565UZ",
     "@SP-570UZ", "SP570UZ",
-    "@STYLUS 1s", "STYLUS1s", "STYLUS1,1s",
-    "@STYLUS 1", "STYLUS1",
+    "@Stylus 1", "STYLUS1", "STYLUS1s", "STYLUS1,1s",
   };
 
   static const char panalias[][16] = { // Panasonic, PanaLeica
@@ -286,35 +500,35 @@ void LibRaw::GetNormalizedModel()
     "@DC-ZS80", "DC-TZ95", "DC-TZ96", "DC-TZ97",
 
 // interchangeable lens
-    "@DC-G99", "DC-G90", "DC-G91", "DC-G95",
-    "@DMC-G7", "DMC-G70",
-    "@DMC-G8", "DMC-G80", "DMC-G81", "DMC-G85",
-    "@DMC-GH4", "AG-GH4", "CGO4",
-    "@DC-GF10", "DC-GF90", "DC-GX880",
-    "@DC-GF9", "DC-GX850", "DC-GX800",
-    "@DMC-GM1", "DMC-GM1S",
+    "@DC-G99",   "DC-G90",   "DC-G91",  "DC-G95",
+    "@DMC-G7",   "DMC-G70",
+    "@DMC-G8",   "DMC-G80",  "DMC-G81", "DMC-G85",
+    "@DMC-GH4",  "AG-GH4",   "CGO4",
+    "@DC-GF10",  "DC-GF90",  "DC-GX880",
+    "@DC-GF9",   "DC-GX850", "DC-GX800",
+    "@DMC-GM1",  "DMC-GM1S",
     "@DMC-GX85", "DMC-GX80", "DMC-GX7MK2",
-    "@DC-GX9", "DC-GX7MK3",
-    "@DMC-L1", "DIGILUX 3", "DIGILUX3", // full 4/3 mount, not m43
+    "@DC-GX9",   "DC-GX7MK3",
+    "@DMC-L1",   "DIGILUX 3", "DIGILUX3", // full 4/3 mount, not m43
   };
 
   static const char phase1alias[][16] = {
-    "@H20", "H 20",
-    "@H25", "H 25",
+    "@H20",  "H 20",
+    "@H25",  "H 25",
     "@P20+", "P 20+",
-    "@P20", "P 20",
+    "@P20",  "P 20",
     "@P21+", "P 21+", "M18", // "Mamiya M18"
-    "@P21", "P 21",
+    "@P21",  "P 21",
     "@P25+", "P 25+", "M22", // "Mamiya M22"
-    "@P25", "P 25",
+    "@P25",  "P 25",
     "@P30+", "P 30+", "M31", // "Mamiya M31"
-    "@P30", "P 30",
+    "@P30",  "P 30",
     "@P40+", "P 40+",
-    "@P40", "P 40",
+    "@P40",  "P 40",
     "@P45+", "P 45+",
-    "@P45", "P 45",
+    "@P45",  "P 45",
     "@P65+", "P 65+",
-    "@P65", "P 65",
+    "@P65",  "P 65",
   };
 
   static const char SamsungPentax_aliases[][16] = {
@@ -330,7 +544,6 @@ void LibRaw::GetNormalizedModel()
 
   static const char samsungalias[][64] = {
     "@EX1", "TL500",
-//    "@GX20", "GX-20",
     "@NX U", "EK-GN100", "EK-GN110", "EK-GN120", "EK-KN120", "Galaxy NX",
     "@NX mini", "NXF1",
     "@WB2000", "TL350",
@@ -338,42 +551,51 @@ void LibRaw::GetNormalizedModel()
       //    "@WB5500", "WB5500 / VLUU WB5500 / SAMSUNG HZ50W",
       //    "@WB500", "WB510 / VLUU WB500 / SAMSUNG HZ10W",
       //    "@WB550", "WB560 / VLUU WB550 / SAMSUNG HZ15W",
+      //    "@WB650", "SAMSUNG WB650 / VLUU WB650 / SAMSUNG WB660" aka HZ35W
   };
 
 //clang-format on
-  if (!strncasecmp(model, "KODAK PIXPRO S-1", 16))
-  {
-    setMakeFromIndex(LIBRAW_CAMERAMAKER_Kodak);
-    strcpy(make, "Kodak");
-    strcpy(model, "Pixpro S-1");
-    ilm.CameraFormat = LIBRAW_FORMAT_FT;
-  }
-
-  if (strstr(make, "VLUU"))
-  {
+  if (makeIs(LIBRAW_CAMERAMAKER_VLUU)) {
 	  setMakeFromIndex(LIBRAW_CAMERAMAKER_Samsung);
   }
-  else if (makeIs(LIBRAW_CAMERAMAKER_Unknown)) {
+
+  if (makeIs(LIBRAW_CAMERAMAKER_Samsung) &&
+      (ilm.CameraMount == LIBRAW_MOUNT_Pentax_K)) {
+	  setMakeFromIndex(LIBRAW_CAMERAMAKER_Pentax);
+
+  } else if (makeIs(LIBRAW_CAMERAMAKER_Unknown)) {
     if (strcasestr(model, "Google")) {
-		setMakeFromIndex(LIBRAW_CAMERAMAKER_Google);
+		  setMakeFromIndex(LIBRAW_CAMERAMAKER_Google);
     }
+#ifdef USE_6BY9RPI
+	else if(strcasestr(make,"RaspberryPi"))
+		setMakeFromIndex(LIBRAW_CAMERAMAKER_Broadcom);
+#endif
   }
   else if (makeIs(LIBRAW_CAMERAMAKER_Hasselblad) && is_Sony)
   {
 	  setMakeFromIndex(LIBRAW_CAMERAMAKER_Sony);
   }
-  else if (makeIs(LIBRAW_CAMERAMAKER_Clauss) && (OlyID == 0x5330303539ULL))
+  else if (makeIs(LIBRAW_CAMERAMAKER_Clauss) && (OlyID == OlyID_E_M10_Mark_II))
   {
 	  setMakeFromIndex(LIBRAW_CAMERAMAKER_Olympus);
-  }
-  else if (!strncmp(model, "EOS D2000", 9) || !strncmp(model, "EOS D6000", 9) ||
-           !strncmp(model, "EOSDCS", 6) ||
-           !strncasecmp(model, "Camerz ZDS 14", 13))
-  {
+
+  } else if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
+             (!strncmp(model, "EOS D2000", 9) || // don't use unique_id here
+              !strncmp(model, "EOS D6000", 9) || // because ids for Monochrome models are unknown
+              !strncmp(model, "EOSDCS", 6))) {
+    setMakeFromIndex(LIBRAW_CAMERAMAKER_Kodak);
+//    if (unique_id == CanonID_EOS_D2000C) {
+//
+//    } else if (unique_id  == CanonID_EOS_D6000C) {
+///
+//    }
+
+  } else if (makeIs(LIBRAW_CAMERAMAKER_PhotoControl) &&
+             !strncasecmp(model, "Camerz ZDS 14", 13)) {
 	  setMakeFromIndex(LIBRAW_CAMERAMAKER_Kodak);
-  }
-  else
-  {
+
+  } else {
     strcpy(normalized_make, make);
   }
 
@@ -385,7 +607,7 @@ void LibRaw::GetNormalizedModel()
   } else if (makeIs(LIBRAW_CAMERAMAKER_Kodak)) {
     if ((model[6] == ' ') &&
         (!strncmp(model, "DCS4", 4) ||
-        !strncmp(model, "NC2000", 6)))
+         !strncmp(model, "NC2000", 6)))
     {
       model[6] = 0;
     }
@@ -468,7 +690,7 @@ void LibRaw::GetNormalizedModel()
 
   if (makeIs(LIBRAW_CAMERAMAKER_Canon))
   {
-    if (unique_id)
+    if ((unique_id) && (unique_id != CanonID_EOS_D2000C) && (unique_id != CanonID_EOS_D6000C))
     {
       for (i = 0; i < sizeof unique / sizeof *unique; i++)
       {
@@ -483,20 +705,12 @@ void LibRaw::GetNormalizedModel()
   }
   else if (makeIs(LIBRAW_CAMERAMAKER_Fujifilm))
   {
-    if (!strcmp(model + 7, "S2Pro"))
-    {
-      strcpy(model, "S2Pro");
-      strcpy(normalized_model, model);
-    }
     for (i = 0; i < sizeof fujialias / sizeof *fujialias; i++)
     {
       if (fujialias[i][0] == '@')
       {
         orig = fujialias[i] + 1;
-        if (!strcmp(model, orig))
-        {
-          break;
-        }
+        if (!strcmp(model, orig)) break;
       }
       else if (!strcmp(model, fujialias[i]))
       {
@@ -512,23 +726,17 @@ void LibRaw::GetNormalizedModel()
   {
     for (i = 0; i < sizeof phase1alias / sizeof *phase1alias; i++)
     { // re-badged Phase One backs
-      if (phase1alias[i][0] == '@')
-      {
-        orig = phase1alias[i] + 1;
-      }
+      if (phase1alias[i][0] == '@') orig = phase1alias[i] + 1;
       else if (!strcmp(model, phase1alias[i]))
       {
-		setMakeFromIndex(LIBRAW_CAMERAMAKER_PhaseOne);
+        setMakeFromIndex(LIBRAW_CAMERAMAKER_PhaseOne);
         strcpy(normalized_model, orig);
         break;
       }
     }
     for (i = 0; i < sizeof leafalias / sizeof *leafalias; i++)
     { // re-badged Leaf backs
-      if (leafalias[i][0] == '@')
-      {
-        orig = leafalias[i] + 1;
-      }
+      if (leafalias[i][0] == '@') orig = leafalias[i] + 1;
       else if (!strcmp(model, leafalias[i]))
       {
         setMakeFromIndex(LIBRAW_CAMERAMAKER_Leaf);
@@ -547,10 +755,7 @@ void LibRaw::GetNormalizedModel()
       if (leafalias[i][0] == '@')
       {
         orig = leafalias[i] + 1;
-        if (!strcmp(model, orig))
-        {
-          break;
-        }
+        if (!strcmp(model, orig)) break;
       }
       else if (!strcmp(model, leafalias[i]))
       { // maybe to change regular "make" to "Mamiya" too
@@ -566,7 +771,7 @@ void LibRaw::GetNormalizedModel()
   {
     if (makeIs(LIBRAW_CAMERAMAKER_Konica) && !strncasecmp(model, "DiMAGE", 6))
     {
-	  setMakeFromIndex(LIBRAW_CAMERAMAKER_Minolta);
+      setMakeFromIndex(LIBRAW_CAMERAMAKER_Minolta);
       strcpy(make, "Minolta");
     }
     else
@@ -580,14 +785,14 @@ void LibRaw::GetNormalizedModel()
           orig = KonicaMinolta_aliases[i] + 1;
           if (!strcmp(model, orig))
           {
-			setMakeFromIndex(LIBRAW_CAMERAMAKER_Minolta);
+            setMakeFromIndex(LIBRAW_CAMERAMAKER_Minolta);
             strcpy(make, "Minolta");
             break;
           }
         }
         else if (!strcmp(model, KonicaMinolta_aliases[i]))
         {
-		  setMakeFromIndex(LIBRAW_CAMERAMAKER_Minolta);
+          setMakeFromIndex(LIBRAW_CAMERAMAKER_Minolta);
           strcpy(make, "Minolta");
           strcpy(normalized_model, orig);
           break;
@@ -602,10 +807,7 @@ void LibRaw::GetNormalizedModel()
       if (nikonalias[i][0] == '@')
       {
         orig = nikonalias[i] + 1;
-        if (!strcmp(model, orig))
-        {
-          break;
-        }
+        if (!strcmp(model, orig)) break;
       }
       else if (!strcmp(model, nikonalias[i]))
       {
@@ -613,54 +815,65 @@ void LibRaw::GetNormalizedModel()
         break;
       }
     }
-  }
-  else if (makeIs(LIBRAW_CAMERAMAKER_Olympus))
-  {
-    for (i = 0; i < sizeof olyalias / sizeof *olyalias; i++)
-    {
-      if (olyalias[i][0] == '@')
-      {
+
+  } else if (makeIs(LIBRAW_CAMERAMAKER_Olympus)) {
+    for (i = 0; i < sizeof olyalias / sizeof *olyalias; i++) {
+      if (olyalias[i][0] == '@') {
         orig = olyalias[i] + 1;
-        if (!strcmp(model, orig))
-        {
-          break;
-        }
-      }
-      else if (!strcmp(model, olyalias[i]))
-      {
+        if (!strcmp(model, orig)) break;
+      } else if (!strcmp(model, olyalias[i])) {
         strcpy(normalized_model, orig);
         break;
       }
     }
-  }
-  else if (makeIs(LIBRAW_CAMERAMAKER_Panasonic) ||
-           makeIs(LIBRAW_CAMERAMAKER_Leica) ||
-           makeIs(LIBRAW_CAMERAMAKER_Yuneec))
+
+    if (!OlyID) {
+      if (!strcmp(normalized_model, "C-740UZ")) {
+        ilm.CamID = OlyID = unique_id = OlyID_C_740UZ;
+
+      } else if (!strcmp(normalized_model, "C-770UZ")) {
+        ilm.CamID = OlyID = unique_id = OlyID_C_770UZ;
+      }
+    }
+
+  } else if (makeIs(LIBRAW_CAMERAMAKER_Panasonic) ||
+             makeIs(LIBRAW_CAMERAMAKER_Leica) ||
+             makeIs(LIBRAW_CAMERAMAKER_Yuneec))
   {
     for (i = 0; i < sizeof panalias / sizeof *panalias; i++)
     {
       if (panalias[i][0] == '@')
       {
         orig = panalias[i] + 1;
-        if (!strcmp(model, orig))
-        {
-          break;
-        }
+        if (!strcmp(model, orig)) break;
       }
       else if (!strcmp(model, panalias[i]))
       {
-   	    setMakeFromIndex(LIBRAW_CAMERAMAKER_Panasonic);
+        setMakeFromIndex(LIBRAW_CAMERAMAKER_Panasonic);
         strcpy(normalized_model, orig);
         break;
       }
     }
   } else if (makeIs(LIBRAW_CAMERAMAKER_Pentax)) {
+
+    if (!unique_id) {
+      if (!strcmp(model, "Optio S")) {
+        ilm.CamID = unique_id = PentaxID_Optio_S;
+      } else if (!strcmp(model, "Optio S V1.01")) {
+        ilm.CamID = unique_id = PentaxID_Optio_S_V101;
+      } else if (!strcmp(model, "Optio S4")) {
+        ilm.CamID = unique_id = PentaxID_Optio_S4;
+      } else if (!strcmp(model, "Optio 750Z")) {
+        ilm.CamID = unique_id = PentaxID_Optio_750Z;
+      } else if (!strcmp(model, "Optio 33WR")) {
+        ilm.CamID = unique_id = PentaxID_Optio_33WR;
+      }
+    }
+
     for (i = 0; i < sizeof SamsungPentax_aliases / sizeof *SamsungPentax_aliases; i++) {
       if (SamsungPentax_aliases[i][0] == '@') {
         orig = SamsungPentax_aliases[i] + 1;
-        if (!strcmp(model, orig)) {
-          break;
-        }
+        if (!strcmp(model, orig)) break;
       } else if (!strcmp(model, SamsungPentax_aliases[i])) {
         strcpy(normalized_model, orig);
         break;
@@ -678,10 +891,7 @@ void LibRaw::GetNormalizedModel()
       if (phase1alias[i][0] == '@')
       {
         orig = phase1alias[i] + 1;
-        if (!strcmp(model, orig))
-        {
-          break;
-        }
+        if (!strcmp(model, orig)) break;
       }
       else if (!strcmp(model, phase1alias[i]))
       {
@@ -693,22 +903,22 @@ void LibRaw::GetNormalizedModel()
   else if (makeIs(LIBRAW_CAMERAMAKER_Samsung))
   {
     j = 0;
-    if (strstr(model, "WB5500"))
+    if (strstr(model, "WB5500") || strstr(model, "HZ50W"))
     {
       strcpy(model, "WB5500");
       j++;
     }
-    else if (strstr(model, "WB5000"))
+    else if (strstr(model, "WB5000") || strstr(model, "HZ25W"))
     {
       strcpy(model, "WB5000");
       j++;
     }
-    else if (strstr(model, "WB550"))
+    else if (strstr(model, "WB550") || strstr(model, "HZ15W"))
     {
       strcpy(model, "WB550");
       j++;
     }
-    else if (strstr(model, "WB500"))
+    else if (strstr(model, "WB500") || strstr(model, "HZ10W"))
     {
       strcpy(model, "WB500");
       j++;
@@ -724,29 +934,10 @@ void LibRaw::GetNormalizedModel()
         if (samsungalias[i][0] == '@')
         {
           orig = samsungalias[i] + 1;
-          if (!strcmp(model, orig))
-          {
-            break;
-          }
+          if (!strcmp(model, orig)) break;
         }
         else if (!strcmp(model, samsungalias[i]))
         {
-          strcpy(normalized_model, orig);
-          break;
-        }
-      }
-      // re-badged Pentax cameras, CamIDs differ from original Pentax models
-      for (i = 0;
-           i < sizeof SamsungPentax_aliases / sizeof *SamsungPentax_aliases;
-           i++)
-      {
-        if (SamsungPentax_aliases[i][0] == '@')
-        {
-          orig = SamsungPentax_aliases[i] + 1;
-        }
-        else if (!strcmp(model, SamsungPentax_aliases[i]))
-        {
-		  setMakeFromIndex(LIBRAW_CAMERAMAKER_Pentax);
           strcpy(normalized_model, orig);
           break;
         }
@@ -777,10 +968,7 @@ void LibRaw::GetNormalizedModel()
       if (kodakalias[i][0] == '@')
       {
         orig = kodakalias[i] + 1;
-        if (!strcmp(model, orig))
-        {
-          break;
-        }
+        if (!strcmp(model, orig)) break;
       }
       else if (!strcmp(model, kodakalias[i]))
       {
@@ -865,8 +1053,14 @@ void LibRaw::GetNormalizedModel()
         ilm.CameraMount = LIBRAW_MOUNT_Mamiya645;
         strcpy(ilm.body, "Mamiya 645");
       }
+
+    } else if (!strncasecmp(model, "PIXPRO S-1", 10)) {
+      ilm.CameraFormat = LIBRAW_FORMAT_FT;
+    } else if (!strncasecmp(model, "PIXPRO ", 7)) {
+      ilm.CameraFormat = LIBRAW_FORMAT_1div2p3INCH;
     }
   }
+
   else if (makeIs(LIBRAW_CAMERAMAKER_Fujifilm))
   {
     if (!strncmp(normalized_model, "DBP", 3))
@@ -903,7 +1097,7 @@ void LibRaw::GetNormalizedModel()
       if (!strncmp(normalized_model, "DC-S", 4))
       {
         ilm.CameraFormat = LIBRAW_FORMAT_FF;
-        ilm.CameraMount = LIBRAW_MOUNT_Leica_L;
+        ilm.CameraMount = LIBRAW_MOUNT_LPS_L;
       }
       else if (!strncmp(normalized_model, "DMC-L1", 6) ||
                !strncmp(normalized_model, "DMC-L10", 7))
@@ -1017,7 +1211,7 @@ void LibRaw::GetNormalizedModel()
       if (!strncmp(normalized_model, "fp", 2))
       {
         ilm.CameraFormat = LIBRAW_FORMAT_FF;
-        ilm.CameraMount = LIBRAW_MOUNT_Sigma_X3F;
+        ilm.CameraMount = LIBRAW_MOUNT_LPS_L;
       }
       else if (!strncasecmp(normalized_model, "SD", 2))
       {
@@ -1106,6 +1300,12 @@ void LibRaw::GetNormalizedModel()
     }
   }
 
+  if ((ilm.LensMount == LIBRAW_MOUNT_Canon_RF) &&
+      (ilm.LensID == 61182)                    &&
+      (imCanon.RF_lensID != 0))                {
+    ilm.LensID = imCanon.RF_lensID;
+  }
+
   if (ilm.LensMount == LIBRAW_MOUNT_Unknown)
   {
     if (makeIs(LIBRAW_CAMERAMAKER_Samsung))
@@ -1155,34 +1355,29 @@ void LibRaw::GetNormalizedModel()
 
   if (normalized_model[0] && !CM_found)
     CM_found = adobe_coeff(maker_index, normalized_model);
+
 }
 
 void LibRaw::SetStandardIlluminants (unsigned makerIdx, const char* normModel) {
   int i = -1;
   int c;
-  if (!imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] &&
-      !imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][0]) {
+  if (!icWBC[LIBRAW_WBI_Ill_A][0] &&
+      !icWBC[LIBRAW_WBI_D65][0]) {
     if (makerIdx == LIBRAW_CAMERAMAKER_Olympus) {
-      while (++i, imgdata.color.WBCT_Coeffs[i][0]) {
-        if (imgdata.color.WBCT_Coeffs[i][0] == 3000)
-          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][c] =
-                    imgdata.color.WBCT_Coeffs[i][c+1];
-        else if (imgdata.color.WBCT_Coeffs[i][0] == 6600)
-          FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][c] =
-                    imgdata.color.WBCT_Coeffs[i][c+1];
+      while (++i, icWBCCTC[i][0]) {
+        if (icWBCCTC[i][0] == 3000)
+          FORC4 icWBC[LIBRAW_WBI_Ill_A][c] = icWBCCTC[i][c+1];
+        else if (icWBCCTC[i][0] == 6600)
+          FORC4 icWBC[LIBRAW_WBI_D65][c] = icWBCCTC[i][c+1];
       }
     }
   }
 
-  if (!imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][0] &&
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][0])
-    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_Ill_A][c] =
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_Tungsten][c];
+  if (!icWBC[LIBRAW_WBI_Ill_A][0] && icWBC[LIBRAW_WBI_Tungsten][0])
+    FORC4 icWBC[LIBRAW_WBI_Ill_A][c] = icWBC[LIBRAW_WBI_Tungsten][c];
 
-  if (!imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][0] &&
-      imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][0])
-    FORC4 imgdata.color.WB_Coeffs[LIBRAW_WBI_D65][c] =
-              imgdata.color.WB_Coeffs[LIBRAW_WBI_FL_N][c];
+  if (!icWBC[LIBRAW_WBI_D65][0] && icWBC[LIBRAW_WBI_FL_N][0])
+    FORC4 icWBC[LIBRAW_WBI_D65][c] = icWBC[LIBRAW_WBI_FL_N][c];
 
   return;
 }

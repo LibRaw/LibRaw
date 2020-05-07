@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -24,6 +24,57 @@
 #include "gpr_read_image.h"
 #endif
 
+#ifdef USE_DNGSDK
+static dng_ifd* search_single_ifd(const std::vector <dng_ifd *>& v, uint64 offset, int& idx, dng_stream& stream)
+{
+    idx = -1;
+    for (int i = 0; i < v.size(); i++)
+    {
+        if (!v[i]) continue;
+        if (v[i]->fTileOffsetsOffset == offset)
+        {
+            idx = i;
+            return v[i];
+        }
+        else if (v[i]->fTileOffsetsCount == 1 && v[i]->fTileOffset[0] == offset)
+        {
+            idx = i;
+            return v[i];
+        }
+		else if (v[i]->fTileOffsetsCount > dng_ifd::kMaxTileInfo)
+		{
+			uint64 p  = stream.Position();
+			stream.SetReadPosition(v[i]->fTileOffsetsOffset);
+			int32 oo = stream.TagValue_uint32(v[i]->fTileOffsetsType);
+			stream.SetReadPosition(p);
+			if (oo == offset)
+			{
+				idx = i;
+				return v[i];
+			}
+		}
+    }
+    return NULL;
+}
+
+static dng_ifd* search_for_ifd(const dng_info& info, uint64 offset, ushort w, ushort h, int& ifdIndex, dng_stream& stream)
+{
+    dng_ifd *ret = 0;
+    ret = search_single_ifd(info.fIFD, offset, ifdIndex, stream);
+    int dummy;
+    if (!ret) ret = search_single_ifd(info.fChainedIFD, offset, dummy, stream);
+    if (!ret)
+    {
+        for (int c = 0; !ret && c < info.fChainedSubIFD.size(); c++)
+            ret = search_single_ifd(info.fChainedSubIFD[c], offset, dummy, stream);
+    }
+    if (ret && (ret->fImageLength == h) && ret->fImageWidth == w)
+        return ret;
+    ifdIndex = -1;
+    return 0;
+}
+#endif
+
 int LibRaw::valid_for_dngsdk()
 {
 #ifndef USE_DNGSDK
@@ -31,6 +82,32 @@ int LibRaw::valid_for_dngsdk()
 #else
   if (!imgdata.idata.dng_version)
     return 0;
+  if (libraw_internal_data.unpacker_data.tiff_compress == 34892
+	  && libraw_internal_data.unpacker_data.tiff_bps == 8
+	  && libraw_internal_data.unpacker_data.tiff_samples == 3
+	  && load_raw == &LibRaw::lossy_dng_load_raw
+	  )
+  {
+      if (!dnghost)
+          return 0;
+      dng_host *host = static_cast<dng_host *>(dnghost);
+      libraw_dng_stream stream(libraw_internal_data.internal_data.input);
+      AutoPtr<dng_negative> negative;
+      negative.Reset(host->Make_dng_negative());
+      dng_info info;
+      info.Parse(*host, stream);
+      info.PostParse(*host);
+      if (!info.IsValidDNG())
+          return 0;
+      negative->Parse(*host, stream, info);
+      negative->PostParse(*host, stream, info);
+      int ifdindex = -1;
+      dng_ifd *rawIFD = search_for_ifd(info, libraw_internal_data.unpacker_data.data_offset, imgdata.sizes.raw_width, imgdata.sizes.raw_height, ifdindex,stream);
+      if (rawIFD && ifdindex >= 0 && ifdindex == info.fMainIndex)
+          return 1;
+	  return 0;
+  }
+
 #ifdef USE_GPRSDK
   if (load_raw == &LibRaw::vc5_dng_load_raw_placeholder) // regardless of flags or use_dngsdk value!
       return 1;
@@ -65,31 +142,7 @@ int LibRaw::valid_for_dngsdk()
 #endif
 }
 
-#ifdef USE_DNGSDK
-static dng_ifd* search_single_ifd(const std::vector <dng_ifd *>& v, uint64 offset)
-{
-    for(int i = 0; i < v.size(); i++)
-    {
-        if(!v[i]) continue;;
-        if(v[i]->fTileOffsetsOffset == offset) return v[i];
-        if(v[i]->fTileOffsetsCount == 1 && v[i]->fTileOffset[0] == offset) return v[i];
-    }
-    return NULL;
-}
 
-static dng_ifd* search_for_ifd(const dng_info& info, uint64 offset, ushort w, ushort h)
-{
-    dng_ifd *ret = 0;
-    ret = search_single_ifd(info.fIFD,offset);
-    if(!ret) ret = search_single_ifd(info.fChainedIFD,offset);
-    if(!ret)
-        for(int c = 0; !ret && c < info.fChainedSubIFD.size(); c++)
-            ret = search_single_ifd(info.fChainedSubIFD[c],offset);
-    if(ret && (ret->fImageLength == h) && ret->fImageWidth == w)
-        return ret;
-    return 0;
-}
-#endif
 
 
 int LibRaw::try_dngsdk()
@@ -117,34 +170,90 @@ int LibRaw::try_dngsdk()
     }
     negative->Parse(*host, stream, info);
     negative->PostParse(*host, stream, info);
-    dng_ifd *rawIFD = search_for_ifd(info,libraw_internal_data.unpacker_data.data_offset,imgdata.sizes.raw_width,imgdata.sizes.raw_height);
+    int ifdindex;
+    dng_ifd *rawIFD = search_for_ifd(info,libraw_internal_data.unpacker_data.data_offset,imgdata.sizes.raw_width,imgdata.sizes.raw_height,ifdindex,stream);
     if(!rawIFD)
         return LIBRAW_DATA_ERROR;
 
-    AutoPtr<dng_simple_image> stage2(new dng_simple_image(rawIFD->Bounds (),rawIFD->fSamplesPerPixel,rawIFD->PixelType (), host->Allocator()));
-#ifdef USE_GPRSDK
-    if(libraw_internal_data.unpacker_data.tiff_compress == 9)
-    {
-        gpr_allocator allocator;
-        allocator.Alloc = ::malloc;
-        allocator.Free = ::free;
-        gpr_buffer_auto vc5_image_obj( allocator.Alloc, allocator.Free );
+    AutoPtr<dng_simple_image> stage2;
+    bool stage23used = false;
+	bool zerocopy = false;
 
-        gpr_read_image reader(&vc5_image_obj);
-        reader.Read(*host,*rawIFD,stream,*stage2.Get(),NULL,NULL);
+    //(new dng_simple_image(rawIFD->Bounds(), rawIFD->fSamplesPerPixel, rawIFD->PixelType(), host->Allocator()));
+
+    if (((libraw_internal_data.unpacker_data.tiff_compress == 34892 
+        && libraw_internal_data.unpacker_data.tiff_bps == 8
+        && libraw_internal_data.unpacker_data.tiff_samples == 3
+        && load_raw == &LibRaw::lossy_dng_load_raw) || 
+		(imgdata.params.raw_processing_options & (LIBRAW_PROCESSING_DNG_STAGE2| LIBRAW_PROCESSING_DNG_STAGE3)))
+        && ifdindex >= 0)
+    {
+        if (info.fMainIndex != ifdindex)
+            info.fMainIndex = ifdindex;
+
+        negative->ReadStage1Image(*host, stream, info);
+        negative->BuildStage2Image(*host);
+		imgdata.process_warnings |= LIBRAW_WARN_DNG_STAGE2_APPLIED;
+		if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNG_STAGE3)
+		{
+			negative->BuildStage3Image(*host);
+			stage2.Reset((dng_simple_image*)negative->Stage3Image());
+			imgdata.process_warnings |= LIBRAW_WARN_DNG_STAGE3_APPLIED;
+		}
+		else
+			stage2.Reset((dng_simple_image*)negative->Stage2Image());
+        stage23used = true;
     }
     else
-#endif
     {
-        dng_read_image reader;
-        reader.Read(*host,*rawIFD,stream,*stage2.Get(),NULL,NULL);
+        stage2.Reset(new dng_simple_image(rawIFD->Bounds(), rawIFD->fSamplesPerPixel, rawIFD->PixelType(), host->Allocator()));
+#ifdef USE_GPRSDK
+        if (libraw_internal_data.unpacker_data.tiff_compress == 9)
+        {
+            gpr_allocator allocator;
+            allocator.Alloc = ::malloc;
+            allocator.Free = ::free;
+            gpr_buffer_auto vc5_image_obj(allocator.Alloc, allocator.Free);
+
+            gpr_read_image reader(&vc5_image_obj);
+            reader.Read(*host, *rawIFD, stream, *stage2.Get(), NULL, NULL);
+        }
+        else
+#endif
+        {
+            dng_read_image reader;
+            reader.Read(*host, *rawIFD, stream, *stage2.Get(), NULL, NULL);
+        }
     }
 
     if (stage2->Bounds().W() != S.raw_width ||
         stage2->Bounds().H() != S.raw_height)
     {
-      return LIBRAW_DATA_ERROR;
+		if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNG_ALLOWSIZECHANGE)
+		{
+			S.raw_width = S.width = stage2->Bounds().W();
+			S.left_margin = 0;
+			S.raw_height = S.height = stage2->Bounds().H();
+			S.top_margin = 0;
+		}
+		else
+		{
+			stage2.Release(); // It holds copy to internal dngnegative
+			return LIBRAW_DATA_ERROR;
+		}
     }
+	if (stage23used)
+	{
+		if (stage2->Planes() > 1)
+		{
+			imgdata.idata.filters = 0;
+			imgdata.idata.colors = stage2->Planes();
+		}
+		// reset BL and whitepoint
+		imgdata.color.black = 0;
+		memset(imgdata.color.cblack, 0, sizeof(imgdata.color.cblack));
+		imgdata.color.maximum = 0xffff;
+	}
 
     int pplanes = stage2->Planes();
     int ptype = stage2->PixelType();
@@ -153,9 +262,8 @@ int LibRaw::try_dngsdk()
     stage2->GetPixelBuffer(buffer);
 
     int pixels = stage2->Bounds().H() * stage2->Bounds().W() * pplanes;
-    bool zerocopy = false;
 
-    if (ptype == ttShort && !is_curve_linear())
+    if (ptype == ttShort && !stage23used &&  !is_curve_linear())
     {
       imgdata.rawdata.raw_alloc = malloc(pixels * TagTypeSize(ptype));
       ushort *src = (ushort *)buffer.fData;
@@ -163,6 +271,7 @@ int LibRaw::try_dngsdk()
       for (int i = 0; i < pixels; i++)
         dst[i] = imgdata.color.curve[src[i]];
       S.raw_pitch = S.raw_width * pplanes * TagTypeSize(ptype);
+
     }
     else if (ptype == ttByte)
     {
@@ -184,8 +293,7 @@ int LibRaw::try_dngsdk()
     else
     {
       // Alloc
-      if (imgdata.params.raw_processing_options &
-          LIBRAW_PROCESSING_DNGSDK_ZEROCOPY)
+      if ((imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNGSDK_ZEROCOPY) && !stage23used)
       {
         zerocopy = true;
       }
@@ -197,6 +305,9 @@ int LibRaw::try_dngsdk()
       }
       S.raw_pitch = S.raw_width * pplanes * TagTypeSize(ptype);
     }
+
+    if (stage23used)
+        stage2.Release();
 
     if (zerocopy)
     {

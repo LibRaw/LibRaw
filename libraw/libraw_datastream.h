@@ -1,6 +1,6 @@
 /* -*- C -*-
  * File: libraw_datastream.h
- * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
  * Created: Sun Jan 18 13:07:35 2009
  *
  * LibRaw Data stream interface
@@ -96,7 +96,8 @@ public:
   virtual int scanf_one(const char *, void *) = 0;
   virtual int eof() = 0;
   virtual void *make_jas_stream() = 0;
-  virtual int jpeg_src(void *) { return -1; }
+  virtual int jpeg_src(void *);
+  virtual void buffering_off() {}
   /* reimplement in subclass to use parallel access in xtrans_load_raw() if
    * OpenMP is not used */
   virtual int lock() { return 1; } /* success */
@@ -137,7 +138,6 @@ public:
   LibRaw_file_datastream(const wchar_t *fname);
 #endif
   virtual void *make_jas_stream();
-  virtual int jpeg_src(void *jpegdata);
   virtual int valid();
   virtual int read(void *ptr, size_t size, size_t nmemb);
   virtual int eof();
@@ -188,7 +188,6 @@ public:
 #endif
   virtual ~LibRaw_bigfile_datastream();
   virtual int valid();
-  virtual int jpeg_src(void *jpegdata);
   virtual void *make_jas_stream();
 
   virtual int read(void *ptr, size_t size, size_t nmemb);
@@ -261,6 +260,7 @@ public:
   {
     if (parent_stream)
     {
+        parent_stream->buffering_off();
       off = parent_stream->tell();
       parent_stream->seek(0UL, SEEK_SET); /* seek to start */
     }

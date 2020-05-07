@@ -2421,6 +2421,8 @@ void LibRaw::crxLoadFinalizeLoopE3(void *p, int planeHeight)
 
 void LibRaw::crxLoadRaw()
 {
+	if (libraw_internal_data.unpacker_data.CR3_Version != 0x100)
+		throw LIBRAW_EXCEPTION_DECODE_RAW;
   CrxImage img;
   if (libraw_internal_data.unpacker_data.crx_track_selected < 0 ||
       libraw_internal_data.unpacker_data.crx_track_selected >=
@@ -2501,8 +2503,9 @@ int LibRaw::crxParseImageHeader(uchar *cmp1TagData, int nTrack)
   hdr->mdatHdrSize = sgetn(4, cmp1TagData + 28);
 
   // validation
-  if (hdr->version != 0x100 || !hdr->mdatHdrSize)
+  if ((hdr->version != 0x100 && hdr->version != 0x200) || !hdr->mdatHdrSize)
     return -1;
+  libraw_internal_data.unpacker_data.CR3_Version = hdr->version;
   if (hdr->encType == 1)
   {
     if (hdr->nBits > 15)

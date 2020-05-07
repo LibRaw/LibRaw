@@ -14,7 +14,6 @@ LibRaw distribution files are prepared by ./mkdist.sh script
      - generates ./configure script from autotools stuff
      - removes developer Makefile
      - fetches 'Official' dcraw.c from Dave Coffin's site
-     - removes .PSD files from doc/
      - removes itself
 
 Feel free to contact us (info@libraw.org or Contact form on www.libraw.org) if

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -248,10 +248,12 @@ int LibRaw::thumbOK(INT64 maxsz)
               LIBRAW_PROCESSING_USE_PPM16_THUMBS)
                  ? 2
                  : 1);
+#ifdef USE_X3FTOOLS
   else if (write_thumb == &LibRaw::x3f_thumb_loader)
   {
     tsize = x3f_thumb_size();
   }
+#endif
   else // Kodak => no check
     tsize = 1;
   if (tsize < 0)

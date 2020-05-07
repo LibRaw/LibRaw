@@ -1,7 +1,7 @@
 /* -*- C++ -*-
  * File: raw2text.cpp
- * Copyright 2008-2019 LibRaw LLC (info@libraw.org)
- * Created: Sun Sept 01, 2019
+ * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
+ * Created: Sun Sept 01, 2020
  *
  * LibRaw sample
  * Dumps (small) selection of RAW data to text file

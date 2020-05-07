@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -17,10 +17,11 @@
  */
 
 #include "../../internal/dcraw_defs.h"
+#include "../../internal/libraw_cameraids.h"
 
 int LibRaw::parse_tiff_ifd(int base)
 {
-  unsigned entries, tag, type, len, plen = 16, save;
+  unsigned entries, tag, type, len, plen = 16, save, utmp;
   int ifd, use_cm = 0, cfa, i, j, c, ima_len = 0;
   char *cbuf, *cp;
   uchar cfa_pat[16], cfa_pc[] = {0, 1, 2, 3}, tab[256];
@@ -149,9 +150,9 @@ int LibRaw::parse_tiff_ifd(int base)
         {
           if ((j = get2()) < 0x100)
           {
-            imgdata.color.WB_Coeffs[j][0] = get2();
-            imgdata.color.WB_Coeffs[j][2] = get2();
-            imgdata.color.WB_Coeffs[j][1] = imgdata.color.WB_Coeffs[j][3] =
+            icWBC[j][0] = get2();
+            icWBC[j][2] = get2();
+            icWBC[j][1] = icWBC[j][3] =
                 0x100;
           }
           else // light source out of EXIF numbers range
@@ -174,10 +175,11 @@ int LibRaw::parse_tiff_ifd(int base)
                         2 - RAW DMC-FZ8/FZ18
                         3 - RAW DMC-L10
                         4 - RW2 for most other models, including G9 in "pixel shift off"
-                      mode and YUNEEC CGO4            (must add 15 to black levels for RawFormat == 4)
-                        5 - RW2 DC-GH5s; G9 in "pixel shift on" mode
-                        6 - RW2 DC-S1, DC-S1R in "pixel shift off" mode
-                        7 - RW2 DC-S1R (probably DC-S1 too) in "pixel shift on" mode
+                      mode and YUNEEC CGO4            (must add 15 to black levels for
+                      RawFormat == 4)            5 - RW2 DC-GH5s; G9 in "pixel shift on"
+                      mode            6 - RW2            DC-S1, DC-S1R in "pixel shift off"
+                      mode            7 -            RW2 DC-S1R (probably            DC-S1 too) in
+                      "pixel shift on" mode
                    */
         pana_encoding = get2();
         break;
@@ -226,6 +228,25 @@ int LibRaw::parse_tiff_ifd(int base)
       case 0x0121: /* 289, Multishot, 0 is Off, 65536 is Pixel Shift */
         imPana.Multishot = get4();
         break;
+      case 0x1201:
+        if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT)) {
+          ilm.LensID = fgetc(ifp);
+          if (ilm.LensID && (ilm.LensID != 0xff)) ilm.LensID <<= 16;
+        } else if (type == 258) {
+          unsigned n = get4();
+          if (n == 257) {
+            ilm.LensMount = LIBRAW_MOUNT_LPS_L;
+            ilm.LensFormat = LIBRAW_FORMAT_FF;
+          }
+        }
+        break;
+      case 0x1202:
+        if (ilm.LensID != 0xffffffffffffffff) {
+          utmp = (fgetc(ifp) << 8) | fgetc(ifp);
+          if (utmp) ilm.LensID += utmp;
+          else ilm.LensID = 0xffffffffffffffff;
+        }
+        break;
       case 0x1203: /* 4611, FocalLengthIn35mmFormat, contained in 0x0120
                       CameraIFD */
         if (imgdata.lens.FocalLengthIn35mmFormat < 0.65f)
@@ -245,12 +266,11 @@ int LibRaw::parse_tiff_ifd(int base)
         }
         break;
       case 0x3420: /* 13344, WB_RedLevelAuto, contained in 0x0120 CameraIFD */
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][0] = get2();
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1] =
-            imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] = 1024.0f;
+        icWBC[LIBRAW_WBI_Auto][0] = get2();
+        icWBC[LIBRAW_WBI_Auto][1] = icWBC[LIBRAW_WBI_Auto][3] = 1024.0f;
         break;
       case 0x3421: /* 13345, WB_BlueLevelAuto, contained in 0x0120 CameraIFD */
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][2] = get2();
+        icWBC[LIBRAW_WBI_Auto][2] = get2();
         break;
       case 0x0002: /*   2, ImageWidth */
         tiff_ifd[ifd].t_width = getint(type);
@@ -279,11 +299,11 @@ int LibRaw::parse_tiff_ifd(int base)
         break;
       case 0x0011: /*  17, RedBalance */
       case 0x0012: /*  18, BlueBalance */
-        if (type == 3 && len == 1)
+        if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT) && len == 1)
           cam_mul[(tag - 0x0011) * 2] = get2() / 256.0;
         break;
       case 0x0017: /*  23, ISO */
-        if (type == 3)
+        if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_SHORT))
           iso_speed = get2();
         break;
       case 0x0024: /*  36, WBRedLevel */
@@ -298,10 +318,9 @@ int LibRaw::parse_tiff_ifd(int base)
         {
           if ((j = get2()) < 0x100)
           {
-            imgdata.color.WB_Coeffs[j][0] = get2();
-            imgdata.color.WB_Coeffs[j][1] = imgdata.color.WB_Coeffs[j][3] =
-                get2();
-            imgdata.color.WB_Coeffs[j][2] = get2();
+            icWBC[j][0] = get2();
+            icWBC[j][1] = icWBC[j][3] = get2();
+            icWBC[j][2] = get2();
           }
           else
             fseek(ifp, 6, SEEK_CUR);
@@ -313,14 +332,14 @@ int LibRaw::parse_tiff_ifd(int base)
         FORC3 cam_mul[c] = get2();
         break;
       case 0x002e: /*  46, JpgFromRaw */
-        if (type != 7 || fgetc(ifp) != 0xff || fgetc(ifp) != 0xd8)
+        if ((type != LIBRAW_EXIFTAG_TYPE_UNDEFINED) || (fgetc(ifp) != 0xff) || (fgetc(ifp) != 0xd8))
           break;
         thumb_offset = ftell(ifp) - 2;
         thumb_length = len;
         break;
 
       case 0x0118: /* 280, Panasonic RW2 offset */
-        if (type != 4)
+        if (type != LIBRAW_EXIFTAG_TYPE_LONG)
           break;
         load_raw = &LibRaw::panasonic_load_raw;
         load_flags = 0x2008;
@@ -370,8 +389,8 @@ int LibRaw::parse_tiff_ifd(int base)
       parse_tiff_ifd(base);
       break;
     case 0x00fe: /* NewSubfileType */
-        tiff_ifd[ifd].newsubfiletype = getreal(type);
-        break;
+      tiff_ifd[ifd].newsubfiletype = getreal(type);
+      break;
     case 0x0100: /* 256, ImageWidth */
     case 0xf001: /* 61441, Fuji RAF IFD 0xf001 RawImageFullWidth */
       tiff_ifd[ifd].t_width = getint(type);
@@ -418,8 +437,7 @@ int LibRaw::parse_tiff_ifd(int base)
       fgets(make, 64, ifp);
       break;
     case 0x0110: /* 272, Model */
-      if (!strncmp(make, "Hasselblad", 10) &&
-          model[0] &&
+      if (!strncmp(make, "Hasselblad", 10) && model[0] &&
           (imHassy.format != LIBRAW_HF_Imacon))
         break;
       fgets(model, 64, ifp);
@@ -432,6 +450,9 @@ int LibRaw::parse_tiff_ifd(int base)
       break;
     case 0x0115: /* 277, SamplesPerPixel */
       tiff_ifd[ifd].samples = getint(type) & 7;
+      break;
+    case 0x0152: /* Extrasamples */
+      tiff_ifd[ifd].extrasamples = (getint(type) & 0xff) + 1024;
       break;
     case 0x0117: /* 279, StripByteCounts */
       if (len > 1 && len < 16384)
@@ -523,8 +544,11 @@ int LibRaw::parse_tiff_ifd(int base)
       maximum = 0xfff;
       break;
     case 0x02bc: // 700
-      if ((type == 1 || type == 2 || type == 6 || type == 7) && len > 1 &&
-          len < 5100000)
+      if ((tagtypeIs(LIBRAW_EXIFTAG_TYPE_BYTE) ||
+          tagtypeIs(LIBRAW_EXIFTAG_TYPE_ASCII) ||
+          tagtypeIs(LIBRAW_EXIFTAG_TYPE_SBYTE) ||
+          tagtypeIs(LIBRAW_EXIFTOOLTAGTYPE_binary)) &&
+          (len > 1) && (len < 5100000))
       {
         xmpdata = (char *)malloc(xmplen = len + 1);
         fread(xmpdata, len, 1, ifp);
@@ -554,13 +578,13 @@ int LibRaw::parse_tiff_ifd(int base)
       raw_width = 0;
       break;
     case 0x7303: // 29443, Sony SR2SubIFD
-      FORC4 cam_mul[c ^ (c < 2)] = get2();
+      FORC4 cam_mul[GRBG_2_RGBG(c)] = get2();
       break;
     case 0x7313: // 29459, Sony SR2SubIFD
-      FORC4 cam_mul[c ^ (c >> 1)] = get2();
+      FORC4 cam_mul[RGGB_2_RGBG(c)] = get2();
       break;
     case 0x7310: // 29456, Sony SR2SubIFD
-      FORC4 cblack[c ^ c >> 1] = get2();
+      FORC4 cblack[RGGB_2_RGBG(c)] = get2();
       i = cblack[3];
       FORC3 if (i > cblack[c]) i = cblack[c];
       FORC4 cblack[c] -= i;
@@ -623,25 +647,26 @@ int LibRaw::parse_tiff_ifd(int base)
       aperture = getreal(type);
       break;
     case 0x9400:
-      imgdata.makernotes.common.exifAmbientTemperature = getreal(type);
-      if ((imgdata.makernotes.common.CameraTemperature > -273.15f) &&
-          ((OlyID == 0x4434353933ULL) || (OlyID == 0x4434363033ULL))) // TG-5/6
-        imgdata.makernotes.common.CameraTemperature += imgdata.makernotes.common.exifAmbientTemperature;
+      imCommon.exifAmbientTemperature = getreal(type);
+      if ((imCommon.CameraTemperature > -273.15f) &&
+          ((OlyID == OlyID_TG_5) || (OlyID == OlyID_TG_6)))
+        imCommon.CameraTemperature +=
+            imCommon.exifAmbientTemperature;
       break;
     case 0x9401:
-      imgdata.makernotes.common.exifHumidity = getreal(type);
+      imCommon.exifHumidity = getreal(type);
       break;
     case 0x9402:
-      imgdata.makernotes.common.exifPressure = getreal(type);
+      imCommon.exifPressure = getreal(type);
       break;
     case 0x9403:
-      imgdata.makernotes.common.exifWaterDepth = getreal(type);
+      imCommon.exifWaterDepth = getreal(type);
       break;
     case 0x9404:
-      imgdata.makernotes.common.exifAcceleration = getreal(type);
+      imCommon.exifAcceleration = getreal(type);
       break;
     case 0x9405:
-      imgdata.makernotes.common.exifCameraElevationAngle = getreal(type);
+      imCommon.exifCameraElevationAngle = getreal(type);
       break;
     case 0xa405: // FocalLengthIn35mmFormat
       imgdata.lens.FocalLengthIn35mmFormat = get2();
@@ -688,7 +713,7 @@ int LibRaw::parse_tiff_ifd(int base)
       {
         int q = get2();
         if (q)
-          cam_mul[c ^ 1] = 4096.0 / q;
+          cam_mul[GRGB_2_RGBG(c)] = 4096.0 / q;
       }
       break;
     case 0x8603: /* 34307, Leaf CatchLight color matrix */
@@ -698,7 +723,7 @@ int LibRaw::parse_tiff_ifd(int base)
       colors = 4;
       for (raw_color = i = 0; i < 3; i++)
       {
-        FORC4 fscanf(ifp, "%f", &rgb_cam[i][c ^ 1]);
+        FORC4 fscanf(ifp, "%f", &rgb_cam[i][GRGB_2_RGBG(c)]);
         if (!use_camera_wb)
           continue;
         num = 0;
@@ -739,7 +764,7 @@ int LibRaw::parse_tiff_ifd(int base)
       shot_order = getint(type);
       break;
     case 0x9215: /* 37397, ExposureIndex */
-      imgdata.makernotes.common.exifExposureIndex = getreal(type);
+      imCommon.exifExposureIndex = getreal(type);
       break;
     case 0x9218: /* 37400, old Kodak KDC tag */
       for (raw_color = i = 0; i < 3; i++)
@@ -807,7 +832,8 @@ int LibRaw::parse_tiff_ifd(int base)
         left_margin = top_margin = filters = flip = 0;
       }
       c = height * width / 1000000;
-      if (c == 32) c--;
+      if (c == 32)
+        c--;
       sprintf(model, "Ixpress %d-Mp", c);
       load_raw = &LibRaw::imacon_full_load_raw;
       if (filters)
@@ -884,7 +910,7 @@ int LibRaw::parse_tiff_ifd(int base)
       break;
     case 0xc617: /* 50711, CFALayout */
       if (get2() == 2)
-       tiff_ifd[ifd].t_fuji_width = fuji_width = 1;
+        tiff_ifd[ifd].t_fuji_width = fuji_width = 1;
       break;
     case 0x0123: // 291
     case 0xc618: /* 50712, LinearizationTable */
@@ -899,7 +925,9 @@ int LibRaw::parse_tiff_ifd(int base)
           tiff_ifd[ifd].dng_levels.dng_cblack[4] = cblack[4] = get2();
       tiff_ifd[ifd].dng_levels.dng_fcblack[5] =
           tiff_ifd[ifd].dng_levels.dng_cblack[5] = cblack[5] = get2();
-      if (cblack[4] * cblack[5] > (LIBRAW_CBLACK_SIZE - 7)) // Use last cblack item as DNG black level count
+      if (cblack[4] * cblack[5] >
+          (LIBRAW_CBLACK_SIZE -
+           7)) // Use last cblack item as DNG black level count
         tiff_ifd[ifd].dng_levels.dng_fcblack[4] =
             tiff_ifd[ifd].dng_levels.dng_fcblack[5] =
                 tiff_ifd[ifd].dng_levels.dng_cblack[4] =
@@ -914,10 +942,9 @@ int LibRaw::parse_tiff_ifd(int base)
         FORC4 fwb[c] = get4();
         if (fwb[3] < 0x100)
         {
-          imgdata.color.WB_Coeffs[fwb[3]][0] = fwb[1];
-          imgdata.color.WB_Coeffs[fwb[3]][1] =
-              imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
-          imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
+          icWBC[fwb[3]][0] = fwb[1];
+          icWBC[fwb[3]][1] = icWBC[fwb[3]][3] = fwb[0];
+          icWBC[fwb[3]][2] = fwb[2];
           if ((fwb[3] == 17) &&
               (libraw_internal_data.unpacker_data.lenRAFData > 3) &&
               (libraw_internal_data.unpacker_data.lenRAFData < 10240000))
@@ -957,44 +984,41 @@ int LibRaw::parse_tiff_ifd(int base)
                     fwb[0]) // 15 is offset of Tungsten WB from the first
                             // preset, Fine Weather WB
                   continue;
+// printf ("==>> in parse_tiff_ifd:\n\tmodel: =%s=\n\tRAF data version: 0x%04x\n\tWB section offset: 0x%04x bytes\n",
+//  model, imFuji.RAFDataVersion, (fi-15)*2);
                 for (int wb_ind = 0, ofst = fi - 15; wb_ind < nFuji_wb_list1;
                      wb_ind++, ofst += 3)
                 {
-                  imgdata.color.WB_Coeffs[Fuji_wb_list1[wb_ind]][1] =
-                      imgdata.color.WB_Coeffs[Fuji_wb_list1[wb_ind]][3] =
-                          rafdata[ofst];
-                  imgdata.color.WB_Coeffs[Fuji_wb_list1[wb_ind]][0] =
-                      rafdata[ofst + 1];
-                  imgdata.color.WB_Coeffs[Fuji_wb_list1[wb_ind]][2] =
-                      rafdata[ofst + 2];
+                  icWBC[Fuji_wb_list1[wb_ind]][1] =
+                      icWBC[Fuji_wb_list1[wb_ind]][3] = rafdata[ofst];
+                  icWBC[Fuji_wb_list1[wb_ind]][0] = rafdata[ofst + 1];
+                  icWBC[Fuji_wb_list1[wb_ind]][2] = rafdata[ofst + 2];
                 }
 
-                if (imFuji.RAFDataVersion == 0x260) { // X-Pro3
-                  for (int iCCT = 0, ofst = fi+24; iCCT < 31; iCCT++, ofst += 3)  {
-                    imgdata.color.WBCT_Coeffs[iCCT][0] = FujiCCT_K[iCCT];
-                    imgdata.color.WBCT_Coeffs[iCCT][1] =
-                        rafdata[ofst+1];
-                    imgdata.color.WBCT_Coeffs[iCCT][2] =
-                        imgdata.color.WBCT_Coeffs[iCCT][4] =
-                            rafdata[ofst];
-                    imgdata.color.WBCT_Coeffs[iCCT][3] =
-                        rafdata[ofst+2];
-                  }
-                  free(rafdata);
-                  break;
-                }
+                if ((imFuji.RAFDataVersion == 0x0260) || // X-Pro3
+                    (imFuji.RAFDataVersion == 0x0261) || // X100V
+                    (imFuji.RAFDataVersion == 0x0262))   // X-T4
+                  fi += 24;
                 fi += 96;
-                for (fj = fi; fj < (fi + 15); fj += 3) {
-                  if (rafdata[fj] != rafdata[fi]) {
-                    for (int iCCT = 0, ofst = fj - 93; iCCT < 31; iCCT++, ofst += 3) {
-                      imgdata.color.WBCT_Coeffs[iCCT][0] = FujiCCT_K[iCCT];
-                      imgdata.color.WBCT_Coeffs[iCCT][1] =
-                          rafdata[ofst+1];
-                      imgdata.color.WBCT_Coeffs[iCCT][2] =
-                          imgdata.color.WBCT_Coeffs[iCCT][4] =
-                              rafdata[ofst];
-                      imgdata.color.WBCT_Coeffs[iCCT][3] =
-                          rafdata[ofst+2];
+                for (fj = fi; fj < (fi + 15); fj += 3)
+                {
+                  if (rafdata[fj] != rafdata[fi])
+                  {
+                    fj -= 93;
+// X-Pro3 has 34 CCT values instead of 31, manual still clames 2500 to 10000 K
+// aligned 3000 K to Incandescent, as it is usual w/ other Fujifilm cameras
+                    if ((imFuji.RAFDataVersion == 0x0260) || // X-Pro3
+                        (imFuji.RAFDataVersion == 0x0261) || // X100V
+                        (imFuji.RAFDataVersion == 0x0262))   // X-T4
+                      fj -= 9;
+// printf ("\tCCT WB section offset: 0x%04x bytes\n", fj*2);
+                    for (int iCCT = 0, ofst = fj; iCCT < 31;
+                         iCCT++, ofst += 3)
+                    {
+                      icWBCCTC[iCCT][0] = FujiCCT_K[iCCT];
+                      icWBCCTC[iCCT][1] = rafdata[ofst + 1];
+                      icWBCCTC[iCCT][2] = icWBCCTC[iCCT][4] = rafdata[ofst];
+                      icWBCCTC[iCCT][3] = rafdata[ofst + 2];
                     }
                     break;
                   }
@@ -1008,20 +1032,18 @@ int LibRaw::parse_tiff_ifd(int base)
         FORC4 fwb[c] = get4();
         if (fwb[3] < 0x100)
         {
-          imgdata.color.WB_Coeffs[fwb[3]][0] = fwb[1];
-          imgdata.color.WB_Coeffs[fwb[3]][1] =
-              imgdata.color.WB_Coeffs[fwb[3]][3] = fwb[0];
-          imgdata.color.WB_Coeffs[fwb[3]][2] = fwb[2];
+          icWBC[fwb[3]][0] = fwb[1];
+          icWBC[fwb[3]][1] =
+              icWBC[fwb[3]][3] = fwb[0];
+          icWBC[fwb[3]][2] = fwb[2];
         }
       }
       break;
     case 0xf00d:
       if (!is_4K_RAFdata)
       {
-        FORC3 imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][(4 - c) % 3] =
-            getint(type);
-        imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][3] =
-            imgdata.color.WB_Coeffs[LIBRAW_WBI_Auto][1];
+        FORC3 icWBC[LIBRAW_WBI_Auto][(4 - c) % 3] = getint(type);
+        icWBC[LIBRAW_WBI_Auto][3] = icWBC[LIBRAW_WBI_Auto][1];
         //        free(rafdata);
       }
       break;
@@ -1045,17 +1067,18 @@ int LibRaw::parse_tiff_ifd(int base)
         tiff_ifd[ifd].dng_levels.dng_fblack =
             tiff_ifd[ifd].dng_levels.dng_black = black = 0;
       }
-      else if( tiff_ifd[ifd].samples > 1  // Linear DNG w repeat dim
-          && (tiff_ifd[ifd].samples * cblack[4] * cblack[5] == len))
+      else if (tiff_ifd[ifd].samples > 1 // Linear DNG w repeat dim
+               && (tiff_ifd[ifd].samples * cblack[4] * cblack[5] == len))
       {
-          tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
-          tiff_ifd[ifd].dng_levels.dng_cblack[LIBRAW_CBLACK_SIZE-1] = cblack[LIBRAW_CBLACK_SIZE-1] = len;
-          for (i = 0; i < len && i < LIBRAW_CBLACK_SIZE-7; i++)
-          {
-              tiff_ifd[ifd].dng_levels.dng_fcblack[i+6] = getreal(type);
-              tiff_ifd[ifd].dng_levels.dng_cblack[i+6] = cblack[i+6] =
-                  tiff_ifd[ifd].dng_levels.dng_fcblack[i+6] + 0.5;
-          }
+        tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
+        tiff_ifd[ifd].dng_levels.dng_cblack[LIBRAW_CBLACK_SIZE - 1] =
+            cblack[LIBRAW_CBLACK_SIZE - 1] = len;
+        for (i = 0; i < len && i < LIBRAW_CBLACK_SIZE - 7; i++)
+        {
+          tiff_ifd[ifd].dng_levels.dng_fcblack[i + 6] = getreal(type);
+          tiff_ifd[ifd].dng_levels.dng_cblack[i + 6] = cblack[i + 6] =
+              tiff_ifd[ifd].dng_levels.dng_fcblack[i + 6] + 0.5;
+        }
       }
       else if ((cblack[4] * cblack[5] < 2) && len == 1)
       {
@@ -1181,7 +1204,8 @@ int LibRaw::parse_tiff_ifd(int base)
     {
       int chan = (len == 9) ? 3 : (len == 12 ? 4 : 0);
       i = tag == 0xc621 ? 0 : 1;
-      if (chan) {
+      if (chan)
+      {
         tiff_ifd[ifd].dng_color[i].parsedfields |= LIBRAW_DNGFM_COLORMATRIX;
         imHassy.nIFD_CM[i] = ifd;
       }
@@ -1392,10 +1416,10 @@ int LibRaw::parse_tiff_ifd(int base)
       stmread(imgdata.color.OriginalRawFileName, len, ifp);
       break;
     case 0xc68d: /* 50829 ActiveArea */
-        tiff_ifd[ifd].t_tm=top_margin = getint(type);
-        tiff_ifd[ifd].t_lm = left_margin = getint(type);
-        tiff_ifd[ifd].t_vheight = height = getint(type) - top_margin;
-        tiff_ifd[ifd].t_vwidth = width = getint(type) - left_margin;
+      tiff_ifd[ifd].t_tm = top_margin = getint(type);
+      tiff_ifd[ifd].t_lm = left_margin = getint(type);
+      tiff_ifd[ifd].t_vheight = height = getint(type) - top_margin;
+      tiff_ifd[ifd].t_vwidth = width = getint(type) - left_margin;
       break;
     case 0xc68e: /* 50830 MaskedAreas */
       for (i = 0; i < len && i < 32; i++)
@@ -1420,7 +1444,7 @@ int LibRaw::parse_tiff_ifd(int base)
       load_raw = &LibRaw::packed_load_raw;
       break;
     case 0xfe02: // 65026
-      if (type == 2)
+      if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_ASCII))
         fgets(model2, 64, ifp);
     }
     fseek(ifp, save, SEEK_SET);
@@ -1473,16 +1497,18 @@ int LibRaw::parse_tiff(int base)
 
 struct ifd_size_t
 {
-    int ifdi;
-    INT64 databits;
+  int ifdi;
+  INT64 databits;
 };
 
 int ifd_size_t_cmp(const void *a, const void *b)
 {
-    if(!a || !b) return 0;
-    const ifd_size_t *ai = (ifd_size_t*)a;
-    const ifd_size_t *bi = (ifd_size_t*)b;
-    return bi->databits > ai->databits ? 1 : (bi->databits < ai->databits? -1 : 0);
+  if (!a || !b)
+    return 0;
+  const ifd_size_t *ai = (ifd_size_t *)a;
+  const ifd_size_t *bi = (ifd_size_t *)b;
+  return bi->databits > ai->databits ? 1
+                                     : (bi->databits < ai->databits ? -1 : 0);
 }
 
 void LibRaw::apply_tiff()
@@ -1513,140 +1539,164 @@ void LibRaw::apply_tiff()
     tiff_ifd[i].t_shutter = shutter;
   }
 
-  if(dng_version)
+  if (dng_version)
   {
-      int ifdc = 0;
-      for (i = 0; i < tiff_nifds; i++)
+    int ifdc = 0;
+    for (i = 0; i < tiff_nifds; i++)
+    {
+      if (tiff_ifd[i].t_width < 1 || tiff_ifd[i].t_width > 65535 ||
+          tiff_ifd[i].t_height < 1 || tiff_ifd[i].t_height > 65535)
+        continue; /* wrong image dimensions */
+
+      int samp = tiff_ifd[i].samples;
+      if (samp == 2)
+        samp = 1; // Fuji 2-frame
+      max_samp = LIM(MAX(max_samp, samp), 1,
+                     3); // max_samp is needed for thumbnail selection below
+
+      if (tiff_ifd[i].phint != 32803 && tiff_ifd[i].phint != 34892)
+        continue;
+
+      if ((tiff_ifd[i].newsubfiletype == 0) // main image
+                                            // Enhanced demosaiced:
+          || (tiff_ifd[i].newsubfiletype == 16 &&
+              (imgdata.params.raw_processing_options &
+               LIBRAW_PROCESSING_DNG_ADD_ENHANCED))
+          // Preview: 0x1 or 0x10001
+          || ((tiff_ifd[i].newsubfiletype & 0xffff) == 1 &&
+              (imgdata.params.raw_processing_options &
+               LIBRAW_PROCESSING_DNG_ADD_PREVIEWS)))
       {
-          if (tiff_ifd[i].t_width < 1 || tiff_ifd[i].t_width > 65535 ||
-              tiff_ifd[i].t_height < 1 || tiff_ifd[i].t_height > 65535)
-              continue; /* wrong image dimensions */
-
-          int samp = tiff_ifd[i].samples;
-          if(samp == 2) samp = 1; // Fuji 2-frame
-          max_samp = LIM(MAX(max_samp,samp),1,3); // max_samp is needed for thumbnail selection below
-
-          if(tiff_ifd[i].phint != 32803 && tiff_ifd[i].phint != 34892) continue;
-
-          if(
-              (tiff_ifd[i].newsubfiletype == 0) // main image
-              // Enhanced demosaiced:
-              || (tiff_ifd[i].newsubfiletype == 16 && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNG_ADD_ENHANCED))
-              // Preview: 0x1 or 0x10001
-              || ((tiff_ifd[i].newsubfiletype & 0xffff) == 1 && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNG_ADD_PREVIEWS))
-             )
-          {
-              // Add this IFD to dng_frames
-              libraw_internal_data.unpacker_data.dng_frames[ifdc] = ((tiff_ifd[i].newsubfiletype & 0xffff)<<16) | ((i<<8)&0xff00);
-              ifdc++;
-              // Fuji SuperCCD: second frame:
-              if((tiff_ifd[i].newsubfiletype == 0) && tiff_ifd[i].samples == 2)
-              {
-                  libraw_internal_data.unpacker_data.dng_frames[ifdc] = ((tiff_ifd[i].newsubfiletype & 0xffff)<<16) | ((i<<8)&0xff00) | 1;
-                  ifdc++;
-              }
-          }
+        // Add this IFD to dng_frames
+        libraw_internal_data.unpacker_data.dng_frames[ifdc] =
+            ((tiff_ifd[i].newsubfiletype & 0xffff) << 16) | ((i << 8) & 0xff00);
+        ifdc++;
+        // Fuji SuperCCD: second frame:
+        if ((tiff_ifd[i].newsubfiletype == 0) && tiff_ifd[i].samples == 2)
+        {
+          libraw_internal_data.unpacker_data.dng_frames[ifdc] =
+              ((tiff_ifd[i].newsubfiletype & 0xffff) << 16) |
+              ((i << 8) & 0xff00) | 1;
+          ifdc++;
+        }
       }
-      if(ifdc)
+    }
+    if (ifdc)
+    {
+      if (ifdc > 1 && (imgdata.params.raw_processing_options &
+                       LIBRAW_PROCESSING_DNG_PREFER_LARGEST_IMAGE))
       {
-          if(ifdc>1 && (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNG_PREFER_LARGEST_IMAGE))
-          {
-              ifd_size_t arr[LIBRAW_IFD_MAXCOUNT*2];
-              memset(arr,0,sizeof(arr));
-              for(int i = 0; i < ifdc && i < LIBRAW_IFD_MAXCOUNT*2; i++)
-              {
-                  int ifdidx = (libraw_internal_data.unpacker_data.dng_frames[i]>>8) & 0xff;
-                  arr[i].ifdi = libraw_internal_data.unpacker_data.dng_frames[i];
-                  arr[i].databits = tiff_ifd[ifdidx].t_width * tiff_ifd[ifdidx].t_height * tiff_ifd[ifdidx].samples * tiff_ifd[ifdidx].bps
-                      + (0x100 - (arr[i].ifdi & 0xff)); // add inverted frame # to ensure same sort order for similar sized frames.
-              }
-              qsort(arr, MIN(ifdc,LIBRAW_IFD_MAXCOUNT*2) ,sizeof(arr[0]),ifd_size_t_cmp);
-              for(int i = 0; i < ifdc && i < LIBRAW_IFD_MAXCOUNT*2; i++)
-                  libraw_internal_data.unpacker_data.dng_frames[i] = arr[i].ifdi;
-          }
-
-          int idx = LIM(shot_select,0,ifdc-1);
-          i = (libraw_internal_data.unpacker_data.dng_frames[idx]>>8) & 0xff; // extract frame# back
-
-          raw_width = tiff_ifd[i].t_width;
-          raw_height = tiff_ifd[i].t_height;
-          tiff_bps = tiff_ifd[i].bps;
-          tiff_compress = tiff_ifd[i].comp;
-          tiff_sampleformat = tiff_ifd[i].sample_format;
-          data_offset = tiff_ifd[i].offset;
-          data_size = tiff_ifd[i].bytes;
-          tiff_flip = tiff_ifd[i].t_flip;
-          tiff_samples = tiff_ifd[i].samples;
-          tile_width = tiff_ifd[i].t_tile_width;
-          tile_length = tiff_ifd[i].t_tile_length;
-          fuji_width = tiff_ifd[i].t_fuji_width;
-          if(tiff_samples != 2) /* special case: Fuji SuperCCD */
-          {
-              if(tiff_ifd[i].phint == 34892)
-                  filters = 0;
-              else if(i > 0 && tiff_ifd[i].phint == 32803 && tiff_ifd[0].phint == 32803 && !tiff_ifd[i].t_filters && tiff_ifd[0].t_filters)
-                  filters = tiff_ifd[0].t_filters;
-              else
-                  filters = tiff_ifd[i].t_filters;
-              width = tiff_ifd[i].t_vwidth;
-              height = tiff_ifd[i].t_vheight;
-              top_margin = tiff_ifd[i].t_tm;
-              left_margin = tiff_ifd[i].t_lm;
-              shutter = tiff_ifd[i].t_shutter;
-              if(tiff_ifd[i].dng_levels.dng_whitelevel[0])
-                  maximum = tiff_ifd[i].dng_levels.dng_whitelevel[0];
-              else if (tiff_ifd[i].sample_format <= 2  && tiff_bps > 0 && tiff_bps < 32) // SampleFormat: 0-default(1), 1 - Uint, 2 - Int
-                  maximum = (1<<tiff_bps)-1;
-              else if (tiff_ifd[i].sample_format == 3)
-                  maximum = 1; // Defaults for FP
-          }
-          raw = i;
-          is_raw = ifdc;
+        ifd_size_t arr[LIBRAW_IFD_MAXCOUNT * 2];
+        memset(arr, 0, sizeof(arr));
+        for (int i = 0; i < ifdc && i < LIBRAW_IFD_MAXCOUNT * 2; i++)
+        {
+          int ifdidx =
+              (libraw_internal_data.unpacker_data.dng_frames[i] >> 8) & 0xff;
+          arr[i].ifdi = libraw_internal_data.unpacker_data.dng_frames[i];
+          arr[i].databits =
+              tiff_ifd[ifdidx].t_width * tiff_ifd[ifdidx].t_height *
+                  tiff_ifd[ifdidx].samples * tiff_ifd[ifdidx].bps +
+              (0x100 -
+               (arr[i].ifdi & 0xff)); // add inverted frame # to ensure same
+                                      // sort order for similar sized frames.
+        }
+        qsort(arr, MIN(ifdc, LIBRAW_IFD_MAXCOUNT * 2), sizeof(arr[0]),
+              ifd_size_t_cmp);
+        for (int i = 0; i < ifdc && i < LIBRAW_IFD_MAXCOUNT * 2; i++)
+          libraw_internal_data.unpacker_data.dng_frames[i] = arr[i].ifdi;
       }
-      else
-          is_raw = 0;
+
+      int idx = LIM(shot_select, 0, ifdc - 1);
+      i = (libraw_internal_data.unpacker_data.dng_frames[idx] >> 8) &
+          0xff; // extract frame# back
+
+      raw_width = tiff_ifd[i].t_width;
+      raw_height = tiff_ifd[i].t_height;
+      tiff_bps = tiff_ifd[i].bps;
+      tiff_compress = tiff_ifd[i].comp;
+      tiff_sampleformat = tiff_ifd[i].sample_format;
+      data_offset = tiff_ifd[i].offset;
+      data_size = tiff_ifd[i].bytes;
+      tiff_flip = tiff_ifd[i].t_flip;
+      tiff_samples = tiff_ifd[i].samples;
+      tile_width = tiff_ifd[i].t_tile_width;
+      tile_length = tiff_ifd[i].t_tile_length;
+      fuji_width = tiff_ifd[i].t_fuji_width;
+      if (tiff_samples != 2) /* special case: Fuji SuperCCD */
+      {
+        if (tiff_ifd[i].phint == 34892)
+          filters = 0;
+        else if (i > 0 && tiff_ifd[i].phint == 32803 &&
+                 tiff_ifd[0].phint == 32803 && !tiff_ifd[i].t_filters &&
+                 tiff_ifd[0].t_filters)
+          filters = tiff_ifd[0].t_filters;
+        else
+          filters = tiff_ifd[i].t_filters;
+        width = tiff_ifd[i].t_vwidth;
+        height = tiff_ifd[i].t_vheight;
+        top_margin = tiff_ifd[i].t_tm;
+        left_margin = tiff_ifd[i].t_lm;
+        shutter = tiff_ifd[i].t_shutter;
+        if (tiff_ifd[i].dng_levels.dng_whitelevel[0])
+          maximum = tiff_ifd[i].dng_levels.dng_whitelevel[0];
+        else if (tiff_ifd[i].sample_format <= 2 && tiff_bps > 0 &&
+                 tiff_bps < 32) // SampleFormat: 0-default(1), 1 - Uint, 2 - Int
+          maximum = (1 << tiff_bps) - 1;
+        else if (tiff_ifd[i].sample_format == 3)
+          maximum = 1; // Defaults for FP
+      }
+      raw = i;
+      is_raw = ifdc;
+    }
+    else
+      is_raw = 0;
   }
   else
   {
-      for (i = 0; i < tiff_nifds; i++)
-      {
-          if (tiff_ifd[i].t_width < 1 || tiff_ifd[i].t_width > 65535 ||
-              tiff_ifd[i].t_height < 1 || tiff_ifd[i].t_height > 65535)
-              continue; /* wrong image dimensions */
-          if (max_samp < tiff_ifd[i].samples)
-              max_samp = tiff_ifd[i].samples;
-          if (max_samp > 3)
-              max_samp = 3;
+    for (i = 0; i < tiff_nifds; i++)
+    {
+      if (tiff_ifd[i].t_width < 1 || tiff_ifd[i].t_width > 65535 ||
+          tiff_ifd[i].t_height < 1 || tiff_ifd[i].t_height > 65535)
+        continue; /* wrong image dimensions */
+      if (max_samp < tiff_ifd[i].samples)
+        max_samp = tiff_ifd[i].samples;
+      if (max_samp > 3)
+        max_samp = 3;
 
-          os = raw_width * raw_height;
-          ns = tiff_ifd[i].t_width * tiff_ifd[i].t_height;
-          if (tiff_bps)
-          {
-              os *= tiff_bps;
-              ns *= tiff_ifd[i].bps;
-          }
-          if ((tiff_ifd[i].comp != 6 || tiff_ifd[i].samples != 3) &&
-              unsigned(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
-              (unsigned)tiff_ifd[i].bps < 33 && (unsigned)tiff_ifd[i].samples < 13 &&
-              ns && ((ns > os && (ties = 1)) || (ns == os && shot_select == ties++)))
-          {
-              raw_width = tiff_ifd[i].t_width;
-              raw_height = tiff_ifd[i].t_height;
-              tiff_bps = tiff_ifd[i].bps;
-              tiff_compress = tiff_ifd[i].comp;
-              tiff_sampleformat = tiff_ifd[i].sample_format;
-              data_offset = tiff_ifd[i].offset;
-              data_size = tiff_ifd[i].bytes;
-              tiff_flip = tiff_ifd[i].t_flip;
-              tiff_samples = tiff_ifd[i].samples;
-              tile_width = tiff_ifd[i].t_tile_width;
-              tile_length = tiff_ifd[i].t_tile_length;
-              shutter = tiff_ifd[i].t_shutter;
-              raw = i;
-          }
+      os = raw_width * raw_height;
+      ns = tiff_ifd[i].t_width * tiff_ifd[i].t_height;
+      if (tiff_bps)
+      {
+        os *= tiff_bps;
+        ns *= tiff_ifd[i].bps;
       }
-      if (is_raw == 1 && ties)
-          is_raw = ties;
+      /* too complex if below, so separate if to skip RGB+Alpha TIFFs*/
+      if (tiff_ifd[i].phint == 2 && tiff_ifd[i].extrasamples > 0 && tiff_ifd[i].samples > 3)
+          continue; // SKIP RGB+Alpha IFDs
+
+      if ((tiff_ifd[i].comp != 6 || tiff_ifd[i].samples != 3) &&
+            unsigned(tiff_ifd[i].t_width | tiff_ifd[i].t_height) < 0x10000 &&
+            (unsigned)tiff_ifd[i].bps < 33 &&
+            (unsigned)tiff_ifd[i].samples < 13 && ns &&
+            ((ns > os && (ties = 1)) || (ns == os && shot_select == ties++)))
+        {
+        raw_width = tiff_ifd[i].t_width;
+        raw_height = tiff_ifd[i].t_height;
+        tiff_bps = tiff_ifd[i].bps;
+        tiff_compress = tiff_ifd[i].comp;
+        tiff_sampleformat = tiff_ifd[i].sample_format;
+        data_offset = tiff_ifd[i].offset;
+        data_size = tiff_ifd[i].bytes;
+        tiff_flip = tiff_ifd[i].t_flip;
+        tiff_samples = tiff_ifd[i].samples;
+        tile_width = tiff_ifd[i].t_tile_width;
+        tile_length = tiff_ifd[i].t_tile_length;
+        shutter = tiff_ifd[i].t_shutter;
+        raw = i;
+        }
+    }
+    if (is_raw == 1 && ties)
+      is_raw = ties;
   }
   if (is_NikonTransfer && raw >= 0)
   {
@@ -1681,6 +1731,12 @@ void LibRaw::apply_tiff()
   for (i = tiff_nifds; i--;)
     if (tiff_ifd[i].t_flip)
       tiff_flip = tiff_ifd[i].t_flip;
+
+#if 0
+  if (raw < 0 && is_raw)
+      is_raw = 0;
+#endif
+
   if (raw >= 0 && !load_raw)
     switch (tiff_compress)
     {
@@ -1747,7 +1803,8 @@ void LibRaw::apply_tiff()
         break;
       }
       if (!strncasecmp(make, "Nikon", 5) &&
-          (!strncmp(software, "Nikon Scan", 10) || (is_NikonTransfer == 2) || strcasestr(model,"COOLSCAN")))
+          (!strncmp(software, "Nikon Scan", 10) || (is_NikonTransfer == 2) ||
+           strcasestr(model, "COOLSCAN")))
       {
         load_raw = &LibRaw::nikon_coolscan_load_raw;
         raw_color = 1;
@@ -1891,24 +1948,30 @@ void LibRaw::apply_tiff()
       break;
 #ifdef USE_GPRSDK
     case 9:
-        if(dng_version)
-            break; /* Compression=9 supported for dng if we compiled with GPR SDK */
-        /* Else: fallthrough */
+      if (dng_version)
+        break; /* Compression=9 supported for dng if we compiled with GPR SDK */
+               /* Else: fallthrough */
 #endif
     default:
       is_raw = 0;
     }
   if (!dng_version)
-    if (((tiff_samples == 3 && tiff_ifd[raw].bytes &&
+  {
+      if (((tiff_samples == 3 && tiff_ifd[raw].bytes &&
           !(tiff_bps == 16 &&
-            !strncmp(make, "Leaf", 4)) && // Allow Leaf/16bit/3color files
+              !strncmp(make, "Leaf", 4)) && // Allow Leaf/16bit/3color files
           tiff_bps != 14 &&
           (tiff_compress & -16) != 32768) ||
-         (tiff_bps == 8 && strncmp(make, "Phase", 5) &&
-          strncmp(make, "Leaf", 4) && !strcasestr(make, "Kodak") &&
-          !strstr(model2, "DEBUG RAW"))) && !strcasestr(model,"COOLSCAN") &&
-        strncmp(software, "Nikon Scan", 10) && is_NikonTransfer != 2)
-      is_raw = 0;
+          (tiff_bps == 8 && strncmp(make, "Phase", 5) &&
+              strncmp(make, "Leaf", 4) && !strcasestr(make, "Kodak") &&
+              !strstr(model2, "DEBUG RAW"))) &&
+          !strcasestr(model, "COOLSCAN") && strncmp(software, "Nikon Scan", 10) &&
+          is_NikonTransfer != 2)
+          is_raw = 0;
+
+      if (is_raw && raw >= 0 && tiff_ifd[raw].phint == 2 && tiff_ifd[raw].extrasamples > 0 && tiff_ifd[raw].samples > 3)
+          is_raw = 0; // SKIP RGB+Alpha IFDs
+  }
 
   for (i = 0; i < tiff_nifds; i++)
     if (i != raw &&
