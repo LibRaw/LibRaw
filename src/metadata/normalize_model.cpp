@@ -417,8 +417,8 @@ void LibRaw::GetNormalizedModel()
   };
 
   static const char KonicaMinolta_aliases[][24] = {
-    "@Dynax 5D", "DYNAX 5D", "MAXXUM 5D", "ALPHA-5 DIGITAL", "Alpha-5 Digital", "Alpha Sweet Digital",
-    "@Dynax 7D", "DYNAX 7D", "MAXXUM 7D", "Alpha-7 Digital",
+    "@DG-5D", "DYNAX 5D", "MAXXUM 5D", "ALPHA-5 DIGITAL", "ALPHA SWEET DIGITAL",
+    "@DG-7D", "DYNAX 7D", "MAXXUM 7D", "ALPHA-7 DIGITAL",
   };
 
   static const char nikonalias[][16] = {
@@ -783,14 +783,14 @@ void LibRaw::GetNormalizedModel()
         if (KonicaMinolta_aliases[i][0] == '@')
         {
           orig = KonicaMinolta_aliases[i] + 1;
-          if (!strcmp(model, orig))
+          if (!strcasecmp(model, orig))
           {
             setMakeFromIndex(LIBRAW_CAMERAMAKER_Minolta);
             strcpy(make, "Minolta");
             break;
           }
         }
-        else if (!strcmp(model, KonicaMinolta_aliases[i]))
+        else if (!strcasecmp(model, KonicaMinolta_aliases[i]))
         {
           setMakeFromIndex(LIBRAW_CAMERAMAKER_Minolta);
           strcpy(make, "Minolta");
@@ -1190,8 +1190,8 @@ void LibRaw::GetNormalizedModel()
     }
     else if (makeIs(LIBRAW_CAMERAMAKER_Minolta))
     {
-      if (!strcmp(normalized_model, "Dynax 5D") ||
-          !strcmp(normalized_model, "Dynax 7D"))
+      if (!strcmp(normalized_model, "DG-5D") ||
+          !strcmp(normalized_model, "DG-7D"))
       {
         ilm.CameraFormat = LIBRAW_FORMAT_APSC;
         ilm.CameraMount = LIBRAW_MOUNT_Minolta_A;
