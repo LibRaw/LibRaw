@@ -783,7 +783,7 @@ void LibRaw::GetNormalizedModel()
         if (KonicaMinolta_aliases[i][0] == '@')
         {
           orig = KonicaMinolta_aliases[i] + 1;
-          if (!strcasecmp(model, orig))
+          if (!strcmp(model, orig))
           {
             setMakeFromIndex(LIBRAW_CAMERAMAKER_Minolta);
             strcpy(make, "Minolta");
