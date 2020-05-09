@@ -2283,7 +2283,7 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize)
 			tiff_bps = 12;
 			load_raw = &LibRaw::packed_load_raw;
 		}
-		else if (!strncmp(normalized_model, "Dynax", 5))
+		else if (!strncmp(normalized_model, "DG-", 3))
 		{
 
 			// 'make' can be 'Konica', 'Minolta', or 'Konica Minolta';
