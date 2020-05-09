@@ -1042,6 +1042,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 	fprintf(outfile, "\tMaxFocal: %0.1f mm\n", exifLens.MaxFocal);
 	fprintf(outfile, "\tMaxAp @MinFocal: f/%0.1f\n", exifLens.MaxAp4MinFocal);
 	fprintf(outfile, "\tMaxAp @MaxFocal: f/%0.1f\n", exifLens.MaxAp4MaxFocal);
+	fprintf(outfile, "\tCurFocal: %0.1f mm\n", P2.focal_len);
 	fprintf(outfile, "\tMaxAperture @CurFocal: f/%0.1f\n", exifLens.EXIF_MaxAp);
 	fprintf(outfile, "\tFocalLengthIn35mmFormat: %d mm\n",
 		exifLens.FocalLengthIn35mmFormat);

@@ -91,9 +91,9 @@ void LibRaw::parse_exif(int base)
 	case 0xA001: // ExifIFD.ColorSpace
 		c = get2();
 		if (c == 1 && imgdata.color.ExifColorSpace == LIBRAW_COLORSPACE_Unknown)
-			imgdata.color.ExifColorSpace == LIBRAW_COLORSPACE_sRGB;
+			imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_sRGB;
 		else if (c == 2)
-			imgdata.color.ExifColorSpace == LIBRAW_COLORSPACE_AdobeRGB;
+			imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
 		break;
     case 0x9400:
       imCommon.exifAmbientTemperature = getreal(type);

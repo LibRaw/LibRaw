@@ -2285,14 +2285,6 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize)
 		}
 		else if (!strncmp(normalized_model, "DG-", 3))
 		{
-
-			// 'make' can be 'Konica', 'Minolta', or 'Konica Minolta';
-			// 'normalized_make' is 'Minolta', where it started;
-			// aliases (MAXXUM in USA, DYNAX in Europe, Alpha in Japan - also gave
-			// A-mount and Sony Alpha line their names):
-			// "Dynax 5D", "Maxxum 5D", "Alpha 5D", "Alpha Sweet Digital",
-			// "Dynax 7D", "Maxxum 7D", "Alpha 7D"
-
 			load_raw = &LibRaw::packed_load_raw;
 		}
 		else if (!strncmp(model, "DiMAGE G",
