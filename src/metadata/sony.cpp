@@ -1799,6 +1799,14 @@ void LibRaw::parseSonySR2(uchar *cbuf_SR2, unsigned SR2SubIFDOffset,
   float num;
   int i;
   int WBCTC_count;
+#define CHECKBUFFER_N(offset,N)                                     \
+  do                                                                \
+  {                                                                 \
+    if ((((offset) + (N)) > SR2SubIFDLength) || ((offset) < 0))     \
+      return;														\
+  } while (0)
+
+  CHECKBUFFER_N(0, 2);
   entries = sget2(cbuf_SR2);
   if (entries > 1000)
     return;
@@ -1812,15 +1820,18 @@ void LibRaw::parseSonySR2(uchar *cbuf_SR2, unsigned SR2SubIFDOffset,
       if (dng_writer == nonDNG) {
         switch (tag_id) {
         case 0x7300:
-          FORC4 cblack[c] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 4,0);
+			FORC4 cblack[c] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
           TagProcessed = 1;
           break;
         case 0x7303:
-          FORC4 cam_mul[GRBG_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 4, 0);
+			FORC4 cam_mul[GRBG_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
           TagProcessed = 1;
           break;
         case 0x7310:
-          FORC4 cblack[RGGB_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 4, 0);
+			FORC4 cblack[RGGB_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
           i = cblack[3];
           FORC3 if (i > cblack[c]) i = cblack[c];
           FORC4 cblack[c] -= i;
@@ -1828,27 +1839,33 @@ void LibRaw::parseSonySR2(uchar *cbuf_SR2, unsigned SR2SubIFDOffset,
           TagProcessed = 1;
           break;
         case 0x7313:
-          FORC4 cam_mul[RGGB_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 4, 0);
+			FORC4 cam_mul[RGGB_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
           TagProcessed = 1;
           break;
         case 0x74a0:
-          ilm.MaxAp4MaxFocal = sgetreal(tag_type, cbuf_SR2 + tag_dataoffset);
+			CHECKBUFFER_N(tag_dataoffset, 4);
+			ilm.MaxAp4MaxFocal = sgetreal(tag_type, cbuf_SR2 + tag_dataoffset);
           TagProcessed = 1;
           break;
         case 0x74a1:
-          ilm.MaxAp4MinFocal = sgetreal(tag_type, cbuf_SR2 + tag_dataoffset);
+			CHECKBUFFER_N(tag_dataoffset, 4);
+			ilm.MaxAp4MinFocal = sgetreal(tag_type, cbuf_SR2 + tag_dataoffset);
           TagProcessed = 1;
           break;
         case 0x74a2:
-          ilm.MaxFocal = sgetreal(tag_type, cbuf_SR2 + tag_dataoffset);
+			CHECKBUFFER_N(tag_dataoffset, 4);
+			ilm.MaxFocal = sgetreal(tag_type, cbuf_SR2 + tag_dataoffset);
           TagProcessed = 1;
           break;
         case 0x74a3:
-          ilm.MinFocal = sgetreal(tag_type, cbuf_SR2 + tag_dataoffset);
+			CHECKBUFFER_N(tag_dataoffset, 4);
+			ilm.MinFocal = sgetreal(tag_type, cbuf_SR2 + tag_dataoffset);
           TagProcessed = 1;
           break;
         case 0x7800:
-          for (i = 0; i < 3; i++)
+			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 8, 2);
+		  for (i = 0; i < 3; i++)
           {
             num = 0.0;
             for (c = 0; c < 3; c++)
@@ -1865,12 +1882,14 @@ void LibRaw::parseSonySR2(uchar *cbuf_SR2, unsigned SR2SubIFDOffset,
         case 0x787f:
           if (tag_datalen == 3)
           {
-            FORC3 imgdata.color.linear_max[c] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			  CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 2, 2);
+			  FORC3 imgdata.color.linear_max[c] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
             imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
           }
           else if (tag_datalen == 1)
           {
-            imgdata.color.linear_max[0] = imgdata.color.linear_max[1] =
+			  CHECKBUFFER_N(tag_dataoffset, 2);
+			  imgdata.color.linear_max[0] = imgdata.color.linear_max[1] =
                 imgdata.color.linear_max[2] = imgdata.color.linear_max[3] =
                     sget2(cbuf_SR2 + tag_dataoffset);
           }
@@ -1884,18 +1903,21 @@ void LibRaw::parseSonySR2(uchar *cbuf_SR2, unsigned SR2SubIFDOffset,
           i = tag_id - 0x7480;
           if (Sony_SR2_wb_list[i] > 255) {
             icWBCCTC[WBCTC_count][0] = Sony_SR2_wb_list[i];
-            FORC3 icWBCCTC[WBCTC_count][c + 1] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 2, 2);
+			FORC3 icWBCCTC[WBCTC_count][c + 1] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
             icWBCCTC[WBCTC_count][4] = icWBCCTC[WBCTC_count][2];
             WBCTC_count++;
           } else {
-            FORC3 icWBC[Sony_SR2_wb_list[i]][c] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			  CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 2, 2);
+			  FORC3 icWBC[Sony_SR2_wb_list[i]][c] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
             icWBC[Sony_SR2_wb_list[i]][3] = icWBC[Sony_SR2_wb_list[i]][1];
           }
         } else if ((tag_id >= 0x7820) && (tag_id <= 0x782d)) {
           i = tag_id - 0x7820;
           if (Sony_SR2_wb_list1[i] > 255) {
             icWBCCTC[WBCTC_count][0] = Sony_SR2_wb_list1[i];
-            FORC3 icWBCCTC[WBCTC_count][c + 1] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 2, 2);
+			FORC3 icWBCCTC[WBCTC_count][c + 1] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
             icWBCCTC[WBCTC_count][4] = icWBCCTC[WBCTC_count][2];
             if (Sony_SR2_wb_list1[i] == 3200) {
               FORC3 icWBC[LIBRAW_WBI_StudioTungsten][c] = icWBCCTC[WBCTC_count][c + 1];
@@ -1903,18 +1925,22 @@ void LibRaw::parseSonySR2(uchar *cbuf_SR2, unsigned SR2SubIFDOffset,
             }
             WBCTC_count++;
           } else {
-            FORC3 icWBC[Sony_SR2_wb_list1[i]][c] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			  CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 2, 2);
+			  FORC3 icWBC[Sony_SR2_wb_list1[i]][c] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
             icWBC[Sony_SR2_wb_list1[i]][3] = icWBC[Sony_SR2_wb_list1[i]][1];
           }
         } else if (tag_id == 0x7302) {
-          FORC4 icWBC[LIBRAW_WBI_Auto][GRBG_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 3, 2);
+			FORC4 icWBC[LIBRAW_WBI_Auto][GRBG_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
         } else if (tag_id == 0x7312) {
-          FORC4 icWBC[LIBRAW_WBI_Auto][RGGB_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
+			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 3, 2);
+			FORC4 icWBC[LIBRAW_WBI_Auto][RGGB_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
         }
       }
     }
   }
 }
+#undef CHECKBUFFER_N
 
 void LibRaw::parseSonySRF(unsigned len)
 {
@@ -1935,10 +1961,10 @@ void LibRaw::parseSonySRF(unsigned len)
   INT64 srf_offset, tag_offset, tag_data, tag_dataoffset;
   int tag_dataunitlen;
   uchar *srf_buf;
-  short entries;
+  ushort entries;
   unsigned tag_id, tag_type, tag_datalen;
 
-  srf_buf = (uchar *)malloc(len);
+  srf_buf = (uchar *)malloc(len+64);
   fread(srf_buf, len, 1, ifp);
 
   offset += srf_buf[offset] << 2;
@@ -1995,9 +2021,11 @@ void LibRaw::parseSonySRF(unsigned len)
                    &tag_offset, &tag_id, &tag_type, &tag_dataoffset,
                    &tag_datalen, &tag_dataunitlen) == 0) {
       if (tag_id == 0x0000) {
-        SRF2Key = sget4(srf_buf + tag_dataoffset);
+		  CHECKBUFFER_SGET4(tag_dataoffset);
+		  SRF2Key = sget4(srf_buf + tag_dataoffset);
       } else if (tag_id == 0x0001) {
-        RawDataKey = sget4(srf_buf + tag_dataoffset);
+		  CHECKBUFFER_SGET4(tag_dataoffset);
+		  RawDataKey = sget4(srf_buf + tag_dataoffset);
       }
     } else goto restore_after_parseSonySRF;
   }
@@ -2019,20 +2047,22 @@ void LibRaw::parseSonySRF(unsigned len)
   tag_offset = offset;
 
   while (entries--) {
-    if (tiff_sget (save, srf_buf, len,
+	  if (tiff_sget(save, srf_buf, len,
                    &tag_offset, &tag_id, &tag_type, &tag_dataoffset,
                    &tag_datalen, &tag_dataunitlen) == 0) {
       if ((tag_id >= 0x00c0) && (tag_id <= 0x00ce)) {
         i = (tag_id - 0x00c0) % 3;
         nWB = (tag_id - 0x00c0) / 3;
-        icWBC[Sony_SRF_wb_list[nWB]][i] = sget4(srf_buf + tag_dataoffset);
+		CHECKBUFFER_SGET4(tag_dataoffset);
+		icWBC[Sony_SRF_wb_list[nWB]][i] = sget4(srf_buf + tag_dataoffset);
         if (i == 1) {
           icWBC[Sony_SRF_wb_list[nWB]][3] =
             icWBC[Sony_SRF_wb_list[nWB]][i];
         }
       } else if ((tag_id >= 0x00d0) && (tag_id <= 0x00d2)) {
         i = (tag_id - 0x00d0) % 3;
-        cam_mul[i] = sget4(srf_buf + tag_dataoffset);
+		CHECKBUFFER_SGET4(tag_dataoffset);
+		cam_mul[i] = sget4(srf_buf + tag_dataoffset);
         if (i == 1) {
           cam_mul[3] = cam_mul[i];
         }
@@ -2044,16 +2074,20 @@ void LibRaw::parseSonySRF(unsigned len)
         0x0005  RawDataLength
         */
       case 0x0043:
-        ilm.MaxAp4MaxFocal = sgetreal(tag_type, srf_buf + tag_dataoffset);
+		  CHECKBUFFER_SGET4(tag_dataoffset); // need to add extra space
+		  ilm.MaxAp4MaxFocal = sgetreal(tag_type, srf_buf + tag_dataoffset);
         break;
       case 0x0044:
-         ilm.MaxAp4MinFocal = sgetreal(tag_type, srf_buf + tag_dataoffset);
+		  CHECKBUFFER_SGET4(tag_dataoffset);
+		  ilm.MaxAp4MinFocal = sgetreal(tag_type, srf_buf + tag_dataoffset);
         break;
       case 0x0045:
-        ilm.MinFocal = sgetreal(tag_type, srf_buf + tag_dataoffset);
+		  CHECKBUFFER_SGET4(tag_dataoffset);
+		  ilm.MinFocal = sgetreal(tag_type, srf_buf + tag_dataoffset);
         break;
       case 0x0046:
-        ilm.MaxFocal = sgetreal(tag_type, srf_buf + tag_dataoffset);
+		  CHECKBUFFER_SGET4(tag_dataoffset);
+		  ilm.MaxFocal = sgetreal(tag_type, srf_buf + tag_dataoffset);
         break;
       }
     } else goto restore_after_parseSonySRF;
