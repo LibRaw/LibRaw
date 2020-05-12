@@ -19,7 +19,7 @@
 void LibRaw::GetNormalizedModel()
 {
 
-  int i, j, c;
+  int i, j;
   char *ps;
 
   static const struct
@@ -97,7 +97,7 @@ void LibRaw::GetNormalizedModel()
       { CanonID_EOS_250D,          "EOS 250D"}, // Rebel SL3 / 200D II / Kiss X10
       { CanonID_EOS_90D,           "EOS 90D"},
     },
-
+#if 0
     olyque[] = {
       { OlyID_E_20,            "E-20"},
       { OlyID_E_20,            "E-20,E-20N,E-20P"},
@@ -262,7 +262,7 @@ void LibRaw::GetNormalizedModel()
       { PentaxID_KP,           "KP"},          // Ricoh
       { PentaxID_K_1_Mark_II,  "K-1 Mark II"}, // Ricoh
     },
-
+#endif
     sonique[] = {
       { SonyID_DSC_R1,         "DSC-R1"},
       { SonyID_DSLR_A100,      "DSLR-A100"},
@@ -629,7 +629,7 @@ void LibRaw::GetNormalizedModel()
       remove_caseSubstr (imgdata.lens.Lens, (char *)"Lens");
       removeExcessiveSpaces (imgdata.lens.Lens);
     }
-    if (ilm.LensID == -1) {
+    if (ilm.LensID == LIBRAW_LENS_NOT_SET) {
       if (strstr(imgdata.lens.Lens, "50mm"))
         ilm.LensID = 1;
       else if (strstr(imgdata.lens.Lens, "S10"))
@@ -681,7 +681,7 @@ void LibRaw::GetNormalizedModel()
       strcpy(model, "GXR Mount A12");
       ilm.CameraFormat = LIBRAW_FORMAT_APSC;
       ilm.CameraMount = LIBRAW_MOUNT_Leica_M;
-      ilm.LensID = -1;
+      ilm.LensID = LIBRAW_LENS_NOT_SET;
       break;
     }
   }
@@ -692,7 +692,7 @@ void LibRaw::GetNormalizedModel()
   {
     if ((unique_id) && (unique_id != CanonID_EOS_D2000C) && (unique_id != CanonID_EOS_D6000C))
     {
-      for (i = 0; i < sizeof unique / sizeof *unique; i++)
+      for (i = 0; i < int(sizeof unique / sizeof *unique); i++)
       {
         if (unique_id == unique[i].id)
         {
@@ -705,7 +705,7 @@ void LibRaw::GetNormalizedModel()
   }
   else if (makeIs(LIBRAW_CAMERAMAKER_Fujifilm))
   {
-    for (i = 0; i < sizeof fujialias / sizeof *fujialias; i++)
+    for (i = 0; i < int(sizeof fujialias / sizeof *fujialias); i++)
     {
       if (fujialias[i][0] == '@')
       {
@@ -724,7 +724,7 @@ void LibRaw::GetNormalizedModel()
   }
   else if (makeIs(LIBRAW_CAMERAMAKER_Mamiya))
   {
-    for (i = 0; i < sizeof phase1alias / sizeof *phase1alias; i++)
+    for (i = 0; i < int(sizeof phase1alias / sizeof *phase1alias); i++)
     { // re-badged Phase One backs
       if (phase1alias[i][0] == '@') orig = phase1alias[i] + 1;
       else if (!strcmp(model, phase1alias[i]))
@@ -734,7 +734,7 @@ void LibRaw::GetNormalizedModel()
         break;
       }
     }
-    for (i = 0; i < sizeof leafalias / sizeof *leafalias; i++)
+    for (i = 0; i < int(sizeof leafalias / sizeof *leafalias); i++)
     { // re-badged Leaf backs
       if (leafalias[i][0] == '@') orig = leafalias[i] + 1;
       else if (!strcmp(model, leafalias[i]))
@@ -750,7 +750,7 @@ void LibRaw::GetNormalizedModel()
   }
   else if (makeIs(LIBRAW_CAMERAMAKER_Leaf))
   {
-    for (i = 0; i < sizeof leafalias / sizeof *leafalias; i++)
+    for (i = 0; i < int(sizeof leafalias / sizeof *leafalias); i++)
     { // re-badged Leaf backs
       if (leafalias[i][0] == '@')
       {
@@ -777,7 +777,7 @@ void LibRaw::GetNormalizedModel()
     else
     {
       for (i = 0;
-           i < sizeof KonicaMinolta_aliases / sizeof *KonicaMinolta_aliases;
+           i<int(sizeof KonicaMinolta_aliases / sizeof *KonicaMinolta_aliases);
            i++)
       {
         if (KonicaMinolta_aliases[i][0] == '@')
@@ -802,7 +802,7 @@ void LibRaw::GetNormalizedModel()
   }
   else if (makeIs(LIBRAW_CAMERAMAKER_Nikon))
   {
-    for (i = 0; i < sizeof nikonalias / sizeof *nikonalias; i++)
+    for (i = 0; i < int(sizeof nikonalias / sizeof *nikonalias); i++)
     {
       if (nikonalias[i][0] == '@')
       {
@@ -817,7 +817,7 @@ void LibRaw::GetNormalizedModel()
     }
 
   } else if (makeIs(LIBRAW_CAMERAMAKER_Olympus)) {
-    for (i = 0; i < sizeof olyalias / sizeof *olyalias; i++) {
+    for (i = 0; i < int(sizeof olyalias / sizeof *olyalias); i++) {
       if (olyalias[i][0] == '@') {
         orig = olyalias[i] + 1;
         if (!strcmp(model, orig)) break;
@@ -840,7 +840,7 @@ void LibRaw::GetNormalizedModel()
              makeIs(LIBRAW_CAMERAMAKER_Leica) ||
              makeIs(LIBRAW_CAMERAMAKER_Yuneec))
   {
-    for (i = 0; i < sizeof panalias / sizeof *panalias; i++)
+    for (i = 0; i < int(sizeof panalias / sizeof *panalias); i++)
     {
       if (panalias[i][0] == '@')
       {
@@ -870,7 +870,9 @@ void LibRaw::GetNormalizedModel()
       }
     }
 
-    for (i = 0; i < sizeof SamsungPentax_aliases / sizeof *SamsungPentax_aliases; i++) {
+    for (i = 0; 
+    i < int(sizeof SamsungPentax_aliases / sizeof *SamsungPentax_aliases);
+    i++) {
       if (SamsungPentax_aliases[i][0] == '@') {
         orig = SamsungPentax_aliases[i] + 1;
         if (!strcmp(model, orig)) break;
@@ -886,7 +888,7 @@ void LibRaw::GetNormalizedModel()
 
   } else if (makeIs(LIBRAW_CAMERAMAKER_PhaseOne))
   {
-    for (i = 0; i < sizeof phase1alias / sizeof *phase1alias; i++)
+    for (i = 0; i < int(sizeof phase1alias / sizeof *phase1alias); i++)
     {
       if (phase1alias[i][0] == '@')
       {
@@ -929,7 +931,7 @@ void LibRaw::GetNormalizedModel()
     }
     else
     {
-      for (i = 0; i < sizeof samsungalias / sizeof *samsungalias; i++)
+      for (i = 0; i < int(sizeof samsungalias / sizeof *samsungalias); i++)
       {
         if (samsungalias[i][0] == '@')
         {
@@ -947,7 +949,7 @@ void LibRaw::GetNormalizedModel()
   } else if (makeIs(LIBRAW_CAMERAMAKER_Sony)) {
     if (unique_id)
     {
-      for (i = 0; i < sizeof sonique / sizeof *sonique; i++)
+      for (i = 0; i < int(sizeof sonique / sizeof *sonique); i++)
       {
         if (unique_id == sonique[i].id)
         {
@@ -963,7 +965,7 @@ void LibRaw::GetNormalizedModel()
     remove_caseSubstr (normalized_model, (char *)"EasyShare");
     remove_caseSubstr (normalized_model, (char *)"ZOOM");
     removeExcessiveSpaces (normalized_model);
-    for (i = 0; i < sizeof kodakalias / sizeof *kodakalias; i++)
+    for (i = 0; i < int(sizeof kodakalias / sizeof *kodakalias); i++)
     {
       if (kodakalias[i][0] == '@')
       {
@@ -998,7 +1000,7 @@ void LibRaw::GetNormalizedModel()
       strcpy(normalized_model, model);
     }
 
-    for (i = 0; i < sizeof KodakMonochrome / sizeof *KodakMonochrome; i++)
+    for (i = 0; i < int(sizeof KodakMonochrome / sizeof *KodakMonochrome); i++)
     {
       if (!strncmp(model, KodakMonochrome[i], strlen(KodakMonochrome[i])))
       {
@@ -1178,7 +1180,7 @@ void LibRaw::GetNormalizedModel()
     else if (makeIs(LIBRAW_CAMERAMAKER_Kodak))
     {
       ilm.CameraMount = LIBRAW_MOUNT_FixedLens;
-      for (i = 0; i < sizeof Kodak_mounts / sizeof *Kodak_mounts; i++)
+      for (i = 0; i < int(sizeof Kodak_mounts / sizeof *Kodak_mounts); i++)
       {
         if (!strncmp(normalized_model, Kodak_mounts[i].Kmodel,
                      strlen(Kodak_mounts[i].Kmodel)))
@@ -1326,7 +1328,7 @@ void LibRaw::GetNormalizedModel()
     }
   }
 
-  if (ilm.LensID == -1)
+  if (ilm.LensID == LIBRAW_LENS_NOT_SET)
   {
     if (makeIs(LIBRAW_CAMERAMAKER_Samsung))
     {
@@ -1349,7 +1351,7 @@ void LibRaw::GetNormalizedModel()
   if ((ilm.CameraMount != LIBRAW_MOUNT_Unknown) &&
       (ilm.CameraMount != LIBRAW_MOUNT_FixedLens) &&
       (ilm.LensMount == LIBRAW_MOUNT_Unknown)) {
-    if (ilm.LensID == -1) ilm.LensMount = LIBRAW_MOUNT_IL_UM;
+    if (ilm.LensID == LIBRAW_LENS_NOT_SET) ilm.LensMount = LIBRAW_MOUNT_IL_UM;
     else ilm.LensMount = ilm.CameraMount;
     }
 

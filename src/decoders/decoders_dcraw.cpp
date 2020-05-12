@@ -37,7 +37,7 @@ unsigned LibRaw::getbithuff(int nbits, ushort *huff)
     return bitbuf = vbits = reset = 0;
   if (nbits == 0 || vbits < 0)
     return 0;
-  while (!reset && vbits < nbits && (c = fgetc(ifp)) != EOF &&
+  while (!reset && vbits < nbits && (c = fgetc(ifp)) != (unsigned)EOF &&
          !(reset = zero_after_ff && c == 0xff && fgetc(ifp)))
   {
     bitbuf = (bitbuf << 8) + (uchar)c;
@@ -190,7 +190,7 @@ int LibRaw::canon_has_lowbits()
 
   fseek(ifp, 0, SEEK_SET);
   fread(test, 1, sizeof test, ifp);
-  for (i = 540; i < sizeof test - 1; i++)
+  for (i = 540; i < int(sizeof test - 1); i++)
     if (test[i] == 0xff)
     {
       if (test[i + 1])
@@ -725,7 +725,7 @@ void LibRaw::pentax_load_raw()
 }
 void LibRaw::nikon_read_curve()
 {
-  ushort ver0, ver1, vpred[2][2], hpred[2], csize;
+  ushort ver0, ver1, vpred[2][2], csize;
   int i, step, max;
 
   fseek(ifp, meta_offset, SEEK_SET);

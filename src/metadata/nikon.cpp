@@ -431,7 +431,7 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
       if (len > 0)
       {
         int model_len = (int)strbuflen(model);
-        while ((c = fgetc(ifp)) && (len-- > 0) && (c != EOF))
+        while ((c = fgetc(ifp)) && (len-- > 0) && (c != (unsigned)EOF))
         {
           if ((!custom_serial) && (!isdigit(c)))
           {

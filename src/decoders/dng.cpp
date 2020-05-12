@@ -39,7 +39,7 @@ void LibRaw::adobe_copy_pixel(unsigned row, unsigned col, ushort **rp)
   else
   {
     if (row < raw_height && col < raw_width)
-      FORC(tiff_samples)
+      FORC(int(tiff_samples))
     image[row * raw_width + col][c] = curve[(*rp)[c]];
     *rp += tiff_samples;
   }
@@ -76,10 +76,10 @@ void LibRaw::lossless_dng_load_raw()
       case 0xc1:
         jh.vpred[0] = 16384;
         getbits(-1);
-        for (jrow = 0; jrow + 7 < jh.high; jrow += 8)
+        for (jrow = 0; jrow + 7 < (unsigned)jh.high; jrow += 8)
         {
           checkCancel();
-          for (jcol = 0; jcol + 7 < jh.wide; jcol += 8)
+          for (jcol = 0; jcol + 7 < (unsigned)jh.wide; jcol += 8)
           {
             ljpeg_idct(&jh);
             rp = jh.idct;
@@ -92,7 +92,7 @@ void LibRaw::lossless_dng_load_raw()
         }
         break;
       case 0xc3:
-        for (row = col = jrow = 0; jrow < jh.high; jrow++)
+        for (row = col = jrow = 0; jrow < (unsigned)jh.high; jrow++)
         {
           checkCancel();
           rp = ljpeg_row(jrow, &jh);
@@ -130,7 +130,7 @@ void LibRaw::lossless_dng_load_raw()
 void LibRaw::packed_dng_load_raw()
 {
   ushort *pixel, *rp;
-  int row, col;
+  unsigned row, col;
 
   int ss = shot_select;
   shot_select = libraw_internal_data.unpacker_data.dng_frames[LIM(ss,0,(LIBRAW_IFD_MAXCOUNT*2-1))] & 0xff;
@@ -177,7 +177,6 @@ void LibRaw::lossy_dng_load_raw()
   if (!image)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
   struct jpeg_decompress_struct cinfo;
-  struct jpeg_error_mgr jerr;
   JSAMPARRAY buf;
   JSAMPLE(*pixel)[3];
   unsigned sorder = order, ntags, opcode, deg, i, j, c;

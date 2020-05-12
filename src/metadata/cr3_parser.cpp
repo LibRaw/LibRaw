@@ -48,7 +48,7 @@ void LibRaw::selectCRXTrack(short maxTrack)
   {
     if (bitcounts[i] == maxbitcount)
     {
-      if (framecnt <= shot_select)
+      if (framecnt <= (int)shot_select)
         framei = i;
       framecnt++;
     }
@@ -83,7 +83,7 @@ void LibRaw::selectCRXTrack(short maxTrack)
 
     int tiff_idx = -1;
     INT64 tpixels = 0;
-    for (int i = 0; i < tiff_nifds; i++)
+    for (unsigned i = 0; i < tiff_nifds; i++)
       if (INT64(tiff_ifd[i].t_height) * INT64(tiff_ifd[i].t_height) > tpixels)
       {
         tpixels = INT64(tiff_ifd[i].t_height) * INT64(tiff_ifd[i].t_height);
@@ -111,8 +111,6 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
   */
   const char UIID_Canon[17] =
       "\x85\xc0\xb6\x87\x82\x0f\x11\xe0\x81\x11\xf4\xce\x46\x2b\x6a\x48";
-  const char UIID_Preview[17] =
-      "\xea\xf4\x2b\x5e\x1c\x98\x4b\x88\xb9\xfb\xb7\xdc\x40\x6e\x4d\x16";
 
   /*
   AtomType = 0 - unknown: "unk."
@@ -120,7 +118,6 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
   AtomType = 2 - leaf atom: "leaf"
   AtomType = 3 - can be container, can be leaf: "both"
   */
-  const char sAtomeType[4][5] = {"unk.", "cont", "leaf", "both"};
   short AtomType;
   static const struct
   {
@@ -220,14 +217,12 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
   char UIID[16];
   uchar CMP1[36];
   char HandlerType[5], MediaFormatID[5];
-  unsigned ImageWidth, ImageHeight;
-  long relpos_inDir, relpos_inBox;
+  uint32_t relpos_inDir, relpos_inBox;
   unsigned szItem, Tag, lTag;
   ushort tItem;
 
   nmAtom[0] = MediaFormatID[0] = nmAtom[4] = MediaFormatID[4] = '\0';
   strcpy(HandlerType, sHandlerType[0]);
-  ImageWidth = ImageHeight = 0U;
   oAtom = oAtomList;
   nesting++;
   if (nesting > 31)
@@ -246,7 +241,7 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
     tL = 4;
     AtomType = 0;
 
-    for (c = 0; c < sizeof AtomNamesList / sizeof *AtomNamesList; c++)
+    for (c = 0; c < int(sizeof AtomNamesList / sizeof *AtomNamesList); c++)
       if (!strcmp(nmAtom, AtomNamesList[c].AtomName))
       {
         AtomType = AtomNamesList[c].AtomType;
@@ -365,7 +360,7 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
     {
       fseek(ifp, 8L, SEEK_CUR);
       FORC4 HandlerType[c] = fgetc(ifp);
-      for (c = 1; c < sizeof sHandlerType / sizeof *sHandlerType; c++)
+      for (c = 1; c < int(sizeof sHandlerType / sizeof *sHandlerType); c++)
         if (!strcmp(HandlerType, sHandlerType[c]))
         {
           TrackType = c;
@@ -402,8 +397,8 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
       }
 #define current_track libraw_internal_data.unpacker_data.crx_header[nTrack]
 
-      ImageWidth = get2();
-      ImageHeight = get2();
+      /*ImageWidth =*/ get2();
+      /*ImageHeight =*/ get2();
     }
     else if (!strcmp(AtomNameStack, "moovtrakmdiaminfstblstsdCRAW"))
     {

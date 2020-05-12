@@ -354,11 +354,11 @@ int LibRaw::unpack(void)
 
     return 0;
   }
-  catch (LibRaw_exceptions err)
+  catch (const LibRaw_exceptions& err)
   {
     EXCEPTION_HANDLER(err);
   }
-  catch (std::exception ee)
+  catch (const std::exception& ee)
   {
     EXCEPTION_HANDLER(LIBRAW_EXCEPTION_IO_CORRUPT);
   }

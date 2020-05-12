@@ -130,7 +130,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
 
     } else if (type == 0x080b) {
       char *p;
-      stmread(imCommon.firmware, len, ifp);
+      stmread(imCommon.firmware, (unsigned)len, ifp);
       if ((p = strrchr(imCommon.firmware, ' ')+1)) {
         imCanon.firmware = atof(p);
       }
@@ -187,7 +187,6 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
         Appendix_A = 1;
         WB_table_offset = -14;
 
-        float mwb[4];
 
         fseek(ifp, 98, SEEK_CUR);
 
@@ -474,7 +473,6 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
           }
         }
 
-        INT64 tmp_save = ftell(ifp);
         fseek (ifp, 78+WB_table_offset, SEEK_CUR);
 #if DEBUG_CIFF_WB
         printf ("==>> wb start: 0x%llx", ftell(ifp));

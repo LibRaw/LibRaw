@@ -59,6 +59,10 @@ static void f_init_source(j_decompress_ptr cinfo)
     src->start_of_file = TRUE;
 }
 
+#ifdef ERREXIT
+#undef ERREXIT
+#endif
+
 #define ERREXIT(cinfo, code)                                                   \
   ((cinfo)->err->msg_code = (code),                                            \
    (*(cinfo)->err->error_exit)((j_common_ptr)(cinfo)))

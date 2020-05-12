@@ -124,7 +124,14 @@ typedef unsigned long long UINT64;
     j = t;                                                                     \
   }
 
-static float fMAX(float a, float b) { return MAX(a, b); }
+#ifdef __GNUC__
+inline
+#elif defined(_MSC_VER)
+__forceinline
+#else
+static
+#endif
+float fMAX(float a, float b) { return MAX(a, b); }
 
 /*
    In order to inline this calculation, I make the risky

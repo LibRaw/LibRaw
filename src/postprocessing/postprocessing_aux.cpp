@@ -263,7 +263,7 @@ void LibRaw::median_filter()
         for (k = 0, i = -width; i <= width; i += width)
           for (j = i - 1; j <= i + 1; j++)
             med[k++] = pix[j][3] - pix[j][1];
-        for (i = 0; i < sizeof opt; i += 2)
+        for (i = 0; i < int(sizeof opt); i += 2)
           if (med[opt[i]] > med[opt[i + 1]])
             SWAP(med[opt[i]], med[opt[i + 1]]);
         pix[0][c] = CLIP(med[4] + pix[0][1]);
@@ -326,15 +326,15 @@ void LibRaw::recover_highlights()
                                         {1, 1},   {1, 0},  {1, -1}, {0, -1}};
 
   grow = pow(2.0, 4 - highlight);
-  FORCC hsat[c] = 32000 * pre_mul[c];
-  for (kc = 0, c = 1; c < colors; c++)
+  FORC(unsigned(colors)) hsat[c] = 32000 * pre_mul[c];
+  for (kc = 0, c = 1; c < (unsigned)colors; c++)
     if (pre_mul[kc] < pre_mul[c])
       kc = c;
   high = height / SCALE;
   wide = width / SCALE;
   map = (float *)calloc(high, wide * sizeof *map);
   merror(map, "recover_highlights()");
-  FORCC if (c != kc)
+  FORC(unsigned(colors)) if (c != kc)
   {
     RUN_CALLBACK(LIBRAW_PROGRESS_HIGHLIGHTS, c - 1, colors - 1);
     memset(map, 0, high * wide * sizeof *map);
@@ -377,7 +377,7 @@ void LibRaw::recover_highlights()
           if (count > 3)
             map[mrow * wide + mcol] = -(sum + grow) / (count + grow);
         }
-      for (change = i = 0; i < high * wide; i++)
+      for (change = i = 0; i < int(high * wide); i++)
         if (map[i] < 0)
         {
           map[i] = -map[i];
@@ -386,7 +386,7 @@ void LibRaw::recover_highlights()
       if (!change)
         break;
     }
-    for (i = 0; i < high * wide; i++)
+    for (i = 0; i < int(high * wide); i++)
       if (map[i] == 0)
         map[i] = 1;
     for (mrow = 0; mrow < high; mrow++)

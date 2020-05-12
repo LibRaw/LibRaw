@@ -30,7 +30,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   if (!load_raw)
     return LIBRAW_OUT_OF_ORDER_CALL;
 
-  int rawdata = (imgdata.idata.filters || P1.colors == 1);
   // dcraw.c names order
   if (load_raw == &LibRaw::android_tight_load_raw)
   {

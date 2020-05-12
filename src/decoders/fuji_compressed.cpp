@@ -74,7 +74,7 @@ struct fuji_compressed_block
 
 void LibRaw::init_fuji_compr(struct fuji_compressed_params *info)
 {
-  int cur_val, i;
+  int cur_val;
   int8_t *qt;
 
   if ((libraw_internal_data.unpacker_data.fuji_block_width % 3 &&
@@ -231,7 +231,7 @@ void LibRaw::copy_line_to_xtrans(struct fuji_compressed_block *info,
   while (row_count < 6)
   {
     pixel_count = 0;
-    while (pixel_count < cur_block_width)
+    while (pixel_count < (unsigned)cur_block_width)
     {
       switch (imgdata.idata.xtrans_abs[row_count][(pixel_count % 6)])
       {
@@ -289,7 +289,7 @@ void LibRaw::copy_line_to_bayer(struct fuji_compressed_block *info,
   while (row_count < 6)
   {
     pixel_count = 0;
-    while (pixel_count < cur_block_width)
+    while (pixel_count < (unsigned)cur_block_width)
     {
       switch (fuji_bayer[row_count & 1][pixel_count & 1])
       {
@@ -1010,12 +1010,11 @@ void LibRaw::fuji_compressed_load_raw()
 {
   struct fuji_compressed_params common_info;
   int cur_block;
-  unsigned line_size, *block_sizes;
+  unsigned *block_sizes;
   INT64 raw_offset, *raw_block_offsets;
   // struct fuji_compressed_block info;
 
   init_fuji_compr(&common_info);
-  line_size = sizeof(ushort) * (common_info.line_width + 2);
 
   // read block sizes
   block_sizes = (unsigned *)malloc(

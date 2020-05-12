@@ -134,7 +134,7 @@ void LibRaw::android_loose_load_raw()
 void LibRaw::unpacked_load_raw_reversed()
 {
   int row, col, bits = 0;
-  while (1 << ++bits < maximum)
+  while (1 << ++bits < (int)maximum)
     ;
   for (row = raw_height - 1; row >= 0; row--)
   {

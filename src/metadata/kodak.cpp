@@ -73,8 +73,7 @@ short LibRaw::KodakIllumMatrix(unsigned type, float *romm_camIllum)
 void LibRaw::parse_kodak_ifd(int base)
 {
   unsigned entries, tag, type, len, save;
-  int j, c, wbi = -1;
-  float mul[3] = {1, 1, 1}, num;
+  int c, wbi = -1;
 
   static const int wbtag_kdc[] = {
       LIBRAW_WBI_Auto,        // 64037 / 0xfa25
@@ -162,51 +161,51 @@ void LibRaw::parse_kodak_ifd(int base)
         while (pkti != NULL)
         {
           c = 12;
-          if ((strlen(pkti) > c) && (!strncasecmp(pkti, "Camera body:", c)))
+          if (((int)strlen(pkti) > c) && (!strncasecmp(pkti, "Camera body:", c)))
           {
-            while ((pkti[c] == ' ') && (c < strlen(pkti)))
+            while ((pkti[c] == ' ') && (c < (int)strlen(pkti)))
             {
               c++;
             }
             strcpy(ilm.body, pkti + c);
           }
           c = 5;
-          if ((strlen(pkti) > c) && (!strncasecmp(pkti, "Lens:", c)))
+          if (((int)strlen(pkti) > c) && (!strncasecmp(pkti, "Lens:", c)))
           {
             ilm.CurFocal = atoi(pkti + c);
           }
           c = 9;
-          if ((strlen(pkti) > c) && (!strncasecmp(pkti, "Aperture:", c)))
+          if (((int)strlen(pkti) > c) && (!strncasecmp(pkti, "Aperture:", c)))
           {
-            while (((pkti[c] == ' ') || (pkti[c] == 'f')) && (c < strlen(pkti)))
+            while (((pkti[c] == ' ') || (pkti[c] == 'f')) && (c < (int)strlen(pkti)))
             {
               c++;
             }
             ilm.CurAp = atof(pkti + c);
           }
           c = 10;
-          if ((strlen(pkti) > c) && (!strncasecmp(pkti, "ISO Speed:", c)))
+          if (((int)strlen(pkti) > c) && (!strncasecmp(pkti, "ISO Speed:", c)))
           {
             iso_speed = atoi(pkti + c);
           }
           c = 13;
-          if ((strlen(pkti) > c) && (!strncasecmp(pkti, "Focal Length:", c)))
+          if (((int)strlen(pkti) > c) && (!strncasecmp(pkti, "Focal Length:", c)))
           {
             ilm.CurFocal = atoi(pkti + c);
           }
           c = 13;
-          if ((strlen(pkti) > c) && (!strncasecmp(pkti, "Max Aperture:", c)))
+          if (((int)strlen(pkti) > c) && (!strncasecmp(pkti, "Max Aperture:", c)))
           {
-            while (((pkti[c] == ' ') || (pkti[c] == 'f')) && (c < strlen(pkti)))
+            while (((pkti[c] == ' ') || (pkti[c] == 'f')) && (c < (int)strlen(pkti)))
             {
               c++;
             }
             ilm.MaxAp4CurFocal = atof(pkti + c);
           }
           c = 13;
-          if ((strlen(pkti) > c) && (!strncasecmp(pkti, "Min Aperture:", c)))
+          if (((int)strlen(pkti) > c) && (!strncasecmp(pkti, "Min Aperture:", c)))
           {
-            while (((pkti[c] == ' ') || (pkti[c] == 'f')) && (c < strlen(pkti)))
+            while (((pkti[c] == ' ') || (pkti[c] == 'f')) && (c < (int)strlen(pkti)))
             {
               c++;
             }

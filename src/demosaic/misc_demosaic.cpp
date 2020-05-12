@@ -86,7 +86,7 @@ void LibRaw::border_interpolate(int border)
   for (row = 0; row < height; row++)
     for (col = 0; col < width; col++)
     {
-      if (col == border && row >= border && row < height - border)
+      if (col == (unsigned)border && row >= (unsigned)border && row < (unsigned)(height - border))
         col = width - border;
       memset(sum, 0, sizeof sum);
       for (y = row - 1; y != row + 2; y++)
@@ -98,7 +98,7 @@ void LibRaw::border_interpolate(int border)
             sum[f + 4]++;
           }
       f = fcol(row, col);
-      FORCC if (c != f && sum[c + 4]) image[row * width + col][c] =
+      FORC(unsigned(colors)) if (c != f && sum[c + 4]) image[row * width + col][c] =
           sum[c] / sum[c + 4];
     }
 }

@@ -104,8 +104,8 @@ int LibRaw::setMakeFromIndex(unsigned makei)
 {
 	if (makei <= LIBRAW_CAMERAMAKER_Unknown || makei >= LIBRAW_CAMERAMAKER_TheLastOne) return 0;
 
-	for (int i = 0; i < sizeof CorpTable / sizeof *CorpTable; i++)
-		if (CorpTable[i].CorpId == makei)
+	for (int i = 0; i < int(sizeof CorpTable / sizeof *CorpTable); i++)
+		if ((unsigned)CorpTable[i].CorpId == makei)
 		{
 			strcpy(normalized_make, CorpTable[i].CorpName);
 			maker_index = makei;
@@ -116,8 +116,8 @@ int LibRaw::setMakeFromIndex(unsigned makei)
 
 const char *LibRaw::cameramakeridx2maker(unsigned maker)
 {
-    for (int i = 0; i < sizeof CorpTable / sizeof *CorpTable; i++)
-        if(CorpTable[i].CorpId == maker)
+    for (int i = 0; i < int(sizeof CorpTable / sizeof *CorpTable); i++)
+        if((unsigned)CorpTable[i].CorpId == maker)
             return CorpTable[i].CorpName;
     return 0;
 }
@@ -152,7 +152,7 @@ void LibRaw::fixupArri()
         {"ALEXA", "Alexa Plus 4:3 XT", 2880 ,1620, 256,0x61616161,0.75f},
         {"ALEXA", "Alexa Plus 4:3 XT", 3424 ,2202, 256,0x61616161,1.f},
     };
-    for(int i = 0; i < sizeof(alist)/sizeof(alist[0]); i++)
+    for(int i = 0; i < int(sizeof(alist)/sizeof(alist[0])); i++)
         if(!strncasecmp(model,alist[i].a_model,strlen(alist[i].a_model)) && software
             && !strncasecmp(software,alist[i].a_software,strlen(alist[i].a_software))
             && width == alist[i].a_width && height == alist[i].a_height)
@@ -398,7 +398,7 @@ void LibRaw::identify()
 
   unsigned camera_count =
       parse_custom_cameras(64, table, imgdata.params.custom_camera_strings);
-  for (int q = 0; q < sizeof(const_table) / sizeof(const_table[0]); q++)
+  for (int q = 0; q < int(sizeof(const_table) / sizeof(const_table[0])); q++)
     memmove(&table[q + camera_count], &const_table[q], sizeof(const_table[0]));
   camera_count += sizeof(const_table) / sizeof(const_table[0]);
 
@@ -688,8 +688,8 @@ void LibRaw::identify()
   }
 
   if (make[0] == 0)
-    for (zero_fsize = i = 0; i < camera_count; i++)
-      if (fsize == table[i].fsize)
+    for (zero_fsize = i = 0; i < (int)camera_count; i++)
+      if (fsize == (int)table[i].fsize)
       {
         strcpy(make, table[i].t_make);
         strcpy(model, table[i].t_model);
@@ -851,7 +851,7 @@ void LibRaw::identify()
   // make sure strings are terminated
   desc[511] = artist[63] = make[63] = model[63] = model2[63] = 0;
 
-  for (i = 0; i < sizeof CorpTable / sizeof *CorpTable; i++)
+  for (i = 0; i < int(sizeof CorpTable / sizeof *CorpTable); i++)
   {
     if (strcasestr(make, CorpTable[i].CorpName))
     { /* Simplify company names */
@@ -949,7 +949,7 @@ void LibRaw::identify()
       bool fromtable = false;
     if (!load_raw)
       load_raw = &LibRaw::lossless_jpeg_load_raw;
-    for (i = 0; i < sizeof canon / sizeof *canon; i++)
+    for (i = 0; i < int(sizeof canon / sizeof *canon); i++)
       if (raw_width == canon[i][0] && raw_height == canon[i][1])
       {
         width = raw_width - (left_margin = canon[i][2]);
@@ -1178,9 +1178,9 @@ dng_skip:
     filters |= ((filters >> 2 & 0x22222222) | (filters << 2 & 0x88888888)) &
                filters << 1;
 notraw:
-  if (flip == UINT_MAX)
+  if (flip == (int)UINT_MAX)
     flip = tiff_flip;
-  if (flip == UINT_MAX)
+  if (flip == (int)UINT_MAX)
     flip = 0;
 
   // Convert from degrees to bit-field if needed
@@ -1214,7 +1214,7 @@ notraw:
 void LibRaw::identify_process_dng_fields()
 {
 	if (!dng_version) return;
-	int i, j, c;
+	int c;
 	{
 		/* copy DNG data from per-IFD field to color.dng */
 		int iifd = find_ifd_by_offset(data_offset);
@@ -1236,7 +1236,7 @@ void LibRaw::identify_process_dng_fields()
 
 #define COPYARR(to, from) memmove(&to, &from, sizeof(from))
 
-		if (iifd < tiff_nifds && iifd >= 0)
+		if (iifd < (int)tiff_nifds && iifd >= 0)
 		{
 			int sidx;
 			// Per field, not per structure
@@ -1252,7 +1252,7 @@ void LibRaw::identify_process_dng_fields()
 				}
 				abidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_ANALOGBALANCE);
 				// Data found, all in same ifd, illuminants are inited
-				if (illidx[0] >= 0 && illidx[0] < tiff_nifds &&
+				if (illidx[0] >= 0 && illidx[0] < (int)tiff_nifds &&
 					illidx[0] == illidx[1] && illidx[0] == cmidx[0] &&
 					illidx[0] == cmidx[1] &&
 					tiff_ifd[illidx[0]].dng_color[0].illuminant > 0 &&
@@ -1270,7 +1270,6 @@ void LibRaw::identify_process_dng_fields()
 					// IS D65 here?
 					for (int i = 0; i < 2; i++)
 					{
-						int ill = tiff_ifd[sidx].dng_color[i].illuminant;
 						if (tiff_ifd[sidx].dng_color[i].illuminant == LIBRAW_WBI_D65)
 						{
 							colidx = i;
@@ -1484,8 +1483,8 @@ void LibRaw::identify_process_dng_fields()
 			/* Special case, Fuji SuperCCD dng */
 			int csum[4] = { 0,0,0,0 }, ccount[4] = { 0,0,0,0 };
 			int i = 6 + shot_select;
-			for (int row = 0; row < imgdata.color.dng_levels.dng_cblack[4]; row++)
-				for (int col = 0; col < imgdata.color.dng_levels.dng_cblack[5]; col++)
+			for (unsigned row = 0; row < imgdata.color.dng_levels.dng_cblack[4]; row++)
+				for (unsigned col = 0; col < imgdata.color.dng_levels.dng_cblack[5]; col++)
 				{
 					csum[FC(row, col)] += imgdata.color.dng_levels.dng_cblack[i];
 					ccount[FC(row, col)]++;
@@ -1503,9 +1502,9 @@ void LibRaw::identify_process_dng_fields()
 			/* Special case, per_channel blacks in RepeatDim, average for per-channel */
 			int csum[4] = { 0,0,0,0 }, ccount[4] = { 0,0,0,0 };
 			int i = 6;
-			for (int row = 0; row < imgdata.color.dng_levels.dng_cblack[4]; row++)
-				for (int col = 0; col < imgdata.color.dng_levels.dng_cblack[5]; col++)
-					for (int c = 0; c < tiff_samples; c++)
+			for (unsigned row = 0; row < imgdata.color.dng_levels.dng_cblack[4]; row++)
+				for (unsigned col = 0; col < imgdata.color.dng_levels.dng_cblack[5]; col++)
+					for (unsigned c = 0; c < tiff_samples; c++)
 					{
 						csum[c] += imgdata.color.dng_levels.dng_cblack[i];
 						ccount[c]++;
@@ -1519,7 +1518,7 @@ void LibRaw::identify_process_dng_fields()
 
 		memmove(cblack, imgdata.color.dng_levels.dng_cblack, sizeof(cblack));
 
-		if (iifd < tiff_nifds && iifd >= 0)
+		if (iifd < (int)tiff_nifds && iifd >= 0)
 		{
 			int sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_LINEARRESPONSELIMIT);
 			if (sidx >= 0)
@@ -2615,7 +2614,7 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize)
 		zero_is_bad = 1;
 		if ((height += 12) > raw_height)
 			height = raw_height;
-		for (i = 0; i < sizeof pana / sizeof *pana; i++)
+		for (i = 0; i < int(sizeof pana / sizeof *pana); i++)
 			if (raw_width == pana[i][0] && raw_height == pana[i][1])
 			{
 				left_margin = pana[i][2];

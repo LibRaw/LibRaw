@@ -137,10 +137,6 @@ struct DHT
         nraw[nr_offset(y - 1, x - 1)][1] / nraw[nr_offset(y - 1, x - 1)][kc];
     float hrd =
         nraw[nr_offset(y + 1, x + 1)][1] / nraw[nr_offset(y + 1, x + 1)][kc];
-    float hru =
-        nraw[nr_offset(y - 1, x + 1)][1] / nraw[nr_offset(y - 1, x + 1)][kc];
-    float hld =
-        nraw[nr_offset(y + 1, x - 1)][1] / nraw[nr_offset(y + 1, x - 1)][kc];
     float dlurd =
         calc_dist(hlu, hrd) *
         calc_dist(nraw[nr_offset(y - 1, x - 1)][1] *
@@ -672,11 +668,6 @@ void DHT::refine_idiag_dirs(int i)
              (ndir[nr_offset(y - 1, x + 1)] & RULD) +
              (ndir[nr_offset(y + 1, x - 1)] & RULD) +
              (ndir[nr_offset(y + 1, x + 1)] & RULD);
-    bool codir = (ndir[nr_offset(y, x)] & LURD)
-                     ? ((ndir[nr_offset(y - 1, x - 1)] & LURD) ||
-                        (ndir[nr_offset(y + 1, x + 1)] & LURD))
-                     : ((ndir[nr_offset(y - 1, x + 1)] & RULD) ||
-                        (ndir[nr_offset(y + 1, x - 1)] & RULD));
     nv /= LURD;
     nh /= RULD;
     if ((ndir[nr_offset(y, x)] & LURD) && nh > 7)
@@ -893,7 +884,6 @@ void DHT::make_rbhv(int i)
      * обоим цветам.
      */
     int dx, dy, dx2, dy2;
-    float h1, h2;
     if (ndir[nr_offset(y, x)] & VER)
     {
       dx = dx2 = 0;

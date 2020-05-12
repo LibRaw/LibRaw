@@ -117,7 +117,7 @@ void LibRaw::PentaxISO(ushort c)
       4500,   6400,   9000,   12800,  18000,  25600,  36000,  51200};
 #define numel (sizeof(code) / sizeof(code[0]))
   int i;
-  for (i = 0; i < numel; i++)
+  for (i = 0; i < (int)numel; i++)
   {
     if (code[i] == c)
     {
@@ -144,7 +144,7 @@ void LibRaw::PentaxLensInfo(unsigned long long id, unsigned len) // tag 0x0207
         (table_buf[20] == 0xff)))))
   {
     iLensData = 3;
-    if (ilm.LensID == -1)
+    if (ilm.LensID == LIBRAW_LENS_NOT_SET)
       ilm.LensID = (((unsigned)table_buf[0]) << 8) + table_buf[1];
   }
   else
@@ -152,20 +152,20 @@ void LibRaw::PentaxLensInfo(unsigned long long id, unsigned len) // tag 0x0207
     {
     case 90: // LensInfo3
       iLensData = 13;
-      if (ilm.LensID == -1)
+      if (ilm.LensID == LIBRAW_LENS_NOT_SET)
         ilm.LensID = ((unsigned)((table_buf[1] & 0x0f) + table_buf[3]) << 8) +
                      table_buf[4];
       break;
     case 91: // LensInfo4
       iLensData = 12;
-      if (ilm.LensID == -1)
+      if (ilm.LensID == LIBRAW_LENS_NOT_SET)
         ilm.LensID = ((unsigned)((table_buf[1] & 0x0f) + table_buf[3]) << 8) +
                      table_buf[4];
       break;
     case 80: // LensInfo5
     case 128:
       iLensData = 15;
-      if (ilm.LensID == -1)
+      if (ilm.LensID == LIBRAW_LENS_NOT_SET)
         ilm.LensID = ((unsigned)((table_buf[1] & 0x0f) + table_buf[4]) << 8) +
                      table_buf[5];
       break;
@@ -175,7 +175,7 @@ void LibRaw::PentaxLensInfo(unsigned long long id, unsigned len) // tag 0x0207
       if (id >= 0x12b9cULL) // LensInfo2
       {
         iLensData = 4;
-        if (ilm.LensID == -1)
+        if (ilm.LensID == LIBRAW_LENS_NOT_SET)
           ilm.LensID = ((unsigned)((table_buf[0] & 0x0f) + table_buf[2]) << 8) +
                        table_buf[3];
       }
@@ -407,7 +407,7 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   else if (tag == 0x0221)
   {
     int nWB = get2();
-    if (nWB <= sizeof(icWBCCTC) / sizeof(icWBCCTC[0]))
+    if (nWB <= int(sizeof(icWBCCTC) / sizeof(icWBCCTC[0])))
       FORC(nWB)
       {
         icWBCCTC[c][0] = (unsigned)0xcfc6 - get2();
@@ -487,7 +487,7 @@ void LibRaw::parseRicohMakernotes(int base, unsigned tag, unsigned type,
     ilm.CameraMount = LIBRAW_MOUNT_FixedLens;
     ilm.LensMount = LIBRAW_MOUNT_FixedLens;
     ilm.CameraFormat = LIBRAW_FORMAT_APSC;
-    ilm.LensID = -1;
+    ilm.LensID = LIBRAW_LENS_NOT_SET;
     ilm.FocalType = LIBRAW_FT_PRIME_LENS;
     imgdata.shootinginfo.ExposureProgram = get2();
   }
@@ -513,9 +513,9 @@ void LibRaw::parseRicohMakernotes(int base, unsigned tag, unsigned type,
   }
   else if ((tag == 0x2001) && !strncmp(model, "GXR", 3))
   {
-    short ntags, cur_tag;
+    short cur_tag;
     fseek(ifp, 20, SEEK_CUR);
-    ntags = get2();
+    /*ntags =*/ get2();
     cur_tag = get2();
     while (cur_tag != 0x002c)
     {

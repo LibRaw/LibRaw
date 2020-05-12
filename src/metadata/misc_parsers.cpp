@@ -53,7 +53,7 @@ void LibRaw::nikon_3700()
   fseek(ifp, 3072, SEEK_SET);
   fread(dp, 1, 24, ifp);
   bits = (dp[8] & 3) << 4 | (dp[20] & 3);
-  for (i = 0; i < sizeof table / sizeof *table; i++)
+  for (i = 0; i < int(sizeof table / sizeof *table); i++)
     if (bits == table[i].bits)
     {
       strcpy(make, table[i].t_make);
@@ -71,7 +71,7 @@ int LibRaw::minolta_z2()
 
   fseek(ifp, -sizeof tail, SEEK_END);
   fread(tail, 1, sizeof tail, ifp);
-  for (nz = i = 0; i < sizeof tail; i++)
+  for (nz = i = 0; i < int(sizeof tail); i++)
     if (tail[i])
       nz++;
   return nz > 20;
@@ -104,7 +104,7 @@ void LibRaw::parse_redcine()
   if (get4() != i || get4() != 0x52454f42)
   {
     fseek(ifp, 0, SEEK_SET);
-    while ((len = get4()) != EOF)
+    while ((len = get4()) != (unsigned)EOF)
     {
       if (get4() == 0x52454456)
         if (is_raw++ == shot_select)
@@ -224,7 +224,7 @@ void LibRaw::parse_smal(int offset, int fsize)
   ver = fgetc(ifp);
   if (ver == 6)
     fseek(ifp, 5, SEEK_CUR);
-  if (get4() != fsize)
+  if (get4() != (unsigned)fsize)
     return;
   if (ver > 6)
     data_offset = get4();

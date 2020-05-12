@@ -44,7 +44,7 @@
 // interpolates green vertically and saves it to image3
 void LibRaw::dcb_ver(float (*image3)[3])
 {
-  int row, col, u = width, v = 2 * u, indx;
+  int row, col, u = width, indx;
 
   for (row = 2; row < height - 2; row++)
     for (col = 2 + (FC(row, 2) & 1), indx = row * width + col; col < u - 2;
@@ -58,7 +58,7 @@ void LibRaw::dcb_ver(float (*image3)[3])
 // interpolates green horizontally and saves it to image2
 void LibRaw::dcb_hor(float (*image2)[3])
 {
-  int row, col, u = width, v = 2 * u, indx;
+  int row, col, u = width, indx;
 
   for (row = 2; row < height - 2; row++)
     for (col = 2 + (FC(row, 2) & 1), indx = row * width + col; col < u - 2;
@@ -312,7 +312,7 @@ void LibRaw::dcb_nyquist()
 // Rodríguez
 void LibRaw::dcb_color_full()
 {
-  int row, col, c, d, i, j, u = width, v = 2 * u, w = 3 * u, indx, g1, g2;
+  int row, col, c, d, u = width, w = 3 * u, indx, g1, g2;
   float f[4], g[4], (*chroma)[2];
 
   chroma = (float(*)[2])calloc(width * height, sizeof *chroma);
@@ -449,7 +449,7 @@ void LibRaw::dcb_color_full()
 // 0 = horizontal
 void LibRaw::dcb_map()
 {
-  int current, row, col, c, u = width, v = 2 * u, indx;
+  int row, col, u = width, indx;
 
   for (row = 1; row < height - 1; row++)
   {
@@ -500,7 +500,6 @@ void LibRaw::dcb_correction()
 void LibRaw::dcb_correction2()
 {
   int current, row, col, c, u = width, v = 2 * u, indx;
-  ushort(*pix)[4];
 
   for (row = 4; row < height - 4; row++)
     for (col = 4 + (FC(row, 2) & 1), indx = row * width + col, c = FC(row, col);
@@ -527,7 +526,7 @@ void LibRaw::dcb_correction2()
 void LibRaw::dcb_refinement()
 {
   int row, col, c, u = width, v = 2 * u, w = 3 * u, indx, current;
-  float f[5], g1, g2, tmp, tmp2 = 0, tmp3 = 0;
+  float f[5], g1, g2;
 
   for (row = 4; row < height - 4; row++)
     for (col = 4 + (FC(row, 2) & 1), indx = row * width + col, c = FC(row, col);
@@ -664,7 +663,6 @@ void LibRaw::lch_to_rgb(double (*image2)[3])
 void LibRaw::fbdd_correction()
 {
   int row, col, c, u = width, indx;
-  ushort(*pix)[4];
 
   for (row = 2; row < height - 2; row++)
   {
@@ -688,7 +686,7 @@ void LibRaw::fbdd_correction()
 // corrects chroma noise
 void LibRaw::fbdd_correction2(double (*image2)[3])
 {
-  int indx, u = width, v = 2 * width;
+  int indx, v = 2 * width;
   int col, row;
   double Co, Ho, ratio;
 
@@ -738,7 +736,7 @@ void LibRaw::fbdd_correction2(double (*image2)[3])
 void LibRaw::fbdd_green()
 {
   int row, col, c, u = width, v = 2 * u, w = 3 * u, x = 4 * u, y = 5 * u, indx,
-                   min, max, current;
+                   min, max;
   float f[4], g[4];
 
   for (row = 5; row < height - 5; row++)

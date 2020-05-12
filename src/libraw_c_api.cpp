@@ -34,7 +34,7 @@ extern "C"
     {
       ret = new LibRaw(flags);
     }
-    catch (std::bad_alloc)
+    catch (const std::bad_alloc& )
     {
       return NULL;
     }

@@ -655,7 +655,7 @@ void LibRaw::process_Sony_0x9050(uchar *buf, ushort len, unsigned long long id)
 
   if (len <= 0x10a)
     return;
-  if ((ilm.LensID == -1) && (ilm.CameraMount == LIBRAW_MOUNT_Minolta_A) &&
+  if ((ilm.LensID == LIBRAW_LENS_NOT_SET) && (ilm.CameraMount == LIBRAW_MOUNT_Minolta_A) &&
       (buf[0x010a] | buf[0x0109]))
   {
     ilm.LensID = // LensType - Minolta/Sony lens ids
@@ -981,7 +981,7 @@ void LibRaw::parseSonyMakernotes(
     uchar *&table_buf_0x940e, ushort &table_buf_0x940e_len)
 {
 
-  ushort lid, a, b, c, d;
+  ushort lid, a, c, d;
   uchar *table_buf;
   uchar uc;
   uchar s[2];
@@ -1092,7 +1092,7 @@ void LibRaw::parseSonyMakernotes(
     imSony.MinoltaCamID =
         (unsigned)table_buf[lid] << 24 | (unsigned)table_buf[lid + 1] << 16 |
         (unsigned)table_buf[lid + 2] << 8 | (unsigned)table_buf[lid + 3];
-    if (imSony.MinoltaCamID != -1)
+    if (imSony.MinoltaCamID != 0xffffffff)
       ilm.CamID = imSony.MinoltaCamID;
 
     lid = 0x30 << 2;
@@ -1252,7 +1252,7 @@ void LibRaw::parseSonyMakernotes(
                            // NEX-3 NEX-5 NEX-C3 NEX-VG10E         : MoreInfo
     {
       a = get2();
-      b = get2();
+      /*b =*/ get2();
       c = get2();
       d = get2();
       if ((a) && (c == 1))
@@ -1726,7 +1726,7 @@ void LibRaw::parseSonyMakernotes(
       table_buf_0x940e_len = 0;
     }
   }
-  else if (((tag == 0xb027) || (tag == 0x010c)) && (ilm.LensID == -1))
+  else if (((tag == 0xb027) || (tag == 0x010c)) && (ilm.LensID == LIBRAW_LENS_NOT_SET))
   {
     ilm.LensID = get4();
 //    printf ("==>> 1: ilm.LensID %lld\n", ilm.LensID);
@@ -1746,7 +1746,7 @@ void LibRaw::parseSonyMakernotes(
       ilm.LensMount = LIBRAW_MOUNT_Canon_EF;
     }
 
-    else if (((ilm.LensID != -1) && (ilm.LensID < 0xef00)) ||
+    else if (((ilm.LensID != LIBRAW_LENS_NOT_SET) && (ilm.LensID < 0xef00)) ||
              (ilm.LensID == 0xff00))
       ilm.LensMount = LIBRAW_MOUNT_Minolta_A;
     /*
@@ -1793,7 +1793,7 @@ void LibRaw::parseSonySR2(uchar *cbuf_SR2, unsigned SR2SubIFDOffset,
 {
   unsigned c;
   unsigned entries, tag_id, tag_type, tag_datalen;
-  INT64 sr2_offset, tag_offset, tag_data, tag_dataoffset;
+  INT64 tag_offset, tag_dataoffset;
   int TagProcessed;
   int tag_dataunitlen;
   float num;
@@ -1833,7 +1833,7 @@ void LibRaw::parseSonySR2(uchar *cbuf_SR2, unsigned SR2SubIFDOffset,
 			CHECKBUFFER_N(tag_dataoffset + tag_dataunitlen * 4, 0);
 			FORC4 cblack[RGGB_2_RGBG(c)] = sget2(cbuf_SR2 + tag_dataoffset + tag_dataunitlen * c);
           i = cblack[3];
-          FORC3 if (i > cblack[c]) i = cblack[c];
+          FORC3 if (i > (int)cblack[c]) i = cblack[c];
           FORC4 cblack[c] -= i;
           black = i;
           TagProcessed = 1;
@@ -1957,8 +1957,8 @@ void LibRaw::parseSonySRF(unsigned len)
                                       un-encrypted metadata field after SRF0 */
 
   unsigned i, nWB;
-  unsigned MasterKey, SRF2Key, RawDataKey;
-  INT64 srf_offset, tag_offset, tag_data, tag_dataoffset;
+  unsigned MasterKey, SRF2Key;
+  INT64 srf_offset, tag_offset, tag_dataoffset;
   int tag_dataunitlen;
   uchar *srf_buf;
   ushort entries;
@@ -2025,7 +2025,7 @@ void LibRaw::parseSonySRF(unsigned len)
 		  SRF2Key = sget4(srf_buf + tag_dataoffset);
       } else if (tag_id == 0x0001) {
 		  CHECKBUFFER_SGET4(tag_dataoffset);
-		  RawDataKey = sget4(srf_buf + tag_dataoffset);
+		  /*RawDataKey =*/ sget4(srf_buf + tag_dataoffset);
       }
     } else goto restore_after_parseSonySRF;
   }

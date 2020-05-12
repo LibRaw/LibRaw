@@ -107,7 +107,6 @@ void LibRaw::ahd_interpolate_r_and_b_in_rgb_and_convert_to_cielab(
   ushort(*pix)[4];
   ushort(*rix)[3];
   short(*lix)[3];
-  float xyz[3];
   const unsigned num_pix_per_row = 4 * width;
   const unsigned rowlimit = MIN(top + LIBRAW_AHD_TILE - 1, height - 3);
   const unsigned collimit = MIN(left + LIBRAW_AHD_TILE - 1, width - 3);
@@ -178,7 +177,7 @@ void LibRaw::ahd_interpolate_build_homogeneity_map(
     char (*out_homogeneity_map)[LIBRAW_AHD_TILE][2])
 {
   int row, col;
-  int tr, tc;
+  int tr;
   int direction;
   int i;
   short(*lix)[3];
@@ -204,7 +203,6 @@ void LibRaw::ahd_interpolate_build_homogeneity_map(
 
     for (col = left + 2; col < collimit; col++)
     {
-      tc = col - left;
       homogeneity_map_p++;
 
       for (direction = 0; direction < 2; direction++)
@@ -294,8 +292,7 @@ void LibRaw::ahd_interpolate_combine_homogeneous_pixels(
 }
 void LibRaw::ahd_interpolate()
 {
-  int i, j, k, top, left;
-  float xyz_cam[3][4], r;
+  int top, left;
   char *buffer;
   ushort(*rgb)[LIBRAW_AHD_TILE][LIBRAW_AHD_TILE][3];
   short(*lab)[LIBRAW_AHD_TILE][LIBRAW_AHD_TILE][3];
@@ -306,8 +303,8 @@ void LibRaw::ahd_interpolate()
   border_interpolate(5);
 
 #ifdef LIBRAW_USE_OPENMP
-#pragma omp parallel private(buffer, rgb, lab, homo, top, left, i, j, k)       \
-    shared(xyz_cam, terminate_flag)
+#pragma omp parallel private(buffer, rgb, lab, homo, top, left )       \
+    shared(terminate_flag)
 #endif
   {
 #ifdef LIBRAW_USE_OPENMP

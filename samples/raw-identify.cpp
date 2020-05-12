@@ -454,49 +454,49 @@ id2hr_t *lookup_id2hr(unsigned long long id, id2hr_t *table, ushort nEntries)
 }
 
 const char *ColorSpace_idx2str(ushort ColorSpace) {
-  for (int i = 0; i < (sizeof ColorSpaceToStr / sizeof *ColorSpaceToStr); i++)
+  for (unsigned i = 0; i < (sizeof ColorSpaceToStr / sizeof *ColorSpaceToStr); i++)
     if(ColorSpaceToStr[i].NumId == ColorSpace)
       return ColorSpaceToStr[i].StrId;
   return 0;
 }
 
 const char *CameraMaker_idx2str(unsigned maker) {
-  for (int i = 0; i < (sizeof CorpToStr / sizeof *CorpToStr); i++)
-    if(CorpToStr[i].NumId == maker)
+  for (unsigned i = 0; i < (sizeof CorpToStr / sizeof *CorpToStr); i++)
+    if(CorpToStr[i].NumId == (int)maker)
       return CorpToStr[i].StrId;
   return 0;
 }
 
 const char *WB_idx2str(unsigned WBi) {
-  for (int i = 0; i < (sizeof WBToStr / sizeof *WBToStr); i++)
-    if(WBToStr[i].NumId == WBi)
+  for (int i = 0; i < int(sizeof WBToStr / sizeof *WBToStr); i++)
+    if(WBToStr[i].NumId == (int)WBi)
       return WBToStr[i].StrId;
   return 0;
 }
 
 const char *WB_idx2hrstr(unsigned WBi) {
-  for (int i = 0; i < (sizeof WBToStr / sizeof *WBToStr); i++)
-    if(WBToStr[i].NumId == WBi)
+  for (int i = 0; i < int(sizeof WBToStr / sizeof *WBToStr); i++)
+    if(WBToStr[i].NumId == (int)WBi)
       return WBToStr[i].hrStrId;
   return 0;
 }
 
 const char *Fujifilm_WhiteBalance_idx2str(ushort WB) {
-  for (int i = 0; i < (sizeof Fujifilm_WhiteBalance2Str / sizeof *Fujifilm_WhiteBalance2Str); i++)
+  for (int i = 0; i < int(sizeof Fujifilm_WhiteBalance2Str / sizeof *Fujifilm_WhiteBalance2Str); i++)
     if(Fujifilm_WhiteBalance2Str[i].NumId == WB)
       return Fujifilm_WhiteBalance2Str[i].StrId;
   return 0;
 }
 
 const char *Fujifilm_FilmMode_idx2str(ushort FilmMode) {
-  for (int i = 0; i < (sizeof Fujifilm_FilmModeToStr / sizeof *Fujifilm_FilmModeToStr); i++)
+  for (int i = 0; i < int(sizeof Fujifilm_FilmModeToStr / sizeof *Fujifilm_FilmModeToStr); i++)
     if(Fujifilm_FilmModeToStr[i].NumId == FilmMode)
       return Fujifilm_FilmModeToStr[i].StrId;
   return 0;
 }
 
 const char *Fujifilm_DynamicRangeSetting_idx2str(ushort DynamicRangeSetting) {
-  for (int i = 0; i < (sizeof Fujifilm_DynamicRangeSettingToStr / sizeof *Fujifilm_DynamicRangeSettingToStr); i++)
+  for (int i = 0; i < int(sizeof Fujifilm_DynamicRangeSettingToStr / sizeof *Fujifilm_DynamicRangeSettingToStr); i++)
     if(Fujifilm_DynamicRangeSettingToStr[i].NumId == DynamicRangeSetting)
       return Fujifilm_DynamicRangeSettingToStr[i].StrId;
   return 0;
@@ -694,7 +694,7 @@ int main(int ac, char *av[])
 	  outfile = fopen(outputfilename, "wt");
 
   timer_start(started);
-  for (int i = 0; i < filelist.size(); i++)
+  for (int i = 0; i < (int)filelist.size(); i++)
   {
 	  if (use_map)
 	  {
@@ -900,7 +900,7 @@ void print_jsonfun(FILE* outfile, LibRaw& MyCoolRawProcessor,
     data_present++;
   }
 
-  for (int cnt = 0; cnt < (sizeof WBToStr / sizeof *WBToStr); cnt++) {
+  for (int cnt = 0; cnt < int(sizeof WBToStr / sizeof *WBToStr); cnt++) {
     WBi = WBToStr[cnt].NumId;
     if (C.WB_Coeffs[WBi][0]) {
 			if (!data_present) {
@@ -1100,7 +1100,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 	else
 		fprintf(outfile, "Unknown\n");
 
-	if (mnLens.LensID == -1)
+	if (mnLens.LensID == 0xffffffff)
 		fprintf(outfile, "\tLensID: n/a\n");
 	else
 		fprintf(outfile, "\tLensID: %llu 0x%0llx\n", mnLens.LensID, mnLens.LensID);
@@ -1373,7 +1373,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 		          C.cam_mul[3]?roundf(log2(C.cam_mul[3] / C.cam_mul[1])*100.0f)/100.0f:0.0f);
 		}
 
-		for (int cnt = 0; cnt < (sizeof WBToStr / sizeof *WBToStr); cnt++) {
+		for (int cnt = 0; cnt < int(sizeof WBToStr / sizeof *WBToStr); cnt++) {
 			WBi = WBToStr[cnt].NumId;
 			if ((C.WB_Coeffs[WBi][0] > 0) && (C.WB_Coeffs[WBi][1] > 0)) {
         denom = (float)C.WB_Coeffs[WBi][1];
@@ -1534,7 +1534,7 @@ void print_wbfun(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 	float denom;
 	const char *CamMakerName = CameraMaker_idx2str(P1.maker_index);
 	fprintf(outfile, "// %s %s\n", P1.make, P1.model);
-	for (int cnt = 0; cnt < (sizeof WBToStr / sizeof *WBToStr); cnt++) {
+	for (int cnt = 0; cnt < int(sizeof WBToStr / sizeof *WBToStr); cnt++) {
 		WBi = WBToStr[cnt].NumId;
 		if (C.WB_Coeffs[WBi][0] && C.WB_Coeffs[WBi][1] && !WBToStr[cnt].aux_setting) {
       denom = (float) C.WB_Coeffs[WBi][1];
@@ -1570,7 +1570,6 @@ void print_wbfun(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 
 void print_szfun(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 {
-	id2hr_t *Aspect;
 	fprintf(outfile, "%s\t%s\t%s\t%d\t%d\n", fn.c_str(), P1.make, P1.model, S.width,
 		S.height);
 	/*

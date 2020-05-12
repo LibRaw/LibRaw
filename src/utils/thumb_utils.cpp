@@ -136,7 +136,7 @@ void LibRaw::kodak_thumb_loader()
   libraw_internal_data.output_data.histogram = t_hist;
 
   // make curve output curve!
-  ushort(*t_curve) = (ushort *)calloc(sizeof(C.curve), 1);
+  ushort *t_curve = (ushort *)calloc(sizeof(C.curve), 1);
   merror(t_curve, "LibRaw::kodak_thumb_loader()");
   memmove(t_curve, C.curve, sizeof(C.curve));
   memset(C.curve, 0, sizeof(C.curve));

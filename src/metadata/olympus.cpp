@@ -99,8 +99,6 @@ void LibRaw::parseOlympus_Equipment(unsigned tag, unsigned type, unsigned len,
 {
   // uptag 2010
 
-  int i;
-
   switch (tag)
   {
   case 0x0100:
@@ -249,7 +247,7 @@ void LibRaw::parseOlympus_CameraSettings(int base, unsigned tag, unsigned type,
     break;
   case 0x0600:
     imgdata.shootinginfo.DriveMode = imOly.DriveMode[0] = get2();
-    for (c = 1; c < len && c < 5; c++)
+    for (c = 1; c < (int)len && c < 5; c++)
     {
       imOly.DriveMode[c] = get2();
     }

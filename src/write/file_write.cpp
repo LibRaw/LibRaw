@@ -225,7 +225,7 @@ void LibRaw::ppm_thumb()
 
 void LibRaw::ppm16_thumb()
 {
-  int i;
+  unsigned i;
   char *thumb;
   thumb_length = thumb_width * thumb_height * 3;
   thumb = (char *)calloc(thumb_length, 2);
@@ -240,7 +240,8 @@ void LibRaw::ppm16_thumb()
 
 void LibRaw::layer_thumb()
 {
-  int i, c;
+  unsigned int i;
+  int c;
   char *thumb, map[][4] = {"012", "102"};
 
   colors = thumb_misc >> 5 & 7;

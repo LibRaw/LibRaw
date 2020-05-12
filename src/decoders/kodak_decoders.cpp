@@ -66,13 +66,13 @@ void LibRaw::kodak_radc_load_raw()
       curve[c] = (float)(c - pt[i - 2]) / (pt[i] - pt[i - 2]) *
                      (pt[i + 1] - pt[i - 1]) +
                  pt[i - 1] + 0.5;
-  for (s = i = 0; i < sizeof src; i += 2)
+  for (s = i = 0; i < int(sizeof src); i += 2)
     FORC(256 >> src[i])
   ((ushort *)huff)[s++] = src[i] << 8 | (uchar)src[i + 1];
   s = kodak_cbpp == 243 ? 2 : 3;
   FORC(256) huff[18][c] = (8 - s) << 8 | c >> s << s | 1 << (s - 1);
   getbits(-1);
-  for (i = 0; i < sizeof(buf) / sizeof(short); i++)
+  for (i = 0; i < int(sizeof(buf) / sizeof(short)); i++)
     ((short *)buf)[i] = 2048;
   for (row = 0; row < height; row += 4)
   {
@@ -86,7 +86,7 @@ void LibRaw::kodak_radc_load_raw()
       s = val > 65564 ? 10 : 12;
       x = ~((~0u) << (s - 1));
       val <<= 12 - s;
-      for (i = 0; i < sizeof(buf[0]) / sizeof(short); i++)
+      for (i = 0; i < int(sizeof(buf[0]) / sizeof(short)); i++)
         ((short *)buf[c])[i] = (((short *)buf[c])[i] * val + x) >> s;
       last[c] = mul[c];
       for (r = 0; r <= !c; r++)

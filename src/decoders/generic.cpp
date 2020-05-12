@@ -21,7 +21,7 @@
 void LibRaw::unpacked_load_raw()
 {
   int row, col, bits = 0;
-  while (1 << ++bits < maximum)
+  while (1 << ++bits < (int)maximum)
     ;
   read_shorts(raw_image, raw_width * raw_height);
   fseek(ifp, -2, SEEK_CUR); // avoid EOF error

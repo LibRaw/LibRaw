@@ -125,9 +125,9 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
  if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_UNDEFINED) &&
      (sget2(CameraInfo) == 0xaaaa) && (dng_writer == nonDNG)) { // CameraOrientation
     int c, i;
-    for (c = i = 2; (ushort)c != 0xbbbb && i < maxlen; i++)
+    for (c = i = 2; (ushort)c != 0xbbbb && i < (int)maxlen; i++)
       c = c << 8 | CameraInfo[i];
-    while (i < (maxlen - 5))
+    while (i < int(maxlen - 5))
       if ((sget4(CameraInfo+i) == 257) && ((c = CameraInfo[i+8]) < 3)) {
         imCanon.MakernotesFlip = "065"[c] - '0';
         break;
@@ -329,7 +329,7 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
   }
   if (!ilm.Lens[0] && iCanonLens)
   {
-    if (iCanonLens + 64 >= maxlen) // broken;
+    if (iCanonLens + 64 >= (int)maxlen) // broken;
       return;
 
     char *pl = (char *)CameraInfo + iCanonLens;

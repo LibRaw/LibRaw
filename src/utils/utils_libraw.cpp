@@ -85,7 +85,7 @@ unsigned LibRaw::parse_custom_cameras(unsigned limit,
   if (!list)
     return 0;
   unsigned index = 0;
-  for (int i = 0; i < limit; i++)
+  for (unsigned i = 0; i < limit; i++)
   {
     if (!list[i])
       break;
@@ -513,7 +513,7 @@ void LibRaw::adjust_bl()
   int i = C.cblack[3];
   int c;
   for (c = 0; c < 3; c++)
-    if (i > C.cblack[c])
+    if (i > (int)C.cblack[c])
       i = C.cblack[c];
 
   for (c = 0; c < 4; c++)
@@ -525,12 +525,12 @@ void LibRaw::adjust_bl()
   if (C.cblack[4] && C.cblack[5])
   {
     i = C.cblack[6];
-    for (c = 1; c < C.cblack[4] * C.cblack[5]; c++)
-      if (i > C.cblack[6 + c])
+    for (c = 1; c < int(C.cblack[4] * C.cblack[5]); c++)
+      if (i > int(C.cblack[6 + c]))
         i = C.cblack[6 + c];
     // Remove i from cblack[6+]
     int nonz = 0;
-    for (c = 0; c < C.cblack[4] * C.cblack[5]; c++)
+    for (c = 0; c < int(C.cblack[4] * C.cblack[5]); c++)
     {
       C.cblack[6 + c] -= i;
       if (C.cblack[6 + c])
@@ -579,7 +579,7 @@ int LibRaw::stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
 
 int LibRaw::find_ifd_by_offset(int o)
 {
-    for(int i = 0; i < libraw_internal_data.identify_data.tiff_nifds && i < LIBRAW_IFD_MAXCOUNT; i++)
+    for(unsigned i = 0; i < libraw_internal_data.identify_data.tiff_nifds && i < LIBRAW_IFD_MAXCOUNT; i++)
         if(tiff_ifd[i].offset == o)
             return i;
     return -1;

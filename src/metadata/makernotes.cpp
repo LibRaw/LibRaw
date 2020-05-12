@@ -25,7 +25,7 @@ unsigned wb_table1 [] = {
   LIBRAW_WBI_Custom, LIBRAW_WBI_Custom1, LIBRAW_WBI_Custom2
 };
 
-  unsigned offset = 0, entries, tag, type, len, save, c;
+  unsigned entries, tag, type, len, save;
   unsigned i;
 
   entries = get2();
@@ -93,14 +93,12 @@ void LibRaw::parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     return;
   }
 
-  unsigned offset = 0, entries, tag, type, len, save, c;
-  unsigned i;
+  unsigned entries, tag, type, len, save, c;
 
   uchar *CanonCameraInfo;
   unsigned lenCanonCameraInfo = 0;
   unsigned typeCanonCameraInfo = 0;
 
-  uchar *table_buf;
   uchar *table_buf_0x0116;
   ushort table_buf_0x0116_len = 0;
   uchar *table_buf_0x2010;
@@ -360,7 +358,6 @@ void LibRaw::parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   next:
     fseek(ifp, save, SEEK_SET);
   }
-quit:
 
   order = sorder;
 }
@@ -418,8 +415,8 @@ void LibRaw::parse_makernote(int base, int uptag)
   }
 
 
-  unsigned offset = 0, entries, tag, type, len, save, c;
-  unsigned serial = 0, i, wb[4] = {0, 0, 0, 0};
+  unsigned entries, tag, type, len, save, c;
+  unsigned i, wb[4] = {0, 0, 0, 0};
   short morder, sorder = order;
 
   uchar *CanonCameraInfo;
@@ -427,7 +424,6 @@ void LibRaw::parse_makernote(int base, int uptag)
   unsigned typeCanonCameraInfo = 0;
   imCanon.wbi = 0;
 
-  uchar *table_buf;
   uchar *table_buf_0x0116;
   ushort table_buf_0x0116_len = 0;
   uchar *table_buf_0x2010;

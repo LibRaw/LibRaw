@@ -132,6 +132,8 @@ enum LibRaw_ExifTagTypes {
 #define LIBRAW_EXIFTOOLTAGTYPE_int64s      LIBRAW_EXIFTAG_TYPE_SLONG8
 #define LIBRAW_EXIFTOOLTAGTYPE_ifd64       LIBRAW_EXIFTAG_TYPE_IFD8
 
+#define LIBRAW_LENS_NOT_SET 0xffffffffffffffffULL
+
 enum LibRaw_whitebalance_code
 {
 // clang-format off
@@ -611,8 +613,7 @@ enum LibRaw_progress
 
   LIBRAW_PROGRESS_THUMB_LOAD = 1 << 28,
   LIBRAW_PROGRESS_TRESERVED1 = 1 << 29,
-  LIBRAW_PROGRESS_TRESERVED2 = 1 << 30,
-  LIBRAW_PROGRESS_TRESERVED3 = 1 << 31
+  LIBRAW_PROGRESS_TRESERVED2 = 1 << 30
 };
 #define LIBRAW_PROGRESS_THUMB_MASK 0x0fffffff
 

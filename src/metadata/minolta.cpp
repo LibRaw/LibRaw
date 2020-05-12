@@ -40,7 +40,7 @@ void LibRaw::parse_minolta(int base)
     len = get4();
     if (len < 0)
       return; // just ignore wrong len?? or raise bad file exception?
-    if ((INT64)len + save + 8ULL > fsize)
+    if ((INT64)len + save + 8LL > fsize)
       return; // just ignore out of file metadata, stop parse
     switch (tag)
     {

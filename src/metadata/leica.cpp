@@ -177,7 +177,7 @@ void LibRaw::parseLeicaMakernote(int base, int uptag, unsigned MakernoteTagType)
 {
   int c;
   uchar ci, cj;
-  unsigned offset = 0, entries, tag, type, len, save;
+  unsigned entries, tag, type, len, save;
   short morder, sorder = order;
   char buf[10];
   int LeicaMakernoteSignature = -1;
@@ -353,6 +353,5 @@ void LibRaw::parseLeicaMakernote(int base, int uptag, unsigned MakernoteTagType)
   next:
     fseek(ifp, save, SEEK_SET);
   }
-quit:
   order = sorder;
 }

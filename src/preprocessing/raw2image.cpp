@@ -318,7 +318,6 @@ int LibRaw::raw2image_ex(int do_subtract_black)
 
     // process cropping
     int do_crop = 0;
-    unsigned save_width = S.width;
     if (~O.cropbox[2] && ~O.cropbox[3])
     {
       int crop[4], c, filt;

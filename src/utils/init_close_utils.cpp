@@ -191,7 +191,7 @@ void LibRaw::recycle()
   MN.sony.real_iso_offset = 0xffff;
   MN.sony.ImageCount3_offset = 0xffff;
   MN.sony.ElectronicFrontCurtainShutter = 0xffff;
-  MN.sony.MinoltaCamID = -1;
+  MN.sony.MinoltaCamID = 0xffffffff;
   MN.sony.RAWFileType = 0xffff;
   MN.sony.AFAreaModeSetting = 0xff;
   MN.sony.FlexibleSpotPosition[0] =
@@ -217,7 +217,7 @@ void LibRaw::recycle()
   ZERO(libraw_internal_data);
   ZERO(imgdata.lens);
   imgdata.lens.makernotes.FocalUnits = 1;
-  imgdata.lens.makernotes.LensID = 0xffffffffffffffffULL;
+  imgdata.lens.makernotes.LensID = LIBRAW_LENS_NOT_SET;
   ZERO(imgdata.shootinginfo);
   imgdata.shootinginfo.DriveMode = -1;
   imgdata.shootinginfo.FocusMode = -1;

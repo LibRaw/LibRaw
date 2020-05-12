@@ -1697,7 +1697,7 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
   }
   int rblack = black + bl4 + bl64;
 
-  for (i = 0; i < sizeof table / sizeof *table; i++)
+  for (i = 0; i < int(sizeof table / sizeof *table); i++)
   {
 	  if (table[i].m_idx == make_idx)
 	  {

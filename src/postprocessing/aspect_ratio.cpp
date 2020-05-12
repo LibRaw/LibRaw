@@ -42,7 +42,7 @@ void LibRaw::fuji_rotate()
     {
       ur = r = fuji_width + (row - col) * step;
       uc = c = (row + col) * step;
-      if (ur > height - 2 || uc > width - 2)
+      if (ur > (unsigned)height - 2 || uc > (unsigned)width - 2)
         continue;
       fr = r - ur;
       fc = c - uc;

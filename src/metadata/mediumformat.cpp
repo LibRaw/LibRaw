@@ -375,7 +375,7 @@ void LibRaw::parse_mos(int offset)
 
     if (!strcmp(data, "CameraObj_camera_type"))
     {
-      stmread(ilm.body, skip, ifp);
+      stmread(ilm.body, (unsigned)skip, ifp);
       if (ilm.body[0])
       {
         if (!strncmp(ilm.body, "Mamiya R", 8))
@@ -415,9 +415,8 @@ void LibRaw::parse_mos(int offset)
     {
       char buffer[sizeof(imgdata.shootinginfo.BodySerial)];
       char *words[4];
-      int nwords;
-      stmread(buffer, skip, ifp);
-      nwords =
+      stmread(buffer, (unsigned)skip, ifp);
+      /*nwords = */
           getwords(buffer, words, 4, sizeof(imgdata.shootinginfo.BodySerial));
       strcpy(imgdata.shootinginfo.BodySerial, words[0]);
     }
@@ -425,9 +424,8 @@ void LibRaw::parse_mos(int offset)
     {
       char buffer[sizeof(imgdata.shootinginfo.InternalBodySerial)];
       char *words[4];
-      int nwords;
-      stmread(buffer, skip, ifp);
-      nwords = getwords(buffer, words, 4,
+      stmread(buffer, (unsigned)skip, ifp);
+      /*nwords =*/ getwords(buffer, words, 4,
                         sizeof(imgdata.shootinginfo.InternalBodySerial));
       strcpy(imgdata.shootinginfo.InternalBodySerial, words[0]);
     }

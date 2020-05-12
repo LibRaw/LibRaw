@@ -48,7 +48,7 @@ void LibRaw::xtrans_interpolate(int passes)
                                        /* Check against right pattern */
   for (row = 0; row < 6; row++)
     for (col = 0; col < 6; col++)
-      cstat[fcol(row, col)]++;
+      cstat[(unsigned)fcol(row, col)]++;
 
   if (cstat[0] < 6 || cstat[0] > 10 || cstat[1] < 16 || cstat[1] > 24 ||
       cstat[2] < 6 || cstat[2] > 10 || cstat[3])

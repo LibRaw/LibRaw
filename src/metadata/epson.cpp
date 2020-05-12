@@ -19,7 +19,7 @@ void LibRaw::parseEpsonMakernote(int base, int uptag, unsigned dng_writer)
 
 #define isRIC imgdata.sizes.raw_inset_crop
 
-  unsigned offset = 0, entries, tag, type, len, save;
+  unsigned entries, tag, type, len, save;
   short morder, sorder = order;
   ushort c;
   INT64 fsize = ifp->size();
@@ -91,7 +91,6 @@ void LibRaw::parseEpsonMakernote(int base, int uptag, unsigned dng_writer)
   next:
     fseek(ifp, save, SEEK_SET);
   }
-quit:
   order = sorder;
 #undef isRIC
 }

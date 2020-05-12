@@ -171,7 +171,7 @@ int LibRaw::unpack_thumb(void)
       }
       else if (write_thumb == &LibRaw::rollei_thumb)
       {
-        unsigned i;
+        int i;
         int tlength = T.twidth * T.theight;
         if (T.thumb)
           free(T.thumb);
@@ -201,7 +201,7 @@ int LibRaw::unpack_thumb(void)
         int t_length = T.twidth * T.theight * t_colors;
 
         if (T.tlength &&
-            T.tlength < t_length) // try to find tiff ifd with needed offset
+            (int)T.tlength < t_length) // try to find tiff ifd with needed offset
         {
           int pifd = find_ifd_by_offset(libraw_internal_data.internal_data.toffset);
           if (pifd >= 0 && tiff_ifd[pifd].strip_offsets_count &&
@@ -211,7 +211,7 @@ int LibRaw::unpack_thumb(void)
             unsigned total_size = 0;
             for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count; i++)
               total_size += tiff_ifd[pifd].strip_byte_counts[i];
-            if (total_size != t_length) // recalculate colors
+            if (total_size != (unsigned)t_length) // recalculate colors
             {
               if (total_size == T.twidth * T.tlength * 3)
                 T.tcolors = 3;

@@ -47,7 +47,7 @@ int LibRaw::open_file(const char *fname, INT64 max_buf_size)
       stream = new LibRaw_file_datastream(fname);
   }
 
-  catch (std::bad_alloc)
+  catch (const std::bad_alloc& )
   {
     recycle();
     return LIBRAW_UNSUFFICIENT_MEMORY;
@@ -139,7 +139,7 @@ int LibRaw::open_buffer(void *buffer, size_t size)
   {
     stream = new LibRaw_buffer_datastream(buffer, size);
   }
-  catch (std::bad_alloc)
+  catch (const std::bad_alloc& )
   {
     recycle();
     return LIBRAW_UNSUFFICIENT_MEMORY;
@@ -180,7 +180,7 @@ int LibRaw::open_bayer(unsigned char *buffer, unsigned datalen,
   {
     stream = new LibRaw_buffer_datastream(buffer, datalen);
   }
-  catch (std::bad_alloc)
+  catch (const std::bad_alloc& )
   {
     recycle();
     return LIBRAW_UNSUFFICIENT_MEMORY;
@@ -442,8 +442,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		  {
 			  int rowbytes = imgdata.sizes.raw_width / 11 * 16;
 			  if ((imgdata.sizes.raw_width % 11) == 0 &&
-				  (imgdata.sizes.raw_height * rowbytes ==
-					  libraw_internal_data.unpacker_data.data_size))
+				  (INT64(imgdata.sizes.raw_height) * rowbytes ==
+					  INT64(libraw_internal_data.unpacker_data.data_size)))
 				  load_raw = &LibRaw::panasonicC6_load_raw;
 			  else
 				  imgdata.idata.raw_count = 0; // incorrect size
@@ -454,8 +454,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 				  libraw_internal_data.unpacker_data.pana_bpp == 14 ? 9 : 10;
 			  int rowbytes = imgdata.sizes.raw_width / pixperblock * 16;
 			  if ((imgdata.sizes.raw_width % pixperblock) == 0 &&
-				  (imgdata.sizes.raw_height * rowbytes ==
-					  libraw_internal_data.unpacker_data.data_size))
+				  (INT64(imgdata.sizes.raw_height) * rowbytes ==
+					  INT64(libraw_internal_data.unpacker_data.data_size)))
 				  load_raw = &LibRaw::panasonicC7_load_raw;
 			  else
 				  imgdata.idata.raw_count = 0; // incorrect size
@@ -479,8 +479,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	  // Linear max from 14-bit camera, but on 12-bit data?
 	  if (makeIs(LIBRAW_CAMERAMAKER_Sony) &&
 		  imgdata.color.maximum > 0 &&
-		  imgdata.color.linear_max[0] > imgdata.color.maximum &&
-		  imgdata.color.linear_max[0] <= imgdata.color.maximum * 4)
+		  imgdata.color.linear_max[0] > (long)imgdata.color.maximum &&
+		  imgdata.color.linear_max[0] <= (long)imgdata.color.maximum * 4)
 		  for (int c = 0; c < 4; c++)
 			  imgdata.color.linear_max[c] /= 4;
 
@@ -674,11 +674,10 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       imgdata.sizes.width = 4288;
 
     if (imgdata.idata.dng_version &&
-        !(imgdata.params.raw_processing_options &
-            LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP) &&
-        makeIs(LIBRAW_CAMERAMAKER_Leica)
+        !(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP) 
+	&& makeIs(LIBRAW_CAMERAMAKER_Leica)
         && !strcasecmp(imgdata.idata.normalized_model, "SL2"))
-        imgdata.sizes.height -= 16;
+        	imgdata.sizes.height -= 16;
 
 	if (makeIs(LIBRAW_CAMERAMAKER_Sony) &&
         imgdata.idata.dng_version &&
@@ -788,7 +787,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         C.black /= 4;
         for (int c = 0; c < 4; c++)
           C.cblack[c] /= 4;
-        for (int c = 0; c < C.cblack[4] * C.cblack[5]; c++)
+        for (unsigned c = 0; c < C.cblack[4] * C.cblack[5]; c++)
           C.cblack[6 + c] /= 4;
       }
     }
@@ -830,7 +829,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       C.black /= 4;
       for (int c = 0; c < 4; c++)
         C.cblack[c] /= 4;
-      for (int c = 0; c < C.cblack[4] * C.cblack[5]; c++)
+      for (unsigned c = 0; c < C.cblack[4] * C.cblack[5]; c++)
         C.cblack[6 + c] /= 4;
     }
 
@@ -920,7 +919,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       C.cblack[0] = ID.pana_black[0] + add;
       C.cblack[1] = C.cblack[3] = ID.pana_black[1] + add;
       C.cblack[2] = ID.pana_black[2] + add;
-      int i = C.cblack[3];
+      unsigned i = C.cblack[3];
       for (int c = 0; c < 3; c++)
         if (i > C.cblack[c])
           i = C.cblack[c];
@@ -981,7 +980,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
   {
     EXCEPTION_HANDLER(err);
   }
-  catch (std::exception ee)
+  catch (const std::exception& ee)
   {
     EXCEPTION_HANDLER(LIBRAW_EXCEPTION_IO_CORRUPT);
   }
