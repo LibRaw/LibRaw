@@ -40,6 +40,11 @@ it under the terms of the one of two licenses as you choose:
 void write_jpeg(libraw_processed_image_t *img, const char *basename, int quality)
 {
   char fn[1024];
+  if(img->colors != 1 && img->colors != 3)
+  {
+	printf("Only BW and 3-color images supported for JPEG output\n");
+	return;
+  }
   snprintf(fn, 1024, "%s.jpg", basename);
   FILE *f = fopen(fn, "wb");
   if (!f)
@@ -54,12 +59,12 @@ void write_jpeg(libraw_processed_image_t *img, const char *basename, int quality
   jpeg_stdio_dest(&cinfo, f);
   cinfo.image_width = img->width;      /* image width and height, in pixels */
   cinfo.image_height = img->height;
-  cinfo.input_components = 3;           /* # of color components per pixel */
-  cinfo.in_color_space = JCS_RGB;       /* colorspace of input image */
+  cinfo.input_components = img->colors;           /* # of color components per pixel */
+  cinfo.in_color_space = img->colors==3?JCS_RGB:JCS_GRAYSCALE;       /* colorspace of input image */
   jpeg_set_defaults(&cinfo);
   jpeg_set_quality(&cinfo, quality, TRUE);
   jpeg_start_compress(&cinfo, TRUE);
-  row_stride = img->width * 3; /* JSAMPLEs per row in image_buffer */
+  row_stride = img->width * img->colors; /* JSAMPLEs per row in image_buffer */
   while (cinfo.next_scanline < cinfo.image_height) {
     row_pointer[0] = &img->data[cinfo.next_scanline * row_stride];
     (void)jpeg_write_scanlines(&cinfo, row_pointer, 1);
@@ -79,16 +84,18 @@ void write_ppm(libraw_processed_image_t *img, const char *basename)
   // type SHOULD be LIBRAW_IMAGE_BITMAP, but we'll check
   if (img->type != LIBRAW_IMAGE_BITMAP)
     return;
-  // only 3-color images supported...
-  if (img->colors != 3)
+  if (img->colors != 3 && img->colors != 1)
+  {
+    printf("Only monochrome and 3-color images supported for PPM output\n");
     return;
+   }
 
   char fn[1024];
-  snprintf(fn, 1024, "%s.ppm", basename);
+  snprintf(fn, 1024, "%s.p%cm", basename, img->colors==1?'g':'p');
   FILE *f = fopen(fn, "wb");
   if (!f)
     return;
-  fprintf(f, "P6\n%d %d\n%d\n", img->width, img->height, (1 << img->bits) - 1);
+  fprintf(f, "P%d\n%d %d\n%d\n", img->colors/2 + 5, img->width, img->height, (1 << img->bits) - 1);
 /*
   NOTE:
   data in img->data is not converted to network byte order.
@@ -101,7 +108,7 @@ void write_ppm(libraw_processed_image_t *img, const char *basename)
     a ^= (b ^= a);                                                             \
   }
   if (img->bits == 16 && htons(0x55aa) != 0x55aa)
-    for (unsigned i = 0; i < img->data_size; i += 2)
+    for (unsigned i = 0; i < img->data_size-1; i += 2)
       SWAP(img->data[i], img->data[i + 1]);
 #undef SWAP
 
