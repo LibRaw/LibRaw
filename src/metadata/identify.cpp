@@ -884,7 +884,8 @@ void LibRaw::identify()
     if (model[0] == ' ') {
       memmove(model, model + 1, strlen(model));
     }
-  } else if (makeIs(LIBRAW_CAMERAMAKER_Kodak) && !strncmp(model, "Digital Camera ", 15)) {
+  } else if ((makeIs(LIBRAW_CAMERAMAKER_Kodak) || makeIs(LIBRAW_CAMERAMAKER_Konica)) &&
+           !strncmp(model, "Digital Camera ", 15)) {
     memmove(model, model + 15, strlen(model) - 14);
   }
 
