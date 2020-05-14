@@ -1,0 +1,5 @@
+object/*.o
+lib/libraw_r.a
+lib/libraw.a
+bin/*
+!bin/.keepme

@@ -326,7 +326,7 @@ protected:
   virtual void copy_bayer(unsigned short cblack[4], unsigned short *dmaxp);
   virtual void fuji_rotate();
   virtual void convert_to_rgb_loop(float out_cam[3][4]);
-  virtual void lin_interpolate_loop(int code[16][16][32], int size);
+  virtual void lin_interpolate_loop(int *code, int size);
   virtual void scale_colors_loop(float scale_mul[4]);
 
   /* Fujifilm compressed decoder public interface (to make parallel decoder) */

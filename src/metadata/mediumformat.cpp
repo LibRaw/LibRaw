@@ -318,7 +318,8 @@ void LibRaw::parse_phase_one(int base)
 void LibRaw::parse_mos(int offset)
 {
   char data[40];
-  int skip, from, i, c, neut[4], planes = 0, frot = 0;
+  int from, i, c, neut[4], planes = 0, frot = 0;
+  unsigned skip;
   static const char *mod[] = {
       /* DM22, DM28, DM40, DM56 are somewhere here too */
       "",             //  0
@@ -364,7 +365,7 @@ void LibRaw::parse_mos(int offset)
   float romm_cam[3][3];
 
   fseek(ifp, offset, SEEK_SET);
-  while (1)
+  while (!feof(ifp))
   {
     if (get4() != 0x504b5453)
       break;

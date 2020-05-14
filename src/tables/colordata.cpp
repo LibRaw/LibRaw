@@ -1723,9 +1723,9 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 			  {
 				  for (raw_color = j = 0; j < 12; j++)
 					  if (internal_only)
-						  imgdata.color.cam_xyz[0][j] = table[i].trans[j] / 10000.0;
+						  imgdata.color.cam_xyz[j / 3][j % 3] = table[i].trans[j] / 10000.0;
 					  else
-						  imgdata.color.cam_xyz[0][j] = ((double *)cam_xyz)[j] =
+						  imgdata.color.cam_xyz[j / 3][j % 3] =
 						  table[i].trans[j] / 10000.0;
 				  if (!internal_only)
 					  cam_xyz_coeff(rgb_cam, cam_xyz);

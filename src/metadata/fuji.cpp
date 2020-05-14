@@ -938,10 +938,11 @@ void LibRaw::parse_fuji(int offset)
     else if (tag == 0x0131) // XTransLayout
     {
       filters = 9;
+      char *xtrans_abs_alias = &xtrans_abs[0][0];
       FORC(36)
       {
         int q = fgetc(ifp);
-        xtrans_abs[0][35 - c] = MAX(0, MIN(q, 2)); /* & 3;*/
+        xtrans_abs_alias[35 - c] = MAX(0, MIN(q, 2)); /* & 3;*/
       }
     }
     else if (tag == 0x2ff0) // WB_GRGBLevels
