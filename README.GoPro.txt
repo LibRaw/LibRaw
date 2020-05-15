@@ -12,20 +12,30 @@ To enable this support:
 
 
 NOTES:
-I. GPR SDK comes with (patched) Adobe DNG SDK source. You may use this DNG SDK instead of
-   Adobe's one, or use standard Adobe's distribution.
+I. GPR SDK comes with (patched) Adobe DNG SDK source (v1.4 but outdated).
+   This DNG SDK is *NOT* compatible with LibRaw since 0.20 due to
+   internals change: 
+     - (older) DNG SDK 1.4 uses static arrays for IFDs/ChainedIFDs
+     - (actula) DNG SDK 1.5 uses std::vector for those
+   Although change is minor, we do not see any way to distinguish two
+   versions at compile time.
 
-II. If Adobe's version is used:
-   a) You'll need to enable dng_ifd.fCompression value == 9 in dng_ifd::IsValidCFA() call
+II. So, you need to patch actual Adobe DNG SDK v1.4 (dated 2015)
+    (most likely, this apply for v1.5 too):
+
+   a) You'll need to enable dng_ifd.fCompression value == 9 in 
+      dng_ifd::IsValidCFA() call
       Use provided patch: LibRaw/GoPro/dng-sdk-allow-VC5-validate.diff 
       (it may not apply to any Adobe DNG SDK version, if so apply it by hands).
 
-   b) Newer (than supplied w/ GPR SDK) Adobe SDK versions changed dng_read_image::ReadTile interface
-     If newer Adobe SDK is used, please apply patches LibRaw/GoPro/gpr_read_image.cpp.diff 
+   b) Newer (than supplied w/ GPR SDK) Adobe SDK versions changes 
+     dng_read_image::ReadTile interface, please apply patches 
+     LibRaw/GoPro/gpr_read_image.cpp.diff 
      and  LibRaw/GoPro/gpr_read_image.h.diff to your GPR SDK code
 
-   c) GPR SDK's gpr_sdk/private/gpr.cpp uses own (added) dng_host method GetGPMFPayload
-      so it will not compile with Adobes (not patched) dng_host.h
+   c) GPR SDK's gpr_sdk/private/gpr.cpp uses own (added) dng_host method 
+      GetGPMFPayload so it will not compile with Adobes (not patched) 
+      dng_host.h
       LibRaw does not use high-level interface provided by gpr.cpp, so
       possible problem solutions are:
        - either compile GPR SDK without gpr_sdk/private/gpr.cpp file
