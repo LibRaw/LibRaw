@@ -39,8 +39,10 @@ int LibRaw::subtract_black_internal()
       int dmax = 0;
       if (C.cblack[4] && C.cblack[5])
       {
-        for (unsigned i = 0; i < size; i++) {
-          for (unsigned c = 0; c < 4; c++) {
+        for (unsigned i = 0; i < size; i++)
+        {
+          for (unsigned c = 0; c < 4; c++)
+          {
             int val = imgdata.image[i][c];
             val -= C.cblack[6 + i / S.iwidth % C.cblack[4] * C.cblack[5] +
                             i % S.iwidth % C.cblack[5]];
@@ -52,8 +54,10 @@ int LibRaw::subtract_black_internal()
       }
       else
       {
-        for (unsigned i = 0; i < size; i++) {
-          for (unsigned c = 0; c < 4; c++) {
+        for (unsigned i = 0; i < size; i++)
+        {
+          for (unsigned c = 0; c < 4; c++)
+          {
             int val = imgdata.image[i][c];
             val -= cblk[c];
             imgdata.image[i][c] = CLIP(val);
