@@ -14,14 +14,13 @@ To enable this support:
 NOTES:
 I. GPR SDK comes with (patched) Adobe DNG SDK source (v1.4 but outdated).
    This DNG SDK is *NOT* compatible with LibRaw since 0.20 due to
-   internals change: 
-     - (older) DNG SDK 1.4 uses static arrays for IFDs/ChainedIFDs
-     - (actula) DNG SDK 1.5 uses std::vector for those
-   Although change is minor, we do not see any way to distinguish two
-   versions at compile time.
+   internals change .
 
-II. So, you need to patch actual Adobe DNG SDK v1.4 (dated 2015)
-    (most likely, this apply for v1.5 too):
+II. So, you need to patch actual Adobe DNG SDK v1.4 (dated 2015), this version
+   is available from Adobe:
+   http://download.adobe.com/pub/adobe/dng/dng_sdk_1_4.zip
+  
+  (most likely, this apply for v1.5 too, but not tested/checked):
 
    a) You'll need to enable dng_ifd.fCompression value == 9 in 
       dng_ifd::IsValidCFA() call
@@ -47,8 +46,8 @@ II. So, you need to patch actual Adobe DNG SDK v1.4 (dated 2015)
 III. LibRaw uses private gpr_read_image() interface
     So you'll need to add PATH_TO/gpr_sdk/gpr_sdk/private to -I compiler flags.
 
-IV.  -DUSE_GPRSDK LibRaw build flag requires -DUSE_DNGSDK. LibRaw will not compile if
-     USE_GPRSDK is set, but USE_DNGSDK is not
+IV.  -DUSE_GPRSDK LibRaw build flag requires -DUSE_DNGSDK. LibRaw will not 
+     compile if USE_GPRSDK is set, but USE_DNGSDK is not
 
 V.  LibRaw will use DNG SDK to unpack GoPro files even if imgdata.params.use_dng_sdk is set to 0.
 
