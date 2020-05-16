@@ -392,7 +392,7 @@ void LibRaw::identify()
 
   // clang-format on
 
-  char head[64], *cp;
+  char head[64] = {0}, *cp;
   int hlen, fsize, zero_fsize = 1, i, c;
   struct jhead jh;
 
@@ -2157,8 +2157,8 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize)
 			height = raw_height;
 		}
 
-		top_margin = (raw_height - height) >> 2 << 1;
-		left_margin = (raw_width - width) >> 2 << 1;
+		top_margin = (raw_height >= height) ? (raw_height - height) >> 2 << 1 : 0;
+		left_margin = (raw_width >= width) ? (raw_width - width) >> 2 << 1 : 0;
 
 		if (!strcmp(model, "X-T3") || !strcmp(model, "X-T4") || !strcmp(model, "X100V") || !strcmp(model, "X-T30") || !strcmp(model, "X-Pro3"))
 		{

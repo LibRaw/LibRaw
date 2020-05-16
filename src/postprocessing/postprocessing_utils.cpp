@@ -83,24 +83,62 @@ void LibRaw::convert_to_rgb_loop(float out_cam[3][4])
   ushort *img;
   memset(libraw_internal_data.output_data.histogram, 0,
          sizeof(int) * LIBRAW_HISTOGRAM_SIZE * 4);
-  for (img = imgdata.image[0], row = 0; row < S.height; row++)
-    for (col = 0; col < S.width; col++, img += 4)
+  if (libraw_internal_data.internal_output_params.raw_color)
+  {
+    for (img = imgdata.image[0], row = 0; row < S.height; row++)
     {
-      if (!libraw_internal_data.internal_output_params.raw_color)
+      for (col = 0; col < S.width; col++, img += 4)
       {
-        out[0] = out[1] = out[2] = 0;
         for (c = 0; c < imgdata.idata.colors; c++)
         {
-          out[0] += out_cam[0][c] * img[c];
-          out[1] += out_cam[1][c] * img[c];
-          out[2] += out_cam[2][c] * img[c];
+          libraw_internal_data.output_data.histogram[c][img[c] >> 3]++;
         }
-        for (c = 0; c < 3; c++)
-          img[c] = CLIP((int)out[c]);
       }
-      for (c = 0; c < imgdata.idata.colors; c++)
-        libraw_internal_data.output_data.histogram[c][img[c] >> 3]++;
     }
+  }
+  else if (imgdata.idata.colors == 3)
+  {
+    for (img = imgdata.image[0], row = 0; row < S.height; row++)
+    {
+      for (col = 0; col < S.width; col++, img += 4)
+      {
+        out[0] = out_cam[0][0] * img[0] + out_cam[0][1] * img[1] +
+                 out_cam[0][2] * img[2];
+        out[1] = out_cam[1][0] * img[0] + out_cam[1][1] * img[1] +
+                 out_cam[1][2] * img[2];
+        out[2] = out_cam[2][0] * img[0] + out_cam[2][1] * img[1] +
+                 out_cam[2][2] * img[2];
+        img[0] = CLIP((int)out[0]);
+        img[1] = CLIP((int)out[1]);
+        img[2] = CLIP((int)out[2]);
+        libraw_internal_data.output_data.histogram[0][img[0] >> 3]++;
+        libraw_internal_data.output_data.histogram[1][img[1] >> 3]++;
+        libraw_internal_data.output_data.histogram[2][img[2] >> 3]++;
+      }
+    }
+  }
+  else if (imgdata.idata.colors == 4)
+  {
+    for (img = imgdata.image[0], row = 0; row < S.height; row++)
+    {
+      for (col = 0; col < S.width; col++, img += 4)
+      {
+        out[0] = out_cam[0][0] * img[0] + out_cam[0][1] * img[1] +
+                 out_cam[0][2] * img[2] + out_cam[0][3] * img[3];
+        out[1] = out_cam[1][0] * img[0] + out_cam[1][1] * img[1] +
+                 out_cam[1][2] * img[2] + out_cam[1][3] * img[3];
+        out[2] = out_cam[2][0] * img[0] + out_cam[2][1] * img[1] +
+                 out_cam[2][2] * img[2] + out_cam[2][3] * img[3];
+        img[0] = CLIP((int)out[0]);
+        img[1] = CLIP((int)out[1]);
+        img[2] = CLIP((int)out[2]);
+        libraw_internal_data.output_data.histogram[0][img[0] >> 3]++;
+        libraw_internal_data.output_data.histogram[1][img[1] >> 3]++;
+        libraw_internal_data.output_data.histogram[2][img[2] >> 3]++;
+        libraw_internal_data.output_data.histogram[3][img[3] >> 3]++;
+      }
+    }
+  }
 }
 
 void LibRaw::scale_colors_loop(float scale_mul[4])
@@ -110,36 +148,43 @@ void LibRaw::scale_colors_loop(float scale_mul[4])
   if (C.cblack[4] && C.cblack[5])
   {
     int val;
-    for (unsigned i = 0; i < size * 4; i++)
+    for (unsigned i = 0; i < size; i++)
     {
-      if (!(val = imgdata.image[0][i]))
-        continue;
-      val -= C.cblack[6 + i / 4 / S.iwidth % C.cblack[4] * C.cblack[5] +
-                      i / 4 % S.iwidth % C.cblack[5]];
-      val -= C.cblack[i & 3];
-      val *= scale_mul[i & 3];
-      imgdata.image[0][i] = CLIP(val);
+      for (unsigned c = 0; c < 4; c++)
+      {
+        if (!(val = imgdata.image[i][c])) continue;
+        val -= C.cblack[6 + i / S.iwidth % C.cblack[4] * C.cblack[5] +
+                        i % S.iwidth % C.cblack[5]];
+        val -= C.cblack[c];
+        val *= scale_mul[c];
+        imgdata.image[i][c] = CLIP(val);
+      }
     }
   }
   else if (C.cblack[0] || C.cblack[1] || C.cblack[2] || C.cblack[3])
   {
-    for (unsigned i = 0; i < size * 4; i++)
+    for (unsigned i = 0; i < size; i++)
     {
-      int val = imgdata.image[0][i];
-      if (!val)
-        continue;
-      val -= C.cblack[i & 3];
-      val *= scale_mul[i & 3];
-      imgdata.image[0][i] = CLIP(val);
+      for (unsigned c = 0; c < 4; c++)
+      {
+        int val = imgdata.image[i][c];
+        if (!val) continue;
+        val -= C.cblack[c];
+        val *= scale_mul[c];
+        imgdata.image[i][c] = CLIP(val);
+      }
     }
   }
   else // BL is zero
   {
-    for (unsigned i = 0; i < size * 4; i++)
+    for (unsigned i = 0; i < size; i++)
     {
-      int val = imgdata.image[0][i];
-      val *= scale_mul[i & 3];
-      imgdata.image[0][i] = CLIP(val);
+      for (unsigned c = 0; c < 4; c++)
+      {
+        int val = imgdata.image[i][c];
+        val *= scale_mul[c];
+        imgdata.image[i][c] = CLIP(val);
+      }
     }
   }
 }

@@ -156,6 +156,7 @@ it under the terms of the one of two licenses as you choose:
     void        ljpeg_end(struct jhead *jh);
     int         ljpeg_diff (ushort *huff);
     ushort *    ljpeg_row (int jrow, struct jhead *jh);
+    ushort *    ljpeg_row_unrolled (int jrow, struct jhead *jh);
     void	    ljpeg_idct (struct jhead *jh);
     unsigned    ph1_bithuff (int nbits, ushort *huff);
 

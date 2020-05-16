@@ -30,7 +30,7 @@ void LibRaw::phase_one_flat_field(int is_float, int nc)
   float *mrow, num, mult[4];
 
   read_shorts(head, 8);
-  if (head[2] * head[3] * head[4] * head[5] == 0)
+  if (head[2] == 0 || head[3] == 0 || head[4] == 0 || head[5] == 0)
     return;
   wide = head[2] / head[4] + (head[2] % head[4] != 0);
   high = head[3] / head[5] + (head[3] % head[5] != 0);
@@ -568,7 +568,7 @@ void LibRaw::hasselblad_load_raw()
           FORC(2)
           {
             diff[s + c] = ph1_bits(len[c]);
-            if ((diff[s + c] & (1 << (len[c] - 1))) == 0)
+            if (len[c] > 0 && (diff[s + c] & (1 << (len[c] - 1))) == 0)
               diff[s + c] -= (1 << len[c]) - 1;
             if (diff[s + c] == 65535)
               diff[s + c] = -32768;

@@ -224,9 +224,8 @@ void LibRaw::xtrans_interpolate(int passes)
                 g = 2 * rix[0][1] - rix[i << c][1] - rix[-i << c][1];
                 color[h][d] = g + rix[i << c][h] + rix[-i << c][h];
                 if (d > 1)
-                  diff[d] += SQR(rix[i << c][1] - rix[-i << c][1] -
-                                 rix[i << c][h] + rix[-i << c][h]) +
-                             SQR(g);
+                  diff[d] += SQR((float)rix[i << c][1] - (float)rix[-i << c][1] -
+                  (float)rix[i << c][h] + (float)rix[-i << c][h]) + SQR((float)g);
               }
               if (d > 1 && (d & 1))
                 if (diff[d - 1] < diff[d])

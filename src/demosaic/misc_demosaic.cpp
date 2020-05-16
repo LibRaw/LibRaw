@@ -103,7 +103,7 @@ void LibRaw::border_interpolate(int border)
     }
 }
 
-void LibRaw::lin_interpolate_loop(int code[16][16][32], int size)
+void LibRaw::lin_interpolate_loop(int *code, int size)
 {
   int row;
   for (row = 1; row < height - 1; row++)
@@ -115,7 +115,7 @@ void LibRaw::lin_interpolate_loop(int code[16][16][32], int size)
       int i;
       int sum[4];
       pix = image[row * width + col];
-      ip = code[row % size][col % size];
+      ip = code + ((((row % size) * 16) + (col % size)) * 32);
       memset(sum, 0, sizeof sum);
       for (i = *ip++; i--; ip += 3)
         sum[ip[2]] += pix[ip[0]] << ip[1];
@@ -127,7 +127,8 @@ void LibRaw::lin_interpolate_loop(int code[16][16][32], int size)
 
 void LibRaw::lin_interpolate()
 {
-  int code[16][16][32], size = 16, *ip, sum[4];
+  std::vector<int> code_buffer(16 * 16 * 32);
+  int* code = &code_buffer[0], size = 16, *ip, sum[4];
   int f, c, x, y, row, col, shift, color;
 
   RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE, 0, 3);
@@ -138,7 +139,7 @@ void LibRaw::lin_interpolate()
   for (row = 0; row < size; row++)
     for (col = 0; col < size; col++)
     {
-      ip = code[row][col] + 1;
+      ip = code + (((row * 16) + col) * 32) + 1;
       f = fcol(row, col);
       memset(sum, 0, sizeof sum);
       for (y = -1; y <= 1; y++)
@@ -153,7 +154,7 @@ void LibRaw::lin_interpolate()
           *ip++ = color;
           sum[color] += 1 << shift;
         }
-      code[row][col][0] = (ip - code[row][col]) / 3;
+      code[(row * 16 + col) * 32] = (ip - (code + ((row * 16) + col) * 32)) / 3;
       FORCC
       if (c != f)
       {
