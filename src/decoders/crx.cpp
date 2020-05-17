@@ -2368,7 +2368,7 @@ int crxFreeImageData(CrxImage *img)
 
   if (img->tiles)
   {
-    for (int32_t curTile = 0; curTile < nTiles; curTile++, tile++)
+    for (int32_t curTile = 0; curTile < nTiles; curTile++)
       if (tile[curTile].comps)
         for (int32_t curPlane = 0; curPlane < img->nPlanes; curPlane++)
           crxFreeSubbandData(img, tile[curTile].comps + curPlane);
