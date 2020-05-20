@@ -7,9 +7,10 @@ I. Installation steps
 
  $  tar xzvf LibRaw-0.xx.yy.tar.gz
 
-2. Go to LibRaw folder and run ./configure and make:
+2. Go to LibRaw folder and run mkdist.sh, ./configure and make:
 
  $ cd LibRaw-0.xx.yy
+ $ ./mkdist.sh
  $ ./configure  [...optional args...]
  $ make
 
