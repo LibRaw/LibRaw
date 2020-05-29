@@ -1,3 +1,14 @@
+2020-05-29 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.20-Beta2
+ * Beta2 fixes:
+   - fixed possible buffer overrun in crx (cr3) decoder
+   - fixed memory leak in crx decoder (if compiled with LIBRAW_NO_CR3_MEMPOOL)
+   - fixed possible overrun in Sony SRF and SR2 metadata parsers
+   - Minolta DG-5/7D supported again
+   - gcc 10/11 -Wall warnings eliminated
+   - Google changes cherry-picked (thanks to Jamie Pinheiro)
+   - vcxproj files regenerated (update to Visual Studio 2019)
+
 2020-05-07 Alex Tutubalin <lexa@lexa.ru>
 
  * LibRaw 0.20-Beta1
