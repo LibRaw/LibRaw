@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * File: postprocessing_benchmark.cpp
+ * File: openvayer_sample.cpp
  * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
  * Created: Feb 11, 2020
  *
