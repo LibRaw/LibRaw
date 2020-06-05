@@ -72,7 +72,7 @@ void LibRaw::packed_load_raw()
       {
         bitbuf <<= bite;
         for (i = 0; i < bite; i += 8)
-          bitbuf |= (unsigned)(fgetc(ifp) << i);
+          bitbuf |= (unsigned(fgetc(ifp)) << i);
       }
       val = bitbuf << (64 - tiff_bps - vbits) >> (64 - tiff_bps);
       RAW(row, col ^ (load_flags >> 6 & 1)) = val;

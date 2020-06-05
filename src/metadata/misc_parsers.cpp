@@ -180,7 +180,7 @@ void LibRaw::parse_cine()
   }
   cam_mul[0] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
   cam_mul[2] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
-  maximum = ~((~0u) << get4());
+  maximum = ~((~0u) << LIM(get4(), 1, 31));
   fseek(ifp, 668, SEEK_CUR);
   shutter = get4() / 1000000000.0;
   fseek(ifp, off_image, SEEK_SET);

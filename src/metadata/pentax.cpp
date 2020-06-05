@@ -320,7 +320,7 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   }
   else if (tag == 0x003f)
   {
-    unsigned a = fgetc(ifp) << 8;
+    unsigned a = unsigned(fgetc(ifp)) << 8;
     ilm.LensID = a | fgetc(ifp);
   }
   else if (tag == 0x0047)
