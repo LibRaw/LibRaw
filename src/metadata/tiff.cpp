@@ -1661,7 +1661,7 @@ void LibRaw::apply_tiff()
         max_samp = 3;
 
       os = raw_width * raw_height;
-      ns = tiff_ifd[i].t_width * tiff_ifd[i].t_height;
+      ns = unsigned(tiff_ifd[i].t_width) * unsigned(tiff_ifd[i].t_height);
       if (tiff_bps)
       {
         os *= tiff_bps;
