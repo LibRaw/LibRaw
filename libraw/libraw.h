@@ -270,7 +270,7 @@ public:
 
   int FC(int row, int col)
   {
-    return (imgdata.idata.filters >> (((row << 1 & 14) | (col & 1)) << 1) & 3);
+    return (imgdata.idata.filters >> ((((row > 0 ? row : -row) << 1 & 14) | ((col > 0 ? col : -col) & 1)) << 1) & 3);
   }
   int fcol(int row, int col);
 
