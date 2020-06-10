@@ -574,10 +574,10 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		  makeIs(LIBRAW_CAMERAMAKER_Fujifilm) &&
 		  (load_raw == &LibRaw::unpacked_load_raw))
 	  {
-		  if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 2 !=
+		  if (imgdata.sizes.raw_width * (imgdata.sizes.raw_height * 2ul) !=
 			  libraw_internal_data.unpacker_data.data_size)
 		  {
-			  if (imgdata.sizes.raw_width * imgdata.sizes.raw_height * 7 / 4 ==
+			  if ((imgdata.sizes.raw_width * (imgdata.sizes.raw_height * 7ul)) / 4 ==
 				  libraw_internal_data.unpacker_data.data_size)
 				  load_raw = &LibRaw::fuji_14bit_load_raw;
 			  else
