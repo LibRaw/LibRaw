@@ -234,8 +234,8 @@ void LibRaw::vng_interpolate()
         x2 = *cp++;
         weight = *cp++;
         grads = *cp++;
-        color = fcol(row + y1, col + x1);
-        if (fcol(row + y2, col + x2) != color)
+        color = fcol(row + y1 + 144, col + x1 + 144);
+        if (fcol(row + y2 + 144, col + x2 + 144) != color)
           continue;
         diag = (fcol(row, col + 1) == color && fcol(row + 1, col) == color) ? 2
                                                                             : 1;
@@ -256,8 +256,8 @@ void LibRaw::vng_interpolate()
         x = *cp++;
         *ip++ = (y * width + x) * 4;
         color = fcol(row, col);
-        if (fcol(row + y, col + x) != color &&
-            fcol(row + y * 2, col + x * 2) == color)
+        if (fcol(row + y + 144, col + x + 144) != color &&
+            fcol(row + y * 2 + 144, col + x * 2 + 144) == color)
           *ip++ = (y * width + x) * 8 + color;
         else
           *ip++ = 0;
