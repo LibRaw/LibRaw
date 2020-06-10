@@ -146,7 +146,7 @@ void LibRaw::lin_interpolate()
         for (x = -1; x <= 1; x++)
         {
           shift = (y == 0) + (x == 0);
-          color = fcol(row + y, col + x);
+          color = fcol(row + y + 48, col + x + 48);
           if (color == f)
             continue;
           *ip++ = (width * y + x) * 4 + color;
