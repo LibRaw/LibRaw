@@ -823,7 +823,7 @@ int LibRaw::parse_tiff_ifd(int base)
       FORC3 cam_mul[c] = getreal(11);
       fseek(ifp, 114, SEEK_CUR);
       flip = (get2() >> 7) * 90;
-      if (width * height * 6 == ima_len)
+      if (width * (height * 6l) == ima_len)
       {
         if (flip % 180 == 90)
           SWAP(width, height);
@@ -831,7 +831,7 @@ int LibRaw::parse_tiff_ifd(int base)
         raw_height = height;
         left_margin = top_margin = filters = flip = 0;
       }
-      c = height * width / 1000000;
+      c = unsigned(height) * unsigned(width) / 1000000;
       if (c == 32)
         c--;
       sprintf(model, "Ixpress %d-Mp", c);
