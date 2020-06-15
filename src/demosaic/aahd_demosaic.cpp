@@ -436,32 +436,32 @@ void AAHD::evaluate_ahd()
       else
       {
         int3 *ynr = &yuv[1][moff];
-        int gv = SQR(2 * ynr[0][0] - ynr[Pn][0] - ynr[Ps][0]);
-        gv += SQR(2 * ynr[0][1] - ynr[Pn][1] - ynr[Ps][1]) +
-              SQR(2 * ynr[0][2] - ynr[Pn][2] - ynr[Ps][2]);
+        long gv = SQR(2l * ynr[0][0] - ynr[Pn][0] - ynr[Ps][0]);
+        gv += SQR(2l * ynr[0][1] - ynr[Pn][1] - ynr[Ps][1]) +
+              SQR(2l * ynr[0][2] - ynr[Pn][2] - ynr[Ps][2]);
         ynr = &yuv[1][moff + Pn];
-        gv += (SQR(2 * ynr[0][0] - ynr[Pn][0] - ynr[Ps][0]) +
-               SQR(2 * ynr[0][1] - ynr[Pn][1] - ynr[Ps][1]) +
-               SQR(2 * ynr[0][2] - ynr[Pn][2] - ynr[Ps][2])) /
+        gv += (SQR(2l * ynr[0][0] - ynr[Pn][0] - ynr[Ps][0]) +
+               SQR(2l * ynr[0][1] - ynr[Pn][1] - ynr[Ps][1]) +
+               SQR(2l * ynr[0][2] - ynr[Pn][2] - ynr[Ps][2])) /
               2;
         ynr = &yuv[1][moff + Ps];
-        gv += (SQR(2 * ynr[0][0] - ynr[Pn][0] - ynr[Ps][0]) +
-               SQR(2 * ynr[0][1] - ynr[Pn][1] - ynr[Ps][1]) +
-               SQR(2 * ynr[0][2] - ynr[Pn][2] - ynr[Ps][2])) /
+        gv += (SQR(2l * ynr[0][0] - ynr[Pn][0] - ynr[Ps][0]) +
+               SQR(2l * ynr[0][1] - ynr[Pn][1] - ynr[Ps][1]) +
+               SQR(2l * ynr[0][2] - ynr[Pn][2] - ynr[Ps][2])) /
               2;
         ynr = &yuv[0][moff];
-        int gh = SQR(2 * ynr[0][0] - ynr[Pw][0] - ynr[Pe][0]);
-        gh += SQR(2 * ynr[0][1] - ynr[Pw][1] - ynr[Pe][1]) +
-              SQR(2 * ynr[0][2] - ynr[Pw][2] - ynr[Pe][2]);
+        long gh = SQR(2l * ynr[0][0] - ynr[Pw][0] - ynr[Pe][0]);
+        gh += SQR(2l * ynr[0][1] - ynr[Pw][1] - ynr[Pe][1]) +
+              SQR(2l * ynr[0][2] - ynr[Pw][2] - ynr[Pe][2]);
         ynr = &yuv[0][moff + Pw];
-        gh += (SQR(2 * ynr[0][0] - ynr[Pw][0] - ynr[Pe][0]) +
-               SQR(2 * ynr[0][1] - ynr[Pw][1] - ynr[Pe][1]) +
-               SQR(2 * ynr[0][2] - ynr[Pw][2] - ynr[Pe][2])) /
+        gh += (SQR(2l * ynr[0][0] - ynr[Pw][0] - ynr[Pe][0]) +
+               SQR(2l * ynr[0][1] - ynr[Pw][1] - ynr[Pe][1]) +
+               SQR(2l * ynr[0][2] - ynr[Pw][2] - ynr[Pe][2])) /
               2;
         ynr = &yuv[0][moff + Pe];
-        gh += (SQR(2 * ynr[0][0] - ynr[Pw][0] - ynr[Pe][0]) +
-               SQR(2 * ynr[0][1] - ynr[Pw][1] - ynr[Pe][1]) +
-               SQR(2 * ynr[0][2] - ynr[Pw][2] - ynr[Pe][2])) /
+        gh += (SQR(2l * ynr[0][0] - ynr[Pw][0] - ynr[Pe][0]) +
+               SQR(2l * ynr[0][1] - ynr[Pw][1] - ynr[Pe][1]) +
+               SQR(2l * ynr[0][2] - ynr[Pw][2] - ynr[Pe][2])) /
               2;
         if (gv > gh)
           d = HOR;
