@@ -1934,7 +1934,7 @@ int LibRaw::crxDecodePlane(void *p, uint32_t planeNumber)
     int imageCol = 0;
     for (int tCol = 0; tCol < img->tileCols; tCol++)
     {
-      CrxTile *tile = img->tiles + tRow * img->tileRows + tCol;
+      CrxTile *tile = img->tiles + tRow * img->tileCols + tCol;
       CrxPlaneComp *planeComp = tile->comps + planeNumber;
       uint64_t tileMdatOffset = tile->dataOffset + planeComp->dataOffset;
 
@@ -1979,7 +1979,7 @@ int LibRaw::crxDecodePlane(void *p, uint32_t planeNumber)
       }
       imageCol += tile->width;
     }
-    imageRow += img->tiles[tRow * img->tileRows].height;
+    imageRow += img->tiles[tRow * img->tileCols].height;
   }
 
   return 0;
