@@ -151,6 +151,24 @@ void LibRaw::xtrans_interpolate(int passes)
       }
     }
 
+  for (row = 3; row < 9 && row < height - 3; row++)
+	  for (col = 3; col < 9 && col < width - 3; col++)
+	  {
+		  if ((f = fcol(row, col)) == 1)
+			  continue;
+		  hex = allhex[row % 3][col % 3][0];
+		  FORC(2)
+		  {
+			  int idx3 = 3 * hex[4 + c] + row * width + col;
+			  int idx4 = -3 * hex[4 + c] + row * width + col;
+			  int maxidx = width * height;
+			  if (idx3 < 0 || idx3 >= maxidx)
+				  throw LIBRAW_EXCEPTION_IO_CORRUPT;
+			  if (idx4 < 0 || idx4 >= maxidx)
+				  throw LIBRAW_EXCEPTION_IO_CORRUPT;
+		  }
+	  }
+
   for (top = 3; top < height - 19; top += LIBRAW_AHD_TILE - 16)
     for (left = 3; left < width - 19; left += LIBRAW_AHD_TILE - 16)
     {
