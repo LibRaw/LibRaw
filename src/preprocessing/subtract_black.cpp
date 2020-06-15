@@ -39,7 +39,7 @@ int LibRaw::subtract_black_internal()
       int dmax = 0;
       if (C.cblack[4] && C.cblack[5])
       {
-        for (unsigned i = 0; i < size; i++)
+        for (unsigned i = 0; i < (unsigned)size; i++)
         {
           for (unsigned c = 0; c < 4; c++)
           {
@@ -54,7 +54,7 @@ int LibRaw::subtract_black_internal()
       }
       else
       {
-        for (unsigned i = 0; i < size; i++)
+        for (unsigned i = 0; i < (unsigned)size; i++)
         {
           for (unsigned c = 0; c < 4; c++)
           {

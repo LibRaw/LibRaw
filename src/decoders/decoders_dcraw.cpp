@@ -445,7 +445,7 @@ ushort *LibRaw::ljpeg_row(int jrow, struct jhead *jh)
 
 ushort *LibRaw::ljpeg_row_unrolled(int jrow, struct jhead *jh)
 {
-  int col, c, diff, pred, spred = 0;
+  int col, c, diff, pred;
   ushort mark = 0, *row[3];
 
   if (jh->restart != 0 && jrow * jh->wide % jh->restart == 0)
