@@ -369,6 +369,9 @@ int LibRaw::ljpeg_diff(ushort *huff)
   if (len == 16 && (!dng_version || dng_version >= 0x1010000))
     return -32768;
   diff = getbits(len);
+
+  len = MAX(1, len);
+
   if ((diff & (1 << (len - 1))) == 0)
     diff -= (1 << len) - 1;
   return diff;
@@ -804,7 +807,7 @@ void LibRaw::pentax_load_raw()
   FORC(dep) bit[0][c] = get2();
   FORC(dep) bit[1][c] = fgetc(ifp);
   FORC(dep)
-  for (i = bit[0][c]; i <= ((bit[0][c] + (4096 >> bit[1][c]) - 1) & 4095);)
+  for (i = bit[0][c]; i <= ((bit[0][c] + (4096 >> LIM(bit[1][c], 0, 31)) - 1) & 4095);)
     huff[++i] = bit[1][c] << 8 | c;
   huff[0] = 12;
   fseek(ifp, data_offset, SEEK_SET);

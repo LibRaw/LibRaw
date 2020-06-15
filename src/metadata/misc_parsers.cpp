@@ -124,7 +124,7 @@ void LibRaw::parse_redcine()
 
 void LibRaw::parse_cine()
 {
-  unsigned off_head, off_setup, off_image, i;
+  unsigned off_head, off_setup, off_image, i, temp;
 
   order = 0x4949;
   fseek(ifp, 4, SEEK_SET);
@@ -180,7 +180,8 @@ void LibRaw::parse_cine()
   }
   cam_mul[0] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
   cam_mul[2] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
-  maximum = ~((~0u) << LIM(get4(), 1, 31));
+  temp = get4();
+  maximum = ~((~0u) << LIM(temp, 1, 31));
   fseek(ifp, 668, SEEK_CUR);
   shutter = get4() / 1000000000.0;
   fseek(ifp, off_image, SEEK_SET);
