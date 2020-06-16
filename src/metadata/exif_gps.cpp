@@ -339,7 +339,7 @@ void LibRaw::parse_gps_libraw(int base)
       break;
     case 0x0004:
       if (len == 3)
-        FORC(3) imgdata.other.parsed_gps.longtitude[c] = getreal(type);
+        FORC(3) imgdata.other.parsed_gps.longitude[c] = getreal(type);
       break;
     case 0x0007:
       if (len == 3)

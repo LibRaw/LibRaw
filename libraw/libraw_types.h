@@ -711,7 +711,7 @@ typedef unsigned long long UINT64;
   typedef struct
   {
     float latitude[3];     /* Deg,min,sec */
-    float longtitude[3];   /* Deg,min,sec */
+    float longitude[3];    /* Deg,min,sec */
     float gpstimestamp[3]; /* Deg,min,sec */
     float altitude;
     char  altref, latref, longref, gpsstatus;
