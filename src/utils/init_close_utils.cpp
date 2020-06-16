@@ -18,7 +18,7 @@
 static void cleargps(libraw_gps_info_t *q)
 {
   for (int i = 0; i < 3; i++)
-    q->latitude[i] = q->longtitude[i] = q->gpstimestamp[i] = 0.f;
+    q->latitude[i] = q->longitude[i] = q->gpstimestamp[i] = 0.f;
   q->altitude = 0.f;
   q->altref = q->latref = q->longref = q->gpsstatus = q->gpsparsed = 0;
 }
