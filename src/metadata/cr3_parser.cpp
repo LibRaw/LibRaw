@@ -83,7 +83,7 @@ void LibRaw::selectCRXTrack(short maxTrack)
 
     int tiff_idx = -1;
     INT64 tpixels = 0;
-    for (unsigned i = 0; i < tiff_nifds; i++)
+    for (unsigned i = 0; i < tiff_nifds && i < LIBRAW_IFD_MAXCOUNT; i++)
       if (INT64(tiff_ifd[i].t_height) * INT64(tiff_ifd[i].t_height) > tpixels)
       {
         tpixels = INT64(tiff_ifd[i].t_height) * INT64(tiff_ifd[i].t_height);

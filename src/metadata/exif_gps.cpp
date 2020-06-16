@@ -164,7 +164,9 @@ void LibRaw::parse_exif(int base)
       imgdata.lens.EXIF_MaxAp = libraw_powf64l(2.0f, (getreal(type) / 2.0f));
       break;
     case 0x829a: // 33434
-      tiff_ifd[tiff_nifds - 1].t_shutter = shutter = getreal(type);
+      shutter = getreal(type);
+      if (tiff_nifds > 0 && tiff_nifds <= LIBRAW_IFD_MAXCOUNT)
+          tiff_ifd[tiff_nifds - 1].t_shutter = shutter;
       break;
     case 0x829d: // 33437, FNumber
       aperture = getreal(type);
@@ -186,9 +188,12 @@ void LibRaw::parse_exif(int base)
       get_timestamp(0);
       break;
     case 0x9201: // 37377
-      if ((expo = -getreal(type)) < 128 && shutter == 0.)
-        tiff_ifd[tiff_nifds - 1].t_shutter = shutter =
-            libraw_powf64l(2.0, expo);
+       if ((expo = -getreal(type)) < 128 && shutter == 0.)
+       {
+            shutter = libraw_powf64l(2.0, expo);
+            if (tiff_nifds > 0 && tiff_nifds <= LIBRAW_IFD_MAXCOUNT)
+              tiff_ifd[tiff_nifds - 1].t_shutter = shutter;
+       }
       break;
     case 0x9202: // 37378 ApertureValue
       if ((fabs(ape = getreal(type)) < 256.0) && (!aperture))
