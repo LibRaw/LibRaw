@@ -232,7 +232,8 @@ mask_set:
     for (row = MAX(mask[m][0], 0); row < MIN(mask[m][2], raw_height); row++)
       for (col = MAX(mask[m][1], 0); col < MIN(mask[m][3], raw_width); col++)
       {
-        c = FC(row - top_margin, col - left_margin);
+        /* No need to subtract margins because full area and active area filters are the same */
+        c = FC(row, col);
         mblack[c] += val = raw_image[(row)*raw_pitch / 2 + (col)];
         mblack[4 + c]++;
         zero += !val;
