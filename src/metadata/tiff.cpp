@@ -984,8 +984,6 @@ int LibRaw::parse_tiff_ifd(int base)
                     fwb[0]) // 15 is offset of Tungsten WB from the first
                             // preset, Fine Weather WB
                   continue;
-// printf ("==>> in parse_tiff_ifd:\n\tmodel: =%s=\n\tRAF data version: 0x%04x\n\tWB section offset: 0x%04x bytes\n",
-//  model, imFuji.RAFDataVersion, (fi-15)*2);
                 for (int wb_ind = 0, ofst = fi - 15; wb_ind < nFuji_wb_list1;
                      wb_ind++, ofst += 3)
                 {
@@ -1011,7 +1009,6 @@ int LibRaw::parse_tiff_ifd(int base)
                         (imFuji.RAFDataVersion == 0x0261) || // X100V
                         (imFuji.RAFDataVersion == 0x0262))   // X-T4
                       fj -= 9;
-// printf ("\tCCT WB section offset: 0x%04x bytes\n", fj*2);
                     for (int iCCT = 0, ofst = fj; iCCT < 31;
                          iCCT++, ofst += 3)
                     {

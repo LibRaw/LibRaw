@@ -951,7 +951,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     size_t bytes = ID.input->size()-libraw_internal_data.unpacker_data.data_offset;
     float bpp = float(bytes)/float(S.raw_width)/float(S.raw_height);
     float bpp2 = float(bytes)/float(S.width)/float(S.height);
-    printf("RawSize: %dx%d data offset: %d data size:%d bpp: %g bpp2: %g\n",S.raw_width,S.raw_height,libraw_internal_data.unpacker_data.data_offset,bytes,bpp,bpp2);
     if(!strcasecmp(imgdata.idata.make,"Hasselblad") && bpp == 6.0f)
       {
         load_raw = &LibRaw::hasselblad_full_load_raw;
@@ -961,7 +960,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
         P1.colors=3;
         P1.raw_count=1;
         C.maximum=0xffff;
-        printf("3 channel hassy found\n");
       }
 #endif
     if (C.profile_length)

@@ -588,27 +588,20 @@ int LibRaw::find_ifd_by_offset(int o)
 short LibRaw::tiff_sget (unsigned save, uchar *buf, unsigned buf_len, INT64 *tag_offset,
                          unsigned *tag_id, unsigned *tag_type, INT64 *tag_dataoffset,
                          unsigned *tag_datalen, int *tag_dataunitlen) {
-//  printf ("==>> entering tiff_sget\n");
-//  printf ("buf pointer: %p; tag_offset: 0x%llx\n", (void *)buf, *tag_offset);
   uchar *pos = buf + *tag_offset;
   if ((((*tag_offset) + 12) > buf_len) || (*tag_offset < 0)) { // abnormal, tag buffer overrun
-//    printf ("abnormal exit from tiff_sget: tag buffer overrun <<==\n");
     return -1;
   }
   *tag_id      = sget2(pos); pos += 2;
   *tag_type    = sget2(pos); pos += 2;
   *tag_datalen = sget4(pos); pos += 4;
   *tag_dataunitlen = tagtype_dataunit_bytes[(*tag_type <= LIBRAW_EXIFTAG_TYPE_IFD8) ? *tag_type : 0];
-//  printf ("pos: %p; tag_id: %d, tag_type: %d, tag_datalen: %d, tag_dataunitlen: %d\n",
-//          (void *)pos, *tag_id, *tag_type, *tag_datalen, *tag_dataunitlen);
   if ((*tag_datalen * (*tag_dataunitlen)) > 4) {
     *tag_dataoffset = sget4(pos) - save;
     if ((*tag_dataoffset + *tag_datalen) > buf_len) { // abnormal, tag data buffer overrun
-//      printf ("abnormal exit from tiff_sget: tag data buffer overrun <<==\n");
       return -2;
     }
   } else *tag_dataoffset = *tag_offset + 8;
   *tag_offset += 12;
-//  printf ("tag_dataoffset: 0x%llx\nexiting tiff_sget <<==\n", *tag_dataoffset);
   return 0;
 }

@@ -83,7 +83,6 @@ CameraMetaDataLR *make_camera_metadata();
 #define EXCEPTION_HANDLER(e)                                                   \
   do                                                                           \
   {                                                                            \
-    /* fprintf(stderr,"Exception %d caught\n",e);*/                            \
     switch (e)                                                                 \
     {                                                                          \
     case LIBRAW_EXCEPTION_MEMPOOL:                                             \

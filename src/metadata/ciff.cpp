@@ -59,9 +59,6 @@ void LibRaw::ciff_block_1030()
  */
 void LibRaw::parse_ciff(int offset, int length, int depth)
 {
-
-#define DEBUG_CIFF_WB 0
-
   int tboff, nrecs, c, type, len, save, wbi = -1;
   ushort key[] = {0x410, 0x45f3};
   ushort CanonColorInfo1_key;
@@ -91,7 +88,6 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
     len = get4();
     INT64 see = offset + get4();
     save = ftell(ifp);
-//    printf ("==>> tag# 0x%04x\n", type);
 
     /* the following tags are not sub-tables
      * they contain the value in the "len" field
@@ -176,53 +172,14 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
       int CanonColorInfo2_type = get2(); // G1 1028, G2 272, Pro90 IS 769, S30 274, S40 273, EOS D30 276
       if (CanonColorInfo2_type > 512) { /* Pro90 IS, G1 */
         fseek(ifp, 118, SEEK_CUR);
-
-#if DEBUG_CIFF_WB
-        printf ("==>> Pro90IS, G1: As Shot pos 0x%llx\n", ftell(ifp));
-#endif
-
         FORC4 cam_mul[BG2RG1_2_RGBG(c)] = get2();
       }
       else if (CanonColorInfo2_type != 276) { /* G2, S30, S40 */
         Appendix_A = 1;
         WB_table_offset = -14;
-
-
         fseek(ifp, 98, SEEK_CUR);
-
-#if DEBUG_CIFF_WB
-        printf ("==>> G2, S30, S40: As Shot pos 0x%llx\n", ftell(ifp));
-#endif
-
         FORC4 cam_mul[GRBG_2_RGBG(c)] = get2();
         if (cam_mul[0] > 0.001f) Got_AsShotWB = 1;
-
-#if DEBUG_CIFF_WB
-        printf ("%5.2f %5.2f %5.2f %5.2f   %5.2f %5.2f %5.2f %5.2f   %4g %4g %4g %4g\n",
-          roundf(log2(cam_mul[0] / cam_mul[1])*100.0f)/100.0f,
-          0.0f,
-          roundf(log2(cam_mul[2] / cam_mul[1])*100.0f)/100.0f,
-          roundf(log2(cam_mul[3] / cam_mul[1])*100.0f)/100.0f,
-          roundf((cam_mul[0] / cam_mul[1])*100.0f)/100.0f,
-          1.0f,
-          roundf((cam_mul[2] / cam_mul[1])*100.0f)/100.0f,
-          roundf((cam_mul[3] / cam_mul[1])*100.0f)/100.0f,
-          cam_mul[0], cam_mul[1], cam_mul[2], cam_mul[3]);
-
-        for (int j = 0; j < 2; j++) {
-          FORC4  mwb[GRBG_2_RGBG(c)] = get2();
-          printf ("%5.2f %5.2f %5.2f %5.2f   %5.2f %5.2f %5.2f %5.2f   %4d %4d %4d %4d\n",
-            roundf(log2(mwb[0] / mwb[1])*100)/100,
-            roundf(log2(mwb[1] / mwb[1])*100)/100,
-            roundf(log2(mwb[2] / mwb[1])*100)/100,
-            roundf(log2(mwb[3] / mwb[1])*100)/100,
-            roundf((mwb[0] / mwb[1])*100)/100,
-            roundf((mwb[1] / mwb[1])*100)/100,
-            roundf((mwb[2] / mwb[1])*100)/100,
-            roundf((mwb[3] / mwb[1])*100)/100,
-            (int)mwb[0], (int)mwb[1], (int)mwb[2], (int)mwb[3]);
-        }
-#endif
       }
     }
     else if (type == 0x10a9) // ColorBalance: Canon D60, 10D, 300D, and clones
@@ -311,9 +268,6 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
       if (len == 768) { // EOS D30
 
         ushort q;
-#if DEBUG_CIFF_WB
-        INT64 wb_save_pos = ftell (ifp);
-#endif
         fseek(ifp, 4, SEEK_CUR);
         for (int linenum = 0; linenum < nCanon_D30_linenums_2_StdWBi; linenum++) {
           if (*(Canon_D30_linenums_2_StdWBi + linenum) != LIBRAW_WBI_Unknown) {
@@ -337,107 +291,26 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
         if (!wbi)
           cam_mul[0] = -1; // use my auto white balance
 
-#if DEBUG_CIFF_WB
-        float mwb[4];
-        fseek (ifp, wb_save_pos+4, SEEK_SET);
-        printf ("==>> firmware, string: =%s= value: %g; wbi: %d\n",
-                 imCommon.firmware, imCanon.firmware, wbi);
-        printf ("           EV                      coeffs                   orig        \n");
-        for (int linenum = 0; linenum < 6; linenum++) {
-          FORC4  mwb[RGGB_2_RGBG(c)] = get2();
-          printf ("%-2d %5.2f %5.2f %5.2f %5.2f   %5.2f %5.2f %5.2f %5.2f   %g %g %g %g\n",
-            linenum,
-            roundf(log2(mwb[1] / mwb[0])*100)/100,
-            roundf(log2(mwb[1] / mwb[1])*100)/100,
-            roundf(log2(mwb[1] / mwb[2])*100)/100,
-            roundf(log2(mwb[1] / mwb[3])*100)/100,
-            roundf((mwb[1] / mwb[0])*100)/100,
-            roundf((mwb[1] / mwb[1])*100)/100,
-            roundf((mwb[1] / mwb[2])*100)/100,
-            roundf((mwb[1] / mwb[3])*100)/100,
-            mwb[0], mwb[1], mwb[2], mwb[3]);
-        }
-/*
-        fseek (ifp, 20, SEEK_CUR);
-        for (int linenum = 0; linenum < 24; linenum++) {
-          FORC4  mwb[RGGB_2_RGBG(c)] = get2();
-          printf ("%-2d %5.2f %5.2f %5.2f %5.2f   %5.2f %5.2f %5.2f %5.2f   %g %g %g %g\n",
-            linenum,
-            roundf(log2(mwb[1] / mwb[0])*100)/100,
-            roundf(log2(mwb[1] / mwb[1])*100)/100,
-            roundf(log2(mwb[1] / mwb[2])*100)/100,
-            roundf(log2(mwb[1] / mwb[3])*100)/100,
-            roundf((mwb[1] / mwb[0])*100)/100,
-            roundf((mwb[1] / mwb[1])*100)/100,
-            roundf((mwb[1] / mwb[2])*100)/100,
-            roundf((mwb[1] / mwb[3])*100)/100,
-            mwb[0], mwb[1], mwb[2], mwb[3]);
-        }
-
-        fseek (ifp, wb_save_pos+72, SEEK_SET);
-        FORC4  mwb[RGGB_2_RGBG(c)] = get2();
-        printf ("%g %g %g %g\n",
-                 mwb[0], mwb[1], mwb[2], mwb[3]);
-*/
-        fseek (ifp, wb_save_pos+72, SEEK_SET);
-        FORC4  mwb[RGGB_2_RGBG(c)] = get2();
-          printf ("%5.2f %5.2f %5.2f %5.2f   %5.2f %5.2f %5.2f %5.2f   %g %g %g %g\n",
-            roundf(log2(mwb[1] / mwb[0])*100)/100,
-            roundf(log2(mwb[1] / mwb[1])*100)/100,
-            roundf(log2(mwb[1] / mwb[2])*100)/100,
-            roundf(log2(mwb[1] / mwb[3])*100)/100,
-            roundf((mwb[1] / mwb[0])*100)/100,
-            roundf((mwb[1] / mwb[1])*100)/100,
-            roundf((mwb[1] / mwb[2])*100)/100,
-            roundf((mwb[1] / mwb[3])*100)/100,
-            mwb[0], mwb[1], mwb[2], mwb[3]);
-#endif
       }
       else if ((cam_mul[0] <= 0.001f) || // Pro1, G3, G5, G6, S45, S50, S60, S70
                Appendix_A)               // G2, S30, S40
       {
-
-#if DEBUG_CIFF_WB
-        float mwb[4];
-        char who[32];
-#endif
         int *linenums_2_StdWBi;
         int nWBs = LIBRAW_WBI_Underwater; // #13 is never used
         int AsShotWB_linenum = nCanon_wbi2std;
 
         CanonColorInfo1_key = get2();
-
-#if DEBUG_CIFF_WB
-        printf ("==>> firmware, string: =%s= value: %g\n=1.0: %s; >1.0: %s; >1.01: %s; <1.02: %s; =1.02: %s\n",
-          imCommon.firmware, imCanon.firmware,
-          imCanon.firmware==1.0f?"yes":"no",
-          imCanon.firmware >1.0f?"yes":"no",
-          imCanon.firmware >1.01f?"yes":"no",
-          imCanon.firmware <1.02f?"yes":"no",
-          imCanon.firmware==1.02f?"yes":"no");
-        printf ("==>> model: =%s=  CanonColorInfo1_key: 0x%04x\n", model, CanonColorInfo1_key);
-#endif
-
         if ((CanonColorInfo1_key == key[0]) && (len == 2048)) { // Pro1
-#if DEBUG_CIFF_WB
-          strcpy(who, "Pro1");
-#endif
           linenums_2_StdWBi = Canon_KeyIs0x0410_Len2048_linenums_2_StdWBi;
           nWBs = nCanon_KeyIs0x0410_Len2048_linenums_2_StdWBi;
           WB_table_offset = 8;
 
         } else if ((CanonColorInfo1_key == key[0]) && (len == 3072)) { // S60, S70, G6
-#if DEBUG_CIFF_WB
-          strcpy(who, "G6, S60, S70");
-#endif
           linenums_2_StdWBi = Canon_KeyIs0x0410_Len3072_linenums_2_StdWBi;
           nWBs = nCanon_KeyIs0x0410_Len3072_linenums_2_StdWBi;
           WB_table_offset = 16;
 
         } else if (!CanonColorInfo1_key && (len == 2048)) { // G2, S30, S40; S45, S50, G3, G5
-#if DEBUG_CIFF_WB
-          strcpy(who, "G2, S30, S40; G3, G5, S45, S50");
-#endif
           key[0] = key[1] = 0;
           linenums_2_StdWBi = Canon_KeyIsZero_Len2048_linenums_2_StdWBi;
           nWBs = nCanon_KeyIsZero_Len2048_linenums_2_StdWBi;
@@ -445,17 +318,6 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
             UseWBfromTable_as_AsShot = 0;
 
         } else goto next_tag;
-
-#if DEBUG_CIFF_WB
-        for (AsShotWB_linenum = 0; AsShotWB_linenum < nWBs; AsShotWB_linenum++) {
-          if (Canon_wbi2std[wbi] == *(linenums_2_StdWBi + AsShotWB_linenum)) {
-            printf ("==>> Canon wb idx %d; line %d; std wb idx: %d; UseWBfromTable_as_AsShot: %s; Got_AsShotWB: %s\n",
-              wbi, AsShotWB_linenum, Canon_wbi2std[wbi],
-              UseWBfromTable_as_AsShot==0?"no":"yes", Got_AsShotWB==0?"no":"yes");
-            break;
-          }
-        }
-#endif
 
         if ((Canon_wbi2std[wbi] == LIBRAW_WBI_Auto)    ||
             (Canon_wbi2std[wbi] == LIBRAW_WBI_Unknown) ||
@@ -474,9 +336,6 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
         }
 
         fseek (ifp, 78+WB_table_offset, SEEK_CUR);
-#if DEBUG_CIFF_WB
-        printf ("==>> wb start: 0x%llx", ftell(ifp));
-#endif
         for (int linenum = 0; linenum < nWBs; linenum++) {
           if (*(linenums_2_StdWBi + linenum) != LIBRAW_WBI_Unknown) {
             FORC4 icWBC[*(linenums_2_StdWBi + linenum)][GRBG_2_RGBG(c)] = get2() ^ key[c & 1];
@@ -488,46 +347,8 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
             fseek(ifp, 8, SEEK_CUR);
           }
         }
-#if DEBUG_CIFF_WB
-        printf ("\t wb end: 0x%llx\n", ftell(ifp));
-#endif
         if (!Got_AsShotWB)
           cam_mul[0] = -1;
-
-#if DEBUG_CIFF_WB
-        printf ("%s nWBs=%d :\n   Canon index (wbi): %d, std.index: %d, AsShotWB_linenum: %d, cam_mul[0]: %g\n",
-                 who, nWBs, wbi, Canon_wbi2std[wbi], AsShotWB_linenum, cam_mul[0]);
-        printf ("           EV                      coeffs                   orig        \n");
-        fseek(ifp, tmp_save, SEEK_SET);
-        for (int linenum = 0; linenum < 30; linenum++) {
-          FORC4  mwb[GRBG_2_RGBG(c)] = get2() ^ key[c & 1];
-          printf ("%5.2f %5.2f %5.2f %5.2f   %5.2f %5.2f %5.2f %5.2f   %4d %4d %4d %4d\n",
-            roundf(log2(mwb[0] / mwb[1])*100)/100,
-            roundf(log2(mwb[1] / mwb[1])*100)/100,
-            roundf(log2(mwb[2] / mwb[1])*100)/100,
-            roundf(log2(mwb[3] / mwb[1])*100)/100,
-            roundf((mwb[0] / mwb[1])*100)/100,
-            roundf((mwb[1] / mwb[1])*100)/100,
-            roundf((mwb[2] / mwb[1])*100)/100,
-            roundf((mwb[3] / mwb[1])*100)/100,
-            (int)mwb[0], (int)mwb[1], (int)mwb[2], (int)mwb[3]);
-        }
-        printf ("\n");
-        fseek(ifp, tmp_save+70, SEEK_SET);
-        for (int linenum = 0; linenum < 23; linenum++) {
-          FORC4  mwb[GRBG_2_RGBG(c)] = get2() ^ key[c & 1];
-          printf ("%5.2f %5.2f %5.2f %5.2f   %5.2f %5.2f %5.2f %5.2f   %4d %4d %4d %4d\n",
-          roundf(log2(mwb[0] / mwb[1])*100)/100,
-          roundf(log2(mwb[1] / mwb[1])*100)/100,
-          roundf(log2(mwb[2] / mwb[1])*100)/100,
-          roundf(log2(mwb[3] / mwb[1])*100)/100,
-          roundf((mwb[0] / mwb[1])*100)/100,
-          roundf((mwb[1] / mwb[1])*100)/100,
-          roundf((mwb[2] / mwb[1])*100)/100,
-          roundf((mwb[3] / mwb[1])*100)/100,
-          (int)mwb[0], (int)mwb[1], (int)mwb[2], (int)mwb[3]);
-        }
-#endif
       }
     }
     else if (type == 0x1030 && wbi >= 0 && (0x18040 >> wbi & 1))
@@ -597,5 +418,3 @@ next_tag:;
     fseek(ifp, save, SEEK_SET);
   }
 }
-
-#undef DEBUG_CIFF_WB

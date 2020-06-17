@@ -54,7 +54,6 @@ void LibRaw::convert_to_rgb()
   prof_desc_len = snprintf(NULL, 0, "%s gamma %g toe slope %g", name[output_color - 1], floorf(1000.f/gamm[0]+.5f)/1000.f, floorf(gamm[1]*1000.0f+.5f)/1000.f) + 1;
   prof_desc = (char *)malloc(prof_desc_len);
   sprintf(prof_desc, "%s gamma %g toe slope %g", name[output_color - 1], floorf(1000.f/gamm[0]+.5f)/1000.f, floorf(gamm[1]*1000.0f+.5f)/1000.f);
-//  printf ("==>> desc: =%s=\n", prof_desc);
 
   gamma_curve(gamm[0], gamm[1], 0, 0);
   memcpy(out_cam, rgb_cam, sizeof out_cam);

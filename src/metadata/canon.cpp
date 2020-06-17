@@ -1048,7 +1048,6 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
 
    default:
    	imCanon.ColorDataSubVer = get2();
-//   	printf ("==>> colordata len: %d; ColorDataSubVer: %d\n", len, imCanon.ColorDataSubVer);
       break;
     }
 
