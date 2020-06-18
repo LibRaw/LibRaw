@@ -361,18 +361,31 @@ void LibRaw::ppg_interpolate()
          col += 2)
     {
       pix = image + row * width + col;
-      for (i = 0; (d = dir[i]) > 0; i++)
-      {
-        guess[i] = (pix[-d][1] + pix[0][c] + pix[d][1]) * 2 - pix[-2 * d][c] -
-                   pix[2 * d][c];
-        diff[i] =
-            (ABS(pix[-2 * d][c] - pix[0][c]) + ABS(pix[2 * d][c] - pix[0][c]) +
-             ABS(pix[-d][1] - pix[d][1])) *
-                3 +
-            (ABS(pix[3 * d][1] - pix[d][1]) +
-             ABS(pix[-3 * d][1] - pix[-d][1])) *
-                2;
-      }
+
+      // horizontal
+      d = dir[0];
+      guess[0] = (pix[-d][1] + pix[0][c] + pix[d][1]) * 2 - pix[-2 * d][c] -
+                  pix[2 * d][c];
+      diff[0] =
+          (ABS(pix[-2 * d][c] - pix[0][c]) + ABS(pix[2 * d][c] - pix[0][c]) +
+            ABS(pix[-d][1] - pix[d][1])) *
+              3 +
+          (ABS(pix[3 * d][1] - pix[d][1]) +
+            ABS(pix[-3 * d][1] - pix[-d][1])) *
+              2;
+
+      // vertical
+      d = dir[1];
+      guess[1] = (pix[-d][1] + pix[0][c] + pix[d][1]) * 2 - pix[-2 * d][c] -
+                  pix[2 * d][c];
+      diff[1] =
+          (ABS(pix[-2 * d][c] - pix[0][c]) + ABS(pix[2 * d][c] - pix[0][c]) +
+            ABS(pix[-d][1] - pix[d][1])) *
+              3 +
+          (ABS(pix[3 * d][1] - pix[d][1]) +
+            ABS(pix[-3 * d][1] - pix[-d][1])) *
+              2;
+
       d = dir[i = diff[0] > diff[1]];
       pix[0][1] = ULIM(guess[i] >> 2, pix[d][1], pix[-d][1]);
     }
@@ -387,10 +400,20 @@ void LibRaw::ppg_interpolate()
          col += 2)
     {
       pix = image + row * width + col;
-      for (i = 0; (d = dir[i]) > 0; c = 2 - c, i++)
-        pix[0][c] = CLIP(
-            (pix[-d][c] + pix[d][c] + 2 * pix[0][1] - pix[-d][1] - pix[d][1]) >>
-            1);
+
+      // horizontal
+      d = dir[0];
+      pix[0][c] = CLIP(
+          (pix[-d][c] + pix[d][c] + 2 * pix[0][1] - pix[-d][1] - pix[d][1]) >>
+          1);
+      c = 2 - c;
+
+      // vertical
+      d = dir[1];
+      pix[0][c] = CLIP(
+          (pix[-d][c] + pix[d][c] + 2 * pix[0][1] - pix[-d][1] - pix[d][1]) >>
+          1);
+      c = 2 - c;
     }
   /*  Calculate blue for red pixels and vice versa:		*/
   RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE, 2, 3);
@@ -403,13 +426,21 @@ void LibRaw::ppg_interpolate()
          col += 2)
     {
       pix = image + row * width + col;
-      for (i = 0; (d = dir[i] + dir[i + 1]) > 0; i++)
-      {
-        diff[i] = ABS(pix[-d][c] - pix[d][c]) + ABS(pix[-d][1] - pix[0][1]) +
-                  ABS(pix[d][1] - pix[0][1]);
-        guess[i] =
-            pix[-d][c] + pix[d][c] + 2 * pix[0][1] - pix[-d][1] - pix[d][1];
-      }
+
+      // diagonal '\'
+      d = dir[0] + dir[1];
+      diff[0] = ABS(pix[-d][c] - pix[d][c]) + ABS(pix[-d][1] - pix[0][1]) +
+                ABS(pix[d][1] - pix[0][1]);
+      guess[0] =
+          pix[-d][c] + pix[d][c] + 2 * pix[0][1] - pix[-d][1] - pix[d][1];
+
+      // diagonal '/'
+      d = dir[1] + dir[2];
+      diff[1] = ABS(pix[-d][c] - pix[d][c]) + ABS(pix[-d][1] - pix[0][1]) +
+                ABS(pix[d][1] - pix[0][1]);
+      guess[1] =
+          pix[-d][c] + pix[d][c] + 2 * pix[0][1] - pix[-d][1] - pix[d][1];
+      
       if (diff[0] != diff[1])
         pix[0][c] = CLIP(guess[diff[0] > diff[1]] >> 1);
       else
