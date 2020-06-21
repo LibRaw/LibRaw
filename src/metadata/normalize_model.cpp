@@ -231,7 +231,7 @@ void LibRaw::GetNormalizedModel()
       { PentaxID_GX10,         "GX-10"},       // Samsung
       { PentaxID_K20D,         "K20D"},
       { PentaxID_GX20,         "GX20"},        // Samsung
-      { PentaxID_GX10,         "GX-20"},       // Samsung
+      { PentaxID_GX20,         "GX-20"},       // Samsung
       { PentaxID_K200D,        "K200D"},
       { PentaxID_K2000,        "K2000"},
       { PentaxID_K_m,          "K-m"},
