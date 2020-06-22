@@ -361,8 +361,9 @@ void LibRaw::ppg_interpolate()
          col += 2)
     {
       pix = image + row * width + col;
-      for (i = 0; (d = dir[i]) > 0; i++)
+      for (i = 0; i < 2; i++)
       {
+        d = dir[i];
         guess[i] = (pix[-d][1] + pix[0][c] + pix[d][1]) * 2 - pix[-2 * d][c] -
                    pix[2 * d][c];
         diff[i] =
@@ -387,10 +388,13 @@ void LibRaw::ppg_interpolate()
          col += 2)
     {
       pix = image + row * width + col;
-      for (i = 0; (d = dir[i]) > 0; c = 2 - c, i++)
+      for (i = 0; i < 2; c = 2 - c, i++)
+      {
+        d = dir[i];
         pix[0][c] = CLIP(
             (pix[-d][c] + pix[d][c] + 2 * pix[0][1] - pix[-d][1] - pix[d][1]) >>
             1);
+      }
     }
   /*  Calculate blue for red pixels and vice versa:		*/
   RUN_CALLBACK(LIBRAW_PROGRESS_INTERPOLATE, 2, 3);
@@ -403,8 +407,9 @@ void LibRaw::ppg_interpolate()
          col += 2)
     {
       pix = image + row * width + col;
-      for (i = 0; (d = dir[i] + dir[i + 1]) > 0; i++)
+      for (i = 0; i < 2; i++)
       {
+        d = dir[i] + dir[i+1];
         diff[i] = ABS(pix[-d][c] - pix[d][c]) + ABS(pix[-d][1] - pix[0][1]) +
                   ABS(pix[d][1] - pix[0][1]);
         guess[i] =
