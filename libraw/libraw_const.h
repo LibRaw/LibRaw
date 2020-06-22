@@ -20,7 +20,14 @@ it under the terms of the one of two licenses as you choose:
 #define LIBRAW_DEFAULT_ADJUST_MAXIMUM_THRESHOLD 0.75
 #define LIBRAW_DEFAULT_AUTO_BRIGHTNESS_THRESHOLD 0.01
 /* limit allocation size, default is 2Gb */
+#ifndef LIBRAW_MAX_ALLOC_MB_DEFAULT
 #define LIBRAW_MAX_ALLOC_MB_DEFAULT 2048L
+#endif
+
+/* limit thumbnail size, default is 512Mb*/
+#ifndef LIBRAW_MAX_THUMBNAIL_MB
+#define LIBRAW_MAX_THUMBNAIL_MB 512L
+#endif
 
 /* Check if enough file space exists before tag read */
 #ifndef LIBRAW_NO_IOSPACE_CHECK

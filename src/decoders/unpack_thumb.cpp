@@ -33,6 +33,25 @@ int LibRaw::unpack_thumb(void)
   CHECK_ORDER_LOW(LIBRAW_PROGRESS_IDENTIFY);
   CHECK_ORDER_BIT(LIBRAW_PROGRESS_THUMB_LOAD);
 
+#define THUMB_SIZE_CHECKT(A) \
+  do { \
+    if (INT64(A) > 1024ULL * 1024ULL * LIBRAW_MAX_THUMBNAIL_MB) throw LIBRAW_EXCEPTION_IO_CORRUPT; \
+    if (INT64(A) > 0 &&  INT64(A) < 64ULL)        throw LIBRAW_EXCEPTION_IO_CORRUPT; \
+  } while (0)
+
+#define THUMB_SIZE_CHECKTNZ(A) \
+  do { \
+    if (INT64(A) > 1024ULL * 1024ULL * LIBRAW_MAX_THUMBNAIL_MB) throw LIBRAW_EXCEPTION_IO_CORRUPT; \
+    if (INT64(A) < 64ULL)        throw LIBRAW_EXCEPTION_IO_CORRUPT; \
+  } while (0)
+
+
+#define THUMB_SIZE_CHECKWH(W,H) \
+  do { \
+    if (INT64(W)*INT64(H) > 1024ULL * 1024ULL * LIBRAW_MAX_THUMBNAIL_MB) throw LIBRAW_EXCEPTION_IO_CORRUPT; \
+    if (INT64(W)*INT64(H) < 64ULL)        throw LIBRAW_EXCEPTION_IO_CORRUPT; \
+  } while (0)
+
   try
   {
     if (!libraw_internal_data.internal_data.input)
@@ -65,6 +84,7 @@ int LibRaw::unpack_thumb(void)
 
         if (INT64(ID.toffset) + tsize > ID.input->size() + THUMB_READ_BEYOND)
           throw LIBRAW_EXCEPTION_IO_EOF;
+        THUMB_SIZE_CHECKT(tsize);
       }
 #else
 	if (0) {}
@@ -82,6 +102,8 @@ int LibRaw::unpack_thumb(void)
       ID.input->seek(ID.toffset, SEEK_SET);
       if (write_thumb == &LibRaw::jpeg_thumb)
       {
+        THUMB_SIZE_CHECKTNZ(T.tlength);
+
         if (T.thumb)
           free(T.thumb);
         T.thumb = (char *)malloc(T.tlength);
@@ -132,6 +154,8 @@ int LibRaw::unpack_thumb(void)
         if (colors != 1 && colors != 3)
           return LIBRAW_UNSUPPORTED_THUMBNAIL;
 
+        THUMB_SIZE_CHECKWH(T.twidth, T.theight);
+
         int tlength = T.twidth * T.theight;
         if (T.thumb)
           free(T.thumb);
@@ -172,6 +196,7 @@ int LibRaw::unpack_thumb(void)
       else if (write_thumb == &LibRaw::rollei_thumb)
       {
         int i;
+        THUMB_SIZE_CHECKWH(T.twidth, T.theight);
         int tlength = T.twidth * T.theight;
         if (T.thumb)
           free(T.thumb);
@@ -198,6 +223,7 @@ int LibRaw::unpack_thumb(void)
         if (t_bytesps > 1)
           throw LIBRAW_EXCEPTION_IO_CORRUPT; // 8-bit thumb, but parsed for more
                                              // bits
+        THUMB_SIZE_CHECKWH(T.twidth, T.theight);
         int t_length = T.twidth * T.theight * t_colors;
 
         if (T.tlength &&
@@ -219,6 +245,7 @@ int LibRaw::unpack_thumb(void)
                 T.tcolors = 1;
             }
             T.tlength = total_size;
+            THUMB_SIZE_CHECKTNZ(T.tlength);
             if (T.thumb)
               free(T.thumb);
             T.thumb = (char *)malloc(T.tlength);
@@ -254,6 +281,8 @@ int LibRaw::unpack_thumb(void)
         if (T.thumb)
           free(T.thumb);
 
+        THUMB_SIZE_CHECKTNZ(T.tlength);
+
         T.thumb = (char *)malloc(T.tlength);
         if (!T.tcolors)
           T.tcolors = t_colors;
@@ -278,6 +307,10 @@ int LibRaw::unpack_thumb(void)
         int i_length = T.twidth * T.theight * t_colors * 2;
         if (!T.tlength)
           T.tlength = o_length;
+        THUMB_SIZE_CHECKTNZ(o_length);
+        THUMB_SIZE_CHECKTNZ(i_length);
+        THUMB_SIZE_CHECKTNZ(T.tlength);
+
         ushort *t_thumb = (ushort *)calloc(i_length, 1);
         ID.input->read(t_thumb, 1, i_length);
         if ((libraw_internal_data.unpacker_data.order == 0x4949) ==

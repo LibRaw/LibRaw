@@ -33,6 +33,20 @@ libraw_processed_image_t *LibRaw::dcraw_make_mem_thumb(int *errcode)
     return NULL;
   }
 
+  if (T.tlength < 64u)
+  {
+      if (errcode)
+          *errcode = EINVAL;
+      return NULL;
+  }
+
+  if (INT64(T.tlength) > 1024ULL * 1024ULL * LIBRAW_MAX_THUMBNAIL_MB)
+  {
+      if (errcode)
+          *errcode = LIBRAW_TOO_BIG;
+      return NULL;
+  }
+
   if (T.tformat == LIBRAW_THUMBNAIL_BITMAP)
   {
     libraw_processed_image_t *ret = (libraw_processed_image_t *)::malloc(
