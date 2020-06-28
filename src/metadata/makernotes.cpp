@@ -42,7 +42,8 @@ unsigned wb_table1 [] = {
       ilm.MaxAp4MinFocal = getreal(type);
       ilm.MaxAp4MaxFocal = getreal(type);
     } else if (tag == 0x0120) {
-      if ((len >= (sizeof wb_table1 / sizeof wb_table1[0])) && (len%3 == 0)) {
+      const unsigned tblsz = (sizeof wb_table1 / sizeof wb_table1[0]);
+      if ((len >= tblsz) && (len%3 == 0) && len/3 <= tblsz) {
         for (i=0; i<(len/3); i++) {
           icWBC[wb_table1[i]][0] = (int)(getreal(type)*10000.0);
           icWBC[wb_table1[i]][1] = icWBC[wb_table1[i]][3] = (int)(getreal(type)*10000.0);
