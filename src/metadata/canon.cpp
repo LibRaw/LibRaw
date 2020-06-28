@@ -591,7 +591,8 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
     int Got_AsShotWB = 0;
     fseek(ifp, 8, SEEK_CUR);
     for (int linenum = 0; linenum < nCanon_G9_linenums_2_StdWBi; linenum++) {
-      if (*(Canon_G9_linenums_2_StdWBi + linenum) != LIBRAW_WBI_Unknown) {
+      if (*(Canon_G9_linenums_2_StdWBi + linenum) != LIBRAW_WBI_Unknown 
+          && imCanon.wbi < nCanon_wbi2std && imCanon.wbi >= 0) {
         FORC4 icWBC[*(Canon_G9_linenums_2_StdWBi + linenum)][GRBG_2_RGBG(c)] = get4();
         if (Canon_wbi2std[imCanon.wbi] == *(Canon_G9_linenums_2_StdWBi + linenum)) {
           FORC4 cam_mul[c] = icWBC[*(Canon_G9_linenums_2_StdWBi + linenum)][c];
