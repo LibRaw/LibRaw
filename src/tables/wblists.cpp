@@ -162,13 +162,14 @@ static const int _Pentax_wb_list2[] = {
 libraw_static_table_t LibRaw::Pentax_wb_list2(_Pentax_wb_list2, _ARR_SZ(_Pentax_wb_list2));
 
 
-const int LibRaw::Oly_wb_list1[] = {
+static const int _Oly_wb_list1[] = {
     LIBRAW_WBI_Shade,    LIBRAW_WBI_Cloudy, LIBRAW_WBI_FineWeather,
     LIBRAW_WBI_Tungsten, LIBRAW_WBI_Sunset, LIBRAW_WBI_FL_D,
     LIBRAW_WBI_FL_N,     LIBRAW_WBI_FL_W,   LIBRAW_WBI_FL_WW
 };
+libraw_static_table_t LibRaw::Oly_wb_list1(_Oly_wb_list1, _ARR_SZ(_Oly_wb_list1));
 
-const int LibRaw::Oly_wb_list2[] = {
+static const int _Oly_wb_list2[] = {
     LIBRAW_WBI_Auto, 0,
     LIBRAW_WBI_Tungsten, 3000,
     0x100, 3300,
@@ -187,6 +188,7 @@ const int LibRaw::Oly_wb_list2[] = {
     LIBRAW_WBI_Custom3, 0,
     LIBRAW_WBI_Custom4, 0
 };
+libraw_static_table_t LibRaw::Oly_wb_list2(_Oly_wb_list2, _ARR_SZ(_Oly_wb_list2));
 
 const int LibRaw::Sony_SRF_wb_list[] = {
     LIBRAW_WBI_Daylight, LIBRAW_WBI_Cloudy, LIBRAW_WBI_Fluorescent,

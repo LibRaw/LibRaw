@@ -44,8 +44,9 @@ it under the terms of the one of two licenses as you choose:
     static libraw_static_table_t Pentax_wb_list1;
     static libraw_static_table_t Pentax_wb_list2;
 
-    static const int Oly_wb_list1[];
-    static const int Oly_wb_list2[];
+    static libraw_static_table_t Oly_wb_list1;
+    static libraw_static_table_t Oly_wb_list2;
+
     static const int Sony_SRF_wb_list[];
     static const int Sony_SR2_wb_list[];
     static const int Sony_SR2_wb_list1[];
