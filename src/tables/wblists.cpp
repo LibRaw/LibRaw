@@ -146,19 +146,21 @@ static const int _Fuji_wb_list2[] = {
 };
 libraw_static_table_t LibRaw::Fuji_wb_list2(_Fuji_wb_list2, _ARR_SZ(_Fuji_wb_list2));
 
-const int LibRaw::Pentax_wb_list1[] = {
+static const int _Pentax_wb_list1[] = {
     LIBRAW_WBI_Daylight, LIBRAW_WBI_Shade,
     LIBRAW_WBI_Cloudy,   LIBRAW_WBI_Tungsten,
     LIBRAW_WBI_FL_D,     LIBRAW_WBI_FL_N,
     LIBRAW_WBI_FL_W,     LIBRAW_WBI_Flash
 };
+libraw_static_table_t LibRaw::Pentax_wb_list1(_Pentax_wb_list1, _ARR_SZ(_Pentax_wb_list1));
 
-const int LibRaw::Pentax_wb_list2[] = {
+static const int _Pentax_wb_list2[] = {
     LIBRAW_WBI_Daylight, LIBRAW_WBI_Shade, LIBRAW_WBI_Cloudy,
     LIBRAW_WBI_Tungsten, LIBRAW_WBI_FL_D,  LIBRAW_WBI_FL_N,
     LIBRAW_WBI_FL_W,     LIBRAW_WBI_Flash, LIBRAW_WBI_FL_L
 };
-const int LibRaw::nPentax_wb_list2 = sizeof(Pentax_wb_list2) / sizeof(int);
+libraw_static_table_t LibRaw::Pentax_wb_list2(_Pentax_wb_list2, _ARR_SZ(_Pentax_wb_list2));
+
 
 const int LibRaw::Oly_wb_list1[] = {
     LIBRAW_WBI_Shade,    LIBRAW_WBI_Cloudy, LIBRAW_WBI_FineWeather,
