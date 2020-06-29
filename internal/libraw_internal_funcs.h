@@ -47,9 +47,9 @@ it under the terms of the one of two licenses as you choose:
     static libraw_static_table_t Oly_wb_list1;
     static libraw_static_table_t Oly_wb_list2;
 
-    static const int Sony_SRF_wb_list[];
-    static const int Sony_SR2_wb_list[];
-    static const int Sony_SR2_wb_list1[];
+    static libraw_static_table_t Sony_SRF_wb_list;
+    static libraw_static_table_t Sony_SR2_wb_list;
+    static libraw_static_table_t Sony_SR2_wb_list1;
 /*  */
     int     find_ifd_by_offset(int );
     ushort	sget2 (uchar *s);
