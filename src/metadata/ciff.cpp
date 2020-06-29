@@ -161,7 +161,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
       ilm.CurAp = aperture = _CanonConvertAperture((get2(), get2()));
       shutter = libraw_powf64l(2.0, -((short)get2()) / 32.0);
       imCanon.wbi = wbi = (get2(), get2());
-      if (wbi > (nCanon_wbi2std-1))
+      if (wbi >= Canon_wbi2std.size())
         wbi = 0;
       fseek(ifp, 32, SEEK_CUR);
       if (shutter > 1e6)
@@ -269,11 +269,11 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
 
         ushort q;
         fseek(ifp, 4, SEEK_CUR);
-        for (int linenum = 0; linenum < nCanon_D30_linenums_2_StdWBi; linenum++) {
-          if (*(Canon_D30_linenums_2_StdWBi + linenum) != LIBRAW_WBI_Unknown) {
+        for (int linenum = 0; linenum < Canon_D30_linenums_2_StdWBi.size(); linenum++) {
+          if (Canon_D30_linenums_2_StdWBi[linenum] != LIBRAW_WBI_Unknown) {
             FORC4 {
               q = get2();
-              icWBC[*(Canon_D30_linenums_2_StdWBi + linenum)][RGGB_2_RGBG(c)] =
+              icWBC[Canon_D30_linenums_2_StdWBi[linenum]][RGGB_2_RGBG(c)] =
                 (int)(roundf(1024000.0f / (float)MAX(1, q)));
             }
 //         if (Canon_wbi2std[imCanon.wbi] == *(Canon_D30_linenums_2_StdWBi + linenum)) {
@@ -282,7 +282,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
 //           }
           }
         }
-        fseek (ifp, 68-nCanon_D30_linenums_2_StdWBi*8, SEEK_CUR);
+        fseek (ifp, 68-Canon_D30_linenums_2_StdWBi.size()*8, SEEK_CUR);
 
         FORC4 {
           q = get2();
@@ -295,25 +295,21 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
       else if ((cam_mul[0] <= 0.001f) || // Pro1, G3, G5, G6, S45, S50, S60, S70
                Appendix_A)               // G2, S30, S40
       {
-        int *linenums_2_StdWBi;
-        int nWBs = LIBRAW_WBI_Underwater; // #13 is never used
-        int AsShotWB_linenum = nCanon_wbi2std;
+        libraw_static_table_t linenums_2_StdWBi;
+        int AsShotWB_linenum = Canon_wbi2std.size();
 
         CanonColorInfo1_key = get2();
         if ((CanonColorInfo1_key == key[0]) && (len == 2048)) { // Pro1
           linenums_2_StdWBi = Canon_KeyIs0x0410_Len2048_linenums_2_StdWBi;
-          nWBs = nCanon_KeyIs0x0410_Len2048_linenums_2_StdWBi;
           WB_table_offset = 8;
 
         } else if ((CanonColorInfo1_key == key[0]) && (len == 3072)) { // S60, S70, G6
           linenums_2_StdWBi = Canon_KeyIs0x0410_Len3072_linenums_2_StdWBi;
-          nWBs = nCanon_KeyIs0x0410_Len3072_linenums_2_StdWBi;
           WB_table_offset = 16;
 
         } else if (!CanonColorInfo1_key && (len == 2048)) { // G2, S30, S40; S45, S50, G3, G5
           key[0] = key[1] = 0;
           linenums_2_StdWBi = Canon_KeyIsZero_Len2048_linenums_2_StdWBi;
-          nWBs = nCanon_KeyIsZero_Len2048_linenums_2_StdWBi;
           if (imCanon.firmware < 1.02f)
             UseWBfromTable_as_AsShot = 0;
 
@@ -328,19 +324,19 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
           int temp_wbi;
           if (Canon_wbi2std[wbi] == LIBRAW_WBI_Custom) temp_wbi = LIBRAW_WBI_Daylight;
           else temp_wbi = wbi;
-          for (AsShotWB_linenum = 0; AsShotWB_linenum < nWBs; AsShotWB_linenum++) {
-            if (Canon_wbi2std[temp_wbi] == *(linenums_2_StdWBi + AsShotWB_linenum)) {
+          for (AsShotWB_linenum = 0; AsShotWB_linenum < linenums_2_StdWBi.size(); AsShotWB_linenum++) {
+            if (Canon_wbi2std[temp_wbi] == linenums_2_StdWBi[AsShotWB_linenum]) {
               break;
             }
           }
         }
 
         fseek (ifp, 78+WB_table_offset, SEEK_CUR);
-        for (int linenum = 0; linenum < nWBs; linenum++) {
-          if (*(linenums_2_StdWBi + linenum) != LIBRAW_WBI_Unknown) {
-            FORC4 icWBC[*(linenums_2_StdWBi + linenum)][GRBG_2_RGBG(c)] = get2() ^ key[c & 1];
+        for (int linenum = 0; linenum < linenums_2_StdWBi.size(); linenum++) {
+          if (linenums_2_StdWBi[linenum] != LIBRAW_WBI_Unknown) {
+            FORC4 icWBC[linenums_2_StdWBi[linenum]][GRBG_2_RGBG(c)] = get2() ^ key[c & 1];
             if (UseWBfromTable_as_AsShot && (AsShotWB_linenum == linenum)) {
-              FORC4 cam_mul[c] = icWBC[*(linenums_2_StdWBi + linenum)][c];
+              FORC4 cam_mul[c] = icWBC[linenums_2_StdWBi[linenum]][c];
               Got_AsShotWB = 1;
             }
           } else {

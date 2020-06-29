@@ -29,20 +29,14 @@ it under the terms of the one of two licenses as you choose:
     static void removeExcessiveSpaces(char *string);
     static void trimSpaces(char *s);
 /* static tables/variables */
-    static const uchar xlat[2][256];
-    static const int tagtype_dataunit_bytes[19];
-    static const int Canon_wbi2std[];
-    static const int nCanon_wbi2std;
-    static int Canon_KeyIsZero_Len2048_linenums_2_StdWBi[];
-    static const int nCanon_KeyIsZero_Len2048_linenums_2_StdWBi;
-    static int Canon_KeyIs0x0410_Len3072_linenums_2_StdWBi[];
-    static const int nCanon_KeyIs0x0410_Len3072_linenums_2_StdWBi;
-    static int Canon_KeyIs0x0410_Len2048_linenums_2_StdWBi[];
-    static const int nCanon_KeyIs0x0410_Len2048_linenums_2_StdWBi;
-    static const int Canon_D30_linenums_2_StdWBi[];
-    static const int nCanon_D30_linenums_2_StdWBi;
-    static const int Canon_G9_linenums_2_StdWBi[];
-    static const int nCanon_G9_linenums_2_StdWBi;
+    static libraw_static_table_t tagtype_dataunit_bytes;
+    static libraw_static_table_t Canon_wbi2std;
+    static libraw_static_table_t Canon_KeyIsZero_Len2048_linenums_2_StdWBi;
+    static libraw_static_table_t Canon_KeyIs0x0410_Len3072_linenums_2_StdWBi;
+    static libraw_static_table_t Canon_KeyIs0x0410_Len2048_linenums_2_StdWBi;
+    static libraw_static_table_t Canon_D30_linenums_2_StdWBi;
+    static libraw_static_table_t Canon_G9_linenums_2_StdWBi;
+
     static const int Fuji_wb_list1[];
     static const int nFuji_wb_list1;
     static const int FujiCCT_K[31];
