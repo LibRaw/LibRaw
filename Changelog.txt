@@ -1,3 +1,21 @@
+2020-06-29 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.20-RC1
+ * RC1
+  - fixed typo in normalize_model.cpp 
+  - speedup: ppg interpolate: const loop invariant 
+  - Thumbnail size range check
+    Thanks to Jennifer Gehrke of Recurity Labs GmbH for problem report.
+  - fixed possible overflows in canon and sigma makernotes parsers
+  - WB preset indexes tables converted to self-bounds-checking arrays
+
+2020-06-17 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.20-Beta3
+ * Beta2 fixes:
+   -Fixed several UBs found by OSS Fuzz
+   -Fixed several problems found by other fuzzers.
+   -Overall code cleanup: debug statements removed
+   -Fixed typo in longitude (member of parsed GPS structure), update required for code that uses it. 
+
 2020-05-29 Alex Tutubalin <lexa@lexa.ru>
  * LibRaw 0.20-Beta2
  * Beta2 fixes:
