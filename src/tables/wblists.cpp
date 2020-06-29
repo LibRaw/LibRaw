@@ -125,25 +125,26 @@ static const int _Canon_D30_linenums_2_StdWBi[] = {
 };
 libraw_static_table_t LibRaw::Canon_D30_linenums_2_StdWBi(_Canon_D30_linenums_2_StdWBi, _ARR_SZ(_Canon_D30_linenums_2_StdWBi));
 
-const int LibRaw::Fuji_wb_list1[] = {
+static const int _Fuji_wb_list1[] = {
     LIBRAW_WBI_FineWeather, LIBRAW_WBI_Shade, LIBRAW_WBI_FL_D,
     LIBRAW_WBI_FL_L,        LIBRAW_WBI_FL_W,  LIBRAW_WBI_Tungsten
 };
-const int LibRaw::nFuji_wb_list1 = sizeof(Fuji_wb_list1) / sizeof(int);
+libraw_static_table_t LibRaw::Fuji_wb_list1(_Fuji_wb_list1, _ARR_SZ(_Fuji_wb_list1));
 
-const int LibRaw::FujiCCT_K[31] = {
+static const int _FujiCCT_K[31] = {
     2500, 2550, 2650, 2700, 2800, 2850, 2950, 3000, 3100, 3200, 3300,
     3400, 3600, 3700, 3800, 4000, 4200, 4300, 4500, 4800, 5000, 5300,
     5600, 5900, 6300, 6700, 7100, 7700, 8300, 9100, 10000
 };
+libraw_static_table_t LibRaw::FujiCCT_K(_FujiCCT_K, _ARR_SZ(_FujiCCT_K));
 
-const int LibRaw::Fuji_wb_list2[] = {
+static const int _Fuji_wb_list2[] = {
     LIBRAW_WBI_Auto,  0,  LIBRAW_WBI_Custom,   6,  LIBRAW_WBI_FineWeather, 1,
     LIBRAW_WBI_Shade, 8,  LIBRAW_WBI_FL_D,     10, LIBRAW_WBI_FL_L,        11,
     LIBRAW_WBI_FL_W,  12, LIBRAW_WBI_Tungsten, 2,  LIBRAW_WBI_Underwater,  35,
     LIBRAW_WBI_Ill_A, 82, LIBRAW_WBI_D65,      83
 };
-const int LibRaw::nFuji_wb_list2 = sizeof(Fuji_wb_list2) / sizeof(int);
+libraw_static_table_t LibRaw::Fuji_wb_list2(_Fuji_wb_list2, _ARR_SZ(_Fuji_wb_list2));
 
 const int LibRaw::Pentax_wb_list1[] = {
     LIBRAW_WBI_Daylight, LIBRAW_WBI_Shade,

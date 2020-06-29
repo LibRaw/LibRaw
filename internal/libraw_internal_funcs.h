@@ -37,11 +37,10 @@ it under the terms of the one of two licenses as you choose:
     static libraw_static_table_t Canon_D30_linenums_2_StdWBi;
     static libraw_static_table_t Canon_G9_linenums_2_StdWBi;
 
-    static const int Fuji_wb_list1[];
-    static const int nFuji_wb_list1;
-    static const int FujiCCT_K[31];
-    static const int Fuji_wb_list2[];
-    static const int nFuji_wb_list2;
+    static libraw_static_table_t Fuji_wb_list1;
+    static libraw_static_table_t FujiCCT_K;
+    static libraw_static_table_t Fuji_wb_list2;
+
     static const int Pentax_wb_list1[];
     static const int Pentax_wb_list2[];
     static const int nPentax_wb_list2;

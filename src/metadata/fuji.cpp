@@ -576,7 +576,7 @@ void LibRaw::parseAdobeRAFMakernote()
             }
 
             posWB = posPrivateMknBuf + wb_section_offset;
-            for (int wb_ind = 0; wb_ind < nFuji_wb_list1; posWB += 6, wb_ind++)
+            for (int wb_ind = 0; wb_ind < Fuji_wb_list1.size(); posWB += 6, wb_ind++)
             {
               icWBC[Fuji_wb_list1[wb_ind]][1] =
                   icWBC[Fuji_wb_list1[wb_ind]][3] =
@@ -651,7 +651,7 @@ void LibRaw::parseAdobeRAFMakernote()
             }
             if (nWB != 0x46)
             {
-              for (pWB = 1; pWB < nFuji_wb_list2; pWB += 2)
+              for (pWB = 1; pWB < Fuji_wb_list2.size(); pWB += 2)
               {
                 if (Fuji_wb_list2[pWB] == nWB)
                 {
@@ -1137,7 +1137,7 @@ void LibRaw::parse_fuji(int offset)
           }
           if (nWB != 70)
           {
-            for (pWB = 1; pWB < nFuji_wb_list2; pWB += 2)
+            for (pWB = 1; pWB < Fuji_wb_list2.size(); pWB += 2)
             {
               if (Fuji_wb_list2[pWB] == nWB)
               {

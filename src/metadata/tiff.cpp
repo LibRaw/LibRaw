@@ -984,7 +984,7 @@ int LibRaw::parse_tiff_ifd(int base)
                     fwb[0]) // 15 is offset of Tungsten WB from the first
                             // preset, Fine Weather WB
                   continue;
-                for (int wb_ind = 0, ofst = fi - 15; wb_ind < nFuji_wb_list1;
+                for (int wb_ind = 0, ofst = fi - 15; wb_ind < Fuji_wb_list1.size();
                      wb_ind++, ofst += 3)
                 {
                   icWBC[Fuji_wb_list1[wb_ind]][1] =
