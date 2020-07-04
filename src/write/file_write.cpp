@@ -120,11 +120,13 @@ void LibRaw::tiff_head(struct tiff_hdr *th, int full)
   tiff_set(th, &th->nexif, 37386, 5, 1, TOFF(th->rat[8]));
   if (gpsdata[1])
   {
+    uchar latref[2] = { uchar(gpsdata[29]),0 },
+          lonref[2] = { uchar(gpsdata[30]),0 };
     tiff_set(th, &th->ntag, 34853, 4, 1, TOFF(th->ngps));
     tiff_set(th, &th->ngps, 0, 1, 4, 0x202);
-    tiff_set(th, &th->ngps, 1, 2, 2, gpsdata[29]);
+    tiff_set(th, &th->ngps, 1, 2, 2, TOFF(latref));
     tiff_set(th, &th->ngps, 2, 5, 3, TOFF(th->gps[0]));
-    tiff_set(th, &th->ngps, 3, 2, 2, gpsdata[30]);
+    tiff_set(th, &th->ngps, 3, 2, 2, TOFF(lonref));
     tiff_set(th, &th->ngps, 4, 5, 3, TOFF(th->gps[6]));
     tiff_set(th, &th->ngps, 5, 1, 1, gpsdata[31]);
     tiff_set(th, &th->ngps, 6, 5, 1, TOFF(th->gps[18]));
