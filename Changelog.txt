@@ -3,7 +3,7 @@
  * RC1
   - fixed typo in normalize_model.cpp 
   - speedup: ppg interpolate: const loop invariant 
-  - Thumbnail size range check
+  - Thumbnail size range check (CVE-2020-15503)
     Thanks to Jennifer Gehrke of Recurity Labs GmbH for problem report.
   - fixed possible overflows in canon and sigma makernotes parsers
   - WB preset indexes tables converted to self-bounds-checking arrays
