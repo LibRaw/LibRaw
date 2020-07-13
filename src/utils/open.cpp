@@ -405,6 +405,16 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		  isRIC.cwidth = isRIC.cheight = 0;
 	  }
 
+      // Wipe out non-standard WB
+      if (!imgdata.idata.dng_version &&
+          (makeIs(LIBRAW_CAMERAMAKER_Sony) && !strcmp(imgdata.idata.normalized_model, "DSC-F828"))
+          && !(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_PROVIDE_NONSTANDARD_WB))
+      {
+          for (int i = 0; i < 4; i++) imgdata.color.cam_mul[i] = (i == 1);
+          memset(imgdata.color.WB_Coeffs, 0, sizeof(imgdata.color.WB_Coeffs));
+          memset(imgdata.color.WBCT_Coeffs, 0, sizeof(imgdata.color.WBCT_Coeffs));
+      }
+
 	  if (load_raw == &LibRaw::nikon_load_raw)
 		  nikon_read_curve();
 

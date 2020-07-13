@@ -548,7 +548,15 @@
         image.</dd>
       <dt><strong> int use_camera_wb; </strong></dt>
       <dd><strong> dcraw keys: </strong> -w <br>
-        If possible, use the white balance from the camera.</dd>
+        If possible, use the white balance from the camera.<p>
+	If camera-recorded WB is not available, dcraw_process() will fallback to:
+	<ul>
+	<li>Auto-WB if bit LIBRAW_PROCESSING_CAMERAWB_FALLBACK_TO_DAYLIGHT is 
+         not set in params.raw_processing_options (or for the rare specific case: 
+	no valid WB index was parsed from CRW file)
+	<li>Daylight-WB if abovementioned bit is not set.
+	</ul>
+	</dd>
       <dt><strong> int use_camera_matrix; </strong></dt>
       <dd><strong> dcraw keys: </strong> +M/-M <br>
         <ul>

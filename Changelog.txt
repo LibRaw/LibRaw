@@ -1,3 +1,20 @@
+2020-07-13 Alex Tutubalin <lexa@lexa.ru>
+ * New processing flag LIBRAW_PROCESSING_PROVIDE_NONSTANDARD_WB
+   If set (default is not), LibRaw will provide non-standard WB settings in 
+   color.cam_mul[], and in color.WB_Coeffs/WBCT_Coeffs.
+   Right now only Sony DSC-F828 affected: camera-recorded white balance is
+   not applicable for normal processing (apply WB before demosaic), it should 
+   be used after RGBE to RGB conversion.
+
+ * New processing flag: LIBRAW_PROCESSING_CAMERAWB_FALLBACK_TO_DAYLIGHT
+   If set (default is not), LibRaw::dcraw_process() will fallback to
+   daylight WB (excluding some very specific cases like Canon D30). 
+   This is how LibRaw 0.19 (and older) works.
+   If not set: LibRaw::dcraw_process() will fallback to auto-WB if
+   camera-WB is requested, but no acceptable white balance was parsed from metadata.
+
+ * API-datastruct: clarified behavior with use_camera_wb=1 setting.
+
 2020-06-29 Alex Tutubalin <lexa@lexa.ru>
  * LibRaw 0.20-RC1
  * RC1
