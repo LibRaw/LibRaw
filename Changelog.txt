@@ -1,4 +1,6 @@
 2020-07-13 Alex Tutubalin <lexa@lexa.ru>
+ * LibRaw 0.20-RC1
+
  * New processing flag LIBRAW_PROCESSING_PROVIDE_NONSTANDARD_WB
    If set (default is not), LibRaw will provide non-standard WB settings in 
    color.cam_mul[], and in color.WB_Coeffs/WBCT_Coeffs.
