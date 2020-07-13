@@ -334,7 +334,7 @@ it under the terms of the one of two licenses as you choose:
 	void		identify_process_dng_fields();
 	void		identify_finetune_pentax();
 	void		identify_finetune_by_filesize(int);
-	void		identify_finetune_dcr(char head[64],int);
+	void		identify_finetune_dcr(char head[64],int,int);
 // Tiff writer
     void        tiff_set(struct tiff_hdr *th, ushort *ntag,ushort tag, ushort type, int count, int val);
     void        tiff_head (struct tiff_hdr *th, int full);

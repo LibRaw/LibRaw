@@ -393,7 +393,7 @@ void LibRaw::identify()
   // clang-format on
 
   char head[64] = {0}, *cp;
-  int hlen, fsize, zero_fsize = 1, i, c;
+  int hlen, fsize, flen, zero_fsize = 1, i, c;
   struct jhead jh;
 
   unsigned camera_count =
@@ -475,7 +475,7 @@ void LibRaw::identify()
       libraw_internal_data.unpacker_data.posRAFData = 0;
 
   fseek(ifp, 0, SEEK_END);
-  fsize = ftell(ifp);
+  flen = fsize = ftell(ifp);
   if ((cp = (char *)memmem(head, 32, (char *)"MMMM", 4)) ||
       (cp = (char *)memmem(head, 32, (char *)"IIII", 4)))
   {
@@ -488,7 +488,7 @@ void LibRaw::identify()
     if (!memcmp(head + 6, "HEAPCCDR", 8))
     {
       data_offset = hlen;
-      parse_ciff(hlen, fsize - hlen, 0);
+      parse_ciff(hlen, flen - hlen, 0);
       load_raw = &LibRaw::canon_load_raw;
     }
     else if (parse_tiff(0))
@@ -748,7 +748,7 @@ void LibRaw::identify()
   if (zero_fsize)
     fsize = 0;
   if (make[0] == 0)
-    parse_smal(0, fsize);
+    parse_smal(0, flen);
   if (make[0] == 0)
   {
     parse_jpeg(0);
@@ -1002,7 +1002,7 @@ void LibRaw::identify()
 
   GetNormalizedModel();
 
-  identify_finetune_dcr(head, fsize);
+  identify_finetune_dcr(head, fsize, flen);
 
   /* Early reject for damaged images */
   if (!load_raw || height < 22 || width < 22 ||
@@ -1672,7 +1672,7 @@ void LibRaw::identify_finetune_by_filesize(int fsize)
 	}
 }
 
-void LibRaw::identify_finetune_dcr(char head[64], int fsize)
+void LibRaw::identify_finetune_dcr(char head[64], int fsize, int flen)
 {
 	static const short pana[][6] = {
 		// raw_width, raw_height, left_margin, top_margin, width_increment,
@@ -2107,7 +2107,7 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize)
 
 			}
 			else if (OlyID == OlyID_SP_550UZ) {
-				thumb_length = fsize - (thumb_offset = 0xa39800);
+				thumb_length = flen - (thumb_offset = 0xa39800);
 				thumb_height = 480;
 				thumb_width = 640;
 
@@ -2605,7 +2605,7 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize)
 	else if (makeIs(LIBRAW_CAMERAMAKER_Panasonic))
 	{
 		if (raw_width > 0 &&
-			((fsize - data_offset) / (raw_width * 8 / 7) == raw_height))
+			((flen - data_offset) / (raw_width * 8 / 7) == raw_height))
 			load_raw = &LibRaw::panasonic_load_raw;
 		if (!load_raw)
 		{
@@ -2792,7 +2792,7 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize)
 					iso_speed = 100;
 				if (!strncmp(model, "DC280", 5))
 					iso_speed = 70;
-				if (fsize < 100000) {
+				if (flen < 100000) {
 					raw_width = 256;
 					width = 249;
 					pixel_aspect = (4.0 * height) / (3.0 * width);
