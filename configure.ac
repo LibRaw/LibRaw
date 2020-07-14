@@ -140,7 +140,6 @@ AM_CONDITIONAL([EXAMPLES], [test x$examples = xtrue])
 
 LIBS="$LIBS -lm"
 
-have_win32=no
 case "${host_os}" in
 	*mingw32*) LIBS="$LIBS -lws2_32" ;;
 esac
