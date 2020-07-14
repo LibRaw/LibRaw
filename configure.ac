@@ -3,6 +3,7 @@ AC_INIT([LibRaw], m4_esyscmd([./version.sh]), [info@libraw.org], [], [http://www
 AM_INIT_AUTOMAKE([foreign no-define])
 #AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIR([m4])
+AC_CANONICAL_HOST
 
 # Tools to use
 AC_PROG_CXX
@@ -138,6 +139,11 @@ AC_ARG_ENABLE([examples],
 AM_CONDITIONAL([EXAMPLES], [test x$examples = xtrue])
 
 LIBS="$LIBS -lm"
+
+have_win32=no
+case "${host_os}" in
+	*mingw32*) LIBS="$LIBS -lws2_32" ;;
+esac
 
 AC_SUBST([LIBRAW_SHLIB_VERSION],m4_esyscmd([./shlib-version.sh]))
 AC_SUBST([LIBRAW_RELEASE_VERSION],m4_esyscmd([./version.sh]))
