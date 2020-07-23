@@ -1,58 +1,6 @@
-2020-07-13 Alex Tutubalin <lexa@lexa.ru>
- * LibRaw 0.20-RC2
- 
- * New processing flag LIBRAW_PROCESSING_PROVIDE_NONSTANDARD_WB
-   If set (default is not), and when applicable, color.cam_mul[] and
-   color.WB_Coeffs/WBCT_Coeffs will contain WB settings for a non-standard 
-   workflow.
-   Right now only Sony DSC-F828 is affected: camera-recorded white balance
-   can't be directly applied to raw data because WB is for RGB, while raw 
-   data is RGBE.
+2020-07-23 Alex Tutubalin <lexa@lexa.ru>
 
- * New processing flag: LIBRAW_PROCESSING_CAMERAWB_FALLBACK_TO_DAYLIGHT
-   If set (default is not), LibRaw::dcraw_process() will fallback to
-   daylight WB (excluding some very specific cases like Canon D30). 
-   This is how LibRaw 0.19 (and older) works.
-   If not set: LibRaw::dcraw_process() will fallback to calculated auto WB if
-   camera WB is requested, but appropriate white balance was not found in 
-   metadata.
-
- * API-datastruct: clarified behavior with use_camera_wb=1 setting.
-
- * identify(): restored the differentiation between fsize and flen.
-
-2020-06-29 Alex Tutubalin <lexa@lexa.ru>
- * LibRaw 0.20-RC1
- * RC1
-  - fixed typo in normalize_model.cpp 
-  - speedup: ppg interpolate: const loop invariant 
-  - Thumbnail size range check (CVE-2020-15503)
-    Thanks to Jennifer Gehrke of Recurity Labs GmbH for problem report.
-  - fixed possible overflows in canon and sigma makernotes parsers
-  - WB preset indexes tables converted to self-bounds-checking arrays
-
-2020-06-17 Alex Tutubalin <lexa@lexa.ru>
- * LibRaw 0.20-Beta3
- * Beta2 fixes:
-   -Fixed several UBs found by OSS Fuzz
-   -Fixed several problems found by other fuzzers.
-   -Overall code cleanup: debug statements removed
-   -Fixed typo in longitude (member of parsed GPS structure), update required for code that uses it. 
-
-2020-05-29 Alex Tutubalin <lexa@lexa.ru>
- * LibRaw 0.20-Beta2
- * Beta2 fixes:
-   - fixed possible buffer overrun in crx (cr3) decoder
-   - fixed memory leak in crx decoder (if compiled with LIBRAW_NO_CR3_MEMPOOL)
-   - fixed possible overrun in Sony SRF and SR2 metadata parsers
-   - Minolta DG-5/7D supported again
-   - gcc 10/11 -Wall warnings eliminated
-   - Google changes cherry-picked (thanks to Jamie Pinheiro)
-   - vcxproj files regenerated (update to Visual Studio 2019)
-
-2020-05-07 Alex Tutubalin <lexa@lexa.ru>
-
- * LibRaw 0.20-Beta1
+ * LibRaw 0.20
 
 == Camera Format support ==
   Canon CR3
@@ -68,7 +16,7 @@
          EOS R, EOS RP, EOS 90D, EOS 250D,  EOS M6 Mark II, EOS M50, EOS M200
          EOS 1DX Mark III (lossless files only)
   DJI Mavic Air, Osmo Action
-  FujiFilm GFX 100, X-A7, X-Pro3, X100V, X-T4, X-T200
+  FujiFilm GFX 100, X-A7, X-Pro3, X100V, X-T4 (uncompressed/lossless compressed only), X-T200
   GoPro Fusion, HERO5, HERO6, HERO7, HERO8
   Hasselblad L1D-20c, X1D II 50C
   Leica D-LUX7, Q-P, Q2, V-LUX5, C-Lux / CAM-DC25, SL2, M10 Monochrom
@@ -232,7 +180,7 @@ vendors that are already known to LibRaw will not change.
      * -t parameter for timing
    * samples/dcraw_emu: fixed +M handling
    * better support for Nikon Coolscan 16-bit NEF files.
-   * Visual Studio project files: re-generated to .vcxproj (Visual Studio 2013+), different
+   * Visual Studio project files: re-generated to .vcxproj (Visual Studio 2019), different
      intermediate folders for different sub-projects to allow 1-step rebuild.
    * imgdata.makernotes...cameraspecific: removed the vendor name prefix from variables.
    * Bayer images: ensure that even margins have the same COLOR() for both the active sensor area and the full sensor area.
@@ -246,6 +194,37 @@ vendors that are already known to LibRaw will not change.
 	ctop,cleft,cwidth,cheight - crop size.
 	aspect - LibRawImageAspects enum (3to2, 4to3, etc)
    * New define LIBRAW_NO_WINSOCK2 to not include winsock2.h on compile
+  
+   * New processing flag LIBRAW_PROCESSING_PROVIDE_NONSTANDARD_WB
+   If set (default is not), and when applicable, color.cam_mul[] and
+   color.WB_Coeffs/WBCT_Coeffs will contain WB settings for a non-standard 
+   workflow.
+   Right now only Sony DSC-F828 is affected: camera-recorded white balance
+   can't be directly applied to raw data because WB is for RGB, while raw 
+   data is RGBE.
+
+   * New processing flag: LIBRAW_PROCESSING_CAMERAWB_FALLBACK_TO_DAYLIGHT
+   If set (default is not), LibRaw::dcraw_process() will fallback to
+   daylight WB (excluding some very specific cases like Canon D30). 
+   This is how LibRaw 0.19 (and older) works.
+   If not set: LibRaw::dcraw_process() will fallback to calculated auto WB if
+   camera WB is requested, but appropriate white balance was not found in 
+   metadata.
+
+  * Google changes cherry-picked (thanks to Jamie Pinheiro)
+  * speedup: ppg interpolate: const loop invariant 
+
+  * Bugs fixed
+   -Fixed several UBs found by OSS Fuzz
+   -Fixed several problems found by other fuzzers.
+   - Thumbnail size range check (CVE-2020-15503)
+    Thanks to Jennifer Gehrke of Recurity Labs GmbH for problem report.
+   - fixed possible overflows in canon and sigma makernotes parsers
+   - fixed possible buffer overrun in crx (cr3) decoder
+   - fixed memory leak in crx decoder (if compiled with LIBRAW_NO_CR3_MEMPOOL)
+   - fixed possible overrun in Sony SRF and SR2 metadata parsers
+
+  * Fixed typo in longitude (member of parsed GPS structure), update required for code that uses it. 
 
 2019-03-05 Alex Tutubalin <lexa@lexa.ru>
  * Camera support
