@@ -456,10 +456,15 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
         relpos_inDir = 0L;
         while (relpos_inDir + 6 < current_track.MediaSize)
         {
+          if (current_track.MediaOffset + relpos_inDir > ifp->size() - 6) // need at least 6 bytes
+          {
+              err = -11;
+              goto fin;
+          }
           fseek(ifp, current_track.MediaOffset + relpos_inDir, SEEK_SET);
           szItem = get4();
           tItem = get2();
-          if ((relpos_inDir + szItem) > current_track.MediaSize)
+          if (szItem < 1 || (  (relpos_inDir + szItem) > current_track.MediaSize))
           {
             err = -11;
             goto fin;
@@ -469,6 +474,11 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
             relpos_inBox = relpos_inDir + 12L;
             while (relpos_inBox + 8 < relpos_inDir + szItem)
             {
+              if (current_track.MediaOffset + relpos_inBox > ifp->size() - 8) // need at least 8 bytes
+              {
+                  err = -11;
+                  goto fin;
+              }
               fseek(ifp, current_track.MediaOffset + relpos_inBox, SEEK_SET);
               lTag = get4();
               Tag = get4();
