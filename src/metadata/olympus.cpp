@@ -389,7 +389,7 @@ void LibRaw::parseOlympus_ImageProcessing(unsigned tag, unsigned type,
   {
     imOly.SensorCalibration[0] = getreal(type);
     imOly.SensorCalibration[1] = getreal(type);
-    if (dng_writer == nonDNG)
+    if ((dng_writer == nonDNG)&& (OlyID != OlyID_XZ_1))
       FORC4 imgdata.color.linear_max[c] = imOly.SensorCalibration[0];
   }
   else if (tag == 0x1112)
