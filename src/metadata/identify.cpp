@@ -1299,19 +1299,19 @@ void LibRaw::identify_process_dng_fields()
 
 						if (calidx[colidx] == sidx)
 						{
-							for (int i = 0; i < colors; i++)
+							for (int i = 0; i < colors && i < 4; i++)
 								FORCC
 								cc[i][c] = tiff_ifd[sidx].dng_color[colidx].calibration[i][c];
 						}
 
 						if (abidx == sidx)
-							for (int i = 0; i < colors; i++)
+							for (int i = 0; i < colors && i < 4; i++)
 								FORCC cc[i][c] *= tiff_ifd[sidx].dng_levels.analogbalance[i];
 						int j;
-						FORCC for (int i = 0; i < 3; i++) for (cam_xyz[c][i] = j = 0;
-							j < colors; j++)
-							cam_xyz[c][i] +=
-							cc[c][j] * cm[j][i]; // add AsShotXY later * xyz[i];
+						FORCC for (int i = 0; i < 3; i++) 
+                            for (cam_xyz[c][i] = j = 0; j < colors && j < 4; j++)
+							    cam_xyz[c][i] +=
+							        cc[c][j] * cm[j][i]; // add AsShotXY later * xyz[i];
 						cam_xyz_coeff(cmatrix, cam_xyz);
 					}
 				}
@@ -1505,7 +1505,7 @@ void LibRaw::identify_process_dng_fields()
 			int i = 6;
 			for (unsigned row = 0; row < imgdata.color.dng_levels.dng_cblack[4]; row++)
 				for (unsigned col = 0; col < imgdata.color.dng_levels.dng_cblack[5]; col++)
-					for (unsigned c = 0; c < tiff_samples; c++)
+					for (unsigned c = 0; c < tiff_samples && c < 4; c++)
 					{
 						csum[c] += imgdata.color.dng_levels.dng_cblack[i];
 						ccount[c]++;
