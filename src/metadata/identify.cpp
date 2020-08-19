@@ -1153,7 +1153,8 @@ dng_skip:
       pixel_aspect < 0.1 || pixel_aspect > 10. ||
       raw_height > 64000)
     is_raw = 0;
-
+   if(raw_width <= left_margin || raw_height <= top_margin)
+       is_raw = 0;
 #ifdef NO_JASPER
   if (load_raw == &LibRaw::redcine_load_raw)
   {

@@ -494,8 +494,8 @@ int LibRaw::raw2image_ex(int do_subtract_black)
         {
           // legacy is always 4channel and not shrinked!
           memmove(imgdata.image, imgdata.rawdata.color4_image,
-                  MIN(S.raw_width - S.left_margin, S.width) *
-                      MIN(S.raw_height - S.top_margin, S.height) *
+                  MAX(0,MIN(S.raw_width - S.left_margin, S.width)) *
+                      MAX(0,MIN(S.raw_height - S.top_margin, S.height)) *
                       sizeof(*imgdata.image));
         }
       }
