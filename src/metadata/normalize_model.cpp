@@ -1354,10 +1354,6 @@ void LibRaw::GetNormalizedModel()
     if (ilm.LensID == LIBRAW_LENS_NOT_SET) ilm.LensMount = LIBRAW_MOUNT_IL_UM;
     else ilm.LensMount = ilm.CameraMount;
     }
-
-  if (normalized_model[0] && !CM_found)
-    CM_found = adobe_coeff(maker_index, normalized_model);
-
 }
 
 void LibRaw::SetStandardIlluminants (unsigned makerIdx, const char* normModel) {
