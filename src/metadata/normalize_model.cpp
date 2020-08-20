@@ -1332,7 +1332,7 @@ void LibRaw::GetNormalizedModel()
   {
     if (makeIs(LIBRAW_CAMERAMAKER_Samsung))
     {
-      if ((ilm.LensMount == LIBRAW_MOUNT_Samsung_NX) && (strlen(xmpdata) > 9) &&
+      if ((ilm.LensMount == LIBRAW_MOUNT_Samsung_NX) && xmpdata && (strlen(xmpdata) > 9) &&
           (ps = strstr(xmpdata, "LensID=\"(")))
       {
         ilm.LensID = atoi(ps + 9);
