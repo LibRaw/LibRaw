@@ -93,7 +93,7 @@ static const char *Hasselblad_SensorEnclosures[] = {
   int norm_model_isSet = 0;
 
   if (model[0] == ' ')
-    memmove(model, model+1, strlen(model));
+    memmove(model, model+1, MIN(sizeof(model)-1,strlen(model)));
 
   if (!imHassy.format) {
     if (dng_version) {
@@ -116,49 +116,62 @@ static const char *Hasselblad_SensorEnclosures[] = {
     memmove(imHassy.SensorUnitConnector, imHassy.SensorUnitConnector+11, 64-11);
 
   if (imHassy.format == LIBRAW_HF_AdobeDNG) { // Adobe DNG, use LocalizedCameraModel
+      imgdata.color.LocalizedCameraModel[63] = 0; // make sure 0-termination
     if ((ps = strrchr(imgdata.color.LocalizedCameraModel, '-')))
       c = ps-imgdata.color.LocalizedCameraModel;
     else c = strlen(imgdata.color.LocalizedCameraModel);
-    memcpy(tmp_model, imgdata.color.LocalizedCameraModel, c);
-    tmp_model[c] = 0;
+    int cc = MIN(c, sizeof(tmp_model)-1);
+    memcpy(tmp_model, imgdata.color.LocalizedCameraModel,cc);
+    tmp_model[cc] = 0;
     if (strcasestr(imgdata.color.UniqueCameraModel, "coated")) {
-      strcpy(normalized_model, imgdata.color.UniqueCameraModel);
+      strncpy(normalized_model, imgdata.color.UniqueCameraModel,sizeof(imgdata.color.UniqueCameraModel)-1);
+      normalized_model[sizeof(imgdata.color.UniqueCameraModel) - 1] = 0;
       norm_model_isSet = 1;
     }
       if (!strncmp(normalized_model, "Hasselblad ", 11))
         memmove(normalized_model, normalized_model+11, 64-11);
-  } else
-    strcpy(tmp_model, imgdata.color.UniqueCameraModel);
+  }
+  else
+  {
+      strncpy(tmp_model, imgdata.color.UniqueCameraModel, sizeof(imgdata.color.UniqueCameraModel) - 1);
+      tmp_model[63] = 0;
+  }
   if (!strncasecmp(tmp_model, "Hasselblad ", 11))
     memmove(tmp_model, tmp_model+11, 64-11);
 
 // check if model tag contains manual CaptureSequenceInitiator info:
-  strcpy(imHassy.CaptureSequenceInitiator, model);
+  strncpy(imHassy.CaptureSequenceInitiator, model,31);
+  imHassy.CaptureSequenceInitiator[31] = 0;
   FORC(int(sizeof Hasselblad_Ctrl / sizeof *Hasselblad_Ctrl)) {
     if (strcasestr(model, Hasselblad_Ctrl[c])) {
 // yes, fill 'model' with sensor unit data
-      strcpy(model, tmp_model);
+      strncpy(model, tmp_model,63);
+      model[63] = 0;
       break;
     }
   }
 
   ps = strchr(model, '-');
   if (ps) {                  // check if model contains both host body and sensor version, resolution, MS info
-    strcpy(imHassy.SensorUnit, model);
+    strncpy(imHassy.SensorUnit, model,63);
     memcpy(imHassy.HostBody, model, ps-model);
     imHassy.HostBody[ps-model] = 0;
     if (!strncmp(ps-2, "II-", 3))
       ps -=2;
-    strcpy(imHassy.Sensor, ps);
+    strncpy(imHassy.Sensor, ps,7);
+    imHassy.Sensor[7] = 0;
     add_MP_toName = 0;
   } else {                   // model contains host body only
-    strcpy(imHassy.HostBody, model);
+    strncpy(imHassy.HostBody, model,63);
+    imHassy.HostBody[63] = 0;
 // fill 'model' with sensor unit data
-    strcpy(model, tmp_model);
+    strncpy(model, tmp_model,63);
+    model[63] = 0;
   }
 
   if (!strncmp(model, "503CWD", 6)) {
-    strcpy(imHassy.HostBody, model);
+    strncpy(imHassy.HostBody, model,63);
+    imHassy.HostBody[63] = 0;
     ilm.CameraFormat = LIBRAW_FORMAT_66;
     ilm.CameraMount = LIBRAW_MOUNT_Hasselblad_V;
     if (model[6] == 'I' && model[7] == 'I')
