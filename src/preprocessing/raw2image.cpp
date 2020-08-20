@@ -205,12 +205,13 @@ void LibRaw::copy_fuji_uncropped(unsigned short cblack[4],
 #if defined(LIBRAW_USE_OPENMP)
 #pragma omp parallel for default(shared)
 #endif
-  for (row = 0; row < S.raw_height - S.top_margin * 2; row++)
+  for (row = 0; row < int(S.raw_height) - int(S.top_margin) * 2; row++)
   {
     int col;
     unsigned short ldmax = 0;
     for (col = 0;
-         col < IO.fuji_width << !libraw_internal_data.unpacker_data.fuji_layout;
+         col < IO.fuji_width << !libraw_internal_data.unpacker_data.fuji_layout
+         && col + int(S.left_margin) < int(S.raw_width);
          col++)
     {
       unsigned r, c;
