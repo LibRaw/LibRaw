@@ -648,7 +648,7 @@ void LibRaw::leaf_hdr_load_raw()
         pixel = raw_image + r * raw_width;
       read_shorts(pixel, raw_width);
       if (!filters && image && (row = r - top_margin) < height)
-        for (col = 0; col < width; col++)
+        for (col = 0; col < width && col + left_margin < raw_width; col++)
           image[row * width + col][c] = pixel[col + left_margin];
     }
   }
