@@ -160,7 +160,6 @@ static const struct {
     {LIBRAW_WBI_PC_Set4,         "WBI_PC_Set4",         "PC Set 4",                1},
     {LIBRAW_WBI_PC_Set5,         "WBI_PC_Set5",         "PC Set 5",                1},
     {LIBRAW_WBI_Kelvin,          "WBI_Kelvin",          "Kelvin",                  1},
-    {LIBRAW_WBI_None,            "WBI_None",            "None",                    1},
 };
 
 typedef struct
