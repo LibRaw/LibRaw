@@ -35,6 +35,11 @@ void LibRaw::parse_exif_interop(int base)
 			fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
 			continue;
 		}
+        if (callbacks.exif_cb)
+        {
+            callbacks.exif_cb(callbacks.exifparser_data, tag | 0x40000, type, len, order, ifp, base);
+            fseek(ifp, savepos, SEEK_SET);
+        }
 
 		switch (tag)
 		{
@@ -314,6 +319,7 @@ void LibRaw::parse_gps_libraw(int base)
     return;
   if (entries > 0)
     imgdata.other.parsed_gps.gpsparsed = 1;
+  INT64 fsize = ifp->size();
   while (entries--)
   {
     tiff_get(base, &tag, &type, &len, &save);
@@ -322,6 +328,19 @@ void LibRaw::parse_gps_libraw(int base)
       fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
       continue;                   // no GPS tags are 1k or larger
     }
+    INT64 savepos = ftell(ifp);
+    if (len > 8 && savepos + len > fsize * 2)
+    {
+        fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
+        continue;
+    }
+
+    if (callbacks.exif_cb)
+    {
+        callbacks.exif_cb(callbacks.exifparser_data, tag | 0x50000, type, len, order, ifp, base);
+        fseek(ifp, savepos, SEEK_SET);
+    }
+
     switch (tag)
     {
     case 0x0001:
