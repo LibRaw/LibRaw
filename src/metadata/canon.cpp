@@ -1043,7 +1043,7 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
       Canon_WBCTpresets(0);
       offsetChannelBlackLevel = save1 + (0x0326 << 1);
       offsetChannelBlackLevel2 = save1 + (0x0157 << 1);
-      imCanon.SpecularWhiteLevel = 16050;
+      offsetWhiteLevels = save1 + (0x032a << 1);
       break;
 
    default:
