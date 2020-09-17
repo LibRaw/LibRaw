@@ -91,7 +91,7 @@ void usage(const char *prog)
          "-m <num>  Apply a 3x3 median filter to R-G and B-G\n"
          "-s [0..N-1] Select one raw image from input file\n"
          "-4        Linear 16-bit, same as \"-6 -W -g 1 1\n"
-         "-6        Write 16-bit linear instead of 8-bit with gamma\n"
+         "-6        Write 16-bit output\n"
          "-g pow ts Set gamma curve to gamma pow and toe slope ts (default = "
          "2.222 4.5)\n"
          "-T        Write TIFF instead of PPM\n"
