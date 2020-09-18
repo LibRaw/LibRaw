@@ -945,6 +945,22 @@ void print_jsonfun(FILE* outfile, LibRaw& MyCoolRawProcessor,
   else fprintf (outfile, ",");
 }
 
+#define PRINTMATRIX3x4(of,mat,clrs)																		\
+	do{																								    \
+		for(int r = 0; r < 3; r++)																		\
+			if(clrs==4) 																				\
+				fprintf(of, "%6.4f\t%6.4f\t%6.4f\t%6.4f\n", mat[r][0],mat[r][1],mat[r][2],mat[r][3]); 	\
+			else																						\
+				fprintf(of, "%6.4f\t%6.4f\t%6.4f\n", mat[r][0],mat[r][1],mat[r][2]);					\
+	}while(0)
+
+#define PRINTMATRIX4x3(of,mat,clrs)																		\
+	do{																									\
+		for(int r = 0; r < clrs && r < 4; r++)																	\
+				fprintf(of, "%6.4f\t%6.4f\t%6.4f\n", mat[r][0],mat[r][1],mat[r][2]);					\
+	}while(0)
+
+
 void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 {
 	id2hr_t *MountName, *FormatName, *Aspect, *Crop, *DriveMode;
@@ -1396,15 +1412,11 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 		if (C.rgb_cam[0][0] > 0.0001)
 		{
 			fprintf(outfile, "\n\nCamera2RGB matrix (mode: %d):\n", MyCoolRawProcessor.imgdata.params.use_camera_matrix);
-			for (int i = 0; i < P1.colors; i++)
-				fprintf(outfile, "%6.4f\t%6.4f\t%6.4f\n", C.rgb_cam[i][0], C.rgb_cam[i][1],
-				C.rgb_cam[i][2]);
+            PRINTMATRIX3x4(outfile,C.rgb_cam,P1.colors);
 		}
 
 		fprintf(outfile, "\nXYZ->CamRGB matrix:\n");
-		for (int i = 0; i < P1.colors; i++)
-			fprintf(outfile, "%6.4f\t%6.4f\t%6.4f\n", C.cam_xyz[i][0], C.cam_xyz[i][1],
-			C.cam_xyz[i][2]);
+        PRINTMATRIX4x3(outfile,C.cam_xyz,P1.colors);
 
     for (int cnt = 0; cnt < 2; cnt++) {
       if (fabsf(C.P1_color[cnt].romm_cam[0]) > 0)
@@ -1420,23 +1432,13 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 		if (fabsf(C.cmatrix[0][0]) > 0)
 		{
 			fprintf(outfile, "\ncamRGB -> sRGB Matrix:\n");
-			for (int i = 0; i < P1.colors; i++)
-			{
-				for (int j = 0; j < P1.colors; j++)
-					fprintf(outfile, "%6.4f\t", C.cmatrix[i][j]);
-				fprintf(outfile, "\n");
-			}
+            PRINTMATRIX3x4(outfile,C.cmatrix,P1.colors);
 		}
 
 		if (fabsf(C.ccm[0][0]) > 0)
 		{
 			fprintf(outfile, "\nColor Correction Matrix:\n");
-			for (int i = 0; i < P1.colors; i++)
-			{
-				for (int j = 0; j < P1.colors; j++)
-					fprintf(outfile, "%6.4f\t", C.ccm[i][j]);
-				fprintf(outfile, "\n");
-			}
+            PRINTMATRIX3x4(outfile,C.ccm,P1.colors);
 		}
 
     for (int cnt = 0; cnt < 2; cnt++) {
@@ -1459,10 +1461,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
       if (fabsf(C.dng_color[n].colormatrix[0][0]) > 0)
       {
         fprintf(outfile, "\nDNG color matrix %d:\n", n+1);
-        for (int i = 0; i < P1.colors; i++)
-          fprintf(outfile, "%6.4f\t%6.4f\t%6.4f\n", C.dng_color[n].colormatrix[i][0],
-          C.dng_color[n].colormatrix[i][1],
-          C.dng_color[n].colormatrix[i][2]);
+        PRINTMATRIX4x3(outfile,C.dng_color[n].colormatrix,P1.colors);
       }
     }
 
@@ -1470,9 +1469,9 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
       if (fabsf(C.dng_color[n].calibration[0][0]) > 0)
       {
         fprintf(outfile, "\nDNG calibration matrix %d:\n", n+1);
-        for (int i = 0; i < P1.colors; i++)
+        for (int i = 0; i < P1.colors && i < 4; i++)
         {
-          for (int j = 0; j < P1.colors; j++)
+          for (int j = 0; j < P1.colors && j < 4; j++)
             fprintf(outfile, "%6.4f\t", C.dng_color[n].calibration[j][i]);
           fprintf(outfile, "\n");
         }
@@ -1483,10 +1482,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
       if (fabsf(C.dng_color[n].forwardmatrix[0][0]) > 0)
       {
         fprintf(outfile, "\nDNG forward matrix %d:\n", n+1);
-        for (int i = 0; i < P1.colors; i++)
-          fprintf(outfile, "%6.4f\t%6.4f\t%6.4f\n", C.dng_color[n].forwardmatrix[0][i],
-          C.dng_color[n].forwardmatrix[1][i],
-          C.dng_color[n].forwardmatrix[2][i]);
+        PRINTMATRIX3x4(outfile,C.dng_color[n].forwardmatrix,P1.colors);
       }
     }
 
