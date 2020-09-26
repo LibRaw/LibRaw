@@ -1361,7 +1361,7 @@ void print_verbose(FILE* outfile, LibRaw& MyCoolRawProcessor, std::string& fn)
 	}
 	if ((C.cblack[4] * C.cblack[5]) > 0)
 	{
-		fprintf(outfile, "\nBlackLevelRepeatDim: %d x %d\n", C.cblack[4], C.cblack[4]);
+		fprintf(outfile, "\nBlackLevelRepeatDim: %d x %d\n", C.cblack[4], C.cblack[5]);
 		int n = C.cblack[4] * C.cblack[5];
 		fprintf(outfile, "cblack[6 .. %d]:", 6 + n - 1);
 		for (int c = 6; c < 6 + n; c++)
