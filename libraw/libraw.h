@@ -173,7 +173,7 @@ public:
 #endif
   int open_buffer(const void *buffer, size_t size);
   virtual int open_datastream(LibRaw_abstract_datastream *);
-  virtual int open_bayer(unsigned char *data, unsigned datalen,
+  virtual int open_bayer(const unsigned char *data, unsigned datalen,
                          ushort _raw_width, ushort _raw_height,
                          ushort _left_margin, ushort _top_margin,
                          ushort _right_margin, ushort _bottom_margin,
