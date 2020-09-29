@@ -156,7 +156,7 @@ public:
 class DllDef LibRaw_buffer_datastream : public LibRaw_abstract_datastream
 {
 public:
-  LibRaw_buffer_datastream(void *buffer, size_t bsize);
+  LibRaw_buffer_datastream(const void *buffer, size_t bsize);
   virtual ~LibRaw_buffer_datastream();
   virtual int valid();
   virtual void *make_jas_stream();
