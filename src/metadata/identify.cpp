@@ -1093,7 +1093,7 @@ dng_skip:
       cam_mul[3] = 0;
     }
   }
-  if ((use_camera_matrix & (((use_camera_wb || dng_version)?0:1) | 0x2)) &&
+  if ((use_camera_matrix & (((use_camera_wb || dng_version)?1:0) | 0x2)) &&
       cmatrix[0][0] > 0.125)
   {
     memcpy(rgb_cam, cmatrix, sizeof cmatrix);
