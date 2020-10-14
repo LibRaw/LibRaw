@@ -1,3 +1,35 @@
+2020-10-14 Alex Tutubalin <lexa@lexa.ru>
+
+ * LibRaw 0.20.1
+ * Improvements:
+   - exif callback is called on EXIF GPS and EXIF Interop IFDs
+   - open_bayer call documented
+   - Canon (ColorDatsSubver==32): parse Specular White instead of hardcoded value
+ * Fixes for normal files processing:
+   - Olympus XZ-1: do not provide linear_max (it is wrong in metadata)
+   - Nikon Z cameras: added space in camera list
+   - raw-identify: fixed wb-preset print
+   - Pentax Optio 33WR: maker index was incorrect
+   - dcraw_emu: corrected help line for -6 option.
+   - raw-identify: corrected range check for color matrices print
+   - use_camera_matrix option: fixed a bug introduced when making
+     compiler more happy.
+
+ * Fixes for damaged/special crafted files processing:
+   - Fix for truncated CR3 files parsing
+   - DNG metadata merger: all color loops are limited to MIN(4,colors)
+   - Check for marings: should be less than raw image size
+   - Check for xmpdata present in Samsung Lens ID assignment
+   - Check for column range in leaf_hdr decoder
+   - Additional checks in Hasselblad model parser
+   - Fuji rotate: better limits check
+   - DNG files: limit tiff_samples
+
+ * Not fixes, but makes ASAN/compilers/etc happy:
+   - corrected GPS EXIF output
+   - const buffer for open_buffer() and open_bayer() calls
+
+
 2020-07-23 Alex Tutubalin <lexa@lexa.ru>
 
  * LibRaw 0.20
