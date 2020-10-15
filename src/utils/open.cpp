@@ -128,10 +128,10 @@ int LibRaw::open_file(const wchar_t *fname, INT64 max_buf_size)
 #endif
 #endif
 
-int LibRaw::open_buffer(const void *buffer, size_t size)
+int LibRaw::open_buffer(void *buffer, size_t size)
 {
   // this stream will close on recycle()
-  if (!buffer || buffer == (const void *)-1)
+  if (!buffer || buffer == (void *)-1)
     return LIBRAW_IO_ERROR;
 
   LibRaw_buffer_datastream *stream;

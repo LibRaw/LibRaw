@@ -120,7 +120,7 @@ extern "C"
     return ip->open_file(file, sz);
   }
 #endif
-  int libraw_open_buffer(libraw_data_t *lr, const void *buffer, size_t size)
+  int libraw_open_buffer(libraw_data_t *lr, void *buffer, size_t size)
   {
     if (!lr)
       return EINVAL;

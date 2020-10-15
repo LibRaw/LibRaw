@@ -86,7 +86,7 @@ extern "C"
   DllDef int libraw_open_wfile_ex(libraw_data_t *, const wchar_t *,
                                   INT64 max_buff_sz);
 #endif
-  DllDef int libraw_open_buffer(libraw_data_t *, const void *buffer, size_t size);
+  DllDef int libraw_open_buffer(libraw_data_t *, void *buffer, size_t size);
   DllDef int libraw_unpack(libraw_data_t *);
   DllDef int libraw_unpack_thumb(libraw_data_t *);
   DllDef void libraw_recycle_datastream(libraw_data_t *);
@@ -171,7 +171,7 @@ public:
   int open_file(const wchar_t *fname,
                 INT64 max_buffered_sz = LIBRAW_USE_STREAMS_DATASTREAM_MAXSIZE);
 #endif
-  int open_buffer(const void *buffer, size_t size);
+  int open_buffer(void *buffer, size_t size);
   virtual int open_datastream(LibRaw_abstract_datastream *);
   virtual int open_bayer(const unsigned char *data, unsigned datalen,
                          ushort _raw_width, ushort _raw_height,
