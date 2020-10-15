@@ -1,5 +1,12 @@
 2020-10-14 Alex Tutubalin <lexa@lexa.ru>
 
+ * LibRaw 0.20.2
+ Reverted 0.20.1 change:
+   - const buffer for open_buffer() and open_bayer() calls
+ Because of 0.20.0 ABI break
+
+2020-10-14 Alex Tutubalin <lexa@lexa.ru>
+
  * LibRaw 0.20.1
  * Improvements:
    - exif callback is called on EXIF GPS and EXIF Interop IFDs
