@@ -459,7 +459,7 @@ int main(int argc, char *argv[])
       break;
     default:
       fprintf(stderr, "Unknown option \"-%c\".\n", opt);
-      return 1;
+      break;
     }
   }
 #ifndef LIBRAW_WIN32_CALLS
@@ -485,6 +485,8 @@ int main(int argc, char *argv[])
     printf("Using %d threads\n", omp_get_max_threads());
 #endif
 
+  int done = 0;
+  int total = argc - arg;
   for (; arg < argc; arg++)
   {
     char outfn[1024];
@@ -634,6 +636,8 @@ int main(int argc, char *argv[])
 
     if (LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_ppm_tiff_writer(outfn)))
       fprintf(stderr, "Cannot write %s: %s\n", outfn, libraw_strerror(ret));
+    else
+      done++;
 
 	RawProcessor.recycle(); // just for show this call
 
@@ -649,5 +653,5 @@ int main(int argc, char *argv[])
   if (dnghost)
     delete dnghost;
 #endif
-  return 0;
+  return done == 0 || done < total;
 }
