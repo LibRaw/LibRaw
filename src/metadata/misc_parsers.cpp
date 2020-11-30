@@ -304,6 +304,7 @@ void LibRaw::parse_rollei()
     line[0] = 0;
     if (!fgets(line, 128, ifp))
       break;
+    line[127] = 0;
     if(!line[0]) break; // zero-length
     if ((val = strchr(line, '=')))
       *val++ = 0;
