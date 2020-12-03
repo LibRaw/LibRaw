@@ -422,7 +422,7 @@ char *LibRaw_buffer_datastream::gets(char *s, int sz)
   psrc = buf + streampos;
   pdest = str;
   if(streampos >= streamsize) return NULL;
-  while ((size_t(psrc - buf) < streamsize) && ((pdest - str) < sz))
+  while ((size_t(psrc - buf) < streamsize) && ((pdest - str) < (sz-1)))
   {
     *pdest = *psrc;
     if (*psrc == '\n')
@@ -432,8 +432,11 @@ char *LibRaw_buffer_datastream::gets(char *s, int sz)
   }
   if (size_t(psrc - buf) < streamsize)
     psrc++;
-  if ((pdest - str) < sz)
+  if ((pdest - str) < sz-1)
     *(++pdest) = 0;
+  else
+    s[sz - 1] = 0; // ensure trailing zero
+
   streampos = psrc - buf;
   return s;
 }
