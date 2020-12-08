@@ -314,8 +314,10 @@ void LibRaw::cam_xyz_coeff(float _rgb_cam[3][4], double cam_xyz[4][3])
     }
   }
   pseudoinverse(cam_rgb, inverse, colors);
+  //check "colors" in order to prevent a stack buffer overflow
+  ushort colorsSize = (colors <= 4) ? colors : 4;
   for (i = 0; i < 3; i++)
-    for (j = 0; j < colors && j < 4; j++)
+    for (j = 0; j < colorsSize && j < 4; j++)
       _rgb_cam[i][j] = inverse[j][i];
 }
 
