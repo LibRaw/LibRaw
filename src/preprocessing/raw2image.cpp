@@ -143,7 +143,15 @@ int LibRaw::raw2image(void)
                   S.width * S.height * sizeof(*imgdata.image));
         else
         {
-          for (int row = 0; row < S.height; row++)
+            // To prevent OOB buffer access of color4_image
+            if (S.raw_width < S.left_margin)
+            {
+                throw LIBRAW_EXCEPTION_DECODE_RAW;
+            }
+            int width = MIN(S.width, S.raw_width - S.left_margin);
+            for (int row = 0; row < S.height && (row + S.top_margin) < S.raw_height;
+                row++)
+            {
             memmove(&imgdata.image[row * S.width],
                     &imgdata.rawdata
                          .color4_image[(row + S.top_margin) * S.raw_pitch / 8 +
