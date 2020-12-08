@@ -156,7 +156,7 @@ int LibRaw::raw2image(void)
                     &imgdata.rawdata
                          .color4_image[(row + S.top_margin) * S.raw_pitch / 8 +
                                        S.left_margin],
-                    S.width * sizeof(*imgdata.image));
+                width * sizeof(*imgdata.image));
         }
       }
       else if (imgdata.rawdata.color3_image)
