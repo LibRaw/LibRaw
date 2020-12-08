@@ -163,7 +163,8 @@ int LibRaw::unpack_thumb(void)
         merror(T.thumb, "layer_thumb()");
         unsigned char *tbuf = (unsigned char *)calloc(colors, tlength);
         merror(tbuf, "layer_thumb()");
-        ID.input->read(tbuf, colors, T.tlength);
+        // Avoid OOB of tbuf, should use tlength
+        ID.input->read(tbuf, colors, tlength);
         if (libraw_internal_data.unpacker_data.thumb_misc >> 8 &&
             colors == 3) // GRB order
           for (int i = 0; i < tlength; i++)
