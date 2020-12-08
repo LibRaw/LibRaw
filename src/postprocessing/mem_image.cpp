@@ -106,11 +106,11 @@ libraw_processed_image_t *LibRaw::dcraw_make_mem_thumb(int *errcode)
       tiff_head(&th, 0);
       memmove(ret->data + (2 + sizeof(exif)), &th, sizeof(th));
       memmove(ret->data + (2 + sizeof(exif) + sizeof(th)), T.thumb + 2,
-              T.tlength - 2);
+              MAX(T.tlength - 2, 0));
     }
     else
     {
-      memmove(ret->data + 2, T.thumb + 2, T.tlength - 2);
+      memmove(ret->data + 2, T.thumb + 2, MAX(T.tlength - 2, 0));
     }
     if (errcode)
       *errcode = 0;
