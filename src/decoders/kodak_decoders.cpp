@@ -477,6 +477,7 @@ void LibRaw::kodak_ycbcr_load_raw()
 
   unsigned int bits =
       (load_flags && load_flags > 9 && load_flags < 17) ? load_flags : 10;
+  const int pixels = int(width)*int(height);
   for (row = 0; row < height; row += 2)
   {
     checkCancel();
@@ -497,8 +498,12 @@ void LibRaw::kodak_ycbcr_load_raw()
           {
             if ((y[j][k] = y[j][k ^ 1] + *bp++) >> bits)
               derror();
-            ip = image[(row + j) * width + col + i + k];
-            FORC3 ip[c] = curve[LIM(y[j][k] + rgb[c], 0, 0xfff)];
+            int indx = (row + j) * width + col + i + k;
+            if(indx>=0 && indx < pixels)
+            {
+                ip = image[indx];
+                FORC3 ip[c] = curve[LIM(y[j][k] + rgb[c], 0, 0xfff)];
+            }
           }
       }
     }
