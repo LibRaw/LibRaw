@@ -503,7 +503,8 @@ void LibRaw::kodak_ycbcr_load_raw()
             int idx = (row + j) * width + col + i + k;
             if (idx > iheight * iwidth)
             {
-                throw LIBRAW_EXCEPTION_IO_CORRUPT;
+                // Skip out of range pixel
+                break;
             }
             ip = image[idx];
             FORC3 ip[c] = curve[LIM(y[j][k] + rgb[c], 0, 0xfff)];
