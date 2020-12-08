@@ -497,7 +497,15 @@ void LibRaw::kodak_ycbcr_load_raw()
           {
             if ((y[j][k] = y[j][k ^ 1] + *bp++) >> bits)
               derror();
-            ip = image[(row + j) * width + col + i + k];
+            // "image" is calloc in kodak_thumb_loader:
+            // (ushort(*)[4])calloc(S.iheight * S.iwidth, sizeof(*imgdata.image));
+            // check idx to ensure "ip" cannot access memory larger than image size
+            int idx = (row + j) * width + col + i + k;
+            if (idx > iheight * iwidth)
+            {
+                throw LIBRAW_EXCEPTION_IO_CORRUPT;
+            }
+            ip = image[idx];
             FORC3 ip[c] = curve[LIM(y[j][k] + rgb[c], 0, 0xfff)];
           }
       }
