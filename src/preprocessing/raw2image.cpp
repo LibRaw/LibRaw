@@ -89,6 +89,10 @@ int LibRaw::raw2image(void)
     libraw_decoder_info_t decoder_info;
     get_decoder_info(&decoder_info);
 
+    // Copy area size
+    int copyheight = MAX(0, MIN(int(S.height), int(S.raw_height) - int(S.top_margin)));
+    int copywidth = MAX(0, MIN(int(S.width), int(S.raw_width) - int(S.left_margin)));
+
     // Move saved bitmap to imgdata.image
     if ((imgdata.idata.filters || P1.colors == 1) && imgdata.rawdata.raw_image)
     {
@@ -125,8 +129,8 @@ int LibRaw::raw2image(void)
       else
       {
         int row, col;
-        for (row = 0; row < S.height; row++)
-          for (col = 0; col < S.width; col++)
+        for (row = 0; row < copyheight; row++)
+          for (col = 0; col < copywidth; col++)
             imgdata.image[((row) >> IO.shrink) * S.iwidth +
                           ((col) >> IO.shrink)][fcol(row, col)] =
                 imgdata.rawdata
@@ -138,28 +142,28 @@ int LibRaw::raw2image(void)
     {
       if (imgdata.rawdata.color4_image)
       {
-        if (S.width * 8 == S.raw_pitch)
+        if (S.width * 8 == S.raw_pitch && S.height == S.raw_height)
           memmove(imgdata.image, imgdata.rawdata.color4_image,
                   S.width * S.height * sizeof(*imgdata.image));
         else
         {
-          for (int row = 0; row < S.height; row++)
+            for (int row = 0; row < copyheight; row++)
             memmove(&imgdata.image[row * S.width],
                     &imgdata.rawdata
                          .color4_image[(row + S.top_margin) * S.raw_pitch / 8 +
                                        S.left_margin],
-                    S.width * sizeof(*imgdata.image));
+                    copywidth * sizeof(*imgdata.image));
         }
       }
       else if (imgdata.rawdata.color3_image)
       {
         unsigned char *c3image = (unsigned char *)imgdata.rawdata.color3_image;
-        for (int row = 0; row < S.height; row++)
+        for (int row = 0; row < copyheight; row++)
         {
           ushort(*srcrow)[3] =
               (ushort(*)[3]) & c3image[(row + S.top_margin) * S.raw_pitch];
           ushort(*dstrow)[4] = (ushort(*)[4]) & imgdata.image[row * S.width];
-          for (int col = 0; col < S.width; col++)
+          for (int col = 0; col < copywidth; col++)
           {
             for (int c = 0; c < 3; c++)
               dstrow[col][c] = srcrow[S.left_margin + col][c];
@@ -257,7 +261,7 @@ void LibRaw::copy_bayer(unsigned short cblack[4], unsigned short *dmaxp)
 {
   // Both cropped and uncropped
   int row;
-  int maxHeight = MIN(S.height,S.raw_height-S.top_margin);
+  int maxHeight = MIN(int(S.height),int(S.raw_height)-int(S.top_margin));
 #if defined(LIBRAW_USE_OPENMP)
 #pragma omp parallel for default(shared)
 #endif
@@ -412,6 +416,10 @@ int LibRaw::raw2image_ex(int do_subtract_black)
         cblack[i] = (unsigned short)C.cblack[i];
     }
 
+    // Max area size to definitely not overrun in/out buffers
+    int copyheight = MAX(0, MIN(int(S.height), int(S.raw_height) - int(S.top_margin)));
+    int copywidth = MAX(0, MIN(int(S.width), int(S.raw_width) - int(S.left_margin)));
+
     // Move saved bitmap to imgdata.image
     if ((imgdata.idata.filters || P1.colors == 1) && imgdata.rawdata.raw_image)
     {
@@ -480,37 +488,31 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     {
       if (imgdata.rawdata.color4_image)
       {
-        if (S.raw_pitch != S.width * 8)
-        {
-          for (int row = 0; row < S.height && row + S.top_margin < S.raw_height;
-               row++)
-            memmove(&imgdata.image[row * S.width],
-                    &imgdata.rawdata
-                         .color4_image[(row + S.top_margin) * S.raw_pitch / 8 +
-                                       S.left_margin],
-                    MIN(S.width, S.raw_width - S.left_margin) *
-                        sizeof(*imgdata.image));
-        }
-        else
-        {
-          // legacy is always 4channel and not shrinked!
-          memmove(imgdata.image, imgdata.rawdata.color4_image,
-                  MAX(0,MIN(S.raw_width - S.left_margin, S.width)) *
-                      MAX(0,MIN(S.raw_height - S.top_margin, S.height)) *
-                      sizeof(*imgdata.image));
-        }
+          if (S.raw_pitch != S.width * 8 || S.height != S.raw_height)
+          {
+              for (int row = 0; row < copyheight; row++)
+                  memmove(&imgdata.image[row * S.width],
+                      &imgdata.rawdata
+                      .color4_image[(row + S.top_margin) * S.raw_pitch / 8 +
+                      S.left_margin],
+                      copywidth * sizeof(*imgdata.image));
+          }
+          else
+          {
+              // legacy is always 4channel and not shrinked!
+              memmove(imgdata.image, imgdata.rawdata.color4_image,
+                  S.width*copyheight * sizeof(*imgdata.image));
+          }
       }
       else if (imgdata.rawdata.color3_image)
       {
-        unsigned char *c3image = (unsigned char *)imgdata.rawdata.color3_image;
-        for (int row = 0; row < S.height && row + S.top_margin < S.raw_height;
-             row++)
+          unsigned char *c3image = (unsigned char *)imgdata.rawdata.color3_image;
+          for (int row = 0; row < copyheight; row++)
         {
           ushort(*srcrow)[3] =
               (ushort(*)[3]) & c3image[(row + S.top_margin) * S.raw_pitch];
           ushort(*dstrow)[4] = (ushort(*)[4]) & imgdata.image[row * S.width];
-          for (int col = 0; col < S.width && col + S.left_margin < S.raw_width;
-               col++)
+          for (int col = 0; col < copywidth; col++)
           {
             for (int c = 0; c < 3; c++)
               dstrow[col][c] = srcrow[S.left_margin + col][c];
