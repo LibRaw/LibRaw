@@ -727,7 +727,8 @@ void LibRaw::parse_makernote(int base, int uptag)
         {
           parse_makernote(base, tag);
         }
-        else if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_IFD))
+        else if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_IFD)
+	   || tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         {
           fseek(ifp, base + get4(), SEEK_SET);
           parse_makernote(base, tag);
