@@ -2629,6 +2629,9 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize, int flen)
 		if (!tiff_bps && pana_bpp >= 12 && pana_bpp <= 14)
 			tiff_bps = pana_bpp;
 
+        if (!strcmp(model, "DC-LX100M2") && raw_height == 3568 && raw_width == 4816 && filters == 3)
+            filters = 4;
+
 		filters = 0x01010101U *
 			(uchar) "\x94\x61\x49\x16"[((filters - 1) ^ (left_margin & 1) ^
 			(top_margin << 1)) &
