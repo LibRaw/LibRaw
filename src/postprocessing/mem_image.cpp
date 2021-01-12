@@ -63,7 +63,10 @@ libraw_processed_image_t *LibRaw::dcraw_make_mem_thumb(int *errcode)
     ret->type = LIBRAW_IMAGE_BITMAP;
     ret->height = T.theight;
     ret->width = T.twidth;
-    ret->colors = 3;
+    if (T.tcolors > 0 && T.tcolors < 4)
+        ret->colors = T.tcolors;
+    else
+        ret->colors = 3; // defaults
     ret->bits = 8;
     ret->data_size = T.tlength;
     memmove(ret->data, T.thumb, T.tlength);
