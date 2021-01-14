@@ -77,7 +77,7 @@ void LibRaw::broadcom_load_raw()
   int rev, row, col, c;
   ushort _raw_stride = (ushort)load_flags;
   rev = 3 * (order == 0x4949);
-  data = (uchar *)malloc(raw_stride * 2);
+  data = (uchar *)malloc(_raw_stride * 2);
   merror(data, "broadcom_load_raw()");
 
   for (row = 0; row < raw_height; row++)
