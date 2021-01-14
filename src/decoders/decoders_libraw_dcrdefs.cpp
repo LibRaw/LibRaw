@@ -76,6 +76,10 @@ void LibRaw::broadcom_load_raw()
   uchar *data, *dp;
   int rev, row, col, c;
   ushort _raw_stride = (ushort)load_flags;
+#ifdef USE_6BY9RPI
+  if (raw_stride)
+    _raw_stride = raw_stride;
+#endif
   rev = 3 * (order == 0x4949);
   data = (uchar *)malloc(_raw_stride * 2);
   merror(data, "broadcom_load_raw()");
