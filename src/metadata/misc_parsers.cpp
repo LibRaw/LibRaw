@@ -504,8 +504,7 @@ void LibRaw::parse_broadcom()
   header.bayer_order = 0;
   fseek(ifp, 0xb0 - 0x20, SEEK_CUR);
   fread(&header, 1, sizeof(header), ifp);
-  /* load_flags is not used in broadcom loader, so reuse it for raw_stride */
-  load_flags =
+  raw_stride =
       ((((((header.uwidth + header.padding_right) * 5) + 3) >> 2) + 0x1f) &
        (~0x1f));
   raw_width = width = header.uwidth;
