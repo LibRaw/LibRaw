@@ -208,3 +208,4 @@ static const int _Sony_SR2_wb_list1[] = {
     LIBRAW_WBI_FL_L, 8500, 6000, 3200, 2500
 };
 libraw_static_table_t LibRaw::Sony_SR2_wb_list1(_Sony_SR2_wb_list1, _ARR_SZ(_Sony_SR2_wb_list1));
+

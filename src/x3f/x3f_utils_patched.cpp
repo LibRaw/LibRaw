@@ -2121,3 +2121,4 @@ static void x3f_load_camf(x3f_info_t *I, x3f_directory_entry_t *DE)
 /* --------------------------------------------------------------------- */
 
 #endif
+

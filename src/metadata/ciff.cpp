@@ -127,7 +127,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
     } else if (type == 0x080b) {
       char *p;
       stmread(imCommon.firmware, (unsigned)len, ifp);
-      if (p = strrchr(imCommon.firmware, ' ')) {
+      if ((p = strrchr(imCommon.firmware, ' '))) {
         imCanon.firmware = atof(p+1);
       }
 
