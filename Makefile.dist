@@ -27,6 +27,10 @@ CXX=g++
 # LIBJPEG8:
 #CFLAGS+=-DUSE_JPEG8
 
+# ZLIB support (FP dng)
+CFLAGS+=-DUSE_ZLIB
+LDADD+=-lz
+
 # LCMS support
 #CFLAGS+=-DUSE_LCMS -I/usr/local/include
 #LDADD+=-L/usr/local/lib -llcms

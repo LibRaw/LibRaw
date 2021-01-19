@@ -32,6 +32,10 @@ CFLAGS+= -g -I. -pedantic -Wno-long-long -Wno-overflow -O3
 #CFLAGS+=-DUSE_JASPER -I/opt/local/include
 #LDADD+=-L/opt/local/lib -ljasper
 
+# ZLIB support (FP dng)
+CFLAGS+=-DUSE_ZLIB
+LDADD+=-lz
+
 # JPEG support for DNG and Kodak
 CFLAGS+=-DUSE_JPEG -I/usr/local/include
 LDADD+=-L/usr/local/lib -ljpeg
