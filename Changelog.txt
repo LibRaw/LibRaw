@@ -1,3 +1,131 @@
+2021-01-21  Alex Tutubalin <lexa@lexa.ru>
+
+ == LibRaw snapshot 202101 ==
+
+ = Camera format support: =
+   Lossy compressed CR3 files
+   Lossy compressed RAF files
+   Uncompressed floating point DNG files (16-24-32 bit)
+   Deflate compressed striped DNG files
+   XMP and HEIF-preview extraction from CR3 files
+
+ =  Camera support =
+   Apple iPhone 12 Max, iPhone 12 Max Pro
+   Canon EOS R5, EOS R6, EOS 850D, EOS-1D X Mark III (lossy compressed files)
+   FujiFilm X-S10
+   Hasselblad CFV II 50C",
+   Leica M10-R, Q2 Monochrom, S3, SL2-S
+   Nikon Z 5, Z 6 II, Z 7 II
+   Olympus E-M10 Mark IV
+   Panasonic DC-G100 / G110, DC-S5
+   Sony ILCE-7C (A7C), ILCE-7SM3 (A7S III)
+   Zeiss ZX1
+   Plus multiple DNG-recording cameraphones/drones/etc.
+
+ = Almost dropped camera support: =
+   Old/partially supported video/cinema cameras support is available only if
+   LibRaw is compiled with USE_OLD_VIDEOCAMS defined (this #define is
+   converted internally to LIBRAW_OLD_VIDEO_SUPPORT defined).
+   This affects:
+     Arri cameras
+     Canon C500
+     RED Cine cameras
+   We plan to keep the support in LibRaw 0.21 (if compiled with define 
+   mentioned above) and completely drop the support after 0.21.
+   If you're using LibRaw to decode RED Cine files, see LibRaw*datastreams
+   section below (in short: you'll need to use old fstream-based datastream 
+   under Windows).
+   Cinema DNG files are not affected by this.
+
+ = API/ABI changes =
+
+  * Decoding parameters
+    imgdata.params is split into
+      imgdata.rawparams: parameters used for metadata/raw data decoding
+      imgdata.params:  parameters used at postprocessing stage
+
+    imgdata.params.raw_processing options are split into two sub-options sets
+      imgdata.rawparams.options: raw processing flags, useful for normal 
+      operations
+      imgdata.rawparams.specials: special modes (e.g decoding only delta 
+      pixels from Sony ARW)
+
+   Old LIBRAW_PROCESSING_* flags are renamed to LIBRAW_RAWOPTIONS_* and 
+    LIBRAW_RAWSPECIAL*
+   LIBRAW_PROCESSING_DP2Q_INTERPOLATE... flags are renamed to 
+   LIBRAW_RAWSPECIAL_NODP2Q_INTERPOLATE with inverted meaning (with the 
+   goal to have zero imgdata.rawparams.specials in normal use).
+
+ * New processing flag LIBRAW_RAWOPTIONS_PROVIDE_NONSTANDARD_WB
+   If set (default is not), and when applicable, color.cam_mul[] and
+   color.WB_Coeffs/WBCT_Coeffs will contain WB settings for a
+   non-standard workflow.
+   Right now only Sony DSC-F828 is affected: camera-recorded white balance
+   can't be directly applied to raw data because WB is for RGB, while raw
+   data is RGBE.
+
+ * New processing flag: LIBRAW_RAWOPTIONS_CAMERAWB_FALLBACK_TO_DAYLIGHT
+   If set (default is not), LibRaw::dcraw_process() will fallback to
+   daylight WB (excluding some very specific cases like Canon D30).
+   This is how LibRaw 0.19 (and older) works.
+   If not set: LibRaw::dcraw_process() will fallback to calculated auto WB if
+   camera WB is requested, but appropriate white balance was not found in
+   metadata.
+
+  * Removed LIBRAW_PROCESSING_SKIP_MAKERNOTES processing flag: with new
+    Windows(-handle) datastreams metadata parsing performance is enough
+    to not skip makernotes parsing.
+
+  * new output parameter: imgdata.params.output_flags and new
+    enum LibRaw_output_flags
+    Right now the only flag is implemented: LIBRAW_OUTPUT_FLAGS_PPMMETA
+    setting it will result into metadata written to PPM/PGM output file
+
+  * LibRaw_*datastreams change and corresponding open_file() parameters change
+   LibRaw_file_datastream (based on iostreams) is moved under
+      #ifdef LIBRAW_USE_DEPRECATED_IOSTREAMS_DATASTREAM
+    Standard datastreams are:
+     LibRaw_bigfile_datastream (FILE* based) for POSIX systems
+     LibRaw_bigfile_buffered_datastream - for use with Win32 syscalls
+    API changes:
+    if LIBRAW_USE_DEPRECATED_IOSTREAMS_DATASTREAM is NOT defined, than 
+    LibRaw::open_file() and similar calls drops the last INT64 max_buffered_sz 
+    parameter which defines automatic selection between iostreams and 
+    FILE* based datasteams.
+
+    Note: LibRaw_bigfile_buffered_datastream does NOT implements 
+    make_jas_stream() call, so RED Cine file decoding is not possible with 
+    this datastream. Use deprecaded iostreams implementation instead.
+
+    We plan to keep LIBRAW_USE_DEPRECATED_IOSTREAMS_DATASTREAM up to 
+    LibRaw 0.21 and drop in 0.22.
+
+  * Fuji decoder:
+    fuji_decode_loop/fuji_decode_strip parameters has changed; look into source
+    code for details if you're implementing your own fuji_decode_loop() 
+    call in subclass to provide parallel fuji decoding.
+
+  * Canon CR3 H265 (HEIF) preview limited support:
+    - new format value: LIBRAW_THUMBNAIL_H265
+    - this thumbnail is NOT extracted by LibRaw::make_mem_thumb() yet;
+
+  * LibRaw::capabilities
+    Two bits added:
+      LIBRAW_CAPS_ZLIB if compiled with USE_ZLIB
+      LIBRAW_CAPS_JPEG if compiled with USE_JPEG
+
+ * samples/raw-identify.cpp sample: removed lot of extra output
+   used only by development team
+
+ * Windows datastreams: CreateFile2 is used if compiled for UWP.
+
+ * API-datastruct: clarified behavior with use_camera_wb=1 setting.
+
+ * identify(): restored the differentiation between fsize and flen.
+
+ * New compile-time LIBRAW_FORCE_OPENMP to skip compiler version check
+   (if LibRaw user is absolutely sure that OpenMP is supported by compiler)
+
 2020-10-14 Alex Tutubalin <lexa@lexa.ru>
 
  * LibRaw 0.20.2
@@ -47,7 +175,7 @@
   Panasonic 14-bit
   Fujifilm compressed/16bit
   Rapsberry Pi RAW+JPEG format (if USE_6BY9RPI defined)
-  Foveon X3F support changed: it is supported only if USE_X3FTOOLS defined 
+  Foveon X3F support changed: it is supported only if USE_X3FTOOLS defined
   at build (see below for 'Imported code policy changed')
 
 == Camera support (+59, 1131 total) ==
@@ -87,20 +215,20 @@ also multiple smartphones (the tested ones are listed in LibRaw::cameraList)
 
 There is a huge number of identical cameras sold under different names,
 depending on the market (e.g. multiple Panasonic or Canon models)
-and even some identical cameras sold under different brands 
+and even some identical cameras sold under different brands
 (Panasonic -> Leica, Sony -> Hasselblad).
 
 To reduce clutter, a normalization mechanism has been implemented in LibRaw:
 
 In imgdata.idata:
-    char normalized_make[64]; - primary vendor name (e.g. Panasonic for 
+    char normalized_make[64]; - primary vendor name (e.g. Panasonic for
     Leica re-branded cameras)
     char normalized_model[64]; - primary camera model name
     unsigned maker_index; - primary vendor name in indexed form (enum
        LibRaw_cameramaker_index, LIBRAW_CAMERAMAKER_* constant).
 These fields are always filled upon LibRaw::open_file()/open_buffer() calls.
 
-const char* LibRaw::cameramakeridx2maker(int index): converts maker_index 
+const char* LibRaw::cameramakeridx2maker(int index): converts maker_index
 to normalized_make.
 
 We recommend that you use these normalized names in a variety of data tables
@@ -113,15 +241,15 @@ vendors that are already known to LibRaw will not change.
 == DNG frame selection  ==
 
  DNG frames selection code re-worked:
-  - by default all frames w/ the NewSubfileType tag equal to 0 
-  (high-res image) are added to the list of available images (selection 
+  - by default all frames w/ the NewSubfileType tag equal to 0
+  (high-res image) are added to the list of available images (selection
   performed via imgdata.params.shot_select field, as usual)
   - the special case for Fuju SuperCCD (SamplesPerPixel == 2) works as
   before: shot_select=1 will extract second sub-image.
   - Additional flags to imgdata.params.raw_processing_options:
-     LIBRAW_PROCESSING_DNG_ADD_ENHANCED - will add Enhanced DNG frame 
+     LIBRAW_PROCESSING_DNG_ADD_ENHANCED - will add Enhanced DNG frame
      (NewSubfileType == 16) to the list of available frames
-     LIBRAW_PROCESSING_DNG_ADD_PREVIEWS - will add previews 
+     LIBRAW_PROCESSING_DNG_ADD_PREVIEWS - will add previews
      (NewSubfileType == 1) to the list.
 
   - By default, DNG frames are not reordered and are available in same order
@@ -129,31 +257,31 @@ vendors that are already known to LibRaw will not change.
   To prioritize the largest image, set LIBRAW_PROCESSING_DNG_PREFER_LARGEST_IMAGE
   bit in imgdata.params.raw_processing_options.
 
- - DNG Stage2/Stage3 processing via DNG SDK (request via flags in 
+ - DNG Stage2/Stage3 processing via DNG SDK (request via flags in
  raw_processing_options)
 
 == Imported code policy disclaimer ==
 
   We've changed the policy regarding 3rd party code imported into LibRaw.
 
-  We (like other authors of open-source RAW parsers) gladly import support 
+  We (like other authors of open-source RAW parsers) gladly import support
   code for various RAW formats from other projects (if the license allows it).
   This is done to expand camera support.
-  Unfortunately, not all imported code can tolerate truncated or otherwise 
+  Unfortunately, not all imported code can tolerate truncated or otherwise
   damaged raw files, as well as arbitrary conditions or arbitrary data;
   not all authors handle rejecting unexpected input well.
 
   LibRaw is now widely used in various projects, including ImageMagick, which,
-  in turn, is often used on web sites to process any input images, including 
+  in turn, is often used on web sites to process any input images, including
   arbitrary data from unknown users.
-  This opens up wide possibilities for exploiting the various vulnerabilities 
+  This opens up wide possibilities for exploiting the various vulnerabilities
   present in the code borrowed from other projects into LibRaw. In order to
-  avoid such security risks, - the borrowed code will no longer compile 
+  avoid such security risks, - the borrowed code will no longer compile
   by default.
-  We are not able to support it in general case, and the authors refuse 
+  We are not able to support it in general case, and the authors refuse
   to add code to reject unexpected input.
 
-  Thus, if you use some kind of camera for which the support is disabled 
+  Thus, if you use some kind of camera for which the support is disabled
   by default, you need to recompile LibRaw for your specific case.
 
   Formats currently affected:
@@ -191,10 +319,10 @@ vendors that are already known to LibRaw will not change.
 
 == LibRaw*datastream simplified ==
 
-  * tempbuffer_open, subfile_open are not used, so removed from 
+  * tempbuffer_open, subfile_open are not used, so removed from
   LibRaw_abstract_datastream and derived classes.
 
-  * jpeg_src() call implemented using ->read() call and own buffering  
+  * jpeg_src() call implemented using ->read() call and own buffering
   (16k buffer).
   * buffering_off() call added. It should be used in derived classes
     to switch from buffered reads to unbuffered.
@@ -233,25 +361,25 @@ vendors that are already known to LibRaw will not change.
 	ctop,cleft,cwidth,cheight - crop size.
 	aspect - LibRawImageAspects enum (3to2, 4to3, etc)
    * New define LIBRAW_NO_WINSOCK2 to not include winsock2.h on compile
-  
+
    * New processing flag LIBRAW_PROCESSING_PROVIDE_NONSTANDARD_WB
    If set (default is not), and when applicable, color.cam_mul[] and
-   color.WB_Coeffs/WBCT_Coeffs will contain WB settings for a non-standard 
+   color.WB_Coeffs/WBCT_Coeffs will contain WB settings for a non-standard
    workflow.
    Right now only Sony DSC-F828 is affected: camera-recorded white balance
-   can't be directly applied to raw data because WB is for RGB, while raw 
+   can't be directly applied to raw data because WB is for RGB, while raw
    data is RGBE.
 
    * New processing flag: LIBRAW_PROCESSING_CAMERAWB_FALLBACK_TO_DAYLIGHT
    If set (default is not), LibRaw::dcraw_process() will fallback to
-   daylight WB (excluding some very specific cases like Canon D30). 
+   daylight WB (excluding some very specific cases like Canon D30).
    This is how LibRaw 0.19 (and older) works.
    If not set: LibRaw::dcraw_process() will fallback to calculated auto WB if
-   camera WB is requested, but appropriate white balance was not found in 
+   camera WB is requested, but appropriate white balance was not found in
    metadata.
 
   * Google changes cherry-picked (thanks to Jamie Pinheiro)
-  * speedup: ppg interpolate: const loop invariant 
+  * speedup: ppg interpolate: const loop invariant
 
   * Bugs fixed
    -Fixed several UBs found by OSS Fuzz
@@ -263,7 +391,8 @@ vendors that are already known to LibRaw will not change.
    - fixed memory leak in crx decoder (if compiled with LIBRAW_NO_CR3_MEMPOOL)
    - fixed possible overrun in Sony SRF and SR2 metadata parsers
 
-  * Fixed typo in longitude (member of parsed GPS structure), update required for code that uses it. 
+  * Fixed typo in longitude (member of parsed GPS structure), update required for code that uses it.
+
 
 2019-03-05 Alex Tutubalin <lexa@lexa.ru>
  * Camera support

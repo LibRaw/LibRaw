@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 #include "../../internal/libraw_cxx_defs.h"
 #include "../../internal/libraw_cameraids.h"
 
+#ifndef LIBRAW_NO_IOSTREAMS_DATASTREAM
 int LibRaw::open_file(const char *fname, INT64 max_buf_size)
 {
 	int big = 0;
@@ -102,7 +103,7 @@ int LibRaw::open_file(const wchar_t *fname, INT64 max_buf_size)
       stream = new LibRaw_file_datastream(fname);
   }
 
-  catch (std::bad_alloc)
+  catch (const std::bad_alloc&)
   {
     recycle();
     return LIBRAW_UNSUFFICIENT_MEMORY;
@@ -128,10 +129,83 @@ int LibRaw::open_file(const wchar_t *fname, INT64 max_buf_size)
 #endif
 #endif
 
-int LibRaw::open_buffer(void *buffer, size_t size)
+#else /* LIBRAW_NO_IOSTREAMS_DATASTREAM*/
+
+int LibRaw::libraw_openfile_tail(LibRaw_abstract_datastream *stream)
+{
+    if (!stream->valid())
+    {
+        delete stream;
+        return LIBRAW_IO_ERROR;
+    }
+    ID.input_internal = 0; // preserve from deletion on error
+    int ret = open_datastream(stream);
+    if (ret == LIBRAW_SUCCESS)
+    {
+        ID.input_internal = 1; // flag to delete datastream on recycle
+    }
+    else
+    {
+        delete stream;
+        ID.input_internal = 0;
+    }
+    return ret;
+}
+
+int LibRaw::open_file(const char *fname)
+{
+    LibRaw_abstract_datastream *stream;
+    try
+    {
+#ifdef LIBRAW_WIN32_CALLS
+        stream = new LibRaw_bigfile_buffered_datastream(fname);
+#else
+        stream = new LibRaw_bigfile_datastream(fname);
+#endif
+    }
+
+    catch (const std::bad_alloc&)
+    {
+        recycle();
+        return LIBRAW_UNSUFFICIENT_MEMORY;
+    }
+    return libraw_openfile_tail(stream);
+}
+
+#if defined(WIN32) || defined(_WIN32)
+#ifndef LIBRAW_WIN32_UNICODEPATHS
+int LibRaw::open_file(const wchar_t *, INT64)
+{
+    return LIBRAW_NOT_IMPLEMENTED;
+}
+#else
+int LibRaw::open_file(const wchar_t *fname)
+{
+    LibRaw_abstract_datastream *stream;
+    try
+    {
+#ifdef LIBRAW_WIN32_CALLS
+        stream = new LibRaw_bigfile_buffered_datastream(fname);
+#else
+        stream = new LibRaw_bigfile_datastream(fname);
+#endif
+    }
+    catch (const std::bad_alloc&)
+    {
+        recycle();
+        return LIBRAW_UNSUFFICIENT_MEMORY;
+    }
+    return libraw_openfile_tail(stream);
+}
+#endif
+#endif
+
+#endif
+
+int LibRaw::open_buffer(const void *buffer, size_t size)
 {
   // this stream will close on recycle()
-  if (!buffer || buffer == (void *)-1)
+  if (!buffer || buffer == (const void *)-1)
     return LIBRAW_IO_ERROR;
 
   LibRaw_buffer_datastream *stream;
@@ -163,7 +237,7 @@ int LibRaw::open_buffer(void *buffer, size_t size)
   return ret;
 }
 
-int LibRaw::open_bayer(unsigned char *buffer, unsigned datalen,
+int LibRaw::open_bayer(const unsigned char *buffer, unsigned datalen,
                        ushort _raw_width, ushort _raw_height,
                        ushort _left_margin, ushort _top_margin,
                        ushort _right_margin, ushort _bottom_margin,
@@ -172,7 +246,7 @@ int LibRaw::open_bayer(unsigned char *buffer, unsigned datalen,
                        unsigned black_level)
 {
   // this stream will close on recycle()
-  if (!buffer || buffer == (void *)-1)
+  if (!buffer || buffer == (const void *)-1)
     return LIBRAW_IO_ERROR;
 
   LibRaw_buffer_datastream *stream;
@@ -408,7 +482,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       // Wipe out non-standard WB
       if (!imgdata.idata.dng_version &&
           (makeIs(LIBRAW_CAMERAMAKER_Sony) && !strcmp(imgdata.idata.normalized_model, "DSC-F828"))
-          && !(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_PROVIDE_NONSTANDARD_WB))
+          && !(imgdata.rawparams.options & LIBRAW_RAWOPTIONS_PROVIDE_NONSTANDARD_WB))
       {
           for (int i = 0; i < 4; i++) imgdata.color.cam_mul[i] = (i == 1);
           memset(imgdata.color.WB_Coeffs, 0, sizeof(imgdata.color.WB_Coeffs));
@@ -419,7 +493,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		  nikon_read_curve();
 
 	  if (load_raw == &LibRaw::lossless_jpeg_load_raw &&
-		  imgdata.makernotes.canon.RecordMode && makeIs(LIBRAW_CAMERAMAKER_Kodak) &&
+		  MN.canon.RecordMode && makeIs(LIBRAW_CAMERAMAKER_Kodak) &&
 		  /* Not normalized models here, it is intentional */
 		  (!strncasecmp(imgdata.idata.model, "EOS D2000", 9) || // if we want something different for B&W cameras,
 			  !strncasecmp(imgdata.idata.model, "EOS D6000", 9)))  // it's better to compare with CamIDs
@@ -478,8 +552,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	  // Ugly hack, replace with proper data/line size for different
 	  // cameras/format when available
 	  if (makeIs(LIBRAW_CAMERAMAKER_Nikon)
-		  && !strncasecmp(imgdata.idata.model, "Z", 1) &&
-		  NIKON_14BIT_SIZE(imgdata.sizes.raw_width, imgdata.sizes.raw_height) ==
+		  && (!strncasecmp(imgdata.idata.model, "Z", 1) || !strcasecmp(imgdata.idata.model,"D6"))
+		  &&  NIKON_14BIT_SIZE(imgdata.sizes.raw_width, imgdata.sizes.raw_height) ==
 		  libraw_internal_data.unpacker_data.data_size)
 	  {
 		  load_raw = &LibRaw::nikon_14bit_load_raw;
@@ -496,20 +570,19 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
 	  if (makeIs(LIBRAW_CAMERAMAKER_Canon))
 	  {
-#define imC imgdata.makernotes.canon
-		  if (imC.SensorLeftBorder != -1)
+		  if (MN.canon.SensorLeftBorder != -1)
 		  { // tag 0x00e0 SensorInfo was parsed
 			  if (isRIC.aspect != LIBRAW_IMAGE_ASPECT_UNKNOWN)
 			  { // tag 0x009a AspectInfo was parsed
-				  isRIC.cleft += imC.SensorLeftBorder;
-				  isRIC.ctop += imC.SensorTopBorder;
+				  isRIC.cleft += MN.canon.SensorLeftBorder;
+				  isRIC.ctop += MN.canon.SensorTopBorder;
 			  }
 			  else
 			  {
-				  isRIC.cleft = imC.SensorLeftBorder;
-				  isRIC.ctop = imC.SensorTopBorder;
-				  isRIC.cwidth = imC.SensorRightBorder - imC.SensorLeftBorder + 1;
-				  isRIC.cheight = imC.SensorBottomBorder - imC.SensorTopBorder + 1;
+				  isRIC.cleft = MN.canon.SensorLeftBorder;
+				  isRIC.ctop = MN.canon.SensorTopBorder;
+				  isRIC.cwidth = MN.canon.SensorRightBorder - MN.canon.SensorLeftBorder + 1;
+				  isRIC.cheight = MN.canon.SensorBottomBorder - MN.canon.SensorTopBorder + 1;
 			  }
 		  }
 		  else
@@ -522,7 +595,6 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 			  }
 		  }
 #undef isRIC
-#undef imC
 	  }
 
 	  if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
@@ -532,19 +604,17 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		  float ratio =
 			  float(imgdata.sizes.raw_height) / float(imgdata.sizes.raw_width);
 		  if ((ratio < 0.57 || ratio > 0.75) &&
-			  imgdata.makernotes.canon.SensorHeight > 1 &&
-			  imgdata.makernotes.canon.SensorWidth > 1)
+			  MN.canon.SensorHeight > 1 &&
+			  MN.canon.SensorWidth > 1)
 		  {
-			  imgdata.sizes.raw_width = imgdata.makernotes.canon.SensorWidth;
-			  imgdata.sizes.left_margin = imgdata.makernotes.canon.SensorLeftBorder;
+			  imgdata.sizes.raw_width = MN.canon.SensorWidth;
+			  imgdata.sizes.left_margin = MN.canon.SensorLeftBorder;
 			  imgdata.sizes.iwidth = imgdata.sizes.width =
-				  imgdata.makernotes.canon.SensorRightBorder -
-				  imgdata.makernotes.canon.SensorLeftBorder + 1;
-			  imgdata.sizes.raw_height = imgdata.makernotes.canon.SensorHeight;
-			  imgdata.sizes.top_margin = imgdata.makernotes.canon.SensorTopBorder;
+				  MN.canon.SensorRightBorder - MN.canon.SensorLeftBorder + 1;
+			  imgdata.sizes.raw_height = MN.canon.SensorHeight;
+			  imgdata.sizes.top_margin = MN.canon.SensorTopBorder;
 			  imgdata.sizes.iheight = imgdata.sizes.height =
-				  imgdata.makernotes.canon.SensorBottomBorder -
-				  imgdata.makernotes.canon.SensorTopBorder + 1;
+				  MN.canon.SensorBottomBorder - MN.canon.SensorTopBorder + 1;
 			  libraw_internal_data.unpacker_data.load_flags |=
 				  256; // reset width/height in canon_sraw_load_raw()
 			  imgdata.sizes.raw_pitch = 8 * imgdata.sizes.raw_width;
@@ -641,8 +711,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
 #ifdef USE_DNGSDK
 	  if (
-		  imgdata.params.use_dngsdk &&
-		  !(imgdata.params.raw_processing_options & (LIBRAW_PROCESSING_DNG_STAGE2 | LIBRAW_PROCESSING_DNG_STAGE3 | LIBRAW_PROCESSING_DNG_DISABLEWBADJUST)))
+		  imgdata.rawparams.use_dngsdk &&
+		  !(imgdata.rawparams.options & (LIBRAW_RAWOPTIONS_DNG_STAGE2 | LIBRAW_RAWOPTIONS_DNG_STAGE3 | LIBRAW_RAWOPTIONS_DNG_DISABLEWBADJUST)))
 #endif
 	  {
 		  // Fix DNG white balance if needed: observed only for Kalpanika X3F tools produced DNGs
@@ -677,22 +747,20 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	  }
 
     if (imgdata.idata.dng_version &&
-        !(imgdata.params.raw_processing_options &
-        LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP) &&
+        !(imgdata.rawparams.options & LIBRAW_RAWOPTIONS_USE_DNG_DEFAULT_CROP) &&
 		makeIs(LIBRAW_CAMERAMAKER_Panasonic)
           && !strcasecmp(imgdata.idata.normalized_model, "DMC-LX100"))
       imgdata.sizes.width = 4288;
 
     if (imgdata.idata.dng_version &&
-        !(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP) 
+        !(imgdata.rawparams.options & LIBRAW_RAWOPTIONS_USE_DNG_DEFAULT_CROP)
 	&& makeIs(LIBRAW_CAMERAMAKER_Leica)
         && !strcasecmp(imgdata.idata.normalized_model, "SL2"))
         	imgdata.sizes.height -= 16;
 
 	if (makeIs(LIBRAW_CAMERAMAKER_Sony) &&
         imgdata.idata.dng_version &&
-        !(imgdata.params.raw_processing_options &
-          LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP))
+        !(imgdata.rawparams.options & LIBRAW_RAWOPTIONS_USE_DNG_DEFAULT_CROP))
     {
       if (S.raw_width == 3984)
         S.width = 3925;
@@ -745,8 +813,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	if (makeIs(LIBRAW_CAMERAMAKER_Pentax) &&
         /*!strcasecmp(imgdata.idata.model,"K-3 II")  &&*/
             imgdata.idata.raw_count == 4 &&
-        (imgdata.params.raw_processing_options &
-         LIBRAW_PROCESSING_PENTAX_PS_ALLFRAMES))
+        (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_PENTAX_PS_ALLFRAMES))
     {
       imgdata.idata.raw_count = 1;
       imgdata.idata.filters = 0;
@@ -848,16 +915,16 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       imgdata.color.as_shot_wb_applied =
           LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_NIKON_SRAW;
     else if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
-             imgdata.makernotes.canon.multishot[0] >= 8 &&
-             imgdata.makernotes.canon.multishot[1] > 0)
+             MN.canon.multishot[0] >= 8 &&
+             MN.canon.multishot[1] > 0)
       imgdata.color.as_shot_wb_applied =
           LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_CANON;
     else if (makeIs(LIBRAW_CAMERAMAKER_Nikon) &&
-             imgdata.makernotes.nikon.ExposureMode == 1)
+             MN.nikon.ExposureMode == 1)
       imgdata.color.as_shot_wb_applied =
           LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_NIKON;
 	else if (makeIs(LIBRAW_CAMERAMAKER_Pentax) &&
-             ((imgdata.makernotes.pentax.MultiExposure & 0x01) == 1))
+             ((MN.pentax.MultiExposure & 0x01) == 1))
       imgdata.color.as_shot_wb_applied =
           LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_PENTAX;
     else
@@ -984,7 +1051,11 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
     SET_PROC_FLAG(LIBRAW_PROGRESS_IDENTIFY);
   }
-  catch (LibRaw_exceptions err)
+  catch (const std::bad_alloc&)
+  {
+      EXCEPTION_HANDLER(LIBRAW_EXCEPTION_ALLOC);
+  }
+  catch (const LibRaw_exceptions& err)
   {
     EXCEPTION_HANDLER(err);
   }

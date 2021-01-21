@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@ void LibRaw::GetNormalizedModel()
 
   int i, j;
   char *ps;
+  int try_xml = 0;
 
   static const struct
   {
@@ -40,7 +41,7 @@ void LibRaw::GetNormalizedModel()
       { CanonID_EOS_M100,          "EOS M100"},
       { CanonID_EOS_M6,            "EOS M6"},
       { CanonID_EOS_1D,            "EOS-1D"},
-      { CanonID_EOS_1DS,           "EOS-1DS"},
+      { CanonID_EOS_1Ds,           "EOS-1Ds"},
       { CanonID_EOS_10D,           "EOS 10D"},
       { CanonID_EOS_1D_Mark_III,   "EOS-1D Mark III"},
       { CanonID_EOS_300D,          "EOS 300D"}, // Digital Rebel / Kiss Digital
@@ -89,13 +90,16 @@ void LibRaw::GetNormalizedModel()
       { CanonID_EOS_6D_Mark_II,    "EOS 6D Mark II"},
       { CanonID_EOS_77D,           "EOS 77D"},     // 9000D
       { CanonID_EOS_200D,          "EOS 200D"},   // Rebel SL2 / Kiss X9
+      { CanonID_EOS_R5,            "EOS R5"},
       { CanonID_EOS_3000D,         "EOS 3000D"}, // Rebel T100 / 4000D
-      { CanonID_EOS_1D_X_Mark_III, "EOS-1D X Mark III"},
       { CanonID_EOS_R,             "EOS R"},
+      { CanonID_EOS_1D_X_Mark_III, "EOS-1D X Mark III"},
       { CanonID_EOS_1500D,         "EOS 1500D"}, // Rebel T7 / 2000D / Kiss X90
       { CanonID_EOS_RP,            "EOS RP"},
+      { CanonID_EOS_850D,          "EOS 850D"},  // EOS Rebel T8i / X10i
       { CanonID_EOS_250D,          "EOS 250D"}, // Rebel SL3 / 200D II / Kiss X10
       { CanonID_EOS_90D,           "EOS 90D"},
+      { CanonID_EOS_R6,            "EOS R6"},
     },
 #if 0
     olyque[] = {
@@ -171,6 +175,9 @@ void LibRaw::GetNormalizedModel()
       { OlyID_E_PL9,           "E-PL9"},
       { OlyID_E_M1X,           "E-M1X"},
       { OlyID_E_PL10,          "E-PL10"},
+      { OlyID_E_M10_Mark_IV,   "E-M10 Mark IV"},
+      { OlyID_E_M10_Mark_IV,   "E-M10MarkIV"},
+      { OlyID_E_M10_Mark_IV,   "E-M10_M4"},
       { OlyID_E_M5_Mark_III,   "E-M5 Mark III"},
       { OlyID_E_M5_Mark_III,   "E-M5MarkIII"},
       { OlyID_E_M5_Mark_III,   "E-M5_M3"},
@@ -347,6 +354,9 @@ void LibRaw::GetNormalizedModel()
       { SonyID_ILCE_9M2,       "ILCE-9M2"},
       { SonyID_ILCE_6600,      "ILCE-6600"},
       { SonyID_ILCE_6100,      "ILCE-6100"},
+      { SonyID_ZV_1,           "ZV-1"},
+      { SonyID_ILCE_7C,        "ILCE-7C"},
+      { SonyID_ILCE_7SM3,      "ILCE-7SM3"},
     };
 
   static const char *orig;
@@ -449,10 +459,11 @@ void LibRaw::GetNormalizedModel()
     "@E-20", "E-20,E-20N,E-20P", "E-20N", "E-20P",
     "@E-M10 Mark II", "E-M10MarkII", "E-M10_M2", "piX 5oo",
     "@E-M10 Mark III", "E-M10MarkIII", "E-M10_M3",
+    "@E-M10 Mark IV", "E-M10MarkIV", "E-M10_M4",
     "@E-M1 Mark II", "E-M1MarkII", "E-M1_M2",
     "@E-M1 Mark III", "E-M1MarkIII", "E-M1_M3",
-    "@E-M5 Mark III", "E-M5MarkIII", "E-M5_M3",
     "@E-M5 Mark II", "E-M5MarkII", "E-M5_M2",
+    "@E-M5 Mark III", "E-M5MarkIII", "E-M5_M3",
     "@SH-2", "SH-3",
     "@SP-310", "SP310",
     "@SP-320", "SP320",
@@ -500,6 +511,7 @@ void LibRaw::GetNormalizedModel()
     "@DC-ZS80", "DC-TZ95", "DC-TZ96", "DC-TZ97",
 
 // interchangeable lens
+    "@DC-G100",  "DC-G110",
     "@DC-G99",   "DC-G90",   "DC-G91",  "DC-G95",
     "@DMC-G7",   "DMC-G70",
     "@DMC-G8",   "DMC-G80",  "DMC-G81", "DMC-G85",
@@ -690,15 +702,37 @@ void LibRaw::GetNormalizedModel()
 
   if (makeIs(LIBRAW_CAMERAMAKER_Canon))
   {
-    if ((unique_id) && (unique_id != CanonID_EOS_D2000C) && (unique_id != CanonID_EOS_D6000C))
+    if (unique_id)
     {
-      for (i = 0; i < int(sizeof unique / sizeof *unique); i++)
+      if ((unique_id != CanonID_EOS_D2000C) &&
+          (unique_id != CanonID_EOS_D6000C))
       {
-        if (unique_id == unique[i].id)
+        for (i = 0; i < int(sizeof unique / sizeof *unique); i++)
         {
-          strcpy(model, unique[i].t_model);
-          strcpy(normalized_model, unique[i].t_model);
-          break;
+          if (unique_id == unique[i].id)
+          {
+            strcpy(model, unique[i].t_model);
+            strcpy(normalized_model, unique[i].t_model);
+            break;
+          }
+        }
+      }
+    }
+    else
+    {
+      if ((dng_version) &&
+          (strlen(imgdata.color.UniqueCameraModel) > 6) &&
+          strncmp(imgdata.color.UniqueCameraModel+6, "PowerShot", 9))
+      {
+        for (i = 0; i < int(sizeof unique / sizeof *unique); i++)
+        {
+          if (!strcmp(unique[i].t_model, imgdata.color.UniqueCameraModel+6))
+          {
+            ilm.CamID = unique_id = unique[i].id;
+            strcpy(normalized_model, unique[i].t_model);
+            try_xml = 1;
+            break;
+          }
         }
       }
     }
@@ -870,7 +904,7 @@ void LibRaw::GetNormalizedModel()
       }
     }
 
-    for (i = 0; 
+    for (i = 0;
     i < int(sizeof SamsungPentax_aliases / sizeof *SamsungPentax_aliases);
     i++) {
       if (SamsungPentax_aliases[i][0] == '@') {
@@ -1135,7 +1169,7 @@ void LibRaw::GetNormalizedModel()
         ilm.CameraMount = LIBRAW_MOUNT_Fuji_GF;
       }
       else if (!strncmp(normalized_model, "X-", 2) &&
-               strncmp(normalized_model, "X-S1", 4))
+               (strncmp(normalized_model, "X-S1", 4) || !strncmp(normalized_model, "X-S10", 5)))
       {
         ilm.CameraFormat = LIBRAW_FORMAT_APSC;
         ilm.CameraMount = LIBRAW_MOUNT_Fuji_X;
@@ -1159,8 +1193,9 @@ void LibRaw::GetNormalizedModel()
     }
     else if (makeIs(LIBRAW_CAMERAMAKER_Samsung))
     {
-      if ((normalized_model[0] == 'N') && (normalized_model[1] == 'X'))
-      { // DNG converters delete makernotes
+      if ((normalized_model[0] == 'N') &&
+          (normalized_model[1] == 'X')) // DNG converters delete makernotes
+      {
         if ((normalized_model[2] == 'F') && (normalized_model[3] == '1'))
         {
           ilm.CameraMount = LIBRAW_MOUNT_Samsung_NX_M;
@@ -1312,8 +1347,9 @@ void LibRaw::GetNormalizedModel()
   {
     if (makeIs(LIBRAW_CAMERAMAKER_Samsung))
     {
-      if ((imgdata.lens.Lens[0] == 'N') && (imgdata.lens.Lens[1] == 'X'))
-      { // same DNG problem
+      if ((imgdata.lens.Lens[0] == 'N') &&
+          (imgdata.lens.Lens[1] == 'X')) // same DNG problem
+      {
         if (imgdata.lens.Lens[2] == '-')
         {
           ilm.LensMount = LIBRAW_MOUNT_Samsung_NX_M;
@@ -1328,11 +1364,23 @@ void LibRaw::GetNormalizedModel()
     }
   }
 
-  if (ilm.LensID == LIBRAW_LENS_NOT_SET)
+  if ((ilm.LensID == LIBRAW_LENS_NOT_SET) &&
+      xmpdata &&
+      (strlen(xmpdata) > 9))
   {
-    if (makeIs(LIBRAW_CAMERAMAKER_Samsung))
+    if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
+        try_xml &&
+        (ps = strstr(xmpdata, "LensID=\"")))
     {
-      if ((ilm.LensMount == LIBRAW_MOUNT_Samsung_NX) && xmpdata && (strlen(xmpdata) > 9) &&
+      ilm.LensID = atoi(ps + 8);
+      if (ilm.LensID == 61182)
+      {
+        ilm.LensMount = ilm.CameraMount = LIBRAW_MOUNT_Canon_RF;
+      }
+    }
+    else if (makeIs(LIBRAW_CAMERAMAKER_Samsung))
+    {
+      if ((ilm.LensMount == LIBRAW_MOUNT_Samsung_NX) &&
           (ps = strstr(xmpdata, "LensID=\"(")))
       {
         ilm.LensID = atoi(ps + 9);

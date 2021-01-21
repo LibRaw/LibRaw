@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -78,14 +78,6 @@ char *LibRaw::strcasestr(char *haystack, const char *needle)
   return 0;
 }
 
-ushort LibRaw::sget2(uchar *s)
-{
-  if (order == 0x4949) /* "II" means little-endian */
-    return s[0] | s[1] << 8;
-  else /* "MM" means big-endian */
-    return s[0] << 8 | s[1];
-}
-
 void LibRaw::initdata()
 {
   tiff_flip = flip = filters = UINT_MAX; /* unknown */
@@ -120,10 +112,11 @@ void LibRaw::initdata()
   tile_width = tile_length = 0;
   metadata_blocks = 0;
   is_NikonTransfer = 0;
+  is_Olympus = 0;
+  OlympusDNG_SubDirOffsetValid = 0;
   is_Sony = 0;
   is_pana_raw = 0;
   maker_index = LIBRAW_CAMERAMAKER_Unknown;
-  is_4K_RAFdata = 0;
   FujiCropMode = 0;
   is_PentaxRicohMakernotes = 0;
   normalized_model[0] = 0;

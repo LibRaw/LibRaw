@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -179,9 +179,8 @@ void LibRaw::kodak_jpeg_load_raw()
 
   unsigned char *jpg_buf = (unsigned char *)malloc(data_size);
   merror(jpg_buf, "kodak_jpeg_load_raw");
-  unsigned char *pixel_buf = (unsigned char *)malloc(width * 3);
+  std::vector<uchar> pixel_buf(width * 3);
   jpeg_create_decompress(&cinfo);
-  merror(pixel_buf, "kodak_jpeg_load_raw");
 
   fread(jpg_buf, data_size, 1, ifp);
   swab((char *)jpg_buf, (char *)jpg_buf, data_size);
@@ -200,7 +199,7 @@ void LibRaw::kodak_jpeg_load_raw()
     }
 
     unsigned char *buf[1];
-    buf[0] = pixel_buf;
+    buf[0] = pixel_buf.data();
 
     while (cinfo.output_scanline < cinfo.output_height)
     {
@@ -222,13 +221,11 @@ void LibRaw::kodak_jpeg_load_raw()
     jpeg_finish_decompress(&cinfo);
     jpeg_destroy_decompress(&cinfo);
     free(jpg_buf);
-    free(pixel_buf);
     throw;
   }
   jpeg_finish_decompress(&cinfo);
   jpeg_destroy_decompress(&cinfo);
   free(jpg_buf);
-  free(pixel_buf);
   maximum = 0xff << 1;
 }
 #endif
@@ -255,38 +252,28 @@ void LibRaw::kodak_c330_load_raw()
 {
   if (!image)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
-  uchar *pixel;
   int row, col, y, cb, cr, rgb[3], c;
 
-  pixel = (uchar *)calloc(raw_width, 2 * sizeof *pixel);
-  merror(pixel, "kodak_c330_load_raw()");
-  try
+  std::vector<uchar> pixel(raw_width*2);
+
+  for (row = 0; row < height; row++)
   {
-    for (row = 0; row < height; row++)
-    {
       checkCancel();
-      if (fread(pixel, raw_width, 2, ifp) < 2)
-        derror();
+      if (fread(pixel.data(), raw_width, 2, ifp) < 2)
+          derror();
       if (load_flags && (row & 31) == 31)
-        fseek(ifp, raw_width * 32, SEEK_CUR);
+          fseek(ifp, raw_width * 32, SEEK_CUR);
       for (col = 0; col < width; col++)
       {
-        y = pixel[col * 2];
-        cb = pixel[(col * 2 & -4) | 1] - 128;
-        cr = pixel[(col * 2 & -4) | 3] - 128;
-        rgb[1] = y - ((cb + cr + 2) >> 2);
-        rgb[2] = rgb[1] + cb;
-        rgb[0] = rgb[1] + cr;
-        FORC3 image[row * width + col][c] = curve[LIM(rgb[c], 0, 255)];
+          y = pixel[col * 2];
+          cb = pixel[(col * 2 & -4) | 1] - 128;
+          cr = pixel[(col * 2 & -4) | 3] - 128;
+          rgb[1] = y - ((cb + cr + 2) >> 2);
+          rgb[2] = rgb[1] + cb;
+          rgb[0] = rgb[1] + cr;
+          FORC3 image[row * width + col][c] = curve[LIM(rgb[c], 0, 255)];
       }
-    }
   }
-  catch (...)
-  {
-    free(pixel);
-    throw;
-  }
-  free(pixel);
   maximum = curve[0xff];
 }
 
@@ -294,37 +281,26 @@ void LibRaw::kodak_c603_load_raw()
 {
   if (!image)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
-  uchar *pixel;
   int row, col, y, cb, cr, rgb[3], c;
 
-  pixel = (uchar *)calloc(raw_width, 3 * sizeof *pixel);
-  merror(pixel, "kodak_c603_load_raw()");
-  try
+  std::vector<uchar> pixel(raw_width * 3);
+  for (row = 0; row < height; row++)
   {
-    for (row = 0; row < height; row++)
-    {
       checkCancel();
       if (~row & 1)
-        if (fread(pixel, raw_width, 3, ifp) < 3)
-          derror();
+          if (fread(pixel.data(), raw_width, 3, ifp) < 3)
+              derror();
       for (col = 0; col < width; col++)
       {
-        y = pixel[width * 2 * (row & 1) + col];
-        cb = pixel[width + (col & -2)] - 128;
-        cr = pixel[width + (col & -2) + 1] - 128;
-        rgb[1] = y - ((cb + cr + 2) >> 2);
-        rgb[2] = rgb[1] + cb;
-        rgb[0] = rgb[1] + cr;
-        FORC3 image[row * width + col][c] = curve[LIM(rgb[c], 0, 255)];
+          y = pixel[width * 2 * (row & 1) + col];
+          cb = pixel[width + (col & -2)] - 128;
+          cr = pixel[width + (col & -2) + 1] - 128;
+          rgb[1] = y - ((cb + cr + 2) >> 2);
+          rgb[2] = rgb[1] + cb;
+          rgb[0] = rgb[1] + cr;
+          FORC3 image[row * width + col][c] = curve[LIM(rgb[c], 0, 255)];
       }
-    }
   }
-  catch (...)
-  {
-    free(pixel);
-    throw;
-  }
-  free(pixel);
   maximum = curve[0xff];
 }
 
@@ -336,14 +312,12 @@ void LibRaw::kodak_262_load_raw()
       {0, 3, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
   ushort *huff[2];
-  uchar *pixel;
   int *strip, ns, c, row, col, chess, pi = 0, pi1, pi2, pred, val;
 
   FORC(2) huff[c] = make_decoder(kodak_tree[c]);
   ns = (raw_height + 63) >> 5;
-  pixel = (uchar *)malloc(raw_width * 32 + ns * 4);
-  merror(pixel, "kodak_262_load_raw()");
-  strip = (int *)(pixel + raw_width * 32);
+  std::vector<uchar> pixel(raw_width * 32 + ns * 4);
+  strip = (int *)(pixel.data() + raw_width * 32);
   order = 0x4d4d;
   FORC(ns) strip[c] = get4();
   try
@@ -381,10 +355,9 @@ void LibRaw::kodak_262_load_raw()
   }
   catch (...)
   {
-    free(pixel);
-    throw;
+      FORC(2) free(huff[c]);
+      throw;
   }
-  free(pixel);
   FORC(2) free(huff[c]);
 }
 

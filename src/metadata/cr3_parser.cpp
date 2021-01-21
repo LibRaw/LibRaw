@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -111,7 +111,9 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
   */
   const char UIID_Canon[17] =
       "\x85\xc0\xb6\x87\x82\x0f\x11\xe0\x81\x11\xf4\xce\x46\x2b\x6a\x48";
-
+  const unsigned char UIID_CanonPreview[17] = "\xea\xf4\x2b\x5e\x1c\x98\x4b\x88\xb9\xfb\xb7\xdc\x40\x6e\x4d\x16";
+  const unsigned char UUID_XMP[17] = "\xbe\x7a\xcf\xcb\x97\xa9\x42\xe8\x9c\x71\x99\x94\x91\xe3\xaf\xac";
+  
   /*
   AtomType = 0 - unknown: "unk."
   AtomType = 1 - container atom: "cont"
@@ -216,6 +218,7 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
 
   char UIID[16];
   uchar CMP1[36];
+  uchar CDI1[60];
   char HandlerType[5], MediaFormatID[5];
   uint32_t relpos_inDir, relpos_inBox;
   unsigned szItem, Tag, lTag;
@@ -281,6 +284,31 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
       oAtomContent = oAtom + 8ULL;
       szAtomContent = szAtom - 8ULL;
     }
+
+	if (!strcmp(AtomNameStack, "uuid")) // Top level uuid
+	{
+		INT64 tt = ftell(ifp);
+		lHdr = 16ULL;
+		fread(UIID, 1, lHdr, ifp);
+		if (!memcmp(UIID, UUID_XMP, 16) && szAtom > 24 && szAtom < 1024000ULL)
+		{
+			xmpdata = (char *)malloc(xmplen = szAtom - 23);
+			fread(xmpdata, szAtom - 24, 1, ifp);
+			xmpdata[szAtom - 24] = 0;
+		}
+		else if (!memcmp(UIID, UIID_CanonPreview, 16) && szAtom > 48 && szAtom < 100ULL * 1024000ULL)
+		{
+			// read next 48 bytes, check for 'PRVW'
+			unsigned char xdata[32];
+			fread(xdata, 32, 1, ifp);	
+			if (!memcmp(xdata + 12, "PRVW", 4))
+			{
+				thumb_length = szAtom - 56;
+				thumb_offset = ftell(ifp);
+			}
+		}
+		fseek(ifp, tt, SEEK_SET);
+	}
 
     if (!strcmp(nmAtom, "trak"))
     {
@@ -416,6 +444,21 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
       if (!crxParseImageHeader(CMP1, nTrack))
         current_track.MediaType = 1;
     }
+
+    else if (!strcmp(AtomNameStack, "moovtrakmdiaminfstblstsdCRAWCDI1")) {
+      if (szAtomContent >= 60) {
+        fread(CDI1, 1, 60, ifp);
+        if (!strncmp((char *)CDI1+8, "IAD1", 4) && (sgetn(8, CDI1) == 0x38)) {
+          // sensor area at CDI1+12, 4 16-bit values
+          // Bayer pattern? - next 4 16-bit values
+          // image area, next 4 16-bit values
+          FORC4 imCanon.LeftOpticalBlack[c]  = sgetn(2, CDI1+12 + 3*4*2 +2*c);
+          FORC4 imCanon.UpperOpticalBlack[c] = sgetn(2, CDI1+12 + 4*4*2 +2*c);
+          FORC4 imCanon.ActiveArea[c]        = sgetn(2, CDI1+12 + 5*4*2 +2*c);
+        }
+      }
+    }
+
     else if (!strcmp(AtomNameStack, "moovtrakmdiaminfstblstsdCRAWJPEG"))
     {
       current_track.MediaType = 2;

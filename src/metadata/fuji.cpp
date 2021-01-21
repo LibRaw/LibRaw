@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -18,15 +18,97 @@
 
 #include "../../internal/dcraw_defs.h"
 
+int LibRaw::guess_RAFDataGeneration (uchar *RAFData_start) // returns offset to first valid width/height pair
+{
+
+/* RAFDataGeneration codes, values are 4 bytes, little endian
+
+   RAFData gen. 0: no RAFData
+     DBP for GX680 / DX-2000
+     E550, E900, (F500 / F505?) F550, F600 / F605, F700, F770 / F775, F800, F810, F900
+     HS10 HS11, HS20 / HS22, HS30 / HS33 / HS35, HS50
+     S1, SL1000, S100, S200 / S205, S20Pro, S2Pro, S3Pro, S5Pro
+     S5000, S5100 / S5500, S5200 / S5600, S6000 / S6500, S7000, S9000 / S9500, S9100 / S9600
+
+   RAFData gen. 1, offset to WH pair (offsetWH_inRAFData) = 0:
+   - number in bytes 0..1 is less than 10000
+   - contains WH pair, recommended image size WH pair, 16 bytes unknown, 2*13 values (for crops, scales?)
+     X100, X-Pro1, X-S1, X10, XF1
+
+   RAFData gen. 2, offset to WH pair = 4:
+   - bytes 0..1 contain a number greater than 10000; bytes 2..3 contain zero;
+     version is in bytes 0..1, possibly big endian
+     - contains WH pair, recommended image size WH pair, 16 bytes unknown, 2*13 values
+     X-E1
+
+   RAFData gen. 3, offset to WH pair = 4:
+   - bytes 0..1 contain zero; bytes 2..3 contain version;
+   - contains a table of 3+2*13 values; first 3 values look like WHW
+     X-A1, X-A2, X-E2, X-M1
+     X-T1, X-T10
+     X100S, X100T
+     X20, X30, X70, XQ1, XQ2
+
+   RAFData gen. 4, offset to WH pair = 8:
+   - same conditions as for RAFData gen. 3, but also adds WRTS in bytes 4..7
+   - contains a table of 3+2*13 values; first 3 values look like WHW
+   - H in WHW group has a different meaning if the shot is taken in crop 2 mode
+     GFX 100, GFX 50R, GFX 50S
+     X-E2S, X-E3, X-H1, X-S10
+     X-T2, X-T3, X-T4, X-T20, X-T30
+     X-Pro2, X-Pro3
+     X100F, X100V
+
+   RAFData gen. set to 4096:
+   - RAFData length is exactly 4096
+     X-A3, X-A5, X-A7, X-A10, X-A20
+     X-T100, X-T200,
+     XF10
+*/
+
+  int offsetWH_inRAFData=0; /* clang warns about not initialized value */
+  ushort b01  = sget2(RAFData_start);   // bytes 0..1
+  ushort b23  = sget2(RAFData_start+2); // bytes 2..3
+  int is_WRTS = (sget4(RAFData_start + 4) == 0x53545257); // STRW
+  if (b01 && !b23 && (b01<10000))
+  {
+    imFuji.RAFDataGeneration = 1;
+    offsetWH_inRAFData = 0;
+  }
+  else if ((b01>10000) && !b23)
+  {
+    imFuji.RAFDataGeneration = 2;
+    imFuji.RAFDataVersion = b01;
+    offsetWH_inRAFData = 4;
+  }
+  else if (!b01)
+  {
+    if (!is_WRTS)
+    {
+      imFuji.RAFDataGeneration = 3;
+      offsetWH_inRAFData = 4;
+    }
+    else
+    {
+      imFuji.RAFDataGeneration = 4;
+      offsetWH_inRAFData = 8;
+    }
+    imFuji.RAFDataVersion = b23;
+  }
+  return offsetWH_inRAFData;
+}
+
 void LibRaw::parseAdobeRAFMakernote()
 {
 
   uchar *PrivateMknBuf;
-  unsigned posPrivateMknBuf;
+  unsigned posPrivateMknBuf=0; /* clang warns about not inited value */
   unsigned PrivateMknLength;
   unsigned PrivateOrder;
+  unsigned ifd_start, ifd_len;
   unsigned PrivateEntries, PrivateTagID;
   unsigned PrivateTagBytes;
+  int FujiShotSelect;
   unsigned wb_section_offset = 0;
   int posWB;
   int c;
@@ -46,63 +128,99 @@ void LibRaw::parseAdobeRAFMakernote()
       sget2(posWB + 10) != 0xff && sget2(posWB) == sget2(posWB + 6) &&         \
       sget2(posWB) < sget2(posWB + 2) && sget2(posWB) < sget2(posWB + 4) &&    \
       sget2(posWB) < sget2(posWB + 8) && sget2(posWB) < sget2(posWB + 10)
-#define imfRAFDataVersion imFuji.RAFDataVersion
-#define imfRAFVersion imFuji.RAFVersion
+
+#define get_average_WB(wb_index)                                               \
+  FORC4 icWBC[wb_index][GRGB_2_RGBG(c)] =                                      \
+      sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));                      \
+  if ((PrivateTagBytes == 16) && average_WBData) {                             \
+    FORC4 icWBC[wb_index][GRGB_2_RGBG(c)] =                                    \
+             (icWBC[wb_index][GRGB_2_RGBG(c)] +                                \
+              sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1)+8)) /2;        \
+  }                                                                            \
+  if (use_WBcorr_coeffs) {                                                     \
+    icWBC[wb_index][0] *= wbR_corr;                                            \
+    icWBC[wb_index][2] *= wbB_corr;                                            \
+  }
 
   ushort use_WBcorr_coeffs = 0;
   double wbR_corr = 1.0;
   double wbB_corr = 1.0;
 
-  if (strstr(model, "S7000") ||
-      strstr(model, "S5000") ||
-      strstr(model, "F700")  ||
-      strstr(model, "S2Pro") ||
-      strstr(model, "S20Pro")) {
+  if (strstr(model, "S2Pro")
+      || strstr(model, "S20Pro")
+      || strstr(model, "F700")
+      || strstr(model, "S5000")
+      || strstr(model, "S7000")
+      ) {
     use_WBcorr_coeffs = 1;
     wbR_corr = 10.0 / 17.0 / 0.652941;
     wbB_corr = 2.0 /3.0 / (3.0 / 4.0 + 1.0 / 300.0);
+  } else if (strstr(model, "DBP") || strstr(model, "DX-2000")) {
+    use_WBcorr_coeffs = 1;
+    wbR_corr = 0.7632653061;
+    wbB_corr = 0.8591549296;
   }
+
+  FujiShotSelect = LIM(shot_select, 0, 1);
+  int average_WBData = 1;
 
   order = 0x4d4d;
   PrivateMknLength = get4();
 
   if ((PrivateMknLength > 4) && (PrivateMknLength < 10240000) &&
-      (PrivateMknBuf = (uchar *)malloc(PrivateMknLength + 1024)))
-  { // 1024b for safety
+      (PrivateMknBuf = (uchar *)malloc(PrivateMknLength + 1024))) // 1024b for safety
+  {
     fread(PrivateMknBuf, PrivateMknLength, 1, ifp);
-    PrivateOrder = sget2(PrivateMknBuf);
-    posPrivateMknBuf = sget4(PrivateMknBuf + 2) + 12;
-
     memcpy(imFuji.SerialSignature, PrivateMknBuf + 6, 0x0c);
     imFuji.SerialSignature[0x0c] = 0;
+    memcpy(imFuji.SensorID, imFuji.SerialSignature + 0x06, 0x04);
+    imFuji.SensorID[0x04] = 0;
+    c = 11;
+    while (isdigit(imFuji.SerialSignature[c]) && (c>0))
+      c--;
+    ilm.CamID = unique_id = (unsigned long long)atoi(imFuji.SerialSignature+c+1);
     memcpy(model, PrivateMknBuf + 0x12, 0x20);
     model[0x20] = 0;
-    memcpy(model2, PrivateMknBuf + 0x32, 4);
-    model2[4] = 0;
-    strcpy(imFuji.RAFVersion, model2);
-    PrivateEntries = sget2(PrivateMknBuf + posPrivateMknBuf);
+    memcpy(imFuji.RAFVersion, PrivateMknBuf + 0x32, 4);
+    imFuji.RAFVersion[4] = 0;
+
+    PrivateOrder = sget2(PrivateMknBuf);
+    unsigned s, l;
+    s = ifd_start = sget4(PrivateMknBuf +2)+6;
+    CHECKSPACE(ifd_start+4);
+    l = ifd_len = sget4(PrivateMknBuf +ifd_start);
+    if ((s+l) > PrivateMknLength) {
+      free(PrivateMknBuf);
+      return;
+    }
+    if (!sget4(PrivateMknBuf+ifd_start+ifd_len+4))
+      FujiShotSelect = 0;
+
+    if ((FujiShotSelect == 1) && (PrivateMknLength > ifd_len*2)) {
+      ifd_start += (ifd_len+4);
+      ifd_len = sget4(PrivateMknBuf +ifd_start);
+      if ((ifd_start+ifd_len) > PrivateMknLength) {
+        ifd_start = s;
+        ifd_len = l;
+        FujiShotSelect = 0;
+      }
+    } else FujiShotSelect = 0;
+
+    PrivateEntries = sget4(PrivateMknBuf +ifd_start+4);
     if ((PrivateEntries > 1000) ||
         ((PrivateOrder != 0x4d4d) && (PrivateOrder != 0x4949)))
     {
       free(PrivateMknBuf);
       return;
     }
-    posPrivateMknBuf += 2;
+    posPrivateMknBuf = (ifd_start+8);
+
     /*
      * because Adobe DNG converter strips or misplaces 0xfnnn tags,
-     * Auto WB for following cameras is missing for now
-     * - F550EXR
-     * - F600EXR
-     * - F770EXR
-     * - F800EXR
-     * - F900EXR
-     * - HS10
-     * - HS11
-     * - HS20EXR
-     * - HS30EXR
-     * - HS50EXR
-     * - S1
-     * - SL1000
+     * for now, Auto WB is missing for the following cameras:
+     * - F550EXR / F600EXR / F770EXR / F800EXR / F900EXR
+     * - HS10 / HS11 / HS20EXR / HS30EXR / HS33EXR / HS35EXR / HS50EXR
+     * - S1 / SL1000
      **/
     while (PrivateEntries--)
     {
@@ -115,125 +233,87 @@ void LibRaw::parseAdobeRAFMakernote()
 
       if (PrivateTagID == 0x2000)
       {
-        FORC4 icWBC[LIBRAW_WBI_Auto][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_Auto][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_Auto][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_Auto);
       }
       else if (PrivateTagID == 0x2100)
       {
-        FORC4 icWBC[LIBRAW_WBI_FineWeather][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_FineWeather][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_FineWeather][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_FineWeather);
       }
       else if (PrivateTagID == 0x2200)
       {
-        FORC4 icWBC[LIBRAW_WBI_Shade][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_Shade][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_Shade][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_Shade);
       }
       else if (PrivateTagID == 0x2300)
       {
-        FORC4 icWBC[LIBRAW_WBI_FL_D][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_FL_D][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_FL_D][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_FL_D);
       }
       else if (PrivateTagID == 0x2301)
       {
-        FORC4 icWBC[LIBRAW_WBI_FL_N][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_FL_N][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_FL_N][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_FL_N);
       }
       else if (PrivateTagID == 0x2302)
       {
-        FORC4 icWBC[LIBRAW_WBI_FL_WW][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_FL_WW][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_FL_WW][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_FL_W);
       }
       else if (PrivateTagID == 0x2310)
       {
-        FORC4 icWBC[LIBRAW_WBI_FL_L][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_FL_L][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_FL_L][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_FL_WW);
       }
       else if (PrivateTagID == 0x2311)
       {
-        FORC4 icWBC[LIBRAW_WBI_FL_W][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_FL_W][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_FL_W][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_FL_L);
       }
       else if (PrivateTagID == 0x2400)
       {
-        FORC4 icWBC[LIBRAW_WBI_Tungsten][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_Tungsten][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_Tungsten][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_Tungsten);
       }
       else if (PrivateTagID == 0x2410)
       {
-        FORC4 icWBC[LIBRAW_WBI_Flash][GRGB_2_RGBG(c)] =
-            sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-          icWBC[LIBRAW_WBI_Flash][0] *= wbR_corr;
-          icWBC[LIBRAW_WBI_Flash][2] *= wbB_corr;
-        }
+        get_average_WB(LIBRAW_WBI_Flash);
       }
       else if (PrivateTagID == 0x2f00)
       {
         int nWBs = MIN(sget4(PrivateMknBuf + posPrivateMknBuf), 6);
         posWB = posPrivateMknBuf + 4;
-        for (int wb_ind = 0; wb_ind < nWBs; wb_ind++)
-        {
-          FORC4 icWBC[LIBRAW_WBI_Custom1 + wb_ind][GRGB_2_RGBG(c)] =
-              sget2(PrivateMknBuf + posWB + (c << 1));
+        for (int wb_ind = LIBRAW_WBI_Custom1; wb_ind < LIBRAW_WBI_Custom1+nWBs; wb_ind++) {
+          FORC4 icWBC[wb_ind][GRGB_2_RGBG(c)] =
+                  sget2(PrivateMknBuf + posWB + (c << 1));
+          if ((PrivateTagBytes >= (4+16*nWBs)) && average_WBData) {
+            posWB += 8;
+            FORC4 icWBC[wb_ind][GRGB_2_RGBG(c)] =
+                    (icWBC[wb_ind][GRGB_2_RGBG(c)] +
+                     sget2(PrivateMknBuf + posWB + (c << 1))) /2;
+          }
           if (use_WBcorr_coeffs) {
-            icWBC[LIBRAW_WBI_Custom1 + wb_ind][0] *= wbR_corr;
-            icWBC[LIBRAW_WBI_Custom1 + wb_ind][2] *= wbB_corr;
+             icWBC[wb_ind][0] *= wbR_corr;
+             icWBC[wb_ind][2] *= wbB_corr;
           }
           posWB += 8;
         }
       }
       else if (PrivateTagID == 0x2ff0)
       {
-        FORC4 cam_mul[GRGB_2_RGBG(c)] =
+        get_average_WB(LIBRAW_WBI_AsShot);
+        FORC4 cam_mul[c] = icWBC[LIBRAW_WBI_AsShot][c];
+      }
+      else if ((PrivateTagID == 0x4000) &&
+               ((PrivateTagBytes == 8) || (PrivateTagBytes == 16)))
+      {
+        imFuji.BlackLevel[0] = PrivateTagBytes / 2;
+        FORC4 imFuji.BlackLevel[GRGB_2_RGBG(c)+1] =
             sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1));
-        if (use_WBcorr_coeffs) {
-         cam_mul[0] *= wbR_corr;
-         cam_mul[2] *= wbB_corr;
+        if (imFuji.BlackLevel[0] == 8) {
+          FORC4 imFuji.BlackLevel[GRGB_2_RGBG(c)+5] =
+              sget2(PrivateMknBuf + posPrivateMknBuf + (c << 1) + 8);
         }
       }
-
       else if (PrivateTagID == 0x9650)
       {
         CHECKSPACE(4);
         short a = (short)sget2(PrivateMknBuf + posPrivateMknBuf);
         float b = fMAX(1.0f, sget2(PrivateMknBuf + posPrivateMknBuf + 2));
         imFuji.ExpoMidPointShift = a / b;
+        imCommon.ExposureCalibrationShift += imFuji.ExpoMidPointShift;
       }
       else if ((PrivateTagID == 0xc000) && (PrivateTagBytes > 3) &&
                (PrivateTagBytes < 10240000))
@@ -241,9 +321,7 @@ void LibRaw::parseAdobeRAFMakernote()
         order = 0x4949;
         if (PrivateTagBytes != 4096) // not one of Fuji X-A3, X-A5, X-A7, X-A10, X-A20, X-T100, X-T200, XF10
         {
-          if (!sget2(PrivateMknBuf + posPrivateMknBuf))
-            imfRAFDataVersion = sget2(PrivateMknBuf + posPrivateMknBuf + 2);
-
+          guess_RAFDataGeneration (PrivateMknBuf + posPrivateMknBuf);
           for (posWB = 0; posWB < (int)PrivateTagBytes - 16; posWB++)
           {
             if ((!memcmp(PrivateMknBuf + posWB, "TSNERDTS", 8) &&
@@ -260,72 +338,79 @@ void LibRaw::parseAdobeRAFMakernote()
               break;
             }
           }
-          if (imfRAFDataVersion == 0x0146 || // X20
-              imfRAFDataVersion == 0x0149 || // X100S
-              imfRAFDataVersion == 0x0249)   // X100S
+          if (imFuji.RAFDataVersion == 0x4500) // X-E1, RAFData gen. 3
+          {
+            wb_section_offset = 0x13ac;        // (fj<<1) - 0x3c
+          }
+          else if (imFuji.RAFDataVersion == 0x0146 || // X20
+                   imFuji.RAFDataVersion == 0x0149 || // X100S
+                   imFuji.RAFDataVersion == 0x0249)   // X100S
           {
             wb_section_offset = 0x1410;
           }
-          else if (imfRAFDataVersion == 0x014d || // X-M1
-                   imfRAFDataVersion == 0x014e)   // X-A1, X-A2
+          else if (imFuji.RAFDataVersion == 0x014d || // X-M1
+                   imFuji.RAFDataVersion == 0x014e)   // X-A1, X-A2
           {
             wb_section_offset = 0x1474;
           }
-          else if (imfRAFDataVersion == 0x014f || // X-E2
-                   imfRAFDataVersion == 0x024f || // X-E2
-                   imfRAFDataVersion == 0x025d)   // X-H1
+          else if (imFuji.RAFDataVersion == 0x014f || // X-E2
+                   imFuji.RAFDataVersion == 0x024f || // X-E2
+                   imFuji.RAFDataVersion == 0x025d || // X-H1
+                   imFuji.RAFDataVersion == 0x035d)   // X-H1
           {
             wb_section_offset = 0x1480;
           }
-          else if (imfRAFDataVersion == 0x0150) // XQ1, XQ2
+          else if (imFuji.RAFDataVersion == 0x0150) // XQ1, XQ2
           {
             wb_section_offset = 0x1414;
           }
-          else if (imfRAFDataVersion == 0x0151 || // X-T1 w/diff. fws
-                   imfRAFDataVersion == 0x0251 || imfRAFDataVersion == 0x0351 ||
-                   imfRAFDataVersion == 0x0451 || imfRAFDataVersion == 0x0551)
+          else if (imFuji.RAFDataVersion == 0x0151 || // X-T1 w/diff. fws
+                   imFuji.RAFDataVersion == 0x0251 || imFuji.RAFDataVersion == 0x0351 ||
+                   imFuji.RAFDataVersion == 0x0451 || imFuji.RAFDataVersion == 0x0551)
           {
             wb_section_offset = 0x14b0;
           }
-          else if (imfRAFDataVersion == 0x0152 || // X30
-                   imfRAFDataVersion == 0x0153)   // X100T
+          else if (imFuji.RAFDataVersion == 0x0152 || // X30
+                   imFuji.RAFDataVersion == 0x0153)   // X100T
           {
             wb_section_offset = 0x1444;
           }
-          else if (imfRAFDataVersion == 0x0154) // X-T10
+          else if (imFuji.RAFDataVersion == 0x0154) // X-T10
           {
             wb_section_offset = 0x1824;
           }
-          else if (imfRAFDataVersion == 0x0155) // X70
+          else if (imFuji.RAFDataVersion == 0x0155) // X70
           {
             wb_section_offset = 0x17b4;
           }
-          else if (imfRAFDataVersion == 0x0255) // X-Pro2
+          else if (imFuji.RAFDataVersion == 0x0255 || // X-Pro2
+                   imFuji.RAFDataVersion == 0x0455)
           {
             wb_section_offset = 0x135c;
           }
-          else if (imfRAFDataVersion == 0x0258 || // X-T2
-                   imfRAFDataVersion == 0x025b)   // X-T20
+          else if (imFuji.RAFDataVersion == 0x0258 || // X-T2
+                   imFuji.RAFDataVersion == 0x025b)   // X-T20
           {
             wb_section_offset = 0x13dc;
           }
-          else if (imfRAFDataVersion == 0x0259) // X100F
+          else if (imFuji.RAFDataVersion == 0x0259) // X100F
           {
             wb_section_offset = 0x1370;
           }
-          else if (imfRAFDataVersion == 0x025a) // GFX 50S
+          else if (imFuji.RAFDataVersion == 0x025a || // GFX 50S
+                   imFuji.RAFDataVersion == 0x045a)
           {
             wb_section_offset = 0x1424;
-          }
-          else if (imfRAFDataVersion == 0x025c) // X-E3
+         }
+          else if (imFuji.RAFDataVersion == 0x025c) // X-E3
           {
             wb_section_offset = 0x141c;
           }
-          else if (imfRAFDataVersion == 0x025e) // X-T3
+          else if (imFuji.RAFDataVersion == 0x025e) // X-T3
           {
             wb_section_offset = 0x2014;
           }
-          else if (imfRAFDataVersion == 0x025f) // X-T30, GFX 50R, GFX 100
+          else if (imFuji.RAFDataVersion == 0x025f) // X-T30, GFX 50R, GFX 100
           {
             if (!strcmp(model, "X-T30")) {
               if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x20b8))
@@ -338,19 +423,26 @@ void LibRaw::parseAdobeRAFMakernote()
             else if (!strcmp(model, "GFX 100"))
               wb_section_offset = 0x20e4;
           }
-          else if (imfRAFDataVersion == 0x0260) // X-Pro3
+          else if (imFuji.RAFDataVersion == 0x0260) // X-Pro3
           {
             wb_section_offset = 0x20e8;
           }
-          else if (imfRAFDataVersion == 0x0261) // X100V
+          else if (imFuji.RAFDataVersion == 0x0261) // X100V
           {
             wb_section_offset = 0x2078;
           }
-          else if (imfRAFDataVersion == 0x0262) // X-T4
+          else if (imFuji.RAFDataVersion == 0x0262) // X-T4
           {
             wb_section_offset = 0x21c8;
           }
-
+          else if (imFuji.RAFDataVersion == 0x0264) // X-S10
+          {
+            wb_section_offset = 0x21de;
+          }
+          else if (imFuji.RAFDataVersion == 0x0355) // X-E2S
+          {
+            wb_section_offset = 0x1840;
+          }
             /* try for unknown RAF Data versions */
           else if (!strcmp(model, "X-Pro2"))
           {
@@ -362,32 +454,25 @@ void LibRaw::parseAdobeRAFMakernote()
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1370))
               wb_section_offset = 0x1370;
           }
-          else if (!strcmp(model, "X-T2"))
+          else if (!strcmp(model, "X-E1"))
+          {
+            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x13ac))
+              wb_section_offset = 0x13ac;
+          }
+          else if (!strcmp(model, "X-T2") ||
+                   !strcmp(model, "X-T20"))
           {
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x13dc))
               wb_section_offset = 0x13dc;
           }
-          else if (!strcmp(model, "X-T20"))
-          {
-            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x13dc))
-              wb_section_offset = 0x13dc;
-          }
-          else if (!strcmp(model, "X20"))
+          else if (!strcmp(model, "X20") ||
+                   !strcmp(model, "X100S"))
           {
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1410))
               wb_section_offset = 0x1410;
           }
-          else if (!strcmp(model, "X100S"))
-          {
-            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1410))
-              wb_section_offset = 0x1410;
-          }
-          else if (!strcmp(model, "XQ1"))
-          {
-            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1414))
-              wb_section_offset = 0x1414;
-          }
-          else if (!strcmp(model, "XQ2"))
+          else if (!strcmp(model, "XQ1") ||
+                   !strcmp(model, "XQ2"))
           {
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1414))
               wb_section_offset = 0x1414;
@@ -397,47 +482,27 @@ void LibRaw::parseAdobeRAFMakernote()
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x141c))
               wb_section_offset = 0x141c;
           }
-          else if (!strcmp(model, "GFX 50S"))
+          else if (!strcmp(model, "GFX 50S") ||
+                   !strcmp(model, "GFX 50R"))
           {
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1424))
               wb_section_offset = 0x1424;
           }
-          else if (!strcmp(model, "GFX 50R"))
-          {
-            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1424))
-              wb_section_offset = 0x1424;
-          }
-          else if (!strcmp(model, "X30"))
+          else if (!strcmp(model, "X30") ||
+                   !strcmp(model, "X100T"))
           {
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1444))
               wb_section_offset = 0x1444;
           }
-          else if (!strcmp(model, "X100T"))
-          {
-            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1444))
-              wb_section_offset = 0x1444;
-          }
-          else if (!strcmp(model, "X-M1"))
+          else if (!strcmp(model, "X-M1") ||
+                   !strcmp(model, "X-A1") ||
+                   !strcmp(model, "X-A2"))
           {
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1474))
               wb_section_offset = 0x1474;
           }
-          else if (!strcmp(model, "X-A1"))
-          {
-            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1474))
-              wb_section_offset = 0x1474;
-          }
-          else if (!strcmp(model, "X-A2"))
-          {
-            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1474))
-              wb_section_offset = 0x1474;
-          }
-          else if (!strcmp(model, "X-E2"))
-          {
-            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1480))
-              wb_section_offset = 0x1480;
-          }
-          else if (!strcmp(model, "X-H1"))
+          else if (!strcmp(model, "X-E2") ||
+                   !strcmp(model, "X-H1"))
           {
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1480))
               wb_section_offset = 0x1480;
@@ -492,60 +557,53 @@ void LibRaw::parseAdobeRAFMakernote()
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x21c8))
               wb_section_offset = 0x21c8;
           }
-
+          else if (!strcmp(model, "X-S10"))
+          {
+            if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x21de))
+              wb_section_offset = 0x21de;
+          }
             /* no RAF Data version for the models below */
           else if (!strcmp(model, "FinePix X100")) // X100 0 0x19f0 0x19e8
           {
-            if (!strcmp(imfRAFVersion, "0069"))
+            if (!strcmp(imFuji.RAFVersion, "0069"))
               wb_section_offset = 0x19e8;
-            else if (!strcmp(imfRAFVersion, "0100"))
-              wb_section_offset = 0x19f0;
-            else if (!strcmp(imfRAFVersion, "0110"))
+            else if (!strcmp(imFuji.RAFVersion, "0100") ||
+                     !strcmp(imFuji.RAFVersion, "0110"))
               wb_section_offset = 0x19f0;
             else if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x19e8))
               wb_section_offset = 0x19e8;
             else if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x19f0))
               wb_section_offset = 0x19f0;
           }
-          else if (!strcmp(model, "X-E1")) // X-E1 0 0x13ac
-          {
-            if (!strcmp(imfRAFVersion, "0101"))
-              wb_section_offset = 0x13ac;
-            else if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x13ac))
-              wb_section_offset = 0x13ac;
-          }
           else if (!strcmp(model, "X-Pro1")) // X-Pro1 0 0x13a4
           {
-            if (!strcmp(imfRAFVersion, "0100"))
-              wb_section_offset = 0x13a4;
-            else if (!strcmp(imfRAFVersion, "0101"))
-              wb_section_offset = 0x13a4;
-            else if (!strcmp(imfRAFVersion, "0204"))
+            if (!strcmp(imFuji.RAFVersion, "0100") ||
+                !strcmp(imFuji.RAFVersion, "0101") ||
+                !strcmp(imFuji.RAFVersion, "0204"))
               wb_section_offset = 0x13a4;
             else if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x13a4))
               wb_section_offset = 0x13a4;
           }
           else if (!strcmp(model, "XF1")) // XF1 0 0x138c
           {
-            if (!strcmp(imfRAFVersion, "0100"))
+            if (!strcmp(imFuji.RAFVersion, "0100"))
               wb_section_offset = 0x138c;
             else if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x138c))
               wb_section_offset = 0x138c;
           }
           else if (!strcmp(model, "X-S1")) // X-S1 0 0x1284
           {
-            if (!strcmp(imfRAFVersion, "0100"))
+            if (!strcmp(imFuji.RAFVersion, "0100"))
               wb_section_offset = 0x1284;
             else if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1284))
               wb_section_offset = 0x1284;
           }
           else if (!strcmp(model, "X10")) // X10 0 0x1280 0x12d4
           {
-            if (!strcmp(imfRAFVersion, "0100"))
+            if (!strcmp(imFuji.RAFVersion, "0100") ||
+                !strcmp(imFuji.RAFVersion, "0102"))
               wb_section_offset = 0x1280;
-            else if (!strcmp(imfRAFVersion, "0102"))
-              wb_section_offset = 0x1280;
-            else if (!strcmp(imfRAFVersion, "0103"))
+            else if (!strcmp(imFuji.RAFVersion, "0103"))
               wb_section_offset = 0x12d4;
             else if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x1280))
               wb_section_offset = 0x1280;
@@ -554,7 +612,7 @@ void LibRaw::parseAdobeRAFMakernote()
           }
           else if (!strcmp(model, "XF1")) // XF1 0 0x138c
           {
-            if (!strcmp(imfRAFVersion, "0100"))
+            if (!strcmp(imFuji.RAFVersion, "0100"))
               wb_section_offset = 0x138c;
             else if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x138c))
               wb_section_offset = 0x138c;
@@ -563,7 +621,7 @@ void LibRaw::parseAdobeRAFMakernote()
               isWB(PrivateMknBuf + posPrivateMknBuf + wb_section_offset))
           {
 
-            if (!imfRAFDataVersion)
+            if (!imFuji.RAFDataVersion)
             {
               posWB = posPrivateMknBuf + wb_section_offset - 6;
               icWBC[LIBRAW_WBI_Auto][1] =
@@ -587,9 +645,10 @@ void LibRaw::parseAdobeRAFMakernote()
                   sget2(PrivateMknBuf + posWB + 4);
             }
             int found = 0;
-            if ((imfRAFDataVersion == 0x0260) ||
-                (imfRAFDataVersion == 0x0261) ||
-                (imfRAFDataVersion == 0x0262))
+            if ((imFuji.RAFDataVersion == 0x0260) || // X-Pro3
+                (imFuji.RAFDataVersion == 0x0261) || // X100V
+                (imFuji.RAFDataVersion == 0x0262) || // X-T4
+                (imFuji.RAFDataVersion == 0x0264))   // X-S10
               posWB += 0x30;
             posWB += 0xc0;
             ushort Gval = sget2(PrivateMknBuf + posWB);
@@ -598,9 +657,10 @@ void LibRaw::parseAdobeRAFMakernote()
             {
               if (sget2(PrivateMknBuf + posEndCCTsection) != Gval)
               {
-                if ((imfRAFDataVersion == 0x0260) ||
-                    (imfRAFDataVersion == 0x0261) ||
-                    (imfRAFDataVersion == 0x0262))
+                if ((imFuji.RAFDataVersion == 0x0260) || // X-Pro3
+                    (imFuji.RAFDataVersion == 0x0261) || // X100V
+                    (imFuji.RAFDataVersion == 0x0262) || // X-T4
+                    (imFuji.RAFDataVersion == 0x0264))   // X-S10
                   wb_section_offset = posEndCCTsection - 34*3*2; // 34 records, 3 2-byte values in a record
                 else
                   wb_section_offset = posEndCCTsection - 31*3*2; // 31 records, 3 2-byte values in a record
@@ -626,7 +686,7 @@ void LibRaw::parseAdobeRAFMakernote()
           int wb[4];
           int nWB, tWB, pWB;
           int iCCT = 0;
-          is_4K_RAFdata = 1; /* X-A3, X-A5, X-A7, X-A10, X-A20, X-T100, X-T200, XF10 */
+          imFuji.RAFDataGeneration = 4096; // X-A3, X-A5, X-A7, X-A10, X-A20, X-T100, X-T200, XF10
           posWB = posPrivateMknBuf + 0x200;
           for (int wb_ind = 0; wb_ind < 42; wb_ind++)
           {
@@ -655,8 +715,7 @@ void LibRaw::parseAdobeRAFMakernote()
               {
                 if (Fuji_wb_list2[pWB] == nWB)
                 {
-                  FORC4 icWBC[Fuji_wb_list2[pWB - 1]][c] =
-                      wb[c];
+                  FORC4 icWBC[Fuji_wb_list2[pWB - 1]][c] = wb[c];
                   break;
                 }
               }
@@ -668,14 +727,14 @@ void LibRaw::parseAdobeRAFMakernote()
     }
     free(PrivateMknBuf);
   }
-#undef imfRAFVersion
-#undef imfRAFDataVersion
+#undef get_average_WB
 #undef CHECKSPACE
 }
+
 void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
                                  unsigned dng_writer)
 {
-  if ((dng_writer == nonDNG) && (tag == 0x0010))
+  if (tag == 0x0010)
   {
     char FujiSerial[sizeof(imgdata.shootinginfo.InternalBodySerial)];
     char *words[4];
@@ -745,7 +804,8 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
         for (int j = 0; ynum[j] && ynum[j + 1] && sscanf(ynum + j, "%2x", &c);
              j += 2)
           ystr[j / 2] = c;
-        ystr[ynum_len / 2 + 1] = 0;
+        ynum_len /= 2;
+        ystr[ynum_len + 1] = 0;
         strcpy(model2, ystr);
 
         if (i == 0)
@@ -755,13 +815,10 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
           if (nwords == 1)
           {
             snprintf(
-                tbuf, sizeof(tbuf), "%s %s %d:%s:%s",
-                words[0] +
-                    strnlen(words[0],
-                            sizeof(imgdata.shootinginfo.InternalBodySerial) -
-                                1) -
-                    12,
-                ystr, year, mm, dd);
+              tbuf, sizeof(tbuf), "%s %d:%s:%s %s",
+              ystr, year, mm, dd,
+              words[0] +
+                strnlen(words[0], sizeof(imgdata.shootinginfo.InternalBodySerial)-1)-12);
           }
           else
           {
@@ -814,6 +871,15 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
       imFuji.FocusPixel[0] = get2();
       imFuji.FocusPixel[1] = get2();
       break;
+    case 0x102b:
+      imFuji.PrioritySettings = get2();
+      break;
+    case 0x102d:
+      imFuji.FocusSettings = get4();
+      break;
+    case 0x102e:
+      imFuji.AF_C_Settings = get4();
+      break;
     case 0x1034:
       imFuji.ExrMode = get2();
       break;
@@ -827,7 +893,9 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
       imgdata.shootinginfo.DriveMode = get2();
       imFuji.DriveMode = imgdata.shootinginfo.DriveMode & 0xff;
       break;
-
+    case 0x1301:
+      imFuji.FocusWarning = get2();
+      break;
     case 0x1400:
       imFuji.DynamicRange = get2();
       break;
@@ -840,19 +908,6 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
     case 0x1403:
       imFuji.DevelopmentDynamicRange = get2();
       break;
-    case 0x140b:
-      imFuji.AutoDynamicRange = get2();
-      break;
-    case 0x1443:
-      imFuji.DRangePriority = get2();
-      break;
-    case 0x1444:
-      imFuji.DRangePriorityAuto = get2();
-      break;
-    case 0x1445:
-      imFuji.DRangePriorityFixed = get2();
-      break;
-
     case 0x1404:
       ilm.MinFocal = getreal(type);
       break;
@@ -865,6 +920,9 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
     case 0x1407:
       ilm.MaxAp4MaxFocal = getreal(type);
       break;
+    case 0x140b:
+      imFuji.AutoDynamicRange = get2();
+      break;
     case 0x1422:
       imFuji.ImageStabilization[0] = get2();
       imFuji.ImageStabilization[1] = get2();
@@ -875,14 +933,14 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
     case 0x1431:
       imFuji.Rating = get4();
       break;
-    case 0x3820:
-      imFuji.FrameRate = get2();
+    case 0x1443:
+      imFuji.DRangePriority = get2();
       break;
-    case 0x3821:
-      imFuji.FrameWidth = get2();
+    case 0x1444:
+      imFuji.DRangePriorityAuto = get2();
       break;
-    case 0x3822:
-      imFuji.FrameHeight = get2();
+    case 0x1445:
+      imFuji.DRangePriorityFixed = get2();
       break;
     }
   return;
@@ -891,10 +949,24 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
 void LibRaw::parse_fuji(int offset)
 {
   unsigned entries, tag, len, save, c;
+
+#define get_average_WB(wb_index)                                               \
+  FORC4 icWBC[wb_index][GRGB_2_RGBG(c)] = get2();                              \
+  if ((len == 16) && average_WBData) {                                         \
+    FORC4 icWBC[wb_index][GRGB_2_RGBG(c)] =                                    \
+             (icWBC[wb_index][GRGB_2_RGBG(c)] + get2())/2;                     \
+  }                                                                            \
+  if (use_WBcorr_coeffs) {                                                     \
+    icWBC[wb_index][0] *= wbR_corr;                                            \
+    icWBC[wb_index][2] *= wbB_corr;                                            \
+  }
+
   ushort raw_inset_present = 0;
   ushort use_WBcorr_coeffs = 0;
   double wbR_corr = 1.0;
   double wbB_corr = 1.0;
+  ilm.CamID = unique_id;
+  int average_WBData = 1;
 
   fseek(ifp, offset, SEEK_SET);
   entries = get4();
@@ -902,14 +974,19 @@ void LibRaw::parse_fuji(int offset)
     return;
   imgdata.process_warnings |= LIBRAW_WARN_PARSEFUJI_PROCESSED;
 
-  if (strstr(model, "S7000") ||
-      strstr(model, "S5000") ||
-      strstr(model, "F700")  ||
-      strstr(model, "S2Pro") ||
-      strstr(model, "S20Pro")) {
+  if (strstr(model, "S2Pro")
+      || strstr(model, "S20Pro")
+      || strstr(model, "F700")
+      || strstr(model, "S5000")
+      || strstr(model, "S7000")
+      ) {
     use_WBcorr_coeffs = 1;
     wbR_corr = 10.0 / 17.0 / 0.652941;
     wbB_corr = 2.0 /3.0 / (3.0 / 4.0 + 1.0 / 300.0);
+  } else if (strstr(model, "DBP") || strstr(model, "DX-2000")) {
+    use_WBcorr_coeffs = 1;
+    wbR_corr = 0.7632653061;
+    wbB_corr = 0.8591549296;
   }
 
   while (entries--)
@@ -917,43 +994,12 @@ void LibRaw::parse_fuji(int offset)
     tag = get2();
     len = get2();
     save = ftell(ifp);
-
     if (tag == 0x0100) // RawImageFullSize
     {
       raw_height = get2();
       raw_width = get2();
       raw_inset_present = 1;
     }
-    else if (tag == 0x0121) // RawImageSize
-    {
-      height = get2();
-      if ((width = get2()) == 4284)
-        width += 3;
-    }
-    else if (tag == 0x0130) // FujiLayout
-    {
-      fuji_layout = fgetc(ifp) >> 7;
-      fuji_width = !(fgetc(ifp) & 8);
-    }
-    else if (tag == 0x0131) // XTransLayout
-    {
-      filters = 9;
-      char *xtrans_abs_alias = &xtrans_abs[0][0];
-      FORC(36)
-      {
-        int q = fgetc(ifp);
-        xtrans_abs_alias[35 - c] = MAX(0, MIN(q, 2)); /* & 3;*/
-      }
-    }
-    else if (tag == 0x2ff0) // WB_GRGBLevels
-    {
-      FORC4 cam_mul[GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-       cam_mul[0] *= wbR_corr;
-       cam_mul[2] *= wbB_corr;
-      }
-    }
-
     else if ((tag == 0x0110) && raw_inset_present) // RawImageCropTopLeft
     {
       imgdata.sizes.raw_inset_crop.ctop = get2();
@@ -977,149 +1023,157 @@ void LibRaw::parse_fuji(int offset)
       else if (a * b == 1)
         imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_1to1;
     }
+    else if (tag == 0x0121) // RawImageSize
+    {
+      height = get2();
+      if ((width = get2()) == 4284)
+        width += 3;
+    }
+    else if (tag == 0x0130) // FujiLayout,
+    {
+      fuji_layout = fgetc(ifp) >> 7;
+      fuji_width  = !(fgetc(ifp) & 8);
+    }
+    else if (tag == 0x0131) // XTransLayout
+    {
+      filters = 9;
+      char *xtrans_abs_alias = &xtrans_abs[0][0];
+      FORC(36)
+      {
+        int q = fgetc(ifp);
+        xtrans_abs_alias[35 - c] = MAX(0, MIN(q, 2)); /* & 3;*/
+      }
+    }
+    else if (tag == 0x2ff0) // WB_GRGBLevels
+    {
+      get_average_WB(LIBRAW_WBI_AsShot);
+      FORC4 cam_mul[c] = icWBC[LIBRAW_WBI_AsShot][c];
+    }
+    else if ((tag == 0x4000) &&
+             ((len == 8) || (len == 16)))
+    {
+      imFuji.BlackLevel[0] = len / 2;
+      FORC4 imFuji.BlackLevel[GRGB_2_RGBG(c)+1] = get2();
+      if (imFuji.BlackLevel[0] == 8)
+        FORC4 imFuji.BlackLevel[GRGB_2_RGBG(c)+5] = get2();
+      if (imFuji.BlackLevel[0] == 4)
+        FORC4 cblack[c] = imFuji.BlackLevel[c+1];
+      else if (imFuji.BlackLevel[0] == 8)
+        FORC4 cblack[c] = (imFuji.BlackLevel[c+1]+imFuji.BlackLevel[c+5]) /2;
+    }
     else if (tag == 0x9200) // RelativeExposure
     {
-      int a = get4();
-      if ((a == 0x01000100) || (a <= 0))
+      int s1 = get2();
+      int s2 = get2();
+      if ((s1 == s2) || !s1)
         imFuji.BrightnessCompensation = 0.0f;
-      else if (a == 0x00100100)
+      else if ((s1*4) == s2)
+        imFuji.BrightnessCompensation = 2.0f;
+      else if ((s1*16) == s2)
         imFuji.BrightnessCompensation = 4.0f;
       else
-        imFuji.BrightnessCompensation =
-            24.0f - float(log((double)a) / log(2.0));
+        imFuji.BrightnessCompensation = log(double(s2)/double(s1))/log(2.0);
     }
     else if (tag == 0x9650) // RawExposureBias
     {
       short a = (short)get2();
       float b = fMAX(1.0f, get2());
       imFuji.ExpoMidPointShift = a / b;
+      imCommon.ExposureCalibrationShift += imFuji.ExpoMidPointShift;
+    }
+    else if (tag == 0x2000) // WB_GRGBLevelsAuto
+    {
+      get_average_WB(LIBRAW_WBI_Auto);
+    }
+    else if (tag == 0x2100) // WB_GRGBLevelsDaylight
+    {
+      get_average_WB(LIBRAW_WBI_FineWeather);
+    }
+    else if (tag == 0x2200) // WB_GRGBLevelsCloudy
+    {
+      get_average_WB(LIBRAW_WBI_Shade);
+    }
+    else if (tag == 0x2300) // WB_GRGBLevelsDaylightFluor
+    {
+      get_average_WB(LIBRAW_WBI_FL_D);
+    }
+    else if (tag == 0x2301) // WB_GRGBLevelsDayWhiteFluor
+    {
+      get_average_WB(LIBRAW_WBI_FL_N);
+    }
+    else if (tag == 0x2302) // WB_GRGBLevelsWhiteFluorescent
+    {
+      get_average_WB(LIBRAW_WBI_FL_W);
+    }
+    else if (tag == 0x2310) // WB_GRGBLevelsWarmWhiteFluor
+    {
+      get_average_WB(LIBRAW_WBI_FL_WW);
+    }
+    else if (tag == 0x2311) // WB_GRGBLevelsLivingRoomWarmWhiteFluor
+    {
+      get_average_WB(LIBRAW_WBI_FL_L);
+    }
+    else if (tag == 0x2400) // WB_GRGBLevelsTungsten
+    {
+      get_average_WB(LIBRAW_WBI_Tungsten);
+    }
+    else if (tag == 0x2410)
+    {
+      get_average_WB(LIBRAW_WBI_Flash);
     }
     else if (tag == 0x2f00) // WB_GRGBLevels
     {
       int nWBs = get4();
       nWBs = MIN(nWBs, 6);
-      for (int wb_ind = 0; wb_ind < nWBs; wb_ind++)
-      {
-        FORC4 icWBC[LIBRAW_WBI_Custom1 + wb_ind][GRGB_2_RGBG(c)] = get2();
+      for (int wb_ind = LIBRAW_WBI_Custom1; wb_ind < LIBRAW_WBI_Custom1+nWBs; wb_ind++) {
+        FORC4 icWBC[wb_ind][GRGB_2_RGBG(c)] = get2();
+        if ((len >= (4+16*nWBs)) && average_WBData) {
+          FORC4 icWBC[wb_ind][GRGB_2_RGBG(c)] =
+                  (icWBC[wb_ind][GRGB_2_RGBG(c)] +get2()) /2;
+        }
         if (use_WBcorr_coeffs) {
           icWBC[LIBRAW_WBI_Custom1 + wb_ind][0] *= wbR_corr;
           icWBC[LIBRAW_WBI_Custom1 + wb_ind][2] *= wbB_corr;
         }
-        fseek(ifp, 8, SEEK_CUR);
-      }
-    }
-    else if (tag == 0x2000) // WB_GRGBLevelsAuto
-    {
-      FORC4 icWBC[LIBRAW_WBI_Auto][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_Auto][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_Auto][2] *= wbB_corr;
-      }
-    }
-    else if (tag == 0x2100) // WB_GRGBLevelsDaylight
-    {
-      FORC4 icWBC[LIBRAW_WBI_FineWeather][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_FineWeather][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_FineWeather][2] *= wbB_corr;
-      }
-    }
-    else if (tag == 0x2200) // WB_GRGBLevelsCloudy
-    {
-      FORC4 icWBC[LIBRAW_WBI_Shade][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_Shade][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_Shade][2] *= wbB_corr;
-      }
-    }
-    else if (tag == 0x2300) // WB_GRGBLevelsDaylightFluor
-    {
-      FORC4 icWBC[LIBRAW_WBI_FL_D][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_FL_D][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_FL_D][2] *= wbB_corr;
-      }
-    }
-    else if (tag == 0x2301) // WB_GRGBLevelsDayWhiteFluor
-    {
-      FORC4 icWBC[LIBRAW_WBI_FL_N][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_FL_N][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_FL_N][2] *= wbB_corr;
-      }
-    }
-    else if (tag == 0x2302) // WB_GRGBLevelsWhiteFluorescent
-    {
-      FORC4 icWBC[LIBRAW_WBI_FL_WW][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_FL_WW][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_FL_WW][2] *= wbB_corr;
-      }
-    }
-    else if (tag == 0x2310) // WB_GRGBLevelsWarmWhiteFluor
-    {
-      FORC4 icWBC[LIBRAW_WBI_FL_L][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_FL_L][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_FL_L][2] *= wbB_corr;
-      }
-    }
-    else if (tag == 0x2311) // WB_GRGBLevelsLivingRoomWarmWhiteFluor
-    {
-      FORC4 icWBC[LIBRAW_WBI_FL_W][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_FL_W][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_FL_W][2] *= wbB_corr;
-      }
-    }
-    else if (tag == 0x2400) // WB_GRGBLevelsTungsten
-    {
-      FORC4 icWBC[LIBRAW_WBI_Tungsten][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_Tungsten][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_Tungsten][2] *= wbB_corr;
-      }
-    }
-    else if (tag == 0x2410)
-    {
-      FORC4 icWBC[LIBRAW_WBI_Flash][GRGB_2_RGBG(c)] = get2();
-      if (use_WBcorr_coeffs) {
-        icWBC[LIBRAW_WBI_Flash][0] *= wbR_corr;
-        icWBC[LIBRAW_WBI_Flash][2] *= wbB_corr;
       }
     }
 
     else if (tag == 0xc000) // RAFData
     {
-      c = order;
+      int offsetWH_inRAFData;
+      unsigned save_order = order;
       order = 0x4949;
       if (len > 20000)
       {
-        tag = get4();
-        if (tag > 10000)
-        {
-          imFuji.RAFDataVersion = tag >> 16;
-          if (!imFuji.RAFDataVersion)
-            imFuji.RAFDataVersion = tag;
-          tag = get4();
+        uchar RAFDataHeader[16];
+        libraw_internal_data.unpacker_data.posRAFData = save;
+        libraw_internal_data.unpacker_data.lenRAFData = (len >> 1);
+        fread(RAFDataHeader, sizeof RAFDataHeader, 1, ifp);
+        offsetWH_inRAFData = guess_RAFDataGeneration(RAFDataHeader);
+        fseek(ifp, offsetWH_inRAFData-(sizeof RAFDataHeader), SEEK_CUR);
+        for (int i=0;
+             i<((sizeof imFuji.RAFData_ImageSizeTable) / (sizeof imFuji.RAFData_ImageSizeTable[0]));
+             i++) {
+          imFuji.RAFData_ImageSizeTable[i] = get4();
         }
-        if (tag > 10000)
-        { // if it is >1000 it normally contains 0x53545257, "WRTS"
-          tag = get4();
-        }
-        width = tag;
-        height = get4();
-        if (width > raw_width)
-          width = raw_width;
-        if (height > raw_height)
-          height = raw_height;
+
+//         if ((width > raw_width)
+//             || (raw_inset_present && (width < imgdata.sizes.raw_inset_crop.cwidth))
+//         )
+//           width = raw_width;
+//         if ((height > raw_height)
+//             || (raw_inset_present && (height < imgdata.sizes.raw_inset_crop.cheight))
+//         )
+//           height = raw_height;
+//
+
       }
-      if (len == 4096) // X-A3, X-A5, X-A7, X-A10, X-A20, X-T100, X-T200, XF10
-      {                // Ill.A aligned to CCT 2850
+      else if (len == 4096) // X-A3, X-A5, X-A7, X-A10, X-A20, X-T100, X-T200, XF10
+      {                     // Ill.A aligned to CCT 2850
         int wb[4];
-        int nWB, tWB, pWB;
+        int nWB, tWB;
         int iCCT = 0;
-        is_4K_RAFdata = 1;
+        imFuji.RAFDataGeneration = 4096;
         fseek(ifp, save + 0x200, SEEK_SET);
         for (int wb_ind = 0; wb_ind < 42; wb_ind++)
         {
@@ -1137,27 +1191,26 @@ void LibRaw::parse_fuji(int offset)
           }
           if (nWB != 70)
           {
-            for (pWB = 1; pWB < Fuji_wb_list2.size(); pWB += 2)
+            for (int pWB = 1; pWB < Fuji_wb_list2.size(); pWB += 2)
             {
               if (Fuji_wb_list2[pWB] == nWB)
               {
-                FORC4 icWBC[Fuji_wb_list2[pWB - 1]][c] =
-                    wb[c];
+                FORC4 icWBC[Fuji_wb_list2[pWB - 1]][c] = wb[c];
                 break;
               }
             }
           }
         }
       }
-      else
-      {
-        libraw_internal_data.unpacker_data.posRAFData = save;
-        libraw_internal_data.unpacker_data.lenRAFData = (len >> 1);
-      }
-      order = c;
+      order = save_order;
     }
     fseek(ifp, save + len, SEEK_SET);
   }
-  height <<= fuji_layout;
-  width >>= fuji_layout;
+
+  if (!imFuji.RAFDataGeneration) {
+    height <<= fuji_layout;
+    width >>= fuji_layout;
+  }
+#undef get_average_WB
 }
+

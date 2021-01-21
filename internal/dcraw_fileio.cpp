@@ -1,5 +1,5 @@
 /*
-  Copyright 2008-2020 LibRaw LLC (info@libraw.org)
+  Copyright 2008-2021 LibRaw LLC (info@libraw.org)
 
  * This file is provided for compatibility w/ old build scripts/tools:
  * It includes multiple separate files that should be built separately

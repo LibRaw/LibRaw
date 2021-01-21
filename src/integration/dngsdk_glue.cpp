@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -82,6 +82,13 @@ int LibRaw::valid_for_dngsdk()
 #else
   if (!imgdata.idata.dng_version)
     return 0;
+
+  if (!strcasecmp(imgdata.idata.make, "Blackmagic") 
+      && (libraw_internal_data.unpacker_data.tiff_compress == 7)
+      && (libraw_internal_data.unpacker_data.tiff_bps > 8)
+      )
+      return 0;
+
   if (libraw_internal_data.unpacker_data.tiff_compress == 34892
 	  && libraw_internal_data.unpacker_data.tiff_bps == 8
 	  && libraw_internal_data.unpacker_data.tiff_samples == 3
@@ -112,31 +119,28 @@ int LibRaw::valid_for_dngsdk()
   if (load_raw == &LibRaw::vc5_dng_load_raw_placeholder) // regardless of flags or use_dngsdk value!
       return 1;
 #endif
-  if (!imgdata.params.use_dngsdk)
+  if (!imgdata.rawparams.use_dngsdk)
     return 0;
   if (load_raw == &LibRaw::lossy_dng_load_raw) // WHY??
     return 0;
-  if (load_raw ==
-      &LibRaw::float_dng_load_raw_placeholder) // regardless of flags!
+  if (is_floating_point() && (imgdata.rawparams.use_dngsdk & LIBRAW_DNG_FLOAT))
     return 1;
-  if (is_floating_point() && (imgdata.params.use_dngsdk & LIBRAW_DNG_FLOAT))
-    return 1;
-  if (!imgdata.idata.filters && (imgdata.params.use_dngsdk & LIBRAW_DNG_LINEAR))
+  if (!imgdata.idata.filters && (imgdata.rawparams.use_dngsdk & LIBRAW_DNG_LINEAR))
     return 1;
   if (libraw_internal_data.unpacker_data.tiff_bps == 8 &&
-      (imgdata.params.use_dngsdk & LIBRAW_DNG_8BIT))
+      (imgdata.rawparams.use_dngsdk & LIBRAW_DNG_8BIT))
     return 1;
   if (libraw_internal_data.unpacker_data.tiff_compress == 8 &&
-      (imgdata.params.use_dngsdk & LIBRAW_DNG_DEFLATE))
+      (imgdata.rawparams.use_dngsdk & LIBRAW_DNG_DEFLATE))
     return 1;
   if (libraw_internal_data.unpacker_data.tiff_samples == 2)
     return 0; // Always deny 2-samples (old fuji superccd)
   if (imgdata.idata.filters == 9 &&
-      (imgdata.params.use_dngsdk & LIBRAW_DNG_XTRANS))
+      (imgdata.rawparams.use_dngsdk & LIBRAW_DNG_XTRANS))
     return 1;
   if (is_fuji_rotated())
     return 0; // refuse
-  if (imgdata.params.use_dngsdk & LIBRAW_DNG_OTHER)
+  if (imgdata.rawparams.use_dngsdk & LIBRAW_DNG_OTHER)
     return 1;
   return 0;
 #endif
@@ -185,7 +189,7 @@ int LibRaw::try_dngsdk()
         && libraw_internal_data.unpacker_data.tiff_bps == 8
         && libraw_internal_data.unpacker_data.tiff_samples == 3
         && load_raw == &LibRaw::lossy_dng_load_raw) || 
-		(imgdata.params.raw_processing_options & (LIBRAW_PROCESSING_DNG_STAGE2| LIBRAW_PROCESSING_DNG_STAGE3)))
+		(imgdata.rawparams.options & (LIBRAW_RAWOPTIONS_DNG_STAGE2| LIBRAW_RAWOPTIONS_DNG_STAGE3)))
         && ifdindex >= 0)
     {
         if (info.fMainIndex != ifdindex)
@@ -194,7 +198,7 @@ int LibRaw::try_dngsdk()
         negative->ReadStage1Image(*host, stream, info);
         negative->BuildStage2Image(*host);
 		imgdata.process_warnings |= LIBRAW_WARN_DNG_STAGE2_APPLIED;
-		if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNG_STAGE3)
+		if (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_DNG_STAGE3)
 		{
 			negative->BuildStage3Image(*host);
 			stage2.Reset((dng_simple_image*)negative->Stage3Image());
@@ -229,7 +233,7 @@ int LibRaw::try_dngsdk()
     if (stage2->Bounds().W() != S.raw_width ||
         stage2->Bounds().H() != S.raw_height)
     {
-		if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNG_ALLOWSIZECHANGE)
+		if (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_DNG_ALLOWSIZECHANGE)
 		{
 			S.raw_width = S.width = stage2->Bounds().W();
 			S.left_margin = 0;
@@ -293,7 +297,7 @@ int LibRaw::try_dngsdk()
     else
     {
       // Alloc
-      if ((imgdata.params.raw_processing_options & LIBRAW_PROCESSING_DNGSDK_ZEROCOPY) && !stage23used)
+      if ((imgdata.rawparams.options & LIBRAW_RAWOPTIONS_DNGSDK_ZEROCOPY) && !stage23used)
       {
         zerocopy = true;
       }
@@ -376,7 +380,8 @@ int LibRaw::try_dngsdk()
   {
     return LIBRAW_UNSPECIFIED_ERROR;
   }
-  return imgdata.rawdata.raw_alloc ? LIBRAW_SUCCESS : LIBRAW_UNSPECIFIED_ERROR;
+  
+  return (dngnegative || imgdata.rawdata.raw_alloc) ? LIBRAW_SUCCESS : LIBRAW_UNSPECIFIED_ERROR;
 #else
   return LIBRAW_UNSPECIFIED_ERROR;
 #endif

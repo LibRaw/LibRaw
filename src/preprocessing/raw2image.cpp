@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -196,7 +196,11 @@ int LibRaw::raw2image(void)
         LIBRAW_PROGRESS_SIZE_ADJUST | LIBRAW_PROGRESS_LOAD_RAW;
     return 0;
   }
-  catch (LibRaw_exceptions err)
+  catch (const std::bad_alloc&)
+  {
+      EXCEPTION_HANDLER(LIBRAW_EXCEPTION_ALLOC);
+  }
+  catch (const LibRaw_exceptions& err)
   {
     EXCEPTION_HANDLER(err);
   }
@@ -553,7 +557,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
         LIBRAW_PROGRESS_SIZE_ADJUST | LIBRAW_PROGRESS_LOAD_RAW;
     return 0;
   }
-  catch (LibRaw_exceptions err)
+  catch (const LibRaw_exceptions& err)
   {
     EXCEPTION_HANDLER(err);
   }

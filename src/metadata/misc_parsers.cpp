@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -92,6 +92,7 @@ int LibRaw::canon_s2is()
   return 0;
 }
 
+#ifdef LIBRAW_OLD_VIDEO_SUPPORT
 void LibRaw::parse_redcine()
 {
   unsigned i, len, rdvo;
@@ -123,6 +124,7 @@ void LibRaw::parse_redcine()
     data_offset = get4();
   }
 }
+#endif
 
 void LibRaw::parse_cine()
 {
@@ -304,6 +306,7 @@ void LibRaw::parse_rollei()
     line[0] = 0;
     if (!fgets(line, 128, ifp))
       break;
+    line[127] = 0;
     if(!line[0]) break; // zero-length
     if ((val = strchr(line, '=')))
       *val++ = 0;

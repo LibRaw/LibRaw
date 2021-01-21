@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -247,7 +247,12 @@ int LibRaw::dcraw_process(void)
 
     return 0;
   }
-  catch (LibRaw_exceptions err)
+  catch (const std::bad_alloc&)
+  {
+      recycle();
+      return LIBRAW_UNSUFFICIENT_MEMORY;
+  }
+  catch (const LibRaw_exceptions& err)
   {
     EXCEPTION_HANDLER(err);
   }

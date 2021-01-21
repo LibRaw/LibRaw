@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -118,7 +118,7 @@ void LibRaw::scale_colors()
   if (use_auto_wb || (use_camera_wb && 
       (cam_mul[0] < -0.5  // LibRaw 0.19 and older: fallback to auto only if cam_mul[0] is set to -1
           || (cam_mul[0] <= 0.00001f  // New default: fallback to auto if no cam_mul parsed from metadata
-              && !(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_CAMERAWB_FALLBACK_TO_DAYLIGHT))
+              && !(imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CAMERAWB_FALLBACK_TO_DAYLIGHT))
           )))
   {
     memset(dsum, 0, sizeof dsum);

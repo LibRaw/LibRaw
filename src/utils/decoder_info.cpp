@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -40,10 +40,6 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "android_loose_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC;
-  }
-  else if (load_raw == &LibRaw::float_dng_load_raw_placeholder)
-  {
-    d_info->decoder_name = "float_dng_load_raw_placeholder()";
   }
   else if (load_raw == &LibRaw::vc5_dng_load_raw_placeholder)
   {
@@ -184,11 +180,13 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
     d_info->decoder_name = "nokia_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC;
   }
+#ifdef LIBRAW_OLD_VIDEO_SUPPORT
   else if (load_raw == &LibRaw::canon_rmf_load_raw)
   {
     // UNTESTED
     d_info->decoder_name = "canon_rmf_load_raw()";
   }
+#endif
   else if (load_raw == &LibRaw::panasonic_load_raw)
   {
     d_info->decoder_name = "panasonic_load_raw()";
@@ -320,11 +318,13 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
     d_info->decoder_name = "smal_v9_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC;
   }
+#ifdef LIBRAW_OLD_VIDEO_SUPPORT
   else if (load_raw == &LibRaw::redcine_load_raw)
   {
     d_info->decoder_name = "redcine_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_HASCURVE;
   }
+#endif
   else if (load_raw == &LibRaw::x3f_load_raw)
   {
     d_info->decoder_name = "x3f_load_raw()";
@@ -339,6 +339,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   else if (load_raw == &LibRaw::deflate_dng_load_raw)
   {
     d_info->decoder_name = "deflate_dng_load_raw()";
+    d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC;
+  }
+  else if (load_raw == &LibRaw::uncompressed_fp_dng_load_raw)
+  {
+    d_info->decoder_name = "uncompressed_fp_dng_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_OWNALLOC;
   }
   else if (load_raw == &LibRaw::nikon_load_striped_packed_raw)

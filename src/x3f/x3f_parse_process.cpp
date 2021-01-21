@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -170,7 +170,7 @@ void LibRaw::parse_x3f()
         if (!strcmp(name, "FLEQ35MM"))
           imgdata.lens.makernotes.FocalLengthIn35mmFormat = atof(value);
         if (!strcmp(name, "IMAGERTEMP"))
-          imgdata.makernotes.common.SensorTemperature = atof(value);
+          MN.common.SensorTemperature = atof(value);
         if (!strcmp(name, "LENSARANGE"))
         {
           char *sp;
@@ -367,14 +367,6 @@ void LibRaw::x3f_thumb_loader()
   }
 }
 
-static inline uint32_t _clampbits(int x, uint32_t n)
-{
-  uint32_t _y_temp;
-  if ((_y_temp = x >> n))
-    x = ~_y_temp >> (32 - n);
-  return x;
-}
-
 void LibRaw::x3f_dpq_interpolate_rg()
 {
   int w = imgdata.sizes.raw_width / 2;
@@ -387,10 +379,8 @@ void LibRaw::x3f_dpq_interpolate_rg()
     {
       uint16_t *row0 =
           &image[imgdata.sizes.raw_width * 3 * (y * 2) + color]; // dst[1]
-      uint16_t row0_3 = row0[3];
       uint16_t *row1 =
           &image[imgdata.sizes.raw_width * 3 * (y * 2 + 1) + color]; // dst1[1]
-      uint16_t row1_3 = row1[3];
       for (int x = 2; x < (w - 2); x++)
       {
         row1[0] = row1[3] = row0[3] = row0[0];
@@ -412,9 +402,6 @@ void LibRaw::x3f_dpq_interpolate_rg()
 void LibRaw::x3f_dpq_interpolate_af(int xstep, int ystep, int scale)
 {
   unsigned short *image = (ushort *)imgdata.rawdata.color3_image;
-  unsigned int rowpitch =
-      imgdata.rawdata.sizes.raw_pitch / 2; // in 16-bit words
-                                           // Interpolate single pixel
   for (int y = 0;
        y < imgdata.rawdata.sizes.height + imgdata.rawdata.sizes.top_margin;
        y += ystep)
@@ -503,9 +490,6 @@ void LibRaw::x3f_dpq_interpolate_af_sd(int xstart, int ystart, int xend,
                                        int scale)
 {
   unsigned short *image = (ushort *)imgdata.rawdata.color3_image;
-  unsigned int rowpitch =
-      imgdata.rawdata.sizes.raw_pitch / 2; // in 16-bit words
-  // Interpolate single pixel
   for (int y = ystart; y <= yend && y < imgdata.rawdata.sizes.height +
                                            imgdata.rawdata.sizes.top_margin;
        y += ystep)
@@ -660,8 +644,7 @@ void LibRaw::x3f_load_raw()
 
 #if 1
     if (TRU && Q &&
-        (imgdata.params.raw_processing_options &
-         LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF))
+        !(imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_NODP2Q_INTERPOLATEAF))
     {
       if (imgdata.sizes.raw_width == 5888 &&
           imgdata.sizes.raw_height == 3672) // dpN Quattro normal
@@ -712,8 +695,7 @@ void LibRaw::x3f_load_raw()
     }
 #endif
     if (TRU && Q && Q->quattro_layout &&
-        (imgdata.params.raw_processing_options &
-         LIBRAW_PROCESSING_DP2Q_INTERPOLATERG))
+        !(imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_NODP2Q_INTERPOLATERG))
       x3f_dpq_interpolate_rg();
   }
   else
@@ -723,4 +705,3 @@ end:
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
 }
 #endif
-

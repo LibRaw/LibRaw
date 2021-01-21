@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -22,7 +22,7 @@ void LibRaw::sony_arq_load_raw()
   libraw_internal_data.internal_data.input->seek(
       -2, SEEK_CUR); // avoid wrong eof error
 
-  if(imgdata.params.raw_processing_options & LIBRAW_PROCESSING_ARQ_SKIP_CHANNEL_SWAP)
+  if(imgdata.rawparams.options & LIBRAW_RAWOPTIONS_ARQ_SKIP_CHANNEL_SWAP)
     return;
 
   for (row = 0; row < imgdata.sizes.raw_height; row++)
@@ -65,11 +65,11 @@ void LibRaw::pentax_4shot_load_raw()
   for (int i = 0; i < 4; i++)
   {
     int move_row, move_col;
-    if (imgdata.params.p4shot_order[i] >= '0' &&
-        imgdata.params.p4shot_order[i] <= '3')
+    if (imgdata.rawparams.p4shot_order[i] >= '0' &&
+        imgdata.rawparams.p4shot_order[i] <= '3')
     {
-      move_row = ((imgdata.params.p4shot_order[i] - '0') & 2) ? 1 : 0;
-      move_col = ((imgdata.params.p4shot_order[i] - '0') & 1) ? 1 : 0;
+      move_row = ((imgdata.rawparams.p4shot_order[i] - '0') & 2) ? 1 : 0;
+      move_col = ((imgdata.rawparams.p4shot_order[i] - '0') & 1) ? 1 : 0;
     }
     else
     {
@@ -535,8 +535,7 @@ void LibRaw::nikon_load_sraw()
   }
   free(rd);
   C.maximum = 0xfff; // 12 bit?
-  if (imgdata.params.raw_processing_options &
-      LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE)
+  if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SRAW_NO_INTERPOLATE)
   {
     return; // no CbCr interpolation
   }
@@ -562,7 +561,7 @@ void LibRaw::nikon_load_sraw()
                            2);
     }
   }
-  if (imgdata.params.raw_processing_options & LIBRAW_PROCESSING_SRAW_NO_RGB)
+  if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SRAW_NO_RGB)
     return;
 
   for (row = 0; row < imgdata.sizes.raw_height; row++)

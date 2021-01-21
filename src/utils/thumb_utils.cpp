@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -171,8 +171,7 @@ void LibRaw::kodak_thumb_loader()
   // from write_ppm_tiff - copy pixels into bitmap
 
   int s_flip = imgdata.sizes.flip;
-  if (imgdata.params.raw_processing_options &
-      LIBRAW_PROCESSING_NO_ROTATE_FOR_KODAK_THUMBNAILS)
+  if (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_NO_ROTATE_FOR_KODAK_THUMBNAILS)
     imgdata.sizes.flip = 0;
 
   S.iheight = S.height;
@@ -209,8 +208,7 @@ void LibRaw::kodak_thumb_loader()
   free(imgdata.image);
   imgdata.image = s_image;
 
-  if (imgdata.params.raw_processing_options &
-      LIBRAW_PROCESSING_NO_ROTATE_FOR_KODAK_THUMBNAILS)
+  if (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_NO_ROTATE_FOR_KODAK_THUMBNAILS)
     imgdata.sizes.flip = s_flip;
 
   T.twidth = S.width;
@@ -250,10 +248,7 @@ int LibRaw::thumbOK(INT64 maxsz)
     tsize = tcol * T.twidth * T.theight;
   else if (write_thumb == &LibRaw::ppm16_thumb)
     tsize = tcol * T.twidth * T.theight *
-            ((imgdata.params.raw_processing_options &
-              LIBRAW_PROCESSING_USE_PPM16_THUMBS)
-                 ? 2
-                 : 1);
+            ((imgdata.rawparams.options & LIBRAW_RAWOPTIONS_USE_PPM16_THUMBS) ? 2 : 1);
 #ifdef USE_X3FTOOLS
   else if (write_thumb == &LibRaw::x3f_thumb_loader)
   {
@@ -305,7 +300,12 @@ int LibRaw::dcraw_thumb_writer(const char *fname)
     fclose(tfp);
     return 0;
   }
-  catch (LibRaw_exceptions err)
+  catch (const std::bad_alloc&)
+  {
+      fclose(tfp);
+      EXCEPTION_HANDLER(LIBRAW_EXCEPTION_ALLOC);
+  }
+  catch (const LibRaw_exceptions& err)
   {
     fclose(tfp);
     EXCEPTION_HANDLER(err);

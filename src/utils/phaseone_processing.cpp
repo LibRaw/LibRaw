@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -95,7 +95,7 @@ int LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
     }
     return 0;
   }
-  catch (LibRaw_exceptions err)
+  catch (const LibRaw_exceptions& err)
   {
     return LIBRAW_CANCELLED_BY_CALLBACK;
   }

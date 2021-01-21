@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -22,6 +22,12 @@ static const int _tagtype_dataunit_bytes [19] = {
 };
 
 libraw_static_table_t LibRaw::tagtype_dataunit_bytes(_tagtype_dataunit_bytes, _ARR_SZ(_tagtype_dataunit_bytes));
+
+int libraw_tagtype_dataunit_bytes(int tagtype)
+{
+    return _tagtype_dataunit_bytes[(tagtype <= _ARR_SZ(_tagtype_dataunit_bytes)) ? tagtype : 0];
+}
+
 
 static const int _Canon_wbi2std[] = { // Canon WB index to standard indexes
 //      std. number                wbi - Canon number
@@ -127,7 +133,8 @@ libraw_static_table_t LibRaw::Canon_D30_linenums_2_StdWBi(_Canon_D30_linenums_2_
 
 static const int _Fuji_wb_list1[] = {
     LIBRAW_WBI_FineWeather, LIBRAW_WBI_Shade, LIBRAW_WBI_FL_D,
-    LIBRAW_WBI_FL_L,        LIBRAW_WBI_FL_W,  LIBRAW_WBI_Tungsten
+    LIBRAW_WBI_FL_N,        LIBRAW_WBI_FL_W,  LIBRAW_WBI_Tungsten
+
 };
 libraw_static_table_t LibRaw::Fuji_wb_list1(_Fuji_wb_list1, _ARR_SZ(_Fuji_wb_list1));
 
@@ -140,7 +147,7 @@ libraw_static_table_t LibRaw::FujiCCT_K(_FujiCCT_K, _ARR_SZ(_FujiCCT_K));
 
 static const int _Fuji_wb_list2[] = {
     LIBRAW_WBI_Auto,  0,  LIBRAW_WBI_Custom,   6,  LIBRAW_WBI_FineWeather, 1,
-    LIBRAW_WBI_Shade, 8,  LIBRAW_WBI_FL_D,     10, LIBRAW_WBI_FL_L,        11,
+    LIBRAW_WBI_Shade, 8,  LIBRAW_WBI_FL_D,     10, LIBRAW_WBI_FL_N,        11,
     LIBRAW_WBI_FL_W,  12, LIBRAW_WBI_Tungsten, 2,  LIBRAW_WBI_Underwater,  35,
     LIBRAW_WBI_Ill_A, 82, LIBRAW_WBI_D65,      83
 };
@@ -208,4 +215,3 @@ static const int _Sony_SR2_wb_list1[] = {
     LIBRAW_WBI_FL_L, 8500, 6000, 3200, 2500
 };
 libraw_static_table_t LibRaw::Sony_SR2_wb_list1(_Sony_SR2_wb_list1, _ARR_SZ(_Sony_SR2_wb_list1));
-

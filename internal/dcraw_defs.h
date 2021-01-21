@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -31,13 +31,15 @@
   strncat(buf, string, LIM(sizeof(buf) - strbuflen(buf) - 1, 0, sizeof(buf)))
 
 // DNG was written by:
-#define nonDNG 0
+#define nonDNG    0
 #define CameraDNG 1
-#define AdobeDNG 2
+#define AdobeDNG  2
 
 // Makernote tag type:
 #define is_0x927c 0 /* most cameras */
 #define is_0xc634 2 /* Adobe DNG, Sony SR2, Pentax */
+
+// abbreviations
 #define ilm imgdata.lens.makernotes
 #define icWBC imgdata.color.WB_Coeffs
 #define icWBCCTC imgdata.color.WBCT_Coeffs
@@ -49,6 +51,8 @@
 #define imOly imgdata.makernotes.olympus
 #define imPana imgdata.makernotes.panasonic
 #define imPentax imgdata.makernotes.pentax
+#define imPhaseOne imgdata.makernotes.phaseone
+#define imRicoh imgdata.makernotes.ricoh
 #define imSamsung imgdata.makernotes.samsung
 #define imSony imgdata.makernotes.sony
 #define imCommon imgdata.makernotes.common
@@ -56,7 +60,7 @@
 
 #define ph1_bits(n) ph1_bithuff(n, 0)
 #define ph1_huff(h) ph1_bithuff(*h, h + 1)
-#define getbits(n) getbithuff(n, 0)
-#define gethuff(h) getbithuff(*h, h + 1)
+#define getbits(n)  getbithuff(n, 0)
+#define gethuff(h)  getbithuff(*h, h + 1)
 
 #endif

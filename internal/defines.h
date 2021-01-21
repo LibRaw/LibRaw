@@ -1,5 +1,5 @@
 /*
-  Copyright 2008-2020 LibRaw LLC (info@libraw.org)
+  Copyright 2008-2021 LibRaw LLC (info@libraw.org)
 
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of two licenses as you choose:
@@ -176,6 +176,7 @@ float fMAX(float a, float b) { return MAX(a, b); }
 #define GRBG_2_RGBG(q)    (q ^ (q >> 1) ^ 1)
 #define RGGB_2_RGBG(q)    (q ^ (q >> 1))
 #define BG2RG1_2_RGBG(q)  (q ^ 2)
+#define G2BRG1_2_RGBG(q)  (q ^ (q >> 1) ^ 3)
 #define GRGB_2_RGBG(q)    (q ^ 1)
 #define RBGG_2_RGBG(q)    ((q >> 1) | ((q & 1) << 1))
 

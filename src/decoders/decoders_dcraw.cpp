@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -634,8 +634,7 @@ void LibRaw::canon_sraw_load_raw()
             rp = (short *)ljpeg_row(jrow++, &jh);
           if (col >= width)
             continue;
-          if (imgdata.params.raw_processing_options &
-              LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE)
+          if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SRAW_NO_INTERPOLATE)
           {
             FORC(jh.clrs - 2)
             {
@@ -646,8 +645,7 @@ void LibRaw::canon_sraw_load_raw()
             ip[col][1] = rp[jcol + jh.clrs - 2] - 8192;
             ip[col][2] = rp[jcol + jh.clrs - 1] - 8192;
           }
-          else if (imgdata.params.raw_processing_options &
-                   LIBRAW_PROCESSING_SRAW_NO_RGB)
+          else if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SRAW_NO_RGB)
           {
             FORC(jh.clrs - 2)
             ip[col + (c >> 1) * width + (c & 1)][0] = rp[jcol + c];
@@ -671,8 +669,7 @@ void LibRaw::canon_sraw_load_raw()
     throw;
   }
 
-  if (imgdata.params.raw_processing_options &
-      LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE)
+  if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SRAW_NO_INTERPOLATE)
   {
     ljpeg_end(&jh);
     maximum = 0x3fff;
@@ -716,8 +713,7 @@ void LibRaw::canon_sraw_load_raw()
           else
             ip[col][c] = (ip[col - 1][c] + ip[col + 1][c] + 1) >> 1;
     }
-    if (!(imgdata.params.raw_processing_options &
-          LIBRAW_PROCESSING_SRAW_NO_RGB))
+    if (!(imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SRAW_NO_RGB))
       for (; rp < ip[0]; rp += 4)
       {
         checkCancel();
@@ -1004,7 +1000,7 @@ void LibRaw::rollei_load_raw()
 
 void LibRaw::nokia_load_raw()
 {
-  uchar *data, *dp;
+  uchar *dp;
   int rev, dwide, row, col, c;
   double sum[] = {0, 0};
 
@@ -1014,26 +1010,16 @@ void LibRaw::nokia_load_raw()
   if (raw_stride)
 	  dwide = raw_stride;
 #endif
-  data = (uchar *)malloc(dwide * 2);
-  merror(data, "nokia_load_raw()");
-  try
+  std::vector<uchar> data(dwide * 2);
+  for (row = 0; row < raw_height; row++)
   {
-    for (row = 0; row < raw_height; row++)
-    {
       checkCancel();
-      if (fread(data + dwide, 1, dwide, ifp) < dwide)
-        derror();
+      if (fread(data.data() + dwide, 1, dwide, ifp) < dwide)
+          derror();
       FORC(dwide) data[c] = data[dwide + (c ^ rev)];
-      for (dp = data, col = 0; col < raw_width; dp += 5, col += 4)
-        FORC4 RAW(row, col + c) = (dp[c] << 2) | (dp[4] >> (c << 1) & 3);
-    }
+      for (dp = data.data(), col = 0; col < raw_width; dp += 5, col += 4)
+          FORC4 RAW(row, col + c) = (dp[c] << 2) | (dp[4] >> (c << 1) & 3);
   }
-  catch (...)
-  {
-    free(data);
-    throw;
-  }
-  free(data);
   maximum = 0x3ff;
 #ifdef USE_6BY9RPI
   if (!strcmp(make, "OmniVision") ||
@@ -1052,6 +1038,8 @@ void LibRaw::nokia_load_raw()
   if (sum[1] > sum[0])
     filters = 0x4b4b4b4b;
 }
+
+#ifdef LIBRAW_OLD_VIDEO_SUPPORT
 
 void LibRaw::canon_rmf_load_raw()
 {
@@ -1082,6 +1070,7 @@ void LibRaw::canon_rmf_load_raw()
   free(words);
   maximum = curve[0x3ff];
 }
+#endif
 
 unsigned LibRaw::pana_data(int nb, unsigned *bytes)
 {
@@ -1484,10 +1473,8 @@ void LibRaw::sony_arw2_load_raw()
         for (sh = 0; sh < 4 && 0x80 << sh <= max - min; sh++)
           ;
         /* flag checks if outside of loop */
-        if (!(imgdata.params.raw_processing_options &
-              LIBRAW_PROCESSING_SONYARW2_ALLFLAGS) // no flag set
-            || (imgdata.params.raw_processing_options &
-                LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE))
+        if (!(imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SONYARW2_ALLFLAGS) // no flag set
+            || (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SONYARW2_DELTATOVALUE))
         {
           for (bit = 30, i = 0; i < 16; i++)
             if (i == imax)
@@ -1503,8 +1490,7 @@ void LibRaw::sony_arw2_load_raw()
               bit += 7;
             }
         }
-        else if (imgdata.params.raw_processing_options &
-                 LIBRAW_PROCESSING_SONYARW2_BASEONLY)
+        else if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SONYARW2_BASEONLY)
         {
           for (bit = 30, i = 0; i < 16; i++)
             if (i == imax)
@@ -1514,8 +1500,7 @@ void LibRaw::sony_arw2_load_raw()
             else
               pix[i] = 0;
         }
-        else if (imgdata.params.raw_processing_options &
-                 LIBRAW_PROCESSING_SONYARW2_DELTAONLY)
+        else if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SONYARW2_DELTAONLY)
         {
           for (bit = 30, i = 0; i < 16; i++)
             if (i == imax)
@@ -1531,8 +1516,7 @@ void LibRaw::sony_arw2_load_raw()
               bit += 7;
             }
         }
-        else if (imgdata.params.raw_processing_options &
-                 LIBRAW_PROCESSING_SONYARW2_DELTAZEROBASE)
+        else if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SONYARW2_DELTAZEROBASE)
         {
           for (bit = 30, i = 0; i < 16; i++)
             if (i == imax)
@@ -1548,8 +1532,7 @@ void LibRaw::sony_arw2_load_raw()
             }
         }
 
-        if (imgdata.params.raw_processing_options &
-            LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE)
+        if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SONYARW2_DELTATOVALUE)
         {
           for (i = 0; i < 16; i++, col += 2)
           {
@@ -1559,7 +1542,7 @@ void LibRaw::sony_arw2_load_raw()
             unsigned step = 1 << sh;
             RAW(row, col) =
                 curve[pix[i] << 1] >
-                        black + imgdata.params.sony_arw2_posterization_thr
+                        black + imgdata.rawparams.sony_arw2_posterization_thr
                     ? LIM(((slope * step * 1000) /
                            (curve[pix[i] << 1] - black)),
                           0, 10000)
@@ -1578,8 +1561,7 @@ void LibRaw::sony_arw2_load_raw()
     free(data);
     throw;
   }
-  if (imgdata.params.raw_processing_options &
-      LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE)
+  if (imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SONYARW2_DELTATOVALUE)
     maximum = 10000;
   free(data);
 }
@@ -1733,6 +1715,7 @@ void LibRaw::samsung3_load_raw()
   }
 }
 
+#ifdef LIBRAW_OLD_VIDEO_SUPPORT
 void LibRaw::redcine_load_raw()
 {
 #ifndef NO_JASPER
@@ -1813,3 +1796,4 @@ void LibRaw::redcine_load_raw()
     throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
 #endif
 }
+#endif

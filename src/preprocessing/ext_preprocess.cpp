@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -70,7 +70,6 @@ void LibRaw::subtract(const char *fname)
   FILE *fp;
   int dim[3] = {0, 0, 0}, comment = 0, number = 0, error = 0, nd = 0, c, row,
       col;
-  ushort *pixel;
   RUN_CALLBACK(LIBRAW_PROGRESS_DARK_FRAME, 0, 2);
 
   if (!(fp = fopen(fname, "rb")))
@@ -114,15 +113,13 @@ void LibRaw::subtract(const char *fname)
     fclose(fp);
     return;
   }
-  pixel = (ushort *)calloc(width, sizeof *pixel);
-  merror(pixel, "subtract()");
+  std::vector<ushort> pixel(width, 0);
   for (row = 0; row < height; row++)
   {
-    fread(pixel, 2, width, fp);
+    fread(pixel.data(), 2, width, fp);
     for (col = 0; col < width; col++)
       BAYER(row, col) = MAX(BAYER(row, col) - ntohs(pixel[col]), 0);
   }
-  free(pixel);
   fclose(fp);
   memset(cblack, 0, sizeof cblack);
   black = 0;

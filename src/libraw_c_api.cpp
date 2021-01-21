@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_c_api.cpp
- * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2021 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  *
  * LibRaw C interface
@@ -95,6 +95,7 @@ extern "C"
     return &(lr->other);
   }
 
+#ifndef LIBRAW_NO_IOSTREAMS_DATASTREAM
   int libraw_open_file_ex(libraw_data_t *lr, const char *file, INT64 sz)
   {
     if (!lr)
@@ -102,6 +103,8 @@ extern "C"
     LibRaw *ip = (LibRaw *)lr->parent_class;
     return ip->open_file(file, sz);
   }
+#endif
+
 #if defined(_WIN32) && !defined(__MINGW32__) && defined(_MSC_VER) &&           \
     (_MSC_VER > 1310)
   int libraw_open_wfile(libraw_data_t *lr, const wchar_t *file)
@@ -112,6 +115,7 @@ extern "C"
     return ip->open_file(file);
   }
 
+#ifndef LIBRAW_NO_IOSTREAMS_DATASTREAM
   int libraw_open_wfile_ex(libraw_data_t *lr, const wchar_t *file, INT64 sz)
   {
     if (!lr)
@@ -120,7 +124,8 @@ extern "C"
     return ip->open_file(file, sz);
   }
 #endif
-  int libraw_open_buffer(libraw_data_t *lr, void *buffer, size_t size)
+#endif
+  int libraw_open_buffer(libraw_data_t *lr, const void *buffer, size_t size)
   {
     if (!lr)
       return EINVAL;

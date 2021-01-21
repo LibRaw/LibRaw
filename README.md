@@ -11,7 +11,7 @@ RAW conversion.
 The library is intended for embedding in RAW converters, data analyzers, and 
 other programs using RAW files as the initial data.
 
-LibRaw library, Copyright &copy; 2008-2020 LibRaw LLC (info@libraw.org)
+LibRaw library, Copyright &copy; 2008-2021 LibRaw LLC (info@libraw.org)
 The library includes source code from
       
      dcraw.c, Dave Coffin's raw photo decoder

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -135,43 +135,37 @@ void LibRaw::setPhaseOneFeatures(unsigned long long id)
       {0x1c9ULL, "Phase One 645DF", LIBRAW_MOUNT_Mamiya645, LIBRAW_FORMAT_645},
       {0x1d7ULL, "Phase One 645DF+", LIBRAW_MOUNT_Mamiya645, LIBRAW_FORMAT_645},
       {0x2c0ULL, "Phase One iXA", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
-      {0x2c1ULL, "Phase One iXA - R", LIBRAW_MOUNT_Unknown,
-       LIBRAW_FORMAT_Unknown},
-      {0x2c2ULL, "Phase One iXU 150", LIBRAW_MOUNT_Unknown,
-       LIBRAW_FORMAT_Unknown},
-      {0x2c3ULL, "Phase One iXU 150 - NIR", LIBRAW_MOUNT_Unknown,
-       LIBRAW_FORMAT_Unknown},
-      {0x2c4ULL, "Phase One iXU 180", LIBRAW_MOUNT_Unknown,
-       LIBRAW_FORMAT_Unknown},
+      {0x2c1ULL, "Phase One iXA - R", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
+      {0x2c2ULL, "Phase One iXU 150", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
+      {0x2c3ULL, "Phase One iXU 150 - NIR", LIBRAW_MOUNT_Unknown,LIBRAW_FORMAT_Unknown},
+      {0x2c4ULL, "Phase One iXU 180", LIBRAW_MOUNT_Unknown,LIBRAW_FORMAT_Unknown},
       {0x2d1ULL, "Phase One iXR", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
       // Leaf section:
-      {0x14dULL, "Mamiya", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
-      {0x149ULL, "Universal", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
-      {0x14aULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H,
-       LIBRAW_FORMAT_645},
-      {0x14cULL, "Contax 645", LIBRAW_MOUNT_Contax645, LIBRAW_FORMAT_645},
-      {0x150ULL, "AFi", LIBRAW_MOUNT_Rollei_bayonet, LIBRAW_FORMAT_66},
-      {0x147ULL, "Mamiya", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
-      {0x144ULL, "Universal", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
-      {0x145ULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H,
-       LIBRAW_FORMAT_645},
-      {0x146ULL, "Contax 645", LIBRAW_MOUNT_Contax645, LIBRAW_FORMAT_645},
-      {0x14fULL, "AFi", LIBRAW_MOUNT_Rollei_bayonet, LIBRAW_FORMAT_66},
-      {0x154ULL, "Mamiya", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
-      {0x151ULL, "Universal", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
-      {0x152ULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H,
-       LIBRAW_FORMAT_645},
-      {0x153ULL, "Contax 645", LIBRAW_MOUNT_Contax645, LIBRAW_FORMAT_645},
-      {0x143ULL, "Mamiya", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
       {0x140ULL, "Universal", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
-      {0x142ULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H,
-       LIBRAW_FORMAT_645},
       {0x141ULL, "Contax 645", LIBRAW_MOUNT_Contax645, LIBRAW_FORMAT_645},
+      {0x142ULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H, LIBRAW_FORMAT_645},
+      {0x143ULL, "Mamiya", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
+      {0x144ULL, "Universal", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
+      {0x145ULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H, LIBRAW_FORMAT_645},
+      {0x146ULL, "Contax 645", LIBRAW_MOUNT_Contax645, LIBRAW_FORMAT_645},
+      {0x147ULL, "Mamiya", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
+      {0x149ULL, "Universal", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
+      {0x14aULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H, LIBRAW_FORMAT_645},
+      {0x14cULL, "Contax 645", LIBRAW_MOUNT_Contax645, LIBRAW_FORMAT_645},
+      {0x14dULL, "Mamiya", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
       {0x14eULL, "AFi", LIBRAW_MOUNT_Rollei_bayonet, LIBRAW_FORMAT_66},
+      {0x14fULL, "AFi", LIBRAW_MOUNT_Rollei_bayonet, LIBRAW_FORMAT_66},
+      {0x150ULL, "AFi", LIBRAW_MOUNT_Rollei_bayonet, LIBRAW_FORMAT_66},
+      {0x151ULL, "Universal", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
+      {0x152ULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H, LIBRAW_FORMAT_645},
+      {0x153ULL, "Contax 645", LIBRAW_MOUNT_Contax645, LIBRAW_FORMAT_645},
+      {0x154ULL, "Mamiya", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
+
+      {0x16cULL, "Phase One iXM-RS150F", LIBRAW_MOUNT_PhaseOne_iXM_RS, LIBRAW_FORMAT_645},
+
       {0x171ULL, "Universal", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
       {0x172ULL, "Mamiya", LIBRAW_MOUNT_Unknown, LIBRAW_FORMAT_Unknown},
-      {0x173ULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H,
-       LIBRAW_FORMAT_645},
+      {0x173ULL, "Hasselblad H1/H2", LIBRAW_MOUNT_Hasselblad_H, LIBRAW_FORMAT_645},
       {0x174ULL, "Contax 645", LIBRAW_MOUNT_Contax645, LIBRAW_FORMAT_645},
       {0x175ULL, "AFi", LIBRAW_MOUNT_Rollei_bayonet, LIBRAW_FORMAT_66},
   };
@@ -183,7 +177,15 @@ void LibRaw::setPhaseOneFeatures(unsigned long long id)
       {
         strcpy(ilm.body, p1_unique[i].t_model);
         ilm.CameraFormat = p1_unique[i].CamFmt;
-        ilm.CameraMount = p1_unique[i].CamMnt;
+        ilm.CameraMount  = p1_unique[i].CamMnt;
+        if ((ilm.CameraMount == LIBRAW_MOUNT_PhaseOne_iXM_RS) ||
+            (ilm.CameraMount == LIBRAW_MOUNT_PhaseOne_iXM)) {
+          ilm.FocalType = LIBRAW_FT_PRIME_LENS;
+          ilm.LensMount = ilm.CameraMount;
+        } else if (ilm.CameraMount == LIBRAW_MOUNT_PhaseOne_iXM_MV) {
+          ilm.LensMount = ilm.CameraMount;
+        }
+        break;
       }
   }
   return;

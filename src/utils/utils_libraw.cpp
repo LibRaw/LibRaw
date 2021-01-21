@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -211,6 +211,12 @@ unsigned LibRaw::capabilities()
 #endif
 #ifdef USE_6BY9RPI
   ret |= LIBRAW_CAPS_RPI6BY9;
+#endif
+#ifdef USE_ZLIB
+  ret |= LIBRAW_CAPS_ZLIB;
+#endif
+#ifdef USE_JPEG
+  ret |= LIBRAW_CAPS_JPEG;
 #endif
   return ret;
 }

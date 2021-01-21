@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -122,7 +122,7 @@ void LibRaw::processNikonLensData(uchar *LensData, unsigned len)
     case 16:
       i = 8;
       break;
-    case 58: // "Z 6", "Z 7", "Z 50", D780
+    case 58: // "Z 6", "Z 7", "Z 50", D780, "Z 5"
       if (model[6] == 'Z')
         ilm.CameraMount = LIBRAW_MOUNT_Nikon_Z;
       if (imNikon.HighSpeedCropFormat != 12)
@@ -139,7 +139,9 @@ void LibRaw::processNikonLensData(uchar *LensData, unsigned len)
             ilm.LensFormat = LIBRAW_FORMAT_APSC;
             break;
           case 1:  case 2:  case 4:  case 8:
-          case 9: case 13: case 14: case 15:
+          case 9:  case 13: case 14: case 15:
+          case 16: case 17: case 18: case 21:
+          case 22: case 23:
             ilm.LensFormat = LIBRAW_FORMAT_FF;
             break;
         }
@@ -315,11 +317,11 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
     }
     else if (tag == 0x0012)
     {
-      ci = fgetc(ifp);
-      cj = fgetc(ifp);
-      ck = fgetc(ifp);
-      if (ck)
-        imCommon.FlashEC = (float)(ci * cj) / (float)ck;
+      uchar uc1 = fgetc(ifp);
+      uchar uc2 = fgetc(ifp);
+      uchar uc3 = fgetc(ifp);
+      if (uc3)
+        imCommon.FlashEC = (float)(uc1 * uc2) / (float)uc3;
     }
     else if (tag == 0x0014)
     {
@@ -515,12 +517,15 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
       }
     } else if (tag == 0x0025)
     {
+      imCommon.real_ISO = int(100.0 * libraw_powf64l(2.0, double((uchar)fgetc(ifp)) / 12.0 - 5.0));
       if (!iso_speed || (iso_speed == 65535))
       {
-        iso_speed =
-            int(100.0 *
-                libraw_powf64l(2.0f, double((uchar)fgetc(ifp)) / 12.0 - 5.0));
+        iso_speed = imCommon.real_ISO;
       }
+    }
+    else if (tag == 0x0022)
+    {
+      imNikon.Active_D_Lighting = get2();
     }
     else if (tag == 0x003b)
     { // WB for multi-exposure (ME); all 1s for regular exposures
@@ -559,14 +564,26 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
       ilm.MaxAp4MinFocal = getreal(type);
       ilm.MaxAp4MaxFocal = getreal(type);
     }
-    else if (tag == 0x008b)
-    { // lens f-stops
-      ci = fgetc(ifp);
-      cj = fgetc(ifp);
-      ck = fgetc(ifp);
-      if (ck)
+    else if (tag == 0x0088) // AFInfo
+    {
+      if (!imCommon.afcount)
       {
-        imgdata.lens.nikon.LensFStops = ci * cj * (12 / ck);
+        imCommon.afdata[imCommon.afcount].AFInfoData_tag = tag;
+        imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
+        imCommon.afdata[imCommon.afcount].AFInfoData_length = len;
+        imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)malloc(imCommon.afdata[imCommon.afcount].AFInfoData_length);
+        fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
+        imCommon.afcount = 1;
+      }
+    }
+    else if (tag == 0x008b) // lens f-stops
+    {
+      uchar uc1 = fgetc(ifp);
+      uchar uc2 = fgetc(ifp);
+      uchar uc3 = fgetc(ifp);
+      if (uc3)
+      {
+        imgdata.lens.nikon.LensFStops = uc1 * uc2 * (12 / uc3);
         ilm.LensFStops = (float)imgdata.lens.nikon.LensFStops / 12.0f;
       }
     }
@@ -656,8 +673,8 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
         ilm.FocalType = LIBRAW_FT_PRIME_LENS;
       }
     }
-    else if (tag == 0x0098)
-    { // contains lens data
+    else if (tag == 0x0098) // contains lens data
+    {
       FORC4 imNikon.LensDataVersion =
           imNikon.LensDataVersion * 10 + fgetc(ifp) - '0';
       switch (imNikon.LensDataVersion)
@@ -687,6 +704,7 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
         LensData_len = 879;
         break;
       case 800:
+      case 801:
         LensData_len = 58;
         break;
       }
@@ -700,8 +718,8 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
     {
       stmread(imgdata.shootinginfo.BodySerial, len, ifp);
     }
-    else if (tag == 0x00a7)
-    { // shutter count
+    else if (tag == 0x00a7) // shutter count
+    {
       imNikon.key = fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp) ^ fgetc(ifp);
       if (custom_serial)
       {
@@ -750,6 +768,21 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
       imNikon.ExposureMode = get4();
       imNikon.nMEshots = get4();
       imNikon.MEgainOn = get4();
+    }
+    else if (tag == 0x00b7) // AFInfo2
+    {
+      if (!imCommon.afcount)
+      {
+        imCommon.afdata[imCommon.afcount].AFInfoData_tag = tag;
+        imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
+        int ver = 0;
+        FORC4  ver = ver * 10 + (fgetc(ifp) - '0');
+        imCommon.afdata[imCommon.afcount].AFInfoData_version = ver;
+        imCommon.afdata[imCommon.afcount].AFInfoData_length = len-4;
+        imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)malloc(imCommon.afdata[imCommon.afcount].AFInfoData_length);
+        fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
+        imCommon.afcount = 1;
+      }
     }
     else if (tag == 0x00b9)
     {

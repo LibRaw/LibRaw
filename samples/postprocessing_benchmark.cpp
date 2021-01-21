@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: postprocessing_benchmark.cpp
- * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2021 LibRaw LLC (info@libraw.org)
  * Created: Jul 13, 2011
  *
  * LibRaw simple C++ API:  creates 8 different renderings from 1 source file.
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         rep = 1;
       break;
     case 'c':
-      OUT.use_rawspeed = 0;
+      RawProcessor.imgdata.rawparams.use_rawspeed = 0;
       break;
     default:
       fprintf(stderr, "Unknown option \"-%c\".\n", opt);

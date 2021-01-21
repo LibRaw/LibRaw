@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -86,7 +86,7 @@ int LibRaw::unpack(void)
           (imgdata.idata.filters || P1.colors == 1) ? 1 : LIM(P1.colors, 3, 4);
       INT64 samplesize = is_floating_point() ? 4 : 2;
       INT64 bytes = pixcount * planecount * samplesize;
-      if (bytes > INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+      if (bytes > INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
         throw LIBRAW_EXCEPTION_TOOBIG;
 
       // find ifd to check sample
@@ -122,7 +122,7 @@ int LibRaw::unpack(void)
         rawspeed_enabled = 0;
 
       if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
-          (libraw_internal_data.identify_data.unique_id == CanonID_EOS_6D_Mark_II)) 
+          (libraw_internal_data.identify_data.unique_id == CanonID_EOS_6D_Mark_II))
         rawspeed_enabled = 0;
 
       if (imgdata.idata.dng_version && imgdata.idata.filters == 0 &&
@@ -138,7 +138,7 @@ int LibRaw::unpack(void)
         rawspeed_enabled = 0;
 
 	if (load_raw == &LibRaw::lossless_jpeg_load_raw &&
-		imgdata.makernotes.canon.RecordMode && makeIs(LIBRAW_CAMERAMAKER_Kodak) &&
+		MN.canon.RecordMode && makeIs(LIBRAW_CAMERAMAKER_Kodak) &&
 		/* Not normalized models here, it is intentional */
 		(!strncasecmp(imgdata.idata.model, "EOS D2000", 9) ||
 		 !strncasecmp(imgdata.idata.model, "EOS D6000", 9)))
@@ -154,10 +154,10 @@ int LibRaw::unpack(void)
         rawspeed_enabled = 0;
 
       // RawSpeed Supported,
-      if (O.use_rawspeed && rawspeed_enabled &&
-          !(is_sraw() && (O.raw_processing_options &
-                          (LIBRAW_PROCESSING_SRAW_NO_RGB |
-                           LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE))) &&
+      if (imgdata.rawparams.use_rawspeed && rawspeed_enabled &&
+          !(is_sraw() && (imgdata.rawparams.specials &
+                          (LIBRAW_RAWSPECIAL_SRAW_NO_RGB |
+                           LIBRAW_RAWSPECIAL_SRAW_NO_INTERPOLATE))) &&
           (decoder_info.decoder_flags & LIBRAW_DECODER_TRYRAWSPEED) &&
           _rawspeed_camerameta)
       {
@@ -169,7 +169,7 @@ int LibRaw::unpack(void)
         INT64 bytes =
             pixcount * planecount * 2; // sample size is always 2 for rawspeed
         if (bytes >
-            INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+            INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
 
         int rr = try_rawspeed();
@@ -191,7 +191,7 @@ int LibRaw::unpack(void)
         {
           if (INT64(rwidth) * INT64(rheight + 8) *
                   sizeof(imgdata.rawdata.raw_image[0]) >
-              INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+              INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
             throw LIBRAW_EXCEPTION_TOOBIG;
           imgdata.rawdata.raw_alloc = malloc(
               rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
@@ -203,7 +203,7 @@ int LibRaw::unpack(void)
         {
           if (INT64(rwidth) * INT64(rheight + 8) *
                   sizeof(imgdata.rawdata.raw_image[0]) * 4 >
-              INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+              INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
             throw LIBRAW_EXCEPTION_TOOBIG;
           S.raw_pitch = S.raw_width * 8;
           imgdata.rawdata.raw_alloc = 0;
@@ -217,7 +217,7 @@ int LibRaw::unpack(void)
       {
         if (INT64(rwidth) * INT64(rheight + 8) *
                 sizeof(imgdata.rawdata.raw_image[0]) * 3 >
-            INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+            INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
 
         imgdata.rawdata.raw_alloc = malloc(
@@ -232,7 +232,7 @@ int LibRaw::unpack(void)
       {
         if (INT64(rwidth) * INT64(rheight + 8) *
                 sizeof(imgdata.rawdata.raw_image[0]) >
-            INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+            INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
         imgdata.rawdata.raw_alloc = malloc(
             rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
@@ -263,7 +263,7 @@ int LibRaw::unpack(void)
         if (INT64(MAX(S.width, S.raw_width)) *
                 INT64(MAX(S.height, S.raw_height) + 8) *
                 sizeof(*imgdata.image) >
-            INT64(imgdata.params.max_raw_memory_mb) * INT64(1024 * 1024))
+            INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
 
         imgdata.rawdata.raw_alloc = 0;
@@ -353,6 +353,10 @@ int LibRaw::unpack(void)
     RUN_CALLBACK(LIBRAW_PROGRESS_LOAD_RAW, 1, 2);
 
     return 0;
+  }
+  catch (const std::bad_alloc&)
+  {
+      EXCEPTION_HANDLER(LIBRAW_EXCEPTION_ALLOC);
   }
   catch (const LibRaw_exceptions& err)
   {

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -123,7 +123,7 @@ void LibRaw::parseOlympus_Equipment(unsigned tag, unsigned type, unsigned len,
         (ilm.LensID & 0x10))
       ilm.LensMount = LIBRAW_MOUNT_mFT;
   }
-  break;
+    break;
   case 0x0202:
     if ((!imgdata.lens.LensSerial[0]))
       stmread(imgdata.lens.LensSerial, len, ifp);
@@ -178,7 +178,6 @@ void LibRaw::parseOlympus_CameraSettings(int base, unsigned tag, unsigned type,
   // uptag 0x2020
 
   int c;
-  uchar uc;
   switch (tag)
   {
   case 0x0101:
@@ -219,8 +218,7 @@ void LibRaw::parseOlympus_CameraSettings(int base, unsigned tag, unsigned type,
     }
     break;
   case 0x0306:
-    fread(&uc, 1, 1, ifp);
-    imOly.AFFineTune = uc;
+    imOly.AFFineTune = fgetc(ifp);
     break;
   case 0x0307:
     FORC3 imOly.AFFineTuneAdj[c] = get2();
@@ -369,6 +367,10 @@ void LibRaw::parseOlympus_ImageProcessing(unsigned tag, unsigned type,
   {
     FORC4 cblack[RGGB_2_RGBG(c)] = get2();
   }
+  else if ((tag == 0x0611) && (dng_writer == nonDNG))
+  {
+     imOly.ValidBits = get2();
+  }
   else if ((tag == 0x0612) && (dng_writer == nonDNG))
   {
     imgdata.sizes.raw_inset_crop.cleft = get2();
@@ -389,7 +391,7 @@ void LibRaw::parseOlympus_ImageProcessing(unsigned tag, unsigned type,
   {
     imOly.SensorCalibration[0] = getreal(type);
     imOly.SensorCalibration[1] = getreal(type);
-    if ((dng_writer == nonDNG)&& (OlyID != OlyID_XZ_1))
+    if ((dng_writer == nonDNG) && (OlyID != OlyID_XZ_1))
       FORC4 imgdata.color.linear_max[c] = imOly.SensorCalibration[0];
   }
   else if (tag == 0x1112)
@@ -398,30 +400,50 @@ void LibRaw::parseOlympus_ImageProcessing(unsigned tag, unsigned type,
     order = 0x4d4d;
     c = get2();
     order = sorder;
-    switch (c)
-    {
-    case 0x21:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_3to2;
+    switch (c) {
+    case 0x0101:
+    case 0x0901:
+    case 0x0909:
+      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_4to3;
       break;
-    case 0x31:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_16to9;
-      break;
-    case 0x41:
+    case 0x0104:
+    case 0x0401:
       imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_1to1;
       break;
-    case 0x91:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_4to3;
+    case 0x0201:
+    case 0x0202:
+      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_3to2;
+      break;
+    case 0x0301:
+    case 0x0303:
+      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_16to9;
+      break;
+    case 0x0404:
+      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_6to6;
+      break;
+    case 0x0505:
+      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_5to4;
+      break;
+    case 0x0606:
+      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_7to6;
+      break;
+    case 0x0707:
+      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_6to5;
+      break;
+    case 0x0808:
+      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_7to5;
+      break;
+    default:
+      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_OTHER;
       break;
     }
   }
   else if (tag == 0x1113)
   {
-    imgdata.sizes.raw_inset_crop.cleft = get2();
-    imgdata.sizes.raw_inset_crop.ctop = get2();
-    imgdata.sizes.raw_inset_crop.cwidth =
-        get2() - imgdata.sizes.raw_inset_crop.cleft;
-    imgdata.sizes.raw_inset_crop.cheight =
-        get2() - imgdata.sizes.raw_inset_crop.ctop;
+    imOly.AspectFrame[0] = get2();
+    imOly.AspectFrame[1] = get2();
+    imOly.AspectFrame[2] = get2();
+    imOly.AspectFrame[3] = get2();
   }
   else if (tag == 0x1306)
   {
@@ -507,4 +529,142 @@ void LibRaw::parseOlympus_RawInfo(unsigned tag, unsigned type, unsigned len,
     imgdata.sizes.raw_inset_crop.cheight = get2();
   }
   return;
+}
+
+
+void LibRaw::parseOlympusMakernotes (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer) {
+
+  int c;
+  unsigned a, b;
+  if ((tag >= 0x20100000) && (tag <= 0x2010ffff)) {
+        parseOlympus_Equipment((tag & 0x0000ffff), type, len, dng_writer);
+
+  } else if ((tag >= 0x20200000) && (tag <= 0x2020ffff)) {
+    parseOlympus_CameraSettings(base, (tag & 0x0000ffff), type, len, dng_writer);
+
+  } else if ((tag >= 0x20400000) && (tag <= 0x2040ffff)) {
+     parseOlympus_ImageProcessing((tag & 0x0000ffff), type, len, dng_writer);
+
+  } else if ((tag >= 0x30000000) && (tag <= 0x3000ffff)) {
+        parseOlympus_RawInfo((tag & 0x0000ffff), type, len, dng_writer);
+
+  } else {
+		switch (tag) {
+			case 0x0200:
+			  FORC3 if ((imOly.SpecialMode[c] = get4()) >= 0xff) imOly.SpecialMode[c] = 0xffffffff;
+			  break;
+			case 0x0207:
+				getOlympus_CameraType2();
+				break;
+			case 0x0404:
+			case 0x101a:
+				if (!imgdata.shootinginfo.BodySerial[0] && (dng_writer == nonDNG))
+					stmread(imgdata.shootinginfo.BodySerial, len, ifp);
+				break;
+			case 0x1002:
+				ilm.CurAp = libraw_powf64l(2.0f, getreal(type) / 2);
+				break;
+			case 0x1007:
+				imCommon.SensorTemperature = (float)get2();
+				break;
+			case 0x1008:
+				imCommon.LensTemperature = (float)get2();
+				break;
+			case 0x100b:
+				if (imOly.FocusMode[0] == 0xffff) {
+					imgdata.shootinginfo.FocusMode = imOly.FocusMode[0] = get2();
+					if (imgdata.shootinginfo.FocusMode == 1)
+						imgdata.shootinginfo.FocusMode = imOly.FocusMode[0] = 10;
+				}
+				break;
+      case 0x100d:
+        if (imOly.ZoomStepCount == 0xffff) imOly.ZoomStepCount = get2();
+        break;
+      case 0x100e:
+        if (imOly.FocusStepCount == 0xffff) imOly.FocusStepCount = get2();
+        break;
+			case 0x1011:
+				if (strcmp(software, "v757-71") && (dng_writer == nonDNG)) {
+					for (int i = 0; i < 3; i++) {
+						if (!imOly.ColorSpace) {
+							FORC3 cmatrix[i][c] = ((short)get2()) / 256.0;
+						} else {
+							FORC3 imgdata.color.ccm[i][c] = ((short)get2()) / 256.0;
+						}
+					}
+				}
+				break;
+			case 0x1012:
+			  if (dng_writer == nonDNG)
+				  FORC4 cblack[RGGB_2_RGBG(c)] = get2();
+				break;
+			case 0x1017:
+				if (dng_writer == nonDNG)
+				  cam_mul[0] = get2() / 256.0;
+				break;
+			case 0x1018:
+				if (dng_writer == nonDNG)
+				  cam_mul[2] = get2() / 256.0;
+				break;
+			case 0x102c:
+				if (dng_writer == nonDNG)
+				  imOly.ValidBits = get2();
+				break;
+			case 0x1038:
+				imOly.AFResult = get2();
+				break;
+      case 0x103b:
+        if (imOly.FocusStepInfinity == 0xffff) imOly.FocusStepInfinity = get2();
+        break;
+      case 0x103c:
+        if (imOly.FocusStepNear == 0xffff) imOly.FocusStepNear = get2();
+        break;
+			case 0x20300108:
+			case 0x20310109:
+				if (dng_writer == nonDNG) {
+          imOly.ColorSpace = get2();
+          switch (imOly.ColorSpace) {
+          case 0:
+            imCommon.ColorSpace = LIBRAW_COLORSPACE_sRGB;
+            break;
+          case 1:
+            imCommon.ColorSpace = LIBRAW_COLORSPACE_AdobeRGB;
+            break;
+          case 2:
+            imCommon.ColorSpace = LIBRAW_COLORSPACE_ProPhotoRGB;
+            break;
+          default:
+            imCommon.ColorSpace = LIBRAW_COLORSPACE_Unknown;
+            break;
+          }
+				}
+			case 0x20500209:
+				imOly.AutoFocus = get2();
+				break;
+			case 0x20500300:
+			  imOly.ZoomStepCount = get2();
+			  break;
+			case 0x20500301:
+			  imOly.FocusStepCount = get2();
+			  break;
+			case 0x20500303:
+			  imOly.FocusStepInfinity = get2();
+			  break;
+			case 0x20500304:
+			  imOly.FocusStepNear = get2();
+			  break;
+			case 0x20500305:
+			  a = get4();
+			  b = get4();
+			  if (a >= 0x7f000000) imOly.FocusDistance = -1.0; // infinity
+			  else imOly.FocusDistance = (double) a / 1000.0;  // convert to meters
+			  break;
+			case 0x20500308:
+				imOly.AFPoint = get2();
+				break;
+			case 0x20501500:
+				getOlympus_SensorTemperature(len);
+				break;
+		}
+  }
 }

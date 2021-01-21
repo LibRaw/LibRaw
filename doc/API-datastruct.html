@@ -29,9 +29,11 @@
               Description of Thumbnail </a></li>
           <li><a href="#libraw_lensinfo_t"> Structure libraw_lensinfo_t - lens
               data, extracted from EXIF/Makernotes </a></li>
+          <li><a href="#libraw_raw_unpack_params_t"> Structure
+              libraw_raw_unpack_params_t: metadata and raw decoding options and
+              flags</a></li>
           <li><a href="#libraw_output_params_t"> Structure
-              libraw_output_params_t: Management of dcraw-Style Postprocessing </a>
-            .</li>
+              libraw_output_params_t: Management of dcraw-style postprocessing </a></li>
           <li><a href="#libraw_callbacks_t">Structure libraw_callbacks_t:
               user-settable callbacks</a> </li>
           <li><a href="#libraw_processed_image_t"> Structure
@@ -60,6 +62,8 @@
               structure</a></li>
           <li><a href="#LibRaw_processing_options">enum
               LibRaw_processing_options - flags that affects extracted RAW data</a></li>
+          <li><a href="#LibRaw_rawspecial_t">enum LibRaw_rawspecial_t - special
+              raw extraction modes</a></li>
         </ol>
       </li>
     </ol>
@@ -121,8 +125,7 @@
         when raw2image() or dcraw_process() is called.</dd>
       <dt><strong> libraw_output_params_t params; </strong></dt>
       <dd>Data structure intended for management of image postprocessing (using
-        the dcraw emulator). Fields of this structure are described in detail <a
-
+        the dcraw emulator). Fields of this structure are described in detail <a
           href="#libraw_iparams_t"> below </a> .</dd>
       <dt>libraw_callbacks_t callbacks;</dt>
       <dd><a href="#libraw_callbacks_t">user-settable callbacks</a> </dd>
@@ -287,21 +290,23 @@
         values, than 4 pixel counts (per channel).</dd>
       <dt><strong> libraw_dng_color_t dng_color[2]; </strong></dt>
       <dd>Color data read from DNG: illuminant, calbiration matrix and color
-        matrix for two light sources. (see DNG specs for details).</dd>  
+        matrix for two light sources. (see DNG specs for details).</dd>
       <dt>libraw_dng_levels_t dng_levels</dt>
-      <dd>DNG black/white levels,  analog balance, WB for active IFD. See DNG specs for details.</dd>
-    <dt>int WB_Coeffs[256][4]</dt>
+      <dd>DNG black/white levels, analog balance, WB for active IFD. See DNG
+        specs for details.</dd>
+      <dt>int WB_Coeffs[256][4]</dt>
       <dd>Index: EXIF color source value, [i][0..3] WB Coeffs</dd>
-    <dt>float WBCT_Coeffs[64][5]</dt>
+      <dt>float WBCT_Coeffs[64][5]</dt>
       <dd>Color temperature in [i][0], WB coeffs in [i][1..4]</dd>
-    <dt>int as_shot_wb_applied</dt>
+      <dt>int as_shot_wb_applied</dt>
       <dd>Set to 1 if WB already applied in camera (multishot modes; small raw)</dd>
-    <dt>libraw_P1_color_t P1_color[2]</dt>
+      <dt>libraw_P1_color_t P1_color[2]</dt>
       <dd>Phase-one specific color data</dd>
-    <dt>unsigned raw_bps</dt>
+      <dt>unsigned raw_bps</dt>
       <dd>RAW bits per pixel (PhaseOne: Raw format used)</dd>
-    <dt>int ExifColorSpace</dt>
-      <dd>EXIF color space parsed from EXIF tags: LIBRAW_COLORSPACE_Unknown, LIBRAW_COLORSPACE_sRGB, or LIBRAW_COLORSPACE_Adobe</dd>
+      <dt>int ExifColorSpace</dt>
+      <dd>EXIF color space parsed from EXIF tags: LIBRAW_COLORSPACE_Unknown,
+        LIBRAW_COLORSPACE_sRGB, or LIBRAW_COLORSPACE_Adobe</dd>
     </dl>
     <p><a name="libraw_imgother_t"></a></p>
     <h3>Structure libraw_imgother_t: Other Parameters of the Image</h3>
@@ -480,11 +485,37 @@
       <li><strong>EXIF_MaxAp</strong> - if non-zero, contains the value derived
         from EXIF tag 0x9205.</li>
     </ul>
-    <p><a name="libraw_output_params_t"></a></p>
-    <h3>Structure libraw_output_params_t: Management of dcraw-Style
-      Postprocessing</h3>
-    <p>Structure libraw_output_params_t is used for management of
-      dcraw-compatible calls dcraw_process(), dcraw_ppm_tiff_writer(), and
+    <p><a name="libraw_raw_unpack_params_t"></a></p>
+    <h3>Structure libraw_raw_unpack_params_t: RAW decoding options and flags</h3>
+    <p>Structure libraw_raw_unpack_params_t contains fields/flags that affects
+      RAWdata and metadata decoding</p>
+    <dl>
+      <dt><strong> int options </strong></dt>
+      <dd>Processing options used on unpack() phase for specific image formats,
+        see below for possible values:<a href="#LibRaw_processing_options">
+          LibRaw_processing_options</a></dd>
+      <dt><strong> int specials </strong></dt>
+      <dd>Special processing mode (e.g. omit YCC to RGB conversion), see below
+        for possible values. <a href="#LibRaw_rawspecial_t">
+          LibRaw_rawspecial_t</a></dd>
+      <dt><strong>int max_raw_memory_mb</strong></dt>
+      <dd>Stop processing if raw buffer size grows larger than that value (in
+        megabytes). Default is LIBRAW_MAX_ALLOC_MB_DEFAULT (2048Mb)</dd>
+      <dt><strong> int sony_arw2_posterization_thr </strong></dt>
+      <dd>If LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE used for
+        raw_processing_options, sets the level to suppress posterization display
+        in shadows.</dd>
+      <dt><strong> float coolscan_nef_gamma; </strong></dt>
+      <dd>Gamma value for Coolscan NEF decoding (no way to get if from file, it
+        should be set by calling application).</dd>
+      <dt><strong> char p4shot_order[5]; </strong></dt>
+      <dd>Shot order for Pentax 4shot files. Default is "3102".</dd>
+    </dl>
+    <h3></h3>
+    <h3>Structure libraw_output_params_t: management of dcraw-style
+      postprocessing</h3>
+    <p>Structure libraw_output_params_t (imgdata.params) is used for management
+      of dcraw-compatible calls dcraw_process(), dcraw_ppm_tiff_writer(), and
       dcraw_thumb_writer(). Fields of this structure correspond to command line
       keys of dcraw. </p>
     <h4> Data fields:</h4>
@@ -548,15 +579,16 @@
         image.</dd>
       <dt><strong> int use_camera_wb; </strong></dt>
       <dd><strong> dcraw keys: </strong> -w <br>
-        If possible, use the white balance from the camera.<p>
-	If camera-recorded WB is not available, dcraw_process() will fallback to:
-	<ul>
-	<li>Auto-WB if bit LIBRAW_PROCESSING_CAMERAWB_FALLBACK_TO_DAYLIGHT is 
-         not set in params.raw_processing_options (or for the rare specific case: 
-	no valid WB index was parsed from CRW file)
-	<li>Daylight-WB if abovementioned bit is not set.
-	</ul>
-	</dd>
+        If possible, use the white balance from the camera.
+        <p> If camera-recorded WB is not available, dcraw_process() will
+          fallback to: </p>
+        <ul>
+          <li>Auto-WB if bit LIBRAW_PROCESSING_CAMERAWB_FALLBACK_TO_DAYLIGHT is
+            not set in params.raw_processing_options (or for the rare specific
+            case: no valid WB index was parsed from CRW file) </li>
+          <li>Daylight-WB if abovementioned bit is not set. </li>
+        </ul>
+      </dd>
       <dt><strong> int use_camera_matrix; </strong></dt>
       <dd><strong> dcraw keys: </strong> +M/-M <br>
         <ul>
@@ -591,6 +623,14 @@
       <dt><strong> int output_tiff; </strong></dt>
       <dd><strong> dcraw keys: </strong> -T <br>
         0/1: output PPM/TIFF.</dd>
+      <dt><strong> int output_flags; </strong></dt>
+      <dd><strong> dcraw keys:</strong> none<br>
+        Bitfield that allows to set output file options:
+        <ul>
+          <li><strong>LIBRAW_OUTPUT_FLAGS_PPMMETA</strong> - write additional
+            metadata into PPM/PGM output files</li>
+        </ul>
+      </dd>
       <dt><strong> int user_flip; </strong></dt>
       <dd><strong> dcraw keys: </strong> -t <br>
         [0-7] Flip image (0=none, 3=180, 5=90CCW, 6=90CW). Default -1, which
@@ -703,22 +743,6 @@
         interpolation callback call.</dd>
       <dt><strong> int no_interpolation; </strong></dt>
       <dd>Disables call to demosaic code in LibRaw::dcraw_process()</dd>
-      <dt><strong> int raw_processing_options </strong></dt>
-      <dd>Processing options used on unpack() phase for specific image formats,
-        see below for possible values:<a href="#LibRaw_processing_options">
-          LibRaw_processing_options</a></dd>
-      <dt><strong>int max_raw_memory_mb</strong></dt>
-      <dd>Stop processing if raw buffer size grows larger than that value (in
-        megabytes). Default is LIBRAW_MAX_ALLOC_MB_DEFAULT (2048Mb)</dd>
-      <dt><strong> int sony_arw2_posterization_thr </strong></dt>
-      <dd>If LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE used for
-        raw_processing_options, sets the level to suppress posterization display
-        in shadows.</dd>
-      <dt><strong> float coolscan_nef_gamma; </strong></dt>
-      <dd>Gamma value for Coolscan NEF decoding (no way to get if from file, it
-        should be set by calling application).</dd>
-      <dt><strong> char p4shot_order[5]; </strong></dt>
-      <dd>Shot order for Pentax 4shot files. Default is "3102".</dd>
     </dl>
     <p><a name="libraw_callbacks_t"></a></p>
     <h3>Structure libraw_callbacks_t: user-settable callbacks</h3>
@@ -730,8 +754,7 @@
       <dd>Called on data error, settable via set_dataerror_handler. See <a href="API-CXX.html#callbacks">C++
           API</a> for details.</dd>
       <dt>progress_callback progress_cb</dt>
-      <dd>Called on process callback, settable via set_progress_handler. See <a
-
+      <dd>Called on process callback, settable via set_progress_handler. See <a
           href="API-CXX.html#callbacks">C++ API</a> for details.</dd>
       <dt>exif_parser_callback exif_cb, params: (void *context, int tag, int
         type, int len, unsigned int ord, void *ifp)</dt>
@@ -907,8 +930,7 @@
       <dt><strong> LIBRAW_BAD_CROP </strong></dt>
       <dd>The incorrect cropping coordinates are set via params.cropbox[]: the
         left-top corner of cropping rectangle is outside the image. The
-        processing will be cancelled, all allocated resources will be freed, <a
-
+        processing will be cancelled, all allocated resources will be freed, <a
           <dt=""><strong> LIBRAW_TOO_BIG</strong> </a></dd>
       <dd><a <dt="">Raw data size exceeds data limit.</a></dd>
       <a <dt=""> </a>
@@ -930,12 +952,10 @@
           file (only for formats supporting storage of several images in a
           file).</dd>
         <dt><strong> LIBRAW_OUT_OF_ORDER_CALL </strong></dt>
-      </a><dd><a <dt="">API functions have been called in wrong order (e.g., </a><a
-
+      </a><dd><a <dt="">API functions have been called in wrong order (e.g., </a><a
           href="API-CXX.html#unpack"> unpack() </a> before <a href="API-CXX.html#open_file">
           open_file() </a> ) or the previous stage has ended with an error
-        (e.g., <a href="API-CXX.html#unpack"> unpack() </a> is called after <a
-
+        (e.g., <a href="API-CXX.html#unpack"> unpack() </a> is called after <a
           href="API-CXX.html#open_file"> open_file() </a> has returned an
         error).</dd>
       <dt><strong> LIBRAW_NO_THUMBNAIL </strong></dt>
@@ -1152,89 +1172,113 @@
     <h3> enum enum LibRaw_processing_options - bit that affects RAW data
       extraction</h3>
     These flags could be OR'ed with imgdata.params.raw_processing_options:
-    <p>Sony ARW2.3 processing options: (for more details see
-      http://www.rawdigger.com/howtouse/sony-craw-arw2-posterization-detection)</p>
-    <ul>
-      <li><b>LIBRAW_PROCESSING_SONYARW2_BASEONLY</b> - decode only base pixels,
-        leave delta pixels as zero;</li>
-      <li><b>LIBRAW_PROCESSING_SONYARW2_DELTAONLY</b> - decode only delta pixels
-        with base pixels zeroed;</li>
-      <li><b>LIBRAW_PROCESSING_SONYARW2_DELTAZEROBASE</b> - decode delta pixels,
-        do not add base value;</li>
-      <li><b>LIBRAW_PROCESSING_SONYARW2_DELTATOVALUE</b> - show possible
-        posterization areas;</li>
-    </ul>
-    <p>Sigma Quattro decoding flags:</p>
-    <ul>
-      <li><b>LIBRAW_DP2Q_INTERPOLATERG</b> - turn on R/G channels interpolation</li>
-      <li><b>LIBRAW_DP2Q_INTERPOLATEAF</b> - turn on data interpolation of
-        low-sensitivity (AF or overexposure control) points on Quattro sensors.</li>
-    </ul>
     <p>Pentax 4-shot options:</p>
     <ul>
-      <li><b>LIBRAW_PROCESSING_PENTAX_PS_ALLFRAMES</b> - merge all frames for
+      <li><b>LIBRAW_RAWOPTIONS_PENTAX_PS_ALLFRAMES</b> - merge all frames for
         Pentax 4-shot files</li>
     </ul>
     <p>Floating point DNG files:</p>
     <ul>
-      <li><b>LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT</b> - convert FP data to
+      <li><b>LIBRAW_RAWOPTIONS_CONVERTFLOAT_TO_INT</b> - convert FP data to
         16-bit integer</li>
     </ul>
-    <p>Canon/Nikon small RAW (YCC) decoding flags (do not use both at same
-      time):</p>
+    <p>Sony ARQ Files:</p>
     <ul>
-      <li><b>LIBRAW_PROCESSING_SRAW_NO_RGB</b> - disable YCC to RGB conversion</li>
-      <li><b>LIBRAW_PROCESSING_SRAW_NO_INTERPOLATE</b> - disable missing color
-        values interpolation</li>
+      <li><b>LIBRAW_RAWOPTIONS_ARQ_SKIP_CHANNEL_SWAP</b> - do not perform Sony
+        ARQ channel swap to RGBG channel format, but use RGGB original channel
+        order</li>
     </ul>
     <p>DNG processing flags:</p>
     <ul>
-      <li><b>LIBRAW_PROCESSING_USE_DNG_DEFAULT_CROP</b> - use DNG DefaultCrop*
+      <li><b>LIBRAW_RAWOPTIONS_USE_DNG_DEFAULT_CROP</b> - use DNG DefaultCrop*
         tags for cropping</li>
-      <li><b>LIBRAW_PROCESSING_DONT_CHECK_DNG_ILLUMINANT</b> - skip DNG
+      <li><b>LIBRAW_RAWOPTIONS_DONT_CHECK_DNG_ILLUMINANT</b> - skip DNG
         illuminant check when parsing DNG color data (use for compatibility w/
         older LibRaw versions).</li>
-      <li><b>LIBRAW_PROCESSING_DNGSDK_ZEROCOPY</b> - do not copy data extracted
+      <li><b>LIBRAW_RAWOPTIONS_DNGSDK_ZEROCOPY</b> - do not copy data extracted
         by Adobe DNG SDK into separate buffer, but use DNG SDK buffer as is.</li>
-      <li><b>LIBRAW_PROCESSING_DNG_ADD_ENHANCED</b> - if set, LibRaw will add
+      <li><b>LIBRAW_RAWOPTIONS_DNG_ADD_ENHANCED</b> - if set, LibRaw will add
         Enhanced DNG frame (NewSubfileType == 16) to the list of available
         frames.</li>
-      <li><b>LIBRAW_PROCESSING_DNG_ADD_PREVIEWS</b> - if set, LibRaw will add
+      <li><b>LIBRAW_RAWOPTIONS_DNG_ADD_PREVIEWS</b> - if set, LibRaw will add
         previews (NewSubfileType == 1) to the frames list.</li>
-      <li><b>LIBRAW_PROCESSING_DNG_PREFER_LARGEST_IMAGE</b>- By default, DNG
+      <li><b>LIBRAW_RAWOPTIONS_DNG_PREFER_LARGEST_IMAGE</b>- By default, DNG
         frames are not reordered and are available in same order as in DNG&nbsp;
         (LibRaw traverses IFD/Sub-IFD trees in deep-first order).This bit will
         prioritize the largest image</li>
-      <li><strong>LIBRAW_PROCESSING_DNG_STAGE2</strong> - request DNG Stage2
+      <li><strong>LIBRAW_RAWOPTIONS_DNG_STAGE2</strong> - request DNG Stage2
         processing (by DNG SDK)</li>
-      <li><strong>LIBRAW_PROCESSING_DNG_STAGE3</strong> - request DNG Stage3
+      <li><strong>LIBRAW_RAWOPTIONS_DNG_STAGE3</strong> - request DNG Stage3
         processing</li>
-      <li><strong>LIBRAW_PROCESSING_DNG_ALLOWSIZECHANGE</strong> - by default,
+      <li><strong>LIBRAW_RAWOPTIONS_DNG_ALLOWSIZECHANGE</strong> - by default,
         if image size parsed by DNG SDK does not match image dimensions parsed
         by LibRaw, processing will stop with LIBRAW_DATA_ERROR code. This flags
         allows size change in LibRaw::unpack() stage.</li>
-      <li><strong>LIBRAW_PROCESSING_DNG_DISABLEWBADJUST</strong> - by default,
+      <li><strong>LIBRAW_RAWOPTIONS_DNG_DISABLEWBADJUST</strong> - by default,
         for DNG images with different per-channel maximums WB adjustment
         procedure is performed. This flag disables such adjustment.</li>
     </ul>
     Other flags
     <ul>
-      <li><b>LIBRAW_PROCESSING_NO_ROTATE_FOR_KODAK_THUMBNAILS</b> - disable
+      <li><b>LIBRAW_RAWOPTIONS_NO_ROTATE_FOR_KODAK_THUMBNAILS</b> - disable
         auto-rotation for Kodak PPM bitmaps</li>
-      <li><b>LIBRAW_PROCESSING_USE_PPM16_THUMBS</b> - enable 16-bit PPM
+      <li><b>LIBRAW_RAWOPTIONS_USE_PPM16_THUMBS</b> - enable 16-bit PPM
         thumbnails</li>
-      <li><b> LIBRAW_PROCESSING_SKIP_MAKERNOTES</b> - if this flag is set,
-        LibRaw will perform only basic metadata parsing (Note: this flag is
-        scheduled for removal in future versions).</li>
-      <li><b>LIBRAW_PROCESSING_ZEROFILTERS_FOR_MONOCHROMETIFFS</b> - by default,
+      <li><b>LIBRAW_RAWOPTIONS_ZEROFILTERS_FOR_MONOCHROMETIFFS</b> - by default,
         LibRaw assigns bayer pattern for Monochrome TIFF files (e.g. images from
         Kodak 760).This does not work as expected if input file is really
         monochrome (e.g. scan from Imacon X1 in monochrome mode).This flag will
         force monochrome mode for TIFF RAWs w/o bayer filter tags (so, it will
         break old Kodak processing). It is better to make it settable via user
         interaction.</li>
+      <li><strong>LIBRAW_RAWOPTIONS_PROVIDE_NONSTANDARD_WB</strong> - If set and
+        when applicable, color.cam_mul[] and color.WB_Coeffs/WBCT_Coeffs will
+        contain WB settings for a non-standard workflow. Right now only Sony
+        DSC-F828 is affected: camera-recorded white balance can't be directly
+        applied to raw data because WB is for RGB, while raw data is RGBE.</li>
+      <li><strong>LIBRAW_RAWOPTIONS_CAMERAWB_FALLBACK_TO_DAYLIGHT</strong> - if
+        use_camera_wb is set, but no camera-recorded white balance present in
+        metadata, then fallback to daylight WB (default: fallback to
+        auto-balance).</li>
+      <li><strong>LIBRAW_RAWOPTIONS_CHECK_THUMBNAILS_KNOWN_VENDORS</strong> -
+        Some cameras (e.g.Ricoh) may record broken thumbnail in file:data offset
+        plus data size is beyond filecontents. This flag enforces size+offset
+        checks for files from known vendors (this will result into correct but
+        smaller thumbnail selected).</li>
+      <li><strong>LIBRAW_RAWOPTIONS_CHECK_THUMBNAILS_ALL_VENDORS</strong> - same
+        is above, but check is performed regardless of vendor (Make tag).</li>
     </ul>
     <ul>
+    </ul>
+    <p> <a name="LibRaw_rawspecial_t"></a></p>
+    <h3>enum LibRaw_rawspecial_t - special/non standard RAW extraction modes</h3>
+    These flags are applied to imgdata.rawparams:
+    <p>Sony ARW2.3 processing options: (for more details see
+      http://www.rawdigger.com/howtouse/sony-craw-arw2-posterization-detection)</p>
+    <ul>
+      <li><b>LIBRAW_RAWSPECIAL_SONYARW2_BASEONLY</b> - decode only base pixels,
+        leave delta pixels as zero;</li>
+      <li><b>LIBRAW_RAWSPECIAL_SONYARW2_DELTAONLY</b> - decode only delta pixels
+        with base pixels zeroed;</li>
+      <li><b>LIBRAW_RAWSPECIAL_SONYARW2_DELTAZEROBASE</b> - decode delta pixels,
+        do not add base value;</li>
+      <li><b>LIBRAW_RAWSPECIAL_SONYARW2_DELTATOVALUE</b> - show possible
+        posterization areas;</li>
+    </ul>
+    <p>Sigma Quattro decoding flags:</p>
+    <ul>
+      <li><b>LIBRAW_RAWSPECIAL_NODP2Q_INTERPOLATERG</b> - disable R/G channels
+        interpolation</li>
+      <li><b>LIBRAW_RAWSPECIAL_NODP2Q_INTERPOLATEAF</b> - disable data
+        interpolation of low-sensitivity (AF or overexposure control) points on
+        Quattro sensors.</li>
+    </ul>
+    <p>Canon/Nikon small RAW (YCC) decoding flags (do not use both at same
+      time):</p>
+    <ul>
+      <li><b>LIBRAW_RAWSPECIAL_SRAW_NO_RGB</b> - disable YCC to RGB conversion</li>
+      <li><b>LIBRAW_RAWSPECIAL_SRAW_NO_INTERPOLATE</b> - disable missing color
+        values interpolation</li>
     </ul>
     <a href="index.html">[back to Index] </a>
   </body>

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -86,27 +86,16 @@ void LibRaw::packed_load_raw()
 
 void LibRaw::eight_bit_load_raw()
 {
-  uchar *pixel;
   unsigned row, col;
 
-  pixel = (uchar *)calloc(raw_width, sizeof *pixel);
-  merror(pixel, "eight_bit_load_raw()");
-  try
+  std::vector<uchar> pixel(raw_width);
+  for (row = 0; row < raw_height; row++)
   {
-    for (row = 0; row < raw_height; row++)
-    {
       checkCancel();
-      if (fread(pixel, 1, raw_width, ifp) < raw_width)
-        derror();
+      if (fread(pixel.data(), 1, raw_width, ifp) < raw_width)
+          derror();
       for (col = 0; col < raw_width; col++)
-        RAW(row, col) = curve[pixel[col]];
-    }
+          RAW(row, col) = curve[pixel[col]];
   }
-  catch (...)
-  {
-    free(pixel);
-    throw;
-  }
-  free(pixel);
   maximum = curve[0xff];
 }

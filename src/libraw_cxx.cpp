@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_cxx.cpp
- * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2021 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  *
  * This file is provided for compatibility w/ old build scripts/tools:

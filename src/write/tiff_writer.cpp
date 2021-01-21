@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -59,10 +59,17 @@ int LibRaw::dcraw_ppm_tiff_writer(const char *filename)
       fclose(f);
     return 0;
   }
-  catch (LibRaw_exceptions err)
+  catch (const LibRaw_exceptions& err)
   {
     if (strcmp(filename, "-"))
       fclose(f);
     EXCEPTION_HANDLER(err);
   }
+  catch (const std::bad_alloc&)
+  {
+      if (strcmp(filename, "-"))
+          fclose(f);
+      EXCEPTION_HANDLER(LIBRAW_EXCEPTION_ALLOC);
+  }
+
 }

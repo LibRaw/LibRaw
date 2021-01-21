@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -66,9 +66,9 @@ void LibRaw::parse_phase_one(int base)
       setPhaseOneFeatures(unique_id);
       break;
     case 0x0203:
-      stmread(imgdata.makernotes.phaseone.Software, len, ifp);
+      stmread(imPhaseOne.Software, len, ifp);
     case 0x0204:
-      stmread(imgdata.makernotes.phaseone.SystemType, len, ifp);
+      stmread(imPhaseOne.SystemType, len, ifp);
     case 0x0211:
       imCommon.SensorTemperature2 = int_to_float(data);
       break;
@@ -213,9 +213,9 @@ void LibRaw::parse_phase_one(int base)
       break;
     case 0x0301:
       model[63] = 0;
-      imgdata.makernotes.phaseone.FirmwareString[255] = 0;
-      fread(imgdata.makernotes.phaseone.FirmwareString, 1, 255, ifp);
-      memcpy(model, imgdata.makernotes.phaseone.FirmwareString, 63);
+      imPhaseOne.FirmwareString[255] = 0;
+      fread(imPhaseOne.FirmwareString, 1, 255, ifp);
+      memcpy(model, imPhaseOne.FirmwareString, 63);
       if ((cp = strstr(model, " camera")))
         *cp = 0;
       else if ((cp = strchr(model, ',')))
@@ -229,7 +229,7 @@ void LibRaw::parse_phase_one(int base)
         because of adapter conflicts (Mamiya RZ body) if not present, Phase One
         645 AF, Mamiya 645AFD Series, or anything
        */
-      strcpy(imgdata.makernotes.phaseone.SystemModel, model);
+      strcpy(imPhaseOne.SystemModel, model);
       if ((cp = strchr(model, '-')))
       {
         if (cp[1] == 'C')
@@ -292,6 +292,14 @@ void LibRaw::parse_phase_one(int base)
       fseek(ifp, save, SEEK_SET);
     }
   }
+
+  if ((ilm.MaxAp4CurFocal > 0.7f) &&
+      (ilm.MinAp4CurFocal > 0.7f)) {
+    float MinAp4CurFocal = MAX(ilm.MaxAp4CurFocal,ilm.MinAp4CurFocal);
+    ilm.MaxAp4CurFocal   = MIN(ilm.MaxAp4CurFocal,ilm.MinAp4CurFocal);
+    ilm.MinAp4CurFocal = MinAp4CurFocal;
+  }
+
   load_raw = ph1.format < 3 ? &LibRaw::phase_one_load_raw
                             : &LibRaw::phase_one_load_raw_c;
   maximum = 0xffff;

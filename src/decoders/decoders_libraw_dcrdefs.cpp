@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -25,9 +25,9 @@ void LibRaw::nikon_coolscan_load_raw()
   unsigned short *ubuf = (unsigned short *)buf;
 
   if (tiff_bps <= 8)
-    gamma_curve(1.0 / imgdata.params.coolscan_nef_gamma, 0., 1, 255);
+    gamma_curve(1.0 / imgdata.rawparams.coolscan_nef_gamma, 0., 1, 255);
   else
-    gamma_curve(1.0 / imgdata.params.coolscan_nef_gamma, 0., 1, 65535);
+    gamma_curve(1.0 / imgdata.rawparams.coolscan_nef_gamma, 0., 1, 65535);
   fseek(ifp, data_offset, SEEK_SET);
   for (int row = 0; row < raw_height; row++)
   {

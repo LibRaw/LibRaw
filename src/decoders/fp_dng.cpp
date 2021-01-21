@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -14,7 +14,6 @@
 
 #include "../../internal/libraw_cxx_defs.h"
 
-#ifdef USE_ZLIB
 inline unsigned int __DNG_HalfToFloat(ushort halfValue)
 {
   int sign = (halfValue >> 15) & 0x00000001;
@@ -157,6 +156,7 @@ inline void DecodeDeltaBytes(unsigned char *bytePtr, int cols, int channels)
   }
 }
 
+#ifdef USE_ZLIB
 static void DecodeFPDelta(unsigned char *input, unsigned char *output, int cols,
                           int channels, int bytesPerSample)
 {
@@ -216,6 +216,7 @@ static void DecodeFPDelta(unsigned char *input, unsigned char *output, int cols,
     }
   }
 }
+#endif
 
 static float expandFloats(unsigned char *dst, int tileWidth, int bytesps)
 {
@@ -251,6 +252,79 @@ static float expandFloats(unsigned char *dst, int tileWidth, int bytesps)
   return max;
 }
 
+struct tile_stripe_data_t
+{
+    bool tiled, striped;
+    int tileCnt;
+    unsigned tileWidth, tileHeight, tilesH, tilesV;
+    size_t maxBytesInTile;
+    std::vector<size_t> tOffsets, tBytes;
+    tile_stripe_data_t() : tiled(false), striped(false),tileCnt(0),
+        tileWidth(0),tileHeight(0),tilesH(0),tilesV(0),
+        maxBytesInTile(0){}
+    void init(tiff_ifd_t *ifd, const libraw_image_sizes_t&, const unpacker_data_t&,
+        short _order,
+        LibRaw_abstract_datastream *stream);
+};
+
+static unsigned static_get4(LibRaw_abstract_datastream *stream, short _order)
+{
+    uchar str[4] = { 0xff, 0xff, 0xff, 0xff };
+    stream->read(str, 1, 4);
+    return libraw_sget4_static(_order, str);
+}
+
+
+void tile_stripe_data_t::init(tiff_ifd_t *ifd, const libraw_image_sizes_t& sizes, 
+    const unpacker_data_t& unpacker_data, short _order, LibRaw_abstract_datastream *stream)
+{
+    tiled = (unpacker_data.tile_width <= sizes.raw_width) && (unpacker_data.tile_length <= sizes.raw_height);
+    striped = (ifd->rows_per_strip > 0 && ifd->rows_per_strip < sizes.raw_height) && ifd->strip_byte_counts_count > 0;
+
+    tileWidth = tiled ? unpacker_data.tile_width : sizes.raw_width;
+    tileHeight = tiled ? unpacker_data.tile_length :(striped ? ifd->rows_per_strip : sizes.raw_height);
+    tilesH = tiled ? (sizes.raw_width + tileWidth - 1) / tileWidth : 1;
+    tilesV = tiled ? (sizes.raw_height + tileHeight - 1) / tileHeight : 1;
+    tileCnt = tilesH * tilesV;
+
+    if (tileCnt < 1 || tileCnt > 1000000)
+        throw LIBRAW_EXCEPTION_DECODE_RAW;
+
+    tOffsets = std::vector<size_t>(tileCnt);
+    tBytes = std::vector <size_t>(tileCnt);
+
+    if (tiled)
+        for (int t = 0; t < tileCnt; ++t)
+            tOffsets[t] = static_get4(stream, _order);
+    else if (striped)
+        for (int t = 0; t < tileCnt && t < ifd->strip_offsets_count; ++t)
+            tOffsets[t] = ifd->strip_offsets[t];
+    else
+        tOffsets[0] = ifd->offset;
+
+    maxBytesInTile = 0;
+
+    if (tileCnt == 1 || (!tiled && !striped))
+        tBytes[0] = maxBytesInTile = ifd->bytes;
+    else if (tiled)
+    {
+        // ifd->bytes points to tile size table if more than 1 tile exists
+        stream->seek(ifd->bytes, SEEK_SET);
+        for (size_t t = 0; t < tileCnt; ++t)
+        {
+            tBytes[t] = static_get4(stream, _order); ;
+            maxBytesInTile = MAX(maxBytesInTile, tBytes[t]);
+        }
+    }
+    else if (striped)
+        for (size_t t = 0; t < tileCnt && t < ifd->strip_byte_counts_count; ++t)
+        {
+            tBytes[t] = ifd->strip_byte_counts[t];
+            maxBytesInTile = MAX(maxBytesInTile, tBytes[t]);
+        }
+}
+
+#ifdef USE_ZLIB
 void LibRaw::deflate_dng_load_raw()
 {
   int iifd = find_ifd_by_offset(libraw_internal_data.unpacker_data.data_offset);
@@ -267,24 +341,12 @@ void LibRaw::deflate_dng_load_raw()
   if (libraw_internal_data.unpacker_data.tiff_samples != ifd->samples)
     throw LIBRAW_EXCEPTION_DECODE_RAW; // Wrong IFD
 
-  size_t tilesH = (imgdata.sizes.raw_width +
-                   libraw_internal_data.unpacker_data.tile_width - 1) /
-                  libraw_internal_data.unpacker_data.tile_width;
-  size_t tilesV = (imgdata.sizes.raw_height +
-                   libraw_internal_data.unpacker_data.tile_length - 1) /
-                  libraw_internal_data.unpacker_data.tile_length;
-  size_t tileCnt = tilesH * tilesV;
+  tile_stripe_data_t tiles;
+  tiles.init(ifd, imgdata.sizes, libraw_internal_data.unpacker_data, libraw_internal_data.unpacker_data.order,
+      libraw_internal_data.internal_data.input);
 
   if (ifd->sample_format == 3)
-  { // Floating point data
-    float_raw_image = (float *)calloc(
-        tileCnt * libraw_internal_data.unpacker_data.tile_length *
-            libraw_internal_data.unpacker_data.tile_width * ifd->samples,
-        sizeof(float));
-    // imgdata.color.maximum = 65535;
-    // imgdata.color.black = 0;
-    // memset(imgdata.color.cblack,0,sizeof(imgdata.color.cblack));
-  }
+      float_raw_image = (float *)calloc(tiles.tileCnt * tiles.tileWidth * tiles.tileHeight *ifd->samples, sizeof(float));
   else
     throw LIBRAW_EXCEPTION_DECODE_RAW; // Only float deflated supported
 
@@ -303,88 +365,40 @@ void LibRaw::deflate_dng_load_raw()
     break;
   }
 
-  if (libraw_internal_data.unpacker_data.tile_length < INT_MAX)
-  {
-    if (tileCnt < 1 || tileCnt > 1000000)
-      throw LIBRAW_EXCEPTION_DECODE_RAW;
+  unsigned tilePixels = tiles.tileWidth * tiles.tileHeight;
+  unsigned pixelSize = sizeof(float) * ifd->samples;
+  unsigned tileBytes = tilePixels * pixelSize;
+  unsigned tileRowBytes = tiles.tileWidth * pixelSize;
 
-    size_t *tOffsets = (size_t *)malloc(tileCnt * sizeof(size_t));
-    for (int t = 0; t < tileCnt; ++t)
-      tOffsets[t] = get4();
+  std::vector<uchar> cBuffer(tiles.maxBytesInTile);
+  std::vector<uchar> uBuffer(tileBytes + tileRowBytes); // extra row for decoding
 
-    size_t *tBytes = (size_t *)malloc(tileCnt * sizeof(size_t));
-    unsigned long maxBytesInTile = 0;
-    if (tileCnt == 1)
-      tBytes[0] = maxBytesInTile = ifd->bytes;
-    else
+  for (size_t y = 0, t = 0; y < imgdata.sizes.raw_height; y += tiles.tileHeight)
     {
-      libraw_internal_data.internal_data.input->seek(ifd->bytes, SEEK_SET);
-      for (size_t t = 0; t < tileCnt; ++t)
+      for (size_t x = 0; x < imgdata.sizes.raw_width; x += tiles.tileWidth, ++t)
       {
-        tBytes[t] = get4();
-        maxBytesInTile = MAX(maxBytesInTile, tBytes[t]);
-      }
-    }
-    unsigned tilePixels = libraw_internal_data.unpacker_data.tile_width *
-                          libraw_internal_data.unpacker_data.tile_length;
-    unsigned pixelSize = sizeof(float) * ifd->samples;
-    unsigned tileBytes = tilePixels * pixelSize;
-    unsigned tileRowBytes =
-        libraw_internal_data.unpacker_data.tile_width * pixelSize;
-
-    unsigned char *cBuffer = (unsigned char *)malloc(maxBytesInTile);
-    unsigned char *uBuffer = (unsigned char *)malloc(
-        tileBytes + tileRowBytes); // extra row for decoding
-
-    for (size_t y = 0, t = 0; y < imgdata.sizes.raw_height;
-         y += libraw_internal_data.unpacker_data.tile_length)
-    {
-      for (size_t x = 0; x < imgdata.sizes.raw_width;
-           x += libraw_internal_data.unpacker_data.tile_width, ++t)
-      {
-        libraw_internal_data.internal_data.input->seek(tOffsets[t], SEEK_SET);
-        libraw_internal_data.internal_data.input->read(cBuffer, 1, tBytes[t]);
+        libraw_internal_data.internal_data.input->seek(tiles.tOffsets[t], SEEK_SET);
+        libraw_internal_data.internal_data.input->read(cBuffer.data(), 1, tiles.tBytes[t]);
         unsigned long dstLen = tileBytes;
         int err =
-            uncompress(uBuffer + tileRowBytes, &dstLen, cBuffer, tBytes[t]);
+            uncompress(uBuffer.data() + tileRowBytes, &dstLen, cBuffer.data(), tiles.tBytes[t]);
         if (err != Z_OK)
         {
-          free(tOffsets);
-          free(tBytes);
-          free(cBuffer);
-          free(uBuffer);
           throw LIBRAW_EXCEPTION_DECODE_RAW;
           return;
         }
         else
         {
           int bytesps = ifd->bps >> 3;
-          size_t rowsInTile =
-              y + libraw_internal_data.unpacker_data.tile_length >
-                      imgdata.sizes.raw_height
-                  ? imgdata.sizes.raw_height - y
-                  : libraw_internal_data.unpacker_data.tile_length;
-          size_t colsInTile =
-              x + libraw_internal_data.unpacker_data.tile_width >
-                      imgdata.sizes.raw_width
-                  ? imgdata.sizes.raw_width - x
-                  : libraw_internal_data.unpacker_data.tile_width;
+          size_t rowsInTile = y + tiles.tileHeight > imgdata.sizes.raw_height ? imgdata.sizes.raw_height - y : tiles.tileHeight;
+          size_t colsInTile = x + tiles.tileWidth > imgdata.sizes.raw_width ? imgdata.sizes.raw_width - x : tiles.tileWidth;
 
-          for (size_t row = 0; row < rowsInTile;
-               ++row) // do not process full tile if not needed
+          for (size_t row = 0; row < rowsInTile; ++row) // do not process full tile if not needed
           {
-            unsigned char *dst =
-                uBuffer + row * libraw_internal_data.unpacker_data.tile_width *
-                              bytesps * ifd->samples;
-            unsigned char *src = dst + tileRowBytes;
-            DecodeFPDelta(src, dst,
-                          libraw_internal_data.unpacker_data.tile_width /
-                              xFactor,
-                          ifd->samples * xFactor, bytesps);
-            float lmax = expandFloats(
-                dst,
-                libraw_internal_data.unpacker_data.tile_width * ifd->samples,
-                bytesps);
+              unsigned char *dst = uBuffer.data() + row * tiles.tileWidth * bytesps * ifd->samples;
+              unsigned char *src = dst + tileRowBytes;
+              DecodeFPDelta(src, dst, tiles.tileWidth / xFactor, ifd->samples * xFactor, bytesps);
+              float lmax = expandFloats(dst, tiles.tileWidth * ifd->samples, bytesps);
             max = MAX(max, lmax);
             unsigned char *dst2 = (unsigned char *)&float_raw_image
                 [((y + row) * imgdata.sizes.raw_width + x) * ifd->samples];
@@ -393,11 +407,7 @@ void LibRaw::deflate_dng_load_raw()
         }
       }
     }
-    free(tOffsets);
-    free(tBytes);
-    free(cBuffer);
-    free(uBuffer);
-  }
+  
   imgdata.color.fmaximum = max;
 
   // Set fields according to data format
@@ -422,18 +432,12 @@ void LibRaw::deflate_dng_load_raw()
         imgdata.sizes.raw_width * 16;
   }
 
-  if (imgdata.params.raw_processing_options &
-      LIBRAW_PROCESSING_CONVERTFLOAT_TO_INT)
+  if (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CONVERTFLOAT_TO_INT)
     convertFloatToInt(); // with default settings
 }
 #else
 void LibRaw::deflate_dng_load_raw() { throw LIBRAW_EXCEPTION_DECODE_RAW; }
 #endif
-void LibRaw::float_dng_load_raw_placeholder()
-{
-  // placeholder only, real decoding implemented in DNG SDK
-  throw LIBRAW_EXCEPTION_DECODE_RAW;
-}
 
 int LibRaw::is_floating_point()
 {
@@ -459,6 +463,7 @@ void LibRaw::convertFloatToInt(float dmin /* =4096.f */,
 {
   int samples = 0;
   float *data = 0;
+  void *orawalloc = imgdata.rawdata.raw_alloc;
   if (imgdata.rawdata.float_image)
   {
     samples = 1;
@@ -531,8 +536,139 @@ void LibRaw::convertFloatToInt(float dmin /* =4096.f */,
     imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch =
         imgdata.sizes.raw_width * 8;
   }
-  free(data); // remove old allocation
+  if(orawalloc)
+    free(orawalloc); // remove old allocation
   imgdata.rawdata.float_image = 0;
   imgdata.rawdata.float3_image = 0;
   imgdata.rawdata.float4_image = 0;
 }
+
+static
+#if defined(_MSC_VER)
+_forceinline
+#else
+inline
+#endif
+void swap24(uchar *data, int len)
+{
+    for (int i = 0; i < len - 2; i += 3)
+    {
+        uchar t = data[i];
+        data[i] = data[i + 2];
+        data[i + 2] = t;
+    }
+}
+
+static
+#if defined(_MSC_VER)
+_forceinline
+#else
+inline
+#endif
+void swap32(uchar *data, int len)
+{
+    unsigned *d = (unsigned*)data;
+    for (int i = 0; i < len / 4; i++)
+    {
+        unsigned x = d[i];
+        d[i] = (x << 24) + ((x << 8) & 0x00FF0000) +
+            ((x >> 8) & 0x0000FF00) + (x >> 24);
+    }
+}
+
+
+void LibRaw::uncompressed_fp_dng_load_raw()
+{
+    int iifd = find_ifd_by_offset(libraw_internal_data.unpacker_data.data_offset);
+    if (iifd < 0 || iifd > libraw_internal_data.identify_data.tiff_nifds)
+        throw LIBRAW_EXCEPTION_DECODE_RAW;
+    struct tiff_ifd_t *ifd = &tiff_ifd[iifd];
+
+    float *float_raw_image = 0;
+
+    if (ifd->samples != 1 && ifd->samples != 3 && ifd->samples != 4)
+        throw LIBRAW_EXCEPTION_DECODE_RAW; 
+
+    if (libraw_internal_data.unpacker_data.tiff_samples != ifd->samples)
+        throw LIBRAW_EXCEPTION_DECODE_RAW; // Wrong IFD
+
+    int bytesps = (ifd->bps + 7) >> 3; // round to upper value
+
+    tile_stripe_data_t tiles;
+    tiles.init(ifd, imgdata.sizes, libraw_internal_data.unpacker_data, libraw_internal_data.unpacker_data.order,
+        libraw_internal_data.internal_data.input);
+
+    if (ifd->sample_format == 3)
+        float_raw_image = (float *)calloc(tiles.tileCnt * tiles.tileWidth * tiles.tileHeight *ifd->samples, sizeof(float));
+    else
+        throw LIBRAW_EXCEPTION_DECODE_RAW; // Only float supported
+
+    bool difford = (libraw_internal_data.unpacker_data.order == 0x4949) == (ntohs(0x1234) == 0x1234);
+    float max = 0.f;
+
+    std::vector<uchar> rowbuf(tiles.tileWidth *sizeof(float) * ifd->samples); // line buffer for last tile in tile row
+
+    for (size_t y = 0, t = 0; y < imgdata.sizes.raw_height; y += tiles.tileHeight)
+    {
+        for (size_t x = 0; x < imgdata.sizes.raw_width  && t < tiles.tileCnt; x += tiles.tileWidth, ++t)
+        {
+            libraw_internal_data.internal_data.input->seek(tiles.tOffsets[t], SEEK_SET);
+            size_t rowsInTile = y + tiles.tileHeight > imgdata.sizes.raw_height ? imgdata.sizes.raw_height - y : tiles.tileHeight;
+            size_t colsInTile = x + tiles.tileWidth > imgdata.sizes.raw_width ? imgdata.sizes.raw_width - x : tiles.tileWidth;
+
+            int inrowbytes = colsInTile * bytesps * ifd->samples;
+            int fullrowbytes = tiles.tileWidth *bytesps * ifd->samples;
+            int outrowbytes = colsInTile * sizeof(float) * ifd->samples;
+            std::vector<uchar> vec(fullrowbytes > inrowbytes ? fullrowbytes : 0);
+
+            for (size_t row = 0; row < rowsInTile; ++row) // do not process full tile if not needed
+            {
+                unsigned char *dst = fullrowbytes > inrowbytes ? rowbuf.data(): // last tile in row, use buffer
+                    (unsigned char *)&float_raw_image
+                    [((y + row) * imgdata.sizes.raw_width + x) * ifd->samples];
+                libraw_internal_data.internal_data.input->read(dst, 1, fullrowbytes);
+                if (bytesps == 2 && difford)
+                    swab((char *)dst, (char *)dst, fullrowbytes);
+                else if (bytesps == 3 && (libraw_internal_data.unpacker_data.order == 0x4949)) // II-16bit
+                    swap24(dst, fullrowbytes);
+                if (bytesps == 4 && difford)
+                    swap32(dst, fullrowbytes);
+
+                float lmax = expandFloats(
+                    dst,
+                    tiles.tileWidth * ifd->samples,
+                    bytesps);
+                if (fullrowbytes > inrowbytes) // last tile in row: copy buffer to destination
+                    memmove(&float_raw_image[((y + row) * imgdata.sizes.raw_width + x) * ifd->samples], dst, outrowbytes);
+                max = MAX(max, lmax);
+            }
+        }
+    }
+
+    imgdata.color.fmaximum = max;
+
+    // setup outpuf fields
+    imgdata.rawdata.raw_alloc = float_raw_image;
+    if (ifd->samples == 1)
+    {
+        imgdata.rawdata.float_image = float_raw_image;
+        imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch =
+            imgdata.sizes.raw_width * 4;
+    }
+    else if (ifd->samples == 3)
+    {
+        imgdata.rawdata.float3_image = (float(*)[3])float_raw_image;
+        imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch =
+            imgdata.sizes.raw_width * 12;
+    }
+    else if (ifd->samples == 4)
+    {
+        imgdata.rawdata.float4_image = (float(*)[4])float_raw_image;
+        imgdata.rawdata.sizes.raw_pitch = imgdata.sizes.raw_pitch =
+            imgdata.sizes.raw_width * 16;
+    }
+
+    if (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CONVERTFLOAT_TO_INT)
+        convertFloatToInt();  
+}
+

@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: simple_dcraw.cpp
- * Copyright 2008-2020 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2021 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8, 2008
  *
  * LibRaw simple C++ API:  emulates call to "dcraw  [-D]  [-T] [-v] [-e] [-4]"
@@ -62,7 +62,7 @@ int main(int ac, char *av[])
   char outfn[1024], thumbfn[1024];
 
   LibRaw* RawProcessor = new LibRaw;
-  RawProcessor->imgdata.params.custom_camera_strings = customCameras;
+  RawProcessor->imgdata.rawparams.custom_camera_strings = customCameras;
   if (ac < 2)
   {
     printf("simple_dcraw - LibRaw %s sample. Emulates dcraw [-D] [-T] [-v] "
