@@ -56,6 +56,10 @@ typedef unsigned __int64 uint64_t;
 /*  Have not tested on 9.x and 10.x, but Intel documentation claims OpenMP 2.5
  * support in 9.1 */
 #define LIBRAW_USE_OPENMP
+#elif defined(__GNUC__) &&                                                     \
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
+/* GCC documentation claims OpenMP 2.5 support since 4.2 */
+#define LIBRAW_USE_OPENMP
 #else
 #undef LIBRAW_USE_OPENMP
 #endif
