@@ -313,6 +313,9 @@ int LibRaw::try_dngsdk()
     if (stage23used)
         stage2.Release();
 
+    if ((ptype == ttFloat) && (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CONVERTFLOAT_TO_INT))
+        zerocopy = true;
+
     if (zerocopy)
     {
       switch (ptype)
@@ -368,6 +371,13 @@ int LibRaw::try_dngsdk()
         break;
       }
     }
+
+    if ((ptype == ttFloat) && (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CONVERTFLOAT_TO_INT))
+    {
+        convertFloatToInt();
+        zerocopy = false;
+    }
+
     if (zerocopy)
     {
       dng_negative *stolen = negative.Release();
