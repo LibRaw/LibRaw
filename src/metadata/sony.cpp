@@ -1296,7 +1296,7 @@ void LibRaw::parseSonyMakernotes(
       d = get2();
       if ((a) && (c == 1))
       {
-        fseek(ifp, d - 8, SEEK_CUR);
+        fseek(ifp, INT64(d) - 8LL, SEEK_CUR);
         table_buf = (uchar *)malloc(256);
         fread(table_buf, 256, 1, ifp);
         imgdata.shootinginfo.DriveMode = table_buf[1];

@@ -608,7 +608,7 @@ void LibRaw::parse_raspberrypi()
 	width = raw_width;
 	data_offset = ftell(ifp) + 0x8000 - sizeof(brcm_tag);
 
-	if (!fseek(ifp, 0xB0 - sizeof(brcm_tag), SEEK_CUR) &&
+	if (!fseek(ifp, 0xB0 - int(sizeof(brcm_tag)), SEEK_CUR) &&
 		fread(&header, 1, sizeof(header), ifp)) {
 		switch (header.bayer_order) {
 		case 0: //RGGB

@@ -219,7 +219,7 @@ int LibRaw::parse_tiff_ifd(int base)
         base = ftell(ifp);
         order = get2();
         fseek(ifp, 2, SEEK_CUR);
-        fseek(ifp, get4() - 8, SEEK_CUR);
+        fseek(ifp, INT64(get4()) - 8LL, SEEK_CUR);
         parse_tiff_ifd(base);
         base = sbase;
         order = sorder;

@@ -281,7 +281,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
 //           }
           }
         }
-        fseek (ifp, 68-Canon_D30_linenums_2_StdWBi.size()*8, SEEK_CUR);
+        fseek (ifp, 68-int(Canon_D30_linenums_2_StdWBi.size())*8, SEEK_CUR);
 
         FORC4 {
           q = get2();
@@ -330,7 +330,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
           }
         }
 
-        fseek (ifp, 78+WB_table_offset, SEEK_CUR);
+        fseek (ifp, 78LL+WB_table_offset, SEEK_CUR);
         for (int linenum = 0; linenum < linenums_2_StdWBi.size(); linenum++) {
           if (linenums_2_StdWBi[linenum] != LIBRAW_WBI_Unknown) {
             FORC4 icWBC[linenums_2_StdWBi[linenum]][GRBG_2_RGBG(c)] = get2() ^ key[c & 1];

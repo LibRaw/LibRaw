@@ -263,7 +263,7 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
     if (get2() != 42)
       goto quit;
     offset = get4();
-    fseek(ifp, offset - 8, SEEK_CUR);
+    fseek(ifp, INT64(offset) - 8LL, SEEK_CUR);
   }
   else
   {
