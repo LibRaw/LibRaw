@@ -62,7 +62,6 @@ unsigned libraw_sget4_static(short _order, uchar *s)
   else
     return s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3];
 }
-#define sget4(s) sget4((uchar *)s)
 
 unsigned LibRaw::get4()
 {
