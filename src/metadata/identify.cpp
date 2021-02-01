@@ -1805,8 +1805,7 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize, int flen)
 		}
 		else if (unique_id == PentaxID_staristD) {
 			load_raw = &LibRaw::unpacked_load_raw;
-			data_error = -1;
-
+			/* data_error = -1; */ /* No way to know why data_error was raised in dcraw.c, looks not needed esp. for unpacked_load_raw */
 		}
 		else if (unique_id == PentaxID_staristDS) {
 			height -= 2;
