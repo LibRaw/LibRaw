@@ -1750,7 +1750,9 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize, int flen)
 	int i,c;
 	struct jhead jh;
 
-	if (makeIs(LIBRAW_CAMERAMAKER_Canon) && !tiff_flip && imCanon.MakernotesFlip)
+	if (makeIs(LIBRAW_CAMERAMAKER_Canon) 
+        && ( !tiff_flip || unique_id == CanonID_EOS_40D)
+        && imCanon.MakernotesFlip)
 	{
 		tiff_flip = imCanon.MakernotesFlip;
 	}

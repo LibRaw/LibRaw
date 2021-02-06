@@ -1749,13 +1749,10 @@ void LibRaw::apply_tiff()
     tile_width = INT_MAX;
   if (!tile_length)
     tile_length = INT_MAX;
+  for (i = tiff_nifds; i--;)
+    if (tiff_ifd[i].t_flip)
+      tiff_flip = tiff_ifd[i].t_flip;
 
-  if (strncasecmp(make, "CANON", 5) || strcasecmp(model,"Canon EOS 40D") || !imCanon.MakernotesFlip) // Not canon, or no canon makernotes flip
-  {
-      for (i = tiff_nifds; i--;)
-          if (tiff_ifd[i].t_flip)
-              tiff_flip = tiff_ifd[i].t_flip;
-  }
 #if 0
   if (raw < 0 && is_raw)
       is_raw = 0;
