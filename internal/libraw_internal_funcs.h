@@ -309,6 +309,10 @@ it under the terms of the one of two licenses as you choose:
 	void        pseudoinverse (double (*in)[3], double (*out)[3], int size);
 	void        simple_coeff (int index);
 
+// Openp
+	char** malloc_omp_buffers(int buffer_count, size_t buffer_size, const char* where);
+	void free_omp_buffers(char** buffers, int buffer_count);
+
 
 // Tiff/Exif parsers
 	void        tiff_get (unsigned base,unsigned *tag, unsigned *type, unsigned *len, unsigned *save);

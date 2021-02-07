@@ -611,3 +611,27 @@ short LibRaw::tiff_sget (unsigned save, uchar *buf, unsigned buf_len, INT64 *tag
   *tag_offset += 12;
   return 0;
 }
+
+char** LibRaw::malloc_omp_buffers(int buffer_count, size_t buffer_size, const char* where)
+{
+    char** buffers = (char**)malloc(sizeof(char*) * buffer_count);
+    merror(buffers, where);
+
+    for (int i = 0; i < buffer_count; i++)
+    {
+        buffers[i] = (char*)malloc(buffer_size);
+        if (buffers[i] == NULL)
+        {
+            free_omp_buffers(buffers, i);
+            merror(NULL, where);
+        }
+    }
+    return buffers;
+}
+
+void LibRaw::free_omp_buffers(char** buffers, int buffer_count)
+{
+    for (int i = 0; i < buffer_count; i++)
+        free(buffers[i]);
+    free(buffers);
+}

@@ -209,11 +209,10 @@ int LibRaw::raw2image(void)
 void LibRaw::copy_fuji_uncropped(unsigned short cblack[4],
                                  unsigned short *dmaxp)
 {
-  int row;
 #if defined(LIBRAW_USE_OPENMP)
-#pragma omp parallel for default(shared)
+#pragma omp parallel for schedule(dynamic) default(none) firstprivate(cblack) shared(dmaxp)
 #endif
-  for (row = 0; row < int(S.raw_height) - int(S.top_margin) * 2; row++)
+  for (int row = 0; row < int(S.raw_height) - int(S.top_margin) * 2; row++)
   {
     int col;
     unsigned short ldmax = 0;
@@ -264,12 +263,11 @@ void LibRaw::copy_fuji_uncropped(unsigned short cblack[4],
 void LibRaw::copy_bayer(unsigned short cblack[4], unsigned short *dmaxp)
 {
   // Both cropped and uncropped
-  int row;
   int maxHeight = MIN(int(S.height),int(S.raw_height)-int(S.top_margin));
 #if defined(LIBRAW_USE_OPENMP)
-#pragma omp parallel for default(shared)
+#pragma omp parallel for schedule(dynamic) default(none) shared(dmaxp) firstprivate(cblack, maxHeight)
 #endif
-  for (row = 0; row < maxHeight ; row++)
+  for (int row = 0; row < maxHeight ; row++)
   {
     int col;
     unsigned short ldmax = 0;
@@ -287,9 +285,7 @@ void LibRaw::copy_bayer(unsigned short cblack[4], unsigned short *dmaxp)
       }
       else
         val = 0;
-      imgdata
-          .image[((row) >> IO.shrink) * S.iwidth + ((col) >> IO.shrink)][cc] =
-          val;
+      imgdata.image[((row) >> IO.shrink) * S.iwidth + ((col) >> IO.shrink)][cc] = val;
     }
 #if defined(LIBRAW_USE_OPENMP)
 #pragma omp critical(dataupdate)
