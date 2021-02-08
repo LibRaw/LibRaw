@@ -2263,7 +2263,7 @@ int crxReadSubbandHeaders(crx_data_header_t *hdr, CrxImage *img, CrxTile *tile, 
       // old header
       uint32_t bitData = LibRaw::sgetn(4, *subbandMdatPtr + 8);
       band->dataSize = subbandSize - (bitData & 0x7FFFF);
-      band->supportsPartial = bitData & 0x8000;
+      band->supportsPartial = bitData & 0x8000000;
       band->qParam = (bitData >> 19) & 0xFF;
       band->qStepBase = 0;
       band->qStepMult = 0;
