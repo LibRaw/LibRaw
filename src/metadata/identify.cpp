@@ -1604,6 +1604,16 @@ void LibRaw::identify_process_dng_fields()
 
 void LibRaw::identify_finetune_pentax()
 {
+    if (dng_version && data_offset)
+    {
+        for(int i = 0; i < tiff_nifds; i++)
+            if (tiff_ifd[i].offset == data_offset)
+            {
+                if (tiff_ifd[i].phint == 34892) return; // Linear DNG made from Pentax source
+                break;
+            }
+    }
+
 	if (makeIs(LIBRAW_CAMERAMAKER_Pentax) ||
 		makeIs(LIBRAW_CAMERAMAKER_Samsung)) {
 		if (height == 2624 &&
