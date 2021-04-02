@@ -75,7 +75,8 @@ void usage(const char *prog)
          "-n <num>  Set threshold for wavelet denoising\n"
          "-H [0-9]  Highlight mode (0=clip, 1=unclip, 2=blend, 3+=rebuild)\n"
          "-t [0-7]  Flip image (0=none, 3=180, 5=90CCW, 6=90CW)\n"
-         "-o [0-6]  Output colorspace (raw,sRGB,Adobe,Wide,ProPhoto,XYZ,ACES)\n"
+         "-o [0-8]  Output colorspace (raw,sRGB,Adobe,Wide,ProPhoto,XYZ,ACES,\n"
+         "          DCI-P3,Rec2020)\n"
 #ifndef NO_LCMS
          "-o file   Output ICC profile\n"
          "-p file   Camera input profile (use \'embed\' for embedded profile)\n"
