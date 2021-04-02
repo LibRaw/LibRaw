@@ -28,10 +28,12 @@ void LibRaw::convert_to_rgb()
   static const double(*out_rgb[])[3] = {
       LibRaw_constants::rgb_rgb,  LibRaw_constants::adobe_rgb,
       LibRaw_constants::wide_rgb, LibRaw_constants::prophoto_rgb,
-      LibRaw_constants::xyz_rgb,  LibRaw_constants::aces_rgb};
+      LibRaw_constants::xyz_rgb,  LibRaw_constants::aces_rgb,
+      LibRaw_constants::dcip3d65_rgb,  LibRaw_constants::rec2020_rgb};
   static const char *name[] = {"sRGB",          "Adobe RGB (1998)",
                                "WideGamut D65", "ProPhoto D65",
-                               "XYZ",           "ACES"};
+                               "XYZ",           "ACES",
+                               "DCI-P3 D65",    "Rec. 2020"};
   static const unsigned phead[] = {
       1024, 0, 0x2100000,  0x6d6e7472, 0x52474220, 0x58595a20, 0,
       0,    0, 0x61637370, 0,          0,          0x6e6f6e65, 0,
@@ -57,7 +59,7 @@ void LibRaw::convert_to_rgb()
 
   gamma_curve(gamm[0], gamm[1], 0, 0);
   memcpy(out_cam, rgb_cam, sizeof out_cam);
-  raw_color |= colors == 1 || output_color < 1 || output_color > 6;
+  raw_color |= colors == 1 || output_color < 1 || output_color > 8;
   if (!raw_color)
   {
     oprof = (unsigned *)calloc(phead[0], 1);
