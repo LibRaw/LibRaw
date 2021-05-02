@@ -773,7 +773,29 @@ void LibRaw::identify()
 		//Assume that this isn't a raw unless the header can be found
 		is_raw = 0;
 
-		if (!strncasecmp(model, "RP_imx", 6)) {
+		if (!strncasecmp(model, "RP_testc",8) ||
+		    !strncasecmp(model, "RP_imx477",9)) {
+			const long offsets[] = {
+				//IMX477 offsets
+				3375104,  //2028x1080 12bit
+				4751360,  //2028x1520 12bit
+				18711040, //4056x3040 12bit
+				1015808,  //1012x760 10bit
+				-1        //Marker for end of table
+			};
+			int offset_idx;
+			for (offset_idx=0; offsets[offset_idx]!=-1; offset_idx++) {
+				if(!fseek (ifp, -offsets[offset_idx], SEEK_END) &&
+				   fread (head, 1, 32, ifp) && !strncmp(head,"BRCM", 4)) {
+					fseek(ifp, -32, SEEK_CUR);
+					strcpy (make, "SonyRPF");
+					black = (offset_idx == 3) ? 64 : 256;
+					parse_raspberrypi();
+					break;
+				}
+			}
+		}
+		else if (!strncasecmp(model, "RP_imx", 6)) {
 			const long offsets[] = {
 				//IMX219 offsets
 				10270208, //8MPix 3280x2464
