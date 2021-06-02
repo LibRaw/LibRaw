@@ -57,6 +57,7 @@ if test x$jpeg = xtrue; then
                         AC_CHECK_HEADERS([jpeglib.h], [
                                 CPPFLAGS="$CPPFLAGS -DUSE_JPEG -DUSE_JPEG8"
                                 LIBS="$LIBS -ljpeg"
+                                AC_SUBST([PACKAGE_LIBS_PRIVATE],"-ljpeg $PACKAGE_LIBS_PRIVATE")
                         ], AC_MSG_WARN([no jpeg headers found]))
                 ],
                 AC_MSG_WARN([libjpeg not found])
@@ -78,6 +79,7 @@ if test x$jasper = xtrue; then
                         AC_CHECK_HEADERS([jasper/jasper.h], [
                                 CPPFLAGS="$CPPFLAGS -DUSE_JASPER"
                                 LIBS="$LIBS -ljasper"
+                                AC_SUBST([PACKAGE_LIBS_PRIVATE],"-ljasper $PACKAGE_LIBS_PRIVATE")
                         ], AC_MSG_WARN([no jasper headers found]))
                 ],
                 AC_MSG_WARN([libjasper not found])
