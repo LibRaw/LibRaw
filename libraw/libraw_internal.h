@@ -76,6 +76,7 @@ public:
   static const double wide_rgb[3][3];
   static const double prophoto_rgb[3][3];
   static const double aces_rgb[3][3];
+  static const double acescg_rgb[3][3];
   static const double dcip3d65_rgb[3][3];
   static const double rec2020_rgb[3][3];
 };
