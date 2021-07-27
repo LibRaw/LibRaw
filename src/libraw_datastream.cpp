@@ -912,6 +912,7 @@ int LibRaw_bigfile_buffered_datastream::read(void *data, size_t size, size_t nme
 
 bool LibRaw_bigfile_buffered_datastream::fillBufferAt(int bi, INT64 off)
 {
+    if (off < 0LL) return false;
     iobuffers[bi]._bstart = off;
     if (iobuffers[bi].size() >= LIBRAW_BUFFER_ALIGN * 2)// Align to a file block.
         iobuffers[bi]._bstart &= (INT64)~((INT64)(LIBRAW_BUFFER_ALIGN - 1));
@@ -941,7 +942,6 @@ int LibRaw_bigfile_buffered_datastream::seek(INT64 o, int whence)
     if (whence == SEEK_SET) _fpos = o;
     else if (whence == SEEK_END) _fpos = o > 0 ? _fsize : _fsize + o;
     else if (whence == SEEK_CUR) _fpos += o;
-
     return 0;
 }
 
