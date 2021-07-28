@@ -606,7 +606,10 @@ void LibRaw::uncompressed_fp_dng_load_raw()
     bool difford = (libraw_internal_data.unpacker_data.order == 0x4949) == (ntohs(0x1234) == 0x1234);
     float max = 0.f;
 
-    std::vector<uchar> rowbuf(tiles.tileWidth *sizeof(float) * ifd->samples); // line buffer for last tile in tile row
+    // fullrowbytes is used as the size of rowbuff in line 631
+    // but fullrowbytes is calculated in line 623
+    // therefore should allocate rowbuf using fullrowbytes
+    std::vector<uchar> rowbuf(tiles.tileWidth * bytesps * ifd->samples); // line buffer for last tile in tile row
 
     for (size_t y = 0, t = 0; y < imgdata.sizes.raw_height; y += tiles.tileHeight)
     {
