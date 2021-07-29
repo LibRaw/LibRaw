@@ -958,15 +958,16 @@ void LibRaw::identify()
     {
     case 0: // Compression not set, assuming uncompressed
     case 1:
-      // Uncompressed float: decoder set in apply_tiff
-      if (load_raw != &LibRaw::uncompressed_fp_dng_load_raw)
+      // Uncompressed float: decoder set in apply_tiff for valid files; not set for non-valid with sampleformat==3
+      if ((load_raw != &LibRaw::uncompressed_fp_dng_load_raw)  && (tiff_sampleformat != 3))
         load_raw = &LibRaw::packed_dng_load_raw;
       break;
     case 7:
       load_raw = &LibRaw::lossless_dng_load_raw;
       break;
     case 8:
-      load_raw = &LibRaw::deflate_dng_load_raw;
+        if (tiff_sampleformat == 3 && tiff_bps > 8 && (tiff_bps % 8 == 0) && tiff_bps <= 32)
+            load_raw = &LibRaw::deflate_dng_load_raw;
       break;
 #ifdef USE_GPRSDK
     case 9:
@@ -1108,7 +1109,9 @@ dng_skip:
       (tiff_bps > 16 &&
        (load_raw != &LibRaw::deflate_dng_load_raw &&
         load_raw != &LibRaw::uncompressed_fp_dng_load_raw )) ||
-      tiff_samples > 4 || colors > 4 || colors < 1)
+      ((load_raw == &LibRaw::deflate_dng_load_raw || load_raw != &LibRaw::uncompressed_fp_dng_load_raw)
+        && (tiff_bps < 16 || tiff_bps > 32 || (tiff_bps % 8))   )
+      ||tiff_samples > 4 || colors > 4 || colors < 1)
   {
     is_raw = 0;
     RUN_CALLBACK(LIBRAW_PROGRESS_IDENTIFY, 1, 2);

@@ -1793,7 +1793,7 @@ void LibRaw::apply_tiff()
     case 0:
     case 1:
         if (dng_version && tiff_sampleformat == 3 &&
-            (tiff_bps > 8 && (tiff_bps % 8 == 0))) // 16,24,32,48...
+          (tiff_bps > 8 && (tiff_bps % 8 == 0) && (tiff_bps <= 32))) // only 16,24, and 32 are allowed
         {
             load_raw = &LibRaw::uncompressed_fp_dng_load_raw;
             break;
