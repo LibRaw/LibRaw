@@ -1109,7 +1109,7 @@ dng_skip:
       (tiff_bps > 16 &&
        (load_raw != &LibRaw::deflate_dng_load_raw &&
         load_raw != &LibRaw::uncompressed_fp_dng_load_raw )) ||
-      ((load_raw == &LibRaw::deflate_dng_load_raw || load_raw != &LibRaw::uncompressed_fp_dng_load_raw)
+      ((load_raw == &LibRaw::deflate_dng_load_raw || load_raw == &LibRaw::uncompressed_fp_dng_load_raw)
         && (tiff_bps < 16 || tiff_bps > 32 || (tiff_bps % 8))   )
       ||tiff_samples > 4 || colors > 4 || colors < 1)
   {
