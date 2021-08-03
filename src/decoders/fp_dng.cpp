@@ -337,10 +337,13 @@ void LibRaw::deflate_dng_load_raw()
   float max = 0.f;
 
   if (ifd->samples != 1 && ifd->samples != 3 && ifd->samples != 4)
-    throw LIBRAW_EXCEPTION_DECODE_RAW; // Only float deflated supported
+    throw LIBRAW_EXCEPTION_DECODE_RAW; 
 
   if (libraw_internal_data.unpacker_data.tiff_samples != ifd->samples)
     throw LIBRAW_EXCEPTION_DECODE_RAW; // Wrong IFD
+
+  if (imgdata.idata.filters && ifd->samples > 1)
+    throw LIBRAW_EXCEPTION_DECODE_RAW;
 
   tile_stripe_data_t tiles;
   tiles.init(ifd, imgdata.sizes, libraw_internal_data.unpacker_data, libraw_internal_data.unpacker_data.order,
@@ -593,7 +596,10 @@ void LibRaw::uncompressed_fp_dng_load_raw()
     if (ifd->samples != 1 && ifd->samples != 3 && ifd->samples != 4)
         throw LIBRAW_EXCEPTION_DECODE_RAW; 
 
-    if (libraw_internal_data.unpacker_data.tiff_samples != ifd->samples)
+    if(imgdata.idata.filters && ifd->samples > 1)
+      throw LIBRAW_EXCEPTION_DECODE_RAW;
+
+    if ((int)libraw_internal_data.unpacker_data.tiff_samples != ifd->samples)
         throw LIBRAW_EXCEPTION_DECODE_RAW; // Wrong IFD
 
     int bytesps = (ifd->bps + 7) >> 3; // round to upper value
