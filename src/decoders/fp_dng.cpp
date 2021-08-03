@@ -284,7 +284,8 @@ void tile_stripe_data_t::init(tiff_ifd_t *ifd, const libraw_image_sizes_t& sizes
     tileWidth = tiled ? unpacker_data.tile_width : sizes.raw_width;
     tileHeight = tiled ? unpacker_data.tile_length :(striped ? ifd->rows_per_strip : sizes.raw_height);
     tilesH = tiled ? (sizes.raw_width + tileWidth - 1) / tileWidth : 1;
-    tilesV = tiled ? (sizes.raw_height + tileHeight - 1) / tileHeight : 1;
+    tilesV = tiled ? (sizes.raw_height + tileHeight - 1) / tileHeight :
+        (striped ? ((sizes.raw_height + ifd->rows_per_strip - 1) / ifd->rows_per_strip) : 1);
     tileCnt = tilesH * tilesV;
 
     if (tileCnt < 1 || tileCnt > 1000000)
@@ -369,6 +370,9 @@ void LibRaw::deflate_dng_load_raw()
   unsigned pixelSize = sizeof(float) * ifd->samples;
   unsigned tileBytes = tilePixels * pixelSize;
   unsigned tileRowBytes = tiles.tileWidth * pixelSize;
+
+  if(tiles.maxBytesInTile > INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024) )
+    throw LIBRAW_EXCEPTION_TOOBIG;
 
   std::vector<uchar> cBuffer(tiles.maxBytesInTile);
   std::vector<uchar> uBuffer(tileBytes + tileRowBytes); // extra row for decoding
@@ -671,4 +675,3 @@ void LibRaw::uncompressed_fp_dng_load_raw()
     if (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CONVERTFLOAT_TO_INT)
         convertFloatToInt();  
 }
-
