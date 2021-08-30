@@ -551,7 +551,7 @@ void LibRaw::convertFloatToInt(float dmin /* =4096.f */,
 }
 
 static
-#if defined(_MSC_VER)
+#if (defined(_MSC_VER) && !defined(__clang__))
 _forceinline
 #else
 inline
@@ -567,7 +567,7 @@ void swap24(uchar *data, int len)
 }
 
 static
-#if defined(_MSC_VER)
+#if (defined(_MSC_VER) && !defined(__clang__))
 _forceinline
 #else
 inline
