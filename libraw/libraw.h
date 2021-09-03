@@ -103,6 +103,14 @@ extern "C"
 #endif
 
   DllDef int libraw_open_buffer(libraw_data_t *, const void *buffer, size_t size);
+  DllDef int libraw_open_bayer(libraw_data_t *lr, unsigned char *data,
+                               unsigned datalen, ushort _raw_width,
+                               ushort _raw_height, ushort _left_margin,
+                               ushort _top_margin, ushort _right_margin,
+                               ushort _bottom_margin, unsigned char procflags,
+                               unsigned char bayer_battern,
+                               unsigned unused_bits, unsigned otherflags,
+                               unsigned black_level);
   DllDef int libraw_unpack(libraw_data_t *);
   DllDef int libraw_unpack_thumb(libraw_data_t *);
   DllDef void libraw_recycle_datastream(libraw_data_t *);

@@ -49,6 +49,15 @@
       <dd>See <a href="API-CXX.html#open_file">LibRaw::open_file()</a></dd>
       <dt>int libraw_open_buffer(libraw_data_t*, void *buffer, size_t bufsize)</dt>
       <dd>See <a href="API-CXX.html#open_buffer">LibRaw::open_buffer()</a></dd>
+      <dt>int libraw_open_bayer(libraw_data_t *lr, unsigned char *data,
+                               unsigned datalen, ushort _raw_width,
+                               ushort _raw_height, ushort _left_margin,
+                               ushort _top_margin, ushort _right_margin,
+                               ushort _bottom_margin, unsigned char procflags,
+                               unsigned char bayer_battern,
+                               unsigned unused_bits, unsigned otherflags,
+                               unsigned black_level)</dt>
+      <dd>See <a href="API-CXX.html#open_bayer">LibRaw::open_bayer()</a></dd>
       <dt>int libraw_unpack(libraw_data_t*);</dt>
       <dd>See <a href="API-CXX.html#unpack">LibRaw::unpack()</a></dd>
       <dt>int libraw_unpack_thumb(libraw_data_t*);</dt>
