@@ -132,6 +132,21 @@ extern "C"
     LibRaw *ip = (LibRaw *)lr->parent_class;
     return ip->open_buffer(buffer, size);
   }
+  int libraw_open_bayer(libraw_data_t *lr, unsigned char *data,
+                        unsigned datalen, ushort _raw_width, ushort _raw_height,
+                        ushort _left_margin, ushort _top_margin,
+                        ushort _right_margin, ushort _bottom_margin,
+                        unsigned char procflags, unsigned char bayer_pattern,
+                        unsigned unused_bits, unsigned otherflags,
+                        unsigned black_level)
+  {
+    if (!lr)
+      return EINVAL;
+    LibRaw *ip = (LibRaw *)lr->parent_class;
+    return ip->open_bayer(data, datalen, _raw_width, _raw_height, _left_margin,
+                          _top_margin, _right_margin, _bottom_margin, procflags,
+                          bayer_pattern, unused_bits, otherflags, black_level);
+  }
   int libraw_unpack(libraw_data_t *lr)
   {
     if (!lr)
