@@ -47,10 +47,10 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
                               // make_camera_metadata()
   _rawspeed_camerameta = static_cast<void *>(camerameta);
 #endif
-  callbacks.mem_cb = (flags & LIBRAW_OPIONS_NO_MEMERR_CALLBACK)
+  callbacks.mem_cb = (flags & LIBRAW_OPTIONS_NO_MEMERR_CALLBACK)
                          ? NULL
                          : &default_memory_callback;
-  callbacks.data_cb = (flags & LIBRAW_OPIONS_NO_DATAERR_CALLBACK)
+  callbacks.data_cb = (flags & LIBRAW_OPTIONS_NO_DATAERR_CALLBACK)
                           ? NULL
                           : &default_data_callback;
   callbacks.exif_cb = NULL; // no default callback
