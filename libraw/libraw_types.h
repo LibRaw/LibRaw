@@ -59,6 +59,8 @@ typedef unsigned __int64 uint64_t;
 /*  Have not tested on 9.x and 10.x, but Intel documentation claims OpenMP 2.5
  * support in 9.1 */
 #define LIBRAW_USE_OPENMP
+#elif defined(__MINGW32__)
+#define LIBRAW_USE_OPENMP
 #else
 #undef LIBRAW_USE_OPENMP
 #endif
