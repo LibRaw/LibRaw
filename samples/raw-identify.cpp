@@ -170,6 +170,7 @@ void print_usage(const char *pname)
 {
   printf("Usage: %s [options] inputfiles\n", pname);
   printf("Options:\n"
+         "\t-v\tverbose output\n"
          "\t-w\tprint white balance\n"
          "\t-u\tprint unpack function\n"
          "\t-f\tprint frame size (only w/ -u)\n"
