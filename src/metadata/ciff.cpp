@@ -59,7 +59,8 @@ void LibRaw::ciff_block_1030()
  */
 void LibRaw::parse_ciff(int offset, int length, int depth)
 {
-  int tboff, nrecs, c, type, len, save, wbi = -1;
+  int nrecs, c, type, len, wbi = -1;
+  INT64 save, tboff;
   ushort key[] = {0x410, 0x45f3};
   ushort CanonColorInfo1_key;
   ushort Appendix_A = 0;
@@ -71,7 +72,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
   fseek(ifp, offset + length - 4, SEEK_SET);
-  tboff = get4() + offset;
+  tboff = INT64(get4()) + offset;
   fseek(ifp, tboff, SEEK_SET);
   nrecs = get2();
   if (nrecs < 1)
@@ -158,13 +159,13 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
       iso_speed =
           libraw_powf64l(2.0f, (get2() + get2()) / 32.0f - 5.0f) * 100.0f;
       ilm.CurAp = aperture = _CanonConvertAperture((get2(), get2()));
-      shutter = libraw_powf64l(2.0, -((short)get2()) / 32.0);
+      shutter = libraw_powf64l(2.0f, -float((short)get2()) / 32.f);
       imCanon.wbi = wbi = (get2(), get2());
-      if (wbi >= Canon_wbi2std.size())
+      if (wbi >= (int)Canon_wbi2std.size())
         wbi = 0;
       fseek(ifp, 32, SEEK_CUR);
       if (shutter > 1e6)
-        shutter = get2() / 10.0;
+        shutter = float(get2()) / 10.f;
     }
     else if (type == 0x102c) // CanonColorInfo2 / Appendix A: Pro90IS, G1, G2, S30, S40
     {
@@ -206,17 +207,17 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
       if (nWB >= 7)
         Canon_WBpresets(0, 0);
       else
-        FORC4 cam_mul[c] = icWBC[LIBRAW_WBI_Auto][c];
+        FORC4 cam_mul[c] = float(icWBC[LIBRAW_WBI_Auto][c]);
       if (nWB == 7) // mostly Canon EOS D60 + some fw#s for 300D;
                     // check for 0x1668000 is unreliable
       {
         if ((wbi >= 0) && (wbi < 9) && (wbi != 6))
         {
-          FORC4 cam_mul[c] = icWBC[Canon_wbi2std[wbi]][c];
+          FORC4 cam_mul[c] = float(icWBC[Canon_wbi2std[wbi]][c]);
         }
         else
         {
-          FORC4 cam_mul[c] = icWBC[LIBRAW_WBI_Auto][c];
+          FORC4 cam_mul[c] = float(icWBC[LIBRAW_WBI_Auto][c]);
         }
       }
       else if (nWB == 9) // Canon 10D, 300D
@@ -225,11 +226,11 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
         FORC4 icWBC[LIBRAW_WBI_Kelvin][RGGB_2_RGBG(c)] = get2();
         if ((wbi >= 0) && (wbi < 10))
         {
-          FORC4 cam_mul[c] = icWBC[Canon_wbi2std[wbi]][c];
+          FORC4 cam_mul[c] = float(icWBC[Canon_wbi2std[wbi]][c]);
         }
         else
         {
-          FORC4 cam_mul[c] = icWBC[LIBRAW_WBI_Auto][c];
+          FORC4 cam_mul[c] = float(icWBC[LIBRAW_WBI_Auto][c]);
         }
       }
       FORC4
@@ -268,7 +269,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
 
         ushort q;
         fseek(ifp, 4, SEEK_CUR);
-        for (int linenum = 0; linenum < Canon_D30_linenums_2_StdWBi.size(); linenum++) {
+        for (unsigned linenum = 0; linenum < Canon_D30_linenums_2_StdWBi.size(); linenum++) {
           if (Canon_D30_linenums_2_StdWBi[linenum] != LIBRAW_WBI_Unknown) {
             FORC4 {
               q = get2();
@@ -285,7 +286,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
 
         FORC4 {
           q = get2();
-          cam_mul[RGGB_2_RGBG(c)] = 1024.0 / MAX(1, q);
+          cam_mul[RGGB_2_RGBG(c)] = 1024.f / float(MAX(1, q));
         }
         if (!wbi)
           cam_mul[0] = -1; // use my auto white balance
@@ -295,7 +296,7 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
                Appendix_A)               // G2, S30, S40
       {
         libraw_static_table_t linenums_2_StdWBi;
-        int AsShotWB_linenum = Canon_wbi2std.size();
+        unsigned AsShotWB_linenum = Canon_wbi2std.size();
 
         CanonColorInfo1_key = get2();
         if ((CanonColorInfo1_key == key[0]) && (len == 2048)) { // Pro1
@@ -331,11 +332,11 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
         }
 
         fseek (ifp, 78LL+WB_table_offset, SEEK_CUR);
-        for (int linenum = 0; linenum < linenums_2_StdWBi.size(); linenum++) {
+        for (unsigned linenum = 0; linenum < linenums_2_StdWBi.size(); linenum++) {
           if (linenums_2_StdWBi[linenum] != LIBRAW_WBI_Unknown) {
             FORC4 icWBC[linenums_2_StdWBi[linenum]][GRBG_2_RGBG(c)] = get2() ^ key[c & 1];
             if (UseWBfromTable_as_AsShot && (AsShotWB_linenum == linenum)) {
-              FORC4 cam_mul[c] = icWBC[linenums_2_StdWBi[linenum]][c];
+              FORC4 cam_mul[c] = float(icWBC[linenums_2_StdWBi[linenum]][c]);
               Got_AsShotWB = 1;
             }
           } else {
@@ -352,24 +353,19 @@ void LibRaw::parse_ciff(int offset, int length, int depth)
     }
     else if (type == 0x1031)
     {
-			raw_width = imCanon.SensorWidth = (get2(), get2());
+			raw_width  = imCanon.SensorWidth = (get2(), get2());
 			raw_height = imCanon.SensorHeight = get2();
-			imCanon.SensorLeftBorder = (get2(), get2(), get2());
-			imCanon.SensorTopBorder = get2();
-			imCanon.SensorRightBorder = get2();
-			imCanon.SensorBottomBorder = get2();
-			imCanon.BlackMaskLeftBorder = get2();
-			imCanon.BlackMaskTopBorder = get2();
-			imCanon.BlackMaskRightBorder = get2();
-			imCanon.BlackMaskBottomBorder = get2();
+			fseek(ifp, 4, SEEK_CUR);
+			imCanon.DefaultCropAbsolute = get_CanonArea();
+			imCanon.LeftOpticalBlack    = get_CanonArea();
     }
     else if (type == 0x501c)
     {
-      iso_speed = len & 0xffff;
+      iso_speed = float(len & 0xffff);
     }
     else if (type == 0x5029)
     {
-      ilm.CurFocal = len >> 16;
+      ilm.CurFocal = float( len >> 16);
       ilm.FocalType = len & 0xffff;
       if (ilm.FocalType == LIBRAW_FT_ZOOM_LENS)
       {

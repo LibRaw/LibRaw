@@ -94,8 +94,6 @@ clean:
 ## script-created rules
 object/libraw_c_api.o: src/libraw_c_api.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/libraw_c_api.o src/libraw_c_api.cpp
-object/libraw_cxx.o: src/libraw_cxx.cpp
-	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/libraw_cxx.o src/libraw_cxx.cpp
 object/libraw_datastream.o: src/libraw_datastream.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/libraw_datastream.o src/libraw_datastream.cpp
 object/canon_600.o: src/decoders/canon_600.cpp

@@ -86,7 +86,9 @@ it under the terms of the one of two licenses as you choose:
 #define CanonID_EOS_850D          (0x80000000ULL + 0x435ULL)
 #define CanonID_EOS_250D          (0x80000000ULL + 0x436ULL)
 #define CanonID_EOS_90D           (0x80000000ULL + 0x437ULL)
+#define CanonID_EOS_R3            (0x80000000ULL + 0x450ULL)
 #define CanonID_EOS_R6            (0x80000000ULL + 0x453ULL)
+#define CanonID_EOS_M50_Mark_II   (0x80000000ULL + 0x468ULL)
 
 // CanonID_EOS_D2000C after Canon's TIFF2CR2 convertor:
 #define CanonID_EOS_D2000C        (0x80000000ULL + 0x520ULL)
@@ -154,6 +156,7 @@ it under the terms of the one of two licenses as you choose:
 #define OlyID_E_M10_Mark_IV   OlyID_str2hex("S0088")
 #define OlyID_E_M5_Mark_III   OlyID_str2hex("S0089")
 #define OlyID_E_M1_Mark_III   OlyID_str2hex("S0092")
+#define OlyID_E_P7            OlyID_str2hex("S0093")
 #define OlyID_C_3030Z         OlyID_str2hex("SX351")
 #define OlyID_C_5050Z         OlyID_str2hex("SX558")
 #define OlyID_C_350Z          OlyID_str2hex("SX751")
@@ -216,6 +219,8 @@ it under the terms of the one of two licenses as you choose:
 #define PentaxID_K_70         0x13222ULL
 #define PentaxID_KP           0x1322cULL
 #define PentaxID_K_1_Mark_II  0x13240ULL
+#define PentaxID_K_3_III      0x13254ULL
+#define PentaxID_GR_IIIx      0x1329aULL
 
 #define SonyID_DSC_R1           0x002ULL
 #define SonyID_DSLR_A100        0x100ULL
@@ -302,5 +307,10 @@ it under the terms of the one of two licenses as you choose:
 #define SonyID_ILCE_6100        0x17bULL
 #define SonyID_ZV_1             0x17cULL
 #define SonyID_ILCE_7C          0x17dULL
+#define SonyID_ZV_E10           0x17eULL
 #define SonyID_ILCE_7SM3        0x17fULL
+#define SonyID_ILCE_1           0x180ULL
+#define SonyID_ILME_FX3         0x181ULL
+#define SonyID_ILCE_7RM3A       0x182ULL
+#define SonyID_ILCE_7RM4A       0x183ULL
 #endif

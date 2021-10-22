@@ -66,6 +66,9 @@ void LibRaw::parse_exif(int base)
 
   unsigned kodak = !strncmp(make, "EASTMAN", 7) && tiff_nifds < 3;
 
+  if (!libraw_internal_data.unpacker_data.exif_offset)
+	  libraw_internal_data.unpacker_data.exif_offset = base;
+
   entries = get2();
   if (!strncmp(make, "Hasselblad", 10) && (tiff_nifds > 3) && (entries > 512))
     return;
@@ -211,10 +214,16 @@ void LibRaw::parse_exif(int base)
       focal_len = getreal(type);
       break;
     case 0x927c: // 37500
+#ifndef USE_6BY9RPI
       if (((make[0] == '\0') && !strncmp(model, "ov5647", 6)) ||
           (!strncmp(make, "RaspberryPi", 11) &&
            (!strncmp(model, "RP_OV5647", 9) ||
             !strncmp(model, "RP_imx219", 9))))
+#else
+      if (((make[0] == '\0') && !strncmp(model, "ov5647", 6)) ||
+          (!strncmp(make, "RaspberryPi", 11) &&
+              (!strncmp(model, "RP_", 3) || !strncmp(model,"imx477",6))))
+#endif
       {
         char mn_text[512];
         char *pos;
@@ -224,6 +233,10 @@ void LibRaw::parse_exif(int base)
 
         fgets(mn_text, MIN(len, 511), ifp);
         mn_text[511] = 0;
+
+        pos = strstr(mn_text, "ev=");
+        if (pos)
+          imCommon.ExposureCalibrationShift = atof(pos + 3);
 
         pos = strstr(mn_text, "gain_r=");
         if (pos)
@@ -255,13 +268,13 @@ void LibRaw::parse_exif(int base)
 #endif
             if (pos)
             {
-              for (l = 0; l < 4; l++)
+              for (l = 0; l < 3; l++) // skip last row
               {
                 num = 0.0;
                 for (c = 0; c < 3; c++)
                 {
-                  imgdata.color.ccm[l][c] = (float)atoi(pos);
-                  num += imgdata.color.ccm[l][c];
+                  cmatrix[l][c] = (float)atoi(pos);
+                  num += cmatrix[c][l];
 #ifdef LIBRAW_WIN32_CALLS
                   pos = strtok(NULL, ",");
 #else
@@ -271,7 +284,7 @@ void LibRaw::parse_exif(int base)
                     goto end; // broken
                 }
                 if (num > 0.01)
-                  FORC3 imgdata.color.ccm[l][c] = imgdata.color.ccm[l][c] / num;
+                    FORC3 cmatrix[l][c] = cmatrix[l][c] / num;
               }
             }
           }

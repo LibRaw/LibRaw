@@ -146,7 +146,7 @@ static const char *Hasselblad_SensorEnclosures[] = {
     if ((ps = strrchr(imgdata.color.LocalizedCameraModel, '-')))
       c = ps-imgdata.color.LocalizedCameraModel;
     else c = strlen(imgdata.color.LocalizedCameraModel);
-    int cc = MIN(c, sizeof(tmp_model)-1);
+    int cc = MIN(c, (int)sizeof(tmp_model)-1);
     memcpy(tmp_model, imgdata.color.LocalizedCameraModel,cc);
     tmp_model[cc] = 0;
     if (strcasestr(imgdata.color.UniqueCameraModel, "coated")) {
@@ -161,7 +161,7 @@ static const char *Hasselblad_SensorEnclosures[] = {
       c = ps-imgdata.color.UniqueCameraModel;
     }
     else c = strlen(imgdata.color.UniqueCameraModel);
-    int cc = MIN(c, sizeof(tmp_model)-1);
+    int cc = MIN(c, (int)sizeof(tmp_model)-1);
     memcpy(tmp_model, imgdata.color.UniqueCameraModel,cc);
     tmp_model[cc] = 0;
   }
@@ -522,10 +522,11 @@ static const char *Hasselblad_SensorEnclosures[] = {
           ilm.LensID = LIBRAW_MOUNT_Hasselblad_XCD*100000000ULL +
                        35*10000ULL + 75*10;
         }
-        else
+        else {
           ilm.FocalType = LIBRAW_FT_PRIME_LENS;
           ilm.LensID = LIBRAW_MOUNT_Hasselblad_XCD*100000000ULL +
                        ilm.LensID*10000ULL + ilm.LensID*10;
+        }
       }
     }
   }

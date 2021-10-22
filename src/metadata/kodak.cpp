@@ -116,13 +116,13 @@ void LibRaw::parse_kodak_ifd(int base)
       fseek(ifp, savepos, SEEK_SET);
     }
     if (tag == 0x03eb) // 1003
-      imgdata.sizes.raw_inset_crop.cleft = get2();
+      imgdata.sizes.raw_inset_crops[0].cleft = get2();
     else if (tag == 0x03ec) // 1004
-      imgdata.sizes.raw_inset_crop.ctop = get2();
+      imgdata.sizes.raw_inset_crops[0].ctop = get2();
     else if (tag == 0x03ed) // 1005
-      imgdata.sizes.raw_inset_crop.cwidth = get2();
+      imgdata.sizes.raw_inset_crops[0].cwidth = get2();
     else if (tag == 0x03ee) // 1006
-      imgdata.sizes.raw_inset_crop.cheight = get2();
+      imgdata.sizes.raw_inset_crops[0].cheight = get2();
     else if (tag == 0x03ef) // 1007
     {
       if (!strcmp(model, "EOS D2000C"))
@@ -326,13 +326,13 @@ void LibRaw::parse_kodak_ifd(int base)
       Kodak_KDC_WBtags(LIBRAW_WBI_Shade, wbi);
 
     else if (tag == 0xfa31) // 64049
-      imgdata.sizes.raw_inset_crop.cwidth = get2();
+      imgdata.sizes.raw_inset_crops[0].cwidth = get2();
     else if (tag == 0xfa32) // 64050
-      imgdata.sizes.raw_inset_crop.cheight = get2();
+      imgdata.sizes.raw_inset_crops[0].cheight = get2();
     else if (tag == 0xfa3e) // 64062
-      imgdata.sizes.raw_inset_crop.cleft = get2();
+      imgdata.sizes.raw_inset_crops[0].cleft = get2();
     else if (tag == 0xfa3f) // 64063
-      imgdata.sizes.raw_inset_crop.ctop = get2();
+      imgdata.sizes.raw_inset_crops[0].ctop = get2();
 
     else if (((tag == 0x07e4) || (tag == 0xfb01)) &&
              (len == 9)) // 2020 or 64257

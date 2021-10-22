@@ -20,7 +20,8 @@
 
 void LibRaw::parse_phase_one(int base)
 {
-  unsigned entries, tag, type, len, data, save, i, c;
+  unsigned entries, tag, type, len, data, i, c;
+  INT64 save;
   float romm_cam[3][3];
   char *cp;
 
@@ -76,13 +77,13 @@ void LibRaw::parse_phase_one(int base)
       if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         ilm.CurAp = libraw_powf64l(2.0f, (int_to_float(data) / 2.0f));
       else
-        ilm.CurAp = libraw_powf64l(2.0f, (getreal(type) / 2.0f));
+        ilm.CurAp = libraw_powf64l(2.0f, float(getreal(type) / 2.0f));
       break;
     case 0x0403:
       if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         ilm.CurFocal = int_to_float(data);
       else
-        ilm.CurFocal = getreal(type);
+        ilm.CurFocal = (float)getreal(type);
       break;
     case 0x0410:
       stmread(ilm.body, len, ifp);
@@ -101,7 +102,7 @@ void LibRaw::parse_phase_one(int base)
       }
       else
       {
-        ilm.MaxAp4CurFocal = libraw_powf64l(2.0f, (getreal(type) / 2.0f));
+        ilm.MaxAp4CurFocal = libraw_powf64l(2.0f, float(getreal(type) / 2.0f));
       }
       break;
     case 0x0415:
@@ -111,7 +112,7 @@ void LibRaw::parse_phase_one(int base)
       }
       else
       {
-        ilm.MinAp4CurFocal = libraw_powf64l(2.0f, (getreal(type) / 2.0f));
+        ilm.MinAp4CurFocal = libraw_powf64l(2.0f, float(getreal(type) / 2.0f));
       }
       break;
     case 0x0416:
@@ -121,7 +122,7 @@ void LibRaw::parse_phase_one(int base)
       }
       else
       {
-        ilm.MinFocal = getreal(type);
+        ilm.MinFocal = (float)getreal(type);
       }
       if (ilm.MinFocal > 1000.0f)
       {
@@ -135,7 +136,7 @@ void LibRaw::parse_phase_one(int base)
       }
       else
       {
-        ilm.MaxFocal = getreal(type);
+        ilm.MaxFocal = (float)getreal(type);
       }
       break;
 
@@ -145,11 +146,11 @@ void LibRaw::parse_phase_one(int base)
     case 0x0106:
       for (i = 0; i < 9; i++)
         imgdata.color.P1_color[0].romm_cam[i] = ((float *)romm_cam)[i] =
-            getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+            (float)getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
       romm_coeff(romm_cam);
       break;
     case 0x0107:
-      FORC3 cam_mul[c] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+      FORC3 cam_mul[c] = (float)getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
       break;
     case 0x0108:
       raw_width = data;
@@ -180,7 +181,7 @@ void LibRaw::parse_phase_one(int base)
       meta_length = len;
       break;
     case 0x0112:
-      ph1.key_off = save - 4;
+      ph1.key_off = int(save - 4);
       break;
     case 0x0210:
       ph1.tag_210 = int_to_float(data);
@@ -209,7 +210,7 @@ void LibRaw::parse_phase_one(int base)
       break;
     case 0x0226:
       for (i = 0; i < 9; i++)
-        imgdata.color.P1_color[1].romm_cam[i] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+        imgdata.color.P1_color[1].romm_cam[i] = (float)getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
       break;
     case 0x0301:
       model[63] = 0;
@@ -323,10 +324,11 @@ void LibRaw::parse_phase_one(int base)
   }
 }
 
-void LibRaw::parse_mos(int offset)
+void LibRaw::parse_mos(INT64 offset)
 {
   char data[40];
-  int from, i, c, neut[4], planes = 0, frot = 0;
+  int i, c, neut[4], planes = 0, frot = 0;
+  INT64 from;
   unsigned skip;
   static const char *mod[] = {
       /* DM22, DM28, DM40, DM56 are somewhere here too */

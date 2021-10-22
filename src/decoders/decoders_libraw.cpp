@@ -313,14 +313,16 @@ void LibRaw::nikon_load_striped_packed_raw()
 
 struct pana_cs6_page_decoder
 {
-  unsigned int pixelbuffer[14], lastoffset, maxoffset;
+  unsigned int pixelbuffer[18], lastoffset, maxoffset;
   unsigned char current, *buffer;
   pana_cs6_page_decoder(unsigned char *_buffer, unsigned int bsize)
       : lastoffset(0), maxoffset(bsize), current(0), buffer(_buffer)
   {
   }
   void read_page(); // will throw IO error if not enough space in buffer
+  void read_page12(); // 12-bit variant
   unsigned int nextpixel() { return current < 14 ? pixelbuffer[current++] : 0; }
+  unsigned int nextpixel12() { return current < 18 ? pixelbuffer[current++] : 0; }
 };
 
 void pana_cs6_page_decoder::read_page()
@@ -328,14 +330,12 @@ void pana_cs6_page_decoder::read_page()
   if (!buffer || (maxoffset - lastoffset < 16))
     throw LIBRAW_EXCEPTION_IO_EOF;
 #define wbuffer(i) ((unsigned short)buffer[lastoffset + 15 - i])
-  pixelbuffer[0] = (wbuffer(0) << 6) | (wbuffer(1) >> 2); // 14 bit
-  pixelbuffer[1] =
-      (((wbuffer(1) & 0x3) << 12) | (wbuffer(2) << 4) | (wbuffer(3) >> 4)) &
-      0x3fff;
-  pixelbuffer[2] = (wbuffer(3) >> 2) & 0x3;
-  pixelbuffer[3] = ((wbuffer(3) & 0x3) << 8) | wbuffer(4);
-  pixelbuffer[4] = (wbuffer(5) << 2) | (wbuffer(6) >> 6);
-  pixelbuffer[5] = ((wbuffer(6) & 0x3f) << 4) | (wbuffer(7) >> 4);
+  pixelbuffer[0] = (wbuffer(0) << 6) | (wbuffer(1) >> 2);                                         // 14 bit
+  pixelbuffer[1] = (((wbuffer(1) & 0x3) << 12) | (wbuffer(2) << 4) | (wbuffer(3) >> 4)) & 0x3fff; // 14 bit
+  pixelbuffer[2] = (wbuffer(3) >> 2) & 0x3;                                                       // 2
+  pixelbuffer[3] = ((wbuffer(3) & 0x3) << 8) | wbuffer(4);                                        // 10
+  pixelbuffer[4] = (wbuffer(5) << 2) | (wbuffer(6) >> 6);                                         // 10
+  pixelbuffer[5] = ((wbuffer(6) & 0x3f) << 4) | (wbuffer(7) >> 4);                                // 10
   pixelbuffer[6] = (wbuffer(7) >> 2) & 0x3;
   pixelbuffer[7] = ((wbuffer(7) & 0x3) << 8) | wbuffer(8);
   pixelbuffer[8] = ((wbuffer(9) << 2) & 0x3fc) | (wbuffer(10) >> 6);
@@ -349,22 +349,70 @@ void pana_cs6_page_decoder::read_page()
   lastoffset += 16;
 }
 
+void pana_cs6_page_decoder::read_page12()
+{
+  if (!buffer || (maxoffset - lastoffset < 16))
+    throw LIBRAW_EXCEPTION_IO_EOF;
+#define wb(i) ((unsigned short)buffer[lastoffset + 15 - i])
+  pixelbuffer[0] = (wb(0) << 4) | (wb(1) >> 4);              // 12 bit: 8/0 + 4 upper bits of /1
+  pixelbuffer[1] = (((wb(1) & 0xf) << 8) | (wb(2))) & 0xfff; // 12 bit: 4l/1 + 8/2
+  
+  pixelbuffer[2] = (wb(3) >> 6) & 0x3;                       // 2; 2u/3, 6 low bits remains in wb(3) 
+  pixelbuffer[3] = ((wb(3) & 0x3f) << 2) | (wb(4) >> 6);     // 8; 6l/3 + 2u/4; 6 low bits remains in wb(4)
+  pixelbuffer[4] = ((wb(4) & 0x3f) << 2) | (wb(5) >> 6);     // 8: 6l/4 + 2u/5; 6 low bits remains in wb(5)
+  pixelbuffer[5] = ((wb(5) & 0x3f) << 2) | (wb(6) >> 6);     // 8: 6l/5 + 2u/6, 6 low bits remains in wb(6)
+
+  pixelbuffer[6] = (wb(6) >> 4) & 0x3;                       // 2, 4 low bits remains in wb(6)
+  pixelbuffer[7] = ((wb(6) & 0xf) << 4) | (wb(7) >> 4);      // 8: 4 low bits from wb(6), 4 upper bits from wb(7)
+  pixelbuffer[8] = ((wb(7) & 0xf) << 4) | (wb(8) >> 4);      // 8: 4 low bits from wb7, 4 upper bits from wb8
+  pixelbuffer[9] = ((wb(8) & 0xf) << 4) | (wb(9) >> 4);      // 8: 4 low bits from wb8, 4 upper bits from wb9
+
+  pixelbuffer[10] = (wb(9) >> 2) & 0x3;                      // 2: bits 2-3 from wb9, two low bits remain in wb9
+  pixelbuffer[11] = ((wb(9) & 0x3) << 6) | (wb(10) >> 2);    // 8: 2 bits from wb9, 6 bits from wb10
+  pixelbuffer[12] = ((wb(10) & 0x3) << 6) | (wb(11) >> 2);   // 8: 2 bits from wb10, 6 bits from wb11
+  pixelbuffer[13] = ((wb(11) & 0x3) << 6) | (wb(12) >> 2);   // 8: 2 bits from wb11, 6 bits from wb12
+
+  pixelbuffer[14] = wb(12) & 0x3;                            // 2: low bits from wb12
+  pixelbuffer[15] = wb(13);
+  pixelbuffer[16] = wb(14);
+  pixelbuffer[17] = wb(15);
+#undef wb
+  current = 0;
+  lastoffset += 16;
+}
+
+
+
 void LibRaw::panasonicC6_load_raw()
 {
   const int rowstep = 16;
-  const int blocksperrow = imgdata.sizes.raw_width / 11;
+  const bool _12bit = libraw_internal_data.unpacker_data.pana_bpp == 12;
+  const int pixperblock =  _12bit ? 14 : 11;
+  const int blocksperrow = imgdata.sizes.raw_width / pixperblock;
   const int rowbytes = blocksperrow * 16;
-  unsigned char *iobuf = (unsigned char *)malloc(rowbytes * rowstep);
-  merror(iobuf, "panasonicC6_load_raw()");
+  const unsigned pixelbase0 = _12bit ? 0x80 : 0x200;
+  const unsigned pixelbase_compare = _12bit ? 0x800 : 0x2000;
+  const unsigned spix_compare = _12bit ? 0x3fff : 0xffff;
+  const unsigned pixel_mask = _12bit ? 0xfff : 0x3fff;
+  std::vector<unsigned char> iobuf;
+  try
+  {
+      iobuf.resize(rowbytes * rowstep);
+  }
+  catch (...)
+  {
+    merror(NULL, "panasonicC6_load_raw()");
+    throw LIBRAW_EXCEPTION_ALLOC;
+  }
 
   for (int row = 0; row < imgdata.sizes.raw_height - rowstep + 1;
        row += rowstep)
   {
     int rowstoread = MIN(rowstep, imgdata.sizes.raw_height - row);
     if (libraw_internal_data.internal_data.input->read(
-            iobuf, rowbytes, rowstoread) != rowstoread)
+            iobuf.data(), rowbytes, rowstoread) != rowstoread)
       throw LIBRAW_EXCEPTION_IO_EOF;
-    pana_cs6_page_decoder page(iobuf, rowbytes * rowstoread);
+    pana_cs6_page_decoder page(iobuf.data(), rowbytes * rowstoread);
     for (int crow = 0, col = 0; crow < rowstoread; crow++, col = 0)
     {
       unsigned short *rowptr =
@@ -372,27 +420,30 @@ void LibRaw::panasonicC6_load_raw()
                .raw_image[(row + crow) * imgdata.sizes.raw_pitch / 2];
       for (int rblock = 0; rblock < blocksperrow; rblock++)
       {
-        page.read_page();
+          if (_12bit)
+              page.read_page12();
+          else
+              page.read_page();
         unsigned oddeven[2] = {0, 0}, nonzero[2] = {0, 0};
         unsigned pmul = 0, pixel_base = 0;
-        for (int pix = 0; pix < 11; pix++)
+        for (int pix = 0; pix < pixperblock; pix++)
         {
           if (pix % 3 == 2)
           {
-            unsigned base = page.nextpixel();
+            unsigned base = _12bit ? page.nextpixel12(): page.nextpixel();
             if (base > 3)
               throw LIBRAW_EXCEPTION_IO_CORRUPT; // not possible b/c of 2-bit
                                                  // field, but....
             if (base == 3)
               base = 4;
-            pixel_base = 0x200 << base;
+            pixel_base = pixelbase0 << base;
             pmul = 1 << base;
           }
-          unsigned epixel = page.nextpixel();
+          unsigned epixel = _12bit ? page.nextpixel12() : page.nextpixel();
           if (oddeven[pix % 2])
           {
             epixel *= pmul;
-            if (pixel_base < 0x2000 && nonzero[pix % 2] > pixel_base)
+            if (pixel_base < pixelbase_compare && nonzero[pix % 2] > pixel_base)
               epixel += nonzero[pix % 2] - pixel_base;
             nonzero[pix % 2] = epixel;
           }
@@ -405,19 +456,19 @@ void LibRaw::panasonicC6_load_raw()
               epixel = nonzero[pix % 2];
           }
           unsigned spix = epixel - 0xf;
-          if (spix <= 0xffff)
-            rowptr[col++] = spix & 0xffff;
+          if (spix <= spix_compare)
+            rowptr[col++] = spix & spix_compare;
           else
           {
             epixel = (((signed int)(epixel + 0x7ffffff1)) >> 0x1f);
-            rowptr[col++] = epixel & 0x3fff;
+            rowptr[col++] = epixel & pixel_mask;
           }
         }
       }
     }
   }
-  free(iobuf);
 }
+
 
 void LibRaw::panasonicC7_load_raw()
 {
@@ -482,7 +533,7 @@ void LibRaw::unpacked_load_raw_fuji_f700s20()
 {
   int base_offset = 0;
   int row_size = imgdata.sizes.raw_width * 2; // in bytes
-  if (imgdata.idata.raw_count == 2 && imgdata.params.shot_select)
+  if (imgdata.idata.raw_count == 2 && imgdata.rawparams.shot_select)
   {
     libraw_internal_data.internal_data.input->seek(-row_size, SEEK_CUR);
     base_offset = row_size; // in bytes

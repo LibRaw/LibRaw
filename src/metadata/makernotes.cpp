@@ -124,13 +124,14 @@ void LibRaw::parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     order = get2();
     if (buf[0] == 'O')
       get2();
+    else if (buf[0] == 'P')
+      is_PentaxRicohMakernotes = 1;
   }
   else if (is_PentaxRicohMakernotes && (dng_writer == CameraDNG))
   {
     base = ftell(ifp) - 10;
     fseek(ifp, -4, SEEK_CUR);
     order = get2();
-    is_PentaxRicohMakernotes = 1;
   }
   else if (!strncmp(buf, "SONY", 4) ||
            !strcmp(buf, "Panasonic"))
@@ -245,7 +246,7 @@ void LibRaw::parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
         imHassy.SensorCode = getint(type);
       } else if ((tag == 0x0015) && tagtypeIs(LIBRAW_EXIFTAG_TYPE_ASCII)) {
         stmread (imHassy.SensorUnitConnector, len, ifp);
-        for (int i=0; i<len; i++) {
+        for (int i=0; i<(int)len; i++) {
           if(!isalnum(imHassy.SensorUnitConnector[i]) &&
              (imHassy.SensorUnitConnector[i]!=' ')    &&
              (imHassy.SensorUnitConnector[i]!='/')    &&
@@ -384,7 +385,7 @@ void LibRaw::parse_makernote(int base, int uptag)
   unsigned i, wb[4] = {0, 0, 0, 0};
   short morder, sorder = order;
 
-  uchar *CanonCameraInfo;
+  uchar *CanonCameraInfo = 0;;
   unsigned lenCanonCameraInfo = 0;
   unsigned typeCanonCameraInfo = 0;
   imCanon.wbi = 0;
@@ -576,7 +577,8 @@ void LibRaw::parse_makernote(int base, int uptag)
         {
           processCanonCameraInfo(unique_id, CanonCameraInfo, lenCanonCameraInfo,
                                  typeCanonCameraInfo, nonDNG);
-          free(CanonCameraInfo);
+	  if(CanonCameraInfo)
+            free(CanonCameraInfo);
           CanonCameraInfo = 0;
           lenCanonCameraInfo = 0;
         }

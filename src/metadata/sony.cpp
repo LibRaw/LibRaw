@@ -132,7 +132,7 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id)
     scf[1]  camera format
     scf[2]  camera mount: Minolta A, Sony E, fixed,
     scf[3]  camera type: DSLR, NEX, SLT, ILCE, ILCA, DSC
-    scf[4]  lens mount
+    scf[4]  lens mount, LIBRAW_MOUNT_FixedLens or LIBRAW_MOUNT_Unknown
     scf[5]  tag 0x2010 group (0 if not used)
     scf[6]  offset of Sony ISO in 0x2010 table, 0xffff if not valid
     scf[7]  offset of ShutterCount3 in 0x9050 table, 0xffff if not valid
@@ -141,177 +141,189 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id)
     scf[10] offset of ReleaseMode2 in 0x2010 table, 0xffff if not valid
     */
   } SonyCamFeatures[] = {
-      {SonyID_DSLR_A100, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A900, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0,
-       0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A700, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A200, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A350, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A300, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A900, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A380, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A330, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A230, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A290, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A850, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0, 0,
-       0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A850, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A550, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A500, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A450, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_NEX_5, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 0,
-       0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_NEX_3, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 0,
-       0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_SLT_A33, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 0,
-       0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_SLT_A55, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 0,
-       0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A560, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_DSLR_A580, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, 0,
-       0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_NEX_C3, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 0,
-       0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_SLT_A35, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 0,
-       0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_SLT_A65, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 2,
-       0x1218, 0x01bd, 0x1178, 0x1179, 0x112c},
-      {SonyID_SLT_A77, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 2,
-       0x1218, 0x01bd, 0x1178, 0x1179, 0x112c},
-      {SonyID_NEX_5N, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 1,
-       0x113e, 0x01bd, 0x1174, 0x1175, 0x112c},
-      {SonyID_NEX_7, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 2,
-       0x1218, 0x01bd, 0x1178, 0x1179, 0x112c},
-      {SonyID_NEX_VG20, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 2,
-       0x1218, 0x01bd, 0x1178, 0x1179, 0x112c},
-      {SonyID_SLT_A37, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 3,
-       0x11f4, 0x01bd, 0x1154, 0x1155, 0x1108},
-      {SonyID_SLT_A57, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 3,
-       0x11f4, 0x01bd, 0x1154, 0x1155, 0x1108},
-      {SonyID_NEX_F3, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 3,
-       0x11f4, 0x01bd, 0x1154, 0x1155, 0x1108},
-      {SonyID_SLT_A99, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 5,
-       0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_NEX_6, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5,
-       0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_NEX_5R, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5,
-       0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_DSC_RX100, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 5, 0x1254, 0xffff, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_DSC_RX1, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 5, 0x1258, 0xffff, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_NEX_VG900, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5,
-       0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_NEX_VG30, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5,
-       0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_ILCE_3000, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 5,
-       0x1280, 0x01aa, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_SLT_A58, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, 0, 5,
-       0x1280, 0x01aa, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_NEX_3N, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5,
-       0x1280, 0x01aa, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_ILCE_7, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7,
-       0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_NEX_5T, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, 0, 5,
-       0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_DSC_RX100M2, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 6, 0x113c, 0xffff, 0x1064, 0x1065, 0x1018},
-      {SonyID_DSC_RX10, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 7, 0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_DSC_RX1R, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 5, 0x1258, 0xffff, 0x11ac, 0x11ad, 0x1160},
-      {SonyID_ILCE_7R, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7,
-       0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_6000, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7,
-       0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_5000, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7,
-       0x0344, 0x01aa, 0x025c, 0x025d, 0x0210},
-      {SonyID_DSC_RX100M3, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 7, 0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_7S, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7,
-       0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCA_77M2, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, 0,
-       7, 0x0344, 0x01a0, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_5100, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7,
-       0x0344, 0x01a0, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_7M2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7,
-       0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_DSC_RX100M4, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_DSC_RX10M2, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_DSC_RX1RM2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_QX1, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 7,
-       0x0344, 0x01a0, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_7RM2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8,
-       0x0346, 0x01cb, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_7SM2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8,
-       0x0346, 0x01cb, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCA_68, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, 0,
-       7, 0x0344, 0x01a0, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCA_99M2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, 0, 8,
-       0x0346, 0x01cd, 0x025c, 0x025d, 0x0210},
-      {SonyID_DSC_RX10M3, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_DSC_RX100M5, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_6300, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8,
-       0x0346, 0x01cd, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_9, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
-      {SonyID_ILCE_6500, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 8,
-       0x0346, 0x01cd, 0x025c, 0x025d, 0x0210},
-      {SonyID_ILCE_7RM3, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
-      {SonyID_ILCE_7M3, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
-      {SonyID_DSC_RX0, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 8, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
-      {SonyID_DSC_RX10M4, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
-      {SonyID_DSC_RX100M6, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
-      {SonyID_DSC_HX99, LIBRAW_FORMAT_1div2p3INCH, LIBRAW_MOUNT_FixedLens,
-       LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b,
-       0x024c, 0x0208},
-      {SonyID_DSC_RX100M5A, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
-      {SonyID_ILCE_6400, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
-      {SonyID_DSC_RX0M2, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
-      {SonyID_DSC_RX100M7, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
-      {SonyID_ILCE_7RM4, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
-      {SonyID_ILCE_9M2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
-      {SonyID_ILCE_6600, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
-      {SonyID_ILCE_6100, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
-      {SonyID_ZV_1, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC,
-       LIBRAW_MOUNT_FixedLens, 9, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
-      {SonyID_ILCE_7C, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
-      {SonyID_ILCE_7SM3, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, 0, 9,
-       0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {SonyID_DSLR_A100, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A900, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A700, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A200, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A350, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A300, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A900, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A380, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A330, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A230, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A290, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A850, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A850, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A550, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A500, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A450, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_NEX_5, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_NEX_3, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_SLT_A33, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_SLT_A55, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A560, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_DSLR_A580, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_DSLR, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_NEX_C3, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_SLT_A35, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_SLT_A65, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010b, 0x1218, 0x01bd, 0x1178, 0x1179, 0x112c},
+      {SonyID_SLT_A77, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010b, 0x1218, 0x01bd, 0x1178, 0x1179, 0x112c},
+      {SonyID_NEX_5N, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010a, 0x113e, 0x01bd, 0x1174, 0x1175, 0x112c},
+      {SonyID_NEX_7, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010b, 0x1218, 0x01bd, 0x1178, 0x1179, 0x112c},
+      {SonyID_NEX_VG20, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010b, 0x1218, 0x01bd, 0x1178, 0x1179, 0x112c},
+      {SonyID_SLT_A37, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010c, 0x11f4, 0x01bd, 0x1154, 0x1155, 0x1108},
+      {SonyID_SLT_A57, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010c, 0x11f4, 0x01bd, 0x1154, 0x1155, 0x1108},
+      {SonyID_NEX_F3, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010c, 0x11f4, 0x01bd, 0x1154, 0x1155, 0x1108},
+      {SonyID_SLT_A99, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010e, 0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_NEX_6, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010e, 0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_NEX_5R, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010e, 0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_DSC_RX100, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010e, 0x1254, 0xffff, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_DSC_RX1, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010e, 0x1258, 0xffff, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_NEX_VG900, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010e, 0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_NEX_VG30, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010e, 0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_ILCE_3000, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010e, 0x1280, 0x01aa, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_SLT_A58, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_SLT, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010e, 0x1280, 0x01aa, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_NEX_3N, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010e, 0x1280, 0x01aa, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_ILCE_7, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_NEX_5T, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_NEX, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010e, 0x1254, 0x01aa, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_DSC_RX100M2, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010f, 0x113c, 0xffff, 0x1064, 0x1065, 0x1018},
+      {SonyID_DSC_RX10, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_DSC_RX1R, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010e, 0x1258, 0xffff, 0x11ac, 0x11ad, 0x1160},
+      {SonyID_ILCE_7R, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_6000, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_5000, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0x01aa, 0x025c, 0x025d, 0x0210},
+      {SonyID_DSC_RX100M3, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_7S, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCA_77M2, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0x01a0, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_5100, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0x01a0, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_7M2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_DSC_RX100M4, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_DSC_RX10M2, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_DSC_RX1RM2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_QX1, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0x01a0, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_7RM2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0x01cb, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_7SM2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0x01cb, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCA_68, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010g, 0x0344, 0x01a0, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCA_99M2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Minolta_A, LIBRAW_SONY_ILCA, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0x01cd, 0x025c, 0x025d, 0x0210},
+      {SonyID_DSC_RX10M3, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_DSC_RX100M5, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_6300, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0x01cd, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_9, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_6500, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0x01cd, 0x025c, 0x025d, 0x0210},
+      {SonyID_ILCE_7RM3, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_7M3, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_DSC_RX0, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010h, 0x0346, 0xffff, 0x025c, 0x025d, 0x0210},
+      {SonyID_DSC_RX10M4, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {SonyID_DSC_RX100M6, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {SonyID_DSC_HX99, LIBRAW_FORMAT_1div2p3INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {SonyID_DSC_RX100M5A, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_6400, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_DSC_RX0M2, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {SonyID_DSC_RX100M7, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_7RM4, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_9M2, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_6600, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_6100, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_ZV_1, LIBRAW_FORMAT_1INCH, LIBRAW_MOUNT_FixedLens, LIBRAW_SONY_DSC, LIBRAW_MOUNT_FixedLens,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_7C, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+
+// a la SonyID_ILCE_6100
+      {SonyID_ZV_E10, LIBRAW_FORMAT_APSC, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+
+      {SonyID_ILCE_7SM3, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_ILCE_1, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_ILME_FX3, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_ILCE_7RM3A, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_7RM4A, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
   };
   ilm.CamID = id;
 
@@ -319,10 +331,12 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id)
   {
     ilm.CameraMount = ilm.LensMount = LIBRAW_MOUNT_FixedLens;
     imSony.CameraType = LIBRAW_SONY_DSC;
+    imSony.group2010 = LIBRAW_SONY_Tag2010None;
+    imSony.group9050 = LIBRAW_SONY_Tag9050None;
     return;
   }
 
-  for (int i = 0; i < (sizeof SonyCamFeatures / sizeof *SonyCamFeatures); i++) {
+  for (unsigned i = 0; i < (sizeof SonyCamFeatures / sizeof *SonyCamFeatures); i++) {
     if (SonyCamFeatures[i].scf[0] == id) {
       ilm.CameraFormat = SonyCamFeatures[i].scf[1];
       ilm.CameraMount = SonyCamFeatures[i].scf[2];
@@ -337,6 +351,40 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id)
       imSony.ReleaseMode2_offset = SonyCamFeatures[i].scf[10];
       break;
     }
+  }
+
+  switch (id) {
+  case SonyID_ILCE_6100:
+  case SonyID_ILCE_6300:
+  case SonyID_ILCE_6400:
+  case SonyID_ILCE_6500:
+  case SonyID_ILCE_6600:
+  case SonyID_ILCE_7C:
+  case SonyID_ILCE_7M3:
+  case SonyID_ILCE_7RM2:
+  case SonyID_ILCE_7RM3A:
+  case SonyID_ILCE_7RM3:
+  case SonyID_ILCE_7RM4:
+  case SonyID_ILCE_7RM4A:
+  case SonyID_ILCE_7SM2:
+  case SonyID_ILCE_9:
+  case SonyID_ILCE_9M2:
+  case SonyID_ILCA_99M2:
+  case SonyID_ZV_E10:
+    imSony.group9050 = LIBRAW_SONY_Tag9050b;
+    break;
+  case SonyID_ILCE_7SM3:
+  case SonyID_ILCE_1:
+  case SonyID_ILME_FX3:
+    imSony.group9050 = LIBRAW_SONY_Tag9050c;
+    break;
+  default:
+    if ((imSony.CameraType != LIBRAW_SONY_DSC) &&
+        (imSony.CameraType != LIBRAW_SONY_DSLR))
+      imSony.group9050 = LIBRAW_SONY_Tag9050a;
+    else
+      imSony.group9050 = LIBRAW_SONY_Tag9050None;
+    break;
   }
 
   char *sbstr = strstr(software, " v");
@@ -370,6 +418,12 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id)
         imSony.ImageCount3_offset = 0x01b6;
     }
   }
+
+  if ((id == SonyID_ILCE_7SM3) &&
+      !strcmp(model, "MODEL-NAME")) {
+    imSony.group9050 = LIBRAW_SONY_Tag9050a;
+  }
+
 }
 
 void LibRaw::parseSonyLensType2(uchar a, uchar b)
@@ -385,11 +439,12 @@ void LibRaw::parseSonyLensType2(uchar a, uchar b)
       ilm.AdapterID = lid2;
       switch (lid2)
       {
-      case 1: // Sony LA-EA1 or Sigma MC-11 Adapter
-      case 2: // Sony LA-EA2
-      case 3: // Sony LA-EA3
-      case 6: // Sony LA-EA4
-      case 7: // Sony LA-EA5
+      case     1: // Sony LA-EA1 or Sigma MC-11 Adapter
+      case     2: // Sony LA-EA2
+      case     3: // Sony LA-EA3
+      case     6: // Sony LA-EA4
+      case     7: // Sony LA-EA5
+      case 24593: // LA-EA4r MonsterAdapter, id = 0x6011
         ilm.LensMount = LIBRAW_MOUNT_Minolta_A;
         break;
       case  44: // Metabones Canon EF Smart Adapter
@@ -517,8 +572,8 @@ void LibRaw::process_Sony_0x0116(uchar *buf, ushort len, unsigned long long id)
 
 void LibRaw::process_Sony_0x2010(uchar *buf, ushort len)
 {
-  if (!imSony.group2010)
-    return;
+
+  if (imSony.group2010 == LIBRAW_SONY_Tag2010None) return;
 
   if ((imSony.real_iso_offset != 0xffff) &&
       (len >= (imSony.real_iso_offset + 2)) && (imCommon.real_ISO < 0.1f))
@@ -554,25 +609,15 @@ void LibRaw::process_Sony_0x9050(uchar *buf, ushort len, unsigned long long id)
   uchar s[4];
   int c;
 
-  if ((id == SonyID_ILCE_7SM3) &&
-      strcmp(model, "MODEL-NAME")) // ? check the firmware version instead ?
-  {
-    if (len <= 0x8d)
-      return;
-    unsigned long long b88 = SonySubstitution[buf[0x88]];
-    unsigned long long b89 = SonySubstitution[buf[0x89]];
-    unsigned long long b8a = SonySubstitution[buf[0x8a]];
-    unsigned long long b8b = SonySubstitution[buf[0x8b]];
-    unsigned long long b8c = SonySubstitution[buf[0x8c]];
-    unsigned long long b8d = SonySubstitution[buf[0x8d]];
-    sprintf(imgdata.shootinginfo.InternalBodySerial, "%06llx",
-            (b88 << 40) + (b89 << 32) + (b8a << 24) + (b8b << 16) + (b8c << 8) +
-                b8d);
-    return;
-  }
+  if ((imSony.group9050 == LIBRAW_SONY_Tag9050None) &&
+      (imSony.CameraType != LIBRAW_SONY_DSC) &&
+      (imSony.CameraType != LIBRAW_SONY_DSLR))
+    imSony.group9050 = LIBRAW_SONY_Tag9050a;
+
+  if (imSony.group9050 == LIBRAW_SONY_Tag9050None) return;
 
   if ((ilm.CameraMount != LIBRAW_MOUNT_Sony_E) &&
-      (ilm.CameraMount != LIBRAW_MOUNT_FixedLens))
+      (imSony.CameraType != LIBRAW_SONY_DSC))
   {
     if (len < 2)
       return;
@@ -589,23 +634,9 @@ void LibRaw::process_Sony_0x9050(uchar *buf, ushort len, unsigned long long id)
              10.0f) / 10.0f;
   }
 
-  if ((id == SonyID_ILCE_6100) ||
-      (id == SonyID_ILCE_6300) ||
-      (id == SonyID_ILCE_6400) ||
-      (id == SonyID_ILCE_6500) ||
-      (id == SonyID_ILCE_6600) ||
-      (id == SonyID_ILCE_7C)   ||
-      (id == SonyID_ILCE_7M3)  ||
-      (id == SonyID_ILCE_7RM2) ||
-      (id == SonyID_ILCE_7RM3) ||
-      (id == SonyID_ILCE_7RM4) ||
-      (id == SonyID_ILCE_7SM2) ||
-      (id == SonyID_ILCE_9)    ||
-      (id == SonyID_ILCE_9M2)  ||
-      (id == SonyID_ILCA_99M2)) // 9050 ver.b
-  {
-    if (len <= 0x8d)
-      return;
+  if ((imSony.group9050 == LIBRAW_SONY_Tag9050b) ||
+      (imSony.group9050 == LIBRAW_SONY_Tag9050c)) {
+    if (len <= 0x8d) return;
     unsigned long long b88 = SonySubstitution[buf[0x88]];
     unsigned long long b89 = SonySubstitution[buf[0x89]];
     unsigned long long b8a = SonySubstitution[buf[0x8a]];
@@ -613,37 +644,34 @@ void LibRaw::process_Sony_0x9050(uchar *buf, ushort len, unsigned long long id)
     unsigned long long b8c = SonySubstitution[buf[0x8c]];
     unsigned long long b8d = SonySubstitution[buf[0x8d]];
     sprintf(imgdata.shootinginfo.InternalBodySerial, "%06llx",
-            (b88 << 40) + (b89 << 32) + (b8a << 24) + (b8b << 16) + (b8c << 8) +
-                b8d);
-  }
-  else if ((ilm.CameraMount == LIBRAW_MOUNT_Sony_E) &&
-           (id != SonyID_NEX_5N) &&
-           (id != SonyID_NEX_7)  &&
-           (id != SonyID_NEX_VG20)) // other 9050 versions
-  {
-    if (len <= 0x7f)
-      return;
-    unsigned b7c = SonySubstitution[buf[0x7c]];
-    unsigned b7d = SonySubstitution[buf[0x7d]];
-    unsigned b7e = SonySubstitution[buf[0x7e]];
-    unsigned b7f = SonySubstitution[buf[0x7f]];
-    sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x",
-            (b7c << 24) + (b7d << 16) + (b7e << 8) + b7f);
-  }
-  else if (ilm.CameraMount == LIBRAW_MOUNT_Minolta_A)
-  {
-    if (len <= 0xf4)
-      return;
-    unsigned long long bf0 = SonySubstitution[buf[0xf0]];
-    unsigned long long bf1 = SonySubstitution[buf[0xf1]];
-    unsigned long long bf2 = SonySubstitution[buf[0xf2]];
-    unsigned long long bf3 = SonySubstitution[buf[0xf3]];
-    unsigned long long bf4 = SonySubstitution[buf[0xf4]];
-    sprintf(imgdata.shootinginfo.InternalBodySerial, "%05llx",
-            (bf0 << 32) + (bf1 << 24) + (bf2 << 16) + (bf3 << 8) + bf4);
+            (b88 << 40) + (b89 << 32) + (b8a << 24) + (b8b << 16) + (b8c << 8) + b8d);
+
+  } else if (imSony.group9050 == LIBRAW_SONY_Tag9050a) {
+      if ((ilm.CameraMount == LIBRAW_MOUNT_Sony_E) &&
+             (id != SonyID_NEX_5N) &&
+             (id != SonyID_NEX_7)  &&
+             (id != SonyID_NEX_VG20)) {
+      if (len <= 0x7f) return;
+      unsigned b7c = SonySubstitution[buf[0x7c]];
+      unsigned b7d = SonySubstitution[buf[0x7d]];
+      unsigned b7e = SonySubstitution[buf[0x7e]];
+      unsigned b7f = SonySubstitution[buf[0x7f]];
+      sprintf(imgdata.shootinginfo.InternalBodySerial, "%04x",
+              (b7c << 24) + (b7d << 16) + (b7e << 8) + b7f);
+
+    } else if (ilm.CameraMount == LIBRAW_MOUNT_Minolta_A) {
+      if (len <= 0xf4) return;
+      unsigned long long bf0 = SonySubstitution[buf[0xf0]];
+      unsigned long long bf1 = SonySubstitution[buf[0xf1]];
+      unsigned long long bf2 = SonySubstitution[buf[0xf2]];
+      unsigned long long bf3 = SonySubstitution[buf[0xf3]];
+      unsigned long long bf4 = SonySubstitution[buf[0xf4]];
+      sprintf(imgdata.shootinginfo.InternalBodySerial, "%05llx",
+              (bf0 << 32) + (bf1 << 24) + (bf2 << 16) + (bf3 << 8) + bf4);
+    }
   }
 
-  if (ilm.CameraMount != LIBRAW_MOUNT_FixedLens)
+  if (imSony.CameraType != LIBRAW_SONY_DSC)
   {
     if (len <= 0x106)
       return;
@@ -748,37 +776,20 @@ void LibRaw::process_Sony_0x9400(uchar *buf, ushort len, unsigned long long id)
   if (((bufx == 0x23) ||
        (bufx == 0x24) ||
        (bufx == 0x26) ||
-       (bufx == 0x28)) &&
+       (bufx == 0x28) ||
+       (bufx == 0x31)) &&
       (len >= 0x1f)) // 0x9400 'c' version
   {
+    imSony.Sony0x9400_version = 0xc;
+    imSony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x09]];
 
-    if ((id == SonyID_ILCE_6100)    ||
-        (id == SonyID_ILCE_6400)    ||
-        (id == SonyID_ILCE_6600)    ||
-        (id == SonyID_ILCE_7M3)     ||
-        (id == SonyID_ILCE_7RM3)    ||
-        (id == SonyID_ILCE_7RM4)    ||
-        (id == SonyID_ILCE_9)       ||
-        (id == SonyID_ILCE_9M2)     ||
-        (id == SonyID_DSC_RX10M4)   ||
-        (id == SonyID_DSC_RX100M5A) ||
-        (id == SonyID_DSC_RX100M6)  ||
-        (id == SonyID_DSC_RX100M7)  ||
-        (id == SonyID_DSC_HX99)     ||
-        (id == SonyID_DSC_RX0M2)    ||
-        (id == SonyID_ZV_1))
-    {
-      imSony.ShotNumberSincePowerUp = SonySubstitution[buf[0x0a]];
-    }
-    else
-    {
+    if ((imSony.group2010 == LIBRAW_SONY_Tag2010g) ||
+        (imSony.group2010 == LIBRAW_SONY_Tag2010h)) {
       FORC4 s[c] = SonySubstitution[buf[0x0a + c]];
       imSony.ShotNumberSincePowerUp = sget4(s);
+    } else {
+      imSony.ShotNumberSincePowerUp = SonySubstitution[buf[0x0a]];
     }
-
-    imSony.Sony0x9400_version = 0xc;
-
-    imSony.Sony0x9400_ReleaseMode2 = SonySubstitution[buf[0x09]];
 
     FORC4 s[c] = SonySubstitution[buf[0x12 + c]];
     imSony.Sony0x9400_SequenceImageNumber = sget4(s);
@@ -947,7 +958,7 @@ void LibRaw::process_Sony_0x940e(uchar *buf, ushort len, unsigned long long id)
     imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
     imCommon.afdata[imCommon.afcount].AFInfoData_length = len;
     imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)malloc(imCommon.afdata[imCommon.afcount].AFInfoData_length);
-    FORC(imCommon.afdata[imCommon.afcount].AFInfoData_length)
+    FORC((int)imCommon.afdata[imCommon.afcount].AFInfoData_length)
       imCommon.afdata[imCommon.afcount].AFInfoData[c] = SonySubstitution[buf[c]];
     imCommon.afcount++;
   }
@@ -1612,13 +1623,7 @@ void LibRaw::parseSonyMakernotes(
   else if (tag == 0x201b)
   {
     if ((imSony.CameraType != LIBRAW_SONY_DSC) ||
-        (ilm.CamID == SonyID_DSC_RX10M4)   ||
-        (ilm.CamID == SonyID_DSC_RX100M6)  ||
-        (ilm.CamID == SonyID_DSC_RX100M5A) ||
-        (ilm.CamID == SonyID_DSC_RX0M2)    ||
-        (ilm.CamID == SonyID_DSC_HX99)     ||
-        (ilm.CamID == SonyID_DSC_RX100M7)  ||
-        (ilm.CamID == SonyID_ZV_1))
+        (imSony.group2010 == LIBRAW_SONY_Tag2010i))
     {
       short t = (short)fgetc(ifp);
       if (imgdata.shootinginfo.FocusMode != t)
@@ -1668,13 +1673,7 @@ void LibRaw::parseSonyMakernotes(
   else if (tag == 0x2021) // AFTracking
   {
     if ((imSony.CameraType != LIBRAW_SONY_DSC) ||
-        (ilm.CamID == SonyID_DSC_RX10M4)   ||
-        (ilm.CamID == SonyID_DSC_RX100M6)  ||
-        (ilm.CamID == SonyID_DSC_RX100M5A) ||
-        (ilm.CamID == SonyID_DSC_RX0M2)    ||
-        (ilm.CamID == SonyID_DSC_HX99)     ||
-        (ilm.CamID == SonyID_DSC_RX100M7)  ||
-        (ilm.CamID == SonyID_ZV_1))
+        (imSony.group2010 == LIBRAW_SONY_Tag2010i))
     {
       imSony.AFTracking = fgetc(ifp);
     }
@@ -1944,11 +1943,11 @@ void LibRaw::parseSonyMakernotes(
     }
     free(table_buf);
   }
-  else if ((tag == 0xb02b) && !imgdata.sizes.raw_inset_crop.cwidth &&
+  else if ((tag == 0xb02b) && !imgdata.sizes.raw_inset_crops[0].cwidth &&
            (len == 2))
   {
-    imgdata.sizes.raw_inset_crop.cheight = get4();
-    imgdata.sizes.raw_inset_crop.cwidth = get4();
+    imgdata.sizes.raw_inset_crops[0].cheight = get4();
+    imgdata.sizes.raw_inset_crops[0].cwidth = get4();
   }
   else if (tag == 0xb041)
   {
@@ -2187,7 +2186,7 @@ void LibRaw::parseSonySRF(unsigned len)
                                           un-encrypted metadata field after SRF0 */
 
       unsigned i, nWB;
-      unsigned MasterKey, SRF2Key;
+      unsigned MasterKey, SRF2Key=0;
       INT64 srf_offset, tag_offset, tag_dataoffset;
       int tag_dataunitlen;
       //uchar *srf_buf;

@@ -125,7 +125,8 @@
         when raw2image() or dcraw_process() is called.</dd>
       <dt><strong> libraw_output_params_t params; </strong></dt>
       <dd>Data structure intended for management of image postprocessing (using
-        the dcraw emulator). Fields of this structure are described in detail <a
+        the dcraw emulator). Fields of this structure are described in detail <a
+
           href="#libraw_iparams_t"> below </a> .</dd>
       <dt>libraw_callbacks_t callbacks;</dt>
       <dd><a href="#libraw_callbacks_t">user-settable callbacks</a> </dd>
@@ -210,6 +211,17 @@
       <dt><strong> int flip; </strong></dt>
       <dd>Image orientation (0 if does not require rotation; 3 if requires
         180-deg rotation; 5 if 90 deg counterclockwise, 6 if 90 deg clockwise).</dd>
+      <dt><strong>libraw_raw_inset_crop_t raw_inset_crops[2];</strong></dt>
+      <dd>(<strong>libraw_raw_inset_crop_t: </strong>ushort cleft, ctop,
+        cwidth, cheight;)<ul>
+        <li>item at[0] contains standard crop data parsed from camera metadata (DNG:
+          DefaultCrop* tags, other formats: vendor specific tags)</li>
+        <li>item at [1] is 'user crop', in particular:
+       <br/>- set by DNG  DefaultUserCrop tag
+       <br/>- or set via raw aspect ratio tags (e.g. 16:9 aspect on Fujifilm cameras)
+          raw_inset_crops[1] is filled only if aspect ratio tags provides different
+          aspect ratio compared to raw_inset_crops[0].
+        </li></ul></dd>
     </dl>
     <p><a name="libraw_colordata_t"></a></p>
     <h3>Structure libraw_colordata_t: Color Information</h3>
@@ -291,20 +303,20 @@
       <dt><strong> libraw_dng_color_t dng_color[2]; </strong></dt>
       <dd>Color data read from DNG: illuminant, calbiration matrix and color
         matrix for two light sources. (see DNG specs for details).</dd>
-      <dt>libraw_dng_levels_t dng_levels</dt>
+      <dt><strong>libraw_dng_levels_t dng_levels</strong></dt>
       <dd>DNG black/white levels, analog balance, WB for active IFD. See DNG
         specs for details.</dd>
-      <dt>int WB_Coeffs[256][4]</dt>
+      <dt><strong>int WB_Coeffs[256][4]</strong></dt>
       <dd>Index: EXIF color source value, [i][0..3] WB Coeffs</dd>
-      <dt>float WBCT_Coeffs[64][5]</dt>
+      <dt><strong>float WBCT_Coeffs[64][5]</strong></dt>
       <dd>Color temperature in [i][0], WB coeffs in [i][1..4]</dd>
-      <dt>int as_shot_wb_applied</dt>
+      <dt><strong>int as_shot_wb_applied</strong></dt>
       <dd>Set to 1 if WB already applied in camera (multishot modes; small raw)</dd>
-      <dt>libraw_P1_color_t P1_color[2]</dt>
+      <dt><strong>libraw_P1_color_t P1_color[2]</strong></dt>
       <dd>Phase-one specific color data</dd>
-      <dt>unsigned raw_bps</dt>
+      <dt><strong>unsigned raw_bps</strong></dt>
       <dd>RAW bits per pixel (PhaseOne: Raw format used)</dd>
-      <dt>int ExifColorSpace</dt>
+      <dt><strong>int ExifColorSpace</strong></dt>
       <dd>EXIF color space parsed from EXIF tags: LIBRAW_COLORSPACE_Unknown,
         LIBRAW_COLORSPACE_sRGB, or LIBRAW_COLORSPACE_Adobe</dd>
     </dl>
@@ -494,6 +506,10 @@
       <dd>Processing options used on unpack() phase for specific image formats,
         see below for possible values:<a href="#LibRaw_processing_options">
           LibRaw_processing_options</a></dd>
+      <dt><strong> unsigned shot_select; </strong></dt>
+      <dd><strong> dcraw keys: </strong> -s <br>
+        Selection of image number for processing (for formats that contain
+        several RAW images in one file).</dd>
       <dt><strong> int specials </strong></dt>
       <dd>Special processing mode (e.g. omit YCC to RGB conversion), see below
         for possible values. <a href="#LibRaw_rawspecial_t">
@@ -553,11 +569,7 @@
       <dt><strong> float user_mul[4]; </strong></dt>
       <dd><strong> dcraw keys: </strong> -r mul0 mul1 mul2 mul3 <br>
         4 multipliers (r,g,b,g) of the user's white balance.</dd>
-      <dt><strong> unsigned shot_select; </strong></dt>
-      <dd><strong> dcraw keys: </strong> -s <br>
-        Selection of image number for processing (for formats that contain
-        several RAW images in one file).</dd>
-      <dt><strong> float bright; </strong></dt>
+      <dt><strong>float bright; </strong></dt>
       <dd><strong> dcraw keys: </strong> -b <br>
         Brightness (default 1.0).</dd>
       <dt><strong> float threshold; </strong></dt>
@@ -601,7 +613,8 @@
       </dd>
       <dt><strong> int output_color; </strong></dt>
       <dd><strong> dcraw keys: </strong> -o <br>
-        [0-8] Output colorspace (raw, sRGB, Adobe, Wide, ProPhoto, XYZ, ACES, DCI-P3, Rec. 2020).</dd>
+        [0-8] Output colorspace (raw, sRGB, Adobe, Wide, ProPhoto, XYZ, ACES,
+        DCI-P3, Rec. 2020).</dd>
       <dt><strong> char* output_profile; </strong></dt>
       <dd><strong> dcraw keys: </strong> -o filename <br>
         Path to output profile ICC file (used only if LibRaw compiled with LCMS
@@ -754,7 +767,8 @@
       <dd>Called on data error, settable via set_dataerror_handler. See <a href="API-CXX.html#callbacks">C++
           API</a> for details.</dd>
       <dt>progress_callback progress_cb</dt>
-      <dd>Called on process callback, settable via set_progress_handler. See <a
+      <dd>Called on process callback, settable via set_progress_handler. See <a
+
           href="API-CXX.html#callbacks">C++ API</a> for details.</dd>
       <dt>exif_parser_callback exif_cb, params: (void *context, int tag, int
         type, int len, unsigned int ord, void *ifp)</dt>
@@ -930,7 +944,8 @@
       <dt><strong> LIBRAW_BAD_CROP </strong></dt>
       <dd>The incorrect cropping coordinates are set via params.cropbox[]: the
         left-top corner of cropping rectangle is outside the image. The
-        processing will be cancelled, all allocated resources will be freed, <a
+        processing will be cancelled, all allocated resources will be freed, <a
+
           <dt=""><strong> LIBRAW_TOO_BIG</strong> </a></dd>
       <dd><a <dt="">Raw data size exceeds data limit.</a></dd>
       <a <dt=""> </a>
@@ -952,10 +967,12 @@
           file (only for formats supporting storage of several images in a
           file).</dd>
         <dt><strong> LIBRAW_OUT_OF_ORDER_CALL </strong></dt>
-      </a><dd><a <dt="">API functions have been called in wrong order (e.g., </a><a
+      </a><dd><a <dt="">API functions have been called in wrong order (e.g., </a><a
+
           href="API-CXX.html#unpack"> unpack() </a> before <a href="API-CXX.html#open_file">
           open_file() </a> ) or the previous stage has ended with an error
-        (e.g., <a href="API-CXX.html#unpack"> unpack() </a> is called after <a
+        (e.g., <a href="API-CXX.html#unpack"> unpack() </a> is called after <a
+
           href="API-CXX.html#open_file"> open_file() </a> has returned an
         error).</dd>
       <dt><strong> LIBRAW_NO_THUMBNAIL </strong></dt>
@@ -1099,6 +1116,9 @@
       <dt><strong> LIBRAW_THUMBNAIL_ROLLEI </strong></dt>
       <dd>Data format is presently recognized upon opening of RAW file but not
         supported: not unpacked into LibRaw::unpack_thumb.</dd>
+      <dt><strong>LIBRAW_THUMBNAIL_H265</strong></dt>
+      <dd>The thumbnail buffer contains a H.265 data frame (read from RAW file
+        as is, no manipulations performed on it).</dd>
     </dl>
     <p><a name="warnings"></a></p>
     <h3>Nonstandard Situations (Warnings) during RAW Data Processing</h3>
@@ -1190,8 +1210,6 @@
     </ul>
     <p>DNG processing flags:</p>
     <ul>
-      <li><b>LIBRAW_RAWOPTIONS_USE_DNG_DEFAULT_CROP</b> - use DNG DefaultCrop*
-        tags for cropping</li>
       <li><b>LIBRAW_RAWOPTIONS_DONT_CHECK_DNG_ILLUMINANT</b> - skip DNG
         illuminant check when parsing DNG color data (use for compatibility w/
         older LibRaw versions).</li>

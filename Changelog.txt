@@ -1,3 +1,159 @@
+2021-10-22  Alex Tutubalin <lexa@lexa.ru>
+  
+   == LibRaw snapshot 202110 ==
+   * Camera Format support:
+    - Sony Lossless compressed support
+    - Panasonic v6/12 bit
+ 
+   * Camera support:
+    DJI Mavic Air 2S
+    Fujifilm GFX 50S II;  GFX 100S, X-E4
+    GoPro HERO9, HERO10 (if compiled w/ USE_GPR_SDK)
+    Nikon Z fc
+    Panasonic GH5 Mark II
+    Pentax K3 Mark III
+    Olympus E-P7
+    Ricoh GR IIIx
+    Sony A1, A7R-IIIA (ILCE-7RM3A), A7R-IVA (ILCE-7RM4A), ZV-E10
+    Canon EOS M50 Mark II was supported but not listed in camera list
+
+    Multiple phones tested and added to cameralist.cpp
+
+   * Support for RaspberryPi HQ camera (if compiled w/  USE_6BY9RPI)
+
+   * Improved support for RPi V1/V2 cameras:
+     - white balance data extraction
+     - color matrix extracted to imgdata.color.cmatrix to use with
+       use_camera_matrix.
+     - full-size thumbnail/preview support for JPEG+RAW files (raspistill -r)
+
+  == API-ABI changes ==
+
+  * (INCOMPATIBILITY WITH OLDER VERSIONS!!!) 
+    imgdata.params.shot_select moved to imgdata.rawparams.shot_select
+     (because this is decode-time option, not postprocessing option)
+
+  * libraw_open_bayer(...) added to C-API
+
+  * imgdata.makernotes.canon: separate SensorLeftBorder,SensorTopBorder....
+    (and many other datafields) are united in libraw_area_t (rectangle)
+    groups for crop areas and optical black areas.
+
+  * Additional fields in libraw_internal_data.unpacker_data:
+    - INT64: exif_offset: base offset of 1st EXIF IFD in file
+    - INT64: ifd0_offset: base offset of 1st TIFF IFD (IFD0) in file
+    - unsigned cr3_exif_length, cr3_ifd0_lenght : CR3-specific length of
+     exif and ifd0 sections.
+
+  *  imgdata.sizes.raw_inset_crop rearranged:
+     now it is imgdata.sizes.raw_inset_crops[2]:
+     - item at [0] is the same as imgdatra.sizes.raw_inset_crop in previous 
+      versions
+     - item at [1] is 'user crop', in particular:
+       -- set by DNG  DefaultUserCrop tag
+       -- or set via raw aspect ratio tags (e.g. 16:9 aspect on Fujifilm cameras)
+          raw_inset_crops[1] is filled only if aspect ratio tags provides different
+          aspect ratio compared to raw_inset_crops[0].
+
+   There are no flags to check if raw_inset_crops[Nth] is filled; to see if it is filled check 
+   the values of:
+     ctop/cleft < 0xffff (0xffff => standard values if not initialized)
+     ctop+cheight <= sizes.raw_height
+     cleft+cwidth <= sizes.raw_width
+
+   Note: raw_inset_crops may be fooled by metadata (makernotes), use some correctness check before use.
+
+  * LIBRAW_RAWOPTIONS_USE_DNG_DEFAULT_CROP processing flag removed,
+    DNG DefaultCrop* tags are parsed into raw_inset_crops[0]
+
+  * new LibRaw call LibRaw::adjust_to_raw_inset_crop(unsigned mask, float maxcrop = 0.55f)
+    Promotes imgdata.sizes.raw_inset_crops[] values to
+    imgdata.sizes.*margin and imgdata.sizes.width/height fields
+
+   mask: if bit 1 is set: prefer raw_inset_crops[1] 
+         if bit 0 is set: prefer raw_inset_crops[0] 
+
+   maxcrop: limits crop to not less than (original width/height)*maxcrop; if raw_inset_crops[i]
+   data results in tighter crop, than this item is ignored.
+
+   return value: index in raw_inset_crops[] used increased by one, so
+    0: no changes made
+    1: [0]th data used
+    2: [1]th data used
+   
+  Note: this call SHOULD be used after LibRaw::unpack(), otherwise black level
+  calculation from masked area may be fooled resulting in wrong black levels.
+
+ * Shared library version incremented to disallow automated upgrades (will not work because of ABI change)
+
+== Metadata parsing improvements ==
+
+  * Olympus makernotes parsing: LiveND mode, Panorama mode tags.
+
+  * Fuji GFX100/GFX100S: PixelShift metadata extraction.
+
+  * Fuji RAF files: XMP block extraction
+
+== Misc improvements, limits implemented, etc ==
+
+  * Canon/12-bit files: adjust color.linear_max and makernotes.canon values
+    to match data range.
+
+  * DNG/Floating point: additional metadata check to refuse ambiguous/corrupted files.
+
+  * DNG/Floating point: correct handling of striped files (never seen in wild)
+
+  * Rawspeed support: disallow Nikon D6/Compressed processing
+ 
+  * Compile-time raw size limits implemented:
+     LIBRAW_MAX_NONDNG_RAW_FILE_SIZE - max file size for non-DNG files (default: 2GB - 1 byte)
+     LIBRAW_MAX_DNG_RAW_FILE_SIZE - max DNG file size limit (4GB-1 if compiled w/ DNG SDK, 2GB-1 overwise)
+
+  * samples/raw-identify.cpp:  -v flag documented in usage print.
+
+  * src/libraw_cxx.cpp completely removed from source tree to not confuse users.
+    (also all mentions are removed from Makefiles)
+
+  * clang-cl compatibility:
+    - defines _MSC_VER, but _forceinline is not supported
+    - warnings eliminated in Windows buffered datastream
+
+  * XMP block size in CR3 files limited to 1MB
+  
+  * Preview block size in CR3 files limited to 100MB
+
+  * Improved Phase One Compressed defects masking, thanks to Alexey Danilchenko
+
+  * CRX (CR3) decoder: fixed typo in constant; this does not affect any
+    known still photo (CR3) sample(s), but allows to use the decoder with 
+    some video (CRM) files.
+
+  * Imported user-contributed improvements to OpenMP postprocessing
+    (AHD and X-Trans demosaic)
+
+  * Bugfix: overwrite (wrong) TIFF/Orientation tag value with Metadata/Camera Orientation
+    value for EOS 40D only.
+
+  * ACES output: color conversion changed to provide D65 white point
+
+  * Fix for Canon 5D Mark II/sRAW1 incorrect camera provided crop   
+
+  * RawSpeed (master): fixed bug in old Samsung/compressed decoder,
+    apply this patch to RawSpeed: RawSpeed/rawspeed.samsung-decoder.patch
+  
+  * DCI-P3 and Rec 2020 output colorspaces
+  
+  * Eliminated multiple signed/unsigned mismatch warnings (reported by gcc11)
+
+  * Fixed a typo in LIBRAW_OPTIONS_* flag names
+    (was LIBRAW_OPIONS, old flags names not removed due to compatibility)
+
+== Bugfixes ==
+  * fixed possible 1-byte stack underrun while handling text tags with zero lengh
+
+  * Fixed wrong handling of linear DNG files created from Pentax out-of-camera DNGs
+ 
+
 2021-01-21  Alex Tutubalin <lexa@lexa.ru>
 
  == LibRaw snapshot 202101 ==
@@ -36,12 +192,6 @@
    section below (in short: you'll need to use old fstream-based datastream 
    under Windows).
    Cinema DNG files are not affected by this.
-
- = Compile/build changes =
- * Old (0.19-compatibility) files (internal/dcraw_*.cpp  
-   internal/demosaic_packs.cpp src/libraw_cxx.cpp) are removed from LibRaw 
-   repository.
-   Please switch to 'modern' multiple source files build.
 
  = API/ABI changes =
 
@@ -120,8 +270,6 @@
       LIBRAW_CAPS_ZLIB if compiled with USE_ZLIB
       LIBRAW_CAPS_JPEG if compiled with USE_JPEG
 
- * samples/raw-identify.cpp sample: removed lot of extra output
-   used only by development team
 
  * Windows datastreams: CreateFile2 is used if compiled for UWP.
 

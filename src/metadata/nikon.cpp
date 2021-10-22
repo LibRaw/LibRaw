@@ -14,6 +14,13 @@
 
 #include "../../internal/dcraw_defs.h"
 
+// void hexDump(char *title, void *addr, int len);
+
+unsigned sget4_order (short _order, uchar *s);
+double sget_fixed32u (short _order, uchar *s);
+double AngleConversion_a (short _order, uchar *s);
+double AngleConversion (short _order, uchar *s);
+
 static const uchar xlat[2][256] = {
     {0xc1, 0xbf, 0x6d, 0x0d, 0x59, 0xc5, 0x13, 0x9d, 0x83, 0x61, 0x6b, 0x4f,
      0xc7, 0x7f, 0x3d, 0x3d, 0x53, 0x59, 0xe3, 0xc7, 0xe9, 0x2f, 0x95, 0xa7,
@@ -60,12 +67,10 @@ static const uchar xlat[2][256] = {
      0xc6, 0x67, 0x4a, 0xf5, 0xa5, 0x12, 0x65, 0x7e, 0xb0, 0xdf, 0xaf, 0x4e,
      0xb3, 0x61, 0x7f, 0x2f} };
 
-
-
 void LibRaw::processNikonLensData(uchar *LensData, unsigned len)
 {
 
-  ushort i;
+  ushort i=0;
   if (imgdata.lens.nikon.LensType & 0x80) {
     strcpy (ilm.LensFeatures_pre, "AF-P");
   } else if (!(imgdata.lens.nikon.LensType & 0x01)) {
@@ -122,7 +127,7 @@ void LibRaw::processNikonLensData(uchar *LensData, unsigned len)
     case 16:
       i = 8;
       break;
-    case 58: // "Z 6", "Z 7", "Z 50", D780, "Z 5"
+    case 58: // "Z 6", "Z 6 II", "Z 7", "Z 7 II", "Z 50", D780, "Z 5", "Z fc"
       if (model[6] == 'Z')
         ilm.CameraMount = LIBRAW_MOUNT_Nikon_Z;
       if (imNikon.HighSpeedCropFormat != 12)
@@ -138,10 +143,11 @@ void LibRaw::processNikonLensData(uchar *LensData, unsigned len)
           case 11: case 12:
             ilm.LensFormat = LIBRAW_FORMAT_APSC;
             break;
-          case 1:  case 2:  case 4:  case 8:
-          case 9:  case 13: case 14: case 15:
+          case  1: case  2: case  4: case  8:
+          case  9: case 13: case 14: case 15:
           case 16: case 17: case 18: case 21:
-          case 22: case 23:
+          case 22: case 23: case 24: case 27:
+          case 29:
             ilm.LensFormat = LIBRAW_FORMAT_FF;
             break;
         }
@@ -240,13 +246,20 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
   unsigned offset = 0, entries, tag, type, len, save;
 
   unsigned c, i;
-  uchar *LensData_buf;
+  unsigned LensData_len = 0;
+  uchar *LensData_buf=0;
   uchar ColorBalanceData_buf[324];
   int ColorBalanceData_ready = 0;
   uchar ci, cj, ck;
   unsigned serial = 0;
   unsigned custom_serial = 0;
-  unsigned LensData_len = 0;
+
+  unsigned ShotInfo_len = 0;
+  uchar *ShotInfo_buf=0;
+
+/* for dump:
+uchar *cj_block, *ck_block;
+*/
 
   short morder, sorder = order;
   char buf[10];
@@ -452,27 +465,27 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
       case 1:
       case 2:
       case 4:
-        imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_3to2;
+        imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_3to2;
         break;
       case 11:
         ilm.CameraFormat = LIBRAW_FORMAT_FF;
-        imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_3to2;
+        imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_3to2;
         break;
       case 12:
         ilm.CameraFormat = LIBRAW_FORMAT_APSC;
-        imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_3to2;
+        imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_3to2;
         break;
       case 3:
-        imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_5to4;
+        imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_5to4;
         break;
       case 6:
-        imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_16to9;
+        imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_16to9;
         break;
       case 17:
-        imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_1to1;
+        imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_1to1;
         break;
       default:
-        imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_OTHER;
+        imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_OTHER;
         break;
       }
     }
@@ -544,10 +557,10 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
     }
     else if (tag == 0x0045)
     { /* upper left pixel (x,y), size (width,height) */
-      imgdata.sizes.raw_inset_crop.cleft = get2();
-      imgdata.sizes.raw_inset_crop.ctop = get2();
-      imgdata.sizes.raw_inset_crop.cwidth = get2();
-      imgdata.sizes.raw_inset_crop.cheight = get2();
+      imgdata.sizes.raw_inset_crops[0].cleft = get2();
+      imgdata.sizes.raw_inset_crops[0].ctop = get2();
+      imgdata.sizes.raw_inset_crops[0].cwidth = get2();
+      imgdata.sizes.raw_inset_crops[0].cheight = get2();
     }
     else if (tag == 0x0082)
     { // lens attachment
@@ -590,6 +603,20 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
     else if ((tag == 0x008c) || (tag == 0x0096))
     {
       meta_offset = ftell(ifp);
+    }
+    else if ((tag == 0x0091) && (len > 4))
+    {
+      ShotInfo_len = len;
+      ShotInfo_buf = (uchar *)malloc(ShotInfo_len);
+
+/* for dump:
+cj_block = (uchar *)malloc(ShotInfo_len);
+ck_block = (uchar *)malloc(ShotInfo_len);
+*/
+
+      fread(ShotInfo_buf, ShotInfo_len, 1, ifp);
+      FORC4 imNikon.ShotInfoVersion =
+          imNikon.ShotInfoVersion * 10 + ShotInfo_buf[c] - '0';
     }
     else if (tag == 0x0093)
     {
@@ -756,6 +783,89 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
         LensData_len = 0;
         free(LensData_buf);
       }
+      if (ShotInfo_len && (imNikon.ShotInfoVersion >= 208)) {
+        unsigned RotationOffset = 0,
+                 OrientationOffset = 0;
+
+        cj = xlat[1][imNikon.key];
+        ck = 0x60;
+        for (i = 4; i < ShotInfo_len; i++) {
+          ShotInfo_buf[i] ^= (cj += ci * ck++);
+
+/* for dump:
+cj_block[i-4] = cj;
+ck_block[i-4] = ck-1;
+*/
+        }
+/* for dump:
+printf ("==>> ci: 0x%02x, cj at start: 0x%02x\n",
+ci, xlat[1][imNikon.key]);
+hexDump("ck array:", ck_block, ShotInfo_len-4);
+hexDump("cj array:", cj_block, ShotInfo_len-4);
+free(cj_block);
+free(ck_block);
+*/
+
+        switch (imNikon.ShotInfoVersion) {
+        case 208: // ShotInfoD80, Rotation
+          RotationOffset = 590;
+          if (RotationOffset<ShotInfo_len) {
+            imNikon.MakernotesFlip = *(ShotInfo_buf+RotationOffset) & 0x07;
+          }
+          break;
+
+        case 231: // ShotInfoD4S, Rotation, Roll/Pitch/Yaw
+          OrientationOffset  = 0x350b;
+          RotationOffset     = 0x3693;
+          if (RotationOffset<ShotInfo_len) {
+            imNikon.MakernotesFlip = (*(ShotInfo_buf+RotationOffset)>>4) & 0x03;
+          }
+          break;
+
+        case 233: // ShotInfoD810, Roll/Pitch/Yaw
+          OrientationOffset = sget4_order(morder, ShotInfo_buf+0x84);
+          break;
+
+        case 238: // D5,   ShotInfoD500, Rotation, Roll/Pitch/Yaw
+        case 239: // D500, ShotInfoD500, Rotation, Roll/Pitch/Yaw
+          RotationOffset = sget4_order(morder, ShotInfo_buf+0x10) + 0xca;
+          if (RotationOffset > 0xca) {
+            RotationOffset -= 0xb0;
+          }
+          if (RotationOffset<ShotInfo_len) {
+            imNikon.MakernotesFlip = *(ShotInfo_buf+RotationOffset) & 0x03;
+          }
+          OrientationOffset = sget4_order(morder, ShotInfo_buf+0xa0);
+          break;
+
+        case 243: // ShotInfoD850, Roll/Pitch/Yaw
+          OrientationOffset = sget4_order(morder, ShotInfo_buf+0xa0);
+          break;
+
+        case 246: // ShotInfoD6, Roll/Pitch/Yaw
+          OrientationOffset = sget4_order(morder, ShotInfo_buf+0x9c);
+          break;
+
+        case 800: // Z 6, Z 7,     ShotInfoZ7_2, Roll/Pitch/Yaw
+        case 803: // Z 6_2, Z 7_2, ShotInfoZ7_2, Roll/Pitch/Yaw
+          OrientationOffset = sget4_order(morder, ShotInfo_buf+0x98);
+          break;
+//        case 804: // Z fc
+//          break;
+        }
+        if (OrientationOffset && ((OrientationOffset+12)<ShotInfo_len)) {
+          if (imNikon.ShotInfoVersion == 231) // ShotInfoD4S
+            imNikon.RollAngle = AngleConversion_a(morder, ShotInfo_buf+OrientationOffset);
+          else
+            imNikon.RollAngle = AngleConversion(morder, ShotInfo_buf+OrientationOffset);
+          imNikon.PitchAngle  = AngleConversion (morder, ShotInfo_buf+OrientationOffset+4);
+          imNikon.YawAngle    = AngleConversion (morder, ShotInfo_buf+OrientationOffset+8);
+        }
+        if ((RotationOffset) && (imNikon.MakernotesFlip < 4))
+          imNikon.MakernotesFlip = "0863"[imNikon.MakernotesFlip] - '0';
+        ShotInfo_len = 0;
+        free(ShotInfo_buf);
+      }     
     }
     else if (tag == 0x00a8)
     { // contains flash data
@@ -855,3 +965,78 @@ void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
 quit:
   order = sorder;
 }
+
+unsigned sget4_order (short _order, uchar *s) {
+  unsigned v;
+  if (_order == 0x4949)
+    v= s[0] | s[1] << 8 | s[2] << 16 | s[3] << 24;
+  else
+    v= s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3];
+  return v;
+}
+
+double sget_fixed32u (short _order, uchar *s) {
+  unsigned v = sget4_order (_order, s);
+  return ((double)v / 6.5536 + 0.5) / 10000.0;
+}
+
+double AngleConversion_a (short _order, uchar *s) {
+  double v = sget_fixed32u(_order, s);
+  if (v < 180.0) return -v;
+  return 360.0-v;
+}
+
+double AngleConversion (short _order, uchar *s) {
+  double v = sget_fixed32u(_order, s);
+  if (v <= 180.0) return v;
+  return v-360.0;
+}
+
+/* ========= */
+/*
+void hexDump(char *title, void *addr, int len) 
+{
+    int i;
+    unsigned char buff[17];
+    unsigned char *pc = (unsigned char*)addr;
+
+    // Output description if given.
+    if (title != NULL)
+        printf ("%s:\n", title);
+
+    // Process every byte in the data.
+    for (i = 0; i < len; i++) {
+        // Multiple of 16 means new line (with line offset).
+
+        if ((i % 16) == 0) {
+            // Just don't print ASCII for the zeroth line.
+            if (i != 0)
+                printf("  %s\n", buff);
+
+            // Output the offset.
+            printf("  %04x ", i);
+        }
+
+        // Now the hex code for the specific character.
+        printf(" %02x", pc[i]);
+
+        // And store a printable ASCII character for later.
+        if ((pc[i] < 0x20) || (pc[i] > 0x7e)) {
+            buff[i % 16] = '.';
+        } else {
+            buff[i % 16] = pc[i];
+        }
+
+        buff[(i % 16) + 1] = '\0';
+    }
+
+    // Pad out last line if not exactly 16 characters.
+    while ((i % 16) != 0) {
+        printf("   ");
+        i++;
+    }
+
+    // And print the final ASCII bit.
+    printf("  %s\n", buff);
+}
+*/

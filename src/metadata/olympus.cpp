@@ -250,8 +250,22 @@ void LibRaw::parseOlympus_CameraSettings(int base, unsigned tag, unsigned type,
       imOly.DriveMode[c] = get2();
     }
     break;
+  case 0x0601:
+  	imOly.Panorama_mode = get2();
+  	imOly.Panorama_frameNum = get2();
+  	break;
   case 0x0604:
     imgdata.shootinginfo.ImageStabilization = get4();
+    break;
+  case 0x0804:
+    imOly.StackedImage[0] = get4();
+    imOly.StackedImage[1] = get4();
+    if (imOly.StackedImage[0] == 3) {
+      imOly.isLiveND = 1;
+      imOly.LiveNDfactor = imOly.StackedImage[1];
+    } else {
+      imOly.isLiveND = 0;
+    }
     break;
   }
 
@@ -373,19 +387,19 @@ void LibRaw::parseOlympus_ImageProcessing(unsigned tag, unsigned type,
   }
   else if ((tag == 0x0612) && (dng_writer == nonDNG))
   {
-    imgdata.sizes.raw_inset_crop.cleft = get2();
+    imgdata.sizes.raw_inset_crops[0].cleft = get2();
   }
   else if ((tag == 0x0613) && (dng_writer == nonDNG))
   {
-    imgdata.sizes.raw_inset_crop.ctop = get2();
+    imgdata.sizes.raw_inset_crops[0].ctop = get2();
   }
   else if ((tag == 0x0614) && (dng_writer == nonDNG))
   {
-    imgdata.sizes.raw_inset_crop.cwidth = get2();
+    imgdata.sizes.raw_inset_crops[0].cwidth = get2();
   }
   else if ((tag == 0x0615) && (dng_writer == nonDNG))
   {
-    imgdata.sizes.raw_inset_crop.cheight = get2();
+    imgdata.sizes.raw_inset_crops[0].cheight = get2();
   }
   else if ((tag == 0x0805) && (len == 2))
   {
@@ -404,37 +418,38 @@ void LibRaw::parseOlympus_ImageProcessing(unsigned tag, unsigned type,
     case 0x0101:
     case 0x0901:
     case 0x0909:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_4to3;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_4to3;
       break;
     case 0x0104:
     case 0x0401:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_1to1;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_1to1;
       break;
     case 0x0201:
     case 0x0202:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_3to2;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_3to2;
       break;
     case 0x0301:
     case 0x0303:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_16to9;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_16to9;
       break;
     case 0x0404:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_6to6;
+//      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_6to6;
+        imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_1to1;
       break;
     case 0x0505:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_5to4;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_5to4;
       break;
     case 0x0606:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_7to6;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_7to6;
       break;
     case 0x0707:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_6to5;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_6to5;
       break;
     case 0x0808:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_7to5;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_7to5;
       break;
     default:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_OTHER;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_OTHER;
       break;
     }
   }
@@ -514,19 +529,19 @@ void LibRaw::parseOlympus_RawInfo(unsigned tag, unsigned type, unsigned len,
   }
   else if ((tag == 0x0612) && (dng_writer == nonDNG))
   {
-    imgdata.sizes.raw_inset_crop.cleft = get2();
+    imgdata.sizes.raw_inset_crops[0].cleft = get2();
   }
   else if ((tag == 0x0613) && (dng_writer == nonDNG))
   {
-    imgdata.sizes.raw_inset_crop.ctop = get2();
+    imgdata.sizes.raw_inset_crops[0].ctop = get2();
   }
   else if ((tag == 0x0614) && (dng_writer == nonDNG))
   {
-    imgdata.sizes.raw_inset_crop.cwidth = get2();
+    imgdata.sizes.raw_inset_crops[0].cwidth = get2();
   }
   else if ((tag == 0x0615) && (dng_writer == nonDNG))
   {
-    imgdata.sizes.raw_inset_crop.cheight = get2();
+    imgdata.sizes.raw_inset_crops[0].cheight = get2();
   }
   return;
 }
@@ -535,7 +550,7 @@ void LibRaw::parseOlympus_RawInfo(unsigned tag, unsigned type, unsigned len,
 void LibRaw::parseOlympusMakernotes (int base, unsigned tag, unsigned type, unsigned len, unsigned dng_writer) {
 
   int c;
-  unsigned a, b;
+  unsigned a;
   if ((tag >= 0x20100000) && (tag <= 0x2010ffff)) {
         parseOlympus_Equipment((tag & 0x0000ffff), type, len, dng_writer);
 
@@ -655,7 +670,7 @@ void LibRaw::parseOlympusMakernotes (int base, unsigned tag, unsigned type, unsi
 			  break;
 			case 0x20500305:
 			  a = get4();
-			  b = get4();
+			  /*b = */ get4(); // b is not used, so removed
 			  if (a >= 0x7f000000) imOly.FocusDistance = -1.0; // infinity
 			  else imOly.FocusDistance = (double) a / 1000.0;  // convert to meters
 			  break;

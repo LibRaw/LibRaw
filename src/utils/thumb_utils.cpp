@@ -235,11 +235,16 @@ int LibRaw::thumbOK(INT64 maxsz)
     return 0;
   if (!ID.toffset && !(imgdata.thumbnail.tlength > 0 &&
                        load_raw == &LibRaw::broadcom_load_raw) // RPi
+#ifdef USE_6BY9RPI
+      && !(imgdata.thumbnail.tlength > 0 && libraw_internal_data.unpacker_data.load_flags & 0x4000 &&
+           (load_raw == &LibRaw::rpi_load_raw8 || load_raw == &LibRaw::nokia_load_raw ||
+            load_raw == &LibRaw::rpi_load_raw12 || load_raw == &LibRaw::rpi_load_raw14))
+#endif
   )
     return 0;
   INT64 fsize = ID.input->size();
-  if (fsize > 0x7fffffffU)
-    return 0; // No thumb for raw > 2Gb
+  if (fsize > 0xffffffffU)
+    return 0; // No thumb for raw > 4Gb-1
   int tsize = 0;
   int tcol = (T.tcolors > 0 && T.tcolors < 4) ? T.tcolors : 3;
   if (write_thumb == &LibRaw::jpeg_thumb)

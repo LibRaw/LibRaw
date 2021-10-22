@@ -348,10 +348,10 @@ void LibRaw::parse_rollei()
       }
     if (!strcmp(line, "CUTRECT")) {
       sscanf(val, "%hu %hu %hu %hu",
-             &imgdata.sizes.raw_inset_crop.cleft,
-             &imgdata.sizes.raw_inset_crop.ctop,
-             &imgdata.sizes.raw_inset_crop.cwidth,
-             &imgdata.sizes.raw_inset_crop.cheight);
+             &imgdata.sizes.raw_inset_crops[0].cleft,
+             &imgdata.sizes.raw_inset_crops[0].ctop,
+             &imgdata.sizes.raw_inset_crops[0].cwidth,
+             &imgdata.sizes.raw_inset_crops[0].cheight);
     }
   } while (strncmp(line, "EOHD", 4));
   data_offset = thumb_offset + thumb_width * thumb_height * 2;
@@ -599,6 +599,14 @@ void LibRaw::parse_raspberrypi()
 
 	struct brcm_raw_header header;
 	uint8_t brcm_tag[4];
+
+    if (ftell(ifp) > 22LL) // 22 bytes is minimum jpeg size
+    {
+        thumb_length = ftell(ifp);
+        thumb_offset = 0;
+        thumb_width = thumb_height = 0;
+        load_flags |= 0x4000; // flag: we have JPEG from beginning to meta_offset
+    }
 
 	// Sanity check that the caller has found a BRCM header
 	if (!fread(brcm_tag, 1, sizeof(brcm_tag), ifp) ||

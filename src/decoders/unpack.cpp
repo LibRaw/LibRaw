@@ -25,7 +25,7 @@ int LibRaw::unpack(void)
       return LIBRAW_INPUT_CLOSED;
 
     RUN_CALLBACK(LIBRAW_PROGRESS_LOAD_RAW, 0, 2);
-    if (O.shot_select >= P1.raw_count)
+    if (imgdata.rawparams.shot_select >= P1.raw_count)
       return LIBRAW_REQUEST_FOR_NONEXISTENT_IMAGE;
 
     if (!load_raw)
@@ -137,6 +137,10 @@ int LibRaw::unpack(void)
            !strncasecmp(imgdata.idata.model, "COOLPIX P1000", 13)))
         rawspeed_enabled = 0;
 
+      if (load_raw == &LibRaw::nikon_load_raw && makeIs(LIBRAW_CAMERAMAKER_Nikon) &&
+          !strcasecmp(imgdata.idata.model, "D6"))
+        rawspeed_enabled = 0;
+
 	if (load_raw == &LibRaw::lossless_jpeg_load_raw &&
 		MN.canon.RecordMode && makeIs(LIBRAW_CAMERAMAKER_Kodak) &&
 		/* Not normalized models here, it is intentional */
@@ -187,7 +191,7 @@ int LibRaw::unpack(void)
       }
       if (decoder_info.decoder_flags & LIBRAW_DECODER_SINAR4SHOT)
       {
-        if (imgdata.params.shot_select) // single image extract
+        if (imgdata.rawparams.shot_select) // single image extract
         {
           if (INT64(rwidth) * INT64(rheight + 8) *
                   sizeof(imgdata.rawdata.raw_image[0]) >
@@ -296,7 +300,7 @@ int LibRaw::unpack(void)
         // x3f foveon decoder only: do nothing
       }
       else if (decoder_info.decoder_flags & LIBRAW_DECODER_SINAR4SHOT &&
-               imgdata.params.shot_select == 0)
+               imgdata.rawparams.shot_select == 0)
       {
         imgdata.rawdata.raw_alloc = imgdata.image;
         imgdata.rawdata.color4_image = (ushort(*)[4])imgdata.rawdata.raw_alloc;

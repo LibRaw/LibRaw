@@ -276,6 +276,10 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "sony_load_raw()";
   }
+  else if (load_raw == &LibRaw::sony_ljpeg_load_raw)
+  {
+    d_info->decoder_name = "sony_ljpeg_load_raw()";
+  }
   else if (load_raw == &LibRaw::sony_arw_load_raw)
   {
     d_info->decoder_name = "sony_arw_load_raw()";

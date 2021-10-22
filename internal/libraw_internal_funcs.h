@@ -51,10 +51,11 @@ it under the terms of the one of two licenses as you choose:
 	static libraw_static_table_t Sony_SR2_wb_list;
 	static libraw_static_table_t Sony_SR2_wb_list1;
 /*  */
-	int     find_ifd_by_offset(int );
+	int	find_ifd_by_offset(int );
 	ushort	sget2 (uchar *s);
 	ushort	sget2Rev(uchar *s);
-	int 	parseCR3(unsigned long long oAtomList, unsigned long long szAtomList, short &nesting, char *AtomNameStack, short& nTrack, short &TrackType);
+	libraw_area_t	get_CanonArea();
+	int	parseCR3(INT64 oAtomList, INT64 szAtomList, short &nesting, char *AtomNameStack, short& nTrack, short &TrackType);
 	void	selectCRXTrack(short maxTrack);
 	void	setCanonBodyFeatures (unsigned long long id);
 	void	processCanonCameraInfo (unsigned long long id, uchar *CameraInfo, unsigned maxlen, unsigned type, unsigned dng_writer);
@@ -127,7 +128,7 @@ it under the terms of the one of two licenses as you choose:
 
 	ushort      get2();
 	unsigned    sget4 (uchar *s);
-    unsigned    getint(int type);
+	unsigned    getint(int type);
 	float       int_to_float (int i);
 	double      getreal (int type);
 	double      sgetreal(int type, uchar *s);
@@ -196,6 +197,7 @@ it under the terms of the one of two licenses as you choose:
 //	void        fuji_load_raw();
 	int         guess_RAFDataGeneration (uchar *RAFData_start);
 	void        parse_fuji (int offset);
+    void        parse_fuji_thumbnail(int offset);
 #ifdef LIBRAW_OLD_VIDEO_SUPPORT
 // RedCine
 	void        parse_redcine();
@@ -213,6 +215,9 @@ it under the terms of the one of two licenses as you choose:
 //int         bayer (unsigned row, unsigned col);
 	int         p1raw(unsigned,unsigned);
 	void        phase_one_flat_field (int is_float, int nc);
+	int 	    p1rawc(unsigned row, unsigned col, unsigned& count);
+	void 	    phase_one_fix_col_pixel_avg(unsigned row, unsigned col);
+	void 	    phase_one_fix_pixel_grad(unsigned row, unsigned col);
 	void        phase_one_load_raw();
 	unsigned    ph1_bits (int nbits);
 	void        phase_one_load_raw_c();
@@ -280,6 +285,7 @@ it under the terms of the one of two licenses as you choose:
 	void        sony_arw_load_raw();
 	void        sony_arw2_load_raw();
 	void        sony_arq_load_raw();
+	void        sony_ljpeg_load_raw();
 	void        samsung_load_raw();
 	void        samsung2_load_raw();
 	void        samsung3_load_raw();
@@ -336,7 +342,7 @@ it under the terms of the one of two licenses as you choose:
 	void        parse_gps_libraw(int base);
 	void        aRGB_coeff(double aRGB_cam[3][3]);
 	void        romm_coeff(float romm_cam[3][3]);
-	void        parse_mos (int offset);
+	void        parse_mos (INT64 offset);
 	void        parse_qt (int end);
 	void        get_timestamp (int reversed);
 

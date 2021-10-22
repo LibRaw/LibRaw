@@ -35,14 +35,14 @@ int LibRaw::unpack_thumb(void)
 
 #define THUMB_SIZE_CHECKT(A) \
   do { \
-    if (INT64(A) > 1024ULL * 1024ULL * LIBRAW_MAX_THUMBNAIL_MB) return LIBRAW_UNSUPPORTED_THUMBNAIL; \
-    if (INT64(A) > 0 &&  INT64(A) < 64ULL)        return LIBRAW_NO_THUMBNAIL; \
+    if (INT64(A) > 1024LL * 1024LL * LIBRAW_MAX_THUMBNAIL_MB) return LIBRAW_UNSUPPORTED_THUMBNAIL; \
+    if (INT64(A) > 0 &&  INT64(A) < 64LL)        return LIBRAW_NO_THUMBNAIL; \
   } while (0)
 
 #define THUMB_SIZE_CHECKTNZ(A) \
   do { \
-    if (INT64(A) > 1024ULL * 1024ULL * LIBRAW_MAX_THUMBNAIL_MB) return LIBRAW_UNSUPPORTED_THUMBNAIL; \
-    if (INT64(A) < 64ULL)        return LIBRAW_NO_THUMBNAIL; \
+    if (INT64(A) > 1024LL * 1024LL * LIBRAW_MAX_THUMBNAIL_MB) return LIBRAW_UNSUPPORTED_THUMBNAIL; \
+    if (INT64(A) < 64LL)        return LIBRAW_NO_THUMBNAIL; \
   } while (0)
 
 
@@ -61,7 +61,12 @@ int LibRaw::unpack_thumb(void)
     int t_bytesps = (libraw_internal_data.unpacker_data.thumb_misc & 31) / 8;
 
     if (!ID.toffset && !(imgdata.thumbnail.tlength > 0 &&
-                         load_raw == &LibRaw::broadcom_load_raw) // RPi
+                         load_raw == &LibRaw::broadcom_load_raw)  // RPi
+#ifdef USE_6BY9RPI
+        && !(imgdata.thumbnail.tlength > 0 && libraw_internal_data.unpacker_data.load_flags & 0x4000
+            && (load_raw == &LibRaw::rpi_load_raw8 || load_raw == &LibRaw::nokia_load_raw ||
+           load_raw == &LibRaw::rpi_load_raw12 || load_raw == &LibRaw::rpi_load_raw14))
+#endif
     )
     {
       return LIBRAW_NO_THUMBNAIL;

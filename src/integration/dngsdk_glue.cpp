@@ -83,6 +83,10 @@ int LibRaw::valid_for_dngsdk()
   if (!imgdata.idata.dng_version)
     return 0;
 
+  // All DNG larger than 2GB - to DNG SDK
+  if (libraw_internal_data.internal_data.input->size() > 2147483647ULL)
+      return 1;
+
   if (!strcasecmp(imgdata.idata.make, "Blackmagic") 
       && (libraw_internal_data.unpacker_data.tiff_compress == 7)
       && (libraw_internal_data.unpacker_data.tiff_bps > 8)

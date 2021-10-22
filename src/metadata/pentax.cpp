@@ -53,6 +53,7 @@ void LibRaw::setPentaxBodyFeatures(unsigned long long id)
   case PentaxID_K_S1:
   case PentaxID_K_S2:
   case PentaxID_K_3_II:
+  case PentaxID_K_3_III:
   case PentaxID_K_70:
   case PentaxID_KP:
     ilm.CameraMount = LIBRAW_MOUNT_Pentax_K;
@@ -85,6 +86,7 @@ void LibRaw::setPentaxBodyFeatures(unsigned long long id)
     ilm.FocalType = LIBRAW_FT_ZOOM_LENS;
     break;
   case PentaxID_GR_III:
+  case PentaxID_GR_IIIx:
     ilm.CameraMount = LIBRAW_MOUNT_FixedLens;
     ilm.LensMount = LIBRAW_MOUNT_FixedLens;
     ilm.CameraFormat = LIBRAW_FORMAT_APSC;
@@ -326,20 +328,25 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   }
   else if (tag == 0x0038)
   {
-    imgdata.sizes.raw_inset_crop.cleft = get2();
-    imgdata.sizes.raw_inset_crop.ctop = get2();
+    imgdata.sizes.raw_inset_crops[0].cleft = get2();
+    imgdata.sizes.raw_inset_crops[0].ctop = get2();
   }
   else if (tag == 0x0039)
   {
-    imgdata.sizes.raw_inset_crop.cwidth = get2();
-    imgdata.sizes.raw_inset_crop.cheight = get2();
+    imgdata.sizes.raw_inset_crops[0].cwidth = get2();
+    imgdata.sizes.raw_inset_crops[0].cheight = get2();
   }
   else if (tag == 0x003c)
   {
-    if ((len == 4) && tagtypeIs(LIBRAW_EXIFTAG_TYPE_UNDEFINED))
+    if ((len == 4) && tagtypeIs(LIBRAW_EXIFTAG_TYPE_UNDEFINED)) {
       imPentax.AFPointsInFocus = get4() & 0x7ff;
-      if (!imPentax.AFPointsInFocus) imPentax.AFPointsInFocus = 0xffffffff;
-      else imPentax.AFPointsInFocus_version = 1;
+      if (!imPentax.AFPointsInFocus) {
+        imPentax.AFPointsInFocus = 0xffffffff;
+      }
+      else {
+        imPentax.AFPointsInFocus_version = 1;
+      }
+    }
   }
   else if (tag == 0x003f)
   {
@@ -378,16 +385,16 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
     switch (a)
     {
     case 0:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_4to3;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_4to3;
       break;
     case 1:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_3to2;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_3to2;
       break;
     case 2:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_16to9;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_16to9;
       break;
     case 3:
-      imgdata.sizes.raw_inset_crop.aspect = LIBRAW_IMAGE_ASPECT_1to1;
+      imgdata.sizes.raw_aspect = LIBRAW_IMAGE_ASPECT_1to1;
       break;
     }
   }
@@ -434,6 +441,12 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   {
     FORC4 icWBC[Pentax_wb_list1[tag - 0x020d]][RGGB_2_RGBG(c)] = get2();
   }
+  else if ((tag == 0x021d) && (len == 18) &&
+           tagtypeIs(LIBRAW_EXIFTAG_TYPE_UNDEFINED) && (dng_writer == nonDNG))
+  {
+    for (int i = 0; i < 3; i++)
+      FORC3 cmatrix[i][c] = ((short)get2()) / 8192.0;
+  }
   else if (tag == 0x021f)
   {
     if ((unique_id != PentaxID_K_1)    &&
@@ -476,10 +489,10 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   {
     int wb_ind;
     getc(ifp);
-    for (int wb_cnt = 0; wb_cnt < Pentax_wb_list2.size(); wb_cnt++)
+    for (int wb_cnt = 0; wb_cnt < (int)Pentax_wb_list2.size(); wb_cnt++)
     {
       wb_ind = getc(ifp);
-      if (wb_ind >= 0 && wb_ind < Pentax_wb_list2.size() )
+      if (wb_ind >= 0 && wb_ind < (int)Pentax_wb_list2.size() )
         FORC4 icWBC[Pentax_wb_list2[wb_ind]][RGGB_2_RGBG(c)] = get2();
     }
   }

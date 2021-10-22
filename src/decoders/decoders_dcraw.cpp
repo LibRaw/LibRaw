@@ -203,7 +203,8 @@ int LibRaw::canon_has_lowbits()
 void LibRaw::canon_load_raw()
 {
   ushort *pixel, *prow, *huff[2];
-  int nblocks, lowbits, i, c, row, r, save, val;
+  int nblocks, lowbits, i, c, row, r, val;
+  INT64 save;
   int block, diffbuf[64], leaf, len, diff, carry = 0, pnum = 0, base[2];
 
   crw_init_tables(tiff_compress, huff);
@@ -834,7 +835,7 @@ void LibRaw::nikon_read_curve()
   if (ver0 == 0x49 || ver1 == 0x58)
     fseek(ifp, 2110, SEEK_CUR);
   read_shorts(vpred[0], 4);
-  max = 1 << tiff_bps & 0x7fff;
+  step = max = 1 << tiff_bps & 0x7fff;
   if ((csize = get2()) > 1)
     step = max / (csize - 1);
   if (ver0 == 0x44 && (ver1 == 0x20 || (ver1 == 0x40 && step > 3)) && step > 0)
@@ -941,7 +942,7 @@ void LibRaw::nikon_yuv_load_raw()
 {
   if (!image)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
-  int row, col, yuv[4], rgb[3], b, c;
+  int row, col, yuv[4]={0,0,0,0}, rgb[3], b, c;
   UINT64 bitbuf = 0;
   float cmul[4];
   FORC4 { cmul[c] = cam_mul[c] > 0.001f ? cam_mul[c] : 1.f; }
@@ -1117,6 +1118,7 @@ void LibRaw::panasonic_load_raw()
 {
   int row, col, i, j, sh = 0, pred[2], nonz[2];
   unsigned bytes[16];
+  memset(bytes,0,sizeof(bytes)); // make gcc11 happy
   ushort *raw_block_data;
 
   pana_data(0, 0);
@@ -1606,7 +1608,7 @@ void LibRaw::samsung_load_raw()
         if (idest < maxpixels &&
             isrc <
                 maxpixels) // less than zero is handled by unsigned conversion
-          RAW(row, col + c) = (i > 0 ? ((signed)ph1_bits(i) << (32 - i) >> (32 - i)) : 0) + 			                
+          RAW(row, col + c) = (i > 0 ? ((signed)ph1_bits(i) << (32 - i) >> (32 - i)) : 0) +
             (dir ? RAW(row + (~c | -2), col + c) : col ? RAW(row, col + (c | -2)) : 128);
         else
           derror();

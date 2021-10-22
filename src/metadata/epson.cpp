@@ -17,7 +17,7 @@
 void LibRaw::parseEpsonMakernote(int base, int uptag, unsigned dng_writer)
 {
 
-#define isRIC imgdata.sizes.raw_inset_crop
+#define isRIC imgdata.sizes.raw_inset_crops[0]
 
   unsigned entries, tag, type, len, save;
   short morder, sorder = order;

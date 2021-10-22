@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
 #undef OUT
 #endif
 #define OUT RawProcessor.imgdata.params
+#define OUTR RawProcessor.imgdata.rawparams
 #define S RawProcessor.imgdata.sizes
 
   if (argc < 2)
@@ -105,7 +106,7 @@ int main(int argc, char *argv[])
       OUT.threshold = (float)atof(argv[arg++]);
       break;
     case 's':
-      OUT.shot_select = abs(atoi(argv[arg++]));
+      OUTR.shot_select = abs(atoi(argv[arg++]));
       break;
     case 'B':
       for (c = 0; c < 4; c++)
@@ -186,7 +187,7 @@ int main(int argc, char *argv[])
              "Params:      WB=%s Highlight=%d Qual=%d HalfSize=%s Median=%d "
              "Wavelet=%.0f\n"
              "Crop:        %u-%u:%ux%u, active Mpix: %.2f, %.1f frames/sec\n",
-             mpixsec, argv[arg], OUT.shot_select, rmpix, msec,
+             mpixsec, argv[arg], OUTR.shot_select, rmpix, msec,
              OUT.use_auto_wb ? "auto" : "default", OUT.highlight, OUT.user_qual,
              OUT.half_size ? "YES" : "No", OUT.med_passes, OUT.threshold,
              crop[0], crop[1], crop[2], crop[3], mpix, 1000.0f / msec);

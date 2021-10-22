@@ -153,8 +153,8 @@ void LibRaw::recycle()
 #undef FREE
 
   ZERO(imgdata.sizes);
-  imgdata.sizes.raw_inset_crop.cleft = 0xffff;
-  imgdata.sizes.raw_inset_crop.ctop  = 0xffff;
+  imgdata.sizes.raw_inset_crops[0].cleft = imgdata.sizes.raw_inset_crops[1].cleft = 0xffff;
+  imgdata.sizes.raw_inset_crops[0].ctop  = imgdata.sizes.raw_inset_crops[1].ctop = 0xffff;
 
   ZERO(imgdata.idata);
   ZERO(imgdata.color);
@@ -183,9 +183,9 @@ void LibRaw::recycle()
       imgdata.color.dng_color[1].illuminant = LIBRAW_WBI_None;
   for (int i = 0; i < 4; i++) imgdata.color.dng_levels.analogbalance[i] = 1.0f;
 
-  MN.canon.SensorLeftBorder = -1;
-  MN.canon.SensorTopBorder = -1;
-  MN.canon.AutoLightingOptimizer = 3; // 'off' value
+  MN.canon.DefaultCropAbsolute.l = -1;
+  MN.canon.DefaultCropAbsolute.t = -1;
+  MN.canon.AutoLightingOptimizer =  3; // 'off' value
 
   MN.fuji.WB_Preset = 0xffff;
   MN.fuji.ExpoMidPointShift = -999.f;
@@ -203,6 +203,11 @@ void LibRaw::recycle()
   MN.fuji.FocusWarning = 0xffff;
   for (int i = 0; i < 3; i++) MN.fuji.ImageStabilization[i] = 0xffff;
   MN.fuji.DriveMode = -1;
+  MN.fuji.ImageCount = -1;
+  MN.fuji.AutoBracketing = -1;
+  MN.fuji.SequenceNumber = -1;
+  MN.fuji.SeriesLength = -1;
+  MN.fuji.PixelShiftOffset[0] = MN.fuji.PixelShiftOffset[1] = -999.f;
 
   MN.hasselblad.nIFD_CM[0] = MN.hasselblad.nIFD_CM[1] = -1;
 
@@ -228,6 +233,7 @@ void LibRaw::recycle()
   MN.olympus.FocusStepNear = 0xffff;
   MN.olympus.FocusDistance = -999.0;
   for (int i = 0; i < 4; i++) MN.olympus.AspectFrame[i] = 0xffff;
+  MN.olympus.StackedImage[0] = 0xffffffff;
 
   MN.panasonic.LensManufacturer = 0xffffffff;
 

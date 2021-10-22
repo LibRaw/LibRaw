@@ -25,7 +25,7 @@ libraw_static_table_t LibRaw::tagtype_dataunit_bytes(_tagtype_dataunit_bytes, _A
 
 int libraw_tagtype_dataunit_bytes(int tagtype)
 {
-    return _tagtype_dataunit_bytes[(tagtype <= _ARR_SZ(_tagtype_dataunit_bytes)) ? tagtype : 0];
+    return _tagtype_dataunit_bytes[((unsigned)tagtype <= _ARR_SZ(_tagtype_dataunit_bytes)) ? tagtype : 0];
 }
 
 

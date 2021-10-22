@@ -106,7 +106,7 @@ it under the terms of the one of two licenses as you choose:
 #define aber              (imgdata.params.aber)
 #define gamm              (imgdata.params.gamm)
 #define user_mul          (imgdata.params.user_mul)
-#define shot_select       (imgdata.params.shot_select)
+#define shot_select       (imgdata.rawparams.shot_select)
 #define bright            (imgdata.params.bright)
 #define threshold         (imgdata.params.threshold)
 #define half_size         (imgdata.params.half_size)

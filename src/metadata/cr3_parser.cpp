@@ -15,6 +15,16 @@
 
 #include "../../internal/dcraw_defs.h"
 
+
+static libraw_area_t sget_CanonArea(uchar *s) {
+  libraw_area_t la = {};
+  la.l = s[0] << 8 | s[1];
+  la.t = s[2] << 8 | s[3];
+  la.r = s[4] << 8 | s[5];
+  la.b = s[6] << 8 | s[7];
+  return la;
+}
+
 void LibRaw::selectCRXTrack(short maxTrack)
 {
   if (maxTrack < 0)
@@ -63,6 +73,7 @@ void LibRaw::selectCRXTrack(short maxTrack)
     raw_width = d->f_width;
     raw_height = d->f_height;
     load_raw = &LibRaw::crxLoadRaw;
+    tiff_bps = d->nBits;
     switch (d->cfaLayout)
     {
     case 0:
@@ -94,11 +105,12 @@ void LibRaw::selectCRXTrack(short maxTrack)
   }
 }
 
-#define bad_hdr                                                                \
+#define bad_hdr()                                                              \
   (((order != 0x4d4d) && (order != 0x4949)) || (get2() != 0x002a) ||           \
    (get4() != 0x00000008))
-int LibRaw::parseCR3(unsigned long long oAtomList,
-                     unsigned long long szAtomList, short &nesting,
+
+int LibRaw::parseCR3(INT64 oAtomList,
+                     INT64 szAtomList, short &nesting,
                      char *AtomNameStack, short &nTrack, short &TrackType)
 {
   /*
@@ -207,14 +219,14 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
 
   const char sHandlerType[5][5] = {"unk.", "soun", "vide", "hint", "meta"};
 
-  int c, err;
+  int c, err=0;
 
   ushort tL;                        // Atom length represented in 4 or 8 bytes
   char nmAtom[5];                   // Atom name
-  unsigned long long oAtom, szAtom; // Atom offset and Atom size
-  unsigned long long oAtomContent,
+  INT64 oAtom, szAtom; // Atom offset and Atom size
+  INT64 oAtomContent,
       szAtomContent; // offset and size of Atom content
-  unsigned long long lHdr;
+  INT64 lHdr;
 
   char UIID[16];
   uchar CMP1[36];
@@ -232,7 +244,7 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
     return -14; // too deep nesting
   short s_order = order;
 
-  while ((oAtom + 8ULL) <= (oAtomList + szAtomList))
+  while ((oAtom + 8LL) <= (oAtomList + szAtomList))
   {
     lHdr = 0ULL;
     err = 0;
@@ -267,9 +279,9 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
       oAtomContent = oAtom + 8ULL;
       szAtomContent = szAtom - 8ULL;
     }
-    else if (szAtom == 1ULL)
+    else if (szAtom == 1LL)
     {
-      if ((oAtom + 16ULL) > (oAtomList + szAtomList))
+      if ((oAtom + 16LL) > (oAtomList + szAtomList))
       {
         err = -3;
         goto fin;
@@ -290,20 +302,20 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
 		INT64 tt = ftell(ifp);
 		lHdr = 16ULL;
 		fread(UIID, 1, lHdr, ifp);
-		if (!memcmp(UIID, UUID_XMP, 16) && szAtom > 24 && szAtom < 1024000ULL)
+		if (!memcmp(UIID, UUID_XMP, 16) && szAtom > 24LL && szAtom < 1024000LL)
 		{
-			xmpdata = (char *)malloc(xmplen = szAtom - 23);
+			xmpdata = (char *)malloc(xmplen = unsigned(szAtom - 23));
 			fread(xmpdata, szAtom - 24, 1, ifp);
 			xmpdata[szAtom - 24] = 0;
 		}
-		else if (!memcmp(UIID, UIID_CanonPreview, 16) && szAtom > 48 && szAtom < 100ULL * 1024000ULL)
+		else if (!memcmp(UIID, UIID_CanonPreview, 16) && szAtom > 48LL && szAtom < 100LL * 1024000LL)
 		{
 			// read next 48 bytes, check for 'PRVW'
 			unsigned char xdata[32];
 			fread(xdata, 32, 1, ifp);	
 			if (!memcmp(xdata + 12, "PRVW", 4))
 			{
-				thumb_length = szAtom - 56;
+				thumb_length = unsigned(szAtom - 56);
 				thumb_offset = ftell(ifp);
 			}
 		}
@@ -336,23 +348,27 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
     {
       short q_order = order;
       order = get2();
-      if ((tL != 4) || bad_hdr)
+      if ((tL != 4) || bad_hdr())
       {
         err = -4;
         goto fin;
       }
+      if (!libraw_internal_data.unpacker_data.cr3_ifd0_length)
+        libraw_internal_data.unpacker_data.cr3_ifd0_length = unsigned(szAtomContent);
       parse_tiff_ifd(oAtomContent);
       order = q_order;
     }
-    else if (!strcmp(AtomNameStack, "moovuuidCMT2"))
-    {
-      short q_order = order;
-      order = get2();
-      if ((tL != 4) || bad_hdr)
-      {
-        err = -5;
-        goto fin;
-      }
+	else if (!strcmp(AtomNameStack, "moovuuidCMT2"))
+	{
+		short q_order = order;
+		order = get2();
+		if ((tL != 4) || bad_hdr())
+		{
+			err = -5;
+			goto fin;
+		}
+		if (!libraw_internal_data.unpacker_data.cr3_exif_length)
+			libraw_internal_data.unpacker_data.cr3_exif_length = unsigned(szAtomContent); 
       parse_exif(oAtomContent);
       order = q_order;
     }
@@ -360,7 +376,7 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
     {
       short q_order = order;
       order = get2();
-      if ((tL != 4) || bad_hdr)
+      if ((tL != 4) || bad_hdr())
       {
         err = -6;
         goto fin;
@@ -373,7 +389,7 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
     {
       short q_order = order;
       order = get2();
-      if ((tL != 4) || bad_hdr)
+      if ((tL != 4) || bad_hdr())
       {
         err = -6;
         goto fin;
@@ -451,10 +467,10 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
         if (!strncmp((char *)CDI1+8, "IAD1", 4) && (sgetn(8, CDI1) == 0x38)) {
           // sensor area at CDI1+12, 4 16-bit values
           // Bayer pattern? - next 4 16-bit values
-          // image area, next 4 16-bit values
-          FORC4 imCanon.LeftOpticalBlack[c]  = sgetn(2, CDI1+12 + 3*4*2 +2*c);
-          FORC4 imCanon.UpperOpticalBlack[c] = sgetn(2, CDI1+12 + 4*4*2 +2*c);
-          FORC4 imCanon.ActiveArea[c]        = sgetn(2, CDI1+12 + 5*4*2 +2*c);
+          imCanon.RecommendedImageArea = sget_CanonArea(CDI1+12 + 2*4*2);
+          imCanon.LeftOpticalBlack     = sget_CanonArea(CDI1+12 + 3*4*2);
+          imCanon.UpperOpticalBlack    = sget_CanonArea(CDI1+12 + 4*4*2);
+          imCanon.ActiveArea           = sget_CanonArea(CDI1+12 + 5*4*2);
         }
       }
     }
@@ -541,7 +557,7 @@ int LibRaw::parseCR3(unsigned long long oAtomList,
                       SEEK_SET);
                 short q_order = order;
                 order = get2();
-                if (bad_hdr)
+                if (bad_hdr())
                 {
                   err = -13;
                   goto fin;

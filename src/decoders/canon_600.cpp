@@ -93,7 +93,7 @@ void LibRaw::canon_600_auto_wb()
   int test[8], total[2][8], ratio[2][2], stat[2];
 
   memset(&total, 0, sizeof total);
-  i = canon_ev + 0.5;
+  i = int(canon_ev + 0.5);
   if (i < 10)
     mar = 150;
   else if (i > 12)
@@ -137,7 +137,8 @@ void LibRaw::canon_600_auto_wb()
   {
     st = count[0] * 200 < count[1];
     for (i = 0; i < 4; i++)
-      pre_mul[i] = 1.0 / (total[st][i] + total[st][i + 4]);
+		if (total[st][i] + total[st][i + 4])
+			pre_mul[i] = 1.0f / (total[st][i] + total[st][i + 4]);
   }
 }
 
@@ -168,7 +169,7 @@ void LibRaw::canon_600_coeff()
   if (flash_used)
     t = 5;
   for (raw_color = i = 0; i < 3; i++)
-    FORCC rgb_cam[i][c] = table[t][i * 4 + c] / 1024.0;
+    FORCC rgb_cam[i][c] = float(table[t][i * 4 + c]) / 1024.f;
 }
 
 void LibRaw::canon_600_load_raw()

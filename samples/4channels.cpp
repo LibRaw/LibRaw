@@ -60,6 +60,7 @@ int main(int ac, char *av[])
 #define T RawProcessor.imgdata.thumbnail
 #define P2 RawProcessor.imgdata.other
 #define OUT RawProcessor.imgdata.params
+#define OUTR RawProcessor.imgdata.rawparams
 
   OUT.output_bps = 16;
   OUT.output_tiff = 1;
@@ -74,7 +75,7 @@ int main(int ac, char *av[])
       if (av[i][1] == 's' && av[i][2] == 0)
       {
         i++;
-        OUT.shot_select = av[i] ? atoi(av[i]) : 0;
+        OUTR.shot_select = av[i] ? atoi(av[i]) : 0;
       }
       else if (av[i][1] == 'g' && av[i][2] == 0)
         use_gamma = 1;
@@ -158,8 +159,8 @@ int main(int ac, char *av[])
       else
         snprintf(lname, 7, "%c", ((char *)("GCMY"))[layer]);
 
-      if (OUT.shot_select)
-        snprintf(outfn, sizeof(outfn), "%s-%d.%s.tiff", av[i], OUT.shot_select,
+      if (OUTR.shot_select)
+        snprintf(outfn, sizeof(outfn), "%s-%d.%s.tiff", av[i], OUTR.shot_select,
                  lname);
       else
         snprintf(outfn, sizeof(outfn), "%s.%s.tiff", av[i], lname);

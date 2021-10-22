@@ -17,8 +17,7 @@
               *rawfile[,INT64 bigfile_size])</a></li>
           <li><a href="#open_buffer">int LibRaw::open_buffer(void *buffer,
               size_t bufsize)</a></li>
-          <li><a href="#open_bayer">int
-              LibRaw::open_bayer(...)</a></li>
+          <li><a href="#open_bayer">int LibRaw::open_bayer(...)</a></li>
           <li><a href="#unpack">int LibRaw::unpack(void)</a></li>
           <li><a href="#unpack_thumb">int LibRaw::unpack_thumb(void)</a></li>
         </ul>
@@ -50,6 +49,8 @@
           <li><a href="#setCancelFlag">void LibRaw::setCancelFlag()</a></li>
           <li><a href="#clearCancelFlag">void LibRaw::clearCancelFlag()</a></li>
           <li><a href="#subtract_black">int LibRaw::subtract_black()</a></li>
+          <li><a href="#adjust_to_raw_inset_crop">int
+              LibRaw::adjust_to_raw_inset_crop()</a></li>
           <li><a href="#floatingpoint">Support for Floating Point data</a></li>
           <li><a href="#ycc">Support for YCC formats</a></li>
           <li><a href="#recycle">void LibRaw::recycle_datastream(void)</a></li>
@@ -218,41 +219,47 @@
       negative (from the <a href="API-datastruct.html#LibRaw_errors">LibRaw
         error list</a>) if there has been an error situation within LibRaw.</p>
     <p><a name="open_bayer"></a></p>
-
-    <h3>int LibRaw::open_bayer(unsigned char *data, unsigned datalen,
-	  ushort _raw_width, ushort _raw_height, ushort _left_margin, ushort _top_margin,
-	  ushort _right_margin, ushort _bottom_margin,
-	  unsigned char procflags, unsigned char bayer_pattern, unsigned unused_bits, unsigned otherflags,
-	  unsigned black_level)</h3>
-    <p>Parameters:
-<ul>
-<li>data, datalen - buffer passed
-<li>_raw_width/_raw_height/*margin - image size and margins
-<li> procflags:
- <ul>
- <li>for 10-bit format:
-  <ul>
-   <li>1: "4 pixels in 5 bytes" packing is used
-   <li>0: "6 pixels in 8 bytes" packing is used
-  </ul>
- <li>for 16-bit format:
-  <ul>
-   <li>1: Big-endian data
-  </ul>
- </ul>
- <li>bayer_pattern: one of LIBRAW_OPENBAYER_RGGB,LIBRAW_OPENBAYER_BGGR,
-                          LIBRAW_OPENBAYER_GRBG,LIBRAW_OPENBAYER_GBRG
- <li>unused_bits: count of upper zero bits
- <li>otherflags:
-  <ul>
-      <li>Bit 1 - filter (average neighbors) for pixels with values of zero
-      <li>Bits 2-4 - the orientation of the image (0=do not rotate, 3=180, 5=90CCW, 6=90CW)
-  </ul>
- <li>black_level: file black level (it also may be specified via imgdata.params)
-</ul>
-    See samples/openbayer_sample.cpp for usage sample (note, this sample is 'sample only', suited for
-    Kodak KAI-0340 sensor, you'll need change open_bayer() params for your data).
-
+    <h3>int LibRaw::open_bayer(unsigned char *data, unsigned datalen, ushort
+      _raw_width, ushort _raw_height, ushort _left_margin, ushort _top_margin,
+      ushort _right_margin, ushort _bottom_margin, unsigned char procflags,
+      unsigned char bayer_pattern, unsigned unused_bits, unsigned otherflags,
+      unsigned black_level)</h3>
+    <p>Parameters: </p>
+    <ul>
+      <li>data, datalen - buffer passed </li>
+      <li>_raw_width/_raw_height/*margin - image size and margins </li>
+      <li> procflags:
+        <ul>
+          <li>for 10-bit format:
+            <ul>
+              <li>1: "4 pixels in 5 bytes" packing is used </li>
+              <li>0: "6 pixels in 8 bytes" packing is used </li>
+            </ul>
+          </li>
+          <li>for 16-bit format:
+            <ul>
+              <li>1: Big-endian data </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>bayer_pattern: one of LIBRAW_OPENBAYER_RGGB,LIBRAW_OPENBAYER_BGGR,
+        LIBRAW_OPENBAYER_GRBG,LIBRAW_OPENBAYER_GBRG </li>
+      <li>unused_bits: count of upper zero bits </li>
+      <li>otherflags:
+        <ul>
+          <li>Bit 1 - filter (average neighbors) for pixels with values of zero
+          </li>
+          <li>Bits 2-4 - the orientation of the image (0=do not rotate, 3=180,
+            5=90CCW, 6=90CW) </li>
+        </ul>
+      </li>
+      <li>black_level: file black level (it also may be specified via
+        imgdata.params) </li>
+    </ul>
+    See samples/openbayer_sample.cpp for usage sample (note, this sample is
+    'sample only', suited for Kodak KAI-0340 sensor, you'll need change
+    open_bayer() params for your data).
     <p><a name="unpack"></a></p>
     <h3>int LibRaw::unpack(void)</h3>
     <p>Unpacks the RAW files of the image, calculates the black level (not for
@@ -354,6 +361,29 @@
         code convention</a>: positive if any system call has returned an error,
       negative (from the <a href="API-datastruct.html#LibRaw_errors">LibRaw
         error list</a>) if there has been an error situation within LibRaw.</p>
+    <a name="adjust_to_raw_inset_crop"></a>
+    <h4>int LibRaw::adjust_to_raw_inset_crop(unsigned mask, float maxcrop =
+      0.55f)</h4>
+    <p> Promotes imgdata.sizes.raw_inset_crops[] values to imgdata.sizes.*margin
+      and imgdata.sizes.width/height fields</p>
+    <p> Parameters<br>
+      mask: </p>
+    <ul>
+      <li>if bit 1 is set: prefer raw_inset_crops[1] </li>
+      <li>if bit 0 is set: prefer raw_inset_crops[0] </li>
+    </ul>
+    <p>maxcrop: limits crop to not less than (original width/height)*maxcrop; if
+      raw_inset_crops[i] data results in tighter crop, than this item is
+      ignored. </p>
+    <p>return value: index in raw_inset_crops[] used increased by one, so </p>
+    <ul>
+      <li>0: no changes made </li>
+      <li>1: [0]th data used </li>
+      <li>2: [1]th data used </li>
+    </ul>
+    <p>Note: this call SHOULD be used after LibRaw::unpack(), otherwise black
+      level calculation from masked area may be fooled resulting in wrong black
+      levels. </p>
     <p><a name="floatingpoint"></a></p>
     <h4>Support for floating point data</h4>
     <p>Libraw can read floating point DNG files (no other RAW formats may use
@@ -475,7 +505,6 @@
       <li>void *ifp - pointer to LibRaw_abstract_datastream, positioned to tag
         data</li>
     </ul>
-    <p>&nbsp;</p>
     <p><a name="memerror"></a></p>
     <h4>Out-of-Memory Notifier</h4>
     <pre>        typedef void (* memory_callback)(void *callback_data,const char *file, const char *where);<br>        void LibRaw::set_memerror_handler(memory_callback func,void *callback_data);<br>    </pre>

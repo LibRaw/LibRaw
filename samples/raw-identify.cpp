@@ -509,13 +509,13 @@ void print_verbose(FILE *outfile, LibRaw &MyCoolRawProcessor, std::string &fn)
     fprintf(outfile, "Thumb size:  %4d x %d\n", T.twidth, T.theight);
   fprintf(outfile, "Full size:   %4d x %d\n", S.raw_width, S.raw_height);
 
-  if (S.raw_inset_crop.cwidth)
+  if (S.raw_inset_crops[0].cwidth)
   {
-    fprintf(outfile, "Raw inset, width x height: %4d x %d ", S.raw_inset_crop.cwidth, S.raw_inset_crop.cheight);
-    if (S.raw_inset_crop.cleft != 0xffff)
-      fprintf(outfile, "left: %d ", S.raw_inset_crop.cleft);
-    if (S.raw_inset_crop.ctop != 0xffff)
-      fprintf(outfile, "top: %d", S.raw_inset_crop.ctop);
+    fprintf(outfile, "Raw inset, width x height: %4d x %d ", S.raw_inset_crops[0].cwidth, S.raw_inset_crops[0].cheight);
+    if (S.raw_inset_crops[0].cleft != 0xffff)
+      fprintf(outfile, "left: %d ", S.raw_inset_crops[0].cleft);
+    if (S.raw_inset_crops[0].ctop != 0xffff)
+      fprintf(outfile, "top: %d", S.raw_inset_crops[0].ctop);
     fprintf(outfile, "\n");
   }
 
@@ -673,6 +673,7 @@ void print_verbose(FILE *outfile, LibRaw &MyCoolRawProcessor, std::string &fn)
     fprintf(outfile, "\nDerived D65 multipliers:");
     for (int c = 0; c < P1.colors; c++)
       fprintf(outfile, " %f", C.pre_mul[c]);
+    fprintf(outfile, "\n");
   }
 }
 

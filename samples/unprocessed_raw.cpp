@@ -70,6 +70,7 @@ int main(int ac, char *av[])
 
 #define S RawProcessor.imgdata.sizes
 #define OUT RawProcessor.imgdata.params
+#define OUTR RawProcessor.imgdata.rawparams
 
   for (i = 1; i < ac; i++)
   {
@@ -86,7 +87,7 @@ int main(int ac, char *av[])
       else if (av[i][1] == 's' && av[i][2] == 0)
       {
         i++;
-        OUT.shot_select = av[i] ? atoi(av[i]) : 0;
+        OUTR.shot_select = av[i] ? atoi(av[i]) : 0;
       }
       else
         goto usage;
@@ -150,8 +151,8 @@ int main(int ac, char *av[])
         printf("Gamma-corrected....\n");
     }
 
-    if (OUT.shot_select)
-      snprintf(outfn, sizeof(outfn), "%s-%d.%s", av[i], OUT.shot_select,
+    if (OUTR.shot_select)
+      snprintf(outfn, sizeof(outfn), "%s-%d.%s", av[i], OUTR.shot_select,
                out_tiff ? "tiff" : "pgm");
     else
       snprintf(outfn, sizeof(outfn), "%s.%s", av[i], out_tiff ? "tiff" : "pgm");

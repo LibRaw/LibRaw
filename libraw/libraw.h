@@ -225,6 +225,7 @@ public:
   void raw2image_start();
   void free_image();
   int adjust_maximum();
+  int adjust_to_raw_inset_crop(unsigned mask, float maxcrop = 0.55f); 
   void set_exifparser_handler(exif_parser_callback cb, void *data)
   {
     callbacks.exifparser_data = data;

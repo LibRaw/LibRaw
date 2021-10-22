@@ -18,6 +18,9 @@ system.
   -- Win32: you need POSIX Threads for Win32 installed on your system
      (http://sources.redhat.com/pthreads-win32/)
 
+  -- use provided RawSpeed/rawspeed.samsung-decoder.patch  to fix
+     old Samsung decoder bug
+
   -- you may use qmake .pro files supplied in LibRaw distribution
      (RawSpeed/rawspeed.qmake-pro-files.patch)
      Adjust path to libraries/includes according to your setup.

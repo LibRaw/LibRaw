@@ -39,6 +39,10 @@ int LibRaw::parse_tiff_ifd(int base)
   for (j = 0; j < 4; j++)
     for (i = 0; i < 4; i++)
       cc[j][i] = i == j;
+
+  if (!libraw_internal_data.unpacker_data.ifd0_offset)
+    libraw_internal_data.unpacker_data.ifd0_offset = base;
+
   entries = get2();
   if (entries > 512)
     return 1;
@@ -103,21 +107,31 @@ int LibRaw::parse_tiff_ifd(int base)
           fseek(ifp, tiff_ifd[ifd].offset, SEEK_SET);
           if (ljpeg_start(&jh, 1))
           {
-            tiff_ifd[ifd].comp = 6;
-            tiff_ifd[ifd].t_width = jh.wide;
-            tiff_ifd[ifd].t_height = jh.high;
-            tiff_ifd[ifd].bps = jh.bits;
-            tiff_ifd[ifd].samples = jh.clrs;
-            if (!(jh.sraw || (jh.clrs & 1)))
-              tiff_ifd[ifd].t_width *= jh.clrs;
-            if ((tiff_ifd[ifd].t_width > 4 * tiff_ifd[ifd].t_height) & ~jh.clrs)
+            if (!dng_version && !strcasecmp(make, "SONY") && tiff_ifd[ifd].phint == 32803 &&
+                tiff_ifd[ifd].comp == 7) // Sony/lossless compressed IFD
             {
-              tiff_ifd[ifd].t_width /= 2;
-              tiff_ifd[ifd].t_height *= 2;
+              tiff_ifd[ifd].comp = 6;
+              tiff_ifd[ifd].bps = jh.bits;
+              tiff_ifd[ifd].samples = 1;
             }
-            i = order;
-            parse_tiff(tiff_ifd[ifd].offset + 12);
-            order = i;
+            else
+            {
+              tiff_ifd[ifd].comp = 6;
+              tiff_ifd[ifd].bps = jh.bits;
+              tiff_ifd[ifd].t_width = jh.wide;
+              tiff_ifd[ifd].t_height = jh.high;
+              tiff_ifd[ifd].samples = jh.clrs;
+              if (!(jh.sraw || (jh.clrs & 1)))
+                tiff_ifd[ifd].t_width *= jh.clrs;
+              if ((tiff_ifd[ifd].t_width > 4 * tiff_ifd[ifd].t_height) & ~jh.clrs)
+              {
+                tiff_ifd[ifd].t_width /= 2;
+                tiff_ifd[ifd].t_height *= 2;
+              }
+              i = order;
+              parse_tiff(tiff_ifd[ifd].offset + 12);
+              order = i;
+            }
           }
         }
         break;
@@ -128,7 +142,7 @@ int LibRaw::parse_tiff_ifd(int base)
       switch (tag)
       {
       case 0x0004: /*   4, SensorTopBorder */
-        imgdata.sizes.raw_inset_crop.ctop = get2();
+        imgdata.sizes.raw_inset_crops[0].ctop = get2();
         break;
       case 0x000a: /*  10, BitsPerSample */
         pana_bpp = get2();
@@ -140,6 +154,10 @@ int LibRaw::parse_tiff_ifd(int base)
       case 0x000f: /*  15, LinearityLimitGreen */
       case 0x0010: /*  16, LinearityLimitBlue */
         imgdata.color.linear_max[tag - 14] = get2();
+        if (imgdata.color.linear_max[tag - 14] == 16383)
+            imgdata.color.linear_max[tag - 14] -= 64;
+        if (imgdata.color.linear_max[tag - 14] == 4095)
+          imgdata.color.linear_max[tag - 14] -= 16;
         if (tag == 0x000f) // 15, LinearityLimitGreen
           imgdata.color.linear_max[3] = imgdata.color.linear_max[1];
         break;
@@ -184,18 +202,18 @@ int LibRaw::parse_tiff_ifd(int base)
         pana_encoding = get2();
         break;
       case 0x002f: /*  47, CropTop */
-        imgdata.sizes.raw_inset_crop.ctop = get2();
+        imgdata.sizes.raw_inset_crops[0].ctop = get2();
         break;
       case 0x0030: /*  48, CropLeft */
-        imgdata.sizes.raw_inset_crop.cleft = get2();
+        imgdata.sizes.raw_inset_crops[0].cleft = get2();
         break;
       case 0x0031: /*  49, CropBottom */
-        imgdata.sizes.raw_inset_crop.cheight =
-            get2() - imgdata.sizes.raw_inset_crop.ctop;
+        imgdata.sizes.raw_inset_crops[0].cheight =
+            get2() - imgdata.sizes.raw_inset_crops[0].ctop;
         break;
       case 0x0032: /*  50, CropRight */
-        imgdata.sizes.raw_inset_crop.cwidth =
-            get2() - imgdata.sizes.raw_inset_crop.cleft;
+        imgdata.sizes.raw_inset_crops[0].cwidth =
+            get2() - imgdata.sizes.raw_inset_crops[0].cleft;
         break;
       case 0x0037: /*  55, ISO if  ISO in 0x8827 & ISO in 0x0017 == 65535 */
         if (iso_speed == 65535)
@@ -297,18 +315,18 @@ int LibRaw::parse_tiff_ifd(int base)
         break;
       case 0x0005: /*   5, SensorLeftBorder */
         width = get2();
-        imgdata.sizes.raw_inset_crop.cleft = width;
+        imgdata.sizes.raw_inset_crops[0].cleft = width;
         break;
       case 0x0006: /*   6, SensorBottomBorder */
         height = get2();
-        imgdata.sizes.raw_inset_crop.cheight =
-            height - imgdata.sizes.raw_inset_crop.ctop;
+        imgdata.sizes.raw_inset_crops[0].cheight =
+            height - imgdata.sizes.raw_inset_crops[0].ctop;
         break;
       case 0x0007: /*   7, SensorRightBorder */
         i = get2();
         width += i;
-        imgdata.sizes.raw_inset_crop.cwidth =
-            i - imgdata.sizes.raw_inset_crop.cleft;
+        imgdata.sizes.raw_inset_crops[0].cwidth =
+            i - imgdata.sizes.raw_inset_crops[0].cleft;
         break;
       case 0x0009: /*   9, CFAPattern */
         if ((i = get2()))
@@ -418,7 +436,8 @@ int LibRaw::parse_tiff_ifd(int base)
       break;
     case 0x0102: /* 258, BitsPerSample */
     case 0xf003: /* 61443, Fuji RAF 0xf003 */
-      tiff_ifd[ifd].samples = len & 7;
+      if(!tiff_ifd[ifd].samples || tag != 0x0102) // ??? already set by tag 0x115
+        tiff_ifd[ifd].samples = len & 7;
       tiff_ifd[ifd].bps = getint(type);
       if (tiff_bps < (unsigned)tiff_ifd[ifd].bps)
         tiff_bps = tiff_ifd[ifd].bps;
@@ -984,18 +1003,37 @@ int LibRaw::parse_tiff_ifd(int base)
                 break;
               }
             }
-            int fj;
+            int fj; // 31? (fj<<1)-0x3c : 34? (fj<<1)-0x4e : undef
+            int is34 = 0;
+            if ((imFuji.RAFDataVersion == 0x0260) || // X-Pro3, GFX 100S
+                (imFuji.RAFDataVersion == 0x0261) || // X100V, GFX 50S II
+                (imFuji.RAFDataVersion == 0x0262) || // X-T4
+                (imFuji.RAFDataVersion == 0x0264) || // X-S10
+                (imFuji.RAFDataVersion == 0x0265) || // X-E4
+                !strcmp(model, "X-Pro3")     ||
+                !strcmp(model, "GFX 100S")   ||
+                !strcmp(model, "GFX100S")    ||
+                !strcmp(model, "GFX 50S II") ||
+                !strcmp(model, "GFX50S II")  ||
+                !strcmp(model, "X100V")      ||
+                !strcmp(model, "X-T4")       ||
+                !strcmp(model, "X-E4")       ||
+                !strcmp(model, "X-S10"))
+// is34 cameras have 34 CCT values instead of 31, manual still claims 2500 to 10000 K
+// aligned 3000 K to Incandescent, as it is usual w/ other Fujifilm cameras
+              is34 = 1;
+
             for (int fi = 0;
-                 fi < int(libraw_internal_data.unpacker_data.lenRAFData - 3); fi++)
-            { // looking for Tungsten WB
+                 fi < int(libraw_internal_data.unpacker_data.lenRAFData - 3); fi++) // looking for Tungsten WB
+            {
               if ((fwb[0] == rafdata[fi]) && (fwb[1] == rafdata[fi + 1]) &&
-                  (fwb[2] == rafdata[fi + 2]))
-              { // found Tungsten WB
+                  (fwb[2] == rafdata[fi + 2])) // found Tungsten WB
+              {
                 if (rafdata[fi - 15] !=
                     fwb[0]) // 15 is offset of Tungsten WB from the first
                             // preset, Fine Weather WB
                   continue;
-                for (int wb_ind = 0, ofst = fi - 15; wb_ind < Fuji_wb_list1.size();
+                for (int wb_ind = 0, ofst = fi - 15; wb_ind < (int)Fuji_wb_list1.size();
                      wb_ind++, ofst += 3)
                 {
                   icWBC[Fuji_wb_list1[wb_ind]][1] =
@@ -1004,10 +1042,7 @@ int LibRaw::parse_tiff_ifd(int base)
                   icWBC[Fuji_wb_list1[wb_ind]][2] = rafdata[ofst + 2];
                 }
 
-                if ((imFuji.RAFDataVersion == 0x0260) || // X-Pro3
-                    (imFuji.RAFDataVersion == 0x0261) || // X100V
-                    (imFuji.RAFDataVersion == 0x0262) || // X-T4
-                    (imFuji.RAFDataVersion == 0x0264))   // X-S10
+                if (is34)
                   fi += 24;
                 fi += 96;
                 for (fj = fi; fj < (fi + 15); fj += 3) // looking for the end of the WB table
@@ -1015,13 +1050,9 @@ int LibRaw::parse_tiff_ifd(int base)
                   if (rafdata[fj] != rafdata[fi])
                   {
                     fj -= 93;
-// X-Pro3 has 34 CCT values instead of 31, manual still clames 2500 to 10000 K
-// aligned 3000 K to Incandescent, as it is usual w/ other Fujifilm cameras
-                    if ((imFuji.RAFDataVersion == 0x0260) || // X-Pro3
-                        (imFuji.RAFDataVersion == 0x0261) || // X100V
-                        (imFuji.RAFDataVersion == 0x0262) || // X-T4
-                        (imFuji.RAFDataVersion == 0x0264))   // X-S10
+                    if (is34)
                       fj -= 9;
+// printf ("wb start in DNG: 0x%04x\n", fj*2-0x4e);
                     for (int iCCT = 0, ofst = fj; iCCT < 31;
                          iCCT++, ofst += 3)
                     {
@@ -1158,9 +1189,9 @@ int LibRaw::parse_tiff_ifd(int base)
         tiff_ifd[ifd].dng_levels.default_crop[1] = getreal(type);
         if (!strncasecmp(make, "SONY", 4))
         {
-          imgdata.sizes.raw_inset_crop.cleft =
+          imgdata.sizes.raw_inset_crops[0].cleft =
               tiff_ifd[ifd].dng_levels.default_crop[0];
-          imgdata.sizes.raw_inset_crop.ctop =
+          imgdata.sizes.raw_inset_crops[0].ctop =
               tiff_ifd[ifd].dng_levels.default_crop[1];
         }
       }
@@ -1174,27 +1205,47 @@ int LibRaw::parse_tiff_ifd(int base)
         tiff_ifd[ifd].dng_levels.default_crop[3] = getreal(type);
         if (!strncasecmp(make, "SONY", 4))
         {
-          imgdata.sizes.raw_inset_crop.cwidth =
+          imgdata.sizes.raw_inset_crops[0].cwidth =
               tiff_ifd[ifd].dng_levels.default_crop[2];
-          imgdata.sizes.raw_inset_crop.cheight =
+          imgdata.sizes.raw_inset_crops[0].cheight =
               tiff_ifd[ifd].dng_levels.default_crop[3];
         }
       }
       break;
 
+    case 0xc7b5: /* 51125 DefaultUserCrop */
+      if (len == 4)
+      {
+          int cnt = 0;
+          FORC4
+          {
+              float v = getreal(type);
+              if (v >= 0.f && v <= 1.f)
+              {
+                  tiff_ifd[ifd].dng_levels.user_crop[c] = v;
+                  cnt++;
+              }
+          }
+          if(cnt == 4 // valid values
+              && tiff_ifd[ifd].dng_levels.user_crop[0] < tiff_ifd[ifd].dng_levels.user_crop[2] // top < bottom
+              && tiff_ifd[ifd].dng_levels.user_crop[1] < tiff_ifd[ifd].dng_levels.user_crop[3] // left < right
+              )
+            tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_USERCROP;
+      }
+      break;
     case 0x74c7:
       if ((len == 2) && !strncasecmp(make, "SONY", 4))
       {
-        imgdata.sizes.raw_inset_crop.cleft = get4();
-        imgdata.sizes.raw_inset_crop.ctop = get4();
+        imgdata.sizes.raw_inset_crops[0].cleft = get4();
+        imgdata.sizes.raw_inset_crops[0].ctop = get4();
       }
       break;
 
     case 0x74c8:
       if ((len == 2) && !strncasecmp(make, "SONY", 4))
       {
-        imgdata.sizes.raw_inset_crop.cwidth = get4();
-        imgdata.sizes.raw_inset_crop.cheight = get4();
+        imgdata.sizes.raw_inset_crops[0].cwidth = get4();
+        imgdata.sizes.raw_inset_crops[0].cheight = get4();
       }
       break;
 
@@ -1664,7 +1715,7 @@ void LibRaw::apply_tiff()
                 if (tiff_ifd[i].dng_levels.dng_whitelevel[0] > 0)
                 {
                     for(int c = 0,j=1; c < 16; c++, j<<=1)
-                        if (j > tiff_ifd[i].dng_levels.dng_whitelevel[0])
+                        if (j > (int)tiff_ifd[i].dng_levels.dng_whitelevel[0])
                         {
                             bps = c; break;
                         }
@@ -1873,7 +1924,10 @@ void LibRaw::apply_tiff()
     case 6:
     case 7:
     case 99:
-      load_raw = &LibRaw::lossless_jpeg_load_raw;
+      if (!dng_version && tiff_compress == 6 && !strcasecmp(make, "SONY"))
+        load_raw = &LibRaw::sony_ljpeg_load_raw;
+      else
+        load_raw = &LibRaw::lossless_jpeg_load_raw;
       break;
     case 262:
       load_raw = &LibRaw::kodak_262_load_raw;
@@ -2013,7 +2067,7 @@ void LibRaw::apply_tiff()
             unsigned(thumb_width * thumb_height / (SQR(thumb_misc) + 1)) &&
         tiff_ifd[i].comp != 34892)
     {
-        if (fsizecheck > 0ULL)
+        if (fsizecheck > 0LL)
         {
             bool ok = true;
             if (tiff_ifd[i].strip_byte_counts_count && tiff_ifd[i].strip_offsets_count)

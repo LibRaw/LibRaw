@@ -348,7 +348,7 @@ int main(int argc, char *argv[])
       OUT.highlight = atoi(argv[arg++]);
       break;
     case 's':
-      OUT.shot_select = abs(atoi(argv[arg++]));
+      OUTR.shot_select = abs(atoi(argv[arg++]));
       break;
     case 'o':
       if (isdigit(argv[arg][0]) && !isdigit(argv[arg][1]))

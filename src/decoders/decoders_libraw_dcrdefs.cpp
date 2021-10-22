@@ -14,6 +14,48 @@
 
 #include "../../internal/dcraw_defs.h"
 
+void LibRaw::sony_ljpeg_load_raw()
+{
+  unsigned trow = 0, tcol = 0, jrow, jcol, row, col;
+  INT64 save;
+  struct jhead jh;
+
+  while (trow < raw_height)
+  {
+    checkCancel();
+    save = ftell(ifp); // We're at
+    if (tile_length < INT_MAX)
+      fseek(ifp, get4(), SEEK_SET);
+    if (!ljpeg_start(&jh, 0))
+      break;
+    try
+    {
+      for (row = jrow = 0; jrow < (unsigned)jh.high; jrow++, row += 2)
+      {
+        checkCancel();
+        ushort(*rowp)[4] = (ushort(*)[4])ljpeg_row(jrow, &jh);
+        for (col = jcol = 0; jcol < (unsigned)jh.wide; jcol++, col += 2)
+        {
+          RAW(trow + row, tcol + col) = rowp[jcol][0];
+          RAW(trow + row, tcol + col + 1) = rowp[jcol][1];
+          RAW(trow + row + 1, tcol + col) = rowp[jcol][2];
+          RAW(trow + row + 1, tcol + col + 1) = rowp[jcol][3];
+        }
+      }
+    }
+    catch (...)
+    {
+      ljpeg_end(&jh);
+      throw;
+    }
+    fseek(ifp, save + 4, SEEK_SET);
+    if ((tcol += tile_width) >= raw_width)
+      trow += tile_length + (tcol = 0);
+    ljpeg_end(&jh);
+  }
+}
+
+
 void LibRaw::nikon_coolscan_load_raw()
 {
   if (!image)
