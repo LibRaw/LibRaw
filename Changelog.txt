@@ -946,7 +946,7 @@ Other fixes:
    Use -DUSE_ZLIB to compile with zlib (to provide deflate DNG support)
  * libjpeg version: jpeg_mem_src() is mandatory, so use libjpeg-turbo
    or libjpeg 8+
- * Fixes in vng_intepolate to make modern compilers happy
+ * Fixes in vng_interpolate to make modern compilers happy
  * Fixed bug in Sony SR2 files black level
  * DNG files with BlackLevel both in vendor makernotes and BlackLevel:
     BlackLevel tag always takes precedence
@@ -1182,7 +1182,7 @@ Other fixes:
 
   * Support for Foveon sensor based on X3F code by Roland Karlsson
     BSD-like license, so included in main LibRaw code.
-    No 'foveon intepolation', so no way to get good colors from
+    No 'foveon interpolation', so no way to get good colors from
     old Sigma cameras (SD9, SD14, Polaroid x530). For modern Foveon cameras
     one may try to create ICC profile (not supplied).
 
