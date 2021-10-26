@@ -899,7 +899,7 @@ typedef unsigned long long UINT64;
     float exp_preser;
     /* Disable Auto-scale */
     int no_auto_scale;
-    /* Disable intepolation */
+    /* Disable interpolation */
     int no_interpolation;
   } libraw_output_params_t;
 
