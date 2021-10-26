@@ -1961,12 +1961,14 @@ void LibRaw::apply_tiff()
         load_flags = 4;
         order = 0x4d4d;
       }
+#if 0 /* Never used because of same condition above, but need to recheck */
       else if (INT64(raw_width) * INT64(raw_height) * 3LL ==
                INT64(tiff_ifd[raw].bytes) * 2LL)
       {
         load_raw = &LibRaw::packed_load_raw;
         load_flags = 80;
       }
+#endif
       else if (tiff_ifd[raw].rows_per_strip &&
                tiff_ifd[raw].strip_offsets_count &&
                tiff_ifd[raw].strip_offsets_count ==
