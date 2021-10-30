@@ -24,7 +24,7 @@ int LibRaw::parse_tiff_ifd(int base)
   unsigned entries, tag, type, len, plen = 16, save, utmp;
   int ifd, use_cm = 0, cfa, i, j, c, ima_len = 0;
   char *cbuf, *cp;
-  uchar cfa_pat[16], cfa_pc[] = {0, 1, 2, 3}, tab[256];
+  uchar cfa_pat[16] = {0}, cfa_pc[] = {0, 1, 2, 3}, tab[256] = {0};
   double fm[3][4], cc[4][4], cm[4][3], cam_xyz[4][3], num;
   double ab[] = {1, 1, 1, 1}, asn[] = {0, 0, 0, 0}, xyz[] = {1, 1, 1};
   unsigned sony_curve[] = {0, 0, 0, 0, 0, 4095};
