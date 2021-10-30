@@ -650,7 +650,7 @@ int LibRaw::parse_tiff_ifd(int base)
       {
         tiff_ifd[ifd].t_filters = filters = 9;
         colors = 3;
-        FORC(36) xtrans[0][c] = fgetc(ifp) & 3;
+        FORC(36)((char *)xtrans)[c] = fgetc(ifp) & 3;
       }
       else if (len > 0)
       {
