@@ -67,7 +67,7 @@ void LibRaw::parse_exif(int base)
   unsigned kodak = !strncmp(make, "EASTMAN", 7) && tiff_nifds < 3;
 
   if (!libraw_internal_data.unpacker_data.exif_offset)
-	  libraw_internal_data.unpacker_data.exif_offset = ifp->tell();
+	  libraw_internal_data.unpacker_data.exif_offset = base;
 
   entries = get2();
   if (!strncmp(make, "Hasselblad", 10) && (tiff_nifds > 3) && (entries > 512))
