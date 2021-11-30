@@ -182,6 +182,7 @@ void LibRaw::parseLeicaMakernote(int base, int uptag, unsigned MakernoteTagType)
   unsigned entries, tag, type, len, save;
   short morder, sorder = order;
   char buf[10];
+  memset(buf, 0, sizeof(buf)); // ensure 0-terminated string for strcmp
   int LeicaMakernoteSignature = -1;
   INT64 fsize = ifp->size();
 

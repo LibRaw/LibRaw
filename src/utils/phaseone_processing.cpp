@@ -95,7 +95,7 @@ int LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
     }
     return 0;
   }
-  catch (const LibRaw_exceptions& err)
+  catch (const LibRaw_exceptions&)
   {
     return LIBRAW_CANCELLED_BY_CALLBACK;
   }

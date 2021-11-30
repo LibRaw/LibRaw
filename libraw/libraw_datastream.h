@@ -87,7 +87,7 @@ public:
   LibRaw_abstract_datastream() { };
   virtual ~LibRaw_abstract_datastream(void) { }
   virtual int valid() = 0;
-  virtual int read(void *, size_t, size_t) = 0;
+  LIBRAW_CHECK_RESULT virtual int read(void *, size_t, size_t) = 0;
   virtual int seek(INT64, int) = 0;
   virtual INT64 tell() = 0;
   virtual INT64 size() = 0;
@@ -219,7 +219,7 @@ public:
     virtual void *make_jas_stream();
 #endif
     virtual void buffering_off() { buffered = 0; }
-    virtual int read(void *ptr, size_t size, size_t nmemb);
+    LIBRAW_CHECK_RESULT virtual int read(void *ptr, size_t size, size_t nmemb);
     virtual int eof();
     virtual int seek(INT64 o, int whence);
     virtual INT64 tell();
@@ -270,7 +270,7 @@ public:
   virtual void *make_jas_stream();
 #endif
   virtual int jpeg_src(void *jpegdata);
-  virtual int read(void *ptr, size_t sz, size_t nmemb);
+  LIBRAW_CHECK_RESULT virtual int read(void *ptr, size_t sz, size_t nmemb);
   virtual int eof();
   virtual int seek(INT64 o, int whence);
   virtual INT64 tell();
@@ -301,7 +301,7 @@ public:
   virtual void *make_jas_stream();
 #endif
 
-  virtual int read(void *ptr, size_t size, size_t nmemb);
+  LIBRAW_CHECK_RESULT virtual int read(void *ptr, size_t size, size_t nmemb);
   virtual int eof();
   virtual int seek(INT64 o, int whence);
   virtual INT64 tell();

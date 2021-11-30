@@ -296,7 +296,7 @@ void LibRaw::xtrans_interpolate(int passes)
                         if ((f = 2 - fcol(row, col)) == 1)
                             continue;
                         rix = &rgb[0][row - top][col - left];
-                        c = (row - sgrow) % 3 ? LIBRAW_AHD_TILE : 1;
+                        c = ((row - sgrow) % 3) ? LIBRAW_AHD_TILE : 1;
                         int h = 3 * (c ^ LIBRAW_AHD_TILE ^ 1);
                         for (int d = 0; d < 4; d++, rix += LIBRAW_AHD_TILE * LIBRAW_AHD_TILE)
                         {
@@ -373,7 +373,7 @@ void LibRaw::xtrans_interpolate(int passes)
                         if (tr > drv[d][row][col])
                             tr = drv[d][row][col];
                     tr *= 8;
-                    for (int d = 0; d < ndir; d++)
+                    for (d = 0; d < ndir; d++)
                         for (int v = -1; v <= 1; v++)
                             for (int h = -1; h <= 1; h++)
                                 if (drv[d][row + v][col + h] <= tr)
@@ -408,7 +408,7 @@ void LibRaw::xtrans_interpolate(int passes)
 
                     int avg[4];
                     memset(avg, 0, sizeof avg);
-                    for (int d = 0; d < ndir; d++)
+                    for (d = 0; d < ndir; d++)
                         if (hm[d] >= max)
                         {
                             FORC3 avg[c] += rgb[d][row][col][c];

@@ -389,7 +389,7 @@ int LibRaw::kodak_65000_decode(short *out, int bsize)
   }
   if ((bsize & 7) == 4)
   {
-    bitbuf = fgetc(ifp) << 8;
+    bitbuf = ((INT64)fgetc(ifp)) << 8;
     bitbuf += fgetc(ifp);
     bits = 16;
   }

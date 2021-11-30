@@ -362,7 +362,7 @@ LibRaw_buffer_datastream::LibRaw_buffer_datastream(const void *buffer, size_t bs
 
 LibRaw_buffer_datastream::~LibRaw_buffer_datastream() {}
 
-int LibRaw_buffer_datastream::read(void *ptr, size_t sz, size_t nmemb)
+LIBRAW_CHECK_RESULT int LibRaw_buffer_datastream::read(void *ptr, size_t sz, size_t nmemb)
 {
   size_t to_read = sz * nmemb;
   if (to_read > streamsize - streampos)
@@ -578,7 +578,7 @@ int LibRaw_bigfile_datastream::valid() { return f ? 1 : 0; }
       throw LIBRAW_EXCEPTION_IO_EOF;                                           \
   } while (0)
 
-int LibRaw_bigfile_datastream::read(void *ptr, size_t size, size_t nmemb)
+LIBRAW_CHECK_RESULT int LibRaw_bigfile_datastream::read(void *ptr, size_t size, size_t nmemb)
 {
   LR_BF_CHK();
   return int(fread(ptr, size, nmemb, f));
@@ -856,7 +856,7 @@ INT64 LibRaw_bigfile_buffered_datastream::readAt(void *ptr, size_t size, INT64 o
 #pragma intrinsic(memcpy)
 #endif
 
-int LibRaw_bigfile_buffered_datastream::read(void *data, size_t size, size_t nmemb)
+LIBRAW_CHECK_RESULT int LibRaw_bigfile_buffered_datastream::read(void *data, size_t size, size_t nmemb)
 {
     if (size < 1 || nmemb < 1)
         return 0;

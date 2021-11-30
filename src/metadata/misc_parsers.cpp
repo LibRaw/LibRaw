@@ -154,7 +154,7 @@ void LibRaw::parse_cine()
   }
   fseek(ifp, off_setup + 792, SEEK_SET);
   strcpy(make, "CINE");
-  sprintf(model, "%d", get4());
+  sprintf(model, "%u", get4());
   fseek(ifp, 12, SEEK_CUR);
   switch ((i = get4()) & 0xffffff)
   {
@@ -236,7 +236,7 @@ void LibRaw::parse_smal(int offset, int fsize)
   raw_height = height = get2();
   raw_width = width = get2();
   strcpy(make, "SMaL");
-  sprintf(model, "v%d %dx%d", ver, width, height);
+  sprintf(model, "v%d %dx%d", ver, (int)width, (int)height);
   if (ver == 6)
     load_raw = &LibRaw::smal_v6_load_raw;
   if (ver == 9)

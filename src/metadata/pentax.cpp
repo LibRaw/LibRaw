@@ -479,7 +479,7 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   else if (tag == 0x0215)
   {
     fseek(ifp, 16, SEEK_CUR);
-    sprintf(imgdata.shootinginfo.InternalBodySerial, "%d", get4());
+    sprintf(imgdata.shootinginfo.InternalBodySerial, "%u", get4());
   }
   else if (tag == 0x0229)
   {

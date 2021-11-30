@@ -57,7 +57,7 @@ float LibRaw::find_green(int bps, int bite, int off0, int off1)
       {
         bitbuf <<= bite;
         for (i = 0; i < bite; i += 8)
-          bitbuf |= (unsigned)(fgetc(ifp) << i);
+          bitbuf |= (UINT64)fgetc(ifp) << i;
       }
       img[c][col] = bitbuf << (64 - bps - vbits) >> (64 - bps);
     }

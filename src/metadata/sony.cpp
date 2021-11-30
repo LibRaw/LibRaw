@@ -2197,7 +2197,7 @@ void LibRaw::parseSonySRF(unsigned len)
       checked_buffer_t srf_buf(order, len);
       fread(srf_buf.data(), len, 1, ifp);
 
-      offset += srf_buf[offset] << 2;
+      offset += (INT64)srf_buf[offset] << 2;
 
       /* master key is stored in big endian */
       MasterKey = ((unsigned)srf_buf[offset] << 24) |

@@ -295,7 +295,7 @@ int LibRaw::dcraw_thumb_writer(const char *fname)
       jpeg_thumb_writer(tfp, T.thumb, T.tlength);
       break;
     case LIBRAW_THUMBNAIL_BITMAP:
-      fprintf(tfp, "P6\n%d %d\n255\n", T.twidth, T.theight);
+      fprintf(tfp, "P6\n%d %d\n255\n", (int)T.twidth, (int)T.theight);
       fwrite(T.thumb, 1, T.tlength, tfp);
       break;
     default:

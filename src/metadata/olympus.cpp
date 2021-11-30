@@ -149,7 +149,7 @@ void LibRaw::parseOlympus_Equipment(unsigned tag, unsigned type, unsigned len,
     ilm.MaxAp4CurFocal = libraw_powf64l(sqrt(2.0f), get2() / 256.0f);
     break;
   case 0x0301:
-    ilm.TeleconverterID = fgetc(ifp) << 8;
+    ilm.TeleconverterID = (unsigned long long)fgetc(ifp) << 8;
     fgetc(ifp);
     ilm.TeleconverterID = ilm.TeleconverterID | fgetc(ifp);
     break;

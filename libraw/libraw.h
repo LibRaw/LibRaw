@@ -75,6 +75,15 @@ it under the terms of the one of two licenses as you choose:
 
 #endif
 
+/* QA checking for the returned result */
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+#define LIBRAW_CHECK_RESULT __attribute__((warn_unused_result))
+#elif defined(_MSC_VER) && (_MSC_VER >= 1700)
+#define LIBRAW_CHECK_RESULT _Check_return_
+#else
+#define LIBRAW_CHECK_RESULT
+#endif
+
 #include "libraw_datastream.h"
 #include "libraw_types.h"
 #include "libraw_const.h"

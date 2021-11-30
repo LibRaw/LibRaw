@@ -956,7 +956,7 @@ void LibRaw::nikon_yuv_load_raw()
       {
         bitbuf = 0;
         FORC(6) bitbuf |= (UINT64)fgetc(ifp) << c * 8;
-        FORC(4) yuv[c] = (bitbuf >> c * 12 & 0xfff) - (c >> 1 << 11);
+        FORC(4) yuv[c] = (int)((bitbuf >> c * 12 & 0xfff) - ((UINT64)c >> 1 << 11)); // cast to 64-bit first, then to 32-bit after arithmetics is done
       }
       rgb[0] = yuv[b] + 1.370705 * yuv[3];
       rgb[1] = yuv[b] - 0.337633 * yuv[2] - 0.698001 * yuv[3];
@@ -970,7 +970,8 @@ void LibRaw::nikon_yuv_load_raw()
 void LibRaw::rollei_load_raw()
 {
   uchar pixel[10];
-  unsigned iten = 0, isix, i, buffer = 0, todo[16];
+  unsigned iten = 0, isix, i, buffer = 0;
+  unsigned todo[17]; // fix A/V in (i+1) index below
   if (raw_width > 32767 || raw_height > 32767)
     throw LIBRAW_EXCEPTION_IO_BADFILE;
   unsigned maxpixel = raw_width * (raw_height + 7);

@@ -95,7 +95,7 @@ it under the terms of the one of two licenses as you choose:
 // CanonID_EOS_D6000C id after Canon's TIFF2CR2 convertor:
 #define CanonID_EOS_D6000C        (0x80000000ULL + 0x560ULL)
 
-#define OlyID_str2hex(str) ((unsigned long long)str[0]<<32 | str[1]<<24 | str[2]<<16 | str[3]<<8 | str[4])
+#define OlyID_str2hex(str) ((unsigned long long)str[0]<<32 | (unsigned long long)str[1]<<24 | (unsigned long long)str[2]<<16 | (unsigned long long)str[3]<<8 | (unsigned long long)str[4])
 #define OlyID_E_20            OlyID_str2hex("D4029")
 #define OlyID_E_1             OlyID_str2hex("D4040")
 #define OlyID_E_300           OlyID_str2hex("D4041")

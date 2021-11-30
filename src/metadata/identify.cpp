@@ -1098,7 +1098,7 @@ void LibRaw::identify()
   }
   if (!model[0])
   {
-    sprintf(model, "%dx%d", width, height);
+    sprintf(model, "%dx%d", (int)width, (int)height);
     strcpy(normalized_model, model);
   }
 
@@ -2436,7 +2436,7 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize, int flen)
 			load_raw = &LibRaw::unpacked_load_raw;
 		} else if (imSony.prd_StorageMethod == LIBRAW_MINOLTA_PACKED) {
 			load_raw = &LibRaw::packed_load_raw;
-      } else if (!load_raw && (maximum = 0xfff)) {
+      } else if (!load_raw && (maximum == 0xfff)) { // TYPO? WAS = INSTEAD OF == !!!
 			load_raw = &LibRaw::unpacked_load_raw;
 		}
 

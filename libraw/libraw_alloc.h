@@ -34,6 +34,9 @@ public:
   {
     size_t alloc_sz = LIBRAW_MSIZE * sizeof(void *);
     mems = (void **)::malloc(alloc_sz);
+    // throwing exceptions in constructor is bad, but it's still better than A/V
+    if (mems == NULL)
+      throw LIBRAW_EXCEPTION_ALLOC;
     memset(mems, 0, alloc_sz);
   }
   ~libraw_memmgr()
@@ -48,18 +51,24 @@ public:
 #else
     void *ptr = ::malloc(sz + extra_bytes);
 #endif
+    if (ptr == NULL)
+      throw LIBRAW_EXCEPTION_ALLOC;
     mem_ptr(ptr);
     return ptr;
   }
   void *calloc(size_t n, size_t sz)
   {
     void *ptr = ::calloc(n + (extra_bytes + sz - 1) / (sz ? sz : 1), sz);
+    if (ptr == NULL)
+      throw LIBRAW_EXCEPTION_ALLOC;
     mem_ptr(ptr);
     return ptr;
   }
   void *realloc(void *ptr, size_t newsz)
   {
     void *ret = ::realloc(ptr, newsz + extra_bytes);
+    if (ptr == NULL)
+      throw LIBRAW_EXCEPTION_ALLOC;
     forget_ptr(ptr);
     mem_ptr(ret);
     return ret;

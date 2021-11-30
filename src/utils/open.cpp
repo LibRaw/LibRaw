@@ -750,10 +750,10 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       if (makeIs(LIBRAW_CAMERAMAKER_Fujifilm) && (imgdata.idata.filters == 9))
       {
           // Adjust top/left margins for X-Trans
-          int newtm = imgdata.sizes.top_margin % 6
+          int newtm = (imgdata.sizes.top_margin % 6)
               ? (imgdata.sizes.top_margin / 6 + 1) * 6
               : imgdata.sizes.top_margin;
-          int newlm = imgdata.sizes.left_margin % 6
+          int newlm = (imgdata.sizes.left_margin % 6)
               ? (imgdata.sizes.left_margin / 6 + 1) * 6
               : imgdata.sizes.left_margin;
           if (newtm != imgdata.sizes.top_margin ||
@@ -1175,7 +1175,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
   {
     EXCEPTION_HANDLER(err);
   }
-  catch (const std::exception& ee)
+  catch (const std::exception&)
   {
     EXCEPTION_HANDLER(LIBRAW_EXCEPTION_IO_CORRUPT);
   }

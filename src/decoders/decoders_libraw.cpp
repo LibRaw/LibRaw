@@ -300,9 +300,7 @@ void LibRaw::nikon_load_striped_packed_raw()
       {
         bitbuf <<= bite;
         for (i = 0; i < bite; i += 8)
-          bitbuf |=
-              (unsigned)(libraw_internal_data.internal_data.input->get_char()
-                         << i);
+          bitbuf |= (INT64)(libraw_internal_data.internal_data.input->get_char()) << i;
       }
       imgdata.rawdata.raw_image[(row)*S.raw_width + (col)] =
           bitbuf << (64 - tiff_bps - vbits) >> (64 - tiff_bps);

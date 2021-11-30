@@ -75,7 +75,8 @@ void LibRaw::parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   }
 
   short morder, sorder = order;
-  char buf[10];
+  char buf[11];
+  memset(buf, 0, sizeof(buf)); // ensure 0-terminated string for strcmp
   INT64 fsize = ifp->size();
 
   fread(buf, 1, 10, ifp);
@@ -351,8 +352,10 @@ void LibRaw::parse_makernote(int base, int uptag)
   if (!strncmp(make, "Nokia", 5))
     return;
 
-  char buf[10];
+  char buf[11];
+  memset(buf, 0, sizeof(buf)); // ensure 0-terminated string for strcmp
   char another_buf[128];
+  memset(another_buf, 0, sizeof(another_buf)); // ensure 0-terminated string for strcmp   
 
   fseek(ifp, -12, SEEK_CUR);
   fread (another_buf, 1, 12, ifp);

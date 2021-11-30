@@ -812,7 +812,7 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
 
   } else if (tag == 0x000c) {
     unsigned tS = get4();
-    sprintf(imgdata.shootinginfo.BodySerial, "%d", tS);
+    sprintf(imgdata.shootinginfo.BodySerial, "%u", tS);
 
   } else if ((tag == 0x0012) ||
              (tag == 0x0026) ||

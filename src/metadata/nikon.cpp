@@ -262,7 +262,8 @@ uchar *cj_block, *ck_block;
 */
 
   short morder, sorder = order;
-  char buf[10];
+  char buf[11];
+  memset(buf, 0, sizeof(buf)); // ensure 0-terminated string for strcmp
   INT64 fsize = ifp->size();
 
   fread(buf, 1, 10, ifp);
@@ -513,7 +514,7 @@ uchar *cj_block, *ck_block;
           serial = serial * 10 + (isdigit(c) ? c - '0' : c % 10);
         }
         if (!imgdata.shootinginfo.BodySerial[0])
-          sprintf(imgdata.shootinginfo.BodySerial, "%d", serial);
+          sprintf(imgdata.shootinginfo.BodySerial, "%u", serial);
       }
     }
     else if (tag == 0x001e) {

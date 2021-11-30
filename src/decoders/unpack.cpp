@@ -366,7 +366,7 @@ int LibRaw::unpack(void)
   {
     EXCEPTION_HANDLER(err);
   }
-  catch (const std::exception& ee)
+  catch (const std::exception&)
   {
     EXCEPTION_HANDLER(LIBRAW_EXCEPTION_IO_CORRUPT);
   }

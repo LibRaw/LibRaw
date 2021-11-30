@@ -2726,7 +2726,7 @@ void LibRaw::crxLoadRaw()
   CrxImage img;
   if (libraw_internal_data.unpacker_data.crx_track_selected < 0 ||
       libraw_internal_data.unpacker_data.crx_track_selected >= LIBRAW_CRXTRACKS_MAXCOUNT)
-    derror();
+    throw LIBRAW_EXCEPTION_IO_CORRUPT; // avoid A/V 
 
   crx_data_header_t hdr =
       libraw_internal_data.unpacker_data.crx_header[libraw_internal_data.unpacker_data.crx_track_selected];
