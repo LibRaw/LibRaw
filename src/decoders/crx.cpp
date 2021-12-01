@@ -104,7 +104,7 @@ struct CrxSubband
   uint16_t height;
   int32_t qParam;
   int32_t kParam;
-  uint32_t qStepBase;
+  int32_t qStepBase;
   uint32_t qStepMult;
   bool supportsPartial;
   int32_t bandSize;
@@ -158,6 +158,7 @@ struct CrxImage
   uint16_t planeWidth;
   uint16_t planeHeight;
   uint8_t samplePrecision;
+  uint8_t medianBits;
   uint8_t subbandCount;
   uint8_t levels;
   uint8_t nBits;
@@ -1091,20 +1092,20 @@ int crxDecodeLineWithIQuantization(CrxSubband *band, CrxQStep *qStep)
 
     for (int i = 0; i < band->colStartAddOn; ++i)
     {
-      uint32_t quantVal = band->qStepBase + ((qStepTblPtr[0] * band->qStepMult) >> 3);
+      int32_t quantVal = band->qStepBase + ((qStepTblPtr[0] * band->qStepMult) >> 3);
       bandBuf[i] *= _constrain(quantVal, 1, 0x168000);
     }
 
     for (int i = band->colStartAddOn; i < band->width - band->colEndAddOn; ++i)
     {
-      uint32_t quantVal =
+      int32_t quantVal =
           band->qStepBase + ((qStepTblPtr[(i - band->colStartAddOn) >> band->levelShift] * band->qStepMult) >> 3);
       bandBuf[i] *= _constrain(quantVal, 1, 0x168000);
     }
     int lastIdx = (band->width - band->colEndAddOn - band->colStartAddOn - 1) >> band->levelShift;
     for (int i = band->width - band->colEndAddOn; i < band->width; ++i)
     {
-      uint32_t quantVal = band->qStepBase + ((qStepTblPtr[lastIdx] * band->qStepMult) >> 3);
+      int32_t quantVal = band->qStepBase + ((qStepTblPtr[lastIdx] * band->qStepMult) >> 3);
       bandBuf[i] *= _constrain(quantVal, 1, 0x168000);
     }
   }
@@ -1700,7 +1701,7 @@ void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plan
     int16_t *plane2 = plane1 + planeSize;
     int16_t *plane3 = plane2 + planeSize;
 
-    int32_t median = 1 << (img->nBits - 1) << 10;
+    int32_t median = (1 << (img->medianBits - 1)) << 10;
     int32_t maxVal = (1 << img->nBits) - 1;
     uint32_t rawLineOffset = 4 * img->planeWidth * imageRow;
 
@@ -2584,6 +2585,7 @@ int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf, ui
   img->mdatSize = mdatSize;
   img->planeBuf = 0;
   img->outBufs[0] = img->outBufs[1] = img->outBufs[2] = img->outBufs[3] = 0;
+  img->medianBits = hdr->medianBits;
 
   // The encoding type 3 needs all 4 planes to be decoded to generate row of
   // RGGB values. It seems to be using some other colour space for raw encoding
@@ -2779,7 +2781,7 @@ void LibRaw::crxLoadRaw()
   crxFreeImageData(&img);
 }
 
-int LibRaw::crxParseImageHeader(uchar *cmp1TagData, int nTrack)
+int LibRaw::crxParseImageHeader(uchar *cmp1TagData, int nTrack, int size)
 {
   if (nTrack < 0 || nTrack >= LIBRAW_CRXTRACKS_MAXCOUNT)
     return -1;
@@ -2801,6 +2803,15 @@ int LibRaw::crxParseImageHeader(uchar *cmp1TagData, int nTrack)
   hdr->hasTileCols = cmp1TagData[27] >> 7;
   hdr->hasTileRows = (cmp1TagData[27] >> 6) & 1;
   hdr->mdatHdrSize = sgetn(4, cmp1TagData + 28);
+  int extHeader = cmp1TagData[32] >> 7;
+  int useMedianBits = 0;
+  hdr->medianBits = hdr->nBits;
+
+  if (extHeader && size >= 56 && hdr->nPlanes == 4)
+    useMedianBits = cmp1TagData[56] >> 6 & 1;
+
+  if (useMedianBits && size >= 84)
+    hdr->medianBits = cmp1TagData[84];
 
   // validation
   if ((hdr->version != 0x100 && hdr->version != 0x200) || !hdr->mdatHdrSize)

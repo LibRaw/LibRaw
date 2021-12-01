@@ -56,7 +56,10 @@ it under the terms of the one of two licenses as you choose:
 	ushort	sget2Rev(uchar *s);
 	libraw_area_t	get_CanonArea();
 	int	parseCR3(INT64 oAtomList, INT64 szAtomList, short &nesting, char *AtomNameStack, short& nTrack, short &TrackType);
-	void	selectCRXTrack(short maxTrack);
+	void 	selectCRXTrack();
+	void    parseCR3_Free();
+	int     parseCR3_CTMD(short trackNum);
+	int     selectCRXFrame(short trackNum, unsigned frameIndex);
 	void	setCanonBodyFeatures (unsigned long long id);
 	void	processCanonCameraInfo (unsigned long long id, uchar *CameraInfo, unsigned maxlen, unsigned type, unsigned dng_writer);
 	static float _CanonConvertAperture(ushort in);
@@ -373,7 +376,7 @@ it under the terms of the one of two licenses as you choose:
 	void fuji_14bit_load_raw();
 	void parse_fuji_compressed_header();
 	void crxLoadRaw();
-	int  crxParseImageHeader(uchar *cmp1TagData, int nTrack);
+	int  crxParseImageHeader(uchar *cmp1TagData, int nTrack, int size);
 	void panasonicC6_load_raw();
 	void panasonicC7_load_raw();
 

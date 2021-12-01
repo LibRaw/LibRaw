@@ -1216,6 +1216,7 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
       CR3_ColorData(0x0047);
       break;
 
+    case 1770: // R5 CRM
     case 2024: // -1D X Mark III; ColorDataSubVer: 32
     case 3656: // R5, R6; ColorDataSubVer: 33
       imCanon.ColorDataVer = 10;
