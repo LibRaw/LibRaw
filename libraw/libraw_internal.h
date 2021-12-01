@@ -113,6 +113,13 @@ typedef struct
   int metadata_blocks;
 } identify_data_t;
 
+typedef struct
+{
+  uint32_t first;
+  uint32_t count;
+  uint32_t id;
+} crx_sample_to_chunk_t;
+
 // contents of tag CMP1 for relevant track in CR3 file
 typedef struct
 {
@@ -129,10 +136,18 @@ typedef struct
   int32_t hasTileCols;
   int32_t hasTileRows;
   int32_t mdatHdrSize;
+  int32_t medianBits;
   // Not from header, but from datastream
   uint32_t MediaSize;
   INT64 MediaOffset;
-  uint32_t MediaType; /* 1 -> /C/RAW, 2-> JPEG */
+  uint32_t MediaType; /* 1 -> /C/RAW, 2-> JPEG, 3-> CTMD metadata*/
+  crx_sample_to_chunk_t * stsc_data; /* samples to chunk */
+  uint32_t stsc_count;
+  uint32_t sample_count;
+  uint32_t sample_size; /* zero if not fixed sample size */
+  int32_t *sample_sizes;
+  uint32_t chunk_count;
+  INT64  *chunk_offsets;
 } crx_data_header_t;
 
 typedef struct
@@ -163,6 +178,7 @@ typedef struct
   int pana_encoding, pana_bpp;
   crx_data_header_t crx_header[LIBRAW_CRXTRACKS_MAXCOUNT];
   int crx_track_selected;
+  int crx_track_count;
   short CR3_CTMDtag;
   short CR3_Version;
   int CM_found;

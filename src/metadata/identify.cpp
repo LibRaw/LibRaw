@@ -434,6 +434,7 @@ void LibRaw::identify()
   CM_found = 0;
   memset(tiff_ifd, 0, sizeof tiff_ifd);
   libraw_internal_data.unpacker_data.crx_track_selected = -1;
+  libraw_internal_data.unpacker_data.crx_track_count -1;
   libraw_internal_data.unpacker_data.CR3_CTMDtag = 0;
   imHassy.nIFD_CM[0] = imHassy.nIFD_CM[1] = -1;
   imKodak.ISOCalibrationGain = 1.0f;
@@ -706,9 +707,10 @@ void LibRaw::identify()
 
     szAtomList = ifp->size();
     err = parseCR3(0ULL, szAtomList, nesting, AtomNameStack, nTrack, TrackType);
+    libraw_internal_data.unpacker_data.crx_track_count = nTrack;
     if ((err == 0 || err == -14) &&
         nTrack >= 0) // no error, or too deep nesting
-      selectCRXTrack(nTrack);
+      selectCRXTrack();
   }
 
   if (dng_version)

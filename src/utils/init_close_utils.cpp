@@ -150,6 +150,8 @@ void LibRaw::recycle()
   FREE(imgdata.rawdata.raw_alloc);
   FREE(imgdata.idata.xmpdata);
 
+  parseCR3_Free();
+
 #undef FREE
 
   ZERO(imgdata.sizes);
