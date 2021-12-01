@@ -71,6 +71,10 @@ it under the terms of the one of two licenses as you choose:
 #  ifndef LIBRAW_WIN32_UNICODEPATHS
 #    define LIBRAW_WIN32_UNICODEPATHS
 #  endif
+# elif defined(_LIBCPP_HAS_OPEN_WITH_WCHAR)
+#  ifndef LIBRAW_WIN32_UNICODEPATHS
+#    define LIBRAW_WIN32_UNICODEPATHS
+#  endif
 # endif
 
 #endif
