@@ -178,7 +178,7 @@ int LibRaw::open_file(const char *fname)
 
 #if defined(WIN32) || defined(_WIN32)
 #ifndef LIBRAW_WIN32_UNICODEPATHS
-int LibRaw::open_file(const wchar_t *, INT64)
+int LibRaw::open_file(const wchar_t *)
 {
     return LIBRAW_NOT_IMPLEMENTED;
 }
