@@ -160,6 +160,7 @@ extern "C"
   /* getters/setters used by 3DLut Creator */
   DllDef void libraw_set_demosaic(libraw_data_t *lr, int value);
   DllDef void libraw_set_output_color(libraw_data_t *lr, int value);
+  DllDef void libraw_set_adjust_maximum_thr(libraw_data_t *lr, float value);
   DllDef void libraw_set_user_mul(libraw_data_t *lr, int index, float val);
   DllDef void libraw_set_output_bps(libraw_data_t *lr, int value);
   DllDef void libraw_set_gamma(libraw_data_t *lr, int index, float value);
