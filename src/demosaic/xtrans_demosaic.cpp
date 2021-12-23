@@ -321,7 +321,7 @@ void LibRaw::xtrans_interpolate(int passes)
                             {
                                 rix = &rgb[0][row - top][col - left];
                                 short* hex = allhex[row % 3][col % 3][1];
-                                for (int d = 0; d < ndir;
+                                for (int d = 0; d < 8;
                                     d += 2, rix += LIBRAW_AHD_TILE * LIBRAW_AHD_TILE)
                                     if (hex[d] + hex[d + 1])
                                     {
