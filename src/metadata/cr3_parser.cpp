@@ -68,6 +68,7 @@ void LibRaw::selectCRXTrack()
     return;
 
   INT64 bitcounts[LIBRAW_CRXTRACKS_MAXCOUNT], maxbitcount = 0;
+  int framecounts[LIBRAW_CRXTRACKS_MAXCOUNT], maxframecount = 0;
   uint32_t maxjpegbytes = 0;
   int framecnt = 0;
   int media_tracks = 0;
@@ -75,21 +76,52 @@ void LibRaw::selectCRXTrack()
   int frame_select = 0;
   int err;
   memset(bitcounts, 0, sizeof(bitcounts));
+  memset(framecounts, 0, sizeof(framecounts));
 
   for (int i = 0; i <= maxTrack && i < LIBRAW_CRXTRACKS_MAXCOUNT; i++)
   {
     crx_data_header_t *d = &libraw_internal_data.unpacker_data.crx_header[i];
-    if (d->MediaType == 1 || d->MediaType == 2)
+    if (d->MediaType == 1) // RAW
     {
-      if (d->sample_count > 1)
-        framecnt = d->sample_count;
-      media_tracks++;
+      bitcounts[i] = INT64(d->nBits) * INT64(d->f_width) * INT64(d->f_height);
+      maxbitcount = MAX(bitcounts[i], maxbitcount);
+	  if (d->sample_count > 1)
+		  framecounts[i] = d->sample_count;
+    }
+	else if (d->MediaType == 2) // JPEG
+	{
+		if (d->MediaSize > maxjpegbytes)
+		{
+			maxjpegbytes = d->MediaSize;
+			thumb_offset = d->MediaOffset;
+			thumb_length = d->MediaSize;
+		}
+	}
+    else if (d->MediaType == 3) // CTMD metadata
+    {
+      if (parseCR3_CTMD(i))
+        return;
     }
   }
 
+  if (maxbitcount < 8) // no raw tracks
+	  return;
+
+  // Calc  RAW tracks
+  for (int i = 0; i <= maxTrack && i < LIBRAW_CRXTRACKS_MAXCOUNT; i++)
+  {
+	  if (bitcounts[i] == maxbitcount)
+	  {
+		  media_tracks++;
+		  if (framecounts[i] > 1)
+			  framecnt = MAX(framecnt, framecounts[i]);
+	  }
+  }
+  
   // If the file has only 1 media track shot_select represents frames select.
   // If the file has multiple media tracks shot_select represents track select.
-  // If the file has multiple media tracks and mulitple frames it is currently unsupported.
+  // If the file has multiple media tracks and multiple frames it is currently unsupported.
+
   if (framecnt && media_tracks > 1)
     return;
   else if (framecnt)
@@ -97,53 +129,29 @@ void LibRaw::selectCRXTrack()
   else
     track_select = shot_select;
 
-  for (int i = 0; i <= maxTrack && i < LIBRAW_CRXTRACKS_MAXCOUNT; i++)
-  {
-    crx_data_header_t *d = &libraw_internal_data.unpacker_data.crx_header[i];
-    if(d->MediaType > 0)
-    {
-      if(selectCRXFrame(i, frame_select))
-        return;
-    }
-
-    if (d->MediaType == 3) // CTMD metadata
-    {
-      if(parseCR3_CTMD(i))
-        return;
-    }
-    else if (d->MediaType == 1) // RAW
-    {
-      bitcounts[i] = INT64(d->nBits) * INT64(d->f_width) * INT64(d->f_height);
-      if (bitcounts[i] > maxbitcount)
-        maxbitcount = bitcounts[i];
-    }
-    else if (d->MediaType == 2) // JPEG
-    {
-      if (d->MediaSize > maxjpegbytes)
-      {
-        maxjpegbytes = d->MediaSize;
-        thumb_offset = d->MediaOffset;
-        thumb_length = d->MediaSize;
-      }
-    }
-  }
-  if (maxbitcount < 8)
-    return;
-  int tracki = -1, trackcnt = 0;
-  for (int i = 0; i <= maxTrack && i < LIBRAW_CRXTRACKS_MAXCOUNT; i++)
+  int tracki = -1;
+  for (int i = 0, trackcnt = 0; i <= maxTrack && i < LIBRAW_CRXTRACKS_MAXCOUNT; i++)
   {
     if (bitcounts[i] == maxbitcount)
     {
       if (trackcnt <= (int)track_select)
         tracki = i;
-      trackcnt++;
+	  trackcnt++;
     }
+  }
+
+  if (tracki >= 0 && tracki < LIBRAW_CRXTRACKS_MAXCOUNT /* && frame_select > 0 */)
+  {
+	  framecnt = framecounts[tracki]; // Update to selected track
+	  frame_select = LIM(frame_select, 0, framecnt);
+    if (selectCRXFrame(tracki, frame_select))
+      return;
   }
 
   if (framecnt)
     is_raw = framecnt;
   else
-    is_raw = trackcnt;
+    is_raw = media_tracks;
 
   if (tracki >= 0 && tracki < LIBRAW_CRXTRACKS_MAXCOUNT)
   {
@@ -193,6 +201,7 @@ void LibRaw::selectCRXTrack()
 int LibRaw::parseCR3_CTMD(short trackNum)
 {
   int err = 0;
+  short s_order = order;
   order = 0x4949;
   uint32_t relpos_inDir = 0;
   uint32_t relpos_inBox = 0;
@@ -270,7 +279,7 @@ int LibRaw::parseCR3_CTMD(short trackNum)
   }
 
 ctmd_fin:
-  order = 0x4d4d;
+  order = s_order;
   return err;
 }
 #undef track
@@ -719,7 +728,7 @@ int LibRaw::parseCR3(INT64 oAtomList,
           err = -11;
           goto fin;
         }
-        current_track.chunk_offsets = (int64_t*)malloc(entries * sizeof(int64_t));
+        current_track.chunk_offsets = (INT64*)malloc(entries * sizeof(int64_t));
         if(!current_track.chunk_offsets)
         {
           err = -11;
