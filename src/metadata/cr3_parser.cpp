@@ -78,6 +78,7 @@ void LibRaw::selectCRXTrack()
   memset(bitcounts, 0, sizeof(bitcounts));
   memset(framecounts, 0, sizeof(framecounts));
 
+  // Calc max frame bitcount for max-sized RAW track(s) selection
   for (int i = 0; i <= maxTrack && i < LIBRAW_CRXTRACKS_MAXCOUNT; i++)
   {
     crx_data_header_t *d = &libraw_internal_data.unpacker_data.crx_header[i];
@@ -88,21 +89,12 @@ void LibRaw::selectCRXTrack()
 	  if (d->sample_count > 1)
 		  framecounts[i] = d->sample_count;
     }
-	else if (d->MediaType == 2) // JPEG
-	{
-		if (d->MediaSize > maxjpegbytes)
-		{
-			maxjpegbytes = d->MediaSize;
-			thumb_offset = d->MediaOffset;
-			thumb_length = d->MediaSize;
-		}
-	}
   }
 
   if (maxbitcount < 8) // no raw tracks
 	  return;
 
-  // Calc  RAW tracks
+  // Calc  RAW tracks and frames
   for (int i = 0; i <= maxTrack && i < LIBRAW_CRXTRACKS_MAXCOUNT; i++)
   {
 	  if (bitcounts[i] == maxbitcount)
@@ -139,20 +131,34 @@ void LibRaw::selectCRXTrack()
   {
 	  framecnt = framecounts[tracki]; // Update to selected track
 	  frame_select = LIM(frame_select, 0, framecnt);
-    if (selectCRXFrame(tracki, frame_select))
-      return;
+	  if (selectCRXFrame(tracki, frame_select))
+		  return;
   }
+  else
+	  return; // No RAW track index
 
   // Frame selected: parse CTMD metadata
   for (int i = 0, trackcnt = 0; i <= maxTrack && i < LIBRAW_CRXTRACKS_MAXCOUNT; i++)
   {
 	  crx_data_header_t *d = &libraw_internal_data.unpacker_data.crx_header[i];
+	  int fsel = LIM(frame_select, 0, d->sample_count);
 	  if (d->MediaType == 3) // CTMD metadata
 	  {
 		  /* ignore errors !*/
-		  if (frame_select)
-			  selectCRXFrame(i, frame_select);
+		  if (fsel)
+			  selectCRXFrame(i, fsel);
 		  parseCR3_CTMD(i);
+	  }
+	  else if (d->MediaType == 2) // JPEG
+	  {
+		  if (fsel)
+			  selectCRXFrame(i, fsel);
+		  if (d->MediaSize > maxjpegbytes)
+		  {
+			  maxjpegbytes = d->MediaSize;
+			  thumb_offset = d->MediaOffset;
+			  thumb_length = d->MediaSize;
+		  }
 	  }
   }
 
