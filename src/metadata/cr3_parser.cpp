@@ -97,11 +97,6 @@ void LibRaw::selectCRXTrack()
 			thumb_length = d->MediaSize;
 		}
 	}
-    else if (d->MediaType == 3) // CTMD metadata
-    {
-      if (parseCR3_CTMD(i))
-        return;
-    }
   }
 
   if (maxbitcount < 8) // no raw tracks
@@ -146,6 +141,19 @@ void LibRaw::selectCRXTrack()
 	  frame_select = LIM(frame_select, 0, framecnt);
     if (selectCRXFrame(tracki, frame_select))
       return;
+  }
+
+  // Frame selected: parse CTMD metadata
+  for (int i = 0, trackcnt = 0; i <= maxTrack && i < LIBRAW_CRXTRACKS_MAXCOUNT; i++)
+  {
+	  crx_data_header_t *d = &libraw_internal_data.unpacker_data.crx_header[i];
+	  if (d->MediaType == 3) // CTMD metadata
+	  {
+		  /* ignore errors !*/
+		  if (frame_select)
+			  selectCRXFrame(i, frame_select);
+		  parseCR3_CTMD(i);
+	  }
   }
 
   if (framecnt)
