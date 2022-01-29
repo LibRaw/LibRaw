@@ -131,8 +131,9 @@ void LibRaw::selectCRXTrack()
   {
 	  framecnt = framecounts[tracki]; // Update to selected track
 	  frame_select = LIM(frame_select, 0, framecnt);
-	  if (selectCRXFrame(tracki, frame_select))
-		  return;
+	  if(frame_select > 0)
+		if (selectCRXFrame(tracki, frame_select))
+			  return;
   }
   else
 	  return; // No RAW track index
