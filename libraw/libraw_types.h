@@ -305,6 +305,16 @@ typedef unsigned long long UINT64;
     int AutoLightingOptimizer;
     int HighlightTonePriority;
 
+    /* -1 = n/a            1 = Economy
+        2 = Normal         3 = Fine
+        4 = RAW            5 = Superfine
+        7 = CRAW         130 = Normal Movie, CRM LightRaw
+      131 = CRM  StandardRaw */
+    short Quality;
+    /* Increases dynamic range of sensor data
+        0 = OFF  1 = CLogV1 2 = CLogV2? 3 = CLogV3 */
+    int CanonLog;
+
    libraw_area_t DefaultCropAbsolute;
    libraw_area_t RecommendedImageArea;   // contains the image in proper aspect ratio?
    libraw_area_t LeftOpticalBlack;       // use this, when present, to estimate black levels?
