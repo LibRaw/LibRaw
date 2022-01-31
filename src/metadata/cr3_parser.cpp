@@ -177,7 +177,7 @@ void LibRaw::selectCRXTrack()
     raw_width = d->f_width;
     raw_height = d->f_height;
     load_raw = &LibRaw::crxLoadRaw;
-    tiff_bps = d->nBits;
+    tiff_bps = d->encType == 3? d->medianBits : d->nBits;
     switch (d->cfaLayout)
     {
     case 0:

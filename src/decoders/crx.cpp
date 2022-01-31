@@ -1702,7 +1702,7 @@ void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plan
     int16_t *plane3 = plane2 + planeSize;
 
     int32_t median = (1 << (img->medianBits - 1)) << 10;
-    int32_t maxVal = (1 << img->nBits) - 1;
+    int32_t maxVal = (1 << img->medianBits) - 1;
     uint32_t rawLineOffset = 4 * img->planeWidth * imageRow;
 
     // for this stage - all except imageRow is ignored
