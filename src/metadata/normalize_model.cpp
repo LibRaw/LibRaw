@@ -600,10 +600,13 @@ void LibRaw::GetNormalizedModel()
   {
 	  setMakeFromIndex(LIBRAW_CAMERAMAKER_Sony);
   }
+  else if (makeIs(LIBRAW_CAMERAMAKER_OmDigital))
+  {
+	  setMakeFromIndex(LIBRAW_CAMERAMAKER_Olympus);
+  }
   else if (makeIs(LIBRAW_CAMERAMAKER_Clauss) && (OlyID == OlyID_E_M10_Mark_II))
   {
 	  setMakeFromIndex(LIBRAW_CAMERAMAKER_Olympus);
-
   } else if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
              (!strncmp(model, "EOS D2000", 9) || // don't use unique_id here
               !strncmp(model, "EOS D6000", 9) || // because ids for Monochrome models are unknown
@@ -1420,7 +1423,7 @@ void LibRaw::SetStandardIlluminants (unsigned makerIdx, const char* normModel) {
   int c;
   if (!icWBC[LIBRAW_WBI_Ill_A][0] &&
       !icWBC[LIBRAW_WBI_D65][0]) {
-    if (makerIdx == LIBRAW_CAMERAMAKER_Olympus) {
+    if (makerIdx == LIBRAW_CAMERAMAKER_Olympus ) {
       while (++i, icWBCCTC[i][0]) {
         if (icWBCCTC[i][0] == 3000)
           FORC4 icWBC[LIBRAW_WBI_Ill_A][c] = icWBCCTC[i][c+1];

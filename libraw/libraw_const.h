@@ -362,6 +362,8 @@ enum LibRaw_cameramaker_index
   LIBRAW_CAMERAMAKER_HMD_Global,
   LIBRAW_CAMERAMAKER_HUAWEI,
   LIBRAW_CAMERAMAKER_RaspberryPi,
+  LIBRAW_CAMERAMAKER_OmDigital,
+
   // Insert additional indexes here
   LIBRAW_CAMERAMAKER_TheLastOne
 };

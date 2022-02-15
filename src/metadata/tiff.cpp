@@ -1881,7 +1881,7 @@ void LibRaw::apply_tiff()
         filters = 0;
         break;
       }
-      if ((!strncmp(make, "OLYMPUS", 7) ||
+      if ((!strncmp(make, "OLYMPUS", 7) || !strncmp(make, "OM Digi", 7) ||
            (!strncasecmp(make, "CLAUSS", 6) &&
             !strncasecmp(model, "piX 5oo", 7))) && // 0x5330303539 works here
           (INT64(tiff_ifd[raw].bytes) * 2ULL ==
@@ -1913,7 +1913,7 @@ void LibRaw::apply_tiff()
         load_flags = 0;
       case 16:
         load_raw = &LibRaw::unpacked_load_raw;
-        if ((!strncmp(make, "OLYMPUS", 7) ||
+        if ((!strncmp(make, "OLYMPUS", 7) || !strncmp(make, "OM Digi", 7) ||
              (!strncasecmp(make, "CLAUSS", 6) &&
               !strncasecmp(model, "piX 5oo", 7))) && // 0x5330303539 works here
             (INT64(tiff_ifd[raw].bytes) * 7ULL >

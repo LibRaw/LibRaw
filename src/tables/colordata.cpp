@@ -1144,6 +1144,9 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
     { LIBRAW_CAMERAMAKER_Olympus, "XZ-2", 0, 0,
       { 9777,-3483,-925,-2886,11297,1800,-602,1663,5134 } },
 
+	  { LIBRAW_CAMERAMAKER_Olympus, "OM-1", 0, 0,
+		{ 9488, -3984, -714, -2887, 10945, 2229, -137, 960, 5786 } },
+
 	{ LIBRAW_CAMERAMAKER_OmniVison, "", 16, 0x3ff,
       { 12782,-4059,-379,-478,9066,1413,1340,1513,5176 } }, /* DJC */
 

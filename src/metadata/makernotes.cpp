@@ -116,7 +116,7 @@ void LibRaw::parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
   uchar *table_buf_0x940e;
   ushort table_buf_0x940e_len = 0;
 
-  if (!strcmp(buf, "OLYMPUS") || !strcmp(buf, "PENTAX ") ||
+  if (!strcmp(buf, "OLYMPUS") || !strcmp(buf, "PENTAX ") || !strncmp(buf,"OM SYS",6)||
       (!strncmp(make, "SAMSUNG", 7) && (dng_writer == CameraDNG)))
   {
     base = ftell(ifp) - 10;
@@ -176,7 +176,7 @@ void LibRaw::parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
     is_Sony = 1;
 
   if (!is_Olympus &&
-      (!strncmp(make, "OLYMPUS", 7) ||
+      (!strncmp(make, "OLYMPUS", 7) || !strncmp(make, "OM Digi", 7) ||
       (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7)))) {
     is_Olympus = 1;
     OlympusDNG_SubDirOffsetValid =
@@ -433,11 +433,13 @@ void LibRaw::parse_makernote(int base, int uptag)
     goto quit;
   }
 
-  if (!strcmp(buf, "OLYMPUS") ||
+  if (!strcmp(buf, "OLYMPUS") || !strncmp(buf, "OM SYS",6) ||
       !strcmp(buf, "PENTAX "))
   {
     base = ftell(ifp) - 10;
     fseek(ifp, -2, SEEK_CUR);
+	if (buf[1] == 'M')
+		get4();
     order = get2();
     if (buf[0] == 'O')
       get2();
@@ -484,7 +486,7 @@ void LibRaw::parse_makernote(int base, int uptag)
   }
 
   if (!is_Olympus &&
-      (!strncasecmp(make, "Olympus", 7) ||
+      (!strncasecmp(make, "Olympus", 7) || !strncmp(make, "OM Digi", 7) ||
       (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7)))) {
     is_Olympus = 1;
   }
