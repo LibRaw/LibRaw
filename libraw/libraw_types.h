@@ -84,6 +84,13 @@ extern "C"
 #if defined(USE_LCMS)
 #include <lcms.h>
 #elif defined(USE_LCMS2)
+#if defined (__MINGW32__)  || defined (_WIN32)
+#  define CMS_IS_WINDOWS_ 1
+#  define CMS_DLL
+#else
+#  undef CMS_DLL
+#endif
+#define CMS_NO_REGISTER_KEYWORD 1
 #include <lcms2.h>
 #else
 #define NO_LCMS

@@ -79,6 +79,13 @@ typedef unsigned long long UINT64;
 #ifdef USE_LCMS
 #include <lcms.h> /* Support color profiles */
 #else
+#if defined (__MINGW32__)  || defined (_WIN32)
+#  define CMS_IS_WINDOWS_ 1
+#  define CMS_DLL
+#else
+#  undef CMS_DLL
+#endif
+#define CMS_NO_REGISTER_KEYWORD 1
 #include <lcms2.h> /* Support color profiles */
 #endif
 #endif
