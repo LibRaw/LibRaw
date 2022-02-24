@@ -42,6 +42,7 @@ static const struct
     {LIBRAW_CAMERAMAKER_Nikon,          "Nikon"},
     {LIBRAW_CAMERAMAKER_Nokia,          "Nokia"},
     {LIBRAW_CAMERAMAKER_Olympus,        "Olympus"},
+	{LIBRAW_CAMERAMAKER_Olympus,        "OM Digital Solutions"},
     {LIBRAW_CAMERAMAKER_Ricoh,          "Ricoh"},
     {LIBRAW_CAMERAMAKER_Pentax,         "Pentax"},
     {LIBRAW_CAMERAMAKER_PhaseOne,       "Phase One"},

@@ -442,6 +442,13 @@ void LibRaw::parse_makernote(int base, int uptag)
     if (buf[0] == 'O')
       get2();
   }
+  else if(!strcmp(buf, "OM SYSTEM"))
+  {
+      base = ftell(ifp) - 10;
+	  fseek(ifp, 2, SEEK_CUR);
+	  order = get2();
+      get2();
+  }
   else if (!strncmp(buf, "SONY", 4) || // DSLR-A100
            !strcmp(buf, "Panasonic")) {
     if (buf[0] == 'S')
@@ -484,7 +491,7 @@ void LibRaw::parse_makernote(int base, int uptag)
   }
 
   if (!is_Olympus &&
-      (!strncasecmp(make, "Olympus", 7) ||
+      (!strncasecmp(make, "Olympus", 7) || !strncasecmp(make, "OM Digital Solutions", 20) ||
       (!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7)))) {
     is_Olympus = 1;
   }
