@@ -787,12 +787,9 @@ LibRaw_bigfile_buffered_datastream::LibRaw_bigfile_buffered_datastream(const wch
             OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0)) != INVALID_HANDLE_VALUE)
 #endif
         {
-            if (fhandle != NULL)
-            {
-                LARGE_INTEGER fs;
-                if (GetFileSizeEx(fhandle, &fs))
-                    _fsize = fs.QuadPart;
-            }
+            LARGE_INTEGER fs;
+            if (GetFileSizeEx(fhandle, &fs))
+                _fsize = fs.QuadPart;
         }
 
     }
@@ -811,7 +808,7 @@ const wchar_t *LibRaw_bigfile_buffered_datastream::wfname()
 
 LibRaw_bigfile_buffered_datastream::~LibRaw_bigfile_buffered_datastream()
 {
-    if (fhandle != NULL)
+    if (fhandle != INVALID_HANDLE_VALUE)
         CloseHandle(fhandle);
 }
 int LibRaw_bigfile_buffered_datastream::valid() {
