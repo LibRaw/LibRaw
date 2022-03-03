@@ -853,7 +853,7 @@ free(ck_block);
 //        case 804: // Z fc
 //          break;
         }
-        if (OrientationOffset && ((OrientationOffset+12)<ShotInfo_len)) {
+        if (OrientationOffset && ((OrientationOffset+12)<ShotInfo_len) && OrientationOffset < 0xffff) {
           if (imNikon.ShotInfoVersion == 231) // ShotInfoD4S
             imNikon.RollAngle = AngleConversion_a(morder, ShotInfo_buf+OrientationOffset);
           else
@@ -861,7 +861,7 @@ free(ck_block);
           imNikon.PitchAngle  = AngleConversion (morder, ShotInfo_buf+OrientationOffset+4);
           imNikon.YawAngle    = AngleConversion (morder, ShotInfo_buf+OrientationOffset+8);
         }
-        if ((RotationOffset) && (imNikon.MakernotesFlip < 4))
+        if ((RotationOffset) && (imNikon.MakernotesFlip < 4) && (imNikon.MakernotesFlip >= 0))
           imNikon.MakernotesFlip = "0863"[imNikon.MakernotesFlip] - '0';
         ShotInfo_len = 0;
         free(ShotInfo_buf);
