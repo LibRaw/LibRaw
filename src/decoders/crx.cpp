@@ -218,10 +218,10 @@ static inline void crxFillBuffer(CrxBitstream *bitStrm)
 #ifndef LIBRAW_USE_OPENMP
       bitStrm->input->unlock();
 #endif
-      if (bitStrm->curBufSize < 1) // nothing read
-        throw LIBRAW_EXCEPTION_IO_EOF;
-      bitStrm->mdatSize -= bitStrm->curBufSize;
     }
+    if (bitStrm->curBufSize < 1) // nothing read
+      throw LIBRAW_EXCEPTION_IO_EOF;
+    bitStrm->mdatSize -= bitStrm->curBufSize;
   }
 }
 
@@ -2697,10 +2697,14 @@ int crxFreeImageData(CrxImage *img)
 void LibRaw::crxLoadDecodeLoop(void *img, int nPlanes)
 {
 #ifdef LIBRAW_USE_OPENMP
-  int results[4]; // nPlanes is always <= 4
+  int results[4] ={0,0,0,0}; // nPlanes is always <= 4
 #pragma omp parallel for
   for (int32_t plane = 0; plane < nPlanes; ++plane)
+   try {
     results[plane] = crxDecodePlane(img, plane);
+   } catch (...) {
+    results[plane] = 1;
+   }
 
   for (int32_t plane = 0; plane < nPlanes; ++plane)
     if (results[plane])
