@@ -348,10 +348,6 @@ void LibRaw::ahd_interpolate()
         }
     }
 
-#ifdef LIBRAW_USE_OPENMP
-#pragma omp barrier
-#endif
-
     free_omp_buffers(buffers, buffer_count);
 
     if (terminate_flag)
