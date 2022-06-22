@@ -1,7 +1,7 @@
 /* -*- C++ -*-
  * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
- Placehoder functions to build LibRaw w/o postprocessing 
+ Placeholder functions to build LibRaw w/o postprocessing 
  and preprocessing calls
  
  LibRaw is free software; you can redistribute it and/or modify

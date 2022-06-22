@@ -114,7 +114,7 @@
       <dt><strong> libraw_thumbnail_t thumbnail; </strong></dt>
       <dd>Data structure containing information on the preview and the preview
         data themselves. All fields of this structure but thumbnail itself are
-        filled when open_file() is called. Thumbnail readed by unpack_thumb()
+        filled when open_file() is called. Thumbnail read by unpack_thumb()
         call. The fields are described in detail <a href="#libraw_thumbnail_t">
           below </a> .</dd>
       <dt><strong> libraw_rawdata_t rawdata; </strong></dt>
@@ -280,7 +280,7 @@
       <dt><strong> float rgb_cam[3][4]; </strong></dt>
       <dd>Camera to sRGB conversion matrix</dd>
       <dt><strong> float ccm[3][4]; </strong></dt>
-      <dd>Camera color correction matrix readed from file metadata (uniform
+      <dd>Camera color correction matrix read from file metadata (uniform
         matrix if no such data in file)</dd>
       <dt><strong> ph1_t phase_one_data; </strong></dt>
       <dd>Color data block that is read for Phase One cameras.</dd>
@@ -298,10 +298,10 @@
       <dt><strong> unsigned profile_length; </strong></dt>
       <dd>Length of ICC profile in bytes.</dd>
       <dt><strong> unsigned black_stat[8]; </strong></dt>
-      <dd>Black level statistics if calcluated from masked area: 4 sum of pixel
+      <dd>Black level statistics if calculated from masked area: 4 sum of pixel
         values, than 4 pixel counts (per channel).</dd>
       <dt><strong> libraw_dng_color_t dng_color[2]; </strong></dt>
-      <dd>Color data read from DNG: illuminant, calbiration matrix and color
+      <dd>Color data read from DNG: illuminant, calibration matrix and color
         matrix for two light sources. (see DNG specs for details).</dd>
       <dt><strong>libraw_dng_levels_t dng_levels</strong></dt>
       <dd>DNG black/white levels, analog balance, WB for active IFD. See DNG
@@ -351,7 +351,7 @@
     <h3>Structure libraw_rawdata_t: holds unpacked RAW data</h3>
     <p>Structure libraw_rawdata_t holds:</p>
     <ul>
-      <li>RAW-data from sensor, readed and unpacked by the <a href="API-CXX.html#unpack">
+      <li>RAW-data from sensor, read and unpacked by the <a href="API-CXX.html#unpack">
           unpack() </a> call.</li>
       <li>"backup" copy of color and over data modified during postprocessing.
         When postprocessing calls repeats, the needed data is restored from this
@@ -680,7 +680,7 @@
         Don't use automatic increase of brightness by histogram.</dd>
       <dt><strong> float auto_bright_thr; </strong></dt>
       <dd><strong> dcraw keys: </strong> none <br>
-        Portion of clipped pixels when auto brighness increase is used. Default
+        Portion of clipped pixels when auto brightness increase is used. Default
         value is 0.01 (1%) for dcraw compatibility. Recommended value for modern
         low-noise multimegapixel cameras depends on shooting style. Values in
         0.001-0.00003 range looks reasonable.</dd>
@@ -900,7 +900,7 @@
     <p>Definition:</p>
     <pre>	class LibRaw_abstract_datastream {...protected: LibRaw_abstract_datastream *substream;}
 </pre>
-    <p><strong> Description: </strong> Ojects derived from
+    <p><strong> Description: </strong> Objects derived from
       LibRaw_abstract_datastream always contains pointer to secondary data
       stream (substream). This substream initialized internally when needed
       (really used only for Sony RAW data) and used for temporary switch input

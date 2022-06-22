@@ -588,7 +588,7 @@ int main(int argc, char *argv[])
     timerstart();
     if (LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_process()))
     {
-      fprintf(stderr, "Cannot do postpocessing on %s: %s\n", argv[arg],
+      fprintf(stderr, "Cannot do postprocessing on %s: %s\n", argv[arg],
               libraw_strerror(ret));
       if (LIBRAW_FATAL_ERROR(ret))
         continue;

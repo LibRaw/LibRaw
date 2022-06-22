@@ -196,9 +196,9 @@ void LibRaw::wavelet_denoise()
 #pragma omp critical
     free(temp);
   } /* end omp parallel */
-  /* the following loops are hard to parallize, no idea yes,
+  /* the following loops are hard to parallelize, no idea yes,
    * problem is wlast which is carrying dependency
-   * second part should be easyer, but did not yet get it right.
+   * second part should be easier, but did not yet get it right.
    */
   if (filters && colors == 3)
   { /* pull G1 and G3 closer together */

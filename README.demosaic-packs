@@ -1,7 +1,7 @@
 ======================= LibRaw demosaic pack(s) ===============================
 
 We were forced to stop supporting LibRaw demosaic packs: the contributed code
-is out of date for several years, inital contributors has no interest in it.
+is out of date for several years, initial contributors has no interest in it.
 
 We too: we (LibRaw team) focused on RAW decode and metadata extraction, but not
 on postprocessing (demosaic, noise suppression, etc).

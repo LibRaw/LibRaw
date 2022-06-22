@@ -46,7 +46,7 @@ int process_once(LibRaw &RawProcessor, int half_mode, int camera_wb,
 
   if (LIBRAW_SUCCESS != ret)
   {
-    fprintf(stderr, "Cannot do postpocessing on %s: %s\n", fname,
+    fprintf(stderr, "Cannot do postprocessing on %s: %s\n", fname,
             libraw_strerror(ret));
     return ret;
   }

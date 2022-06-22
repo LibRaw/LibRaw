@@ -380,7 +380,7 @@ void LibRaw::xtrans_interpolate(int passes)
                                     homo[d][row][col]++;
                 }
 
-            /* Average the most homogenous pixels for the final result:	*/
+            /* Average the most homogeneous pixels for the final result:	*/
             if (height - top < LIBRAW_AHD_TILE + 4)
                 mrow = height - top + 2;
             if (width - left < LIBRAW_AHD_TILE + 4)

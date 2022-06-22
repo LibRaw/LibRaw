@@ -1192,7 +1192,7 @@ dng_skip:
   if ((maker_index != LIBRAW_CAMERAMAKER_Unknown) && normalized_model[0])
     SetStandardIlluminants (maker_index, normalized_model);
 
-  // Clear erorneus fuji_width if not set through parse_fuji or for DNG
+  // Clear erroneous fuji_width if not set through parse_fuji or for DNG
   if (fuji_width && !dng_version &&
       !(imgdata.process_warnings & LIBRAW_WARN_PARSEFUJI_PROCESSED))
     fuji_width = 0;

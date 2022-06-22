@@ -1977,7 +1977,7 @@ static void x3f_setup_camf_entries(x3f_camf_t *CAMF)
     entry[i].name_offset = *p4++;
     entry[i].value_offset = *p4++;
 
-    /* Compute adresses and sizes */
+    /* Compute addresses and sizes */
     entry[i].name_address = (char *)(p + entry[i].name_offset);
     entry[i].value_address = p + entry[i].value_offset;
     entry[i].name_size = entry[i].value_offset - entry[i].name_offset;

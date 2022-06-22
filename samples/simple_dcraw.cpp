@@ -167,7 +167,7 @@ int main(int ac, char *av[])
 
     if (LIBRAW_SUCCESS != ret)
     {
-      fprintf(stderr, "Cannot do postpocessing on %s: %s\n", av[i],
+      fprintf(stderr, "Cannot do postprocessing on %s: %s\n", av[i],
               libraw_strerror(ret));
       if (LIBRAW_FATAL_ERROR(ret))
         continue;

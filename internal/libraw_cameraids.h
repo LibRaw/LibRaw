@@ -90,9 +90,9 @@ it under the terms of the one of two licenses as you choose:
 #define CanonID_EOS_R6            (0x80000000ULL + 0x453ULL)
 #define CanonID_EOS_M50_Mark_II   (0x80000000ULL + 0x468ULL)
 
-// CanonID_EOS_D2000C after Canon's TIFF2CR2 convertor:
+// CanonID_EOS_D2000C after Canon's TIFF2CR2 converter:
 #define CanonID_EOS_D2000C        (0x80000000ULL + 0x520ULL)
-// CanonID_EOS_D6000C id after Canon's TIFF2CR2 convertor:
+// CanonID_EOS_D6000C id after Canon's TIFF2CR2 converter:
 #define CanonID_EOS_D6000C        (0x80000000ULL + 0x560ULL)
 
 #define OlyID_str2hex(str) ((unsigned long long)str[0]<<32 | str[1]<<24 | str[2]<<16 | str[3]<<8 | str[4])
