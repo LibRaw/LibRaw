@@ -114,7 +114,7 @@ void LibRaw::processNikonLensData(uchar *LensData, unsigned len)
 
   imgdata.lens.nikon.LensType = imgdata.lens.nikon.LensType & 0xdf;
 
-  if ((len < 20) || (len == 58))
+  if ((len < 20) || (len == 58) || (len == 108))
   {
     switch (len)
     {
@@ -127,7 +127,8 @@ void LibRaw::processNikonLensData(uchar *LensData, unsigned len)
     case 16:
       i = 8;
       break;
-    case 58: // "Z 6", "Z 6 II", "Z 7", "Z 7 II", "Z 50", D780, "Z 5", "Z fc"
+    case  58: // "Z 6", "Z 6 II", "Z 7", "Z 7 II", "Z 50", D780, "Z 5", "Z fc"
+    case 108: // "Z 9"
       if (model[6] == 'Z')
         ilm.CameraMount = LIBRAW_MOUNT_Nikon_Z;
       if (imNikon.HighSpeedCropFormat != 12)
@@ -139,18 +140,12 @@ void LibRaw::processNikonLensData(uchar *LensData, unsigned len)
       {
         ilm.LensMount = LIBRAW_MOUNT_Nikon_Z;
         ilm.LensID = sget2(LensData + 0x2c);
-        switch (ilm.LensID) {
-          case 11: case 12:
-            ilm.LensFormat = LIBRAW_FORMAT_APSC;
-            break;
-          case  1: case  2: case  4: case  8:
-          case  9: case 13: case 14: case 15:
-          case 16: case 17: case 18: case 21:
-          case 22: case 23: case 24: case 27:
-          case 29:
-            ilm.LensFormat = LIBRAW_FORMAT_FF;
-            break;
-        }
+        if (
+               (ilm.LensID == 11)
+            || (ilm.LensID == 12)
+            || (ilm.LensID == 26)
+           ) ilm.LensFormat = LIBRAW_FORMAT_APSC;
+        else ilm.LensFormat = LIBRAW_FORMAT_FF;
         if (ilm.MaxAp4CurFocal < 0.7f)
           ilm.MaxAp4CurFocal = libraw_powf64l(
               2.0f, (float)sget2(LensData + 0x32) / 384.0f - 1.0f);
@@ -240,7 +235,7 @@ void LibRaw::Nikon_NRW_WBtag(int wb, int skip)
   return;
 }
 
-void LibRaw::parseNikonMakernote(int base, int uptag, unsigned dng_writer)
+void LibRaw::parseNikonMakernote(int base, int uptag, unsigned /*dng_writer */)
 {
 
   unsigned offset = 0, entries, tag, type, len, save;
@@ -562,6 +557,11 @@ uchar *cj_block, *ck_block;
       imgdata.sizes.raw_inset_crops[0].cwidth = get2();
       imgdata.sizes.raw_inset_crops[0].cheight = get2();
     }
+    else if (tag == 0x0051)
+    {
+      fseek(ifp, 10LL, SEEK_CUR);
+      imNikon.NEFCompression = get2();
+    }
     else if (tag == 0x0082)
     { // lens attachment
       stmread(ilm.Attachment, len, ifp);
@@ -734,6 +734,9 @@ ck_block = (uchar *)malloc(ShotInfo_len);
       case 801:
         LensData_len = 58;
         break;
+      case 802:
+        LensData_len = 108;
+        break;
       }
       if (LensData_len)
       {
@@ -846,13 +849,19 @@ free(ck_block);
           OrientationOffset = sget4_order(morder, ShotInfo_buf+0x9c);
           break;
 
-        case 800: // Z 6, Z 7,     ShotInfoZ7_2, Roll/Pitch/Yaw
-        case 803: // Z 6_2, Z 7_2, ShotInfoZ7_2, Roll/Pitch/Yaw
+        case 800: // Z 6, Z 7,     ShotInfoZ7II, Roll/Pitch/Yaw
+        case 801: // Z 50,         ShotInfoZ7II, Roll/Pitch/Yaw
+        case 802: // Z 5,          ShotInfoZ7II, Roll/Pitch/Yaw
+        case 803: // Z 6_2, Z 7_2, ShotInfoZ7II, Roll/Pitch/Yaw
+        case 804: // Z fc          ShotInfoZ7II, Roll/Pitch/Yaw
           OrientationOffset = sget4_order(morder, ShotInfo_buf+0x98);
           break;
-//        case 804: // Z fc
-//          break;
+
+        case 805: // Z 9,          ShotInfoZ9, Roll/Pitch/Yaw
+          OrientationOffset = sget4_order(morder, ShotInfo_buf+0x84);
+          break;
         }
+
         if (OrientationOffset && ((OrientationOffset+12)<ShotInfo_len) && OrientationOffset < 0xffff) {
           if (imNikon.ShotInfoVersion == 231) // ShotInfoD4S
             imNikon.RollAngle = AngleConversion_a(morder, ShotInfo_buf+OrientationOffset);
@@ -865,7 +874,7 @@ free(ck_block);
           imNikon.MakernotesFlip = "0863"[imNikon.MakernotesFlip] - '0';
         ShotInfo_len = 0;
         free(ShotInfo_buf);
-      }     
+      }
     }
     else if (tag == 0x00a8)
     { // contains flash data
@@ -881,7 +890,7 @@ free(ck_block);
     }
     else if (tag == 0x00b7) // AFInfo2
     {
-      if (!imCommon.afcount)
+      if (!imCommon.afcount && len > 4)
       {
         imCommon.afdata[imCommon.afcount].AFInfoData_tag = tag;
         imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
@@ -994,7 +1003,7 @@ double AngleConversion (short _order, uchar *s) {
 
 /* ========= */
 /*
-void hexDump(char *title, void *addr, int len) 
+void hexDump(char *title, void *addr, int len)
 {
     int i;
     unsigned char buff[17];

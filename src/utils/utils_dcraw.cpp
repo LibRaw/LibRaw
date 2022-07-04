@@ -102,8 +102,8 @@ void LibRaw::initdata()
   memset(white, 0, sizeof white);
   memset(mask, 0, sizeof mask);
   thumb_offset = thumb_length = thumb_width = thumb_height = 0;
-  load_raw = thumb_load_raw = 0;
-  write_thumb = &LibRaw::jpeg_thumb;
+  load_raw = 0;
+  thumb_format = LIBRAW_INTERNAL_THUMBNAIL_JPEG; // default to JPEG
   data_offset = meta_offset = meta_length = tiff_bps = tiff_compress = 0;
   kodak_cbpp = zero_after_ff = dng_version = load_flags = 0;
   timestamp = shot_order = tiff_samples = black = is_foveon = 0;
@@ -147,9 +147,9 @@ void LibRaw::aRGB_coeff(double aRGB_cam[3][3])
 void LibRaw::romm_coeff(float romm_cam[3][3])
 {
   static const float rgb_romm[3][3] = /* ROMM == Kodak ProPhoto */
-      {{2.034193, -0.727420, -0.306766},
-       {-0.228811, 1.231729, -0.002922},
-       {-0.008565, -0.153273, 1.161839}};
+      {{2.034193f, -0.727420f, -0.306766f},
+       {-0.228811f, 1.231729f, -0.002922f},
+       {-0.008565f, -0.153273f, 1.161839f}};
   int i, j, k;
 
   for (i = 0; i < 3; i++)

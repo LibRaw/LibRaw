@@ -1,7 +1,7 @@
 /* -*- C++ -*-
  * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
- Placehoder functions to build LibRaw w/o postprocessing 
+ Placeholder functions to build LibRaw w/o postprocessing 
  and preprocessing calls
  
  LibRaw is free software; you can redistribute it and/or modify
@@ -17,8 +17,8 @@
 
 #include "../../internal/libraw_cxx_defs.h"
 
-void LibRaw::copy_fuji_uncropped(unsigned short cblack[4],
-				 unsigned short *dmaxp) {}
-void LibRaw::copy_bayer(unsigned short cblack[4], unsigned short *dmaxp){}
+void LibRaw::copy_fuji_uncropped(unsigned short /*cblack*/[4],
+				 unsigned short * /*dmaxp*/) {}
+void LibRaw::copy_bayer(unsigned short /*cblack*/[4], unsigned short * /*dmaxp*/){}
 void LibRaw::raw2image_start(){}
 

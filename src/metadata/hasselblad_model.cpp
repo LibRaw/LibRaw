@@ -145,7 +145,7 @@ static const char *Hasselblad_SensorEnclosures[] = {
       imgdata.color.LocalizedCameraModel[63] = 0; // make sure it's 0-terminated
     if ((ps = strrchr(imgdata.color.LocalizedCameraModel, '-')))
       c = ps-imgdata.color.LocalizedCameraModel;
-    else c = strlen(imgdata.color.LocalizedCameraModel);
+    else c = int(strlen(imgdata.color.LocalizedCameraModel));
     int cc = MIN(c, (int)sizeof(tmp_model)-1);
     memcpy(tmp_model, imgdata.color.LocalizedCameraModel,cc);
     tmp_model[cc] = 0;
@@ -160,7 +160,7 @@ static const char *Hasselblad_SensorEnclosures[] = {
     if ((ps = strrchr(imgdata.color.UniqueCameraModel, '/'))) {
       c = ps-imgdata.color.UniqueCameraModel;
     }
-    else c = strlen(imgdata.color.UniqueCameraModel);
+    else c = int(strlen(imgdata.color.UniqueCameraModel));
     int cc = MIN(c, (int)sizeof(tmp_model)-1);
     memcpy(tmp_model, imgdata.color.UniqueCameraModel,cc);
     tmp_model[cc] = 0;

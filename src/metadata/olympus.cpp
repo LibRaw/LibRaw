@@ -94,7 +94,7 @@ void LibRaw::getOlympus_SensorTemperature(unsigned len)
   return;
 }
 
-void LibRaw::parseOlympus_Equipment(unsigned tag, unsigned type, unsigned len,
+void LibRaw::parseOlympus_Equipment(unsigned tag, unsigned /*type */, unsigned len,
                                     unsigned dng_writer)
 {
   // uptag 2010
@@ -480,7 +480,7 @@ void LibRaw::parseOlympus_ImageProcessing(unsigned tag, unsigned type,
   return;
 }
 
-void LibRaw::parseOlympus_RawInfo(unsigned tag, unsigned type, unsigned len,
+void LibRaw::parseOlympus_RawInfo(unsigned tag, unsigned /*type */, unsigned len,
                                   unsigned dng_writer)
 {
   // uptag 0x3000

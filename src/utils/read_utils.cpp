@@ -172,5 +172,5 @@ void LibRaw::read_shorts(ushort *pixel, unsigned count)
   if ((unsigned)fread(pixel, 2, count, ifp) < count)
     derror();
   if ((order == 0x4949) == (ntohs(0x1234) == 0x1234))
-    swab((char *)pixel, (char *)pixel, count * 2);
+    libraw_swab(pixel, count * 2);
 }

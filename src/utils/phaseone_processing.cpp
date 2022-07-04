@@ -22,7 +22,6 @@ void LibRaw::phase_one_allocate_tempbuffer()
 {
   // Allocate temp raw_image buffer
   imgdata.rawdata.raw_image = (ushort *)malloc(S.raw_pitch * S.raw_height);
-  merror(imgdata.rawdata.raw_image, "phase_one_prepare_to_correct()");
 }
 void LibRaw::phase_one_free_tempbuffer()
 {
@@ -95,7 +94,7 @@ int LibRaw::phase_one_subtract_black(ushort *src, ushort *dest)
     }
     return 0;
   }
-  catch (const LibRaw_exceptions& err)
+  catch (const LibRaw_exceptions& )
   {
     return LIBRAW_CANCELLED_BY_CALLBACK;
   }

@@ -87,7 +87,7 @@ CameraMetaDataLR *make_camera_metadata()
   for (i = 0; i < RAWSPEED_DATA_COUNT; i++)
     if (_rawspeed_data_xml[i])
     {
-      len += strlen(_rawspeed_data_xml[i]);
+      len += int(strlen(_rawspeed_data_xml[i]));
     }
   char *rawspeed_xml =
       (char *)calloc(len + 1, sizeof(_rawspeed_data_xml[0][0]));
@@ -97,7 +97,7 @@ CameraMetaDataLR *make_camera_metadata()
   for (i = 0; i < RAWSPEED_DATA_COUNT; i++)
     if (_rawspeed_data_xml[i])
     {
-      int ll = strlen(_rawspeed_data_xml[i]);
+      int ll = int(strlen(_rawspeed_data_xml[i]));
       if (offt + ll > len)
         break;
       memmove(rawspeed_xml + offt, _rawspeed_data_xml[i], ll);
@@ -119,7 +119,7 @@ CameraMetaDataLR *make_camera_metadata()
 
 #endif
 
-int LibRaw::set_rawspeed_camerafile(char *filename)
+int LibRaw::set_rawspeed_camerafile(char * filename)
 {
 #ifdef USE_RAWSPEED
   try
@@ -138,11 +138,13 @@ int LibRaw::set_rawspeed_camerafile(char *filename)
     // just return error code
     return -1;
   }
+#else
+    (void)filename;
 #endif
   return 0;
 }
 #ifdef USE_RAWSPEED
-void LibRaw::fix_after_rawspeed(int bl)
+void LibRaw::fix_after_rawspeed(int /*bl*/)
 {
   if (load_raw == &LibRaw::lossy_dng_load_raw)
     C.maximum = 0xffff;
@@ -158,7 +160,11 @@ int LibRaw::try_rawspeed()
 #ifdef USE_RAWSPEED
   int ret = LIBRAW_SUCCESS;
 
+#ifdef USE_RAWSPEED_BITS
+  int rawspeed_ignore_errors = (imgdata.rawparams.use_rawspeed & LIBRAW_RAWSPEEDV1_IGNOREERRORS);
+#else
   int rawspeed_ignore_errors = 0;
+#endif
   if (imgdata.idata.dng_version && imgdata.idata.colors == 3 &&
       !strcasecmp(imgdata.idata.software,
                   "Adobe Photoshop Lightroom 6.1.1 (Windows)"))
@@ -183,6 +189,16 @@ int LibRaw::try_rawspeed()
     d = t.getDecoder();
     if (!d)
       throw "Unable to find decoder";
+
+#ifdef USE_RAWSPEED_BITS
+    if (imgdata.rawparams.use_rawspeed & LIBRAW_RAWSPEEDV1_FAILONUNKNOWN)
+      d->failOnUnknown = TRUE;
+    else
+        d->failOnUnknown = FALSE;
+#endif
+    d->interpolateBadPixels = FALSE;
+    d->applyStage1DngOpcodes = FALSE;
+
     try
     {
       d->checkSupport(meta);
@@ -192,8 +208,6 @@ int LibRaw::try_rawspeed()
       imgdata.process_warnings |= LIBRAW_WARN_RAWSPEED_UNSUPPORTED;
       throw e;
     }
-    d->interpolateBadPixels = FALSE;
-    d->applyStage1DngOpcodes = FALSE;
     _rawspeed_decoder = static_cast<void *>(d);
     d->decodeRaw();
     d->decodeMetaData(meta);
@@ -248,7 +262,6 @@ int LibRaw::try_rawspeed()
       free(_rawspeed_buffer);
       _rawspeed_buffer = 0;
     }
-    const char *p = RDE.what();
     if (!strncmp(RDE.what(), "Decoder canceled", strlen("Decoder canceled")))
       throw LIBRAW_EXCEPTION_CANCELLED_BY_CALLBACK;
     ret = LIBRAW_UNSPECIFIED_ERROR;

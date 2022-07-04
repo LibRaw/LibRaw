@@ -45,34 +45,148 @@ void LibRaw::parse_phase_one(int base)
     len = get4();
     data = get4();
     save = ftell(ifp);
-    fseek(ifp, base + data, SEEK_SET);
+	bool do_seek = (tag < 0x0108 || tag > 0x0110); // to make it single rule, not copy-paste
+	if(do_seek)
+		fseek(ifp, base + data, SEEK_SET);
     switch (tag)
     {
 
+    case 0x0100:
+      flip = "0653"[data & 3] - '0';
+      break;
     case 0x0102:
       stmread(imgdata.shootinginfo.BodySerial, len, ifp);
-      if ((imgdata.shootinginfo.BodySerial[0] == 0x4c) &&
-          (imgdata.shootinginfo.BodySerial[1] == 0x49))
+      if ((imgdata.shootinginfo.BodySerial[0] == 0x4c) && (imgdata.shootinginfo.BodySerial[1] == 0x49))
       {
-        unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) |
-                     (imgdata.shootinginfo.BodySerial[2] & 0x3f)) -
-                    0x41;
+        unique_id =
+            (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[2] & 0x3f)) - 0x41;
       }
       else
       {
-        unique_id = (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) |
-                     (imgdata.shootinginfo.BodySerial[1] & 0x3f)) -
-                    0x41;
+        unique_id =
+            (((imgdata.shootinginfo.BodySerial[0] & 0x3f) << 5) | (imgdata.shootinginfo.BodySerial[1] & 0x3f)) - 0x41;
       }
       setPhaseOneFeatures(unique_id);
+      break;
+    case 0x0106:
+      for (i = 0; i < 9; i++)
+        imgdata.color.P1_color[0].romm_cam[i] = ((float *)romm_cam)[i] =
+            (float)getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+      romm_coeff(romm_cam);
+      break;
+    case 0x0107:
+      FORC3 cam_mul[c] = (float)getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+      break;
+    case 0x0108:
+      raw_width = data;
+      break;
+    case 0x0109:
+      raw_height = data;
+      break;
+    case 0x010a:
+      left_margin = data;
+      break;
+    case 0x010b:
+      top_margin = data;
+      break;
+    case 0x010c:
+      width = data;
+      break;
+    case 0x010d:
+      height = data;
+      break;
+    case 0x010e:
+      ph1.format = data;
+      break;
+    case 0x010f:
+      data_offset = data + base;
+	  data_size = len;
+      break;
+    case 0x0110:
+      meta_offset = data + base;
+      meta_length = len;
+      break;
+    case 0x0112:
+      ph1.key_off = int(save - 4);
       break;
     case 0x0203:
       stmread(imPhaseOne.Software, len, ifp);
     case 0x0204:
       stmread(imPhaseOne.SystemType, len, ifp);
+    case 0x0210:
+      ph1.tag_210 = int_to_float(data);
+      imCommon.SensorTemperature = ph1.tag_210;
+      break;
     case 0x0211:
       imCommon.SensorTemperature2 = int_to_float(data);
       break;
+    case 0x021a:
+      ph1.tag_21a = data;
+      break;
+    case 0x021c:
+      strip_offset = data + base;
+      break;
+    case 0x021d:
+      ph1.t_black = data;
+      break;
+    case 0x0222:
+      ph1.split_col = data;
+      break;
+    case 0x0223:
+      ph1.black_col = data + base;
+      break;
+    case 0x0224:
+      ph1.split_row = data;
+      break;
+    case 0x0225:
+      ph1.black_row = data + base;
+      break;
+    case 0x0226:
+      for (i = 0; i < 9; i++)
+        imgdata.color.P1_color[1].romm_cam[i] = (float)getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+      break;
+    case 0x0301:
+      model[63] = 0;
+      fread(imPhaseOne.FirmwareString, 1, 255, ifp);
+      imPhaseOne.FirmwareString[255] = 0;
+      memcpy(model, imPhaseOne.FirmwareString, 63);
+	  model[63] = 0;
+      if ((cp = strstr(model, " camera")))
+        *cp = 0;
+      else if ((cp = strchr(model, ',')))
+        *cp = 0;
+      /* minus and the letter after it are not always present
+        if present, last letter means:
+          C : Contax 645AF
+          H : Hasselblad H1 / H2
+          M : Mamiya
+          V : Hasselblad 555ELD / 553ELX / 503CW / 501CM; not included below
+        because of adapter conflicts (Mamiya RZ body) if not present, Phase One
+        645 AF, Mamiya 645AFD Series, or anything
+       */
+      strcpy(imPhaseOne.SystemModel, model);
+      if ((cp = strchr(model, '-')))
+      {
+        if (cp[1] == 'C')
+        {
+          strcpy(ilm.body, "Contax 645AF");
+          ilm.CameraMount = LIBRAW_MOUNT_Contax645;
+          ilm.CameraFormat = LIBRAW_FORMAT_645;
+        }
+        else if (cp[1] == 'M')
+        {
+          strcpy(ilm.body, "Mamiya 645");
+          ilm.CameraMount = LIBRAW_MOUNT_Mamiya645;
+          ilm.CameraFormat = LIBRAW_FORMAT_645;
+        }
+        else if (cp[1] == 'H')
+        {
+          strcpy(ilm.body, "Hasselblad H1/H2");
+          ilm.CameraMount = LIBRAW_MOUNT_Hasselblad_H;
+          ilm.CameraFormat = LIBRAW_FORMAT_645;
+        }
+        *cp = 0;
+      }
     case 0x0401:
       if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         ilm.CurAp = libraw_powf64l(2.0f, (int_to_float(data) / 2.0f));
@@ -139,122 +253,9 @@ void LibRaw::parse_phase_one(int base)
         ilm.MaxFocal = (float)getreal(type);
       }
       break;
-
-    case 0x0100:
-      flip = "0653"[data & 3] - '0';
-      break;
-    case 0x0106:
-      for (i = 0; i < 9; i++)
-        imgdata.color.P1_color[0].romm_cam[i] = ((float *)romm_cam)[i] =
-            (float)getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
-      romm_coeff(romm_cam);
-      break;
-    case 0x0107:
-      FORC3 cam_mul[c] = (float)getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
-      break;
-    case 0x0108:
-      raw_width = data;
-      break;
-    case 0x0109:
-      raw_height = data;
-      break;
-    case 0x010a:
-      left_margin = data;
-      break;
-    case 0x010b:
-      top_margin = data;
-      break;
-    case 0x010c:
-      width = data;
-      break;
-    case 0x010d:
-      height = data;
-      break;
-    case 0x010e:
-      ph1.format = data;
-      break;
-    case 0x010f:
-      data_offset = data + base;
-      break;
-    case 0x0110:
-      meta_offset = data + base;
-      meta_length = len;
-      break;
-    case 0x0112:
-      ph1.key_off = int(save - 4);
-      break;
-    case 0x0210:
-      ph1.tag_210 = int_to_float(data);
-      imCommon.SensorTemperature = ph1.tag_210;
-      break;
-    case 0x021a:
-      ph1.tag_21a = data;
-      break;
-    case 0x021c:
-      strip_offset = data + base;
-      break;
-    case 0x021d:
-      ph1.t_black = data;
-      break;
-    case 0x0222:
-      ph1.split_col = data;
-      break;
-    case 0x0223:
-      ph1.black_col = data + base;
-      break;
-    case 0x0224:
-      ph1.split_row = data;
-      break;
-    case 0x0225:
-      ph1.black_row = data + base;
-      break;
-    case 0x0226:
-      for (i = 0; i < 9; i++)
-        imgdata.color.P1_color[1].romm_cam[i] = (float)getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
-      break;
-    case 0x0301:
-      model[63] = 0;
-      imPhaseOne.FirmwareString[255] = 0;
-      fread(imPhaseOne.FirmwareString, 1, 255, ifp);
-      memcpy(model, imPhaseOne.FirmwareString, 63);
-      if ((cp = strstr(model, " camera")))
-        *cp = 0;
-      else if ((cp = strchr(model, ',')))
-        *cp = 0;
-      /* minus and the letter after it are not always present
-        if present, last letter means:
-          C : Contax 645AF
-          H : Hasselblad H1 / H2
-          M : Mamiya
-          V : Hasselblad 555ELD / 553ELX / 503CW / 501CM; not included below
-        because of adapter conflicts (Mamiya RZ body) if not present, Phase One
-        645 AF, Mamiya 645AFD Series, or anything
-       */
-      strcpy(imPhaseOne.SystemModel, model);
-      if ((cp = strchr(model, '-')))
-      {
-        if (cp[1] == 'C')
-        {
-          strcpy(ilm.body, "Contax 645AF");
-          ilm.CameraMount = LIBRAW_MOUNT_Contax645;
-          ilm.CameraFormat = LIBRAW_FORMAT_645;
-        }
-        else if (cp[1] == 'M')
-        {
-          strcpy(ilm.body, "Mamiya 645");
-          ilm.CameraMount = LIBRAW_MOUNT_Mamiya645;
-          ilm.CameraFormat = LIBRAW_FORMAT_645;
-        }
-        else if (cp[1] == 'H')
-        {
-          strcpy(ilm.body, "Hasselblad H1/H2");
-          ilm.CameraMount = LIBRAW_MOUNT_Hasselblad_H;
-          ilm.CameraFormat = LIBRAW_FORMAT_645;
-        }
-        *cp = 0;
-      }
     }
-    fseek(ifp, save, SEEK_SET);
+    if (do_seek)
+      fseek(ifp, save, SEEK_SET);
   }
 
   if (!ilm.body[0] && !imgdata.shootinginfo.BodySerial[0])
@@ -301,9 +302,11 @@ void LibRaw::parse_phase_one(int base)
     ilm.MinAp4CurFocal = MinAp4CurFocal;
   }
 
-  load_raw = ph1.format < 3 ? &LibRaw::phase_one_load_raw
-                            : &LibRaw::phase_one_load_raw_c;
-  maximum = 0xffff;
+  if (ph1.format == 6)
+	  load_raw = &LibRaw::phase_one_load_raw_s;
+  else
+    load_raw = ph1.format < 3 ? &LibRaw::phase_one_load_raw : &LibRaw::phase_one_load_raw_c;
+  maximum = 0xffff; // Always scaled to 16bit?
   strcpy(make, "Phase One");
   if (model[0])
     return;

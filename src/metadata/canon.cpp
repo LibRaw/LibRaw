@@ -111,12 +111,24 @@ void LibRaw::setCanonBodyFeatures(unsigned long long id)
   else if ((id == CanonID_EOS_R)  ||
            (id == CanonID_EOS_RP) ||
            (id == CanonID_EOS_R3) ||
-           (id == CanonID_EOS_R6) ||
-           (id == CanonID_EOS_R5))
+           (id == CanonID_EOS_R5) ||
+           (id == CanonID_EOS_R6))
   {
     ilm.CameraFormat = LIBRAW_FORMAT_FF;
     ilm.CameraMount = LIBRAW_MOUNT_Canon_RF;
+    ilm.LensFormat = LIBRAW_FORMAT_FF;
+    ilm.LensMount = LIBRAW_MOUNT_Canon_EF;
   }
+
+  else if ((id == CanonID_EOS_R7)  ||
+           (id == CanonID_EOS_R10))
+  {
+    ilm.CameraFormat = LIBRAW_FORMAT_APSC;
+    ilm.CameraMount = LIBRAW_MOUNT_Canon_RF;
+    ilm.LensFormat = LIBRAW_FORMAT_APSC;
+    ilm.LensMount = LIBRAW_MOUNT_Canon_EF;
+  }
+
   else if ((id == CanonID_EOS_D30) ||
            (id == CanonID_EOS_D60) ||
            (id > 0x80000000ULL))
@@ -129,13 +141,15 @@ void LibRaw::setCanonBodyFeatures(unsigned long long id)
 int CanonCameraInfo_checkFirmwareRecordLocation (uchar *offset) {
 // firmware record location allows
 // to determine the subversion of the CameraInfo table
-// and to adjust offsets accordingly 
-  if (isdigit(*offset)   && 
-      isdigit(*offset+2) &&
-      isdigit(*offset+4) &&
-      (*(offset+1) == '.') &&
-      (*(offset+3) == '.') &&
-      (*(offset+5) == 0)) return 1;
+// and to adjust offsets accordingly
+	if (
+				isdigit(*offset)     &&
+				isdigit(*(offset+2)) &&
+				isdigit(*(offset+4)) &&
+				(*(offset+1) == '.') &&
+				(*(offset+3) == '.') &&
+				((*(offset+5) == 0) || isspace(*(offset+5)))
+			) return 1;
   else return 0; // error
 }
 
@@ -719,7 +733,7 @@ void LibRaw::Canon_WBCTpresets(short WBCTversion)
   return;
 }
 
-void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
+void LibRaw::parseCanonMakernotes(unsigned tag, unsigned /*type*/, unsigned len, unsigned dng_writer)
 {
 
 #define AsShot_Auto_MeasuredWB(offset)                       \
@@ -908,6 +922,16 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
       ilm.LensMount = LIBRAW_MOUNT_Canon_EF;
       ilm.LensFormat = LIBRAW_FORMAT_FF;
     }
+
+    else if (!strncmp(ilm.Lens, "RF-S", 4))
+    {
+      memmove(ilm.Lens + 5, ilm.Lens + 4, 62);
+      ilm.Lens[4] = ' ';
+      memcpy(ilm.LensFeatures_pre, ilm.Lens, 4);
+      ilm.LensMount = LIBRAW_MOUNT_Canon_RF;
+      ilm.LensFormat = LIBRAW_FORMAT_APSC;
+    }
+
     else if (!strncmp(ilm.Lens, "RF", 2))
     {
       memmove(ilm.Lens + 3, ilm.Lens + 2, 62);
@@ -1220,10 +1244,24 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
 
     case 1770: // R5 CRM
     case 2024: // -1D X Mark III; ColorDataSubVer: 32
-    case 3656: // R5, R6; ColorDataSubVer: 33
+    case 3656: // R5, R6; ColorDataSubVer: 33 
       imCanon.ColorDataVer = 10;
       AsShot_Auto_MeasuredWB(0x0055);
       CR3_ColorData(0x0055);
+      break;
+
+    case 3973: // R3; ColorDataSubVer: 34
+    case 3778: // R7, R10; ColorDataSubVer: 48
+      imCanon.ColorDataVer = 11;
+      AsShot_Auto_MeasuredWB(0x0069);
+
+      fseek(ifp, save1 + ((0x0069+0x0064) << 1), SEEK_SET);
+      Canon_WBpresets(2, 12);
+      fseek(ifp, save1 + ((0x0069+0x00c3) << 1), SEEK_SET);
+      Canon_WBCTpresets(0);
+      offsetChannelBlackLevel2 = save1 + ((0x0069+0x0102) << 1);
+      offsetChannelBlackLevel  = save1 + ((0x0069+0x0213) << 1);
+      offsetWhiteLevels        = save1 + ((0x0069+0x0217) << 1);
       break;
 
    default:

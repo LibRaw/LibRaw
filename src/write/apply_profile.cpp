@@ -49,7 +49,6 @@ void LibRaw::apply_profile(const char *input, const char *output)
     fread(&size, 4, 1, fp);
     fseek(fp, 0, SEEK_SET);
     oprof = (unsigned *)malloc(size = ntohl(size));
-    merror(oprof, "apply_profile()");
     fread(oprof, 1, size, fp);
     fclose(fp);
     if (!(hOutProfile = cmsOpenProfileFromMem(oprof, size)))

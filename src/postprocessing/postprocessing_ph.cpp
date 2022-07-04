@@ -1,7 +1,7 @@
 /* -*- C++ -*-
  * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
  *
- Placehoder functions to build LibRaw w/o postprocessing tools
+ Placeholder functions to build LibRaw w/o postprocessing tools
  
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -22,10 +22,10 @@ int LibRaw::dcraw_process(void)
 }
 
 void LibRaw::fuji_rotate() {}
-void LibRaw::convert_to_rgb_loop(float out_cam[3][4]) {}
+void LibRaw::convert_to_rgb_loop(float /*out_cam*/ [3][4]) {}
 libraw_processed_image_t *LibRaw::dcraw_make_mem_image(int *) {
   return NULL;
 }
 libraw_processed_image_t *LibRaw::dcraw_make_mem_thumb(int *){ return NULL;}
-void LibRaw::lin_interpolate_loop(int *code, int size) {}
-void LibRaw::scale_colors_loop(float scale_mul[4]) {}
+void LibRaw::lin_interpolate_loop(int * /*code*/, int /*size*/) {}
+void LibRaw::scale_colors_loop(float /*scale_mul*/[4]) {}

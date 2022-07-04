@@ -40,7 +40,9 @@ int LibRaw::dcraw_process(void)
     int subtract_inline =
         !O.bad_pixels && !O.dark_frame && is_bayer && !IO.zero_is_bad;
 
-    raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
+    int rc = raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
+	if (rc != LIBRAW_SUCCESS)
+		return rc;
 
     // Adjust sizes
 
@@ -91,11 +93,11 @@ int LibRaw::dcraw_process(void)
       if (load_raw == &LibRaw::x3f_load_raw)
       {
         // Filter out zeroes
-        for (int i = 0; i < S.height * S.width; i++)
+        for (int q = 0; q < S.height * S.width; q++)
         {
           for (int c = 0; c < 4; c++)
-            if ((short)imgdata.image[i][c] < 0)
-              imgdata.image[i][c] = 0;
+            if ((short)imgdata.image[q][c] < 0)
+              imgdata.image[q][c] = 0;
         }
       }
       SET_PROC_FLAG(LIBRAW_PROGRESS_FOVEON_INTERPOLATE);
@@ -218,8 +220,6 @@ int LibRaw::dcraw_process(void)
       libraw_internal_data.output_data.histogram =
           (int(*)[LIBRAW_HISTOGRAM_SIZE])malloc(
               sizeof(*libraw_internal_data.output_data.histogram) * 4);
-      merror(libraw_internal_data.output_data.histogram,
-             "LibRaw::dcraw_process()");
     }
 #ifndef NO_LCMS
     if (O.camera_profile)

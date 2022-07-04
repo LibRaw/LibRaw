@@ -316,7 +316,6 @@ void LibRaw::dcb_color_full()
   float f[4], g[4], (*chroma)[2];
 
   chroma = (float(*)[2])calloc(width * height, sizeof *chroma);
-  merror(chroma, "dcb_color_full()");
 
   for (row = 1; row < height - 1; row++)
     for (col = 1 + (FC(row, 1) & 1), indx = row * width + col, c = FC(row, col),

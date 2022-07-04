@@ -146,7 +146,6 @@ void LibRaw::phase_one_flat_field(int is_float, int nc)
   wide = head[2] / head[4] + (head[2] % head[4] != 0);
   high = head[3] / head[5] + (head[3] % head[5] != 0);
   mrow = (float *)calloc(nc * wide, sizeof *mrow);
-  merror(mrow, "phase_one_flat_field()");
   for (y = 0; y < high; y++)
   {
     checkCancel();
@@ -477,7 +476,6 @@ int LibRaw::phase_one_correct()
       for (i = 0; i < 9; i++)
         head[i] = get4() & 0x7fff;
       yval[0] = (float *)calloc(head[1] * head[3] + head[2] * head[4], 6);
-      merror(yval[0], "phase_one_correct()");
       yval[1] = (float *)(yval[0] + head[1] * head[3]);
       xval[0] = (ushort *)(yval[1] + head[2] * head[4]);
       xval[1] = (ushort *)(xval[0] + head[1] * head[3]);
@@ -535,10 +533,8 @@ void LibRaw::phase_one_load_raw()
   {
     imgdata.rawdata.ph1_cblack =
         (short(*)[2])calloc(raw_height * 2, sizeof(ushort));
-    merror(imgdata.rawdata.ph1_cblack, "phase_one_load_raw()");
     imgdata.rawdata.ph1_rblack =
         (short(*)[2])calloc(raw_width * 2, sizeof(ushort));
-    merror(imgdata.rawdata.ph1_rblack, "phase_one_load_raw()");
     if (ph1.black_col)
     {
       fseek(ifp, ph1.black_col, SEEK_SET);
@@ -606,7 +602,6 @@ void LibRaw::phase_one_load_raw_c()
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
   pixel = (ushort *)calloc(raw_width * 3 + raw_height * 4, 2);
-  merror(pixel, "phase_one_load_raw_c()");
   offset = (int *)(pixel + raw_width);
   fseek(ifp, strip_offset, SEEK_SET);
   for (row = 0; row < raw_height; row++)
@@ -625,12 +620,10 @@ void LibRaw::phase_one_load_raw_c()
   {
     imgdata.rawdata.ph1_cblack =
         (short(*)[2])calloc(raw_height * 2, sizeof(ushort));
-    merror(imgdata.rawdata.ph1_cblack, "phase_one_load_raw_c()");
     memmove(imgdata.rawdata.ph1_cblack, (ushort *)c_black[0],
             raw_height * 2 * sizeof(ushort));
     imgdata.rawdata.ph1_rblack =
         (short(*)[2])calloc(raw_width * 2, sizeof(ushort));
-    merror(imgdata.rawdata.ph1_rblack, "phase_one_load_raw_c()");
     memmove(imgdata.rawdata.ph1_rblack, (ushort *)r_black[0],
             raw_width * 2 * sizeof(ushort));
   }
@@ -698,7 +691,6 @@ void LibRaw::hasselblad_load_raw()
   try
   {
     back[4] = (int *)calloc(raw_width, 3 * sizeof **back);
-    merror(back[4], "hasselblad_load_raw()");
     FORC3 back[c] = back[4] + c * raw_width;
     cblack[6] >>= sh = tiff_samples > 1;
     shot = LIM(shot_select, 1, tiff_samples) - 1;
@@ -777,7 +769,6 @@ void LibRaw::leaf_hdr_load_raw()
     if (!image)
       throw LIBRAW_EXCEPTION_IO_CORRUPT;
     pixel = (ushort *)calloc(raw_width, sizeof *pixel);
-    merror(pixel, "leaf_hdr_load_raw()");
   }
   try
   {
@@ -860,7 +851,6 @@ void LibRaw::sinar_4shot_load_raw()
   if (!image)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
   pixel = (ushort *)calloc(raw_width, sizeof *pixel);
-  merror(pixel, "sinar_4shot_load_raw()");
   try
   {
     for (shot = 0; shot < 4; shot++)
@@ -899,7 +889,6 @@ void LibRaw::imacon_full_load_raw()
 
   unsigned short *buf =
       (unsigned short *)malloc(width * 3 * sizeof(unsigned short));
-  merror(buf, "imacon_full_load_raw");
 
   for (row = 0; row < height; row++)
   {

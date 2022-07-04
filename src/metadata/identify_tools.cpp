@@ -76,7 +76,7 @@ float LibRaw::find_green(int bps, int bite, int off0, int off1)
 void LibRaw::trimSpaces(char *s)
 {
   char *p = s;
-  int l = strlen(p);
+  int l = int(strlen(p));
   if (!l)
     return;
   while (isspace(p[l - 1]))
@@ -94,7 +94,7 @@ void LibRaw::remove_trailing_spaces(char *string, size_t len)
   if (len < 3)
     return; // also not needed
   len = strnlen(string, len - 1);
-  for (int i = len - 1; i >= 0; i--)
+  for (size_t i = len - 1; i >= 0; i--)
   {
     if (isspace((unsigned char)string[i]))
       string[i] = 0;
@@ -108,7 +108,7 @@ void LibRaw::remove_caseSubstr(char *string, char *subStr) // replace a substrin
   char *found;
   while ((found = strcasestr(string,subStr))) {
     if (!found) return;
-    int fill_len = strlen(subStr);
+    int fill_len = int(strlen(subStr));
     int p = found - string;
     for (int i=p; i<p+fill_len; i++) {
       string[i] = 32;
@@ -119,7 +119,7 @@ void LibRaw::remove_caseSubstr(char *string, char *subStr) // replace a substrin
 
 void LibRaw::removeExcessiveSpaces(char *string) // replace repeating spaces with one space
 {
-	int orig_len = strlen(string);
+	int orig_len = int(strlen(string));
 	int i = 0;   // counter for resulting string
 	int j = -1;
 	bool prev_char_is_space = false;

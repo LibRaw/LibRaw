@@ -151,6 +151,12 @@ const char *WB_idx2hrstr(unsigned WBi)
   return 0;
 }
 
+double _log2(double a)
+{
+  if(a > 0.00000000001) return log(a)/log(2.0);
+  return -1000;
+}
+
 void trimSpaces(char *s)
 {
   char *p = s;
@@ -565,9 +571,9 @@ void print_verbose(FILE *outfile, LibRaw &MyCoolRawProcessor, std::string &fn)
     if ((C.cam_mul[0] > 0) && (C.cam_mul[1] > 0))
     {
       fprintf(outfile, "\n  %-23s   %g %g %g %g   %5.2f %5.2f %5.2f %5.2f", "As shot", C.cam_mul[0], C.cam_mul[1],
-              C.cam_mul[2], C.cam_mul[3], roundf(log2(C.cam_mul[0] / C.cam_mul[1]) * 100.0f) / 100.0f, 0.0f,
-              roundf(log2(C.cam_mul[2] / C.cam_mul[1]) * 100.0f) / 100.0f,
-              C.cam_mul[3] ? roundf(log2(C.cam_mul[3] / C.cam_mul[1]) * 100.0f) / 100.0f : 0.0f);
+              C.cam_mul[2], C.cam_mul[3], roundf(_log2(C.cam_mul[0] / C.cam_mul[1]) * 100.0f) / 100.0f, 0.0f,
+              roundf(_log2(C.cam_mul[2] / C.cam_mul[1]) * 100.0f) / 100.0f,
+              C.cam_mul[3] ? roundf(_log2(C.cam_mul[3] / C.cam_mul[1]) * 100.0f) / 100.0f : 0.0f);
     }
 
     for (int cnt = 0; cnt < int(sizeof WBToStr / sizeof *WBToStr); cnt++)
@@ -578,9 +584,9 @@ void print_verbose(FILE *outfile, LibRaw &MyCoolRawProcessor, std::string &fn)
         denom = (float)C.WB_Coeffs[WBi][1];
         fprintf(outfile, "\n  %-23s   %4d %4d %4d %4d   %5.2f %5.2f %5.2f %5.2f", WBToStr[cnt].hrStrId,
                 C.WB_Coeffs[WBi][0], C.WB_Coeffs[WBi][1], C.WB_Coeffs[WBi][2], C.WB_Coeffs[WBi][3],
-                roundf(log2((float)C.WB_Coeffs[WBi][0] / denom) * 100.0f) / 100.0f, 0.0f,
-                roundf(log2((float)C.WB_Coeffs[WBi][2] / denom) * 100.0f) / 100.0f,
-                C.WB_Coeffs[3] ? roundf(log2((float)C.WB_Coeffs[WBi][3] / denom) * 100.0f) / 100.0f : 0.0f);
+                roundf(_log2((float)C.WB_Coeffs[WBi][0] / denom) * 100.0f) / 100.0f, 0.0f,
+                roundf(_log2((float)C.WB_Coeffs[WBi][2] / denom) * 100.0f) / 100.0f,
+                C.WB_Coeffs[3] ? roundf(_log2((float)C.WB_Coeffs[WBi][3] / denom) * 100.0f) / 100.0f : 0.0f);
       }
     }
 

@@ -15,7 +15,7 @@
 
 #include "../../internal/dcraw_defs.h"
 
-void LibRaw::parseSamsungMakernotes(int base, unsigned tag, unsigned type,
+void LibRaw::parseSamsungMakernotes(int /*base*/, unsigned tag, unsigned type,
                                     unsigned len, unsigned dng_writer)
 {
   int i, c;

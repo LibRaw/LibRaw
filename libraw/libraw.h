@@ -117,6 +117,7 @@ extern "C"
                                unsigned black_level);
   DllDef int libraw_unpack(libraw_data_t *);
   DllDef int libraw_unpack_thumb(libraw_data_t *);
+  DllDef int libraw_unpack_thumb_ex(libraw_data_t *,int);
   DllDef void libraw_recycle_datastream(libraw_data_t *);
   DllDef void libraw_recycle(libraw_data_t *);
   DllDef void libraw_close(libraw_data_t *);
@@ -131,8 +132,6 @@ extern "C"
   DllDef int libraw_cameraCount();
 
   /* helpers */
-  DllDef void libraw_set_memerror_handler(libraw_data_t *, memory_callback cb,
-                                          void *datap);
   DllDef void libraw_set_exifparser_handler(libraw_data_t *,
                                             exif_parser_callback cb,
                                             void *datap);
@@ -221,6 +220,7 @@ public:
   void recycle_datastream();
   int unpack(void);
   int unpack_thumb(void);
+  int unpack_thumb_ex(int);
   int thumbOK(INT64 maxsz = -1);
   int adjust_sizes_info_only(void);
   int subtract_black();
@@ -235,11 +235,6 @@ public:
   {
     callbacks.exifparser_data = data;
     callbacks.exif_cb = cb;
-  }
-  void set_memerror_handler(memory_callback cb, void *data)
-  {
-    callbacks.memcb_data = data;
-    callbacks.mem_cb = cb;
   }
   void set_dataerror_handler(data_callback func, void *data)
   {
@@ -407,7 +402,6 @@ protected:
   void *calloc(size_t n, size_t t);
   void *realloc(void *p, size_t s);
   void free(void *p);
-  void merror(void *ptr, const char *where);
   void derror();
 
   LibRaw_TLS *tls;
@@ -417,10 +411,10 @@ protected:
   libraw_memmgr memmgr;
   libraw_callbacks_t callbacks;
 
-  void (LibRaw::*write_thumb)();
+  //void (LibRaw::*write_thumb)();
   void (LibRaw::*write_fun)();
   void (LibRaw::*load_raw)();
-  void (LibRaw::*thumb_load_raw)();
+  //void (LibRaw::*thumb_load_raw)();
   void (LibRaw::*pentax_component_load_raw)();
 
   void kodak_thumb_loader();
@@ -470,11 +464,13 @@ protected:
   void stretch();
 
   void jpeg_thumb_writer(FILE *tfp, char *thumb, int thumb_length);
+#if 0
   void jpeg_thumb();
   void ppm_thumb();
   void ppm16_thumb();
   void layer_thumb();
   void rollei_thumb();
+#endif
   void kodak_thumb_load_raw();
 
   unsigned get4();
@@ -486,6 +482,7 @@ protected:
   /* RawSpeed data */
   void *_rawspeed_camerameta;
   void *_rawspeed_decoder;
+  void *_rawspeed3_handle;
   void fix_after_rawspeed(int bl);
   int try_rawspeed(); /* returns LIBRAW_SUCCESS on success */
   /* Fast cancel flag */

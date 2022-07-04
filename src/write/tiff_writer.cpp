@@ -48,8 +48,6 @@ int LibRaw::dcraw_ppm_tiff_writer(const char *filename)
       libraw_internal_data.output_data.histogram =
           (int(*)[LIBRAW_HISTOGRAM_SIZE])malloc(
               sizeof(*libraw_internal_data.output_data.histogram) * 4);
-      merror(libraw_internal_data.output_data.histogram,
-             "LibRaw::dcraw_ppm_tiff_writer()");
     }
     libraw_internal_data.internal_data.output = f;
     write_ppm_tiff();

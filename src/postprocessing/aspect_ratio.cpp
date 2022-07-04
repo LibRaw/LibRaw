@@ -33,7 +33,6 @@ void LibRaw::fuji_rotate()
   wide = fuji_width / step;
   high = (height - fuji_width) / step;
   img = (ushort(*)[4])calloc(high, wide * sizeof *img);
-  merror(img, "fuji_rotate()");
 
   RUN_CALLBACK(LIBRAW_PROGRESS_FUJI_ROTATE, 0, 2);
 
@@ -74,7 +73,6 @@ void LibRaw::stretch()
   {
     newdim = height / pixel_aspect + 0.5;
     img = (ushort(*)[4])calloc(width, newdim * sizeof *img);
-    merror(img, "stretch()");
     for (rc = row = 0; row < newdim; row++, rc += pixel_aspect)
     {
       frac = rc - (c = rc);
@@ -91,7 +89,6 @@ void LibRaw::stretch()
   {
     newdim = width * pixel_aspect + 0.5;
     img = (ushort(*)[4])calloc(height, newdim * sizeof *img);
-    merror(img, "stretch()");
     for (rc = col = 0; col < newdim; col++, rc += 1 / pixel_aspect)
     {
       frac = rc - (c = rc);

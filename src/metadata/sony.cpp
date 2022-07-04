@@ -324,6 +324,8 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id)
        LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
       {SonyID_ILCE_7RM4A, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
        LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_7M4, LIBRAW_FORMAT_FF, LIBRAW_MOUNT_Sony_E, LIBRAW_SONY_ILCE, LIBRAW_MOUNT_Unknown,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
   };
   ilm.CamID = id;
 
@@ -376,6 +378,7 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id)
   case SonyID_ILCE_7SM3:
   case SonyID_ILCE_1:
   case SonyID_ILME_FX3:
+  case SonyID_ILCE_7M4:
     imSony.group9050 = LIBRAW_SONY_Tag9050c;
     break;
   default:
@@ -766,7 +769,7 @@ void LibRaw::process_Sony_0x9050(uchar *buf, ushort len, unsigned long long id)
   return;
 }
 
-void LibRaw::process_Sony_0x9400(uchar *buf, ushort len, unsigned long long id)
+void LibRaw::process_Sony_0x9400(uchar *buf, ushort len, unsigned long long /*id*/)
 {
 
   uchar s[4];
@@ -1664,7 +1667,7 @@ void LibRaw::parseSonyMakernotes(
         imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)malloc(imCommon.afdata[imCommon.afcount].AFInfoData_length);
         fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
         imSony.nAFPointsUsed =
-            MIN(imCommon.afdata[imCommon.afcount].AFInfoData_length, sizeof imSony.AFPointsUsed);
+            short(MIN(imCommon.afdata[imCommon.afcount].AFInfoData_length, sizeof imSony.AFPointsUsed));
         memcpy(imSony.AFPointsUsed, imCommon.afdata[imCommon.afcount].AFInfoData, imSony.nAFPointsUsed);
         imCommon.afcount++;
       }
@@ -1721,6 +1724,10 @@ void LibRaw::parseSonyMakernotes(
       fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
 		  imCommon.afcount++;
     }
+  }
+  else if (tag == 0x202e)
+  {
+    imSony.RawSizeType = get2();
   }
   else if (tag == 0x202f)
   {

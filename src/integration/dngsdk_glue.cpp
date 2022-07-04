@@ -192,8 +192,11 @@ int LibRaw::try_dngsdk()
     if (((libraw_internal_data.unpacker_data.tiff_compress == 34892 
         && libraw_internal_data.unpacker_data.tiff_bps == 8
         && libraw_internal_data.unpacker_data.tiff_samples == 3
-        && load_raw == &LibRaw::lossy_dng_load_raw) || 
-		(imgdata.rawparams.options & (LIBRAW_RAWOPTIONS_DNG_STAGE2| LIBRAW_RAWOPTIONS_DNG_STAGE3)))
+        && load_raw == &LibRaw::lossy_dng_load_raw) 
+        || (imgdata.rawparams.options & (LIBRAW_RAWOPTIONS_DNG_STAGE2| LIBRAW_RAWOPTIONS_DNG_STAGE3))
+        || ((tiff_ifd[ifdindex].dng_levels.parsedfields & (LIBRAW_DNGFM_OPCODE2| LIBRAW_DNGFM_OPCODE3))
+            && (imgdata.rawparams.options & (LIBRAW_RAWOPTIONS_DNG_STAGE2_IFPRESENT | LIBRAW_RAWOPTIONS_DNG_STAGE3_IFPRESENT)))
+        )
         && ifdindex >= 0)
     {
         if (info.fMainIndex != ifdindex)
@@ -202,7 +205,10 @@ int LibRaw::try_dngsdk()
         negative->ReadStage1Image(*host, stream, info);
         negative->BuildStage2Image(*host);
 		imgdata.process_warnings |= LIBRAW_WARN_DNG_STAGE2_APPLIED;
-		if (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_DNG_STAGE3)
+		if (  (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_DNG_STAGE3) ||
+            ((tiff_ifd[ifdindex].dng_levels.parsedfields & LIBRAW_DNGFM_OPCODE3) &&
+             (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_DNG_STAGE3_IFPRESENT))
+            )
 		{
 			negative->BuildStage3Image(*host);
 			stage2.Reset((dng_simple_image*)negative->Stage3Image());

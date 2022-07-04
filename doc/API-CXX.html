@@ -20,6 +20,7 @@
           <li><a href="#open_bayer">int LibRaw::open_bayer(...)</a></li>
           <li><a href="#unpack">int LibRaw::unpack(void)</a></li>
           <li><a href="#unpack_thumb">int LibRaw::unpack_thumb(void)</a></li>
+          <li><a href="#unpack_thumb_ex">int LibRaw::unpack_thumb_ex(int)</a></li>
         </ul>
       </li>
       <li><a href="#utility">Auxiliary Functions</a>
@@ -67,7 +68,6 @@
                   indication/interruption</a></li>
               <li><a href="#exif">User callback for exif/makernotes parser
                   routines</a></li>
-              <li><a href="#memerror">Out-of-Memory Notifier</a></li>
               <li><a href="#dataerror">File Read Error Notifier</a></li>
             </ul>
           </li>
@@ -142,9 +142,6 @@
     <pre>#include "libraw/libraw.h"<br>...<br><br>   LibRaw ImageProcessor(unsigned int flags=0);<br>...<br>    </pre>
     <p>Flags (several flags are combined via operator |, i.e., bitwise OR):</p>
     <ul>
-      <li><strong>LIBRAW_OPTIONS_NO_MEMERR_CALLBACK</strong>: do not set the
-        standard <a href="#callbacks">out-of-memory error handler</a> (standard
-        handler outputs the error report in stderr);</li>
       <li><strong>LIBRAW_OPTIONS_NO_DATAERR_CALLBACK</strong>: do not set the
         standard <a href="#callbacks">file read error handler</a> (standard
         handler outputs the error report in stderr).</li>
@@ -271,11 +268,15 @@
         code convention</a>: positive if any system call has returned an error,
       negative (from the <a href="API-datastruct.html#LibRaw_errors">LibRaw
         error list</a>) if there has been an error situation within LibRaw.</p>
-    <p><a name="unpack_thumb"></a></p>
+    <p><a name="unpack_thumb"></a><a name="unpack_thumb_ex"></a></p>
     <h3>int LibRaw::unpack_thumb(void)</h3>
-    <p>Reads (or unpacks) the image preview (thumbnail), placing the result into
-      the imgdata.thumbnail.thumb buffer.<br>
-      JPEG previews are placed into this buffer without any changes (with the
+    <h3>int LibRaw::unpack_thumb_ex(int i)</h3>
+    <p></p>
+    <p>unpack_thumb(): reads (or unpacks) the default (largest) image preview
+      (thumbnail), placing the result into the imgdata.thumbnail.thumb buffer.</p>
+    <p>unpack_thumb_ex(int i): reads i-th thumbnail (thumbnails list is
+      available in imgdata.thumbs_list structure).</p>
+    <p> JPEG previews are placed into this buffer without any changes (with the
       header etc.). Other preview formats are placed into the buffer in the form
       of the unpacked bitmap image (three components, 8 bits per component).<br>
       The thumbnail format is written to the imgdata.thumbnail.tformat field;
@@ -285,6 +286,8 @@
         code convention</a>: positive if any system call has returned an error,
       negative (from the <a href="API-datastruct.html#LibRaw_errors">LibRaw
         error list</a>) if there has been an error situation within LibRaw.</p>
+    <h3></h3>
+    <p></p>
     <p><a name="utility"></a></p>
     <h2>Auxiliary Functions</h2>
     <h3>Library version check</h3>
@@ -505,38 +508,6 @@
       <li>void *ifp - pointer to LibRaw_abstract_datastream, positioned to tag
         data</li>
     </ul>
-    <p><a name="memerror"></a></p>
-    <h4>Out-of-Memory Notifier</h4>
-    <pre>        typedef void (* memory_callback)(void *callback_data,const char *file, const char *where);<br>        void LibRaw::set_memerror_handler(memory_callback func,void *callback_data);<br>    </pre>
-    <p>The user may set his or her own function called in the case of memory
-      shortage. It is a void function receiving two string parameters:</p>
-    <ul>
-      <li><strong>void *callback_data</strong> - void*-pointer, passed as 2nd
-        argument to set_progress_handler(). This pointer should be used to pass
-        additional data to callback (i.e. thread local data and so on).</li>
-      <li><strong>file</strong> is the name of the RAW file whose processing
-        evoked the out-of-memory error. This name <strong>can be NULL</strong>
-        if underlying data input layer does not know the name. So, if calling
-        application sets own callback, this callback should work with NULL file
-        name.</li>
-      <li><strong>where</strong> is the name of the function where memory
-        shortage occurred.</li>
-    </ul>
-    <p>The callback function is intended for information purposes: it notifies
-      the user or the program code that processing is impossible.</p>
-    <p>If the user does not set his or her own handler, the standard one (output
-      of error message in stderr) will be used.</p>
-    <p>One can set the null handler by passing NULL to set_memerror_handler;
-      then no notifier function will be called. The same effect can be achieved
-      by creating a LibRaw object with the LIBRAW_OPTIONS_NO_MEMERR_CALLBACK
-      flag in the contructor.</p>
-    <p>In the case of memory shortage, processing of the current file is
-      terminated and a notifier is called; all allocated resources are freed,
-      and <a href="#recycle">recycle()</a> is performed. The current call will
-      return LIBRAW_UNSUFFICIENT_MEMORY. <br>
-      At an attempt to continue data processing, all subsequent calls will
-      return LIBRAW_OUT_OF_ORDER_CALL. Processing of a new file may be started
-      in the usual way, by calling LibRaw::open_file().</p>
     <p><a name="dataerror"></a></p>
     <h4>File Read Error Notifier</h4>
     <pre>        typedef void (*data_callback)(void *callback_data,const char *file, const int offset);<br>        void LibRaw::set_dataerror_handler(data_callback func, void *callback_data); <br>    </pre>
@@ -559,7 +530,7 @@
       the user or the program code that processing is impossible.</p>
     <p>If the user does not set his or her own handler, the standard one (output
       of error message in stderr) will be used.</p>
-    <p>One can set the null handler by passing NULL to set_memerror_handler;
+    <p>One can set the null handler by passing NULL to set_dataerror_handler;
       then no notifier function will be called. The same effect can be achieved
       by creating a LibRaw object with the LIBRAW_OPTIONS_NO_DATAERR_CALLBACK
       flag in the contructor.</p>

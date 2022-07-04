@@ -48,7 +48,6 @@ void LibRaw::pre_interpolate()
     else
     {
       img = (ushort(*)[4])calloc(height, width * sizeof *img);
-      merror(img, "pre_interpolate()");
       for (row = 0; row < height; row++)
         for (col = 0; col < width; col++)
         {
@@ -221,7 +220,6 @@ void LibRaw::vng_interpolate()
   if (filters == 9)
     prow = pcol = 6;
   ip = (int *)calloc(prow * pcol, 1280);
-  merror(ip, "vng_interpolate()");
   for (row = 0; row < prow; row++) /* Precalculate for VNG */
     for (col = 0; col < pcol; col++)
     {
@@ -264,7 +262,6 @@ void LibRaw::vng_interpolate()
       }
     }
   brow[4] = (ushort(*)[4])calloc(width * 3, sizeof **brow);
-  merror(brow[4], "vng_interpolate()");
   for (row = 0; row < 3; row++)
     brow[row] = brow[4] + row * width;
   for (row = 2; row < height - 2; row++)

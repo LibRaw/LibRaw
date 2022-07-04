@@ -223,14 +223,14 @@ int main(int ac, char *av[])
     }
 
     // we should call dcraw_process before thumbnail extraction because for
-    // some cameras (i.e. Kodak ones) white balance for thumbnal should be set
+    // some cameras (i.e. Kodak ones) white balance for thumbnail should be set
     // from main image settings
 
     ret = RawProcessor.dcraw_process();
 
     if (LIBRAW_SUCCESS != ret)
     {
-      fprintf(stderr, "Cannot do postpocessing on %s: %s\n", av[i],
+      fprintf(stderr, "Cannot do postprocessing on %s: %s\n", av[i],
               libraw_strerror(ret));
       if (LIBRAW_FATAL_ERROR(ret))
         continue;

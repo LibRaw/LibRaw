@@ -48,7 +48,7 @@ void LibRaw::setLeicaBodyFeatures(int LeicaMakernoteSignature)
     ilm.FocalType = LIBRAW_FT_ZOOM_LENS;
   }
   else if ((LeicaMakernoteSignature ==
-            0x0200) || // M10, M10-D, M10-R, "S (Typ 007)"
+            0x0200) || // M10, M10-D, M10-R, "S (Typ 007)", M11
            (LeicaMakernoteSignature ==
             0x02ff) || // "M (Typ 240)", "M (Typ 262)", "M-D (Typ 262)",
                        // "M Monochrom (Typ 246)", "S (Typ 006)", "S-E (Typ 006)", S2, S3
@@ -198,6 +198,7 @@ void LibRaw::parseLeicaMakernote(int base, int uptag, unsigned MakernoteTagType)
   {
     fseek(ifp, -2, SEEK_CUR);
     LeicaMakernoteSignature = ((uchar)buf[6] << 8) | (uchar)buf[7];
+    // printf ("LeicaMakernoteSignature 0x%04x\n", LeicaMakernoteSignature);
     if (!LeicaMakernoteSignature &&
         (!strncmp(model, "M8", 2) || !strncmp(model + 6, "M8", 2)))
       LeicaMakernoteSignature = -3;
@@ -296,7 +297,7 @@ void LibRaw::parseLeicaMakernote(int base, int uptag, unsigned MakernoteTagType)
         parseLeicaLensName(len);
       }
     }
-    else if (LeicaMakernoteSignature == 0x0200) // M10, M10-D, M10-R, "S (Typ 007)"
+    else if (LeicaMakernoteSignature == 0x0200) // M10, M10-D, M10-R, "S (Typ 007)", M11
     {
       if ((tag == 0x035a) && (fabs(ilm.CurAp) < 0.17f))
       {

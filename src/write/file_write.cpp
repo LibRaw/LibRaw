@@ -42,7 +42,7 @@ void LibRaw::tiff_set(struct tiff_hdr *th, ushort *ntag, ushort tag,
     FORC(4) tt->val.c[c] = val >> (c << 3);
   else if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_ASCII))
   {
-    count = strnlen((char *)th + val, count - 1) + 1;
+    count = int(strnlen((char *)th + val, count - 1)) + 1;
     if (count <= 4)
       FORC(4) tt->val.c[c] = ((char *)th)[val + c];
   }
@@ -232,15 +232,16 @@ void LibRaw::write_ppm_tiff()
                 else
                     FORCC ppm2[col * colors + c] = curve[image[soff][c]];
             if (output_bps == 16 && !output_tiff && htons(0x55aa) != 0x55aa)
-                swab((char *)ppm2, (char *)ppm2, width * colors * 2);
+                libraw_swab(ppm2, width * colors * 2);
             fwrite(ppm.data(), colors * output_bps / 8, width, ofp);
         }
     }
     catch (...)
     {
-        merror(NULL, "write_ppm_thumb()");
+      throw LIBRAW_EXCEPTION_ALLOC; // rethrow
     }
 }
+#if 0
 void LibRaw::ppm_thumb()
 {
     try
@@ -253,7 +254,7 @@ void LibRaw::ppm_thumb()
     }
     catch (...)
     {
-        merror(NULL, "ppm_thumb()");
+      throw LIBRAW_EXCEPTION_ALLOC; // rethrow
     }
 }
 
@@ -272,7 +273,7 @@ void LibRaw::ppm16_thumb()
     }
     catch (...)
     {
-        merror(NULL, "ppm16_thumb()");
+      throw LIBRAW_EXCEPTION_ALLOC; // rethrow
     }
 }
 
@@ -295,7 +296,7 @@ void LibRaw::layer_thumb()
     }
     catch (...)
     {
-        merror(NULL, "layer_thumb()");
+      throw LIBRAW_EXCEPTION_ALLOC; // rethrow
     }
 }
 
@@ -317,7 +318,7 @@ void LibRaw::rollei_thumb()
     }
     catch (...)
     {
-        merror(NULL, "rollei_thumb()");
+      throw LIBRAW_EXCEPTION_ALLOC; // rethrow
     }
 }
 
@@ -331,6 +332,7 @@ void LibRaw::jpeg_thumb()
     }
     catch (...)
     {
-        merror(NULL, "jpeg_thumb()");
+      throw LIBRAW_EXCEPTION_ALLOC; // rethrow
     }
 }
+#endif

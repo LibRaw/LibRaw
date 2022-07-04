@@ -148,7 +148,7 @@ it under the terms of the one of two licenses as you choose:
 #define shrink            (libraw_internal_data.internal_output_params.shrink)
 #endif
 #define fuji_width        (libraw_internal_data.internal_output_params.fuji_width)
-
+#define thumb_format	  (libraw_internal_data.unpacker_data.thumb_format)
 
 //libraw_internal_data.output_data
 #define histogram         (libraw_internal_data.output_data.histogram)

@@ -133,11 +133,16 @@ void LibRaw::packed_dng_load_raw()
   ushort *pixel, *rp;
   unsigned row, col;
 
+  if (tile_length < INT_MAX)
+  {
+      packed_tiled_dng_load_raw();
+      return;
+  }
+
   int ss = shot_select;
   shot_select = libraw_internal_data.unpacker_data.dng_frames[LIM(ss,0,(LIBRAW_IFD_MAXCOUNT*2-1))] & 0xff;
 
   pixel = (ushort *)calloc(raw_width, tiff_samples * sizeof *pixel);
-  merror(pixel, "packed_dng_load_raw()");
   try
   {
     for (row = 0; row < raw_height; row++)
@@ -168,7 +173,7 @@ void LibRaw::packed_dng_load_raw()
 void LibRaw::lossy_dng_load_raw() {}
 #else
 
-static void jpegErrorExit_d(j_common_ptr cinfo)
+static void jpegErrorExit_d(j_common_ptr /*cinfo*/)
 {
   throw LIBRAW_EXCEPTION_DECODE_JPEG;
 }

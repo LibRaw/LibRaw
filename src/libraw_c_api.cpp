@@ -160,6 +160,13 @@ extern "C"
     LibRaw *ip = (LibRaw *)lr->parent_class;
     return ip->unpack_thumb();
   }
+  int libraw_unpack_thumb_ex(libraw_data_t *lr, int i)
+  {
+    if (!lr)
+      return EINVAL;
+    LibRaw *ip = (LibRaw *)lr->parent_class;
+    return ip->unpack_thumb_ex(i);
+  }
   void libraw_recycle_datastream(libraw_data_t *lr)
   {
     if (!lr)
@@ -191,14 +198,6 @@ extern "C"
     ip->set_exifparser_handler(cb, data);
   }
 
-  void libraw_set_memerror_handler(libraw_data_t *lr, memory_callback cb,
-                                   void *data)
-  {
-    if (!lr)
-      return;
-    LibRaw *ip = (LibRaw *)lr->parent_class;
-    ip->set_memerror_handler(cb, data);
-  }
   void libraw_set_dataerror_handler(libraw_data_t *lr, data_callback func,
                                     void *data)
   {

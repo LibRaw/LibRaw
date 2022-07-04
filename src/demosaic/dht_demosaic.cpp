@@ -152,7 +152,7 @@ struct DHT
         druld < dlurd ? (e > T() ? RULDSH : RULD) : (e > T() ? LURDSH : LURD);
     return d;
   }
-  int get_diag_rbg(int x, int y, int hc)
+  int get_diag_rbg(int x, int y, int /* hc */)
   {
     float dlurd = calc_dist(
         nraw[nr_offset(y - 1, x - 1)][1] * nraw[nr_offset(y + 1, x + 1)][1],
@@ -744,8 +744,8 @@ void DHT::make_gline(int i)
               nraw[nr_offset(y + dy2, x + dx2)][1]);
     max = MAX(nraw[nr_offset(y + dy, x + dx)][1],
               nraw[nr_offset(y + dy2, x + dx2)][1]);
-    min /= 1.2;
-    max *= 1.2;
+    min /= 1.2f;
+    max *= 1.2f;
     if (eg < min)
       eg = scale_under(eg, min);
     else if (eg > max)
@@ -851,8 +851,8 @@ void DHT::make_rbdiag(int i)
               nraw[nr_offset(y + dy2, x + dx2)][cl]);
     max = MAX(nraw[nr_offset(y + dy, x + dx)][cl],
               nraw[nr_offset(y + dy2, x + dx2)][cl]);
-    min /= 1.2;
-    max *= 1.2;
+    min /= 1.2f;
+    max *= 1.2f;
     if (eg < min)
       eg = scale_under(eg, min);
     else if (eg > max)
@@ -925,10 +925,10 @@ void DHT::make_rbhv(int i)
                 nraw[nr_offset(y + dy2, x + dx2)][2]);
     max_b = MAX(nraw[nr_offset(y + dy, x + dx)][2],
                 nraw[nr_offset(y + dy2, x + dx2)][2]);
-    min_r /= 1.2;
-    max_r *= 1.2;
-    min_b /= 1.2;
-    max_b *= 1.2;
+    min_r /= 1.2f;
+    max_r *= 1.2f;
+    min_b /= 1.2f;
+    max_b *= 1.2f;
 
     if (eg_r < min_r)
       eg_r = scale_under(eg_r, min_r);

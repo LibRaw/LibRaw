@@ -18,7 +18,7 @@
 
 #include "../../internal/dcraw_defs.h"
 
-void LibRaw::parseSigmaMakernote (int base, int uptag, unsigned dng_writer) {
+void LibRaw::parseSigmaMakernote (int base, int /*uptag*/, unsigned /*dng_writer*/) {
 unsigned wb_table1 [] = {
   LIBRAW_WBI_Auto, LIBRAW_WBI_Daylight, LIBRAW_WBI_Shade, LIBRAW_WBI_Cloudy,
   LIBRAW_WBI_Tungsten, LIBRAW_WBI_Fluorescent, LIBRAW_WBI_Flash,
@@ -93,7 +93,7 @@ void LibRaw::parse_makernote_0xc634(int base, int uptag, unsigned dng_writer)
 
   unsigned entries, tag, type, len, save, c;
 
-  uchar *CanonCameraInfo;
+  uchar *CanonCameraInfo = NULL;
   unsigned lenCanonCameraInfo = 0;
   unsigned typeCanonCameraInfo = 0;
 
@@ -665,8 +665,8 @@ void LibRaw::parse_makernote(int base, int uptag)
       else if ((tag == 0x002a) &&
                tagtypeIs(LIBRAW_EXIFTAG_TYPE_SRATIONAL) &&
                (len == 12)) {
-        FORC4 for (int i = 0; i < 3; i++)
-                imHassy.mnColorMatrix[c][i] = getreal(type);
+        FORC4 for (int ii = 0; ii < 3; ii++)
+                imHassy.mnColorMatrix[c][ii] = getreal(type);
 
       } else if (tag == 0x0031) {
         imHassy.RecommendedCrop[0] = getint(type);

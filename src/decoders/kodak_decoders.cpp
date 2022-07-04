@@ -90,7 +90,7 @@ void LibRaw::kodak_radc_load_raw()
       for (i = 0; i < int(sizeof(buf[0]) / sizeof(short)); i++)
         ((short *)buf[c])[i] = MIN(0x7FFFFFFF, (((short *)buf[c])[i] * static_cast<long long>(val) + x)) >> s;
       last[c] = mul[c];
-      for (r = 0; r <= !c; r++)
+      for (r = 0; r <= int(!c); r++)
       {
         buf[c][1][width / 2] = buf[c][2][width / 2] = mul[c] << 7;
         for (tree = 1, col = width / 2; col > 0;)
@@ -160,7 +160,7 @@ void LibRaw::kodak_radc_load_raw()
 #ifdef NO_JPEG
 void LibRaw::kodak_jpeg_load_raw() {}
 #else
-static void jpegErrorExit_k(j_common_ptr cinfo)
+static void jpegErrorExit_k(j_common_ptr /*cinfo*/)
 {
   throw LIBRAW_EXCEPTION_DECODE_JPEG;
 }
@@ -178,12 +178,11 @@ void LibRaw::kodak_jpeg_load_raw()
   pub.error_exit = jpegErrorExit_k;
 
   unsigned char *jpg_buf = (unsigned char *)malloc(data_size);
-  merror(jpg_buf, "kodak_jpeg_load_raw");
   std::vector<uchar> pixel_buf(width * 3);
   jpeg_create_decompress(&cinfo);
 
   fread(jpg_buf, data_size, 1, ifp);
-  swab((char *)jpg_buf, (char *)jpg_buf, data_size);
+  libraw_swab(jpg_buf, data_size);
   try
   {
     jpeg_mem_src(&cinfo, jpg_buf, data_size);
@@ -254,7 +253,7 @@ void LibRaw::kodak_c330_load_raw()
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
   int row, col, y, cb, cr, rgb[3], c;
 
-  std::vector<uchar> pixel(raw_width*2);
+  std::vector<uchar> pixel(raw_width*2 + 4);
 
   for (row = 0; row < height; row++)
   {

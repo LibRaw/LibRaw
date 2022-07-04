@@ -157,11 +157,12 @@ typedef struct
   unsigned kodak_cbpp;
   INT64 strip_offset, data_offset;
   INT64 meta_offset;
-  INT64 exif_offset, ifd0_offset;
+  INT64 exif_offset, exif_subdir_offset, ifd0_offset;
   unsigned data_size;
   unsigned meta_length;
   unsigned cr3_exif_length, cr3_ifd0_length;
   unsigned thumb_misc;
+  enum LibRaw_internal_thumbnail_formats thumb_format;
   unsigned fuji_layout;
   unsigned tiff_samples;
   unsigned tiff_bps;

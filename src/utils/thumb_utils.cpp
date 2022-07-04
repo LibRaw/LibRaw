@@ -44,7 +44,10 @@ void LibRaw::kodak_thumb_loader()
   S.width = T.twidth;
   P1.filters = 0;
 
-  if (thumb_load_raw == &LibRaw::kodak_ycbcr_load_raw)
+#define Tformat libraw_internal_data.unpacker_data.thumb_format
+
+
+  if (Tformat == LIBRAW_INTERNAL_THUMBNAIL_KODAK_YCBCR)
   {
     S.height += S.height & 1;
     S.width += S.width & 1;
@@ -52,13 +55,17 @@ void LibRaw::kodak_thumb_loader()
 
   imgdata.image =
       (ushort(*)[4])calloc(S.iheight * S.iwidth, sizeof(*imgdata.image));
-  merror(imgdata.image, "LibRaw::kodak_thumb_loader()");
 
   ID.input->seek(ID.toffset, SEEK_SET);
   // read kodak thumbnail into T.image[]
   try
   {
-    (this->*thumb_load_raw)();
+      if (Tformat == LIBRAW_INTERNAL_THUMBNAIL_KODAK_YCBCR)
+          kodak_ycbcr_load_raw();
+      else if(Tformat == LIBRAW_INTERNAL_THUMBNAIL_KODAK_RGB)
+        kodak_rgb_load_raw();
+      else if (Tformat == LIBRAW_INTERNAL_THUMBNAIL_KODAK_THUMB)
+        kodak_thumb_load_raw();
   }
   catch (...)
   {
@@ -113,11 +120,10 @@ void LibRaw::kodak_thumb_loader()
 
   int(*t_hist)[LIBRAW_HISTOGRAM_SIZE] =
       (int(*)[LIBRAW_HISTOGRAM_SIZE])calloc(sizeof(*t_hist), 4);
-  merror(t_hist, "LibRaw::kodak_thumb_loader()");
 
-  float out[3], out_cam[3][4] = {{2.81761312, -1.98369181, 0.166078627, 0},
-                                 {-0.111855984, 1.73688626, -0.625030339, 0},
-                                 {-0.0379119813, -0.891268849, 1.92918086, 0}};
+  float out[3], out_cam[3][4] = {{2.81761312f, -1.98369181f, 0.166078627f, 0},
+                                 {-0.111855984f, 1.73688626f, -0.625030339f, 0},
+                                 {-0.0379119813f, -0.891268849f, 1.92918086f, 0}};
 
   for (img = imgdata.image[0], row = 0; row < S.height; row++)
     for (col = 0; col < S.width; col++, img += 4)
@@ -143,7 +149,6 @@ void LibRaw::kodak_thumb_loader()
 
   // make curve output curve!
   ushort *t_curve = (ushort *)calloc(sizeof(C.curve), 1);
-  merror(t_curve, "LibRaw::kodak_thumb_loader()");
   memmove(t_curve, C.curve, sizeof(C.curve));
   memset(C.curve, 0, sizeof(C.curve));
   {
@@ -182,7 +187,6 @@ void LibRaw::kodak_thumb_loader()
   if (T.thumb)
     free(T.thumb);
   T.thumb = (char *)calloc(S.width * S.height, P1.colors);
-  merror(T.thumb, "LibRaw::kodak_thumb_loader()");
   T.tlength = S.width * S.height * P1.colors;
 
   // from write_tiff_ppm
@@ -191,12 +195,12 @@ void LibRaw::kodak_thumb_loader()
     int cstep = flip_index(0, 1) - soff;
     int rstep = flip_index(1, 0) - flip_index(0, S.width);
 
-    for (int row = 0; row < S.height; row++, soff += rstep)
+    for (int rr = 0; rr < S.height; rr++, soff += rstep)
     {
-      char *ppm = T.thumb + row * S.width * P1.colors;
-      for (int col = 0; col < S.width; col++, soff += cstep)
+      char *ppm = T.thumb + rr * S.width * P1.colors;
+      for (int cc = 0; cc < S.width; cc++, soff += cstep)
         for (int c = 0; c < P1.colors; c++)
-          ppm[col * P1.colors + c] =
+          ppm[cc * P1.colors + c] =
               imgdata.color.curve[imgdata.image[soff][c]] >> 8;
     }
   }
@@ -247,15 +251,15 @@ int LibRaw::thumbOK(INT64 maxsz)
     return 0; // No thumb for raw > 4Gb-1
   int tsize = 0;
   int tcol = (T.tcolors > 0 && T.tcolors < 4) ? T.tcolors : 3;
-  if (write_thumb == &LibRaw::jpeg_thumb)
+  if (Tformat == LIBRAW_INTERNAL_THUMBNAIL_JPEG)
     tsize = T.tlength;
-  else if (write_thumb == &LibRaw::ppm_thumb)
+  else if (Tformat == LIBRAW_INTERNAL_THUMBNAIL_PPM)
     tsize = tcol * T.twidth * T.theight;
-  else if (write_thumb == &LibRaw::ppm16_thumb)
+  else if (Tformat == LIBRAW_INTERNAL_THUMBNAIL_PPM16)
     tsize = tcol * T.twidth * T.theight *
             ((imgdata.rawparams.options & LIBRAW_RAWOPTIONS_USE_PPM16_THUMBS) ? 2 : 1);
 #ifdef USE_X3FTOOLS
-  else if (write_thumb == &LibRaw::x3f_thumb_loader)
+  else if (Tformat == LIBRAW_INTERNAL_THUMBNAIL_X3F)
   {
     tsize = x3f_thumb_size();
   }

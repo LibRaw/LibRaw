@@ -56,7 +56,7 @@ char *customCameras[] = {
 
 int main(int ac, char *av[])
 {
-  int i, ret, verbose = 0, output_thumbs = 0;
+  int i, ret, verbose = 0, output_thumbs = 0, output_all_thumbs = 0;
 
   // don't use fixed size buffers in real apps!
   char outfn[1024], thumbfn[1024];
@@ -73,7 +73,8 @@ int main(int ac, char *av[])
            "\t-L - list supported cameras and exit\n"
            "\t-v - verbose output\n"
            "\t-T - output TIFF files instead of .pgm/ppm\n"
-           "\t-e - extract thumbnails (same as dcraw -e in separate run)\n",
+           "\t-e - extract thumbnails (same as dcraw -e in separate run)\n"
+           "\t-E - extract all thumbnails\n",
            LibRaw::version(), LibRaw::cameraCount(), av[0]);
     delete RawProcessor;
     return 0;
@@ -98,6 +99,11 @@ int main(int ac, char *av[])
         verbose++;
       if (av[i][1] == 'e' && av[i][2] == 0)
         output_thumbs++;
+      if (av[i][1] == 'E' && av[i][2] == 0)
+      {
+        output_thumbs++;
+        output_all_thumbs++;
+      }
       if (av[i][1] == '4' && av[i][2] == 0)
         OUT.output_bps = 16;
       if (av[i][1] == 'C' && av[i][2] == 0)
@@ -135,7 +141,30 @@ int main(int ac, char *av[])
 
     // thumbnail unpacking and output in the middle of main
     // image processing - for test purposes!
-    if (output_thumbs)
+    if(output_all_thumbs)
+    {
+      if (verbose)
+        printf("Extracting %d thumbnails\n", RawProcessor->imgdata.thumbs_list.thumbcount);
+      for (int t = 0; t < RawProcessor->imgdata.thumbs_list.thumbcount; t++)
+      {
+        if ((ret = RawProcessor->unpack_thumb_ex(t)) != LIBRAW_SUCCESS)
+          fprintf(stderr, "Cannot unpack_thumb #%d from %s: %s\n", t, av[i], libraw_strerror(ret));
+        if (LIBRAW_FATAL_ERROR(ret))
+          break; // skip to next file
+        snprintf(thumbfn, sizeof(thumbfn), "%s.thumb.%d.%s", av[i], t,
+                 T.tformat == LIBRAW_THUMBNAIL_JPEG ? "jpg" : "ppm");
+        if (verbose)
+          printf("Writing thumbnail file %s\n", thumbfn);
+        if (LIBRAW_SUCCESS != (ret = RawProcessor->dcraw_thumb_writer(thumbfn)))
+        {
+          fprintf(stderr, "Cannot write %s: %s\n", thumbfn, libraw_strerror(ret));
+          if (LIBRAW_FATAL_ERROR(ret))
+            break;
+        }
+      }
+      continue;
+    }
+    else if (output_thumbs)
     {
       if ((ret = RawProcessor->unpack_thumb()) != LIBRAW_SUCCESS)
       {
@@ -149,7 +178,6 @@ int main(int ac, char *av[])
         snprintf(thumbfn, sizeof(thumbfn), "%s.%s", av[i],
                  T.tformat == LIBRAW_THUMBNAIL_JPEG ? "thumb.jpg"
                                                     : "thumb.ppm");
-
         if (verbose)
           printf("Writing thumbnail file %s\n", thumbfn);
         if (LIBRAW_SUCCESS != (ret = RawProcessor->dcraw_thumb_writer(thumbfn)))
@@ -167,7 +195,7 @@ int main(int ac, char *av[])
 
     if (LIBRAW_SUCCESS != ret)
     {
-      fprintf(stderr, "Cannot do postpocessing on %s: %s\n", av[i],
+      fprintf(stderr, "Cannot do postprocessing on %s: %s\n", av[i],
               libraw_strerror(ret));
       if (LIBRAW_FATAL_ERROR(ret))
         continue;

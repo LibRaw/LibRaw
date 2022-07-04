@@ -44,6 +44,9 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   else if (load_raw == &LibRaw::vc5_dng_load_raw_placeholder)
   {
       d_info->decoder_name = "vc5_dng_load_raw_placeholder()";
+#ifndef USE_GPRSDK
+    d_info->decoder_flags = LIBRAW_DECODER_UNSUPPORTED_FORMAT;
+#endif
   }
   else if (load_raw == &LibRaw::canon_600_load_raw)
   {
@@ -66,12 +69,12 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "lossless_jpeg_load_raw()";
     d_info->decoder_flags =
-        LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED;
+        LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3;
   }
   else if (load_raw == &LibRaw::canon_sraw_load_raw)
   {
     d_info->decoder_name = "canon_sraw_load_raw()";
-    // d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
+    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED3;
   }
   else if (load_raw == &LibRaw::crxLoadRaw)
   {
@@ -81,31 +84,36 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   {
     d_info->decoder_name = "lossless_dng_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_HASCURVE |
-                            LIBRAW_DECODER_TRYRAWSPEED |
+                            LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3 |
                             LIBRAW_DECODER_ADOBECOPYPIXEL;
   }
   else if (load_raw == &LibRaw::packed_dng_load_raw)
   {
     d_info->decoder_name = "packed_dng_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_HASCURVE |
-                            LIBRAW_DECODER_TRYRAWSPEED |
+                            LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3 |
                             LIBRAW_DECODER_ADOBECOPYPIXEL;
   }
   else if (load_raw == &LibRaw::pentax_load_raw)
   {
     d_info->decoder_name = "pentax_load_raw()";
-    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
+    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3;
   }
   else if (load_raw == &LibRaw::nikon_load_raw)
   {
     d_info->decoder_name = "nikon_load_raw()";
     d_info->decoder_flags =
-        LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_HASCURVE;
+        LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_TRYRAWSPEED3;
   }
   else if (load_raw == &LibRaw::nikon_coolscan_load_raw)
   {
     d_info->decoder_name = "nikon_coolscan_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_FIXEDMAXC;
+  }
+  else if (load_raw == &LibRaw::nikon_he_load_raw_placeholder)
+  {
+    d_info->decoder_name = "nikon_he_load_raw_placeholder()";
+    d_info->decoder_flags = LIBRAW_DECODER_UNSUPPORTED_FORMAT;
   }
   else if (load_raw == &LibRaw::nikon_load_sraw)
   {
@@ -130,10 +138,16 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   else if (load_raw == &LibRaw::phase_one_load_raw_c)
   {
     d_info->decoder_name = "phase_one_load_raw_c()";
+    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED3; /* FIXME: need to make sure correction not applied*/
+  }
+  else if (load_raw == &LibRaw::phase_one_load_raw_s)
+  {
+    d_info->decoder_name = "phase_one_load_raw_s()";
   }
   else if (load_raw == &LibRaw::hasselblad_load_raw)
   {
     d_info->decoder_name = "hasselblad_load_raw()";
+    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED3; /* FIXME: need to make sure correction not applied*/
   }
   else if (load_raw == &LibRaw::leaf_hdr_load_raw)
   {
@@ -166,7 +180,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   else if (load_raw == &LibRaw::packed_load_raw)
   {
     d_info->decoder_name = "packed_load_raw()";
-    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
+    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3;
   }
   else if (load_raw == &LibRaw::broadcom_load_raw)
   {
@@ -190,11 +204,12 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   else if (load_raw == &LibRaw::panasonic_load_raw)
   {
     d_info->decoder_name = "panasonic_load_raw()";
-    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
+    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED;
   }
   else if (load_raw == &LibRaw::panasonicC6_load_raw)
   {
     d_info->decoder_name = "panasonicC6_load_raw()";
+    /* FIXME: No rawspeed3:  not sure it handles 12-bit data too */
   }
   else if (load_raw == &LibRaw::panasonicC7_load_raw)
   {
@@ -203,7 +218,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   else if (load_raw == &LibRaw::olympus_load_raw)
   {
     d_info->decoder_name = "olympus_load_raw()";
-    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
+    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3;;
   }
   else if (load_raw == &LibRaw::minolta_rd175_load_raw)
   {
@@ -283,13 +298,13 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   else if (load_raw == &LibRaw::sony_arw_load_raw)
   {
     d_info->decoder_name = "sony_arw_load_raw()";
-    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
+    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3;
   }
   else if (load_raw == &LibRaw::sony_arw2_load_raw)
   {
     d_info->decoder_name = "sony_arw2_load_raw()";
     d_info->decoder_flags = LIBRAW_DECODER_HASCURVE |
-                            LIBRAW_DECODER_TRYRAWSPEED |
+                            LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3 |
                             LIBRAW_DECODER_SONYARW2;
   }
   else if (load_raw == &LibRaw::sony_arq_load_raw)
@@ -300,7 +315,7 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
   else if (load_raw == &LibRaw::samsung_load_raw)
   {
     d_info->decoder_name = "samsung_load_raw()";
-    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED;
+    d_info->decoder_flags = LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3;
   }
   else if (load_raw == &LibRaw::samsung2_load_raw)
   {

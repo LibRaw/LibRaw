@@ -235,7 +235,7 @@ void LibRaw::PentaxLensInfo(unsigned long long id, unsigned len) // tag 0x0207
   return;
 }
 
-void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
+void LibRaw::parsePentaxMakernotes(int /*base*/, unsigned tag, unsigned type,
                                    unsigned len, unsigned dng_writer)
 {
 
@@ -518,8 +518,8 @@ void LibRaw::parsePentaxMakernotes(int base, unsigned tag, unsigned type,
   }
 }
 
-void LibRaw::parseRicohMakernotes(int base, unsigned tag, unsigned type,
-                                  unsigned len, unsigned dng_writer)
+void LibRaw::parseRicohMakernotes(int /*base*/, unsigned tag, unsigned type,
+                                  unsigned /*len*/, unsigned /*dng_writer */)
 {
   char buffer[17];
   if (tag == 0x0005)

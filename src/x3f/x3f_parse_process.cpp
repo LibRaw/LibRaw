@@ -278,14 +278,14 @@ void LibRaw::parse_x3f()
   }
   if (DE)
   {
-    x3f_directory_entry_header_t *DEH = &DE->header;
-    x3f_image_data_t *ID = &DEH->data_subsection.image_data;
-    imgdata.thumbnail.twidth = ID->columns;
-    imgdata.thumbnail.theight = ID->rows;
+    x3f_directory_entry_header_t *_DEH = &DE->header;
+    x3f_image_data_t *_ID = &_DEH->data_subsection.image_data;
+    imgdata.thumbnail.twidth = _ID->columns;
+    imgdata.thumbnail.theight = _ID->rows;
     imgdata.thumbnail.tcolors = 3;
     imgdata.thumbnail.tformat = format;
     libraw_internal_data.internal_data.toffset = DE->input.offset;
-    write_thumb = &LibRaw::x3f_thumb_loader;
+    libraw_internal_data.unpacker_data.thumb_format = LIBRAW_INTERNAL_THUMBNAIL_X3F;
   }
   DE = x3f_get_camf(x3f);
   if (DE && DE->input.size > 28)
@@ -340,7 +340,6 @@ void LibRaw::x3f_thumb_loader()
     if (imgdata.thumbnail.tformat == LIBRAW_THUMBNAIL_JPEG)
     {
       imgdata.thumbnail.thumb = (char *)malloc(ID->data_size);
-      merror(imgdata.thumbnail.thumb, "LibRaw::x3f_thumb_loader()");
       memmove(imgdata.thumbnail.thumb, ID->data, ID->data_size);
       imgdata.thumbnail.tlength = ID->data_size;
     }
@@ -348,7 +347,6 @@ void LibRaw::x3f_thumb_loader()
     {
       imgdata.thumbnail.tlength = ID->columns * ID->rows * 3;
       imgdata.thumbnail.thumb = (char *)malloc(ID->columns * ID->rows * 3);
-      merror(imgdata.thumbnail.thumb, "LibRaw::x3f_thumb_loader()");
       char *src0 = (char *)ID->data;
       for (int row = 0; row < (int)ID->rows; row++)
       {
@@ -532,21 +530,24 @@ void LibRaw::x3f_dpq_interpolate_af_sd(int xstart, int ystart, int xend,
         uint16_t *pixel0B = &row0[x * 3 + 3]; // right pixel
         uint16_t *pixel1B = &row1[x * 3 + 3]; // right pixel
         float sumG0 = 0, sumG1 = 0.f;
-        float cnt = 0.f;
+        float _cnt = 0.f;
         for (int xx = -scale; xx <= scale; xx += scale)
         {
           sumG0 += row_minus1[(x + xx) * 3 + 2];
           sumG1 += row_plus[(x + xx) * 3 + 2];
-          cnt += 1.f;
+          _cnt += 1.f;
           if (xx)
           {
             sumG0 += row0[(x + xx) * 3 + 2];
             sumG1 += row1[(x + xx) * 3 + 2];
-            cnt += 1.f;
+            _cnt += 1.f;
           }
         }
-        pixel0B[2] = sumG0 / cnt;
-        pixel1B[2] = sumG1 / cnt;
+        if (_cnt > 1.0)
+        {
+          pixel0B[2] = sumG0 / _cnt;
+          pixel1B[2] = sumG1 / _cnt;
+        }
       }
 
       //			uint16_t* pixel10 = &row1[x*3]; // Pixel below current

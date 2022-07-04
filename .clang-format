@@ -1,4 +1,4 @@
 BreakBeforeBraces: Allman
-ColumnLimit: 80
+ColumnLimit: 120
 SortIncludes: false
 TabWidth: 4

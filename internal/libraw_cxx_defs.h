@@ -111,6 +111,9 @@ CameraMetaDataLR *make_camera_metadata();
     case LIBRAW_EXCEPTION_BAD_CROP:                                            \
       recycle();                                                               \
       return LIBRAW_BAD_CROP;                                                  \
+    case LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT:                                  \
+      recycle();                                                               \
+      return LIBRAW_FILE_UNSUPPORTED;                                          \
     default:                                                                   \
       return LIBRAW_UNSPECIFIED_ERROR;                                         \
     }                                                                          \

@@ -55,7 +55,7 @@ void LibRaw::xtrans_interpolate(int passes)
           allhex[i][j][k][l] = 32700;
 
   cielab(0, 0);
-  ndir = 4 << (passes > 1);
+  ndir = 4 << int(passes > 1);
 
   int minv = 0, maxv = 0, minh = 0, maxh = 0;
   /* Map a green hexagon around each non-green pixel and vice versa:	*/
@@ -105,7 +105,7 @@ void LibRaw::xtrans_interpolate(int passes)
   {
       int col;
       ushort min, max;
-      for (col = 2, max = 0, min = ~0; col < width - 2; col++)
+      for (col = 2, max = 0u, min = 0xffffu; col < int(width) - 2; col++)
       {
           if (fcol(row, col) == 1 && (min = ~(max = 0)))
               continue;
@@ -172,7 +172,7 @@ void LibRaw::xtrans_interpolate(int passes)
 #endif
 
   size_t buffer_size = LIBRAW_AHD_TILE * LIBRAW_AHD_TILE * (ndir * 11 + 6);
-  char** buffers = malloc_omp_buffers(buffer_count, buffer_size, "xtrans_interpolate()");
+  char** buffers = malloc_omp_buffers(buffer_count, buffer_size);
 
 #if defined(LIBRAW_USE_OPENMP)
 # pragma omp parallel for schedule(dynamic) default(none) firstprivate(buffers, allhex, passes, sgrow, sgcol, ndir) shared(dir) 
@@ -373,14 +373,14 @@ void LibRaw::xtrans_interpolate(int passes)
                         if (tr > drv[d][row][col])
                             tr = drv[d][row][col];
                     tr *= 8;
-                    for (int d = 0; d < ndir; d++)
+                    for (int dd = 0; dd < ndir; dd++)
                         for (int v = -1; v <= 1; v++)
                             for (int h = -1; h <= 1; h++)
-                                if (drv[d][row + v][col + h] <= tr)
-                                    homo[d][row][col]++;
+                                if (drv[dd][row + v][col + h] <= tr)
+                                    homo[dd][row][col]++;
                 }
 
-            /* Average the most homogenous pixels for the final result:	*/
+            /* Average the most homogeneous pixels for the final result:	*/
             if (height - top < LIBRAW_AHD_TILE + 4)
                 mrow = height - top + 2;
             if (width - left < LIBRAW_AHD_TILE + 4)
@@ -408,10 +408,10 @@ void LibRaw::xtrans_interpolate(int passes)
 
                     int avg[4];
                     memset(avg, 0, sizeof avg);
-                    for (int d = 0; d < ndir; d++)
-                        if (hm[d] >= max)
+                    for (int dd = 0; dd < ndir; dd++)
+                        if (hm[dd] >= max)
                         {
-                            FORC3 avg[c] += rgb[d][row][col][c];
+                            FORC3 avg[c] += rgb[dd][row][col][c];
                             avg[3]++;
                         }
                     FORC3 image[(row + top) * width + col + left][c] = avg[c] / avg[3];

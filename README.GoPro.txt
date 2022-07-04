@@ -16,23 +16,32 @@ I. GPR SDK comes with (patched) Adobe DNG SDK source (v1.4 but outdated).
    This DNG SDK is *NOT* compatible with LibRaw since 0.20 due to
    internals change .
 
-II. So, you need to patch actual Adobe DNG SDK v1.4 (dated 2015), this version
+II. So, you need to patch latest Adobe DNG SDK v1.4 (dated 2015), this version
    is available from Adobe:
    http://download.adobe.com/pub/adobe/dng/dng_sdk_1_4.zip
+   or use Adobe DNG SDK v1.6   
   
   (most likely, this apply for v1.5 too, but not tested/checked):
 
-   a) You'll need to enable dng_ifd.fCompression value == 9 in 
+   a) For Adobe DNG SDK v1.4 you'll need to enable dng_ifd.fCompression value == 9 in 
       dng_ifd::IsValidCFA() call
-      Use provided patch: LibRaw/GoPro/dng-sdk-allow-VC5-validate.diff 
+      Use provided patch: LibRaw/GoPro/dng-sdk-1_4-allow-VC5-validate.diff 
       (it may not apply to any Adobe DNG SDK version, if so apply it by hands).
 
-   b) Newer (than supplied w/ GPR SDK) Adobe SDK versions changes 
+      This compression type is already handled (passed via validation)
+      in Adobe DNG SDK v1.6
+
+   b) Adobe DNG SDK v1.6 defines the ccVc5 constant in dng_tag_values.h
+      so GPR SDK's gpr_read_image.cpp will not compile due to constant redefinition
+      so use provided patch:   LibRaw/GoPro/dng-sdk-1_6-hide-ccVc5-definitiion.diff
+      to use Adobe's definitiion     
+
+   c) Newer (than supplied w/ GPR SDK) Adobe SDK versions changes 
      dng_read_image::ReadTile interface, please apply patches 
      LibRaw/GoPro/gpr_read_image.cpp.diff 
      and  LibRaw/GoPro/gpr_read_image.h.diff to your GPR SDK code
 
-   c) GPR SDK's gpr_sdk/private/gpr.cpp uses own (added) dng_host method 
+   d) GPR SDK's gpr_sdk/private/gpr.cpp uses own (added) dng_host method 
       GetGPMFPayload so it will not compile with Adobes (not patched) 
       dng_host.h
       LibRaw does not use high-level interface provided by gpr.cpp, so

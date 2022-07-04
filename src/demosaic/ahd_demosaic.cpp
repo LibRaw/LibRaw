@@ -303,7 +303,7 @@ void LibRaw::ahd_interpolate()
 #endif
 
     size_t buffer_size = 26 * LIBRAW_AHD_TILE * LIBRAW_AHD_TILE; /* 1664 kB */
-    char** buffers = malloc_omp_buffers(buffer_count, buffer_size, "ahd_interpolate()");
+    char** buffers = malloc_omp_buffers(buffer_count, buffer_size);
 
 #ifdef LIBRAW_USE_OPENMP
 #pragma omp parallel for schedule(dynamic) default(none) shared(terminate_flag) firstprivate(buffers)

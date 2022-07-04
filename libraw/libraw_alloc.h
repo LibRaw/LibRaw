@@ -84,31 +84,62 @@ private:
   unsigned extra_bytes;
   void mem_ptr(void *ptr)
   {
-    if (ptr)
-    {
-      for (int i = 0; i < LIBRAW_MSIZE - 1; i++)
-        if (!mems[i])
-        {
-          mems[i] = ptr;
-          return;
-        }
-#ifdef LIBRAW_MEMPOOL_CHECK
-      /* remember ptr in last mems item to be free'ed at cleanup */
-      if (!mems[LIBRAW_MSIZE - 1])
-        mems[LIBRAW_MSIZE - 1] = ptr;
-      throw LIBRAW_EXCEPTION_MEMPOOL;
+#if defined(LIBRAW_USE_OPENMP)
+      bool ok = false; /* do not return from critical section */
 #endif
-    }
+
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp critical
+      {
+#endif
+          if (ptr)
+          {
+              for (int i = 0; i < LIBRAW_MSIZE - 1; i++)
+                  if (!mems[i])
+                  {
+                      mems[i] = ptr;
+#if defined(LIBRAW_USE_OPENMP)
+		      ok = true;
+		      break;
+#else
+                      return;
+#endif
+                  }
+#ifdef LIBRAW_MEMPOOL_CHECK
+#if !defined(LIBRAW_USE_OPENMP)
+              /* remember ptr in last mems item to be free'ed at cleanup */
+              if (!mems[LIBRAW_MSIZE - 1])
+                  mems[LIBRAW_MSIZE - 1] = ptr;
+              throw LIBRAW_EXCEPTION_MEMPOOL;
+#endif
+#endif
+          }
+#if defined(LIBRAW_USE_OPENMP)
+      }
+      if(!ok)
+      {
+          if (!mems[LIBRAW_MSIZE - 1])
+              mems[LIBRAW_MSIZE - 1] = ptr;
+          throw LIBRAW_EXCEPTION_MEMPOOL;
+      }
+#endif
   }
   void forget_ptr(void *ptr)
   {
-    if (ptr)
+#if defined(LIBRAW_USE_OPENMP)
+#pragma omp critical
+    {
+#endif
+     if (ptr)
       for (int i = 0; i < LIBRAW_MSIZE; i++)
         if (mems[i] == ptr)
         {
           mems[i] = NULL;
           break;
         }
+#if defined(LIBRAW_USE_OPENMP)
+    }
+#endif
   }
 };
 

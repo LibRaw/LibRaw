@@ -145,11 +145,17 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 
     { LIBRAW_CAMERAMAKER_Canon, "EOS RP", 0, 0,
       { 8608,-2097,-1178,-5425,13265,2383,-1149,2238,5680 } },
+    { LIBRAW_CAMERAMAKER_Canon, "EOS R3", 0, 0,
+      { 9423,-2839,-1195,-4532,12377,2415,-483,1374,5276 } },
     { LIBRAW_CAMERAMAKER_Canon, "EOS R5", 0, 0,
       { 9766,-2953,-1254,-4276,12116,2433,-437,1336,5131 } },
     { LIBRAW_CAMERAMAKER_Canon, "EOS R6", 0, 0,
       { 8293,-1611,-1132,-4759,12711,2275,-1013,2415,5509 } },
-    { LIBRAW_CAMERAMAKER_Canon, "EOS R", 0, 0,
+	{ LIBRAW_CAMERAMAKER_Canon, "EOS R7", 0, 0,
+	  { 10424, -3138, -1300, -4221, 11938,  2584,  -547,  1658,  6183 } },
+	{ LIBRAW_CAMERAMAKER_Canon, "EOS R10", 0, 0,
+	  {  9269, -2012, -1107, -3990, 11762,  2527,  -569,  2093,  4913 } },
+	{ LIBRAW_CAMERAMAKER_Canon, "EOS R", 0, 0,
       { 8293,-1789,-1094,-5025,12925,2327,-1199,2769,6108 } }, // v.2
 
     { LIBRAW_CAMERAMAKER_Canon, "EOS M6 Mark II", 0, 0,
@@ -504,6 +510,8 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
       { 13426, -6334, -1177, -4244, 12136, 2371, -580, 1303, 5980 } },
     { LIBRAW_CAMERAMAKER_Fujifilm, "X-H1", 0, 0,
       { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
+	{ LIBRAW_CAMERAMAKER_Fujifilm, "X-H2S", 0, 0,
+      { 12836, -5909, -1032, -3087, 11132,  2236,   -35,   872,  5330 } },
     { LIBRAW_CAMERAMAKER_Fujifilm, "X-M1", 0, 0,
       { 10413,-3996,-993,-3721,11640,2361,-733,1540,6011 } },
     { LIBRAW_CAMERAMAKER_Fujifilm, "X-S10", 0, 0,
@@ -519,7 +527,7 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
       { 15055,-7391,-1274,-4062,12071,2238,-610,1217,6147 } },
     { LIBRAW_CAMERAMAKER_Fujifilm, "X-T2", 0, 0,  // same CMs: X-T2, X-T20
       { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
-    { LIBRAW_CAMERAMAKER_Fujifilm, "X-T3", 0, 0,   // same CMs: X-T3, X-T30
+    { LIBRAW_CAMERAMAKER_Fujifilm, "X-T3", 0, 0,   // same CMs: X-T3, X-T30, "X-T30 II"
       { 13426,-6334,-1177,-4244,12136,2371,580,1303,5980 } }, // v.2
     { LIBRAW_CAMERAMAKER_Fujifilm, "X-T4", 0, 0,
       { 13426,-6334,-1177,-4244,12136,2371,580,1303,5980 } },
@@ -994,6 +1002,8 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
       { 9943,-3269,-839,-5323,13269,2259,-1198,2083,7557 } },  // 'Z 6'(v.2), 'Z 6_2'
     { LIBRAW_CAMERAMAKER_Nikon, "Z 7", 0, 0,
       { 13705,-6004,-1400,-5464,13568,2062,-940,1706,7618 } }, // 'Z 7'(v.2), 'Z 7_2'
+    { LIBRAW_CAMERAMAKER_Nikon, "Z 9", 0, 0,
+      { 13389,-6049,-1441,-4544,12757,1969,229,498,7390 } },
     { LIBRAW_CAMERAMAKER_Nikon, "Z fc", 0, 0,
       { 11640,-4829,-1079,-5107,13006,2325,-972,1711,7380 } },
 
@@ -1603,10 +1613,9 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
       { 13076,-5686,-1481,-4027,12851,1251,-167,725,4937 } },
 
     { LIBRAW_CAMERAMAKER_Sony, "ZV-1", -800, 0,
-      {8280,-2987,-703,-3531,11645,2133,-550,1542,5312 } },
-
+      { 8280,-2987,-703,-3531,11645,2133,-550,1542,5312 } },
     { LIBRAW_CAMERAMAKER_Sony, "ZV-E10", 0, 0,
-      { 7657,-2847,-607,-4083,11966,2389,-684,1418,5844 } }, // a la ILCE-6100
+      { 6355,-2067,-490,-3653,11542,2400,-406,1258,5506 } },
 
     { LIBRAW_CAMERAMAKER_Sony, "DSC-RX100M7", -800, 0,
       {10315, -4390, -937, -4859, 12734, 2365, -734, 1537, 5997 } },
@@ -1685,6 +1694,8 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
     { LIBRAW_CAMERAMAKER_Sony, "ILCE-7C", 0, 0,
       { 7374,-2389,-551,-5435,13162,2519,-1006,1795,6552 } },
 
+    { LIBRAW_CAMERAMAKER_Sony, "ILCE-7M4", 0, 0,
+      { 7460,-2365,-588,-5687,13442,2474,-624,1156,6584 } },
     { LIBRAW_CAMERAMAKER_Sony, "ILCE-7M3", 0, 0,
       { 7374,-2389,-551,-5435,13162,2519,-1006,1795,6552 } },
     { LIBRAW_CAMERAMAKER_Sony, "ILCE-7", 0, 0, // same CMs: ILCE-7, ILCE-7M2
@@ -1813,16 +1824,16 @@ void LibRaw::simple_coeff(int index)
 {
   static const float table[][12] = {
       /* index 0 -- all Foveon cameras */
-      {1.4032, -0.2231, -0.1016, -0.5263, 1.4816, 0.017, -0.0112, 0.0183,
-       0.9113},
+      {1.4032f, -0.2231f, -0.1016f, -0.5263f, 1.4816f, 0.017f, -0.0112f, 0.0183f,
+       0.9113f},
       /* index 1 -- Kodak DC20 and DC25 */
-      {2.25, 0.75, -1.75, -0.25, -0.25, 0.75, 0.75, -0.25, -0.25, -1.75, 0.75,
-       2.25},
+      {2.25f, 0.75f, -1.75f, -0.25f, -0.25f, 0.75f, 0.75f, -0.25f, -0.25f, -1.75f, 0.75f,
+       2.25f},
       /* index 2 -- Logitech Fotoman Pixtura */
-      {1.893, -0.418, -0.476, -0.495, 1.773, -0.278, -1.017, -0.655, 2.672},
+      {1.893f, -0.418f, -0.476f, -0.495f, 1.773f, -0.278f, -1.017f, -0.655f, 2.672f},
       /* index 3 -- Nikon E880, E900, and E990 */
-      {-1.936280, 1.800443, -1.448486, 2.584324, 1.405365, -0.524955, -0.289090,
-       0.408680, -1.204965, 1.082304, 2.941367, -1.818705}};
+      {-1.936280f, 1.800443f, -1.448486f, 2.584324f, 1.405365f, -0.524955f, -0.289090f,
+       0.408680f, -1.204965f, 1.082304f, 2.941367f, -1.818705f}};
   int i, c;
 
   for (raw_color = i = 0; i < 3; i++)

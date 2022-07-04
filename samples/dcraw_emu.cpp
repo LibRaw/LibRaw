@@ -113,6 +113,9 @@ void usage(const char *prog)
          "-aexpo <e p> exposure correction\n"
          "-apentax4shot enables merge of 4-shot pentax files\n"
          "-apentax4shotorder 3102 sets pentax 4-shot alignment order\n"
+#ifdef USE_RAWSPEED_BITS
+         "-arsbits V Set use_rawspeed to V\n"
+#endif
          "-mmap     Use memory mmaped buffer instead of plain FILE I/O\n"
          "-mem	   Use memory buffer instead of FILE I/O\n"
          "-disars   Do not use RawSpeed library\n"
@@ -390,6 +393,12 @@ int main(int argc, char *argv[])
         OUT.exp_shift = (float)atof(argv[arg++]);
         OUT.exp_preser = (float)atof(argv[arg++]);
       }
+#ifdef USE_RAWSPEED_BITS
+      else if (!strcmp(optstr, "-arsbits"))
+      {
+	OUTR.use_rawspeed = atoi(argv[arg++]);
+      }
+#endif
       else if (!strcmp(optstr, "-apentax4shot"))
       {
         OUTR.options |= LIBRAW_RAWOPTIONS_PENTAX_PS_ALLFRAMES;
@@ -588,7 +597,7 @@ int main(int argc, char *argv[])
     timerstart();
     if (LIBRAW_SUCCESS != (ret = RawProcessor.dcraw_process()))
     {
-      fprintf(stderr, "Cannot do postpocessing on %s: %s\n", argv[arg],
+      fprintf(stderr, "Cannot do postprocessing on %s: %s\n", argv[arg],
               libraw_strerror(ret));
       if (LIBRAW_FATAL_ERROR(ret))
         continue;

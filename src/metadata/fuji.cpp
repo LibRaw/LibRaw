@@ -96,6 +96,9 @@ int LibRaw::guess_RAFDataGeneration (uchar *RAFData_start) // returns offset to 
     imFuji.RAFDataVersion = b23;
   }
 
+// printf ("RAFDataVersion: 0x%04x, RAFDataGeneration: %d\n",
+// imFuji.RAFDataVersion, imFuji.RAFDataGeneration);
+
   return offsetWH_inRAFData;
 }
 
@@ -349,6 +352,7 @@ void LibRaw::parseAdobeRAFMakernote()
               (imFuji.RAFDataVersion == 0x0262) || // X-T4
               (imFuji.RAFDataVersion == 0x0264) || // X-S10
               (imFuji.RAFDataVersion == 0x0265) || // X-E4
+              (imFuji.RAFDataVersion == 0x0266) || // X-T30 II
                 !strcmp(model, "X-Pro3")     ||
                 !strcmp(model, "GFX 100S")   ||
                 !strcmp(model, "GFX100S")    ||
@@ -357,6 +361,7 @@ void LibRaw::parseAdobeRAFMakernote()
                 !strcmp(model, "X100V")      ||
                 !strcmp(model, "X-T4")       ||
                 !strcmp(model, "X-E4")       ||
+                !strcmp(model, "X-T30 II")   ||
                 !strcmp(model, "X-S10"))
             is34 = 1;
 
@@ -467,7 +472,8 @@ void LibRaw::parseAdobeRAFMakernote()
           {
             wb_section_offset = 0x21de;
           }
-          else if (imFuji.RAFDataVersion == 0x0265) // X-E4
+          else if ((imFuji.RAFDataVersion == 0x0265)  || // X-E4
+                   (imFuji.RAFDataVersion == 0x0266))    // X-T30 II
           {
             wb_section_offset = 0x21cc;
           }
@@ -601,7 +607,8 @@ void LibRaw::parseAdobeRAFMakernote()
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x21c8))
               wb_section_offset = 0x21c8;
           }
-          else if (!strcmp(model, "X-E4"))
+          else if ((!strcmp(model, "X-E4"))       ||
+                   (!strcmp(model, "X-T30 II")))
           {
             if (isWB(PrivateMknBuf + posPrivateMknBuf + 0x21cc)) 
               wb_section_offset = 0x21cc;
@@ -777,7 +784,7 @@ void LibRaw::parseAdobeRAFMakernote()
 }
 
 void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
-                                 unsigned dng_writer)
+                                 unsigned /*dng_writer*/)
 {
   if (tag == 0x0010)
   {

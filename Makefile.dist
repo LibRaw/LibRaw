@@ -13,6 +13,10 @@ CXX=g++
 #LDADD+=-L../RawSpeed/RawSpeed -lrawspeed -L/usr/local/lib -ljpeg -lxml2
 #RAWSPEED_DATA=../RawSpeed/data/cameras.xml
 
+# RawSpeed3 Support
+#CFLAGS+=-DUSE_RAWSPEED3 -DUSE_RAWSPEED_BITS -I./RawSpeed3/
+#LDADD+=-L../RawSpeed-v3/release -lrawspeed3 -L/usr/local/lib -ljpeg -lz
+
 # DNG SDK Support
 # CFLAGS+=-DUSE_DNGSDK -I../dng_sdk/source
 # LDADDD+=-L../dng_sdk/release -ldng -lXMPCore -ljpeg -lz

@@ -101,6 +101,8 @@ void LibRaw::GetNormalizedModel()
       { CanonID_EOS_90D,           "EOS 90D"},
       { CanonID_EOS_R3,            "EOS R3"},
       { CanonID_EOS_R6,            "EOS R6"},
+      { CanonID_EOS_R6,            "EOS R7"},
+      { CanonID_EOS_R10,           "EOS R10"},
       { CanonID_EOS_M50_Mark_II,   "EOS M50 Mark II"}, // M50m2, Kiss M2
     },
 #if 0
@@ -367,6 +369,7 @@ void LibRaw::GetNormalizedModel()
       { SonyID_ILME_FX3,       "ILME-FX3"},
       { SonyID_ILCE_7RM3A,     "ILCE-7RM3A"},
       { SonyID_ILCE_7RM4A,     "ILCE-7RM4A"},
+      { SonyID_ILCE_7M4,       "ILCE-7M4"},
     };
 
   static const char *orig;
@@ -949,6 +952,11 @@ void LibRaw::GetNormalizedModel()
         break;
       }
     }
+	if (strstr(imPhaseOne.FirmwareString, "Achromatic"))
+	{
+		colors = 1;
+		filters = 0;
+	}
   }
   else if (makeIs(LIBRAW_CAMERAMAKER_Samsung))
   {
@@ -1418,7 +1426,7 @@ void LibRaw::GetNormalizedModel()
     }
 }
 
-void LibRaw::SetStandardIlluminants (unsigned makerIdx, const char* normModel) {
+void LibRaw::SetStandardIlluminants (unsigned makerIdx, const char* /*normModel*/) {
   int i = -1;
   int c;
   if (!icWBC[LIBRAW_WBI_Ill_A][0] &&

@@ -727,7 +727,7 @@ void AAHD::make_ahd_rb_last(int i)
         // строчному цвет
         c ^= d << 1;
       }
-      int bh, bk;
+      int bh = 0, bk = 0;
       int bgd = 0;
       for (int k = 0; k < 3; ++k)
         for (int h = 0; h < 3; ++h)

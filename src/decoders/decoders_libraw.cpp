@@ -1,6 +1,9 @@
 /* -*- C++ -*-
- * Copyright 2019-2021 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2022 LibRaw LLC (info@libraw.org)
  *
+ * PhaseOne IIQ-Sv2 decoder is inspired by code provided by Daniel Vogelbacher <daniel@chaospixel.com>
+ *
+
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
 
@@ -13,6 +16,8 @@
  */
 
 #include "../../internal/libraw_cxx_defs.h"
+#include <vector>
+#include <algorithm> // for std::sort
 
 void LibRaw::sony_arq_load_raw()
 {
@@ -190,7 +195,6 @@ void LibRaw::nikon_14bit_load_raw()
       16; // 14512; // S.raw_width * 7 / 4;
   const unsigned pitch = S.raw_pitch ? S.raw_pitch / 2 : S.raw_width;
   unsigned char *buf = (unsigned char *)malloc(linelen);
-  merror(buf, "nikon_14bit_load_raw()");
   for (int row = 0; row < S.raw_height; row++)
   {
     unsigned bytesread =
@@ -210,7 +214,6 @@ void LibRaw::fuji_14bit_load_raw()
   const unsigned linelen = S.raw_width * 7 / 4;
   const unsigned pitch = S.raw_pitch ? S.raw_pitch / 2 : S.raw_width;
   unsigned char *buf = (unsigned char *)malloc(linelen);
-  merror(buf, "fuji_14bit_load_raw()");
 
   for (int row = 0; row < S.raw_height; row++)
   {
@@ -381,8 +384,6 @@ void pana_cs6_page_decoder::read_page12()
   lastoffset += 16;
 }
 
-
-
 void LibRaw::panasonicC6_load_raw()
 {
   const int rowstep = 16;
@@ -401,7 +402,6 @@ void LibRaw::panasonicC6_load_raw()
   }
   catch (...)
   {
-    merror(NULL, "panasonicC6_load_raw()");
     throw LIBRAW_EXCEPTION_ALLOC;
   }
 
@@ -476,7 +476,6 @@ void LibRaw::panasonicC7_load_raw()
   int pixperblock = libraw_internal_data.unpacker_data.pana_bpp == 14 ? 9 : 10;
   int rowbytes = imgdata.sizes.raw_width / pixperblock * 16;
   unsigned char *iobuf = (unsigned char *)malloc(rowbytes * rowstep);
-  merror(iobuf, "panasonicC7_load_raw()");
   for (int row = 0; row < imgdata.sizes.raw_height - rowstep + 1;
        row += rowstep)
   {
@@ -656,4 +655,207 @@ void LibRaw::nikon_load_sraw()
     }
   }
   C.maximum = 16383;
+}
+
+/*
+ Each row is decoded independently. Each row starts with a 16 bit prefix.
+ The hi byte is zero, the lo byte (first 3 bits) indicates a bit_base.
+ Other bits remain unused.
+
+ |0000 0000|0000 0XXX| => XXX is bit_base
+
+ After the prefix the pixel data starts. Pixels are grouped into clusters
+ forming 8 output pixel. Each cluster starts with a variable length of
+ bits, indicating decompression flags.
+
+
+*/
+
+#undef MIN
+#undef MAX
+#undef LIM
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define LIM(x, min, max) MAX(min, MIN(x, max))
+
+struct iiq_bitstream_t
+{
+	uint64_t curr;
+	uint32_t *input;
+	uint8_t used;
+	iiq_bitstream_t(uint32_t *img_input): curr(0),input(img_input),used(0){}
+
+	void fill()
+    {
+      if (used <= 32)
+      {
+        uint64_t bitpump_next = *input++;
+        curr = (curr << 32) | bitpump_next;
+        used += 32;
+      }
+    }
+    uint64_t peek(uint8_t len)
+    {
+      if (len >= used)
+        fill();
+
+	  uint64_t res = curr >> (used - len);
+      return res & ((1 << (uint8_t)len) - 1);
+    }
+
+    void consume(uint8_t len)
+    {
+      peek(len); // fill buffer if needed
+      used -= len;
+    }
+
+    uint64_t get(char len)
+    {
+      uint64_t val = peek(len);
+      consume(len);
+      return val;
+    }
+
+};
+
+void decode_S_type(int32_t out_width, uint32_t *img_input, ushort *outbuf /*, int bit_depth*/)
+{
+#if 0
+	if (((bit_depth - 12) & 0xFFFFFFFD) != 0)
+		return 0;
+#endif
+	iiq_bitstream_t stream(img_input);
+
+	const int pix_corr_shift = 2; // 16 - bit_depth;
+	unsigned int bit_check[2] = { 0, 0 };
+
+	const uint8_t used_corr[8] = {
+        3, 3, 3, 3, 1, 1, 1, 1,
+    };
+
+	const uint8_t extra_bits[8] = {
+        1, 2, 3, 4, 0, 0, 0, 0,
+    };
+
+	const uint8_t bit_indicator[8 * 4] = {
+        9, 8, 0, 7, 6, 6, 5, 5, 1, 1, 1, 1, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2,
+    };
+
+	const uint8_t skip_bits[8 * 4] = {5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3,
+                                      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+
+	int block_count = ((out_width - 8) >> 3) + 1;
+	int block_total_bytes = 8 * block_count;
+
+	int32_t prev_pix_value[2] = { 0, 0 };
+
+	uint8_t init_bits = stream.get(16) & 7;
+
+	if (out_width - 7 > 0)
+	{
+      uint8_t pix_sub_init = 17 - init_bits;
+
+      for (int blk_id = 0; blk_id < block_count; ++blk_id)
+      {
+        int8_t idx_even = stream.peek(7);
+        stream.consume(2);
+
+        if ((unsigned int)idx_even >= 32)
+          bit_check[0] = ((unsigned int)idx_even >> 5) + bit_check[0] - 2;
+        else
+        {
+          bit_check[0] = bit_indicator[idx_even];
+          stream.consume(skip_bits[idx_even]);
+        }
+
+        int8_t idx_odd = stream.peek(7);
+        stream.consume(2);
+
+        if ((unsigned int)idx_odd >= 32)
+          bit_check[1] = ((unsigned int)idx_odd >> 5) + bit_check[1] - 2;
+        else
+        {
+          bit_check[1] = bit_indicator[idx_odd];
+          stream.consume(skip_bits[idx_odd]);
+        }
+
+        uint8_t bidx = stream.peek(3);
+        stream.consume(used_corr[bidx]);
+
+        uint8_t take_bits = init_bits + extra_bits[bidx]; // 11 or less
+
+        uint32_t bp_shift[2] = {bit_check[0] - extra_bits[bidx], bit_check[1] - extra_bits[bidx]};
+
+		int pix_sub[2] = {0xFFFF >> (pix_sub_init - bit_check[0]), 0xFFFF >> (pix_sub_init - bit_check[1])};
+
+	    for (int i = 0; i < 8; i++) // MAIN LOOP for pixel decoding
+        {
+          int32_t value = 0;
+          if (bit_check[i & 1] == 9)
+            value = stream.get(14);
+          else
+            value = prev_pix_value[i & 1] + ((uint32_t)stream.get(take_bits) << bp_shift[i & 1]) - pix_sub[i & 1];
+
+		  outbuf[i] = LIM(value << pix_corr_shift, 0, 0xffff);
+          prev_pix_value[i & 1] = value;
+        }
+          outbuf += 8; // always produce 8 pixels from this cluster
+      }
+	} // if width > 7                                            // End main if
+
+	// Final block
+	// maybe fill/unpack extra bytes if width % 8 <> 0?
+	if (block_total_bytes < out_width)
+	{
+		do
+		{
+			stream.fill();
+			uint32_t pix_value = stream.get(14);
+			++block_total_bytes;
+			*outbuf++ = pix_value << pix_corr_shift;
+		} while (block_total_bytes < out_width);
+	}
+}
+
+struct p1_row_info_t
+{
+	unsigned row;
+	INT64 offset;
+	p1_row_info_t(): row(0),offset(0){}
+	p1_row_info_t(const p1_row_info_t& q): row(q.row),offset(q.offset){}
+	bool operator < (const p1_row_info_t & rhs) const { return offset < rhs.offset; }
+};
+
+void LibRaw::phase_one_load_raw_s()
+{
+	if(!libraw_internal_data.unpacker_data.strip_offset || !imgdata.rawdata.raw_image || !libraw_internal_data.unpacker_data.data_offset)
+		throw LIBRAW_EXCEPTION_IO_CORRUPT;
+	std::vector<p1_row_info_t> stripes(imgdata.sizes.raw_height+1);
+	libraw_internal_data.internal_data.input->seek(libraw_internal_data.unpacker_data.strip_offset, SEEK_SET);
+	for (unsigned row = 0; row < imgdata.sizes.raw_height; row++)
+	{
+		stripes[row].row = row;
+		stripes[row].offset = INT64(get4()) + libraw_internal_data.unpacker_data.data_offset;
+	}
+	stripes[imgdata.sizes.raw_height].row = imgdata.sizes.raw_height;
+	stripes[imgdata.sizes.raw_height].offset = libraw_internal_data.unpacker_data.data_offset + INT64(libraw_internal_data.unpacker_data.data_size);
+	std::sort(stripes.begin(), stripes.end());
+	INT64 maxsz = imgdata.sizes.raw_width * 3 + 2; // theor max: 17 bytes per 8 pix + row header
+	std::vector<uint8_t> datavec(maxsz);
+
+	for (unsigned row = 0; row < imgdata.sizes.raw_height; row++)
+	{
+		if (stripes[row].row >= imgdata.sizes.raw_height) continue; 
+		ushort *datap = imgdata.rawdata.raw_image + stripes[row].row * imgdata.sizes.raw_width;
+		libraw_internal_data.internal_data.input->seek(stripes[row].offset, SEEK_SET);
+		INT64 readsz = stripes[row + 1].offset - stripes[row].offset;
+		if (readsz > maxsz)
+			throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+		if(libraw_internal_data.internal_data.input->read(datavec.data(), 1, readsz) != readsz)
+			derror(); // TODO: check read state
+
+		decode_S_type(imgdata.sizes.raw_width, (uint32_t *)datavec.data(), datap /*, 14 */);
+	}
 }

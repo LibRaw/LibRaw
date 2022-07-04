@@ -1,55 +1,284 @@
-2021-10-22  Alex Tutubalin <lexa@lexa.ru>
-  
-   == LibRaw snapshot 202110 ==
-   * Camera Format support:
-    - Sony Lossless compressed support
-    - Panasonic v6/12 bit
+2022-07-01  Alex Tutubalin <lexa@lexa.ru>
+
+ LibRaw 0.21-Beta1
+
+ == Camera format support ==
+ * Phase One/Leaf IIQ-S v2 support
+ * Canon CR3 filmrolls
+ * Canon CRM (movie) files
+ * Tiled bit-packed (and 16-bit unpacked) DNGs
+ * (non-standard) Deflate-compressed integer DNG files are allowed
+
+== Camera support ==
+
+ * Canon EOS R3, R7 and R10
+ * Fujifilm X-H2S, X-T30 II
+ * OM System OM-1
+ * Leica M11
+ * Sony A7-IV (ILCE-7M4)
+ * DJI Mavic 3
+ * Nikon Z9: standard compression formats only
+
+ == Multiple (resultion) thumbnails support ==
  
-   * Camera support:
-    DJI Mavic Air 2S
-    Fujifilm GFX 50S II;  GFX 100S, X-E4
-    GoPro HERO9, HERO10 (if compiled w/ USE_GPR_SDK)
-    Nikon Z fc
-    Panasonic GH5 Mark II
-    Pentax K3 Mark III
-    Olympus E-P7
-    Ricoh GR IIIx
-    Sony A1, A7R-IIIA (ILCE-7RM3A), A7R-IVA (ILCE-7RM4A), ZV-E10
-    Canon EOS M50 Mark II was supported but not listed in camera list
+ * New imgdata.thumbs_list data item with data fields:
 
-    Multiple phones tested and added to cameralist.cpp
+   int thumbcount: thumbnail count  
+   libraw_thumbnail_item_t thumblist[LIBRAW_THUMBNAIL_MAXCOUNT]: list  of thumbnails
 
-   * Support for RaspberryPi HQ camera (if compiled w/  USE_6BY9RPI)
+   libraw_thumbnail_item_t fields:
 
-   * Improved support for RPi V1/V2 cameras:
-     - white balance data extraction
-     - color matrix extracted to imgdata.color.cmatrix to use with
-       use_camera_matrix.
-     - full-size thumbnail/preview support for JPEG+RAW files (raspistill -r)
+     enum LibRaw_internal_thumbnail_formats tformat: internal thumbnail format
+        (this is not PPM/JPEG, but internal type related to thumbnail reading/unpacking method)
 
-  == API-ABI changes ==
+     ushort twidth, theight: thumbnail image size.
 
-  * (INCOMPATIBILITY WITH OLDER VERSIONS!!!) 
-    imgdata.params.shot_select moved to imgdata.rawparams.shot_select
-     (because this is decode-time option, not postprocessing option)
+     ushort tflip: image rotation (see notes below)
+    
+     unsigned tlength: on-disk data size (not uncompressed for compressed formats)
+     
+     unsigned tmisc: bit depth and channel count:  (color << 5) | bitsperpixel
+ 
+     INT64 toffset: Thumbnail data offset in file 
 
-  * libraw_open_bayer(...) added to C-API
+  Notes:
+    -  Only TIFF-based and CR3 files are parsed for thumbnail list, other formats will have
+       thumbcount = 1 (or 0 if no thumbnail found in file).
 
-  * imgdata.makernotes.canon: separate SensorLeftBorder,SensorTopBorder....
+    -  Thumbnail image size may be unknown (not recorded in metadata), in this case twidth and theight are zero.
+       Usually small(er) thumbnails will always have twidth/theight filled, while largest one may have these fields set to zero.
+
+    -  Thumbnail rotation (tflip) is filled only for TIFF-based RAWs (if Orientation tag is not present in IFD, default zero value is used)
+       For non-tiff images, tflip is initialized to 0xffff (not known...)
+
+    - There is no code to select thumbnail based on some criteria (e.g. minimal resolution), it is left to user to implement such a criteria, if needed
+      (see unpack_thumb_ex() call below)
+
+    - If you want to get largest possible thumbnail: just use old unpack_thumb() call to get it.
+
+  * new API call:  LibRaw::unpack_thumb_ex(int i):
+    Unpacks i-th thumbnail if it exists into imgdata.thumbnail structure
+    i should be non-zero and less then imgdata.thumbs_list.thumbcount.  
+     
+  * samples/simple_dcraw.cpp: new -E command line switch to extract all thumbnails from input file(s)
+
+ == (Experimental) RawSpeed "version 3" (develop branch) support. ==
+
+   Build with -DUSE_RAWSPEED3, see details in RawSpeed3/README.md
+
+   LibRaw::capabilities will set bit LIBRAW_CAPS_RAWSPEED3 if compiled w/
+   RawSpeed-v3 support
+
+   If file was processed (or tried to process) via RawSpeed-v3, these bits
+   are rised in imgdata.process_warnings:
+    LIBRAW_WARN_RAWSPEED3_PROCESSED - processed via RawSpeed v3
+    LIBRAW_WARN_RAWSPEED3_PROBLEM - not processed (due to exception in RawSpeed library)
+    LIBRAW_WARN_RAWSPEED3_UNSUPPORTED - unsupported file
+    LIBRAW_WARN_RAWSPEED3_NOTLISTED - file not listed in cameras.xml data
+
+  RawSpeed-v3 support is controlled via libraw_decoder_info.t->flags 
+  (LIBRAW_DECODER_TRYRAWSPEED3 bit).
+  The bit is set for:
+    - lossless jpeg decoder
+    - Canon sRAW decoder
+    - lossless compressed and packed-compressed DNG decoders
+    - Pentax decoder
+    - Nikon (compressed) decoder
+    - Phase One Compressed and Hasselblad/Compressed decoders
+    - bitpacked decoder
+    - Panasonic (old 12-bit compression) decoder
+    - Olympus decoder
+    - Sony ARW (v1 and v2) decoders
+    - Samsung (version 1) decoder
+
+ * (Experimental) Fine control of RawSpeed version selection/use.
+   To enable, build LibRaw with -DUSE_RAWSPEED_BITS
+   LibRaw::capabilities will set bit LIBRAW_CAPS_RAWSPEED_BITS if compiled
+   with this flag.
+   If enabled: 
+     imgdata.rawparams.use_rawspeed becomes bit-field (instead of 0/1 off/on) 
+     with bits:
+        LIBRAW_RAWSPEEDV1_USE - use RawSpeed Version 1 (if compiled  with)
+        LIBRAW_RAWSPEEDV1_FAILONUNKNOWN - do not process unknown files 
+             (not listed in RawSpeed v1 camera definitions file)
+        LIBRAW_RAWSPEEDV1_IGNOREERRORS - ignore mirror decoding errors (out of range data,etc)
+
+        LIBRAW_RAWSPEEDV3_USE - Use RawSpeed Version 3 (if compiled with)
+        LIBRAW_RAWSPEEDV3_FAILONUNKNOWN - do not process unknown files
+        LIBRAW_RAWSPEEDV3_IGNOREERRORS - ignore minor decoding errors
+ 
+ == Misc changes/improvements ==
+ * New compile time define LIBRAW_OWN_SWAB
+   to use on platforms without swab() in C/C++ runtime
+
+ * New imgdata.rawparams.options bit: LIBRAW_RAWOPTIONS_CANON_IGNORE_MAKERNOTES_ROTATION
+   If set: image orientation is set based on TIFF/IFD0:Orientation tag,
+   makernotes orientation data is ignored
+
+ * Nikon makernotes: read NEFCompression tag for HE/HE* files
+
+ * Nikon orientation tag: more fixed offsets for known cameras
+
+ * Adobe DNG SDK 1.6 support (meaning, just an additional patch for GPR SDK)
+
+ * removed LibRaw::memerr(),  memory allocation failures are already handled
+   in LibRaw_memmgr::*alloc w/ exception thrown
+
+ * removed memory error callback, out-of-memory error should be handled via
+   returned error code check, all related parameters (e.g. LibRaw constructor
+   option to not set such callback) is also removed
+
+ * imgdata.params.adjust_maximum_thr is settable via C-API libraw_set_adjust_maximum_thr(..)
+
+ * New rawoptions/processing flags for DNG processing if compiled 
+   with Adobe DNG SDK:
+   LIBRAW_RAWOPTIONS_DNG_STAGE2_IFPRESENT,LIBRAW_RAWOPTIONS_DNG_STAGE3_IFPRESENT
+   If these flag(s) are set: Stage2/Stage3 processing will be performed
+   only if OpcodeList2/OpcodeList3 tags are present in the input DNG file
+   Old (hard) flags (LIBRAW_RAWOPTIONS_DNG_STAGE2 and 
+   LIBRAW_RAWOPTIONS_DNG_STAGE3) are not removed and will force Stage2/3
+   processing if set (regardless of input file tags)
+
+ * New imgdata.rawparams.options bit: LIBRAW_RAWOPTIONS_DNG_ADD_MASKS
+   If set: DNG Transparency Masks will be extracted (if selected via shot_select)
+
+ * New decoder flag: LIBRAW_DECODER_UNSUPPORTED_FORMAT
+
+ == Bugs fixed ==
+
+ * Fixed possible out-of-buffer read in Nikon orientation tag parser
+
+ * Windows datastream: fixed logic errors (not showing up in real life)
+
+ * Out-of-range read-only array access in postprocessing if output_color is set to 0 (raw color)
+
+ * Minolta Z2 was not recognized correctly on 32-bit systems
+ 
+ * Fixed possible buffer overflow in Kodak C330 decoder
+
+ * dcraw_process(): check for buffer allocation results to avoid NULL deref
+
+2021-10-11  Alex Tutubalin <lexa@lexa.ru>
+ * Camera support:
+   Apple iPhone 13 Pro
+   GoPro HERO10 (if compiled w/ USE_GPR_SDK)
+   Ricoh GR III
+   Sony Xperia 1 III
+
+ * Fuji RAF files: XMP block extraction
+
+ * Fixed a typo in LIBRAW_OPTIONS_* flag names
+   (was LIBRAW_OPIONS, old flags names not removed due to compatibility)
+
+ * samples/raw-identify.cpp:  -v flag documented in usage print.
+
+2021-09-14  Alex Tutubalin <lexa@lexa.ru>
+ * Camera support:
+   Fujifilm GFX 50S II
+   Nikon Z fc
+   Sony A7R-IIIA (ILCE-7RM3A), A7R-IVA (ILCE-7RM4A)
+
+ * API/datastruct Changes:
+  - imgdata.params.shot_select moved to imgdata.rawparams.shot_select
+   (because this is decode-time option, not postprocessing option)
+
+  - libraw_open_bayer(...) added to C-API
+
+  - imgdata.makernotes.canon: separate SensorLeftBorder,SensorTopBorder....
     (and many other datafields) are united in libraw_area_t (rectangle)
     groups for crop areas and optical black areas.
 
-  * Additional fields in libraw_internal_data.unpacker_data:
-    - INT64: exif_offset: base offset of 1st EXIF IFD in file
-    - INT64: ifd0_offset: base offset of 1st TIFF IFD (IFD0) in file
-    - unsigned cr3_exif_length, cr3_ifd0_lenght : CR3-specific length of
+ * src/libraw_cxx.cpp completely removed from source tree to not confuse users.
+   (also all mentions are removed from Makefiles)
+
+ * Better Olympus makernotes parsing: LiveND mode, Panorama mode tags.
+
+ * clang-cl compatibility:
+  - defines _MSC_VER, but _forceinline is not supported
+  - warnings eliminated in Windows buffered datastream
+
+ * Canon/12-bit files: adjust color.linear_max and makernotes.canon values
+   to match data range.
+
+2021-08-04  Alex Tutubalin <lexa@lexa.ru>
+ * Camera support:
+   Sony ZV-E10
+ * DNG/Floating point: additional metadata check to refuse ambiguous/corrupted files.
+ * DNG/Floating point: correct handling of striped files (never seen in wild)
+ * Rawspeed support: disallow Nikon D6/Compressed processing
+ * Bug fixed: raw_inset_crops[] ctop/cheight was not adjusted right if vendor-specified 
+   ctop equals to 1.
+
+2021-07-20  Alex Tutubalin <lexa@lexa.ru>
+ * Camera support:
+   Olympus E-P7
+
+2021-07-08  Alex Tutubalin <lexa@lexa.ru>
+ * Camera support:
+   Panasonic GH5 Mark II
+   Pentax K3 Mark III
+   several phones w/ DNG files (checked)
+ 
+ * Camera format support:  Panasonic v6/12 bit
+ * Compile-time raw size limits implemented:
+    LIBRAW_MAX_NONDNG_RAW_FILE_SIZE - max file size for non-DNG files (default: 2GB - 1 byte)
+    LIBRAW_MAX_DNG_RAW_FILE_SIZE - max DNG file size limit (4GB-1 if compiled w/ DNG SDK, 2GB-1 overwise)
+ 
+ * ACES output: color conversion changed to provide D65 white point
+
+ * Fix for Canon 5D Mark II/sRAW1 incorrect camera provided crop   
+
+2021-05-07  Alex Tutubalin <lexa@lexa.ru>
+ * Camera support:
+   Fujifilm GFX 100S, X-E4: improved color data
+   Canon EOS M50 Mark II was supported but not listed in camera list
+   DJI Mavic Air 2S
+   GOPRO Hero9
+ * Support for RaspberryPi HQ camera (if compiled w/  USE_6BY9RPI)
+ * Improved support for RPi V1/V2 cameras:
+   - white balance data extraction
+   - color matrix extracted to imgdata.color.cmatrix to use with
+     use_camera_matrix.
+   - full-size thumbnail/preview support for JPEG+RAW files (raspistill -r)
+ * Fuji GFX100/GFX100S: PixelShift metadata extraction.
+ * RawSpeed (master): fixed bug in old Samsung/compressed decoder,
+   apply this patch to RawSpeed: RawSpeed/rawspeed.samsung-decoder.patch
+ * DCI-P3 and Rec 2020 output colorspaces
+ * Eliminated multiple signed/unsigned mismatch warnings (reported by gcc11)
+ * fixed possible 1-byte stack underrun while handling text tags with zero lengh
+ * XMP block size in CR3 files limited to 1MB
+ * Preview block size in CR3 files limited to 100MB
+ * Fixed wrong handling of linear DNG files created from Pentax out-of-camera 
+   DNGs
+
+2021-02-18  Alex Tutubalin <lexa@lexa.ru>
+ * Improved Phase One Compressed defects masking, thanks to Alexey Danilchenko
+ * Sony ILCE-1/Lossless compressed support
+ 
+2021-02-16  Alex Tutubalin <lexa@lexa.ru>
+ * Additional fields in libraw_internal_data.unpacker_data:
+   - INT64: exif_offset: base offset of 1st EXIF IFD in file
+   - INT64: ifd0_offset: base offset of 1st TIFF IFD (IFD0) in file
+   - unsigned cr3_exif_length, cr3_ifd0_lenght : CR3-specific length of
      exif and ifd0 sections.
 
-  *  imgdata.sizes.raw_inset_crop rearranged:
-     now it is imgdata.sizes.raw_inset_crops[2]:
-     - item at [0] is the same as imgdatra.sizes.raw_inset_crop in previous 
+2021-02-08  Alex Tutubalin <lexa@lexa.ru>
+ * CRX (CR3) decoder: fixed typo in constant; this does not affect any
+   known still photo (CR3) sample(s), but allows to use the decoder with 
+   some video (CRM) files.
+
+ * Imported user-contributed improvements to OpenMP postprocessing
+   (AHD and X-Trans demosaic)
+
+ * Bugfix: overwrite (wrong) TIFF/Orientation tag value with Metadata/Camera Orientation
+   value for EOS 40D only.
+
+2021-02-04  Alex Tutubalin <lexa@lexa.ru>
+ * imgdata.sizes.raw_inset_crop rearranged:
+   now it is imgdata.sizes.raw_inset_crops[2]:
+    - item at [0] is the same as imgdatra.sizes.raw_inset_crop in previous 
       versions
-     - item at [1] is 'user crop', in particular:
+    - item at [1] is 'user crop', in particular:
        -- set by DNG  DefaultUserCrop tag
        -- or set via raw aspect ratio tags (e.g. 16:9 aspect on Fujifilm cameras)
           raw_inset_crops[1] is filled only if aspect ratio tags provides different
@@ -63,12 +292,12 @@
 
    Note: raw_inset_crops may be fooled by metadata (makernotes), use some correctness check before use.
 
-  * LIBRAW_RAWOPTIONS_USE_DNG_DEFAULT_CROP processing flag removed,
-    DNG DefaultCrop* tags are parsed into raw_inset_crops[0]
+ * LIBRAW_RAWOPTIONS_USE_DNG_DEFAULT_CROP processing flag removed,
+   DNG DefaultCrop* tags are parsed into raw_inset_crops[0]
 
-  * new LibRaw call LibRaw::adjust_to_raw_inset_crop(unsigned mask, float maxcrop = 0.55f)
-    Promotes imgdata.sizes.raw_inset_crops[] values to
-    imgdata.sizes.*margin and imgdata.sizes.width/height fields
+ * new LibRaw call LibRaw::adjust_to_raw_inset_crop(unsigned mask, float maxcrop = 0.55f)
+   Promotes imgdata.sizes.raw_inset_crops[] values to
+   imgdata.sizes.*margin and imgdata.sizes.width/height fields
 
    mask: if bit 1 is set: prefer raw_inset_crops[1] 
          if bit 0 is set: prefer raw_inset_crops[0] 
@@ -83,76 +312,6 @@
    
   Note: this call SHOULD be used after LibRaw::unpack(), otherwise black level
   calculation from masked area may be fooled resulting in wrong black levels.
-
- * Shared library version incremented to disallow automated upgrades (will not work because of ABI change)
-
-== Metadata parsing improvements ==
-
-  * Olympus makernotes parsing: LiveND mode, Panorama mode tags.
-
-  * Fuji GFX100/GFX100S: PixelShift metadata extraction.
-
-  * Fuji RAF files: XMP block extraction
-
-== Misc improvements, limits implemented, etc ==
-
-  * Canon/12-bit files: adjust color.linear_max and makernotes.canon values
-    to match data range.
-
-  * DNG/Floating point: additional metadata check to refuse ambiguous/corrupted files.
-
-  * DNG/Floating point: correct handling of striped files (never seen in wild)
-
-  * Rawspeed support: disallow Nikon D6/Compressed processing
- 
-  * Compile-time raw size limits implemented:
-     LIBRAW_MAX_NONDNG_RAW_FILE_SIZE - max file size for non-DNG files (default: 2GB - 1 byte)
-     LIBRAW_MAX_DNG_RAW_FILE_SIZE - max DNG file size limit (4GB-1 if compiled w/ DNG SDK, 2GB-1 overwise)
-
-  * samples/raw-identify.cpp:  -v flag documented in usage print.
-
-  * src/libraw_cxx.cpp completely removed from source tree to not confuse users.
-    (also all mentions are removed from Makefiles)
-
-  * clang-cl compatibility:
-    - defines _MSC_VER, but _forceinline is not supported
-    - warnings eliminated in Windows buffered datastream
-
-  * XMP block size in CR3 files limited to 1MB
-  
-  * Preview block size in CR3 files limited to 100MB
-
-  * Improved Phase One Compressed defects masking, thanks to Alexey Danilchenko
-
-  * CRX (CR3) decoder: fixed typo in constant; this does not affect any
-    known still photo (CR3) sample(s), but allows to use the decoder with 
-    some video (CRM) files.
-
-  * Imported user-contributed improvements to OpenMP postprocessing
-    (AHD and X-Trans demosaic)
-
-  * Bugfix: overwrite (wrong) TIFF/Orientation tag value with Metadata/Camera Orientation
-    value for EOS 40D only.
-
-  * ACES output: color conversion changed to provide D65 white point
-
-  * Fix for Canon 5D Mark II/sRAW1 incorrect camera provided crop   
-
-  * RawSpeed (master): fixed bug in old Samsung/compressed decoder,
-    apply this patch to RawSpeed: RawSpeed/rawspeed.samsung-decoder.patch
-  
-  * DCI-P3 and Rec 2020 output colorspaces
-  
-  * Eliminated multiple signed/unsigned mismatch warnings (reported by gcc11)
-
-  * Fixed a typo in LIBRAW_OPTIONS_* flag names
-    (was LIBRAW_OPIONS, old flags names not removed due to compatibility)
-
-== Bugfixes ==
-  * fixed possible 1-byte stack underrun while handling text tags with zero lengh
-
-  * Fixed wrong handling of linear DNG files created from Pentax out-of-camera DNGs
- 
 
 2021-01-21  Alex Tutubalin <lexa@lexa.ru>
 

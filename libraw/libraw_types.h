@@ -138,9 +138,6 @@ typedef unsigned long long UINT64;
                                        int len, unsigned int ord, void *ifp,
                                        INT64 base);
 
-  DllDef void default_memory_callback(void *data, const char *file,
-                                      const char *where);
-
   typedef void (*data_callback)(void *data, const char *file, const int offset);
 
   DllDef void default_data_callback(void *data, const char *file,
@@ -154,9 +151,6 @@ typedef unsigned long long UINT64;
 
   typedef struct
   {
-    memory_callback mem_cb;
-    void *memcb_data;
-
     data_callback data_cb;
     void *datacb_data;
 
@@ -311,7 +305,7 @@ typedef unsigned long long UINT64;
         7 = CRAW         130 = Normal Movie, CRM LightRaw
       131 = CRM  StandardRaw */
     short Quality;
-    /* Increases dynamic range of sensor data
+    /* data compression curve
         0 = OFF  1 = CLogV1 2 = CLogV2? 3 = CLogV3 */
     int CanonLog;
 
@@ -490,6 +484,8 @@ typedef unsigned long long UINT64;
 	 8: Small raw
 	 9: Packed 12-bit
 	10: Packed 14-bit
+	13: High Efficiency  (HE)
+	14: High Efficiency* (HE*)
 */
     ushort NEFCompression;
 
@@ -717,6 +713,11 @@ typedef unsigned long long UINT64;
                                1 for uncompressed;
                                2 lossless compressed raw v.2
                             */
+    ushort RawSizeType;     /* init in 0xffff
+                               1 - large,
+                               2 - small,
+                               3 - medium
+                            */
     unsigned Quality;       /* init in 0xffffffff
                                0 or 6 for raw, 7 or 8 for compressed raw */
     ushort FileFormat;      /*  1000 SR2
@@ -785,7 +786,7 @@ typedef unsigned long long UINT64;
     float WBCT_Coeffs[64][5]; /* CCT, than R, G1, B, G2 coeffs */
     int as_shot_wb_applied;
     libraw_P1_color_t P1_color[2];
-    unsigned raw_bps; /* for Phase One, raw format */
+    unsigned raw_bps; /* for Phase One: raw format; For other cameras: bits per pixel (copy of tiff_bps in most cases) */
                       /* Phase One raw format values, makernotes tag 0x010e:
                       0    Name unknown
                       1    "RAW 1"
@@ -808,6 +809,21 @@ typedef unsigned long long UINT64;
     int tcolors;
     char *thumb;
   } libraw_thumbnail_t;
+
+  typedef struct
+  {
+	enum LibRaw_internal_thumbnail_formats tformat;
+    ushort twidth, theight, tflip;
+    unsigned tlength;
+	unsigned tmisc;
+	INT64 toffset;
+  }libraw_thumbnail_item_t;
+
+  typedef struct
+  {
+	  int thumbcount;
+	  libraw_thumbnail_item_t thumblist[LIBRAW_THUMBNAIL_MAXCOUNT];
+  } libraw_thumbnail_list_t;
 
   typedef struct
   {
@@ -909,7 +925,7 @@ typedef unsigned long long UINT64;
     float exp_preser;
     /* Disable Auto-scale */
     int no_auto_scale;
-    /* Disable interpolation */
+    /* Disable intepolation */
     int no_interpolation;
   } libraw_output_params_t;
 
@@ -1066,6 +1082,7 @@ typedef unsigned long long UINT64;
     libraw_colordata_t color;
     libraw_imgother_t other;
     libraw_thumbnail_t thumbnail;
+	libraw_thumbnail_list_t thumbs_list;
     libraw_rawdata_t rawdata;
     void *parent_class;
   } libraw_data_t;

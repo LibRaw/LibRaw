@@ -32,7 +32,7 @@ it under the terms of the one of two licenses as you choose:
 void usage(const char *av)
 {
 	printf(
-		"Dump (small) selecton of RAW file as tab-separated text file\n"
+		"Dump (small) selection of RAW file as tab-separated text file\n"
 		"Usage: %s inputfile COL ROW [CHANNEL] [width] [height]\n"
 		"  COL - start column\n"
 		"  ROW - start row\n"
