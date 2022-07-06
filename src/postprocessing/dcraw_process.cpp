@@ -146,7 +146,7 @@ int LibRaw::dcraw_process(void)
     /* post-exposure correction fallback */
     if (P1.filters && !O.no_interpolation)
     {
-      if (noiserd > 0 && P1.colors == 3 && P1.filters)
+      if (noiserd > 0 && P1.colors == 3 && P1.filters > 1000)
         fbdd(noiserd);
 
       if (P1.filters > 1000 && callbacks.interpolate_bayer_cb)
