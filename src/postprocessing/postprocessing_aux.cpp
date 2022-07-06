@@ -147,7 +147,6 @@ void LibRaw::wavelet_denoise()
 #pragma omp parallel default(shared) private(                                  \
     i, col, row, thold, lev, lpass, hpass, temp, c) firstprivate(scale, size)
   {
-#pragma omp critical /* LibRaw's malloc is not local thread-safe */
     temp = (float *)malloc((iheight + iwidth) * sizeof *fimg);
     FORC(nc)
     { /* denoise R,G1,B,G3 individually */
@@ -191,7 +190,6 @@ void LibRaw::wavelet_denoise()
       for (i = 0; i < size; i++)
         image[i][c] = CLIP(SQR(fimg[i] + fimg[lpass + i]) / 0x10000);
     }
-#pragma omp critical
     free(temp);
   } /* end omp parallel */
   /* the following loops are hard to parallelize, no idea yes,
