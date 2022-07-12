@@ -708,7 +708,7 @@ void LibRaw::identify()
     short nesting = -1;
     short nTrack = -1;
     short TrackType;
-    char AtomNameStack[128];
+    char AtomNameStack[129];
     strcpy(make, "Canon");
 
     szAtomList = ifp->size();
