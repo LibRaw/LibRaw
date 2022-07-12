@@ -64,6 +64,11 @@ void LibRaw::parseAdobePanoMakernote()
 
       PrivateTagBytes = PrivateTagCount *
           tagtype_dataunit_bytes[(PrivateTagType <= LIBRAW_EXIFTAG_TYPE_IFD8) ? PrivateTagType : 0];
+      if(PrivateTagBytes > 10240000u)
+      {
+         free(PrivateMknBuf);
+         return;
+      }
       if (PrivateTagID == 0x0002)
       {
         posPrivateMknBuf += 2;
