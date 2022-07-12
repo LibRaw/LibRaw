@@ -26,7 +26,7 @@ void LibRaw::parseAdobePanoMakernote()
   int truncated;
 
 #define CHECKSPACE(s)                                                          \
-  if (posPrivateMknBuf + (s) > PrivateMknLength)                               \
+  if (posPrivateMknBuf > PrivateMknLength - (s))                               \
   {                                                                            \
     free(PrivateMknBuf);                                                       \
     return;                                                                    \
