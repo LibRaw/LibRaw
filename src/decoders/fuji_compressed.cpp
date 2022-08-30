@@ -1101,8 +1101,13 @@ void LibRaw::fuji_compressed_load_raw()
   raw_block_offsets = (INT64 *)malloc(sizeof(INT64) * libraw_internal_data.unpacker_data.fuji_total_blocks);
 
   libraw_internal_data.internal_data.input->seek(libraw_internal_data.unpacker_data.data_offset, SEEK_SET);
-  libraw_internal_data.internal_data.input->read(
-      block_sizes, 1, sizeof(unsigned) * libraw_internal_data.unpacker_data.fuji_total_blocks);
+  int sizesToRead = sizeof(unsigned) * libraw_internal_data.unpacker_data.fuji_total_blocks;
+  if (libraw_internal_data.internal_data.input->read(block_sizes, 1, sizesToRead) != sizesToRead)
+  {
+    free(block_sizes);
+    free(raw_block_offsets);
+    throw LIBRAW_EXCEPTION_IO_EOF;
+  }
 
   raw_offset = ((sizeof(unsigned) * libraw_internal_data.unpacker_data.fuji_total_blocks) + 0xF) & ~0xF;
 
