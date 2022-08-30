@@ -26,7 +26,7 @@ void LibRaw::packed_tiled_dng_load_raw()
   try
   {
     int ntiles = 1 + (raw_width) / tile_width;
-    if ((unsigned)ntiles * tile_width > raw_width * 2u) throw;
+    if ((unsigned)ntiles * tile_width > raw_width * 2u) throw LIBRAW_EXCEPTION_ALLOC;
     pixel.resize(tile_width * ntiles * tiff_samples);
   }
   catch (...)
