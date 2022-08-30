@@ -377,6 +377,8 @@ void LibRaw::parse_sinar_ia()
   if (entries < 1 || entries > 8192)
     return;
   fseek(ifp, get4(), SEEK_SET);
+  if (ifp->eof())
+    return;
   while (entries--)
   {
     off = get4();
