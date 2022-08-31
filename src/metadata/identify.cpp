@@ -2338,8 +2338,10 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize, int flen)
         left_margin = 4;
         break;
       case 6336: // X-H2S
-		  width = 6226;
-		  height = 4174;
+		  top_margin = 6;
+		  left_margin = 0;
+		  width = 6264;
+		  height = 4176;
 		  break;
       case 6384:                // X-T3, X-T4, X100V, X-S10, X-T30, X-Pro3
         top_margin = 0;
