@@ -1009,7 +1009,7 @@ void LibRaw::nokia_load_raw()
   if (raw_stride)
 	  dwide = raw_stride;
 #endif
-  std::vector<uchar> data(dwide * 2);
+  std::vector<uchar> data(dwide * 2 + 4);
   for (row = 0; row < raw_height; row++)
   {
       checkCancel();
