@@ -551,6 +551,10 @@ void LibRaw::lossless_jpeg_load_raw()
 
   if (jh.wide < 1 || jh.high < 1 || jh.clrs < 1 || jh.bits < 1)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+  if(cr2_slice[0] && !cr2_slice[1])
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   jwide = jh.wide * jh.clrs;
   jhigh = jh.high;
   if (jh.clrs == 4 && jwide >= raw_width * 2)
