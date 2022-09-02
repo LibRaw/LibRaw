@@ -734,6 +734,12 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 			  else
 				  parse_fuji_compressed_header();
 		  }
+		  else if (!strcmp(imgdata.idata.normalized_model, "X-H2S") 
+			  && libraw_internal_data.internal_data.input->size() 
+			  < (libraw_internal_data.unpacker_data.data_size + libraw_internal_data.unpacker_data.data_offset))
+		  {
+            parse_fuji_compressed_header(); // try to use compressed header: X-H2S may record wrong data size
+		  }
 	  }
       // set raw_inset_crops[1] via raw_aspect
       if (imgdata.sizes.raw_aspect >= LIBRAW_IMAGE_ASPECT_MINIMAL_REAL_ASPECT_VALUE
