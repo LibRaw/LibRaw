@@ -230,8 +230,14 @@ int LibRaw::phase_one_correct()
       data = get4();
       save = ftell(ifp);
       fseek(ifp, meta_offset + data, SEEK_SET);
-      if (ifp->eof())
-        return LIBRAW_DATA_ERROR;
+#if 1
+	  if (ifp->eof())
+	  {
+		  // skip bad or unknown tag
+		  fseek(ifp, save, SEEK_SET);
+		  continue;
+	  }
+#endif
       if (tag == 0x0400)
       { /* Sensor defects */
         while ((len -= 8) >= 0)
