@@ -558,9 +558,10 @@ void LibRaw::identify()
     strncpy(model, head + 0x1c, 0x20);
     model[0x20] = 0;
     c = 11;
-    while (isdigit(imFuji.SerialSignature[c]) && (c>0))
+    while (imFuji.SerialSignature[c] > 0 && isdigit(imFuji.SerialSignature[c]) && (c>0))
       c--;
-    unique_id = (unsigned long long)atoi(imFuji.SerialSignature+c+1);
+	if(c < 11)
+		unique_id = (unsigned long long)atoi(imFuji.SerialSignature+c+1);
     memcpy(imFuji.RAFVersion, head + 0x3c, 4);
     imFuji.RAFVersion[4] = 0;
     fseek(ifp, 84, SEEK_SET);

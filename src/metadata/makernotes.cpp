@@ -425,6 +425,8 @@ void LibRaw::parse_makernote(int base, int uptag)
       wb[0] = wb[2];
       wb[2] = wb[1];
       wb[1] = wb[3];
+	  if (feof(ifp))
+		  break;
       wb[3] = get2();
       if (wb[1] == 256 && wb[3] == 256 && wb[0] > 256 && wb[0] < 640 &&
           wb[2] > 256 && wb[2] < 640)

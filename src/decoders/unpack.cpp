@@ -49,6 +49,10 @@ int LibRaw::unpack(void)
     }
     if (libraw_internal_data.unpacker_data.meta_length)
     {
+      if (libraw_internal_data.unpacker_data.meta_length >
+          INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
+        throw LIBRAW_EXCEPTION_TOOBIG;
+
       libraw_internal_data.internal_data.meta_data =
           (char *)malloc(libraw_internal_data.unpacker_data.meta_length);
     }
@@ -90,7 +94,8 @@ int LibRaw::unpack(void)
           (imgdata.idata.filters || P1.colors == 1) ? 1 : LIM(P1.colors, 3, 4);
       INT64 samplesize = is_floating_point() ? 4 : 2;
       INT64 bytes = pixcount * planecount * samplesize;
-      if (bytes > INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
+      if (bytes + INT64(libraw_internal_data.unpacker_data.meta_length )
+			> INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
         throw LIBRAW_EXCEPTION_TOOBIG;
 
       // find ifd to check sample
@@ -117,7 +122,8 @@ int LibRaw::unpack(void)
       INT64 pixcount = INT64(MAX(S.width, S.raw_width)) * INT64(MAX(S.height, S.raw_height));
       INT64 planecount = (imgdata.idata.filters || P1.colors == 1) ? 1 : LIM(P1.colors, 3, 4);
       INT64 bytes = pixcount * planecount * 2; // sample size is always 2 for rawspeed
-      if (bytes > INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
+      if (bytes + INT64(libraw_internal_data.unpacker_data.meta_length) 
+				> INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
         throw LIBRAW_EXCEPTION_TOOBIG;
 
         if (!_rawspeed3_handle)
@@ -280,7 +286,7 @@ int LibRaw::unpack(void)
                                : LIM(P1.colors, 3, 4);
         INT64 bytes =
             pixcount * planecount * 2; // sample size is always 2 for rawspeed
-        if (bytes >
+        if (bytes + +INT64(libraw_internal_data.unpacker_data.meta_length) >
             INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
 
@@ -303,7 +309,8 @@ int LibRaw::unpack(void)
         if (imgdata.rawparams.shot_select) // single image extract
         {
           if (INT64(rwidth) * INT64(rheight + 8) *
-                  INT64(sizeof(imgdata.rawdata.raw_image[0])) >
+                  INT64(sizeof(imgdata.rawdata.raw_image[0])) 
+				+ +INT64(libraw_internal_data.unpacker_data.meta_length) >
               INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
             throw LIBRAW_EXCEPTION_TOOBIG;
           imgdata.rawdata.raw_alloc = malloc(
@@ -315,7 +322,8 @@ int LibRaw::unpack(void)
         else // Full image extract
         {
           if (INT64(rwidth) * INT64(rheight + 8) *
-                  INT64(sizeof(imgdata.rawdata.raw_image[0])) * 4 >
+                  INT64(sizeof(imgdata.rawdata.raw_image[0])) * 4 
+				+INT64(libraw_internal_data.unpacker_data.meta_length) >
               INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
             throw LIBRAW_EXCEPTION_TOOBIG;
           S.raw_pitch = S.raw_width * 8;
@@ -329,7 +337,8 @@ int LibRaw::unpack(void)
       else if (decoder_info.decoder_flags & LIBRAW_DECODER_3CHANNEL)
       {
         if (INT64(rwidth) * INT64(rheight + 8) *
-                INT64(sizeof(imgdata.rawdata.raw_image[0])) * 3 >
+                INT64(sizeof(imgdata.rawdata.raw_image[0])) * 3 
+			+ INT64(libraw_internal_data.unpacker_data.meta_length) >
             INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
 
@@ -344,7 +353,8 @@ int LibRaw::unpack(void)
                    1) // Bayer image or single color -> decode to raw_image
       {
         if (INT64(rwidth) * INT64(rheight + 8) *
-                INT64(sizeof(imgdata.rawdata.raw_image[0])) >
+                INT64(sizeof(imgdata.rawdata.raw_image[0])) 
+			+ INT64(libraw_internal_data.unpacker_data.meta_length) >
             INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
         imgdata.rawdata.raw_alloc = malloc(
@@ -375,7 +385,8 @@ int LibRaw::unpack(void)
         // allocate image as temporary buffer, size
         if (INT64(MAX(S.width, S.raw_width)) *
                 INT64(MAX(S.height, S.raw_height) + 8) *
-                INT64(sizeof(*imgdata.image)) >
+                INT64(sizeof(*imgdata.image)) 
+			+ INT64(libraw_internal_data.unpacker_data.meta_length) >
             INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
 

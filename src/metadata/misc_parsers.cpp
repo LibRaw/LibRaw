@@ -268,6 +268,8 @@ void LibRaw::parse_riff(int maxdepth)
   {
     while (ftell(ifp) + 7 < end)
     {
+		if (feof(ifp))
+			break;
       i = get2();
       size = get2();
       if ((i + 1) >> 1 == 10 && size == 20)

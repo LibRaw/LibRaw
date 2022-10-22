@@ -42,7 +42,10 @@ void LibRaw::process_Hassy_Lens (int LensMount) {
 //    mount*100000000ULL + series*10000000ULL +
 //    focal1*10000ULL + focal2*10 + version;
   char *ps;
-  int c = atoi(strchr(imgdata.lens.Lens, ' ') +1);
+  int c;
+  char *q =  strchr(imgdata.lens.Lens, ' ');
+  if(!q) return ;
+  c = atoi(q+1);
   if (!c)
     return;
 
