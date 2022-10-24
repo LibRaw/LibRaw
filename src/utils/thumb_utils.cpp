@@ -31,6 +31,9 @@ void LibRaw::kodak_thumb_loader()
   if (INT64(T.theight) * INT64(T.twidth) < 64ULL)
       throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
+  if(T.twidth < 16 || T.twidth > 8192 || T.theight < 16 || T.theight > 8192)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   // some kodak cameras
   ushort s_height = S.height, s_width = S.width, s_iwidth = S.iwidth,
          s_iheight = S.iheight;

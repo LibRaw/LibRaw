@@ -177,6 +177,10 @@ void LibRaw::kodak_jpeg_load_raw()
   cinfo.err = jpeg_std_error(&pub);
   pub.error_exit = jpegErrorExit_k;
 
+  if (INT64(data_size) >
+          INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
+	  throw LIBRAW_EXCEPTION_TOOBIG;
+
   unsigned char *jpg_buf = (unsigned char *)malloc(data_size);
   std::vector<uchar> pixel_buf(width * 3);
   jpeg_create_decompress(&cinfo);
