@@ -116,7 +116,7 @@ int LibRaw::raw2image(void)
               r = IO.fuji_width - 1 + row - (col >> 1);
               c = row + ((col + 1) >> 1);
             }
-            if (r < S.height && c < S.width)
+            if (r < S.height && c < S.width && col + int(S.left_margin) < int(S.raw_width))
               imgdata.image[((r) >> IO.shrink) * S.iwidth + ((c) >> IO.shrink)]
                            [FC(r, c)] =
                   imgdata.rawdata
