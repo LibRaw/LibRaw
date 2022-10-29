@@ -56,6 +56,9 @@ void LibRaw::kodak_thumb_loader()
     S.width += S.width & 1;
   }
 
+  S.iheight = S.height;
+  S.iwidth = S.width;
+
   imgdata.image =
       (ushort(*)[4])calloc(S.iheight * S.iwidth, sizeof(*imgdata.image));
 
