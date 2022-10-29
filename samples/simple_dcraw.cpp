@@ -177,7 +177,7 @@ int main(int ac, char *av[])
       {
         snprintf(thumbfn, sizeof(thumbfn), "%s.%s", av[i],
                  T.tformat == LIBRAW_THUMBNAIL_JPEG ? "thumb.jpg"
-                                                    : "thumb.ppm");
+                                                    : (T.tcolors == 1? "thumb.pgm" : "thumb.ppm"));
         if (verbose)
           printf("Writing thumbnail file %s\n", thumbfn);
         if (LIBRAW_SUCCESS != (ret = RawProcessor->dcraw_thumb_writer(thumbfn)))
