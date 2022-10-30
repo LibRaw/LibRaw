@@ -1011,6 +1011,15 @@ DHT::~DHT()
 
 void LibRaw::dht_interpolate()
 {
+	if (imgdata.idata.filters != 0x16161616
+		&& imgdata.idata.filters != 0x61616161
+		&& imgdata.idata.filters != 0x49494949
+		&& imgdata.idata.filters != 0x94949494
+		)
+	{
+		ahd_interpolate();
+		return;
+	}
   DHT dht(*this);
   dht.hide_hots();
   dht.make_hv_dirs();
