@@ -39,13 +39,14 @@ void LibRaw::wavelet_denoise()
   static const float noise[] = {0.8002f, 0.2735f, 0.1202f, 0.0585f,
                                 0.0291f, 0.0152f, 0.0080f, 0.0044f};
 
+
   while (maximum << scale < 0x10000)
     scale++;
   maximum <<= --scale;
   black <<= scale;
   FORC4 cblack[c] <<= scale;
   if ((size = iheight * iwidth) < 0x15550000)
-    fimg = (float *)malloc((size * 3 + iheight + iwidth) * sizeof *fimg);
+    fimg = (float *)malloc((size * 3 + iheight + iwidth + 128) * sizeof *fimg);
   temp = fimg + size * 3;
   if ((nc = colors) == 3 && filters)
     nc++;
