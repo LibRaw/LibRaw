@@ -479,6 +479,13 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
 	  identify();
 
+	  // Fuji layout files: either DNG or unpacked_load_raw should be used
+	  if (libraw_internal_data.internal_output_params.fuji_width || libraw_internal_data.unpacker_data.fuji_layout)
+	  {
+        if (!imgdata.idata.dng_version && load_raw != &LibRaw::unpacked_load_raw)
+          return LIBRAW_FILE_UNSUPPORTED;
+	  }
+
 	  // promote the old single thumbnail to the thumbs_list if not present already
 	  if (imgdata.thumbs_list.thumbcount < LIBRAW_THUMBNAIL_MAXCOUNT)
 	  {
