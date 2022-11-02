@@ -19,7 +19,7 @@
  * DJI Mavic 3
  * Nikon Z9: standard compression formats only
 
- == Multiple (resultion) thumbnails support ==
+ == Multiple (resolution) thumbnails support ==
  
  * New imgdata.thumbs_list data item with data fields:
 
@@ -70,7 +70,7 @@
    RawSpeed-v3 support
 
    If file was processed (or tried to process) via RawSpeed-v3, these bits
-   are rised in imgdata.process_warnings:
+   are raised in imgdata.process_warnings:
     LIBRAW_WARN_RAWSPEED3_PROCESSED - processed via RawSpeed v3
     LIBRAW_WARN_RAWSPEED3_PROBLEM - not processed (due to exception in RawSpeed library)
     LIBRAW_WARN_RAWSPEED3_UNSUPPORTED - unsupported file
@@ -222,7 +222,7 @@
  * Camera format support:  Panasonic v6/12 bit
  * Compile-time raw size limits implemented:
     LIBRAW_MAX_NONDNG_RAW_FILE_SIZE - max file size for non-DNG files (default: 2GB - 1 byte)
-    LIBRAW_MAX_DNG_RAW_FILE_SIZE - max DNG file size limit (4GB-1 if compiled w/ DNG SDK, 2GB-1 overwise)
+    LIBRAW_MAX_DNG_RAW_FILE_SIZE - max DNG file size limit (4GB-1 if compiled w/ DNG SDK, 2GB-1 otherwise)
  
  * ACES output: color conversion changed to provide D65 white point
 
@@ -245,7 +245,7 @@
    apply this patch to RawSpeed: RawSpeed/rawspeed.samsung-decoder.patch
  * DCI-P3 and Rec 2020 output colorspaces
  * Eliminated multiple signed/unsigned mismatch warnings (reported by gcc11)
- * fixed possible 1-byte stack underrun while handling text tags with zero lengh
+ * fixed possible 1-byte stack underrun while handling text tags with zero length
  * XMP block size in CR3 files limited to 1MB
  * Preview block size in CR3 files limited to 100MB
  * Fixed wrong handling of linear DNG files created from Pentax out-of-camera 
@@ -722,7 +722,7 @@ vendors that are already known to LibRaw will not change.
 
  * Better makernotes parsing for many cameras
 
- * Better parsing of makernotes embeded into DNG files created by
+ * Better parsing of makernotes embedded into DNG files created by
    Adobe DNG Converter
 
  * New imgdata.params.raw_processing_options value: LIBRAW_PROCESSING_ZEROFILTERS_FOR_MONOCHROMETIFFS
@@ -759,7 +759,7 @@ vendors that are already known to LibRaw will not change.
       (note: incompatibility with previous versions, so default is not set).
     LIBRAW_PROCESSING_DNGSDK_ZEROCOPY - will not copy data from Adobe DNG SDK decoded buffer, but use it as is
 
-  * Swtiched from auto_ptr to unique_ptr, to get back define LIBRAW_USE_AUTOPTR
+  * Switched from auto_ptr to unique_ptr, to get back define LIBRAW_USE_AUTOPTR
 
   * dcraw_emu: it is now possible to create output filename in a more flexible manner, via -Z switch:
      -Z - will output to stdout
@@ -1133,7 +1133,7 @@ Other fixes:
 
  * Sony ARW2.3 decoder:
    - params.sony_arw2_hack removed, decoded data are always in 0...17k range (note the difference with dcraw!)
-   - Additional processing options for Sony lossy compression techincal analysis.
+   - Additional processing options for Sony lossy compression technical analysis.
 
  * Dcraw 9.26 imported (but some changes not approved because Libraw do it better) with some exceptions:
     - no Pentax K3-II frame selection code
@@ -1188,7 +1188,7 @@ Other fixes:
    * imported dcraw 1.461: fixed error in BlackLevelDim handling
    * Accurate work with pattern black-level (cblack[6+])
    * Support for Olympus E-M10 and Fujifilm X-T1
-   * Adjusted possbile maximum value for Sigma SD9 small raws
+   * Adjusted possible maximum value for Sigma SD9 small raws
 
 2014-01-27 Alex Tutubalin <lexa@lexa.ru>
    * dcraw 1.460:  Nikon D3300, Panasonic DMC-TZ61, Sony  ILCE-5000
@@ -1345,7 +1345,7 @@ Other fixes:
     old Sigma cameras (SD9, SD14, Polaroid x530). For modern Foveon cameras
     one may try to create ICC profile (not supplied).
 
-    TODO: thumbnail extraction, fast cancelation
+    TODO: thumbnail extraction, fast cancellation
 
     Old foveon_*_load_raw (from dcraw) code is used if compiled with
     LIBRAW_DEMOSAIC_PACK_GPL2
@@ -1453,7 +1453,7 @@ API changes:
 
 2012-04-05 Alex Tutubalin <lexa@lexa.ru>
         * Casio EX-Z500 support
-        * (possible) I/O exceptions on file open catched in open_datastream
+        * (possible) I/O exceptions on file open caught in open_datastream
         * Fixed possible read-after-buffer in Sony ARW2 decoder
         * Fixed mingw32 errors when compiling LibRaw_windows_datastream
         * Makefile.msvc: support of OpenMP and LCMS (uncomment to use)
@@ -1695,7 +1695,7 @@ API changes:
           call.
 
         * No filtering_mode parameter. Raw tone curve is applied
-          at unpack() stage; zero pixels removed on postprocesing stage.
+          at unpack() stage; zero pixels removed on postprocessing stage.
 
         * unprocessed_raw and 4colors samples are adjusted to use
           new RAW data storage layout.
@@ -1826,7 +1826,7 @@ API changes:
              - Banding suppression
              - High-frequency noise suppression
              - Green channel equalization
-          + New chromatic abberration correction.
+          + New chromatic aberration correction.
           All three methods are written by Emil Martinec for Raw Therapee.
           Adapted to LibRaw by Jacques Desmis
 
@@ -2052,7 +2052,7 @@ API changes:
                In some cases LibRaw and calling process have different
                memory managers, so free() of make_mem_image() data
                results to program crash (especially in Win32/VisualStudio
-               enviroment).
+               environment).
 
              * LibRaw::free() is now private instead of public (again).
 
@@ -2071,7 +2071,7 @@ API changes:
                + Debug print removed from fatal error handler.
 
                + Mmaped I/O for dcraw_emu sample is turned on via -E switch
-                 now (because old -B switch is used for settng cropbox).
+                 now (because old -B switch is used for setting cropbox).
 
            * all client code should be recompiled due to structures size change
 
@@ -2328,14 +2328,14 @@ API changes:
            * API changed: params.gamma_16bit field removed. Gamma curve is
              set via params.gamm[0]/gamm[1] values (see documentation and
              samples for details)
-           * LibRaw::identify() splitted to avoid MS VS2008 bug (too many
+           * LibRaw::identify() split to avoid MS VS2008 bug (too many
              nested blocks)
 
            * Samples: dcraw_emu and mem_image samples supports new dcraw
               16bit/gamma semantics:
                 -6: set 16 bit output
                 -4: set 16 bit output and linear gamma curve and no auto
-                   brighness
+                   brightness
            *  LibRaw 0.8.0-Beta1
 
 2009-04-28 Alex Tutubalin <lexa@lexa.ru>
@@ -2475,7 +2475,7 @@ API changes:
 
 2009-01-14 Alex Tutubalin <lexa@lexa.ru>
            * Black mask extraction supported for all files with bayer data
-            (one component per pixel). Black mask data not avaliable
+            (one component per pixel). Black mask data not available
             for multi-component data (Foveon, Canon sRAW, Sinar 4-shot,
             Kodak YCC/YRGB).
 
@@ -2618,7 +2618,7 @@ API changes:
               - new cameras (Canon 50D, Sony A900, Nikon D90 & P6000,
                 Panasonic LX3 FZ28)
               - new method of black point subtraction for Canon cameras,
-                preliminary banding supression.
+                preliminary banding suppression.
             * Stack memory usage lowered (some thread data moved to dynamic
             memory)
             * some patches for MSVC compatibility

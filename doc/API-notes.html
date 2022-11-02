@@ -66,7 +66,7 @@
           <dt><strong>Fatal errors</strong></dt>
           <dd>In the case of fatal errors (memory shortage, input data error,
             data unpacking failure), the current stage of processing is
-            terminated and all allocated resouces are freed.<br>
+            terminated and all allocated resources are freed.<br>
             If an attempt to continue processing is made, all subsequent API
             calls will return the LIBRAW_OUT_OF_ORDER_CALL error.<br>
             At the same time, the LibRaw instance in which a fatal error has
@@ -102,7 +102,7 @@
       When implementing own datastream classes, you need to take <strong>substream</strong>
       into account and pass control to methods of this field if it is active
       (not NULL).</p>
-    <p>If datastream implementaton knows name of input file, it should provide
+    <p>If datastream implementation knows name of input file, it should provide
       fname() call. This name will be used in <a href="API-CXX.html#callbacks">error
         callbacks</a> and in guessing name of JPEG file with metadata (for RAW
       files with external metadata).</p>
@@ -118,7 +118,7 @@
       LibRaw object) is not limited in any way (except by memory requirements).</p>
     <p>If a LibRaw object is created in one execution thread and used in
       another, external synchronization is necessary.</p>
-    <p>There is two libraries under Unix enviroment (Linux/FreeBSD/MacOS):
+    <p>There is two libraries under Unix environment (Linux/FreeBSD/MacOS):
       libraw_r.a (thread-safe) and libraw.a (single-threaded, slightly faster).</p>
     <p>Thread-safe library version stores intermediate unpacker data into LibRaw
       class data. So, several copies of LibRaw, working in parallel, is
@@ -221,7 +221,7 @@
         floating-point data.</li>
     </ul>
     <p>The buffer for RAW data is allocated by <a href="API-CXX.html#unpack">unpack()</a>
-      call and freeed upon calling <a href="API-CXX.html#recycle">recycle()</a>.</p>
+      call and freed upon calling <a href="API-CXX.html#recycle">recycle()</a>.</p>
     <p><a name="memimage"></a></p>
     <h4>Memory for the Postprocessed Image</h4>
     <p>On postprocessing stage each pixel contains four 16-bit values, one for
@@ -269,7 +269,7 @@
       memory is freed before the end of this call.</p>
     <p><a name="memunpack"></a></p>
     <h4>Unpacking into memory buffer</h4>
-    <p>Functons <a href="API-CXX.html#dcraw_make_mem_image">dcraw_make_mem_image()</a>
+    <p>Functions <a href="API-CXX.html#dcraw_make_mem_image">dcraw_make_mem_image()</a>
       <a href="API-CXX.html#dcraw_make_mem_thumb">dcraw_make_mem_thumb()</a>
       (and complementary calls in C-API) allocates memory for entire output
       datasets (full RGB bitmap and thumbnail, respectively).To free allocated

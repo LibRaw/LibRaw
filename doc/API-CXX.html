@@ -342,7 +342,7 @@
       decoder may work again.</p>
     <p><a name="COLOR"></a></p>
     <h4>int LibRaw::COLOR(int row, int col)</h4>
-    <p>This call returns pixel color (color component number) in bayer patter at
+    <p>This call returns pixel color (color component number) in bayer pattern at
       row,col. The returned value is in 0..3 range for 4-component Bayer (RGBG2,
       CMYG and so on) and in 0..2 range for 3-color data.</p>
     <p>Color indexes returned could be used as index in imgdata.idata.cdesc
@@ -350,7 +350,7 @@
     <p><a name="error_count"></a></p>
     <h4>int LibRaw::error_count()</h4>
     <p>This call returns count of non-fatal data errors (out of range, etc)
-      occured in unpack() stage.</p>
+      occurred in unpack() stage.</p>
     <p><a name="subtract_black"></a></p>
     <h4>int LibRaw::subtract_black()</h4>
     <p>This call will subtract black level values from RAW data (for suitable
@@ -533,7 +533,7 @@
     <p>One can set the null handler by passing NULL to set_dataerror_handler;
       then no notifier function will be called. The same effect can be achieved
       by creating a LibRaw object with the LIBRAW_OPTIONS_NO_DATAERR_CALLBACK
-      flag in the contructor.</p>
+      flag in the constructor.</p>
     <p>In the case of error in the input data, processing of the current file is
       terminated and a notifier is called; all allocated resources are freed,
       and <a href="#recycle">recycle()</a> is performed. The current call will
@@ -663,7 +663,7 @@
         image_width*(bit_per_pixel/8)*image_colors, but may be more if you wish
         to align image rows to, for example, 8 or 16 or 32 bytes to make CPU
         more happy.</li>
-      <li>int bgr - pixel copy order. RGB if bgr==0 and BGR overwise.</li>
+      <li>int bgr - pixel copy order. RGB if bgr==0 and BGR otherwise.</li>
     </ul>
     <p>The function returns an integer number in accordance with the <a href="API-notes.html#errors">error
         code convention</a>: positive if any system call has returned an error,
@@ -780,7 +780,7 @@
         This call is not implemented for <a href="#buffer_datastream">LibRaw_buffer_datastream</a>,
         so external JPEG processing is not possible when buffer datastream used.
         <br>
-        This functon should be implemented in real input class, base class call
+        This function should be implemented in real input class, base class call
         always return error. <br>
         Working implementation sample can be found in <a href="#file_datastream">LibRaw_file_datastream</a>
         implementation in <strong>libraw/libraw_datastream.h</strong> file.</dd>
@@ -830,7 +830,7 @@
     </dl>
     <p>All other class methods are <a href="#datastream_methods">described
         above</a>.<br>
-      This class implements all possble methods, including fname() and
+      This class implements all possible methods, including fname() and
       subfile_open().</p>
     <p><a name="bigfile_datastream"></a></p>
     <h4>class LibRaw_bigfile_datastream - file input interface</h4>
@@ -850,7 +850,7 @@
       interface which is limited to 2Gb on many systems.</p>
     <p>All other class methods are <a href="#datastream_methods">described
         above</a>.<br>
-      This class implements all possble methods, including fname() and
+      This class implements all possible methods, including fname() and
       subfile_open().</p>
     <p><a name="buffer_datastream"></a></p>
     <h4>class LibRaw_buffer_datastream - memory buffer input interface</h4>
