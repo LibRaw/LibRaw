@@ -33,7 +33,8 @@ void LibRaw::parse_phase_one(int base)
   unsigned offset = get4();
   if (offset == 0xbad0bad)
     return;
-  fseek(ifp, offset + base, SEEK_SET);
+  if (fseek(ifp, offset + base, SEEK_SET) != 0)
+    return;
   entries = get4();
   if (entries > 8192)
     return; // too much??
