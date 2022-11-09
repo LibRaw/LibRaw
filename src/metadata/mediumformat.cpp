@@ -434,20 +434,21 @@ void LibRaw::parse_mos(INT64 offset)
     if (!strcmp(data, "back_serial_number"))
     {
       char buffer[sizeof(imgdata.shootinginfo.BodySerial)];
-      char *words[4];
+      char *words[4] = {0, 0, 0, 0};
       stmread(buffer, (unsigned)skip, ifp);
       /*nwords = */
           getwords(buffer, words, 4, sizeof(imgdata.shootinginfo.BodySerial));
-      strcpy(imgdata.shootinginfo.BodySerial, words[0]);
+	  if(words[0])
+		strcpy(imgdata.shootinginfo.BodySerial, words[0]);
     }
     if (!strcmp(data, "CaptProf_serial_number"))
     {
       char buffer[sizeof(imgdata.shootinginfo.InternalBodySerial)];
-      char *words[4];
+      char *words[4] = {0, 0, 0, 0};
       stmread(buffer, (unsigned)skip, ifp);
-      /*nwords =*/ getwords(buffer, words, 4,
-                        sizeof(imgdata.shootinginfo.InternalBodySerial));
-      strcpy(imgdata.shootinginfo.InternalBodySerial, words[0]);
+      getwords(buffer, words, 4, sizeof(imgdata.shootinginfo.InternalBodySerial));
+	  if(words[0])
+		strcpy(imgdata.shootinginfo.InternalBodySerial, words[0]);
     }
 
     if (!strcmp(data, "JPEG_preview_data"))

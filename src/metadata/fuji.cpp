@@ -892,7 +892,7 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
   if (tag == 0x0010)
   {
     char FujiSerial[sizeof(imgdata.shootinginfo.InternalBodySerial)];
-    char *words[4];
+	char *words[4] = { 0,0,0,0 };
     char yy[2], mm[3], dd[3], ystr[16], ynum[16];
     int year, nwords, ynum_len;
     unsigned c;
@@ -902,6 +902,7 @@ void LibRaw::parseFujiMakernotes(unsigned tag, unsigned type, unsigned len,
                       sizeof(imgdata.shootinginfo.InternalBodySerial));
     for (int i = 0; i < nwords; i++)
     {
+	  if (!words[i]) break;  // probably damaged input
       mm[2] = dd[2] = 0;
       if (strnlen(words[i],
                   sizeof(imgdata.shootinginfo.InternalBodySerial) - 1) < 18)

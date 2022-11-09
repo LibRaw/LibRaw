@@ -546,7 +546,7 @@ void LibRaw::adjust_bl()
 int LibRaw::getwords(char *line, char *words[], int maxwords, int maxlen)
 {
   line[maxlen - 1] = 0;
-  char *p = line;
+  unsigned char *p = (unsigned char*)line;
   int nwords = 0;
 
   while (1)
@@ -555,7 +555,7 @@ int LibRaw::getwords(char *line, char *words[], int maxwords, int maxlen)
       p++;
     if (*p == '\0')
       return nwords;
-    words[nwords++] = p;
+    words[nwords++] = (char*)p;
     while (!isspace(*p) && *p != '\0')
       p++;
     if (*p == '\0')
