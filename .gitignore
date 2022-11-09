@@ -124,5 +124,89 @@ orleans.codegen.cs
 # JetBrains Rider
 *.sln.iml
 
+# XCode User settings
+xcuserdata/
+
+# Xcode 8 and earlier
+*.xcscmblueprint
+*.xccheckout
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+*.launch
+.cproject
+.recommenders/
+.apt_generated/
+.apt_generated_test/
+
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# Prerequisites
+*.d
+
+# Object files
+*.elf
+*.ko
+*.lo
+*.o
+*.obj
+*.slo
+
+# Linker output
+*.exp
+*.ilk
+*.map
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# (Static) Libraries
+*.a
+*.la
+*.lai
+*.lib
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.dylib
+*.so
+*.so.*
+
+# Executables
+*.app
+*.exe
+*.hex
+*.i*86
+*.out
+*.x86_64
+
+# Debug files
+*.dSYM/
+*.idb
+*.pdb
+*.su
+
 # LibRaw buildfiles
 buildfiles/
