@@ -604,6 +604,9 @@ void LibRaw::uncompressed_fp_dng_load_raw()
 
     int bytesps = (ifd->bps + 7) >> 3; // round to upper value
 
+	if(bytesps < 1 || bytesps > 4)
+      throw LIBRAW_EXCEPTION_DECODE_RAW;
+
     tile_stripe_data_t tiles;
     tiles.init(ifd, imgdata.sizes, libraw_internal_data.unpacker_data, libraw_internal_data.unpacker_data.order,
         libraw_internal_data.internal_data.input);
