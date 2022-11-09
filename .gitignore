@@ -207,6 +207,3 @@ _deps
 *.idb
 *.pdb
 *.su
-
-# LibRaw buildfiles
-buildfiles/
