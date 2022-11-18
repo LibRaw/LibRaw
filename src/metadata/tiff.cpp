@@ -2125,8 +2125,8 @@ void LibRaw::apply_tiff()
             if(!ok)
                 continue;
         }
-		if (unsigned(tiff_ifd[i].t_width * tiff_ifd[i].t_height / (SQR(tiff_ifd[i].bps) + 1)) >
-			unsigned(thumb_width * thumb_height / (SQR(thumb_misc) + 1)))
+		if ( (INT64(tiff_ifd[i].t_width) * INT64(tiff_ifd[i].t_height) / INT64(SQR(tiff_ifd[i].bps) + 1)) >
+			 (INT64(thumb_width) * INT64(thumb_height) / INT64(SQR(thumb_misc) + 1)) ) 
 		{
 
 			thumb_width = tiff_ifd[i].t_width;
