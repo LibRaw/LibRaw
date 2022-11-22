@@ -1212,6 +1212,9 @@ dng_skip:
     width = (height >> fuji_layout) + fuji_width;
     height = width - 1;
     pixel_aspect = 1;
+	// Prevent incorrect-sized fuji-rotated files
+	if (INT64(width)*INT64(height) > INT64(raw_width) * INT64(raw_height) * 8LL)
+		is_raw = 0;
   }
   else
   {
@@ -1246,6 +1249,7 @@ dng_skip:
        is_raw = 0;
    if (dng_version && (tiff_samples < 1 || tiff_samples > 4))
        is_raw = 0; // we do not handle DNGs with more than 4 values per pixel
+
 #ifdef LIBRAW_OLD_VIDEO_SUPPORT
 #ifdef NO_JASPER
   if (load_raw == &LibRaw::redcine_load_raw)
