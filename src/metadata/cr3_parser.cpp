@@ -749,7 +749,7 @@ int LibRaw::parseCR3(INT64 oAtomList,
       if (szAtomContent >= 12) {
         fseek(ifp, 4L, SEEK_CUR);
         int entries = get4();
-        if (!entries)
+        if (entries < 1 || entries > 1000000)
         {
           err =  -9;
           goto fin;
@@ -788,7 +788,7 @@ int LibRaw::parseCR3(INT64 oAtomList,
         else
         {
           current_track.sample_size = 0;
-          if (entries >= (INT_MAX - 4) / 32) {
+          if (entries < 1 || entries > 1000000) {
             err = -10;
             goto fin;
           }
@@ -811,7 +811,7 @@ int LibRaw::parseCR3(INT64 oAtomList,
         fseek(ifp, 4L, SEEK_CUR);
         uint32_t entries = get4();
         int i;
-        if (!entries)
+        if (entries < 1 || entries > 1000000)
         {
           err = -11;
           goto fin;
