@@ -1,3 +1,12 @@
+2023-01-05  Alex Tutubalin <lexa@lexa.ru>
+ LibRaw 0.21.1-Release
+ * fixed typo in panasonic metadata parser
+
+2022-12-18  Alex Tutubalin <lexa@lexa.ru>
+ LibRaw 0.21-Release
+
+ * Multiple fixes inspired by oss-fuzz project
+
 2022-07-01  Alex Tutubalin <lexa@lexa.ru>
 
  LibRaw 0.21-Beta1
