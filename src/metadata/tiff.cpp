@@ -146,7 +146,7 @@ int LibRaw::parse_tiff_ifd(int base)
         break;
       case 0x000a: /*  10, BitsPerSample */
         pana_bpp = get2();
-		pana_bpp = LIM(8, 16, pana_bpp);
+		pana_bpp = LIM(pana_bpp, 8, 16);
         break;
       case 0x000b: /*  11, Compression */
         imPana.Compression = get2();
