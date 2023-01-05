@@ -482,7 +482,10 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	  // Fuji layout files: either DNG or unpacked_load_raw should be used
 	  if (libraw_internal_data.internal_output_params.fuji_width || libraw_internal_data.unpacker_data.fuji_layout)
 	  {
-        if (!imgdata.idata.dng_version && load_raw != &LibRaw::unpacked_load_raw)
+        if (!imgdata.idata.dng_version && load_raw != &LibRaw::unpacked_load_raw
+			&& load_raw != &LibRaw::unpacked_load_raw_FujiDBP 
+			&& load_raw != &LibRaw::unpacked_load_raw_fuji_f700s20
+			)
           return LIBRAW_FILE_UNSUPPORTED;
 	  }
 
