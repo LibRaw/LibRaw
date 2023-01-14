@@ -266,8 +266,9 @@ int LibRaw::unpack_thumb(void)
               tiff_ifd[pifd].strip_byte_counts_count)
           {
             // We found it, calculate final size
-            unsigned total_size = 0;
-            for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count; i++)
+            INT64 total_size = 0;
+            for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count 
+				&& i < tiff_ifd[pifd].strip_offsets_count; i++)
               total_size += tiff_ifd[pifd].strip_byte_counts[i];
             if (total_size != (unsigned)t_length) // recalculate colors
             {
@@ -284,15 +285,15 @@ int LibRaw::unpack_thumb(void)
 
             char *dest = T.thumb;
             INT64 pos = ID.input->tell();
+            INT64 remain = T.tlength;
 
             for (int i = 0; i < tiff_ifd[pifd].strip_byte_counts_count &&
                             i < tiff_ifd[pifd].strip_offsets_count;
                  i++)
             {
-              int remain = T.tlength;
               int sz = tiff_ifd[pifd].strip_byte_counts[i];
-              int off = tiff_ifd[pifd].strip_offsets[i];
-              if (off >= 0 && off + sz <= ID.input->size() && sz <= remain)
+              INT64 off = tiff_ifd[pifd].strip_offsets[i];
+              if (off >= 0 && off + sz <= ID.input->size() && sz > 0 && INT64(sz) <= remain)
               {
                 ID.input->seek(off, SEEK_SET);
                 ID.input->read(dest, sz, 1);
