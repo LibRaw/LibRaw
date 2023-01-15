@@ -609,6 +609,9 @@ void LibRaw::canon_sraw_load_raw()
   int saved_w = width, saved_h = height;
   char *cp;
 
+  if(!image)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   if (!ljpeg_start(&jh, 0) || jh.clrs < 4)
     return;
   jwide = (jh.wide >>= 1) * jh.clrs;
