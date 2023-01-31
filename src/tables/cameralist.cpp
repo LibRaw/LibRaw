@@ -842,7 +842,7 @@ static const char *static_camera_list[] = {
 	"Olympus XZ-1",
 	"Olympus XZ-2",
 	"Olympus XZ-10",
-	"OM Digital Solutions OM-1",
+	"Olympus OM-1",
 	"OmniVision 4688",
 	"OmniVision OV5647",
 	"OmniVision OV5648",
