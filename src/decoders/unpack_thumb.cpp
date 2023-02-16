@@ -333,13 +333,14 @@ int LibRaw::unpack_thumb(void)
         int o_bps = (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_USE_PPM16_THUMBS) ? 2 : 1;
         int o_length = T.twidth * T.theight * t_colors * o_bps;
         int i_length = T.twidth * T.theight * t_colors * 2;
-        if (!T.tlength)
-          T.tlength = o_length;
-        THUMB_SIZE_CHECKTNZ(o_length);
+
+		THUMB_SIZE_CHECKTNZ(o_length);
         THUMB_SIZE_CHECKTNZ(i_length);
         THUMB_SIZE_CHECKTNZ(T.tlength);
 
         ushort *t_thumb = (ushort *)calloc(i_length, 1);
+		if (t_thumb)
+			throw LIBRAW_EXCEPTION_ALLOC;
         ID.input->read(t_thumb, 1, i_length);
         if ((libraw_internal_data.unpacker_data.order == 0x4949) ==
             (ntohs(0x1234) == 0x1234))
@@ -351,14 +352,18 @@ int LibRaw::unpack_thumb(void)
         {
           T.thumb = (char *)t_thumb;
           T.tformat = LIBRAW_THUMBNAIL_BITMAP16;
+          T.tlength = i_length;
         }
         else
         {
           T.thumb = (char *)malloc(o_length);
+          if (T.thumb)
+            throw LIBRAW_EXCEPTION_ALLOC;
           for (int i = 0; i < o_length; i++)
             T.thumb[i] = t_thumb[i] >> 8;
           free(t_thumb);
           T.tformat = LIBRAW_THUMBNAIL_BITMAP;
+          T.tlength = o_length;
         }
         SET_PROC_FLAG(LIBRAW_PROGRESS_THUMB_LOAD);
         return 0;
