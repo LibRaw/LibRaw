@@ -336,7 +336,6 @@ int LibRaw::unpack_thumb(void)
 
 		THUMB_SIZE_CHECKTNZ(o_length);
         THUMB_SIZE_CHECKTNZ(i_length);
-        THUMB_SIZE_CHECKTNZ(T.tlength);
 
         ushort *t_thumb = (ushort *)calloc(i_length, 1);
 		if (t_thumb)
