@@ -101,6 +101,7 @@ void LibRaw::GetNormalizedModel()
       { CanonID_EOS_90D,           "EOS 90D"},
       { CanonID_EOS_R3,            "EOS R3"},
       { CanonID_EOS_R6,            "EOS R6"},
+      { CanonID_EOS_R6_Mark_II,    "EOS R6 Mark II"}, // R6m2
       { CanonID_EOS_R7,            "EOS R7"},
       { CanonID_EOS_R10,           "EOS R10"},
       { CanonID_EOS_M50_Mark_II,   "EOS M50 Mark II"}, // M50m2, Kiss M2

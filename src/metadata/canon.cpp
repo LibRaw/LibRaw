@@ -112,7 +112,8 @@ void LibRaw::setCanonBodyFeatures(unsigned long long id)
            (id == CanonID_EOS_RP) ||
            (id == CanonID_EOS_R3) ||
            (id == CanonID_EOS_R5) ||
-           (id == CanonID_EOS_R6))
+           (id == CanonID_EOS_R6) ||
+           (id == CanonID_EOS_R6_Mark_II))
   {
     ilm.CameraFormat = LIBRAW_FORMAT_FF;
     ilm.CameraMount = LIBRAW_MOUNT_Canon_RF;
