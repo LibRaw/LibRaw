@@ -1173,6 +1173,8 @@ void LibRaw::panasonic_load_raw()
   }
   else
   {
+	if (load_flags >= 0x4000)
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
     for (row = 0; row < raw_height; row++)
     {
       checkCancel();
