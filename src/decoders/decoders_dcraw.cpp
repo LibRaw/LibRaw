@@ -616,6 +616,9 @@ void LibRaw::canon_sraw_load_raw()
     return;
   jwide = (jh.wide >>= 1) * jh.clrs;
 
+  if (jwide < 32 || jwide > 65535)
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   if (load_flags & 256)
   {
     width = raw_width;
