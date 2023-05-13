@@ -1203,9 +1203,15 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
     {
       if (C.profile)
         free(C.profile);
-      C.profile = malloc(C.profile_length);
-      ID.input->seek(ID.profile_offset, SEEK_SET);
-      ID.input->read(C.profile, C.profile_length, 1);
+	  INT64 profile_sz = MIN(INT64(C.profile_length), ID.input->size() - ID.profile_offset);
+	  if (profile_sz > 0LL && profile_sz < LIBRAW_MAX_PROFILE_SIZE_MB * 1024LL * 1024LL)
+	  {
+        C.profile = malloc(size_t(profile_sz));
+        ID.input->seek(ID.profile_offset, SEEK_SET);
+        ID.input->read(C.profile, size_t(profile_sz), 1);
+	  }
+	  else
+		  C.profile = NULL;
     }
 
     SET_PROC_FLAG(LIBRAW_PROGRESS_IDENTIFY);
