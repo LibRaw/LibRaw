@@ -3,6 +3,8 @@
        limits allocation/read size for embedded color profile (default: 256Mb)
 
   * Embedded color profile allocation/read size: limited by input file size.
+
+  * Check against corrupted LJPEG header in Canon sRAW decoder
  
 2023-01-05  Alex Tutubalin <lexa@lexa.ru>
  LibRaw 0.21.1-Release
