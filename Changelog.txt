@@ -60,7 +60,11 @@
 
   Notes:
     -  Only TIFF-based and CR3 files are parsed for thumbnail list, other formats will have
-       thumbcount = 1 (or 0 if no thumbnail found in file).
+       thumbcount = 1.
+
+    - If no thumbnails are found in file: thumbcount will be set to 1 and
+      thumblist[0] will be initialized with data from thumbnail fields, 
+      so LibRaw::unpack_thumb_ex(0) will do the same as LibRaw::unpack_thumb()
 
     -  Thumbnail image size may be unknown (not recorded in metadata), in this case twidth and theight are zero.
        Usually small(er) thumbnails will always have twidth/theight filled, while largest one may have these fields set to zero.
