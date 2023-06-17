@@ -577,6 +577,9 @@ void LibRaw::lossless_jpeg_load_raw()
           i = jidx / (cr2_slice[1] * raw_height);
           if ((j = i >= cr2_slice[0]))
             i = cr2_slice[0];
+		  if(!cr2_slice[1+j])
+            throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
           jidx -= i * (cr2_slice[1] * raw_height);
           row = jidx / cr2_slice[1 + j];
           col = jidx % cr2_slice[1 + j] + i * cr2_slice[1];
