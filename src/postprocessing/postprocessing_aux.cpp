@@ -39,6 +39,7 @@ void LibRaw::wavelet_denoise()
   static const float noise[] = {0.8002f, 0.2735f, 0.1202f, 0.0585f,
                                 0.0291f, 0.0152f, 0.0080f, 0.0044f};
 
+  if (iwidth < 65 || iheight < 65) return;
 
   while (maximum << scale < 0x10000)
     scale++;
@@ -134,6 +135,9 @@ void LibRaw::wavelet_denoise()
   ushort *window[4];
   static const float noise[] = {0.8002, 0.2735, 0.1202, 0.0585,
                                 0.0291, 0.0152, 0.0080, 0.0044};
+
+  if (iwidth < 65 || iheight < 65)
+    return;
 
   while (maximum << scale < 0x10000)
     scale++;
