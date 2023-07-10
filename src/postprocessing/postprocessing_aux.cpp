@@ -328,6 +328,9 @@ void LibRaw::recover_highlights()
 
   grow = pow(2.0, 4 - highlight);
   FORC(unsigned(colors)) hsat[c] = 32000 * pre_mul[c];
+  FORC(unsigned(colors))
+	  if(hsat[c]<1)
+		  return;
   for (kc = 0, c = 1; c < (unsigned)colors; c++)
     if (pre_mul[kc] < pre_mul[c])
       kc = c;
