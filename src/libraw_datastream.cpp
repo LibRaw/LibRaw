@@ -175,6 +175,7 @@ INT64 LibRaw_file_datastream::tell()
 
 char *LibRaw_file_datastream::gets(char *str, int sz)
 {
+  if(sz<1) return NULL;
   if (substream)
     return substream->gets(str, sz);
   LR_STREAM_CHK();
@@ -398,6 +399,7 @@ INT64 LibRaw_buffer_datastream::tell()
 
 char *LibRaw_buffer_datastream::gets(char *s, int sz)
 {
+  if(sz<1) return NULL;
   if (substream)
     return substream->gets(s, sz);
   unsigned char *psrc, *pdest, *str;
@@ -594,6 +596,7 @@ INT64 LibRaw_bigfile_datastream::tell()
 
 char *LibRaw_bigfile_datastream::gets(char *str, int sz)
 {
+  if(sz<1) return NULL;
   LR_BF_CHK();
   return substream ? substream->gets(str, sz) : fgets(str, sz, f);
 }
