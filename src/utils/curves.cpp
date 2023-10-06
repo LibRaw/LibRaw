@@ -37,8 +37,8 @@ void LibRaw::cubic_spline(const int *x_, const int *y_, const int len)
   }
   for (i = len - 1; i > 0; i--)
   {
-	int _div = x[i] - x[i - 1];
-	if (_div == 0) 
+	float _div = x[i] - x[i - 1];
+	if (fabs(_div) < 1.0e-15)
 		_div = 1;
     b[i] = (y[i] - y[i - 1]) / _div;
     d[i - 1] = _div;
