@@ -1,10 +1,24 @@
-2023-05-13   Alex Tutubalin <lexa@lexa.ru>
+2023-12-19  Alex Tutubalin <lexa@lexa.ru>
+
+ LibRaw 0.21.2-Release
+
   * New compile-defined limit LIBRAW_MAX_PROFILE_SIZE_MB: 
        limits allocation/read size for embedded color profile (default: 256Mb)
 
   * Embedded color profile allocation/read size: limited by input file size.
 
-  * Check against corrupted LJPEG header in Canon sRAW decoder
+  * Multiple fixes (mostly inspired by oss-fuzz) to improve library stability and/or input checks.
+
+  * raw-identify: use fallback if PATH_MAX not available   
+
+  * Disabled color conversion for Canon 16-bit thumbnails
+
+  * docs/changelog: explained the case when no thumbnail is found in specific file
+
+  * swapXX renamed to libraw_swapXX to avoid name conflict
+
+  * better striped thumbnails handling
+
  
 2023-01-05  Alex Tutubalin <lexa@lexa.ru>
  LibRaw 0.21.1-Release
