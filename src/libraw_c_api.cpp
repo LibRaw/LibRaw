@@ -215,6 +215,14 @@ extern "C"
     ip->set_progress_handler(cb, data);
   }
 
+  int libraw_adjust_to_raw_inset_crop(libraw_data_t *lr, unsigned mask, float maxcrop)
+  {
+    if (!lr)
+      return EINVAL;
+    LibRaw *ip = (LibRaw *)lr->parent_class;
+    return ip->adjust_to_raw_inset_crop(mask,maxcrop);
+  }
+
   // DCRAW
   int libraw_adjust_sizes_info_only(libraw_data_t *lr)
   {

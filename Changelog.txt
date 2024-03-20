@@ -66,6 +66,10 @@
   * New possible bit in imgdata.process_warnings: LIBRAW_WARN_VENDOR_CROP_SUGGESTED
     If set: unknown/untested RAW image frame size passed to LibRaw, cropping may be incorrect.
     It is suggested to use LibRaw::adjust_to_raw_inset_crop(1) for vendor specified crop.
+ 
+ * LibRaw::adjust_to_raw_inset_crop exposed via C-API call:
+   libraw_adjust_to_raw_inset_crop(libraw_data_t *lr, unsigned mask, float maxcrop);
+   Note: default maxcrop value for C++ API is 0.55f
 
   * Better handling of DNG RAW Previews with Stage2 opcodes
 
