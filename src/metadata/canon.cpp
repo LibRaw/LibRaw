@@ -121,7 +121,8 @@ void LibRaw::setCanonBodyFeatures(unsigned long long id)
   }
 
   else if ((id == CanonID_EOS_R7)  ||
-           (id == CanonID_EOS_R10))
+           (id == CanonID_EOS_R10) ||
+           (id == CanonID_EOS_R50))
   {
     ilm.CameraFormat = LIBRAW_FORMAT_APSC;
     ilm.CameraMount = LIBRAW_MOUNT_Canon_RF;
