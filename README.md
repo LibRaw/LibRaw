@@ -44,7 +44,7 @@ We do not guarantee that the licensing will not change in future versions of Lib
 
 ### Major/minor releases
 
-* Major releases _(for example, 0.20)_ are published once every year and a half to two years.
+* Major releases _(for example, 0.20)_ are published once every year and a half to three years.
 * When the first public beta version of a major release is published, the list of supported cameras and formats is frozen; we try (but do not guarantee) to freeze the API/ABI as well.
 * The public major release contains only that code which has been sufficiently tested on a wide user base (including in our commercial products). Something very new may not be included in it (but it will probably be included in a public snapshot, see below).
 * Minor updates _(0.20.1, 0.20.2�)_ do not change the API/ABI and new cameras are not added; generally they are just bugfixes.
@@ -53,7 +53,7 @@ We do not guarantee that the licensing will not change in future versions of Lib
 
 ### Public snapshots
 
-* Public snapshots are published every 7-9 months in the [public GitHub repository](https://github.com/LibRaw/LibRaw).
+* Public snapshots are published every 9-18 months in the [public GitHub repository](https://github.com/LibRaw/LibRaw).
 * These versions contain support for new cameras that was added after the previous major release. The API/ABI of public snapshots is not frozen, and may change.
 * Public snapshots are always tested on a fairly large user base, and may be considered suitable for use in programs that work with files with known origins (that is, recorded directly by users� digital cameras). However, public snapshots should not be considered sufficiently reliable for processing files that are specially constructed for vulnerability testing; that is, they should not be used in public services that allow for anonymous processing of files of unknown provenance
 
