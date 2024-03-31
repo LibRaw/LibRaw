@@ -690,7 +690,7 @@ ushort checked_buffer_t::sget2(int offset)
 }
 void checked_buffer_t::checkoffset(int off)
 {
-  if (off >= _len)
+  if (off >= _len || off < 0)
     throw LIBRAW_EXCEPTION_IO_EOF;
 }
 unsigned char checked_buffer_t::operator[](int idx)
