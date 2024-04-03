@@ -685,6 +685,7 @@ checked_buffer_t::checked_buffer_t(short ord, unsigned char *dd, int ss) : _orde
 
 ushort checked_buffer_t::sget2(int offset)
 {
+  checkoffset(offset);
   checkoffset(offset + 2);
   return libraw_sget2_static(_order, _data + offset);
 }
@@ -700,12 +701,14 @@ unsigned char checked_buffer_t::operator[](int idx)
 }
 unsigned checked_buffer_t::sget4(int offset)
 {
+  checkoffset(offset);
   checkoffset(offset + 4);
   return libraw_sget4_static(_order, _data + offset);
 }
 
 double checked_buffer_t::sgetreal(int type, int offset)
 {
+  checkoffset(offset);
   int sz = libraw_tagtype_dataunit_bytes(type);
   checkoffset(offset + sz);
   return libraw_sgetreal_static(_order, type, _data + offset);
