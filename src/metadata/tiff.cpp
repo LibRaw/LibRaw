@@ -1817,9 +1817,9 @@ void LibRaw::apply_tiff()
               (libraw_internal_data.unpacker_data.dng_frames[q] >> 8) & 0xff;
           arr[q].ifdi = libraw_internal_data.unpacker_data.dng_frames[q];
           arr[q].databits =
-              tiff_ifd[ifdidx].t_width * tiff_ifd[ifdidx].t_height *
-                  tiff_ifd[ifdidx].samples * tiff_ifd[ifdidx].bps +
-              (0x100 -
+              INT64(tiff_ifd[ifdidx].t_width) * INT64(tiff_ifd[ifdidx].t_height) *
+                  INT64(tiff_ifd[ifdidx].samples) * INT64(tiff_ifd[ifdidx].bps) +
+              INT64(0x100 -
                (arr[q].ifdi & 0xff)); // add inverted frame # to ensure same
                                       // sort order for similar sized frames.
           if (tiff_ifd[ifdidx].phint == 4)
