@@ -47,7 +47,8 @@ void LibRaw::pre_interpolate()
     }
     else
     {
-      img = (ushort(*)[4])calloc(height, width * sizeof *img);
+      int extra = filters ? (filters == 9 ? 6 : 2) : 0;
+      img = (ushort(*)[4])calloc((height+extra), (width+extra) * sizeof *img);
       for (row = 0; row < height; row++)
         for (col = 0; col < width; col++)
         {

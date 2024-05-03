@@ -36,7 +36,7 @@ void LibRaw::xtrans_interpolate(int passes)
   short allhex[3][3][2][8];
   ushort sgrow = 0, sgcol = 0;
 
-  if (width < LIBRAW_AHD_TILE || height < LIBRAW_AHD_TILE)
+  if (width < LIBRAW_AHD_TILE || height < LIBRAW_AHD_TILE || filters != 9)
     throw LIBRAW_EXCEPTION_IO_CORRUPT; // too small image
                                        /* Check against right pattern */
   for (int row = 0; row < 6; row++)

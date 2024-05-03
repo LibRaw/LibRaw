@@ -33,6 +33,10 @@ int LibRaw::dcraw_process(void)
     if (~O.cropbox[2] && ~O.cropbox[3])
       no_crop = 0;
 
+	for(int c = 0; c < 4; c++)
+		if (O.aber[c]< 0.001 || O.aber[c] > 1000.f)
+			O.aber[c] = 1.0;
+
     libraw_decoder_info_t di;
     get_decoder_info(&di);
 
