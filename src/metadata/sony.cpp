@@ -634,7 +634,7 @@ void LibRaw::process_Sony_0x2010(uchar *buf, ushort len)
 	} else if (imSony.group2010 == LIBRAW_SONY_Tag2010i) {
 		ar_offset = 0x188c;
 	}
-	if (ar_offset != 0) {
+	if (ar_offset != 0 && ar_offset<len) {
 		int s = (int)SonySubstitution[buf[ar_offset]];
 		if (s == 0) {
 			imSony.AspectRatio = LIBRAW_IMAGE_ASPECT_16to9;
@@ -661,7 +661,9 @@ void LibRaw::process_Sony_0x2010(uchar *buf, ushort len)
 
   if ((imSony.MeteringMode_offset != 0xffff) &&
       (imSony.ExposureProgram_offset != 0xffff) &&
-      (len >= (imSony.MeteringMode_offset + 2)))
+      (len > (imSony.MeteringMode_offset)) &&
+	  (len > (imSony.ExposureProgram_offset))
+	  )
   {
     imgdata.shootinginfo.MeteringMode =
         SonySubstitution[buf[imSony.MeteringMode_offset]];
@@ -670,7 +672,7 @@ void LibRaw::process_Sony_0x2010(uchar *buf, ushort len)
   }
 
   if ((imSony.ReleaseMode2_offset != 0xffff) &&
-      (len >= (imSony.ReleaseMode2_offset + 2)))
+      (len > (imSony.ReleaseMode2_offset)))
   {
     imgdata.shootinginfo.DriveMode =
         SonySubstitution[buf[imSony.ReleaseMode2_offset]];
