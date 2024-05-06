@@ -1156,7 +1156,7 @@ dng_skip:
       (tiff_bps > 16 &&
        (load_raw != &LibRaw::deflate_dng_load_raw &&
         load_raw != &LibRaw::uncompressed_fp_dng_load_raw)) ||
-      tiff_samples > 6 || colors > 4)
+      tiff_samples > 6 || colors > 4 || colors == 2)
     is_raw = 0;
 
   if (raw_width < 22 || raw_width > 64000 || raw_height < 22 ||
