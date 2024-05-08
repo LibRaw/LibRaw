@@ -159,7 +159,7 @@ int LibRaw::dcraw_process(void)
         (callbacks.interpolate_xtrans_cb)(this);
       else if (quality == 0)
         lin_interpolate();
-      else if (quality == 1 || P1.colors > 3)
+      else if (quality == 1 || P1.colors > 3 || (P1.filters != LIBRAW_XTRANS && P1.filters <= 1000))
         vng_interpolate();
       else if (quality == 2 && P1.filters > 1000)
         ppg_interpolate();
