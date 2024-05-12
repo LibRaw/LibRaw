@@ -544,7 +544,7 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X-T2", 0, 0,  // same CMs: X-T2, X-T20
 	  { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X-T3", 0, 0,   // same CMs: X-T3, X-T30, "X-T30 II"
-	  { 13426,-6334,-1177,-4244,12136,2371,580,1303,5980 } }, // v.2
+	  { 13426,-6334,-1177,-4244,12136,2371, -580,1303,5980 } }, // v.2
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X-T4", 0, 0,
 	  { 13426,-6334,-1177,-4244,12136,2371,580,1303,5980 } },
     { LIBRAW_CAMERAMAKER_Fujifilm, "X-T5", 0, 0,
