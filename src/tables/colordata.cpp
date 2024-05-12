@@ -468,7 +468,7 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X100T", 0, 0,
 	  { 10592,-4262,-1008,-3514,11355,2465,-870,2025,6386 } },
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X100V", 0, 0,
-	  { 13426,-6334,-1177,-4244,12136,2371,580,1303,5980 } },
+	  { 13717, -6490, -1154, -4348, 12266, 2335, -690, 1286, 6134 } }, // 20240512
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X100", 0, 0,
 	  { 12161,-4457,-1069,-5034,12874,2400,-795,1724,6904 } },
 
@@ -494,7 +494,7 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X-Pro2", 0, 0,
 	  { 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 } },
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X-Pro3", 0, 0,
-	  { 13426,-6334,-1177,-4244,12136,2371,580,1303,5980 } },
+	  { 13426,-6334,-1177,-4244,12136,2371, -580,1303,5980 } },
 
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X-A10", 0, 0,
 	  { 11540,-4999,-991,-2949,10963,2278,-382,1049,5605} },
@@ -546,9 +546,9 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X-T3", 0, 0,   // same CMs: X-T3, X-T30, "X-T30 II"
 	  { 13426,-6334,-1177,-4244,12136,2371, -580,1303,5980 } }, // v.2
 	{ LIBRAW_CAMERAMAKER_Fujifilm, "X-T4", 0, 0,
-	  { 13426,-6334,-1177,-4244,12136,2371,580,1303,5980 } },
-    { LIBRAW_CAMERAMAKER_Fujifilm, "X-T5", 0, 0,
-      { 11809, -5358, -1141, -4248, 12164,  2343,  -514,  1097,  5848 } },
+	  { 13426,-6334,-1177,-4244,12136,2371,-580,1303,5980 } },
+  { LIBRAW_CAMERAMAKER_Fujifilm, "X-T5", 0, 0,
+    { 11809,-5358,-1141,-4248,12164,2343,-514,1097,5848 } },
 
 	{ LIBRAW_CAMERAMAKER_GITUP, "G3DUO", 130, 62000,
 	   { 8489,-2583,-1036,-8051,15583,2643,-1307,1407,7354 } },
