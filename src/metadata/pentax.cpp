@@ -466,7 +466,7 @@ void LibRaw::parsePentaxMakernotes(int /*base*/, unsigned tag, unsigned type,
   else if (tag == 0x0221)
   {
     int nWB = get2();
-    if (nWB <= int(sizeof(icWBCCTC) / sizeof(icWBCCTC[0])))
+    if (nWB > 0 && nWB <= int(sizeof(icWBCCTC) / sizeof(icWBCCTC[0])))
       FORC(nWB)
       {
         icWBCCTC[c][0] = (unsigned)0xcfc6 - get2();
