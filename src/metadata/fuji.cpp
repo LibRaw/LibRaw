@@ -856,7 +856,7 @@ void LibRaw::parseAdobeRAFMakernote()
             wb[2] = sget4(PrivateMknBuf + posWB) << 1;
             posWB += 4;
 
-            if (tWB && (iCCT < 255))
+            if (tWB && (iCCT < 64))
             {
               icWBCCTC[iCCT][0] = tWB;
               FORC4 icWBCCTC[iCCT][c + 1] = wb[c];
@@ -1394,7 +1394,7 @@ void LibRaw::parse_fuji(int offset)
           wb[1] = get4();
           wb[3] = get4();
           wb[2] = get4() << 1;
-          if (tWB && (iCCT < 255))
+          if (tWB && (iCCT < 64))
           {
             icWBCCTC[iCCT][0] = tWB;
             FORC4 icWBCCTC[iCCT][c + 1] = wb[c];
