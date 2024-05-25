@@ -169,10 +169,12 @@ int LibRaw::parse_tiff_ifd(int base)
         {
           if ((j = get2()) < 0x100)
           {
-            icWBC[j][0] = get2();
-            icWBC[j][2] = get2();
-            icWBC[j][1] = icWBC[j][3] =
-                0x100;
+			  if (j >= 0) {
+				  icWBC[j][0] = get2();
+				  icWBC[j][2] = get2();
+				  icWBC[j][1] = icWBC[j][3] =
+					  0x100;
+			  }
           }
           else // light source out of EXIF numbers range
             get4();
@@ -354,12 +356,14 @@ int LibRaw::parse_tiff_ifd(int base)
         {
           if ((j = get2()) < 0x100)
           {
+           if(j >= 0) {
             icWBC[j][0] = get2();
             icWBC[j][1] = icWBC[j][3] = get2();
             icWBC[j][2] = get2();
             if (c == 1 && i > 6 && cam_mul[0] <= 0.001f)
                 for (int q = 0; q < 4; q++)
                     cam_mul[q] = icWBC[j][q];
+	   }
           }
           else
             fseek(ifp, 6, SEEK_CUR);
