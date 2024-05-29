@@ -189,11 +189,10 @@ void LibRaw::lossy_dng_load_raw()
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
   struct jpeg_decompress_struct cinfo;
   JSAMPARRAY buf;
-  JSAMPLE(*pixel)[3];
   unsigned sorder = order, ntags, opcode, deg, i, j, c;
   unsigned trow = 0, tcol = 0, row, col;
   INT64 save = data_offset - 4;
-  ushort cur[3][256];
+  ushort cur[4][256];
   double coeff[9], tot;
 
   if (meta_offset)
@@ -212,7 +211,7 @@ void LibRaw::lossy_dng_load_raw()
         continue;
       }
       fseek(ifp, 20, SEEK_CUR);
-      if ((c = get4()) > 2)
+      if ((c = get4()) > 3)
         break;
       fseek(ifp, 12, SEEK_CUR);
       if ((deg = get4()) > 8)
@@ -253,7 +252,7 @@ void LibRaw::lossy_dng_load_raw()
     jpeg_read_header(&cinfo, TRUE);
     jpeg_start_decompress(&cinfo);
     buf = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE,
-                                     cinfo.output_width * 3, 1);
+                                     cinfo.output_width * colors, 1);
     try
     {
       while (cinfo.output_scanline < cinfo.output_height &&
@@ -261,10 +260,9 @@ void LibRaw::lossy_dng_load_raw()
       {
         checkCancel();
         jpeg_read_scanlines(&cinfo, buf, 1);
-        pixel = (JSAMPLE(*)[3])buf[0];
         for (col = 0; col < cinfo.output_width && tcol + col < width; col++)
         {
-          FORC3 image[row * width + tcol + col][c] = cur[c][pixel[col][c]];
+          FORC(colors) image[row * width + tcol + col][c] = cur[c][buf[0][col * colors + c]];
         }
       }
     }
