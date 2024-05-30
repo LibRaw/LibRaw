@@ -95,7 +95,9 @@ int LibRaw::valid_for_dngsdk()
 
   if (libraw_internal_data.unpacker_data.tiff_compress == 34892
 	  && libraw_internal_data.unpacker_data.tiff_bps == 8
-	  && libraw_internal_data.unpacker_data.tiff_samples == 3
+	  && (libraw_internal_data.unpacker_data.tiff_samples == 3
+		  || libraw_internal_data.unpacker_data.tiff_samples == 1
+		  || libraw_internal_data.unpacker_data.tiff_samples == 4 )
 	  && load_raw == &LibRaw::lossy_dng_load_raw
 	  )
   {
