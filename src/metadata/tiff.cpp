@@ -1580,11 +1580,13 @@ int LibRaw::parse_tiff_ifd(int base)
                     (buf_SR2 = (unsigned *)malloc(SR2SubIFDLength + 1024)))
                 { // 1024b for safety
                   fseek(ifp, SR2SubIFDOffset + base, SEEK_SET);
-                  fread(buf_SR2, SR2SubIFDLength, 1, ifp);
-                  sony_decrypt(buf_SR2, SR2SubIFDLength / 4, 1, SR2SubIFDKey);
-                  parseSonySR2((uchar *)buf_SR2, SR2SubIFDOffset,
-                               SR2SubIFDLength, AdobeDNG);
-
+                  int items = fread(buf_SR2, 1, SR2SubIFDLength, ifp);
+				  if (items == SR2SubIFDLength)
+				  {
+					  sony_decrypt(buf_SR2, SR2SubIFDLength / 4, 1, SR2SubIFDKey);
+					  parseSonySR2((uchar *)buf_SR2, SR2SubIFDOffset,
+						  SR2SubIFDLength, AdobeDNG);
+				  }
                   free(buf_SR2);
                 }
 
@@ -1669,9 +1671,12 @@ int LibRaw::parse_tiff_ifd(int base)
       (buf = (unsigned *)malloc(sony_length)))
   {
     fseek(ifp, sony_offset, SEEK_SET);
-    fread(buf, sony_length, 1, ifp);
-    sony_decrypt(buf, sony_length / 4, 1, sony_key);
-    parseSonySR2((uchar *)buf, sony_offset, sony_length, nonDNG);
+    int items = fread(buf, 1, sony_length, ifp);
+	if (items == sony_length)
+	{
+		sony_decrypt(buf, sony_length / 4, 1, sony_key);
+		parseSonySR2((uchar *)buf, sony_offset, sony_length, nonDNG);
+	}
     free(buf);
   }
   for (i = 0; i < colors && i < 4; i++)
