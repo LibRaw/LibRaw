@@ -87,11 +87,11 @@ void LibRaw::sony_ljpeg_load_raw()
       break;
     try
     {
-      for (row = jrow = 0; jrow < (unsigned)jh.high; jrow++, row += 2)
+      for (row = jrow = 0; jrow < (unsigned)jh.high && trow+row < raw_height-1; jrow++, row += 2)
       {
         checkCancel();
         ushort(*rowp)[4] = (ushort(*)[4])ljpeg_row(jrow, &jh);
-        for (col = jcol = 0; jcol < (unsigned)jh.wide; jcol++, col += 2)
+        for (col = jcol = 0; jcol < (unsigned)jh.wide && tcol+col < raw_width-1; jcol++, col += 2)
         {
           RAW(trow + row, tcol + col) = rowp[jcol][0];
           RAW(trow + row, tcol + col + 1) = rowp[jcol][1];
