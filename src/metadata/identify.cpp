@@ -2389,15 +2389,18 @@ void LibRaw::identify_finetune_dcr(char head[64], int fsize, int flen)
       default:
         /* insert model name-based width/height/margins/etc. assignments */
 
-		  /* raw_inset_crops default*/
-        if (imgdata.sizes.raw_inset_crops[0].cwidth > 0 && imgdata.sizes.raw_inset_crops[0].cwidth <= raw_width &&
-            imgdata.sizes.raw_inset_crops[0].cheight > 0 && imgdata.sizes.raw_inset_crops[0].cheight <= raw_height)
-        {
-          top_margin = imgdata.sizes.raw_inset_crops[0].ctop;
-          left_margin = imgdata.sizes.raw_inset_crops[0].cleft;
-          width = imgdata.sizes.raw_inset_crops[0].cwidth;
-          height = imgdata.sizes.raw_inset_crops[0].cheight;
-        }
+		  if (strncmp(model, "S6000", 5) && strncmp(model, "S6500", 5))
+		  {
+			  /* raw_inset_crops default*/
+			  if (imgdata.sizes.raw_inset_crops[0].cwidth > 0 && imgdata.sizes.raw_inset_crops[0].cwidth <= raw_width &&
+				  imgdata.sizes.raw_inset_crops[0].cheight > 0 && imgdata.sizes.raw_inset_crops[0].cheight <= raw_height)
+			  {
+				  top_margin = imgdata.sizes.raw_inset_crops[0].ctop;
+				  left_margin = imgdata.sizes.raw_inset_crops[0].cleft;
+				  width = imgdata.sizes.raw_inset_crops[0].cwidth;
+				  height = imgdata.sizes.raw_inset_crops[0].cheight;
+			  }
+		  }
         break;
       }
     }
