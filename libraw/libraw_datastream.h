@@ -29,7 +29,18 @@ it under the terms of the one of two licenses as you choose:
 #else /* __cplusplus */
 #if defined _WIN32
 #ifndef LIBRAW_NO_WINSOCK2
+#ifdef NOMINMAX
+#define LIBRAW_NO_UNDEF_NOMINMAX
+#else
+#define NOMINMAX
+#endif
+
 #include <winsock2.h>
+
+#ifndef LIBRAW_NO_UNDEF_NOMINMAX
+#undef NOMINMAX /* restore previous mode*/
+#endif
+#undef LIBRAW_NO_UNDEF_NOMINMAX
 #endif
 #endif
 /* No unique_ptr on Apple ?? */
