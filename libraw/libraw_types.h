@@ -1152,7 +1152,19 @@ private:
 
 
 /* Byte order */
-#if defined(__POWERPC__)
+#if defined(__LITTLE_ENDIAN__)
+#define LibRawBigEndian 0
+
+#elif defined(__BIG_ENDIAN__)
+#define LibRawBigEndian 1
+
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define LibRawBigEndian 0
+
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define LibRawBigEndian 1
+
+#elif defined(__POWERPC__)
 #define LibRawBigEndian 1
 
 #elif defined(__INTEL__)
@@ -1164,19 +1176,9 @@ private:
 #elif defined(_M_X64) || defined(__amd64__) || defined(__x86_64__)
 #define LibRawBigEndian 0
 
-#elif defined(__LITTLE_ENDIAN__)
-#define LibRawBigEndian 0
-
-#elif defined(__BIG_ENDIAN__)
-#define LibRawBigEndian 1
 #elif defined(_ARM_)
 #define LibRawBigEndian 0
 
-#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define LibRawBigEndian 0
-
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#define LibRawBigEndian 1
 #else
 #ifndef qXCodeRez
 #error Unable to figure out byte order.
