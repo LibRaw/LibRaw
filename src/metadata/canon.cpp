@@ -113,6 +113,7 @@ void LibRaw::setCanonBodyFeatures(unsigned long long id)
            || (id == CanonID_EOS_RP)
            || (id == CanonID_EOS_R3)
            || (id == CanonID_EOS_R5)
+           || (id == CanonID_EOS_R5m2)
            || (id == CanonID_EOS_R6)
            || (id == CanonID_EOS_R6m2)
            || (id == CanonID_EOS_R8)
@@ -1258,6 +1259,20 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned /*type*/, unsigned len,
       AsShot_Auto_MeasuredWB(0x0055);
       CR3_ColorData(0x0055);
       break;
+
+    case 4528: // R5 Mark II; ColorDataSubVer: 64
+        imCanon.ColorDataVer = 12;
+        AsShot_Auto_MeasuredWB(0x0069);     
+
+        //fseek(ifp, save1 + ((0x0069+0x0064) << 1), SEEK_SET);
+        //Canon_WBpresets(2, 12);
+        //fseek(ifp, save1 + ((0x0069+0x00c3) << 1), SEEK_SET);
+        //Canon_WBCTpresets(0);
+        offsetChannelBlackLevel2 = save1 + (0x017f << 1); 
+        offsetChannelBlackLevel  = save1 + (0x0290 << 1); 
+        offsetWhiteLevels        = save1 + (0x0294 << 1); 
+        break;
+
 
     case 3973: // R3; ColorDataSubVer: 34
     case 3778: // R6 Mark II, R7, R8, R10, R50; ColorDataSubVer: 48

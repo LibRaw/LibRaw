@@ -91,6 +91,7 @@ void LibRaw::GetNormalizedModel()
       { CanonID_EOS_77D,           "EOS 77D"},     // 9000D
       { CanonID_EOS_200D,          "EOS 200D"},   // Rebel SL2 / Kiss X9
       { CanonID_EOS_R5,            "EOS R5"},
+      { CanonID_EOS_R5m2,          "EOS R5 Mark II"},
       { CanonID_EOS_3000D,         "EOS 3000D"}, // Rebel T100 / 4000D
       { CanonID_EOS_R,             "EOS R"},
       { CanonID_EOS_1D_X_Mark_III, "EOS-1D X Mark III"},
