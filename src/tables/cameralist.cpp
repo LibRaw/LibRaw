@@ -144,6 +144,7 @@ static const char *static_camera_list[] = {
 	"Canon EOS R",
 	"Canon EOS Ra",
 	"Canon EOS RP",
+	"Canon EOS R1",
 	"Canon EOS R3",
 	"Canon EOS R5",
 	"Canon EOS R5 Mark II",
