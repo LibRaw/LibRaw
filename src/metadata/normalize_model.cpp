@@ -108,7 +108,8 @@ void LibRaw::GetNormalizedModel()
       { CanonID_EOS_R6m2,          "EOS R6 Mark II"},
       { CanonID_EOS_R8,            "EOS R8"},
       { CanonID_EOS_R100,          "EOS R100"},
-      { CanonID_EOS_R5m2,          "EOS R5 Mark II"}
+      { CanonID_EOS_R5m2,          "EOS R5 Mark II"},
+      { CanonID_EOS_R1,            "EOS R1"}
     },
 #if 0
     olyque[] = {
