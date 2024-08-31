@@ -111,6 +111,7 @@ void LibRaw::setCanonBodyFeatures(unsigned long long id)
   else if (
               (id == CanonID_EOS_R)
            || (id == CanonID_EOS_RP)
+           || (id == CanonID_EOS_R1)
            || (id == CanonID_EOS_R3)
            || (id == CanonID_EOS_R5)
            || (id == CanonID_EOS_R5m2)	  
