@@ -1089,7 +1089,7 @@ void LibRaw::parse_fuji_thumbnail(int offset)
               if ((fread(buf, 1, xmpsz, ifp) == xmpsz) && !memcmp(buf, xmpmarker, xmpsz)) // got it
               {
                   xmplen = len - xmpsz - 2;
-                  xmpdata = (char*) malloc(xmplen+1);
+                  xmpdata = (char*) calloc(xmplen+1,1);
                   fread(xmpdata, 1, xmplen, ifp);
                   xmpdata[xmplen] = 0;
                   break;

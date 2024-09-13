@@ -727,7 +727,7 @@ int LibRaw::parse_tiff_ifd(int base)
           tagtypeIs(LIBRAW_EXIFTOOLTAGTYPE_binary)) &&
           (len > 1) && (len < 5100000))
       {
-        xmpdata = (char *)malloc(xmplen = len + 1);
+        xmpdata = (char *)calloc(xmplen = len + 1,1);
         fread(xmpdata, len, 1, ifp);
         xmpdata[len] = 0;
       }
@@ -1126,8 +1126,8 @@ int LibRaw::parse_tiff_ifd(int base)
               (libraw_internal_data.unpacker_data.lenRAFData < 10240000))
           {
             INT64 f_save = ftell(ifp);
-            rafdata = (ushort *)malloc(
-                sizeof(ushort) * libraw_internal_data.unpacker_data.lenRAFData);
+            rafdata = (ushort *)calloc(
+                sizeof(ushort) * libraw_internal_data.unpacker_data.lenRAFData,1);
             fseek(ifp, libraw_internal_data.unpacker_data.posRAFData, SEEK_SET);
             fread(rafdata, sizeof(ushort),
                   libraw_internal_data.unpacker_data.lenRAFData, ifp);
@@ -1577,7 +1577,7 @@ int LibRaw::parse_tiff_ifd(int base)
                 }
 
                 if (SR2SubIFDLength && (SR2SubIFDLength < 10240000) &&
-                    (buf_SR2 = (unsigned *)malloc(SR2SubIFDLength + 1024)))
+                    (buf_SR2 = (unsigned *)calloc(SR2SubIFDLength + 1024,1)))
                 { // 1024b for safety
                   fseek(ifp, SR2SubIFDOffset + base, SEEK_SET);
                   int items = fread(buf_SR2, 1, SR2SubIFDLength, ifp);
@@ -1668,7 +1668,7 @@ int LibRaw::parse_tiff_ifd(int base)
     fseek(ifp, save, SEEK_SET);
   }
   if (sony_length && sony_length < 10240000 &&
-      (buf = (unsigned *)malloc(sony_length)))
+      (buf = (unsigned *)calloc(sony_length, 1)))
   {
     fseek(ifp, sony_offset, SEEK_SET);
     int items = fread(buf, 1, sony_length, ifp);

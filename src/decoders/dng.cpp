@@ -257,7 +257,7 @@ void LibRaw::lossy_dng_load_raw()
 		throw LIBRAW_EXCEPTION_DECODE_JPEG;
 
 	if (buf.size() < cinfo.output_width * cinfo.output_components)
-		buf = std::vector<JSAMPLE>(cinfo.output_width * cinfo.output_components);
+		buf = std::vector<JSAMPLE>(cinfo.output_width * cinfo.output_components,0);
 
     try
     {

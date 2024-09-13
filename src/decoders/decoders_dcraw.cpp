@@ -1022,7 +1022,7 @@ void LibRaw::nokia_load_raw()
   if (raw_stride)
 	  dwide = raw_stride;
 #endif
-  std::vector<uchar> data(dwide * 2 + 4);
+  std::vector<uchar> data(dwide * 2 + 4,0);
   for (row = 0; row < raw_height; row++)
   {
       checkCancel();
@@ -1406,7 +1406,7 @@ void LibRaw::sony_load_raw()
 
 void LibRaw::sony_arw_load_raw()
 {
-  std::vector<ushort> huff_buffer(32770);
+  std::vector<ushort> huff_buffer(32770,0);
   ushort* huff = &huff_buffer[0];
   static const ushort tab[18] = {0xf11, 0xf10, 0xe0f, 0xd0e, 0xc0d, 0xb0c,
                                  0xa0b, 0x90a, 0x809, 0x708, 0x607, 0x506,
@@ -1438,7 +1438,7 @@ void LibRaw::sony_arw2_load_raw()
   ushort pix[16];
   int row, col, val, max, min, imax, imin, sh, bit, i;
 
-  data = (uchar *)malloc(raw_width + 1);
+  data = (uchar *)calloc(raw_width + 1,1);
   try
   {
     for (row = 0; row < height; row++)

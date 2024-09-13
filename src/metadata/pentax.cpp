@@ -136,7 +136,7 @@ void LibRaw::PentaxLensInfo(unsigned long long id, unsigned len) // tag 0x0207
 {
   ushort iLensData = 0;
   uchar *table_buf;
-  table_buf = (uchar *)malloc(MAX(len, 128));
+  table_buf = (uchar *)calloc(MAX(len, 128),1);
   fread(table_buf, len, 1, ifp);
   if ((id < PentaxID_K100D) ||
       (((id == PentaxID_K100D) ||
@@ -419,7 +419,7 @@ void LibRaw::parsePentaxMakernotes(int /*base*/, unsigned tag, unsigned type,
       imCommon.afdata[imCommon.afcount].AFInfoData_tag = tag;
       imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
       imCommon.afdata[imCommon.afcount].AFInfoData_length = len;
-      imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)malloc(imCommon.afdata[imCommon.afcount].AFInfoData_length);
+      imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length,1);
       fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
       if ((len < 25) && (len >= 11))
       {
@@ -511,7 +511,7 @@ void LibRaw::parsePentaxMakernotes(int /*base*/, unsigned tag, unsigned type,
       imCommon.afdata[imCommon.afcount].AFInfoData_tag = tag;
       imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
       imCommon.afdata[imCommon.afcount].AFInfoData_length = len;
-      imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)malloc(imCommon.afdata[imCommon.afcount].AFInfoData_length);
+      imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length,1);
       fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
       imCommon.afcount++;
     }
