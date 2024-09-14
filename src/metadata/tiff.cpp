@@ -590,8 +590,8 @@ int LibRaw::parse_tiff_ifd(int base)
           (len > 1) && (len < 5100000))
       {
         xmpdata = (char *)calloc(xmplen = len + 1,1);
-        fread(xmpdata, len, 1, ifp);
-        xmpdata[len] = 0;
+        unsigned br = fread(xmpdata,1, len, ifp);
+        xmpdata[br] = 0;
       }
       break;
     case 0x7000:

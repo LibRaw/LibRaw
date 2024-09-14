@@ -518,8 +518,8 @@ int LibRaw::parseCR3(INT64 oAtomList,
 		if (!memcmp(UIID, UUID_XMP, 16) && szAtom > 24LL && szAtom < 1024000LL)
 		{
 			xmpdata = (char *)calloc(xmplen = unsigned(szAtom - 23),1);
-			fread(xmpdata, szAtom - 24, 1, ifp);
-			xmpdata[szAtom - 24] = 0;
+			unsigned br = fread(xmpdata,1, szAtom - 24, ifp);
+			xmpdata[br] = 0;
 		}
 		else if (!memcmp(UIID, UIID_CanonPreview, 16) && szAtom > 48LL && szAtom < 100LL * 1024000LL)
 		{
