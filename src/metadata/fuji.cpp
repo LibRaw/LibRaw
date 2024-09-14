@@ -1090,8 +1090,8 @@ void LibRaw::parse_fuji_thumbnail(int offset)
               {
                   xmplen = len - xmpsz - 2;
                   xmpdata = (char*) calloc(xmplen+1,1);
-                  fread(xmpdata, 1, xmplen, ifp);
-                  xmpdata[xmplen] = 0;
+                  unsigned br = fread(xmpdata, 1, xmplen, ifp);
+                  xmpdata[br] = 0;
                   break;
               }
           }
