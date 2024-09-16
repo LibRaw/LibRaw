@@ -1099,10 +1099,13 @@ unsigned LibRaw::pana_data(int nb, unsigned *bytes)
 	  memset(buf, 0, sizeof(buf));
 	  return vpos = 0;
   }
+  if (load_flags > 0x4000)
+	  throw LIBRAW_EXCEPTION_IO_BADFILE;
 
   if (!vpos)
   {
-    fread(buf + load_flags, 1, 0x4000 - load_flags, ifp);
+	if(load_flags < 0x4000)
+		fread(buf + load_flags, 1, 0x4000 - load_flags, ifp);
     fread(buf, 1, load_flags, ifp);
   }
 
