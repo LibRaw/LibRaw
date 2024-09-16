@@ -1063,7 +1063,10 @@ unsigned LibRaw::pana_data(int nb, unsigned *bytes)
   int byte;
 
   if (!nb && !bytes)
-    return vpos = 0;
+  {
+	  memset(buf, 0, sizeof(buf));
+	  return vpos = 0;
+  }
 
   if (!vpos)
   {
