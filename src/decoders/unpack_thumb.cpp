@@ -132,7 +132,11 @@ int LibRaw::unpack_thumb(void)
         THUMB_SIZE_CHECKTNZ(T.tlength);
         if (T.thumb)
           free(T.thumb);
+#ifdef LIBRAW_CALLOC_RAWSTORE
+        T.thumb = (char *)calloc(T.tlength,1);
+#else
         T.thumb = (char *)malloc(T.tlength);
+#endif
         ID.input->read(T.thumb, 1, T.tlength);
 		unsigned char *tthumb = (unsigned char *)T.thumb;
 		if (load_raw == &LibRaw::crxLoadRaw && T.tlength > 0xE0)
@@ -281,7 +285,11 @@ int LibRaw::unpack_thumb(void)
             THUMB_SIZE_CHECKTNZ(T.tlength);
             if (T.thumb)
               free(T.thumb);
+#ifdef LIBRAW_CALLOC_RAWSTORE
+            T.thumb = (char *)calloc(T.tlength,1);
+#else
             T.thumb = (char *)malloc(T.tlength);
+#endif
 
             char *dest = T.thumb;
             INT64 pos = ID.input->tell();
@@ -314,8 +322,11 @@ int LibRaw::unpack_thumb(void)
           free(T.thumb);
 
         THUMB_SIZE_CHECKTNZ(T.tlength);
-
+#ifdef LIBRAW_CALLOC_RAWSTORE
+        T.thumb = (char *)calloc(T.tlength,1);
+#else
         T.thumb = (char *)malloc(T.tlength);
+#endif
         if (!T.tcolors)
           T.tcolors = t_colors;
 
@@ -355,7 +366,11 @@ int LibRaw::unpack_thumb(void)
         }
         else
         {
+#ifdef LIBRAW_CALLOC_RAWSTORE
+          T.thumb = (char *)calloc(o_length,1);
+#else
           T.thumb = (char *)malloc(o_length);
+#endif
           if (!T.thumb)
             throw LIBRAW_EXCEPTION_ALLOC;
           for (int i = 0; i < o_length; i++)
