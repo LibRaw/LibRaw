@@ -1,3 +1,11 @@
+2024-09-18   Alex Tutubalin <lexa@lexa.ru>
+  * Fixed possible buffer overrun in old panasonic decoder
+  * Most small buffer allocations: malloc changed to calloc to prevent 
+    uninitialized heap data leaks
+  * Large buffer allocation (RAW backing store, thumbnails store):
+    If LIBRAW_CALLOC_RAWSTORE is defined on build: large buffers will be 
+    allocated via calloc
+
 2024-03-30  Alex Tutubalin <lexa@lexa.ru>
 
  LibRaw-snapshot-202403

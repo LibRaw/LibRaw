@@ -54,7 +54,11 @@ int LibRaw::unpack(void)
         throw LIBRAW_EXCEPTION_TOOBIG;
 
       libraw_internal_data.internal_data.meta_data =
+#ifdef LIBRAW_CALLOC_RAWSTORE
+          (char *)calloc(libraw_internal_data.unpacker_data.meta_length,1);
+#else
           (char *)malloc(libraw_internal_data.unpacker_data.meta_length);
+#endif
     }
 
     libraw_decoder_info_t decoder_info;
@@ -325,8 +329,12 @@ int LibRaw::unpack(void)
 				+ +INT64(libraw_internal_data.unpacker_data.meta_length) >
               INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
             throw LIBRAW_EXCEPTION_TOOBIG;
+#ifdef LIBRAW_CALLOC_RAWSTORE
+          imgdata.rawdata.raw_alloc = calloc(size_t(rwidth) * (size_t(rheight) + 8), sizeof(imgdata.rawdata.raw_image[0]));
+#else
           imgdata.rawdata.raw_alloc = malloc(
-              rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
+              size_t(rwidth) * (size_t(rheight) + 8) * sizeof(imgdata.rawdata.raw_image[0]));
+#endif
           imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
           if (!S.raw_pitch)
             S.raw_pitch = S.raw_width * 2; // Bayer case, not set before
@@ -340,10 +348,15 @@ int LibRaw::unpack(void)
             throw LIBRAW_EXCEPTION_TOOBIG;
           S.raw_pitch = S.raw_width * 8;
           imgdata.rawdata.raw_alloc = 0;
+#ifdef LIBRAW_CALLOC_RAWSTORE
           imgdata.image = (ushort(*)[4])calloc(
-              unsigned(MAX(S.width, S.raw_width)) *
-                  unsigned(MAX(S.height, S.raw_height) + 8),
+              size_t(MAX(S.width, S.raw_width)) *
+                  (size_t(MAX(S.height, S.raw_height)) + 8),
               sizeof(*imgdata.image));
+#else
+          imgdata.image = (ushort(*)[4])malloc(
+              size_t(MAX(S.width, S.raw_width)) * (size_t(MAX(S.height, S.raw_height)) + 8) * sizeof(*imgdata.image));
+#endif
         }
       }
       else if (decoder_info.decoder_flags & LIBRAW_DECODER_3CHANNEL)
@@ -354,8 +367,13 @@ int LibRaw::unpack(void)
             INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
 
+#ifdef LIBRAW_CALLOC_RAWSTORE
+        imgdata.rawdata.raw_alloc =
+            calloc(size_t(rwidth) * (size_t(rheight) + 8), sizeof(imgdata.rawdata.raw_image[0]) * 3);
+#else
         imgdata.rawdata.raw_alloc = malloc(
-            rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3);
+            size_t(rwidth) * (size_t(rheight) + 8) * sizeof(imgdata.rawdata.raw_image[0]) * 3);
+#endif
         imgdata.rawdata.color3_image = (ushort(*)[3])imgdata.rawdata.raw_alloc;
         if (!S.raw_pitch)
           S.raw_pitch = S.raw_width * 6;
@@ -369,8 +387,13 @@ int LibRaw::unpack(void)
 			+ INT64(libraw_internal_data.unpacker_data.meta_length) >
             INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
           throw LIBRAW_EXCEPTION_TOOBIG;
+#ifdef LIBRAW_CALLOC_RAWSTORE
+        imgdata.rawdata.raw_alloc =
+            calloc(size_t(rwidth) * (size_t(rheight) + 8),sizeof(imgdata.rawdata.raw_image[0]));
+#else
         imgdata.rawdata.raw_alloc = malloc(
-            rwidth * (rheight + 8) * sizeof(imgdata.rawdata.raw_image[0]));
+            size_t(rwidth) * (size_t(rheight) + 8) * sizeof(imgdata.rawdata.raw_image[0]));
+#endif
         imgdata.rawdata.raw_image = (ushort *)imgdata.rawdata.raw_alloc;
         if (!S.raw_pitch)
           S.raw_pitch = S.raw_width * 2; // Bayer case, not set before

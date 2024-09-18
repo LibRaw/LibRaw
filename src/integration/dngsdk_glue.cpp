@@ -346,8 +346,7 @@ int LibRaw::try_dngsdk()
       ushort *dst = (ushort *)imgdata.rawdata.raw_alloc;
       if (is_curve_linear())
       {
-        for (int i = 0; i < pixels; i++)
-          dst[i] = src[i];
+        memmove(dst, src, pixels * TagTypeSize(ptype));
       }
       else
       {

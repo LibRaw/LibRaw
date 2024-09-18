@@ -54,11 +54,19 @@ void LibRaw::sony_arq_load_raw()
 
 void LibRaw::pentax_4shot_load_raw()
 {
-  ushort *plane = (ushort *)malloc(imgdata.sizes.raw_width *
-                                   imgdata.sizes.raw_height * sizeof(ushort));
-  int alloc_sz = imgdata.sizes.raw_width * (imgdata.sizes.raw_height + 16) * 4 *
+#ifdef LIBRAW_CALLOC_RAWSTORE
+  ushort *plane = (ushort *)calloc(size_t(imgdata.sizes.raw_width) * size_t(imgdata.sizes.raw_height), sizeof(ushort));
+#else
+  ushort *plane = (ushort *)malloc(size_t(imgdata.sizes.raw_width) *
+                                   size_t(imgdata.sizes.raw_height) * sizeof(ushort));
+#endif
+  size_t alloc_sz = size_t(imgdata.sizes.raw_width) * (size_t(imgdata.sizes.raw_height) + 16) * 4 *
                  sizeof(ushort);
+#ifdef LIBRAW_CALLOC_RAWSTORE
+  ushort(*result)[4] = (ushort(*)[4])calloc(alloc_sz,1);
+#else
   ushort(*result)[4] = (ushort(*)[4])malloc(alloc_sz);
+#endif
   struct movement_t
   {
     int row, col;
