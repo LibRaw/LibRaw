@@ -1,3 +1,9 @@
+2024-11-30  Alex Tutubalin <lexa@lexa.ru>
+
+  * H265 (Canon) and JPEG-XL thumbnail support for dcraw_make_mem_thumb
+    Note: libraw_processed_image_t.type is set to LIBRAW_IMAGE_H265 or 
+         LIBRAW_IMAGE_JPEGXL respectively
+
 2024-09-18   Alex Tutubalin <lexa@lexa.ru>
   * Fixed possible buffer overrun in old panasonic decoder
   * Most small buffer allocations: malloc changed to calloc to prevent 

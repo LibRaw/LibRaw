@@ -119,6 +119,24 @@ libraw_processed_image_t *LibRaw::dcraw_make_mem_thumb(int *errcode)
       *errcode = 0;
     return ret;
   }
+  else if (T.tformat == LIBRAW_THUMBNAIL_H265 || T.tformat == LIBRAW_THUMBNAIL_JPEGXL)
+  {
+    int dsize = T.tlength;
+    libraw_processed_image_t *ret = (libraw_processed_image_t *)::malloc(sizeof(libraw_processed_image_t) + dsize);
+    if (!ret)
+    {
+      if (errcode)
+        *errcode = ENOMEM;
+      return NULL;
+    }
+    memset(ret, 0, sizeof(libraw_processed_image_t));
+    ret->type = T.tformat == LIBRAW_THUMBNAIL_H265 ? LIBRAW_IMAGE_H265 : LIBRAW_IMAGE_JPEGXL;
+    ret->data_size = dsize;
+    memmove(ret->data, T.thumb, dsize);
+    if (errcode)
+      *errcode = 0;
+    return ret;
+  }
   else
   {
     if (errcode)

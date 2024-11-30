@@ -813,7 +813,9 @@ enum LibRaw_thumbnail_formats
 enum LibRaw_image_formats
 {
   LIBRAW_IMAGE_JPEG = 1,
-  LIBRAW_IMAGE_BITMAP = 2
+  LIBRAW_IMAGE_BITMAP = 2,
+  LIBRAW_IMAGE_JPEGXL = 3,
+  LIBRAW_IMAGE_H265 = 4
 };
 
 #endif
