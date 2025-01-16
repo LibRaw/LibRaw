@@ -556,6 +556,8 @@ int LibRaw_bigfile_datastream::seek(INT64 o, int whence)
 #else
   return fseek(f, (long)o, whence);
 #endif
+#elif (defined(__ANDROID__) && __ANDROID_API__ < 24)
+  return fseek(f, o, whence);
 #else
   return fseeko(f, o, whence);
 #endif
@@ -570,6 +572,8 @@ INT64 LibRaw_bigfile_datastream::tell()
 #else
   return ftell(f);
 #endif
+#elif (defined(__ANDROID__) && __ANDROID_API__ < 24)
+  return ftell(f);
 #else
   return ftello(f);
 #endif
