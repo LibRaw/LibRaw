@@ -662,7 +662,7 @@ void LibRaw::free_omp_buffers(char** buffers, int buffer_count)
 
 void 	LibRaw::libraw_swab(void *arr, size_t len)
 {
-#ifdef LIBRAW_OWN_SWAB
+#if defined(LIBRAW_OWN_SWAB) || (defined(__ANDROID__) && __ANDROID_API__ < 28)
 	uint16_t *array = (uint16_t*)arr;
 	size_t bytes = len/2;
 	for(; bytes; --bytes)
