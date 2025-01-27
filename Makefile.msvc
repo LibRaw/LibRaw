@@ -167,14 +167,14 @@ $(DLL): $(DLL_OBJECTS)
 
 # LIBRARY BUILD
 $(LIBSTATIC): $(LIB_OBJECTS)
-        -del /f $(LIBSTATIC)
+	-del /f $(LIBSTATIC)
 	lib /OUT:$(LIBSTATIC) /LTCG $(LIB_OBJECTS)
 
 # clean
 clean:
 	-del $(LIBSTATIC) $(LIBDLL) lib\*.exp
 	-del $(LIB_OBJECTS) $(DLL_OBJECTS)
-        -del object\*.o
+	-del object\*.o
 	-del $(DLL) $(SAMPLES)
 
 # OBJ generation rules
