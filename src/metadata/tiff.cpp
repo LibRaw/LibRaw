@@ -1036,31 +1036,37 @@ int LibRaw::parse_tiff_ifd(int base)
               if ((fwb[0] == rafdata[fi]) && (fwb[1] == rafdata[fi + 1]) &&
                   (fwb[2] == rafdata[fi + 2])) // found Tungsten WB
               {
-                if (rafdata[fi - 15] !=
+                if (fi > 14 && rafdata[fi - 15] !=
                     fwb[0]) // 15 is offset of Tungsten WB from the first
                             // preset, Fine Weather WB
                   continue;
-                for (int wb_ind = 0, ofst = fi - 15; wb_ind < (int)Fuji_wb_list1.size();
-                     wb_ind++, ofst += 3)
-                {
-                  icWBC[Fuji_wb_list1[wb_ind]][1] =
-                      icWBC[Fuji_wb_list1[wb_ind]][3] = rafdata[ofst];
-                  icWBC[Fuji_wb_list1[wb_ind]][0] = rafdata[ofst + 1];
-                  icWBC[Fuji_wb_list1[wb_ind]][2] = rafdata[ofst + 2];
-                }
+				if (fi >= 15)
+				{
+					for (int wb_ind = 0, ofst = fi - 15; wb_ind < (int)Fuji_wb_list1.size();
+						wb_ind++, ofst += 3)
+					{
+						icWBC[Fuji_wb_list1[wb_ind]][1] =
+							icWBC[Fuji_wb_list1[wb_ind]][3] = rafdata[ofst];
+						icWBC[Fuji_wb_list1[wb_ind]][0] = rafdata[ofst + 1];
+						icWBC[Fuji_wb_list1[wb_ind]][2] = rafdata[ofst + 2];
+					}
+				}
 
                 if (is34)
                   fi += 24;
                 fi += 96;
                 for (fj = fi; fj < (fi + 15); fj += 3) // looking for the end of the WB table
                 {
+					if (fj > libraw_internal_data.unpacker_data.lenRAFData - 3)
+						break;
                   if (rafdata[fj] != rafdata[fi])
                   {
                     fj -= 93;
                     if (is34)
                       fj -= 9;
-// printf ("wb start in DNG: 0x%04x\n", fj*2-0x4e);
-                    for (int iCCT = 0, ofst = fj; iCCT < 31;
+//printf ("wb start in DNG: 0x%04x\n", fj*2-0x4e);
+                    for (int iCCT = 0, ofst = fj; iCCT < 31 
+						&& ofst < libraw_internal_data.unpacker_data.lenRAFData - 3;
                          iCCT++, ofst += 3)
                     {
                       icWBCCTC[iCCT][0] = FujiCCT_K[iCCT];

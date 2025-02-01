@@ -1,3 +1,8 @@
+2025-02-05  Alex Tutubalin <lexa@lexa.ru>
+
+  * Prevent one-off read in Fuji WB table parsing
+  * Prevent one-off read in phase_one_correct()
+
 2024-09-18  Alex Tutubalin <lexa@lexa.ru>
 
  LibRaw 0.21.3-Release
