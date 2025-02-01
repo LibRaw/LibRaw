@@ -1206,7 +1206,8 @@ int LibRaw::parse_tiff_ifd(int base)
                     if (is34)
                       fj -= 9;
 //printf ("wb start in DNG: 0x%04x\n", fj*2-0x4e);
-                    for (int iCCT = 0, ofst = fj; iCCT < 31;
+                    for (int iCCT = 0, ofst = fj; iCCT < 31 
+						&& ofst < libraw_internal_data.unpacker_data.lenRAFData - 3;
                          iCCT++, ofst += 3)
                     {
                       icWBCCTC[iCCT][0] = FujiCCT_K[iCCT];
