@@ -490,6 +490,9 @@ int LibRaw::phase_one_correct()
       fseek(ifp, off_412, SEEK_SET);
       for (i = 0; i < 9; i++)
         head[i] = get4() & 0x7fff;
+	  unsigned w0 = head[1] * head[3], w1 = head[2] * head[4];
+	  if (w0 > 10240000 || w1 > 10240000)
+		  throw LIBRAW_EXCEPTION_ALLOC;
       yval[0] = (float *)calloc(head[1] * head[3] + head[2] * head[4], 6);
       yval[1] = (float *)(yval[0] + head[1] * head[3]);
       xval[0] = (ushort *)(yval[1] + head[2] * head[4]);
@@ -514,10 +517,17 @@ int LibRaw::phase_one_correct()
             for (k = j = 0; j < head[1]; j++)
               if (num < xval[0][k = head[1] * i + j])
                 break;
-            frac = (j == 0 || j == head[1])
-                       ? 0
-                       : (xval[0][k] - num) / (xval[0][k] - xval[0][k - 1]);
-            mult[i - cip] = yval[0][k - 1] * frac + yval[0][k] * (1 - frac);
+			if (j == 0 || j == head[1] || k < 1 || k >= w0+w1)
+				frac = 0;
+			else
+			{
+				int xdiv = (xval[0][k] - xval[0][k - 1]);
+				frac = xdiv ? (xval[0][k] - num) / (xval[0][k] - xval[0][k - 1]) : 0;
+			}
+			if (k < w0 + w1)
+				mult[i - cip] = yval[0][k > 0 ? k - 1 : 0] * frac + yval[0][k] * (1 - frac);
+			else
+				mult[i - cip] = 0;
           }
           i = ((mult[0] * (1 - cfrac) + mult[1] * cfrac) * row + num) * 2;
           RAW(row, col) = LIM(i, 0, 65535);
