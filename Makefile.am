@@ -77,8 +77,8 @@ lib_libraw_r_a_CFLAGS = -pthread -w
 lib_libraw_la_SOURCES = $(lib_libraw_a_SOURCES)
 lib_libraw_r_la_SOURCES = $(lib_libraw_a_SOURCES)
 
-lib_libraw_la_LDFLAGS = -no-undefined -version-info $(LIBRAW_SHLIB_VER) @OPENMP_LIBS@
-lib_libraw_r_la_LDFLAGS = -no-undefined -version-info $(LIBRAW_SHLIB_VER) @OPENMP_LIBS@
+lib_libraw_la_LDFLAGS = -no-undefined -version-info $(LIBRAW_SHLIB_VER)
+lib_libraw_r_la_LDFLAGS = -no-undefined -version-info $(LIBRAW_SHLIB_VER)
 
 
 # Sample binaries

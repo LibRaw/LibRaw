@@ -40,47 +40,6 @@ if test x$openmp = xtrue ; then
 	],[
 		AC_MSG_WARN([OpenMP support cannot be enabled because your system doesn't support it.])		
 	])
-
-	SAVE_LDFLAGS="$LDFLAGS"
-	LDFLAGS="-nostdlib"
-
-	AC_MSG_CHECKING([whether OpenMP works without explicit -l])
-
-	AC_LINK_IFELSE(
-		[AC_LANG_PROGRAM([[#include <omp.h>]], [[omp_get_num_threads();]])],
-		[OPENMP_LIBS=""; AC_MSG_RESULT([yes])],	# -l not required if success
-		[
-			AC_MSG_RESULT([no])
-			AC_MSG_CHECKING([for OpenMP library])
-
-			# try -lomp (clang), -lgomp (gcc), -liomp5 (intel)
-			LDFLAGS="-nostdlib -lomp $SAVE_LDFLAGS"
-			AC_LINK_IFELSE(
-				[AC_LANG_PROGRAM([[#include <omp.h>]], [[omp_get_num_threads();]])],
-				[OPENMP_LIBS="-lomp"; AC_MSG_RESULT([found -lomp])],
-				[
-					LDFLAGS="-nostdlib -lgomp $SAVE_LDFLAGS"
-					AC_LINK_IFELSE(
-						[AC_LANG_PROGRAM([[#include <omp.h>]], [[omp_get_num_threads();]])],
-						[OPENMP_LIBS="-lgomp"; AC_MSG_RESULT([found -lgomp])],
-						[
-							LDFLAGS="-nostdlib -liomp5 $SAVE_LDFLAGS"
-							AC_LINK_IFELSE(
-								[AC_LANG_PROGRAM([[#include <omp.h>]], [[omp_get_num_threads();]])],
-								[OPENMP_LIBS="-liomp5"; AC_MSG_RESULT([found -liomp5])],
-								[AC_MSG_ERROR([No suitable OpenMP library found])]
-							)
-						]
-					)
-				]
-			)
-		]
-	)
-
-	LDFLAGS="$SAVE_LDFLAGS"
-
-	AC_SUBST([OPENMP_LIBS])
-
 fi
 
 # check for libjpeg v8
