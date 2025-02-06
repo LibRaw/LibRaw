@@ -348,7 +348,8 @@ int LibRaw::phase_one_correct()
           off_412 = ftell(ifp) - 38;
         }
       }
-      else if (tag == 0x041f && !qlin_applied)
+      else if (tag == 0x041f && !qlin_applied && ph1.split_col > 0 && ph1.split_col < raw_width
+		&& ph1.split_row > 0 && ph1.split_row < raw_height)
       { /* Quadrant linearization */
         ushort lc[2][2][16], ref[16];
         int qr, qc;
@@ -432,7 +433,8 @@ int LibRaw::phase_one_correct()
         }
         qmult_applied = 1;
       }
-      else if (tag == 0x0431 && !qmult_applied)
+      else if (tag == 0x0431 && !qmult_applied && ph1.split_col > 0 && ph1.split_col < raw_width 
+		&& ph1.split_row > 0 && ph1.split_row < raw_height)
       { /* Quadrant combined - four tile gain calibration */
         ushort lc[2][2][7], ref[7];
         int qr, qc;
