@@ -1,3 +1,8 @@
+2025-02-05  Alex Tutubalin <lexa@lexa.ru>
+
+  * Prevent one-off read in Fuji WB table parsing
+  * Prevent one-off read in phase_one_correct()
+
 2024-11-30  Alex Tutubalin <lexa@lexa.ru>
 
   * H265 (Canon) and JPEG-XL thumbnail support for dcraw_make_mem_thumb

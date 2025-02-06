@@ -499,7 +499,6 @@ static const char *static_camera_list[] = {
 	"Kodak DCS420",
 	"Kodak DCS460",
 	"Kodak DCS460M",
-	"Kodak DCS460",
 	"Kodak DCS520C",
 	"Kodak DCS560C",
 	"Kodak DCS620C",
