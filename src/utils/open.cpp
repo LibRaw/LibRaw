@@ -638,7 +638,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 
 	  if (makeIs(LIBRAW_CAMERAMAKER_Canon))
 	  {
-		  if (MN.canon.DefaultCropAbsolute.l != -1)  // tag 0x00e0 SensorInfo was parsed
+		  if (!imgdata.idata.dng_version && (MN.canon.DefaultCropAbsolute.l != -1))  // tag 0x00e0 SensorInfo was parsed
 		  {
 			  if (imgdata.sizes.raw_aspect != LIBRAW_IMAGE_ASPECT_UNKNOWN)
 			  { // tag 0x009a AspectInfo was parsed
