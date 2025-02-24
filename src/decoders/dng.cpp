@@ -21,12 +21,12 @@
 void LibRaw::vc5_dng_load_raw_placeholder()
 {
     // placeholder only, real decoding implemented in GPR SDK
-    throw LIBRAW_EXCEPTION_DECODE_RAW;
+    throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
 }
 void LibRaw::jxl_dng_load_raw_placeholder()
 {
   // placeholder only, real decoding implemented in DNG SDK
-  throw LIBRAW_EXCEPTION_DECODE_RAW;
+  throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
 }
 
 void LibRaw::adobe_copy_pixel(unsigned row, unsigned col, ushort **rp)
@@ -70,7 +70,7 @@ void LibRaw::lossless_dng_load_raw()
     if (!ljpeg_start(&jh, 0))
       break;
     jwide = jh.wide;
-    if (filters)
+    if (filters || colors == 1)
       jwide *= jh.clrs;
 
     if(filters && (tiff_samples == 2)) // Fuji Super CCD

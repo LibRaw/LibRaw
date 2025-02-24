@@ -199,23 +199,62 @@ static inline void unpack7bytesto4x16_nikon(unsigned char *src,
   dest[0] = ((src[1] & 0x3f) << 8) | src[0];
 }
 
+static inline void unpack21bytesto12x16_nikon(unsigned char *src, unsigned short (*dest)[4])
+{
+	// bytes 0-6
+  dest[0][0] = ((src[1] & 0x3f) << 8) | src[0];
+  dest[0][1] = (src[3] & 0xf) << 10 | (src[2] << 2) | (src[1] >> 6);
+  dest[0][2] = ((src[5] & 0x3) << 12) | (src[4] << 4) | (src[3] >> 4);
+  dest[1][0] = (src[6] << 6) | (src[5] >> 2);
+  // bytes 7-13
+  dest[1][1] = ((src[8] & 0x3f) << 8) | src[7];
+  dest[1][2] = (src[10] & 0xf) << 10 | (src[9] << 2) | (src[8] >> 6);
+  dest[2][0] = ((src[12] & 0x3) << 12) | (src[11] << 4) | (src[10] >> 4);
+  dest[2][1] = (src[13] << 6) | (src[12] >> 2);
+  // bytes 14-20
+  dest[2][2] = ((src[15] & 0x3f) << 8) | src[14];
+  dest[3][0] = (src[17] & 0xf) << 10 | (src[16] << 2) | (src[15] >> 6);
+  dest[3][1] = ((src[19] & 0x3) << 12) | (src[18] << 4) | (src[17] >> 4);
+  dest[3][2] = (src[20] << 6) | (src[19] >> 2);
+}
+
+
 void LibRaw::nikon_14bit_load_raw()
 {
+  int cps = (imgdata.idata.filters == 0 && imgdata.idata.colors == 3) ? 3 : 1;
+
+  if (cps == 1 && !imgdata.rawdata.raw_image)
+	  throw LIBRAW_EXCEPTION_DECODE_RAW;
+  if(cps == 3 && !imgdata.image)
+    throw LIBRAW_EXCEPTION_DECODE_RAW;
+
   const unsigned linelen =
-      (unsigned)(ceilf((float)(S.raw_width * 7 / 4) / 16.0)) *
+      (unsigned)(ceilf((float)(S.raw_width * cps * 7 / 4) / 16.0f)) *
       16; // 14512; // S.raw_width * 7 / 4;
-  const unsigned pitch = S.raw_pitch ? S.raw_pitch / 2 : S.raw_width;
+  const unsigned pitch = S.raw_pitch ? S.raw_pitch /( (cps>=3)? 8 : 2) : S.raw_width;
   unsigned char *buf = (unsigned char *)calloc(linelen,1);
   for (int row = 0; row < S.raw_height; row++)
   {
     unsigned bytesread =
         libraw_internal_data.internal_data.input->read(buf, 1, linelen);
-    unsigned short *dest = &imgdata.rawdata.raw_image[pitch * row];
-    // swab32arr((unsigned *)buf, bytesread / 4);
-    for (unsigned int sp = 0, dp = 0;
-         dp < pitch - 3 && sp < linelen - 6 && sp < bytesread - 6;
-         sp += 7, dp += 4)
-      unpack7bytesto4x16_nikon(buf + sp, dest + dp);
+	if (cps == 1)
+	{
+		unsigned short *dest = &imgdata.rawdata.raw_image[pitch * row];
+		// swab32arr((unsigned *)buf, bytesread / 4);
+		for (unsigned int sp = 0, dp = 0;
+			dp < pitch - 3 && sp < linelen - 6 && sp < bytesread - 6;
+			sp += 7, dp += 4)
+			unpack7bytesto4x16_nikon(buf + sp, dest + dp);
+	}
+	else if (cps == 3)
+	{
+      unsigned short (*dest)[4] = &imgdata.image[pitch * row];
+      // swab32arr((unsigned *)buf, bytesread / 4);
+      for (unsigned int sp = 0, dp = 0; 
+		  dp < pitch - 3 && sp < linelen - 20 && sp < bytesread - 20; 
+		  sp += 21, dp += 4)
+        unpack21bytesto12x16_nikon(buf + sp, dest + dp);
+	}
   }
   free(buf);
 }
@@ -319,7 +358,7 @@ void LibRaw::nikon_load_striped_packed_raw()
                          << i);
       }
       imgdata.rawdata.raw_image[(row)*S.raw_width + (col)] =
-          bitbuf << (64 - tiff_bps - vbits) >> (64 - tiff_bps);
+          ushort((bitbuf << (64 - tiff_bps - vbits) >> (64 - tiff_bps)) & 0xffff);
     }
     vbits -= rbits;
   }
@@ -647,12 +686,12 @@ void LibRaw::nikon_load_sraw()
         r = 0.f;
       if (r > 1.f)
         r = 1.f;
-      float g = Y - 0.34414f * (Ch2 - 0.5f) - 0.71414 * (Ch3 - 0.5f);
+      float g = Y - 0.34414f * (Ch2 - 0.5f) - 0.71414f * (Ch3 - 0.5f);
       if (g > 1.f)
         g = 1.f;
       if (g < 0.f)
         g = 0.f;
-      float b = Y + 1.77200 * (Ch2 - 0.5f);
+      float b = Y + 1.77200f * (Ch2 - 0.5f);
       if (b > 1.f)
         b = 1.f;
       if (b < 0.f)
@@ -769,7 +808,7 @@ void decode_S_type(int32_t out_width, uint32_t *img_input, ushort *outbuf /*, in
 
       for (int blk_id = 0; blk_id < block_count; ++blk_id)
       {
-        int8_t idx_even = stream.peek(7);
+        int8_t idx_even = int8_t(stream.peek(7));
         stream.consume(2);
 
         if ((unsigned int)idx_even >= 32)
@@ -780,7 +819,7 @@ void decode_S_type(int32_t out_width, uint32_t *img_input, ushort *outbuf /*, in
           stream.consume(skip_bits[idx_even]);
         }
 
-        int8_t idx_odd = stream.peek(7);
+        int8_t idx_odd = int8_t(stream.peek(7));
         stream.consume(2);
 
         if ((unsigned int)idx_odd >= 32)
@@ -791,7 +830,7 @@ void decode_S_type(int32_t out_width, uint32_t *img_input, ushort *outbuf /*, in
           stream.consume(skip_bits[idx_odd]);
         }
 
-        uint8_t bidx = stream.peek(3);
+        uint8_t bidx = uint8_t(stream.peek(3));
         stream.consume(used_corr[bidx]);
 
         uint8_t take_bits = init_bits + extra_bits[bidx]; // 11 or less
@@ -804,7 +843,7 @@ void decode_S_type(int32_t out_width, uint32_t *img_input, ushort *outbuf /*, in
         {
           int32_t value = 0;
           if (bit_check[i & 1] == 9)
-            value = stream.get(14);
+            value = int32_t(stream.get(14));
           else
             value = prev_pix_value[i & 1] + ((uint32_t)stream.get(take_bits) << bp_shift[i & 1]) - pix_sub[i & 1];
 
@@ -822,7 +861,7 @@ void decode_S_type(int32_t out_width, uint32_t *img_input, ushort *outbuf /*, in
 		do
 		{
 			stream.fill();
-			uint32_t pix_value = stream.get(14);
+			uint32_t pix_value = uint32_t(stream.get(14));
 			++block_total_bytes;
 			*outbuf++ = pix_value << pix_corr_shift;
 		} while (block_total_bytes < out_width);

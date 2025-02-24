@@ -776,9 +776,9 @@ void LibRaw::ljpeg_idct(struct jhead *jh)
       63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63};
 
   if (!cs[0])
-    FORC(106) cs[c] = cos((c & 31) * M_PI / 16) / 2;
+    FORC(106) cs[c] = float(cos((c & 31) * M_PI / 16) / 2);
   memset(work, 0, sizeof work);
-  work[0][0][0] = jh->vpred[0] += ljpeg_diff(jh->huff[0]) * jh->quant[0];
+  work[0][0][0] = float(jh->vpred[0] += ljpeg_diff(jh->huff[0]) * jh->quant[0]);
   for (i = 1; i < 64; i++)
   {
     len = gethuff(jh->huff[16]);
@@ -788,7 +788,7 @@ void LibRaw::ljpeg_idct(struct jhead *jh)
     coef = getbits(len);
     if ((coef & (1 << (len - 1))) == 0)
       coef -= (1 << len) - 1;
-    ((float *)work)[zigzag[i]] = coef * jh->quant[i];
+    ((float *)work)[zigzag[i]] =  float(coef * jh->quant[i]);
   }
   FORC(8) work[0][0][c] *= float(M_SQRT1_2);
   FORC(8) work[0][c][0] *= float(M_SQRT1_2);
@@ -969,11 +969,12 @@ void LibRaw::nikon_yuv_load_raw()
         FORC(6) bitbuf |= (UINT64)fgetc(ifp) << c * 8;
         FORC(4) yuv[c] = (bitbuf >> c * 12 & 0xfff) - (c >> 1 << 11);
       }
-      rgb[0] = yuv[b] + 1.370705 * yuv[3];
-      rgb[1] = yuv[b] - 0.337633 * yuv[2] - 0.698001 * yuv[3];
-      rgb[2] = yuv[b] + 1.732446 * yuv[2];
-      FORC3 image[row * width + col][c] =
-          curve[LIM(rgb[c], 0, 0xfff)] / cmul[c];
+      rgb[0] = int(yuv[b] + 1.370705f * yuv[3]);
+      rgb[1] = int(yuv[b] - 0.337633f * yuv[2] - 0.698001f * yuv[3]);
+      rgb[2] = int(yuv[b] + 1.732446f * yuv[2]);
+      FORC3 image[row * width + col][c] = 
+		  ushort(
+			curve[LIM(rgb[c], 0, 0xfff)] / cmul[c]);
     }
   }
 }
@@ -1179,64 +1180,6 @@ void LibRaw::panasonic_load_raw()
             row < height)
           derror();
       }
-    }
-  }
-}
-
-void LibRaw::olympus_load_raw()
-{
-  ushort huff[4096];
-  int row, col, nbits, sign, low, high, i, c, w, n, nw;
-  int acarry[2][3], *carry, pred, diff;
-
-  huff[n = 0] = 0xc0c;
-  for (i = 12; i--;)
-    FORC(2048 >> i) huff[++n] = (i + 1) << 8 | i;
-  fseek(ifp, 7, SEEK_CUR);
-  getbits(-1);
-  for (row = 0; row < height; row++)
-  {
-    checkCancel();
-    memset(acarry, 0, sizeof acarry);
-    for (col = 0; col < raw_width; col++)
-    {
-      carry = acarry[col & 1];
-      i = 2 * (carry[2] < 3);
-      for (nbits = 2 + i; (ushort)carry[0] >> (nbits + i); nbits++)
-        ;
-      low = (sign = getbits(3)) & 3;
-      sign = sign << 29 >> 31;
-      if ((high = getbithuff(12, huff)) == 12)
-        high = getbits(16 - nbits) >> 1;
-      carry[0] = (high << nbits) | getbits(nbits);
-      diff = (carry[0] ^ sign) + carry[1];
-      carry[1] = (diff * 3 + carry[1]) >> 5;
-      carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
-      if (col >= width)
-        continue;
-      if (row < 2 && col < 2)
-        pred = 0;
-      else if (row < 2)
-        pred = RAW(row, col - 2);
-      else if (col < 2)
-        pred = RAW(row - 2, col);
-      else
-      {
-        w = RAW(row, col - 2);
-        n = RAW(row - 2, col);
-        nw = RAW(row - 2, col - 2);
-        if ((w < nw && nw < n) || (n < nw && nw < w))
-        {
-          if (ABS(w - nw) > 32 || ABS(n - nw) > 32)
-            pred = w + n - nw;
-          else
-            pred = (w + n) >> 1;
-        }
-        else
-          pred = ABS(w - nw) > ABS(n - nw) ? w : n;
-      }
-      if ((RAW(row, col) = pred + ((diff << 2) | low)) >> 12)
-        derror();
     }
   }
 }

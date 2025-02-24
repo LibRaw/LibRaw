@@ -14,6 +14,7 @@
 
 #include "../../internal/dcraw_defs.h"
 
+
 void LibRaw::packed_tiled_dng_load_raw()
 {
   ushort *rp;
@@ -153,16 +154,16 @@ void LibRaw::nikon_coolscan_load_raw()
         {
           for (int col = 0; col < width; col++)
           {
-            ip[col][0] = ((float)curve[buf[col * 3]]) / 255.0f;
-            ip[col][1] = ((float)curve[buf[col * 3 + 1]]) / 255.0f;
-            ip[col][2] = ((float)curve[buf[col * 3 + 2]]) / 255.0f;
+            ip[col][0] = ushort(((float)curve[buf[col * 3]]) / 255.0f);
+            ip[col][1] = ushort(((float)curve[buf[col * 3 + 1]]) / 255.0f);
+            ip[col][2] = ushort(((float)curve[buf[col * 3 + 2]]) / 255.0f);
             ip[col][3] = 0;
           }
         }
         else
         {
           for (int col = 0; col < width; col++)
-            rp[col] = ((float)curve[buf[col]]) / 255.0f;
+            rp[col] = ushort(((float)curve[buf[col]]) / 255.0f);
         }
     }
     else if (tiff_bps <= 8)

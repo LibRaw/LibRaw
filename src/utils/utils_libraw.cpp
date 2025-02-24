@@ -21,13 +21,13 @@ extern "C"
 {
 #endif
 
-  void default_data_callback(void *, const char *file, const int offset)
+  void default_data_callback(void *, const char *file, const INT64 offset)
   {
     if (offset < 0)
       fprintf(stderr, "%s: Unexpected end of file\n",
               file ? file : "unknown file");
     else
-      fprintf(stderr, "%s: data corrupted at %d\n",
+      fprintf(stderr, "%s: data corrupted at %lld\n",
               file ? file : "unknown file", offset);
   }
   const char *libraw_strerror(int e)
@@ -581,7 +581,7 @@ int LibRaw::stread(char *buf, size_t len, LibRaw_abstract_datastream *fp)
     return 0;
 }
 
-int LibRaw::find_ifd_by_offset(int o)
+int LibRaw::find_ifd_by_offset(INT64 o)
 {
     for(unsigned i = 0; i < libraw_internal_data.identify_data.tiff_nifds && i < LIBRAW_IFD_MAXCOUNT; i++)
         if(tiff_ifd[i].offset == o)
@@ -617,8 +617,8 @@ int LibRaw::adjust_to_raw_inset_crop(unsigned mask, float maxcrop)
 
 {
     int adjindex = -1;
-	int limwidth = S.width * maxcrop;
-	int limheight = S.height * maxcrop;
+	int limwidth = int(S.width * maxcrop);
+	int limheight = int(S.height * maxcrop);
 
     for(int i = 1; i >= 0; i--)
         if (mask & (1<<i))
@@ -660,11 +660,11 @@ void LibRaw::free_omp_buffers(char** buffers, int buffer_count)
     free(buffers);
 }
 
-void 	LibRaw::libraw_swab(void *arr, size_t len)
+void 	LibRaw::libraw_swab(void *arr, int len)
 {
 #ifdef LIBRAW_OWN_SWAB
 	uint16_t *array = (uint16_t*)arr;
-	size_t bytes = len/2;
+	int bytes = len/2;
 	for(; bytes; --bytes)
 	{
 		*array = ((*array << 8) & 0xff00) | ((*array >> 8) & 0xff);
@@ -721,7 +721,7 @@ int checked_buffer_t::tiff_sget(unsigned save, INT64 *tag_offset, unsigned *tag_
   { // abnormal, tag buffer overrun
     return -1;
   }
-  int pos = *tag_offset;
+  int pos = int(*tag_offset);
   *tag_id = sget2(pos);
   pos += 2;
   *tag_type = sget2(pos);

@@ -152,7 +152,7 @@ void LibRaw::phase_one_flat_field(int is_float, int nc)
     for (x = 0; x < wide; x++)
       for (c = 0; c < (unsigned)nc; c += 2)
       {
-        num = is_float ? getreal(LIBRAW_EXIFTAG_TYPE_FLOAT) : get2() / 32768.0;
+        num = is_float ? getrealf(LIBRAW_EXIFTAG_TYPE_FLOAT) : float(get2()) / 32768.f;
         if (y == 0)
           mrow[c * wide + x] = num;
         else
@@ -180,7 +180,7 @@ void LibRaw::phase_one_flat_field(int is_float, int nc)
           c = nc > 2 ? FC(row - top_margin, col - left_margin) : 0;
           if (!(c & 1))
           {
-            c = RAW(row, col) * mult[c];
+            c = unsigned(RAW(row, col) * mult[c]);
             RAW(row, col) = LIM(c, 0, 65535);
           }
           for (c = 0; c < (unsigned)nc; c += 2)
@@ -197,12 +197,14 @@ void LibRaw::phase_one_flat_field(int is_float, int nc)
 
 int LibRaw::phase_one_correct()
 {
-  unsigned entries, tag, data, save, col, row, type;
+  unsigned entries, tag, data, col, row, type;
+  INT64 save;
   int len, i, j, k, cip, sum;
 #if 0
   int val[4], dev[4], max;
 #endif
-  int head[9], diff, mindiff = INT_MAX, off_412 = 0;
+  int head[9], diff, mindiff = INT_MAX;
+  INT64 off_412 = 0;
   /* static */ const signed char dir[12][2] = {
       {-1, -1}, {-1, 1}, {1, -1},  {1, 1},  {-2, 0}, {0, -2},
       {0, 2},   {2, 0},  {-2, -2}, {-2, 2}, {2, -2}, {2, 2}};
@@ -298,24 +300,24 @@ int LibRaw::phase_one_correct()
       else if (tag == 0x0419)
       { /* Polynomial curve - output calibraion */
         for (get4(), i = 0; i < 8; i++)
-          poly[i] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+          poly[i] = getrealf(LIBRAW_EXIFTAG_TYPE_FLOAT);
         poly[3] += (ph1.tag_210 - poly[7]) * poly[6] + 1;
         for (i = 0; i < 0x10000; i++)
         {
           num = (poly[5] * i + poly[3]) * i + poly[1];
-          curve[i] = LIM(num, 0, 65535);
+          curve[i] = ushort(LIM(num, 0, 65535));
         }
         goto apply; /* apply to right half */
       }
       else if (tag == 0x041a)
       { /* Polynomial curve */
         for (i = 0; i < 4; i++)
-          poly[i] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+          poly[i] = getrealf(LIBRAW_EXIFTAG_TYPE_FLOAT);
         for (i = 0; i < 0x10000; i++)
         {
           for (num = 0, j = 4; j--;)
             num = num * i + poly[j];
-          curve[i] = LIM(num + i, 0, 65535);
+          curve[i] = ushort(LIM(num + i, 0, 65535));
         }
       apply: /* apply to whole image */
         for (row = 0; row < raw_height; row++)
@@ -406,28 +408,28 @@ int LibRaw::phase_one_correct()
         get4();
         get4();
         get4();
-        qmult[0][0] = 1.0 + getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+        qmult[0][0] = 1.0f + getrealf(LIBRAW_EXIFTAG_TYPE_FLOAT);
         get4();
         get4();
         get4();
         get4();
         get4();
-        qmult[0][1] = 1.0 + getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+        qmult[0][1] = 1.0f + getrealf(LIBRAW_EXIFTAG_TYPE_FLOAT);
         get4();
         get4();
         get4();
-        qmult[1][0] = 1.0 + getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+        qmult[1][0] = 1.0f + getrealf(LIBRAW_EXIFTAG_TYPE_FLOAT);
         get4();
         get4();
         get4();
-        qmult[1][1] = 1.0 + getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+        qmult[1][1] = 1.0f + getrealf(LIBRAW_EXIFTAG_TYPE_FLOAT);
         for (row = 0; row < raw_height; row++)
         {
           checkCancel();
           for (col = 0; col < raw_width; col++)
           {
-            i = qmult[row >= (unsigned)ph1.split_row][col >= (unsigned)ph1.split_col] *
-                RAW(row, col);
+            i = int(qmult[row >= (unsigned)ph1.split_row][col >= (unsigned)ph1.split_col] *
+                RAW(row, col));
             RAW(row, col) = LIM(i, 0, 65535);
           }
         }
@@ -502,7 +504,7 @@ int LibRaw::phase_one_correct()
       get2();
       for (i = 0; i < 2; i++)
         for (j = 0; j < head[i + 1] * head[i + 3]; j++)
-          yval[i][j] = getreal(LIBRAW_EXIFTAG_TYPE_FLOAT);
+          yval[i][j] = getrealf(LIBRAW_EXIFTAG_TYPE_FLOAT);
       for (i = 0; i < 2; i++)
         for (j = 0; j < head[i + 1] * head[i + 3]; j++)
           xval[i][j] = get2();
@@ -512,8 +514,9 @@ int LibRaw::phase_one_correct()
         for (col = 0; col < raw_width; col++)
         {
           cfrac = (float)col * head[3] / raw_width;
-          cfrac -= cip = cfrac;
-          num = RAW(row, col) * 0.5;
+		  cip = (int)cfrac;
+          cfrac -= cip;
+          num = RAW(row, col) * 0.5f;
           for (i = cip; i < cip + 2; i++)
           {
             for (k = j = 0; j < head[1]; j++)
@@ -531,7 +534,7 @@ int LibRaw::phase_one_correct()
 			else
 				mult[i - cip] = 0;
           }
-          i = ((mult[0] * (1 - cfrac) + mult[1] * cfrac) * row + num) * 2;
+          i = int(((mult[0] * (1.f - cfrac) + mult[1] * cfrac) * row + num) * 2.f);
           RAW(row, col) = LIM(i, 0, 65535);
         }
       }
@@ -597,7 +600,10 @@ unsigned LibRaw::ph1_bithuff(int nbits, ushort *huff)
   unsigned c;
 
   if (nbits == -1)
-    return bitbuf = vbits = 0;
+  {
+	  bitbuf = vbits = 0;
+	  return 0;
+  }
   if (nbits == 0)
     return 0;
   if (vbits < nbits)
@@ -605,7 +611,7 @@ unsigned LibRaw::ph1_bithuff(int nbits, ushort *huff)
     bitbuf = bitbuf << 32 | get4();
     vbits += 32;
   }
-  c = bitbuf << (64 - vbits) >> (64 - nbits);
+  c = unsigned ((bitbuf << (64 - vbits) >> (64 - nbits)) & 0xffffffff);
   if (huff)
   {
     vbits -= huff[c] >> 8;
@@ -656,7 +662,7 @@ void LibRaw::phase_one_load_raw_c()
   }
 
   for (i = 0; i < 256; i++)
-    curve[i] = i * i / 3.969 + 0.5;
+    curve[i] = ushort(float(i * i) / 3.969f + 0.5f);
   try
   {
     for (row = 0; row < raw_height; row++)

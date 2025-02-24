@@ -335,7 +335,7 @@ int LibRaw::unpack_thumb(void)
               else if (total_size == T.twidth * T.tlength)
                 T.tcolors = 1;
             }
-            T.tlength = total_size;
+            T.tlength = unsigned(total_size);
             THUMB_SIZE_CHECKTNZ(T.tlength);
             if (T.thumb)
               free(T.thumb);

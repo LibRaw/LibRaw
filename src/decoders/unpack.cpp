@@ -110,6 +110,7 @@ int LibRaw::unpack(void)
 #endif
 #ifdef USE_RAWSPEED3
     if (!raw_was_read()
+		&& ID.input->size() < 2147483615LL
         && (!IO.fuji_width) // Do not use for fuji rotated
         && ((imgdata.idata.raw_count == 1) 
             // Canon dual pixel, 1st frame
@@ -171,11 +172,7 @@ int LibRaw::unpack(void)
                       throw "Size mismatch";
 
                     // DECODED w/ success
-				  if (rs3ret.filters > 1) // Fuji or bayer
-				  {
-					imgdata.rawdata.raw_image = (ushort*)rs3ret.pixeldata;
-				  }
-                  else if (rs3ret.cpp == 4)
+                  if (rs3ret.cpp == 4)
                   {
                       imgdata.rawdata.color4_image = (ushort(*)[4])rs3ret.pixeldata;
                     //if (r->whitePoint > 0 && r->whitePoint < 65536)
@@ -186,6 +183,10 @@ int LibRaw::unpack(void)
                       imgdata.rawdata.color3_image = (ushort(*)[3])rs3ret.pixeldata;
                     //if (r->whitePoint > 0 && r->whitePoint < 65536)
                     //  C.maximum = r->whitePoint;
+                  }
+                  else if (rs3ret.cpp == 1 && rs3ret.filters > 1) // Fuji or bayer
+                  {
+                    imgdata.rawdata.raw_image = (ushort *)rs3ret.pixeldata;
                   }
 
                   if (raw_was_read()) // buffers are assigned above
@@ -200,8 +201,8 @@ int LibRaw::unpack(void)
 						load_raw == &LibRaw::phase_one_load_raw_c && imgdata.color.phase_one_data.format != 8)
                     {
                       // Scale data to match libraw own decoder
-                      for (int row = 0; row < rs3ret.height; row++)
-                        for (int col = 0; col < rs3ret.pitch / 2; col++)
+                      for (unsigned row = 0; row < rs3ret.height; row++)
+                        for (unsigned col = 0; col < rs3ret.pitch / 2; col++)
                           imgdata.rawdata.raw_image[row * rs3ret.pitch / 2 + col] <<= 2;
                     }
 
@@ -221,7 +222,7 @@ int LibRaw::unpack(void)
     }
 #endif
 #ifdef USE_RAWSPEED
-    if (!raw_was_read())
+    if (!raw_was_read() && ID.input->size() < 2147483615LL)
     {
       int rawspeed_enabled = 1;
 

@@ -154,7 +154,7 @@ void LibRaw::lin_interpolate()
           *ip++ = color;
           sum[color] += 1 << shift;
         }
-      code[(row * 16 + col) * 32] = (ip - (code + ((row * 16) + col) * 32)) / 3;
+      code[(row * 16 + col) * 32] = int((ip - (code + ((row * 16) + col) * 32)) / 3);
       FORCC
       if (c != f)
       {

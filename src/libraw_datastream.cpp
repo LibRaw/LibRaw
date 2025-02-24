@@ -780,9 +780,11 @@ INT64 LibRaw_bigfile_buffered_datastream::readAt(void *ptr, size_t size, INT64 o
     memset(&olap, 0, sizeof(olap));
     olap.Offset = off & 0xffffffff;
     olap.OffsetHigh = off >> 32;
-    if (ReadFile(fhandle, ptr, nNumberOfBytesToRead, &NumberOfBytesRead, &olap))
-        return NumberOfBytesRead;
-    else
+	if (ReadFile(fhandle, ptr, nNumberOfBytesToRead, &NumberOfBytesRead, &olap))
+		return NumberOfBytesRead;
+	else if (NumberOfBytesRead > 0)
+		return NumberOfBytesRead;
+	else
         return 0;
 }
 
@@ -905,14 +907,14 @@ char *LibRaw_bigfile_buffered_datastream::gets(char *s, int sz)
     if (contains >= sz)
     {
         unsigned char *buf = iobuffers[bufindex].data() + (_fpos - iobuffers[bufindex]._bstart);
-        int streampos = 0;
-        int streamsize = contains;
+        INT64 streampos = 0;
+        INT64 streamsize = contains;
         unsigned char *str = (unsigned char *)s;
         unsigned char *psrc, *pdest;
         psrc = buf + streampos;
         pdest = str;
 
-        while ((size_t(psrc - buf) < streamsize) && ((pdest - str) < sz-1)) // sz-1: to append \0
+        while ((INT64(psrc - buf) < streamsize) && ((pdest - str) < INT64(sz)-1)) // sz-1: to append \0
         {
             *pdest = *psrc;
             if (*psrc == '\n')
@@ -920,7 +922,7 @@ char *LibRaw_bigfile_buffered_datastream::gets(char *s, int sz)
             psrc++;
             pdest++;
         }
-        if (size_t(psrc - buf) < streamsize)
+        if (INT64(psrc - buf) < streamsize)
             psrc++;
         if ((pdest - str) < sz - 1)
             *(++pdest) = 0;
@@ -956,8 +958,8 @@ int LibRaw_bigfile_buffered_datastream::scanf_one(const char *fmt, void *val)
     if (contains >= 24)
     {
         unsigned char *bstart = iobuffers[bufindex].data() + (_fpos - iobuffers[bufindex]._bstart);
-        int streampos = 0;
-        int streamsize = contains;
+        INT64 streampos = 0;
+        INT64 streamsize = contains;
         int
 #ifndef WIN32SECURECALLS
             scanf_res = sscanf((char *)(bstart), fmt, val);

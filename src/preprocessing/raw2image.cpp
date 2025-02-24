@@ -349,8 +349,8 @@ int LibRaw::raw2image_ex(int do_subtract_black)
         crop[1] = (crop[1] / 4) * 4;
         if (!libraw_internal_data.unpacker_data.fuji_layout)
         {
-          crop[2] *= sqrt(2.0);
-          crop[3] /= sqrt(2.0);
+          crop[2] = int(crop[2] * sqrtf(2.f));
+          crop[3] = int(crop[3] / sqrtf(2.f));
         }
         crop[2] = (crop[2] / 4 + 1) * 4;
         crop[3] = (crop[3] / 4 + 1) * 4;

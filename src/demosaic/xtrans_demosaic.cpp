@@ -360,9 +360,11 @@ void LibRaw::xtrans_interpolate(int passes)
                         lix = &lab[row][col];
                         int g = 2 * lix[0][0] - lix[f][0] - lix[-f][0];
                         drv[d][row][col] =
+							float(
                             SQR(g) +
                             SQR((2 * lix[0][1] - lix[f][1] - lix[-f][1] + g * 500 / 232)) +
-                            SQR((2 * lix[0][2] - lix[f][2] - lix[-f][2] - g * 500 / 580));
+                            SQR((2 * lix[0][2] - lix[f][2] - lix[-f][2] - g * 500 / 580))
+								);
                     }
             }
 
