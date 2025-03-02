@@ -495,6 +495,8 @@ int LibRaw::phase_one_correct()
 	  unsigned w0 = head[1] * head[3], w1 = head[2] * head[4];
 	  if (w0 > 10240000 || w1 > 10240000)
 		  throw LIBRAW_EXCEPTION_ALLOC;
+	  if (w0 < 1 || w1 < 1)
+		  throw LIBRAW_EXCEPTION_IO_CORRUPT;
       yval[0] = (float *)calloc(head[1] * head[3] + head[2] * head[4], 6);
       yval[1] = (float *)(yval[0] + head[1] * head[3]);
       xval[0] = (ushort *)(yval[1] + head[2] * head[4]);
