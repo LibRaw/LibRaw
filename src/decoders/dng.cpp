@@ -21,6 +21,8 @@
 void LibRaw::vc5_dng_load_raw_placeholder()
 {
     // placeholder only, real decoding implemented in GPR SDK
+    if(!dng_version)
+    	throw LIBRAW_EXCEPTION_IO_EOF; // never reached
     throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
 }
 void LibRaw::jxl_dng_load_raw_placeholder()

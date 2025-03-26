@@ -115,6 +115,8 @@ void LibRaw::sony_ljpeg_load_raw()
 
 void LibRaw::nikon_he_load_raw_placeholder()
 {
+    if(dng_version)
+    	throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT; // Never reached
     throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
 }
 
