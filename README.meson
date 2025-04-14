@@ -1,0 +1,21 @@
+
+# Prerequisites
+
+ * meson
+ * ninja
+
+# Configuration
+
+ * Simplest invocation:
+ ```
+ meson setup builddir
+ ```
+ * with prefix and options:
+ ```
+ meson setup --prefix=/opt/libraw -Dopenmp=enabled -Djpeg=enabled -Dzlib=enabled -Dlcms=enabled builddir
+ ```
+ * without examples
+ ```
+ meson setup --prefix=/opt/libraw -Dopenmp=enabled -Djpeg=enabled -Dzlib=enabled -Dlcms=enabled -Dexamples=false builddir
+ ```
+ 

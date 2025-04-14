@@ -1,0 +1,49 @@
+
+# [ ] openmp
+# [ ] jpeg
+# [ ] jasper
+# [ ] zlib
+# [ ] lcms
+# [ ] examples
+
+option(
+  'openmp',
+  type: 'feature',
+  value: 'auto',
+  description: 'Enable OpenMP support',
+)
+
+option(
+  'jpeg',
+  type: 'feature',
+  value: 'auto',
+  description: 'Enable JPEG support for Lossy compressed DNG files',
+)
+
+option(
+  'jasper',
+  type: 'feature',
+  value: 'auto',
+  description: 'Enable Jasper (JPEG2000) support for RedCine files',
+)
+
+option(
+  'zlib',
+  type: 'feature',
+  value: 'auto',
+  description: 'Enable zlib support for deflate compressed DNG files',
+)
+
+option(
+  'lcms',
+  type: 'feature',
+  value: 'auto',
+  description: 'Enable LCMS support',
+)
+
+option(
+  'examples',
+  type: 'boolean',
+  value: true,
+  description: 'Enable building of examples'
+)
