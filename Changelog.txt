@@ -1,3 +1,7 @@
+2025-04-22  Alex Tutubalin <lexa@lexa.ru>
+ * The CVE numbers arrived after the 0.21.4 release:
+   CVE-2025-43961, CVE-2025-43962, CVE-2025-43963, CVE-2025-43964
+
 2025-04-14  Alex Tutubalin <lexa@lexa.ru>
 
  LibRaw 0.21.4-Release 
