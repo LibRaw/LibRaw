@@ -1,3 +1,8 @@
+2025-04-23  Alex Tutubalin <lexa@lexa.ru>
+ * CVE numbers arrived after snapshot published (all fixed 
+   in 2025-02-11 snapshot):
+   CVE-2025-43961, CVE-2025-43962, CVE-2025-43963, CVE-2025-43964
+
 2025-02-11  Alex Tutubalin <lexa@lexa.ru>
 
 LibRaw-snapshot-202502
