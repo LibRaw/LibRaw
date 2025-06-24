@@ -983,7 +983,7 @@ void LibRaw::rollei_load_raw()
 {
   uchar pixel[10];
   unsigned iten = 0, isix, i, buffer = 0, todo[16];
-  if (raw_width > 32767 || raw_height > 32767)
+  if (raw_width > 16383 || raw_height > 16383)
     throw LIBRAW_EXCEPTION_IO_BADFILE;
   unsigned maxpixel = raw_width * (raw_height + 7);
 
