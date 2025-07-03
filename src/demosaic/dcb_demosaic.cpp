@@ -351,12 +351,12 @@ void LibRaw::dcb_color_full()
       f[2] = 1.0f /
              (float)(1.0 +
                      fabsf(chroma[indx + u - 1][c] - chroma[indx - u + 1][c]) +
-                     fabsf(chroma[indx + u - 1][c] - chroma[indx + w + 3][c]) +
+                     fabsf(chroma[indx + u - 1][c] - chroma[indx + w - 3][c]) +
                      fabsf(chroma[indx - u + 1][c] - chroma[indx + w - 3][c]));
       f[3] = 1.0f /
              (float)(1.0 +
                      fabsf(chroma[indx + u + 1][c] - chroma[indx - u - 1][c]) +
-                     fabsf(chroma[indx + u + 1][c] - chroma[indx + w - 3][c]) +
+                     fabsf(chroma[indx + u + 1][c] - chroma[indx + w + 3][c]) +
                      fabsf(chroma[indx - u - 1][c] - chroma[indx + w + 3][c]));
       g[0] = 1.325f * chroma[indx - u - 1][c] - 0.175f * chroma[indx - w - 3][c] -
              0.075f * chroma[indx - w - 1][c] - 0.075f * chroma[indx - u - 3][c];
