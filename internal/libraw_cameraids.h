@@ -95,6 +95,7 @@ it under the terms of the one of two licenses as you choose:
 #define CanonID_EOS_R10           (0x80000000ULL + 0x465ULL)
 #define CanonID_EOS_M50_Mark_II   (0x80000000ULL + 0x468ULL)
 #define CanonID_EOS_R50           (0x80000000ULL + 0x480ULL)
+#define CanonID_EOS_R50_V         (0x80000000ULL + 0x516ULL)
 #define CanonID_EOS_R6m2          (0x80000000ULL + 0x481ULL)
 #define CanonID_EOS_R8            (0x80000000ULL + 0x487ULL)
 #define CanonID_EOS_R100          (0x80000000ULL + 0x498ULL)
