@@ -89,8 +89,18 @@ extern "C"
 #define NO_LCMS
 #endif
 
+#ifdef __cplusplus
+} /* extern C */
+#endif
+
+/* This cannot be in the extern C setting... */
 #include "libraw_const.h"
 #include "libraw_version.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #ifdef _WIN32
   typedef __int64 INT64;
