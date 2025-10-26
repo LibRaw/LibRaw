@@ -1173,7 +1173,7 @@ dng_skip:
       FORCC
       {
         cmin = MIN(cmin, cnorm[c]);
-        cmax = MIN(cmax, cnorm[c]);
+        cmax = MAX(cmax, cnorm[c]);
       }
       if (cmin <= 0.01f || cmax > 100.f)
         cmul_ok = false;
