@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2024 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -111,8 +111,10 @@ void LibRaw::setCanonBodyFeatures(unsigned long long id)
   else if (
               (id == CanonID_EOS_R)
            || (id == CanonID_EOS_RP)
+           || (id == CanonID_EOS_R1)
            || (id == CanonID_EOS_R3)
            || (id == CanonID_EOS_R5)
+           || (id == CanonID_EOS_R5_Mark_II)
            || (id == CanonID_EOS_R5_C)
            || (id == CanonID_EOS_R6)
            || (id == CanonID_EOS_R6m2)
@@ -147,7 +149,10 @@ void LibRaw::setCanonBodyFeatures(unsigned long long id)
   }
 }
 
-int CanonCameraInfo_checkFirmwareRecordLocation (uchar *offset) {
+static int CanonCameraInfo_checkFirmwareRecordLocation (uchar *data, size_t _offset, size_t size) 
+{
+	if (size < _offset + 5) return 0; // overrun
+	uchar *offset = data + _offset;
 // firmware record location allows
 // to determine the subversion of the CameraInfo table
 // and to adjust offsets accordingly
@@ -168,10 +173,12 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
   ushort iCanonLensID = 0, iCanonMaxFocal = 0, iCanonMinFocal = 0,
          iCanonLens = 0, iCanonCurFocal = 0, iCanonFocalType = 0,
          iMakernotesFlip = 0,
-         iHTP = 0, iALO = 0;
+         iHTP = 0, iALO = 0,
+         iAutoRotateMode = 0;
   short SubVersion_offset = 0;
   ushort SubVersion = 0, mgck = 0;
 
+// printf ("==>> CanonCameraInfo len: %d\n", maxlen);
   if (maxlen < 16)
     return; // too short
 
@@ -199,11 +206,11 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
     iCanonLensID    =  0x0d;
     iCanonMinFocal  =  0x0e;
     iCanonMaxFocal  =  0x10;
-    if (!ilm.CurFocal)
+    if (!ilm.CurFocal && iCanonCurFocal < maxlen - 1)
       ilm.CurFocal = sget2(CameraInfo + iCanonCurFocal);
-    if (!ilm.MinFocal)
+    if (!ilm.MinFocal && iCanonMinFocal < maxlen - 1)
       ilm.MinFocal = sget2(CameraInfo + iCanonMinFocal);
-    if (!ilm.MaxFocal)
+    if (!ilm.MaxFocal && iCanonMaxFocal < maxlen - 1)
       ilm.MaxFocal = sget2(CameraInfo + iCanonMaxFocal);
     imCommon.CameraTemperature = 0.0f;
     break;
@@ -234,9 +241,9 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
     break;
 
   case CanonID_EOS_1D_Mark_IV:
-    if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x1e8))
+    if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x1e8, maxlen))
       SubVersion = 1;
-    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x1ed))
+    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x1ed, maxlen))
       SubVersion = 2;
 // printf ("==>> CanonID_EOS_1D_Mark_IV, SubVersion: %d\n", SubVersion);
     iHTP            =  0x07;
@@ -254,13 +261,13 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
     break;
 
   case CanonID_EOS_1D_X:
-    if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x271))
+    if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x271, maxlen))
       SubVersion = 1;
-    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x279))
+    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x279, maxlen))
       SubVersion = 2;
-    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x280))
+    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x280, maxlen))
       SubVersion = 3;
-    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x285))
+    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x285, maxlen))
       SubVersion = 4;
 // printf ("==>> CanonID_EOS_1D_X, SubVersion: %d\n", SubVersion);
 
@@ -301,15 +308,15 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
     break;
 
   case CanonID_EOS_5D_Mark_III:
-    if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x22c))
+    if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x22c, maxlen))
       SubVersion = 1;
-    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x22d))
+    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x22d, maxlen))
       SubVersion = 2;
-    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x23c))
+    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x23c, maxlen))
       SubVersion = 3;
-    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x242))
+    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x242, maxlen))
       SubVersion = 4;
-    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x247))
+    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x247, maxlen))
       SubVersion = 5;
 // printf ("==>> CanonID_EOS_5D_Mark_III, SubVersion: %d\n", SubVersion);
 
@@ -339,18 +346,33 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
     iCanonMaxFocal  = 0x157+SubVersion_offset;
     break;
 
+  case CanonID_EOS_5D_Mark_IV:
+    iMakernotesFlip =  0x96;
+    iAutoRotateMode = 0x5da;
+    //printf ("==>> 5DMkIV: MakernotesFlip: %d; AutoRotateMode: %d\n", CameraInfo[iMakernotesFlip], CameraInfo[iAutoRotateMode]);
+    break;
+
+  case CanonID_EOS_5DS:
+  case CanonID_EOS_5DS_R:
+    iMakernotesFlip =  0x96;
+    iAutoRotateMode = 0x580;
+    //printf ("==>> 5DS/5DS R: MakernotesFlip: %d; AutoRotateMode: %d\n", CameraInfo[iMakernotesFlip], CameraInfo[iAutoRotateMode]);
+    break;
+
   case CanonID_EOS_6D:
     iCanonCurFocal  =  0x23;
     iMakernotesFlip =  0x83;
     iCanonLensID    = 0x161;
     iCanonMinFocal  = 0x163;
     iCanonMaxFocal  = 0x165;
+    iAutoRotateMode = 0x3b2;
+    //printf ("==>> 6D: MakernotesFlip: %d; AutoRotateMode: %d\n", CameraInfo[iMakernotesFlip], CameraInfo[iAutoRotateMode]);
     break;
 
   case CanonID_EOS_7D:
-    if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x1a8))
+    if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x1a8, maxlen))
       SubVersion = 1;
-    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo + 0x1ac))
+    else if (CanonCameraInfo_checkFirmwareRecordLocation(CameraInfo, 0x1ac, maxlen))
       SubVersion = 2;
 // printf ("==>> CanonID_EOS_7D, SubVersion: %d\n", SubVersion);
     iHTP            =  0x07;
@@ -478,9 +500,8 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
     break;
   }
 
-  if (iMakernotesFlip && (CameraInfo[iMakernotesFlip] < 3)) {
+  if (iMakernotesFlip && iMakernotesFlip < maxlen && (CameraInfo[iMakernotesFlip] < 3)) {
     imCanon.MakernotesFlip = "065"[CameraInfo[iMakernotesFlip]] - '0';
-// printf ("==>> iMakernotesFlip: 0x%x, flip: %d\n", iMakernotesFlip, imCanon.MakernotesFlip);
   } else if (tagtypeIs(LIBRAW_EXIFTAG_TYPE_UNDEFINED) &&
      (mgck == 0xaaaa) && (dng_writer == nonDNG)) { // CameraOrientation
     int c, i;
@@ -489,12 +510,14 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
     while (i < int(maxlen - 5))
       if ((sget4(CameraInfo+i) == 257) && ((c = CameraInfo[i+8]) < 3)) {
         imCanon.MakernotesFlip = "065"[c] - '0';
-// printf ("==>> MakernotesFlip offset: 0x%x, flip: %d\n", i+8, imCanon.MakernotesFlip);
         break;
       } else i+=4;
   }
 
-  if (iHTP)
+  if (iAutoRotateMode && iAutoRotateMode < maxlen && CameraInfo[iAutoRotateMode] < 3)
+	  imCanon.AutoRotateMode = CameraInfo[iAutoRotateMode];
+
+  if (iHTP && iHTP < maxlen)
   {
     imCanon.HighlightTonePriority = CameraInfo[iHTP];
     if ((imCanon.HighlightTonePriority > 5) ||
@@ -504,7 +527,7 @@ void LibRaw::processCanonCameraInfo(unsigned long long id, uchar *CameraInfo,
       imCommon.ExposureCalibrationShift -= float(imCanon.HighlightTonePriority);
     }
   }
-  if (iALO)
+  if (iALO && iALO < maxlen)
   {
     imCanon.AutoLightingOptimizer = CameraInfo[iALO];
     if ((imCanon.AutoLightingOptimizer > 3) ||
@@ -1272,6 +1295,18 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned /*type*/, unsigned len,
       offsetChannelBlackLevel2 = save1 + ((0x0069+0x0102) << 1);
       offsetChannelBlackLevel  = save1 + ((0x0069+0x0213) << 1);
       offsetWhiteLevels        = save1 + ((0x0069+0x0217) << 1);
+      break;
+
+    case 4528: // R1, R5 Mark II; ColorDataSubVer: 64
+      imCanon.ColorDataVer = 12;
+      AsShot_Auto_MeasuredWB(0x0069);
+      fseek(ifp, save1 + ((0x006d+0x0001) << 1), SEEK_SET);
+      Canon_WBpresets(2, 12);
+      fseek(ifp, save1 + ((0x0069+0x00d7) << 1), SEEK_SET);
+      Canon_WBCTpresets(0);
+      offsetChannelBlackLevel2 = save1 + ((0x0069+0x0116) << 1);
+      offsetChannelBlackLevel  = save1 + ((0x0069+0x0227) << 1);
+      offsetWhiteLevels        = save1 + ((0x0069+0x022b) << 1);
       break;
 
    default:

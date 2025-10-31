@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2024 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -358,6 +358,8 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {SonyID_ILX_LR1, sbfILCE_FF,
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_ZV_E10M2, sbfILCE_DX,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
   };
   ilm.CamID = id;
   int isPreProductionFW = 0;
@@ -446,6 +448,7 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
   case SonyID_ILCE_7CR:
   case SonyID_ILCE_7CM2:
   case SonyID_ILCE_9M3:
+  case SonyID_ZV_E10M2:
     imSony.group9050 = LIBRAW_SONY_Tag9050d;
     break;
   default: // see also process_Sony_0x9050
@@ -2251,12 +2254,12 @@ void LibRaw::parseSonySR2(uchar *_cbuf_SR2, unsigned SR2SubIFDOffset,
                   if ((tag_id >= 0x7480) && (tag_id <= 0x7486)) {
                       i = tag_id - 0x7480;
                       if (Sony_SR2_wb_list[i] > 255) {
-		         if (WBCTC_count < 64) {
-                          icWBCCTC[WBCTC_count][0] = Sony_SR2_wb_list[i];
-                          FORC3 icWBCCTC[WBCTC_count][c + 1] = cbuf_SR2.sget2(tag_dataoffset + tag_dataunitlen * c);
-                          icWBCCTC[WBCTC_count][4] = icWBCCTC[WBCTC_count][2];
-			 }
-                         WBCTC_count++;
+						  if (WBCTC_count < 64) {
+							  icWBCCTC[WBCTC_count][0] = float(Sony_SR2_wb_list[i]);
+							  FORC3 icWBCCTC[WBCTC_count][c + 1] = cbuf_SR2.sget2LL(tag_dataoffset + tag_dataunitlen * c);
+							  icWBCCTC[WBCTC_count][4] = icWBCCTC[WBCTC_count][2];
+						  }
+                          WBCTC_count++;
                       }
                       else {
                           FORC3 icWBC[Sony_SR2_wb_list[i]][c] = cbuf_SR2.sget2LL(tag_dataoffset + tag_dataunitlen * c);
@@ -2266,16 +2269,17 @@ void LibRaw::parseSonySR2(uchar *_cbuf_SR2, unsigned SR2SubIFDOffset,
                   else if ((tag_id >= 0x7820) && (tag_id <= 0x782d)) {
                       i = tag_id - 0x7820;
                       if (Sony_SR2_wb_list1[i] > 255) {
-		        if (WBCTC_count < 64) {
-                          icWBCCTC[WBCTC_count][0] = Sony_SR2_wb_list1[i];
-                          FORC3 icWBCCTC[WBCTC_count][c + 1] = cbuf_SR2.sget2(tag_dataoffset + tag_dataunitlen * c);
-                          icWBCCTC[WBCTC_count][4] = icWBCCTC[WBCTC_count][2];
-                          if (Sony_SR2_wb_list1[i] == 3200) {
-                              FORC3 icWBC[LIBRAW_WBI_StudioTungsten][c] = int(icWBCCTC[WBCTC_count][c + 1]);
-                              icWBC[LIBRAW_WBI_StudioTungsten][3] = icWBC[LIBRAW_WBI_StudioTungsten][1];
-                          }
-			 }
-                         WBCTC_count++;
+						  if (WBCTC_count < 64) {
+							  icWBCCTC[WBCTC_count][0] = float(Sony_SR2_wb_list1[i]);
+							  FORC3 icWBCCTC[WBCTC_count][c + 1] = cbuf_SR2.sget2LL(tag_dataoffset + tag_dataunitlen * c);
+							  icWBCCTC[WBCTC_count][4] = icWBCCTC[WBCTC_count][2];
+							  if (Sony_SR2_wb_list1[i] == 3200)
+							  {
+								  FORC3 icWBC[LIBRAW_WBI_StudioTungsten][c] = int(icWBCCTC[WBCTC_count][c + 1]);
+								  icWBC[LIBRAW_WBI_StudioTungsten][3] = icWBC[LIBRAW_WBI_StudioTungsten][1];
+							  }
+						  }
+                          WBCTC_count++;
                       }
                       else {
                           FORC3 icWBC[Sony_SR2_wb_list1[i]][c] = cbuf_SR2.sget2LL(tag_dataoffset + tag_dataunitlen * c);

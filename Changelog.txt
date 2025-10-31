@@ -1,3 +1,76 @@
+2025-10-29  Alex Tutubalin <lexa@lexa.ru>
+
+  LibRaw 0.22 PreRC1 (documentation: work in progress)
+
+  * Camera support:
+    Canon EOS R1, EOS R5 Mark II
+    Fujifilm X-T50, GFX 100S II
+    Leica Q3 43, D-Lux8
+    Nikon Z6-III (no HE/HE* support)
+    Panasonic GH7, S9
+    Sony ZV-E10M2, UMC-R10C
+
+  * New implementation for Samsung V3 decoder (NX1, NX500, etc)
+
+  * Canon AutoRotate mode detection for several cameras.
+    If LIBRAW_RAWOPTIONS_CANON_CHECK_CAMERA_AUTO_ROTATION_MODE bit
+    is set in imgdata.rawparams: for shots with AutoRotate is Off
+    TIFF::Orientation tag wil be used for imgdata.sizes.flip
+    (and Makernotes rotation tag for other AutoRotate modes).
+    Note: AutoRotate is detected for limited set of Canon cameras,
+    namely: EOS 6D, 5D Mark IV, 5DS, 5DS R
+    To extend this list: we need specially shot samples to detect
+    AutoRotate field location in metadata. Contact us for details
+    if you need to add your camera to list and have such camera on hands
+
+  * New rawoptions/processing flag for DNG processing if compiled 
+    with Adobe DNG SDK:
+	  LIBRAW_RAWOPTIONS_DNG_STAGE23_IFPRESENT_JPGJXL
+   Similar to  LIBRAW_RAWOPTIONS_DNG_STAGE2_IFPRESENT,LIBRAW_RAWOPTIONS_DNG_STAGE3_IFPRESENT 
+   flags but applied to JPEG/JPEG-XL compressed images only:
+   If  OpcodeList2/OpcodeList3 tags are present in the input DNG file, these tags will be 
+   processed via Adobe DNG SDK, producing corrected (de-bayered) image.
+
+  * LibRaw::adjust_to_raw_inset_crop exposed via C-API call:  
+    libraw_adjust_to_raw_inset_crop(libraw_data_t *lr, unsigned mask, float maxcrop);
+    Note: default maxcrop value for C++ API is 0.55f
+
+  * DNG OpcodeList1/2/3: opcode list(s) are read (as is) into
+    imgdata.color.dng_levels.rawopcodes[3]
+
+  * Fixed issue 712: mistype in MIN/MAX that loosens camera WB preset checks
+
+  * Updated libraw_types.h to fix calling C++ files in external C -- main
+    includes cannot be in extern C for the library to correctly compile
+    under Swift Modules. This small change lets the compiler
+    finish when compiling the library inside a module.
+
+  * Read known parts of the X3F 4.X (Quattro) header
+  
+  * Rollei loader: more realistic limits
+  
+  * Additional metadata checks in PhaseOne files processing
+  
+  * Minor fixes to improve stability and special crafted files handling
+  
+  * Multiple minor fixes to better handling of specially crafted files
+   
+  * Fixed regression in Fujufilm S6000/S6500 support
+  
+  * Improved damaged/incorrect files handling
+  
+  * Support for 4-color lossy-compressed DNG files
+  
+  * Improved damaged/incorrect/modified CR3 files handling 
+  
+  * Colordata updated for several Fujifilm cameras
+  
+  * Improved byte order detection for PowerPC
+  
+  * Minor fix: NOMINMAX defined before #include winsock2.h in
+    LibRaw public header to not provide min/max macros to the
+    code that includes libraw.h
+
 2025-04-23  Alex Tutubalin <lexa@lexa.ru>
  * CVE numbers arrived after snapshot published (all fixed 
    in 2025-02-11 snapshot):

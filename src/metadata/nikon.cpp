@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2024 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -128,7 +128,7 @@ void LibRaw::processNikonLensData(uchar *LensData, unsigned len)
       i = 8;
       break;
     case  58: // "Z 6", "Z 6 II", "Z 7", "Z 7 II", "Z 50", D780, "Z 5", "Z fc"
-    case 108: // "Z 9", "Z 30", "Z 8"
+    case 108: // "Z 9", "Z 30", "Z 8", "Z6_2"
       if (model[6] == 'Z')
         ilm.CameraMount = LIBRAW_MOUNT_Nikon_Z;
       if (imNikon.HighSpeedCropFormat != 12)
@@ -605,7 +605,7 @@ photo shooting menu -> [Pixel shift shooting] :
     {
         imNikon.BurstTable_0x0056_len = len;
         if (imNikon.BurstTable_0x0056_len == 16) {
-					imNikon.BurstTable_0x0056 = (uchar *)malloc(imNikon.BurstTable_0x0056_len);
+					imNikon.BurstTable_0x0056 = (uchar *)calloc(imNikon.BurstTable_0x0056_len,1);
 					fread(imNikon.BurstTable_0x0056, imNikon.BurstTable_0x0056_len, 1, ifp);
 					FORC4 imNikon.BurstTable_0x0056_ver = imNikon.BurstTable_0x0056_ver * 10 + (imNikon.BurstTable_0x0056[c] - '0');
 					imNikon.BurstTable_0x0056_gid = (imNikon.BurstTable_0x0056[5]<<8) | imNikon.BurstTable_0x0056[4];
