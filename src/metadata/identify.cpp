@@ -3089,6 +3089,14 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
             height = 2846;
           }
         }
+        else if (unique_id == SonyID_ILME_FX2)
+        {
+          if (raw_width == 7040 && raw_height == 4688) // Sony FX2 FF
+          {
+            width = 7008;
+            height = 4672;
+          }
+        }
         else if(unique_id == SonyID_ILCE_1)
         {
           if (raw_width == 8704 && raw_height == 6144) // ILCE-1 FF@Compressed
