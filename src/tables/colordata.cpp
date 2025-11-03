@@ -1800,6 +1800,8 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
       { 6972, -2408,  -600, -4330, 12101,  2515,  -388,  1277,  5847 } },
     { LIBRAW_CAMERAMAKER_Sony, "ILME-FX3", 0, 0,
       { 6912, -2127, -469, -4470, 12175, 2587, -398, 1478, 6492 } },
+    { LIBRAW_CAMERAMAKER_Sony, "ILME-FX2", 0, 0,
+      { 7460, -2365, -588, -5687, 13442, 2474, -624, 1156, 6584 } },
 
     { LIBRAW_CAMERAMAKER_Sony, "ILX-LR1", 0, 0,
       { 8200, -2976, -719, -4296, 12053, 2532, -429, 1282, 5774 } }, // temp, same as for ILCE-7RM5

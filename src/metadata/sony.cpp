@@ -334,6 +334,8 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {SonyID_ILME_FX3, sbfILCE_FF,
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_ILME_FX2, sbfILCE_FF,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {SonyID_ILCE_7RM3A, sbfILCE_FF,
        LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
       {SonyID_ILCE_7RM4A, sbfILCE_FF,
@@ -443,6 +445,7 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
       imSony.ImageCount3_offset = 0xffff; // not valid
     }
     break;
+  case SonyID_ILME_FX2:
   case SonyID_ZV_E1:
   case SonyID_ILCE_6700:
   case SonyID_ILCE_7CR:
