@@ -733,7 +733,7 @@ void LibRaw::Canon_WBCTpresets(short WBCTversion)
   return;
 }
 
-void LibRaw::parseCanonMakernotes(unsigned tag, unsigned /*type*/, unsigned len, unsigned dng_writer)
+void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, unsigned dng_writer)
 {
 
 #define AsShot_Auto_MeasuredWB(offset)                       \
@@ -836,10 +836,32 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned /*type*/, unsigned len,
     if (!imCommon.afcount) {
       imCommon.afdata[imCommon.afcount].AFInfoData_tag = tag;
       imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
-      imCommon.afdata[imCommon.afcount].AFInfoData_length = len;
-      imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length,1);
-      fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
-      imCommon.afcount = 1;
+	  imCommon.afdata[imCommon.afcount].AFInfoData_length = len;
+	  if (libraw_tagtype_dataunit_bytes(type)) // returns 0 on unknown type
+		  imCommon.afdata[imCommon.afcount].AFInfoData_length *= libraw_tagtype_dataunit_bytes(type);
+
+	  unsigned datalen = 0;
+	  if (tag == 0x0026 || tag == 0x003c) // AFInfo2 bytes 0-1 contains AFSize
+	  {
+		  INT64 here = ftell(ifp);
+		  datalen = get2();
+		  fseek(ifp, here, SEEK_SET);
+	  }
+	  if (!datalen || datalen == imCommon.afdata[imCommon.afcount].AFInfoData_length) // data check not performed or passed
+	  {
+        imCommon.afdata[imCommon.afcount].AFInfoData =
+            (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length, 1);
+        fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1,
+              ifp);
+        imCommon.afcount = 1;
+	  }
+	  else
+	  {
+		  // check not passed: clean up afdata inited
+        imCommon.afdata[imCommon.afcount].AFInfoData_tag = 0;
+        imCommon.afdata[imCommon.afcount].AFInfoData_order = 0;
+        imCommon.afdata[imCommon.afcount].AFInfoData_length = 0;
+	  }
     }
 
   } else if ((tag == 0x0029) && (dng_writer == nonDNG)) { // PowerShot G9
