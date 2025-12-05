@@ -1290,6 +1290,7 @@ static const char *static_camera_list[] = {
 	"Sony ZV-E1",
 	"Sony ZV-E10",
 	"Sony ZV-E10 II",
+	"Sony ILME-FX2 (FX2)",
 	"STV680 VGA",
 	"PtGrey GRAS-50S5C",
 	"JaiPulnix BB-500CL",
