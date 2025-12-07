@@ -43,6 +43,39 @@ make
       <li>libraw.a: non-thread-safe version</li>
       <li>libraw_r.a: thread-safe</li>
     </ul>
+    <h3>Build via provided Makefiles</h3>
+    <p>Several makefiles provided to simplify basic build process:</p>
+    <ul>
+      <li>Makefile.dist - for macOS/Unix builds</li>
+      <li>Makefile.mingw - for MinGW/similar gcc/clang on Windows</li>
+      <li>Makefile.msvc - for Microsoft nmake/Visual studio</li>
+    </ul>
+    To build via provided Makefile: edit it to adjust compilation flag and use
+    make/gmake/nmake -f Makefile
+    <h3>Build time defines</h3>
+    <p>File size/memory limits:</p>
+    <ul>
+      <li>LIBRAW_MAX_ALLOC_MB_DEFAULT - memory use for main RAW image in
+        megabytes (default 2048MB)</li>
+      <li>LIBRAW_MAX_PROFILE_SIZE_MB - embedded profile size limit (256MB)</li>
+      <li>LIBRAW_MAX_NONDNG_RAW_FILE_SIZE - non-DNG file size limit (2GB)</li>
+      <li>LIBRAW_MAX_CR3_RAW_FILE_SIZE -CR3 file size limit (2GB)</li>
+      <li>LIBRAW_MAX_DNG_RAW_FILE_SIZE - DNG file size limit (2GB if compiled
+        without Adobe DNG SDK, 4GB for Adobe-DNG-SDK build)</li>
+      <li>LIBRAW_MAX_THUMBNAIL_MB -maximum thumbnail size (512MB)</li>
+    </ul>
+    Other build-time parameters (defines)
+    <ul>
+      <li>LIBRAW_OWN_SWAB - use own swab() implementation, default for
+        Unix/Linux/Android</li>
+      <li>LIBRAW_WIN32_CALLS - C-runtime used hasWin32 calls (default: on
+        forVisual Studio/Intel compiler)</li>
+      <li>LIBRAW_WIN32_DLLDEFS -build tools has __dllimport/export</li>
+      <li>LIBRAW_WIN32_UNICODEPATHS -Unicode wchar_t paths supported</li>
+      <li>LIBRAW_NO_IOSTREAMS_DATASTREAM - do not build iostreams-based LibRaw
+        datastream</li>
+      <li>LIBRAW_USE_AUTOPTR - use std::auto_ptr for iostreams based datastream</li>
+    </ul>
     <h3>Build parameters</h3>
     <p> ./configure script have some non-standard parameters: </p>
     <dl>
@@ -91,8 +124,8 @@ make
         <b>nmake -f Makefile.msvc</b><br>
       </li>
     </ul>
-    <p>You may need to edit Makefile.msvc to provide libjpeg/zlib
-      paths to INCLUDE/LIB.</p>
+    <p>You may need to edit Makefile.msvc to provide libjpeg/zlib paths to
+      INCLUDE/LIB.</p>
     <p> If all paths are set correctly and the include-files/libraries have been
       found, then the following will be compiled:</p>
     <ul>
