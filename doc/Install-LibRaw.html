@@ -163,6 +163,11 @@ make
     <p>It should return <b>/usr/local/opt/libomp</b>.</p>
     <p>Note: The Intel Homebrew installation works correctly even when invoked
       from an Apple Silicon terminal.</p>
+    <p>Note: building sample apps will fail because on macOS, OpenMP requires different flags for
+      compile vs link and libtool has no native understanding of Apple OpenMP semantics. Thus if
+      you encounter <b>clang++: error: unsupported option '-fopenmp'</b> when building sample apps,
+      copy-paste the linker invocation from the make output and remove the trailing
+      <b>-fopenmp</b> flag.</p>
     <h3>3. Configure and build the x86_64 libraries</h3>
     <p>Configure for x86_64 with OpenMP:</p>
     <pre>    export CFLAGS="-arch x86_64 -I$(brew --prefix libomp)/include"
