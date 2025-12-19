@@ -3089,31 +3089,6 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
             height = 2846;
           }
         }
-        else if (unique_id == SonyID_ILME_FX2)
-        {
-          if (raw_width == 7040 && raw_height == 4688) // Sony FX2 FF Uncompressed/Lossy
-          {
-            width = 7008;
-            height = 4672;
-          }
-          else if (raw_width == 7168 && raw_height == 5120) // Sony FX2 FF Lossless
-          {
-            width = 7008;
-            height = 4672;
-          }
-          else if (raw_width == 5120 && raw_height == 3584) // Sony FX2 Lossless/Medium
-          {
-            width = 4608;
-            height = 3072;
-          }
-          else if (raw_width == 3584 && raw_height == 2560) // Sony FX2 Lossless/Small
-          {
-            width = 3504;
-            height = 2336;
-          }
-          else
-            imgdata.process_warnings |= LIBRAW_WARN_VENDOR_CROP_SUGGESTED;
-        }
         else if(unique_id == SonyID_ILCE_1)
         {
           if (raw_width == 8704 && raw_height == 6144) // ILCE-1 FF@Compressed
@@ -3149,7 +3124,7 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
 
 		  /* need samples for lossy small/medium w/ APC crop*/
         }
-        else if ((unique_id == SonyID_ILCE_7M4)|| (unique_id == SonyID_ILCE_7CM2))
+        else if ((unique_id == SonyID_ILCE_7M4)|| (unique_id == SonyID_ILCE_7CM2) || (unique_id == SonyID_ILME_FX2))
         {
           if (raw_width == 7168 && raw_height == 5120) 
           {
