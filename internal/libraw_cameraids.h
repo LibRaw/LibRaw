@@ -342,4 +342,5 @@ it under the terms of the one of two licenses as you choose:
 #define SonyID_ILCE_7CM2        0x18dULL
 #define SonyID_ILX_LR1          0x18eULL
 #define SonyID_ZV_E10M2         0x18fULL
+#define SonyID_ILME_FX2         0x196ULL
 #endif
