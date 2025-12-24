@@ -1,3 +1,13 @@
+2025-12-24  Alex Tutubalin <lexa@lexa.ru>
+
+ LibRaw 0.21.5-Release 
+
+ This is the last release in 0.21-branch
+
+ * Accurate exception handling in fuji compressed decoder/openmp case
+ * Update libraw_types.h to fix calling C++ files in external C/Swift
+ * Cannon AFData: read/data size fix and check AFInfo2/3 data against tag size
+
 2025-04-22  Alex Tutubalin <lexa@lexa.ru>
  * The CVE numbers arrived after the 0.21.4 release:
    CVE-2025-43961, CVE-2025-43962, CVE-2025-43963, CVE-2025-43964
