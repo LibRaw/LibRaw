@@ -53,6 +53,7 @@
      - old RED Cine cameras
      - Canon C500
      - ARRI video/digital cinema cameras    
+ * Total supported camera count: 1284 (if compiled with all features)
 
   == Preview format support ==
 
