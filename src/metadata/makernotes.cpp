@@ -84,10 +84,11 @@ void LibRaw::parse_makernote_0xc634(INT64 base, int uptag, unsigned dng_writer)
   }
 
   short morder, sorder = order;
-  char buf[10];
+  char buf[10] = {0,0,0,0,0,0,0,0,0,0};
   INT64 fsize = ifp->size();
 
   fread(buf, 1, 10, ifp);
+  buf[9] = 0;
 
   if (!strcmp(buf, "EPSON"))
   {
