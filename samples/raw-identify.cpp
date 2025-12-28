@@ -327,6 +327,10 @@ void print_verbose(FILE *outfile, LibRaw &MyCoolRawProcessor, std::string &fn)
   fprintf(outfile, "Camera: %s %s ID: 0x%llx\n", P1.make, P1.model, mnLens.CamID);
   fprintf(outfile, "Normalized Make/Model: =%s/%s= ", P1.normalized_make, P1.normalized_model);
   fprintf(outfile, "CamMaker ID: %d\n", P1.maker_index);
+  if (P1.maker_index == LIBRAW_CAMERAMAKER_Fujifilm)
+  {
+    fprintf(outfile, "Fuji RAFDataVersion: 0x%04x\n", MyCoolRawProcessor.imgdata.makernotes.fuji.RAFDataVersion);
+  }
 
   {
     int i = 0;
