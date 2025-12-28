@@ -364,6 +364,7 @@ void LibRaw::parseAdobeRAFMakernote()
               (imFuji.RAFDataVersion == 0x0369) || // X100VI
               (imFuji.RAFDataVersion == 0x036a) || // X-T50
               (imFuji.RAFDataVersion == 0x036b) || // X-M5
+              (imFuji.RAFDataVersion == 0x026c) || // X-E5
                 !strcmp(model, "X-Pro3")      ||
                 !strcmp(model, "GFX 100S II") || !strcmp(model, "GFX100S II") ||
                 !strcmp(model, "GFX 100S")    || !strcmp(model, "GFX100S")    ||
@@ -378,6 +379,7 @@ void LibRaw::parseAdobeRAFMakernote()
                 !strcmp(model, "X-T5")        ||
                 !strcmp(model, "X-M5")        ||
                 !strcmp(model, "X-E4")        ||
+                !strcmp(model, "X-E5")        ||
                 !strcmp(model, "X-T30 II")    ||
                 !strcmp(model, "X-S10"))
             is34 = 1;
@@ -529,6 +531,10 @@ void LibRaw::parseAdobeRAFMakernote()
             wb_section_offset = 0x0cca;
           }
           else if (imFuji.RAFDataVersion == 0x036b) // X-M5
+          {
+            wb_section_offset = 0x0cea;
+          }
+          else if (imFuji.RAFDataVersion == 0x026c) // X-E5
           {
             wb_section_offset = 0x0cea;
           }
