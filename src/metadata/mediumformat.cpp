@@ -407,7 +407,9 @@ void LibRaw::parse_mos(INT64 offset)
     if (get4() != 0x504b5453)
       break;
     get4();
+    memset(data,0,sizeof(data));
     fread(data, 1, 40, ifp);
+    data[39] = 0;
     skip = get4();
     from = ftell(ifp);
 

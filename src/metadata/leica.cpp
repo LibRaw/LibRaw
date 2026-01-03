@@ -188,7 +188,9 @@ void LibRaw::parseLeicaMakernote(INT64 base, int uptag, unsigned MakernoteTagTyp
   int LeicaMakernoteSignature = -1;
   INT64 fsize = ifp->size();
 
+  memset(buf,0,sizeof(buf));
   fread(buf, 1, 10, ifp);
+  buf[9] = 0;
   if (strncmp(buf, "LEICA", 5))
   {
     fseek(ifp, -10, SEEK_CUR);

@@ -857,6 +857,7 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
 
   } else if ((tag == 0x0009)  && (dng_writer == nonDNG)) {
     fread(artist, 64, 1, ifp);
+    artist[63] = 0;
 
   } else if (tag == 0x000c) {
     unsigned tS = get4();
@@ -882,7 +883,7 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
 	  if (!datalen || datalen == imCommon.afdata[imCommon.afcount].AFInfoData_length) // data check not performed or passed
 	  {
         imCommon.afdata[imCommon.afcount].AFInfoData =
-            (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length, 1);
+            (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length+1, 1);
         fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1,
               ifp);
         imCommon.afcount = 1;
@@ -928,6 +929,7 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
   } else if (tag == 0x0095 && !ilm.Lens[0])
   { // lens model tag
     fread(ilm.Lens, 64, 1, ifp);
+    ilm.Lens[63] = 0;
     if (!strncmp(ilm.Lens, "EF-S", 4))
     {
       memmove(ilm.Lens + 5, ilm.Lens + 4, 60);

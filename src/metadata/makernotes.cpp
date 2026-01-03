@@ -226,12 +226,12 @@ void LibRaw::parse_makernote_0xc634(INT64 base, int uptag, unsigned dng_writer)
       { // camera info
         if (!tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         {
-          CanonCameraInfo = (uchar *)calloc(MAX(16, len),1);
+          CanonCameraInfo = (uchar *)calloc(MAX(16, len)+1,1);
           fread(CanonCameraInfo, len, 1, ifp);
         }
         else
         {
-          CanonCameraInfo = (uchar *)calloc(MAX(16, len * 4),1);
+          CanonCameraInfo = (uchar *)calloc(MAX(16, len * 4)+1,1);
           fread(CanonCameraInfo, len, 4, ifp);
         }
         lenCanonCameraInfo = len;
@@ -371,6 +371,9 @@ void LibRaw::parse_makernote(INT64 base, int uptag)
 
   char buf[10];
   char another_buf[128];
+
+  memset(another_buf,0,sizeof(another_buf));
+  memset(buf,0,sizeof(buf));
 
   fseek(ifp, -12, SEEK_CUR);
   fread (another_buf, 1, 12, ifp);
@@ -589,12 +592,12 @@ void LibRaw::parse_makernote(INT64 base, int uptag)
       {
         if (!tagtypeIs(LIBRAW_EXIFTAG_TYPE_LONG))
         {
-          CanonCameraInfo = (uchar *)calloc(MAX(16, len),1);
+          CanonCameraInfo = (uchar *)calloc(MAX(16, len)+1,1);
           fread(CanonCameraInfo, len, 1, ifp);
         }
         else
         {
-          CanonCameraInfo = (uchar *)calloc(MAX(16, len * 4),1);
+          CanonCameraInfo = (uchar *)calloc(MAX(16, len * 4)+1,1);
           fread(CanonCameraInfo, len, 4, ifp);
         }
         lenCanonCameraInfo = len;

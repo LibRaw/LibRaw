@@ -610,6 +610,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
       break;
     case 0x010e: /* 270, ImageDescription */
       fread(desc, 512, 1, ifp);
+      desc[511] = 0;
       break;
     case 0x010f: /* 271, Make */
       fgets(make, 64, ifp);
@@ -662,6 +663,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
       break;
     case 0x013b: /* 315, Artist */
       fread(artist, 64, 1, ifp);
+      artist[63] = 0;
       break;
     case 0x013d: // 317
       tiff_ifd[ifd].predictor = getint(type);
@@ -1136,7 +1138,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
           {
             INT64 f_save = ftell(ifp);
             rafdata = (ushort *)calloc(
-                sizeof(ushort) * libraw_internal_data.unpacker_data.lenRAFData,1);
+                sizeof(ushort) * libraw_internal_data.unpacker_data.lenRAFData+1,1);
             fseek(ifp, libraw_internal_data.unpacker_data.posRAFData, SEEK_SET);
             fread(rafdata, sizeof(ushort),
                   libraw_internal_data.unpacker_data.lenRAFData, ifp);

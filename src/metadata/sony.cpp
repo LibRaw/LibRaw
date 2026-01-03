@@ -1853,7 +1853,7 @@ void LibRaw::parseSonyMakernotes(
         imCommon.afdata[imCommon.afcount].AFInfoData_tag = tag;
         imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
         imCommon.afdata[imCommon.afcount].AFInfoData_length = len;
-        imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length,1);
+        imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length+1,1);
         fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
         imSony.nAFPointsUsed =
             short(MIN(imCommon.afdata[imCommon.afcount].AFInfoData_length, sizeof imSony.AFPointsUsed));
@@ -1877,7 +1877,7 @@ void LibRaw::parseSonyMakernotes(
       imCommon.afdata[imCommon.afcount].AFInfoData_tag = tag;
       imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
       imCommon.afdata[imCommon.afcount].AFInfoData_length = len;
-      imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length,1);
+      imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length+1,1);
       fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
       imCommon.afcount++;
     }
@@ -1909,7 +1909,7 @@ void LibRaw::parseSonyMakernotes(
       imCommon.afdata[imCommon.afcount].AFInfoData_tag = tag;
       imCommon.afdata[imCommon.afcount].AFInfoData_order = order;
       imCommon.afdata[imCommon.afcount].AFInfoData_length = len;
-      imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length,1);
+      imCommon.afdata[imCommon.afcount].AFInfoData = (uchar *)calloc(imCommon.afdata[imCommon.afcount].AFInfoData_length+1,1);
       fread(imCommon.afdata[imCommon.afcount].AFInfoData, imCommon.afdata[imCommon.afcount].AFInfoData_length, 1, ifp);
 		  imCommon.afcount++;
     }

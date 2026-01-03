@@ -24,6 +24,8 @@ short LibRaw::guess_byte_order(int words)
   int t = 2, msb;
   double diff, sum[2] = {0, 0};
 
+  memset(test,0,sizeof(test));
+
   fread(test[0], 2, 2, ifp);
   for (words -= 2; words--;)
   {
