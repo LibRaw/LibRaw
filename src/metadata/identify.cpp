@@ -614,8 +614,65 @@ void LibRaw::identify()
         parse_fuji(i);
     }
     load_raw = &LibRaw::unpacked_load_raw;
-    fseek(ifp, 100 + 28 * (shot_select > 0), SEEK_SET);
-    parse_tiff(data_offset = get4());
+
+    // Check for M-RAW (multi-frame) signature
+    int mraw_frame_count = 1;
+    INT64 mraw_frame_offset = 0;
+    char mraw_sig[17];
+    memset(mraw_sig, 0, sizeof(mraw_sig));
+
+    fseek(ifp, 148, SEEK_SET);
+    fread(mraw_sig, 16, 1, ifp);
+
+    if (!memcmp(mraw_sig, "FUJIFILMM-RAW", 13))
+    {
+      // Multi-frame RAF file detected (HDR, bracketing, etc.)
+      fseek(ifp, 172, SEEK_SET);
+      mraw_frame_count = get4();
+      imgdata.idata.raw_count = mraw_frame_count;
+
+      // In M-RAW files, frame 1 (middle exposure) uses the main RAF directory
+      // Frames 0, 2+ have their own embedded RAF structures
+      if (shot_select == 0)
+      {
+        // Frame 0 - underexposed frame with embedded RAF
+        fseek(ifp, 192 + 12, SEEK_SET);
+        mraw_frame_offset = get4();
+      }
+      else if (shot_select >= 2 && shot_select < mraw_frame_count)
+      {
+        // Frame 2+ - overexposed/additional frames with embedded RAF
+        INT64 entry_offset = 192 + shot_select * 80;
+        fseek(ifp, entry_offset + 4, SEEK_SET);
+        mraw_frame_offset = get4();
+      }
+      // For shot_select == 1 (frame 1), mraw_frame_offset stays 0
+      // which will cause it to use the main directory below
+    }
+
+    // Read TIFF offset - either from embedded RAF structure or main directory
+    if (mraw_frame_offset > 0)
+    {
+      // Multi-frame file: frame has its own embedded RAF structure
+      // The TIFF offset is at embedded_RAF_offset + 100 (relative to that RAF)
+      fseek(ifp, mraw_frame_offset + 100, SEEK_SET);
+      INT64 relative_offset = get4();
+      data_offset = mraw_frame_offset + relative_offset;
+
+      // Parse the embedded frame's Fuji metadata
+      fseek(ifp, mraw_frame_offset + 92, SEEK_SET);
+      INT64 fuji_meta_offset = get4();
+      if (fuji_meta_offset > 0)
+        parse_fuji(mraw_frame_offset + fuji_meta_offset);
+    }
+    else
+    {
+      // Single-frame file OR frame 1 of M-RAW: use main directory
+      fseek(ifp, 100, SEEK_SET);
+      data_offset = get4();
+    }
+
+    parse_tiff(data_offset);
     parse_tiff(thumb_offset + 12);
     parse_fuji_thumbnail(thumb_offset);
     apply_tiff();

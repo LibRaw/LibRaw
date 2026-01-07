@@ -201,7 +201,9 @@ void LibRaw::parseAdobeRAFMakernote()
     wbB_corr = 0.8591549296;
   }
 
-  FujiShotSelect = LIM(shot_select, 0, 1);
+  // Allow multi-frame selection for M-RAW files (HDR, bracketing, etc.)
+  // The actual frame count check is done in identify.cpp
+  FujiShotSelect = shot_select;
   int average_WBData = 1;
 
   order = 0x4d4d;
