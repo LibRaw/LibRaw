@@ -1019,11 +1019,11 @@ typedef unsigned long long UINT64;
 
   typedef struct
   {
-    unsigned long long LensID;
+    UINT64 LensID;
     char Lens[128];
     ushort LensFormat; /* to characterize the image circle the lens covers */
     ushort LensMount;  /* 'male', lens itself */
-    unsigned long long CamID;
+    UINT64 CamID;
     ushort CameraFormat; /* some of the sensor formats */
     ushort CameraMount;  /* 'female', body throat */
     char   body[64];
@@ -1037,11 +1037,11 @@ typedef unsigned long long UINT64;
     float  MinFocusDistance;
     float  FocusRangeIndex;
     float  LensFStops;
-    unsigned long long TeleconverterID;
+    UINT64 TeleconverterID;
     char Teleconverter[128];
-    unsigned long long AdapterID;
+    UINT64 AdapterID;
     char Adapter[128];
-    unsigned long long AttachmentID;
+    UINT64 AttachmentID;
     char   Attachment[128];
     ushort FocalUnits;
     float  FocalLengthIn35mmFormat;
