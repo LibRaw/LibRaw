@@ -127,7 +127,8 @@
         when raw2image() or dcraw_process() is called.</dd>
       <dt><strong> libraw_output_params_t params; </strong></dt>
       <dd>Data structure intended for management of image postprocessing (using
-        the dcraw emulator). Fields of this structure are described in detail <a
+        the dcraw emulator). Fields of this structure are described in detail <a
+
           href="#libraw_iparams_t"> below </a> .</dd>
       <dt>libraw_callbacks_t callbacks;</dt>
       <dd><a href="#libraw_callbacks_t">user-settable callbacks</a> </dd>
@@ -268,9 +269,10 @@
       <dd>Block of white pixels extracted from files CIFF/CRW. Not extracted for
         other formats. Used to calculate white balance coefficients.</dd>
       <dt><strong> float cam_xyz[4][3]; </strong></dt>
-      <dd>Camera RGB - XYZ conversion matrix. This matrix is constant (different
-        for different models). Last row is zero for RGB cameras and non-zero for
-        different color models (CMYG and so on).</dd>
+      <dd>Camera RGB - XYZ conversion matrix. This matrix is calculated based on internal LibRaw per-camera color data for the specific camera.
+        It may be unset (filled with zeroes) if color data extracted from a file is used and camera model is not known by LibRaw.
+        It may not match the rgb_cam matrix if color data extracted from a file is used (see <a href="#libraw_output_params_t">use_camera_matrix</a> setting).
+        </dd>
       <dt><strong> float cam_mul[4]; </strong></dt>
       <dd>White balance coefficients (as shot). Either read from file or
         calculated.</dd>
@@ -804,7 +806,8 @@
       <dd>Called on data error, settable via set_dataerror_handler. See <a href="API-CXX.html#callbacks">C++
           API</a> for details.</dd>
       <dt>progress_callback progress_cb</dt>
-      <dd>Called on process callback, settable via set_progress_handler. See <a
+      <dd>Called on process callback, settable via set_progress_handler. See <a
+
           href="API-CXX.html#callbacks">C++ API</a> for details.</dd>
       <dt>exif_parser_callback exif_cb, params: (void *context, int tag, int
         type, int len, unsigned int ord, void *ifp)</dt>
