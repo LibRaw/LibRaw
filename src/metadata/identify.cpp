@@ -618,6 +618,7 @@ void LibRaw::identify()
     // Check for M-RAW (multi-frame) signature
     int mraw_frame_count = 1;
     INT64 mraw_frame_offset = 0;
+    int is_mraw = 0;
     char mraw_sig[17];
     memset(mraw_sig, 0, sizeof(mraw_sig));
 
@@ -627,6 +628,7 @@ void LibRaw::identify()
     if (!memcmp(mraw_sig, "FUJIFILMM-RAW", 13))
     {
       // Multi-frame RAF file detected (HDR, bracketing, etc.)
+      is_mraw = 1;
       fseek(ifp, 172, SEEK_SET);
       mraw_frame_count = get4();
       imgdata.idata.raw_count = mraw_frame_count;
@@ -668,8 +670,10 @@ void LibRaw::identify()
     else
     {
       // Single-frame file OR frame 1 of M-RAW: use main directory
-      // For old dual-image Fuji format (e.g., S200EXR), add 28 bytes for second image
-      fseek(ifp, 100 + 28 * (shot_select > 0), SEEK_SET);
+      // For M-RAW frame 1: just use offset 100
+      // For old dual-image Fuji format (e.g., S200EXR): add 28 bytes for second image
+      int offset_adjustment = (is_mraw) ? 0 : 28 * (shot_select > 0);
+      fseek(ifp, 100 + offset_adjustment, SEEK_SET);
       data_offset = get4();
     }
 
