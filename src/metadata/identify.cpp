@@ -668,7 +668,8 @@ void LibRaw::identify()
     else
     {
       // Single-frame file OR frame 1 of M-RAW: use main directory
-      fseek(ifp, 100, SEEK_SET);
+      // For old dual-image Fuji format (e.g., S200EXR), add 28 bytes for second image
+      fseek(ifp, 100 + 28 * (shot_select > 0), SEEK_SET);
       data_offset = get4();
     }
 
