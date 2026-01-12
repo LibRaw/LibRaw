@@ -538,7 +538,7 @@ void LibRaw::parseAdobeRAFMakernote()
           }
           else if (imFuji.RAFDataVersion == 0x026c) // X-E5
           {
-            wb_section_offset = 0x0cea;
+            wb_section_offset = 0x0d00;
           }
 
 /* try for unknown RAF Data versions */
