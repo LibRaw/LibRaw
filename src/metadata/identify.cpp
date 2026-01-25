@@ -3126,7 +3126,17 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
         }
         else if(unique_id == SonyID_ILCE_1M2)
         {
-          if (raw_width == 5664 && raw_height == 3768) // ILCE-1M2 FF uncompressed/lossy (3:2)
+          if (raw_width == 8704 && raw_height == 6144) // ILCE-1M2 FF uncompressed (4:3)
+          {
+            width = 8640;
+            height = 5760;
+          }
+          else if (raw_width == 6144 && raw_height == 4096) // ILCE-1M2 lossless medium (4:3)
+          {
+            width = 5616;
+            height = 3744;
+          }
+          else if (raw_width == 5664 && raw_height == 3768) // ILCE-1M2 FF uncompressed/lossy (3:2)
           {
             width = 5616;
             height = 3744;
