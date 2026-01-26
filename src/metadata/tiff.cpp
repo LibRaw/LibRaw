@@ -1169,6 +1169,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
                 (imFuji.RAFDataVersion == 0x0369) || // X100VI
                 (imFuji.RAFDataVersion == 0x036a) || // X-T50
                 (imFuji.RAFDataVersion == 0x036b) || // X-M5
+                (imFuji.RAFDataVersion == 0x026c) || // X-E5
                 !strcmp(model, "X-Pro3")     ||
                 !strcmp(model, "GFX100S II") || !strcmp(model, "GFX 100S II") ||
                 !strcmp(model, "GFX100S")    || !strcmp(model, "GFX 100S")    ||
@@ -1180,6 +1181,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
                 !strcmp(model, "X-H2S")      ||
                 !strcmp(model, "X-H2")       ||
                 !strcmp(model, "X-E4")       ||
+                !strcmp(model, "X-E5")       ||
                 !strcmp(model, "X-T50")      ||
                 !strcmp(model, "X-T5")       ||
                 !strcmp(model, "X-M5")       ||
