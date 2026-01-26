@@ -33,7 +33,7 @@
 
 == Camera support ==
 
-  * Canon EOS R1, EOS R5 Mark II, EOS R5 C, EOS R6 Mark II, EOS R8, EOS R50, EOS R100, EOS Ra
+  * Canon EOS R1, EOS R5 Mark II, EOS R5 C, EOS R6 Mark II, EOS R6 Mark III, EOS R8, EOS R50, EOS R100, EOS Ra
   * Fujifilm X-T50, GFX 100S II, GFX100-II, X-T5, X-S20, X-H2
        X-H2S: support of files with wrong metadata (pre 1.03 fw)
   * GoPro HERO11, HERO12 (via GoPro SDK)

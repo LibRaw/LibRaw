@@ -157,6 +157,8 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 
 	{ LIBRAW_CAMERAMAKER_Canon, "EOS R5", 0, 0,
 	  { 9766,-2953,-1254,-4276,12116,2433,-437,1336,5131 } }, // same CMs: "EOS R5", "EOS R5 C"
+  { LIBRAW_CAMERAMAKER_Canon, "EOS R6 Mark III", 0, 0,
+	  { 8309, -1786, -1095, -4851, 12736, 2353, -956, 1911, 5534 } },
 	{ LIBRAW_CAMERAMAKER_Canon, "EOS R6 Mark II", 0, 0,
 	  { 9539, -2795, -1224, -4175, 11998, 2458, -465, 1755,6048 } },
 	{ LIBRAW_CAMERAMAKER_Canon, "EOS R6", 0, 0,
