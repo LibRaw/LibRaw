@@ -201,7 +201,9 @@ void LibRaw::parseAdobeRAFMakernote()
     wbB_corr = 0.8591549296;
   }
 
-  FujiShotSelect = LIM(shot_select, 0, 1);
+  // Allow multi-frame selection for M-RAW files (HDR, bracketing, etc.)
+  // The actual frame count check is done in identify.cpp
+  FujiShotSelect = shot_select;
   int average_WBData = 1;
 
   order = 0x4d4d;
@@ -364,6 +366,7 @@ void LibRaw::parseAdobeRAFMakernote()
               (imFuji.RAFDataVersion == 0x0369) || // X100VI
               (imFuji.RAFDataVersion == 0x036a) || // X-T50
               (imFuji.RAFDataVersion == 0x036b) || // X-M5
+              (imFuji.RAFDataVersion == 0x026c) || // X-E5
                 !strcmp(model, "X-Pro3")      ||
                 !strcmp(model, "GFX 100S II") || !strcmp(model, "GFX100S II") ||
                 !strcmp(model, "GFX 100S")    || !strcmp(model, "GFX100S")    ||
@@ -378,6 +381,7 @@ void LibRaw::parseAdobeRAFMakernote()
                 !strcmp(model, "X-T5")        ||
                 !strcmp(model, "X-M5")        ||
                 !strcmp(model, "X-E4")        ||
+                !strcmp(model, "X-E5")        ||
                 !strcmp(model, "X-T30 II")    ||
                 !strcmp(model, "X-S10"))
             is34 = 1;
@@ -531,6 +535,10 @@ void LibRaw::parseAdobeRAFMakernote()
           else if (imFuji.RAFDataVersion == 0x036b) // X-M5
           {
             wb_section_offset = 0x0cea;
+          }
+          else if (imFuji.RAFDataVersion == 0x026c) // X-E5
+          {
+            wb_section_offset = 0x0d00;
           }
 
 /* try for unknown RAF Data versions */
