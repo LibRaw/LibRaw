@@ -100,6 +100,7 @@ it under the terms of the one of two licenses as you choose:
 #define CanonID_EOS_R1            (0x80000000ULL + 0x495ULL)
 #define CanonID_EOS_R5_Mark_II    (0x80000000ULL + 0x496ULL)
 #define CanonID_EOS_R100          (0x80000000ULL + 0x498ULL)
+#define CanonID_EOS_R6m3          (0x80000000ULL + 0x518ULL)
 
 // CanonID_EOS_D2000C after Canon's TIFF2CR2 convertor:
 #define CanonID_EOS_D2000C        (0x80000000ULL + 0x520ULL)
