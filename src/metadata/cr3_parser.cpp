@@ -337,9 +337,9 @@ ctmd_fin:
 }
 #undef track
 
-int LibRaw::parseCR3(INT64 oAtomList,
-                     INT64 szAtomList, short &nesting,
-                     char *AtomNameStack, short &nTrack, short &TrackType)
+int LibRaw::parseCR3(UINT64 oAtomList,
+                     UINT64 szAtomList, short &nesting,
+                     char *AtomNameStack, short &nTrack, short &TrackType, UINT64 filesz)
 {
   /*
   Atom starts with 4 bytes for Atom size and 4 bytes containing Atom name
@@ -452,10 +452,10 @@ int LibRaw::parseCR3(INT64 oAtomList,
 
   ushort tL;                        // Atom length represented in 4 or 8 bytes
   char nmAtom[5];                   // Atom name
-  INT64 oAtom, szAtom; // Atom offset and Atom size
-  INT64 oAtomContent,
+  UINT64 oAtom, szAtom; // Atom offset and Atom size
+  UINT64 oAtomContent,
       szAtomContent; // offset and size of Atom content
-  INT64 lHdr;
+  UINT64 lHdr;
 
   char UIID[16];
   uchar CMP1[85];
@@ -471,7 +471,7 @@ int LibRaw::parseCR3(INT64 oAtomList,
     return -14; // too deep nesting
   short s_order = order;
 
-  while ((oAtom + 8LL) <= (oAtomList + szAtomList))
+  while (((oAtom + 8ULL) <= (oAtomList + szAtomList)) && ((oAtom+8ULL) < filesz))
   {
     lHdr = 0ULL;
     err = 0;
@@ -482,7 +482,8 @@ int LibRaw::parseCR3(INT64 oAtomList,
       fread(thdr, 1, 4, ifp);
       fseek(ifp, oAtom, SEEK_SET);
 	}
-    szAtom = get4();
+	uint32_t sz = get4();
+    szAtom = sz;
     FORC4 nmAtom[c] = AtomNameStack[nesting * 4 + c] = fgetc(ifp);
     AtomNameStack[(nesting + 1) * 4] = '\0';
     tL = 4;
@@ -528,8 +529,16 @@ int LibRaw::parseCR3(INT64 oAtomList,
         goto fin;
       }
       tL = 8;
-      szAtom = (((unsigned long long)get4()) << 32) | get4();
-      oAtomContent = oAtom + 16ULL;
+	  uint64_t upper = get4();
+	  uint64_t lower = get4();
+      szAtom = ((upper & 0x7fffffff) << 32) | lower; // This will limit atom size to 2^63-1. In practice, you can live with this
+      if (szAtom < 16ULL)
+      {
+        err = -3;
+        goto fin;
+      }
+
+	  oAtomContent = oAtom + 16ULL;
       szAtomContent = szAtom - 16ULL;
     }
     else
@@ -537,6 +546,11 @@ int LibRaw::parseCR3(INT64 oAtomList,
       oAtomContent = oAtom + 8ULL;
       szAtomContent = szAtom - 8ULL;
     }
+	if (szAtom < 8ULL)
+	{
+      err = -3;
+      goto fin;
+	}
 
 	if (!strcmp(AtomNameStack, "uuid")) // Top level uuid
 	{
@@ -880,7 +894,7 @@ int LibRaw::parseCR3(INT64 oAtomList,
     if (AtomType == 1)
     {
       err = parseCR3(oAtomContent + lHdr, szAtomContent - lHdr, nesting,
-                     AtomNameStack, nTrack, TrackType);
+                     AtomNameStack, nTrack, TrackType,filesz);
       if (err)
         goto fin;
     }
