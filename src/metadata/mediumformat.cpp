@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2024 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -407,7 +407,9 @@ void LibRaw::parse_mos(INT64 offset)
     if (get4() != 0x504b5453)
       break;
     get4();
+    memset(data,0,sizeof(data));
     fread(data, 1, 40, ifp);
+    data[39] = 0;
     skip = get4();
     from = ftell(ifp);
 
