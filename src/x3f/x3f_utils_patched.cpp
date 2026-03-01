@@ -1230,7 +1230,14 @@ static uint32_t read_data_block(void **data, x3f_info_t *I,
   if (fpos + size > I->input.file->size())
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
+  // All known files from real cameras are many times smaller than 1 GB, so the hard limit is OK here.
+
+  if(size > 1024*1024*1024)
+    throw LIBRAW_EXCEPTION_ALLOC;
+
   *data = (void *)malloc(size);
+  if (!*data)
+	  throw LIBRAW_EXCEPTION_ALLOC;
 
   GETN(*data, size);
 
