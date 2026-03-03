@@ -397,7 +397,7 @@ void LibRaw::parse_ciff(INT64 offset, int length, int depth)
     }
     else if (type == 0x580e)
     {
-      timestamp = len;
+      timestamp = (unsigned)len;
     }
     else if (type == 0x180e)
     {

@@ -160,7 +160,7 @@ void LibRaw::parse_x3f()
         if (!strcmp(name, "WB_DESC"))
           strcpy(imgdata.color.model2, value);
         if (!strcmp(name, "TIME"))
-          imgdata.other.timestamp = atoi(value);
+          imgdata.other.timestamp = atoll(value);
         if (!strcmp(name, "SHUTTER"))
           imgdata.other.shutter = float(atof(value));
         if (!strcmp(name, "APERTURE"))
