@@ -55,7 +55,7 @@ struct pana8_param_t
 	uint32_t tag39[6];
 	uint32_t tag3B;
 	uint32_t initial[4];
-	uint32_t huff_coeff[17];
+	uint32_t huff_coeff[18];
 	uint32_t tag3B_2;
 	uint32_t noGammaFlag;
 	uint64_t hufftable1[17];
