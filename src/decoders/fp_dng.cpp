@@ -376,12 +376,15 @@ void LibRaw::deflate_dng_load_raw()
     break;
   }
 
-  unsigned tilePixels = tiles.tileWidth * tiles.tileHeight;
+  INT64 tilePixels =  INT64(tiles.tileWidth) * INT64(tiles.tileHeight);
   unsigned pixelSize = sizeof(float) * ifd->samples;
-  unsigned tileBytes = tilePixels * pixelSize;
-  unsigned tileRowBytes = tiles.tileWidth * pixelSize;
+  INT64 tileBytes = tilePixels * INT64(pixelSize);
+  INT64 tileRowBytes = INT64(tiles.tileWidth) * INT64(pixelSize);
 
-  if(INT64(tiles.maxBytesInTile) > INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024) )
+  if(INT64(tiles.maxBytesInTile) > INT64(imgdata.rawparams.max_raw_memory_mb) * 1024LL * 1024LL )
+    throw LIBRAW_EXCEPTION_TOOBIG;
+
+  if (tileBytes + tileRowBytes > INT64(imgdata.rawparams.max_raw_memory_mb) * 1024LL * 1024LL)
     throw LIBRAW_EXCEPTION_TOOBIG;
 
   std::vector<uchar> cBuffer(tiles.maxBytesInTile,0);
