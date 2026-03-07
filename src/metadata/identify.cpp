@@ -3125,31 +3125,36 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
 		  /* need samples for lossy small/medium w/ APC crop*/
         }
         else if(unique_id == SonyID_ILCE_1M2)
-        {
+        {	
+			if (raw_width == 8672 && raw_height == 5784) // ILCE-1M2 FF uncompressed (4:3)
+          {
+            width = 8660;
+            height = 5784;
+          }
           if (raw_width == 8704 && raw_height == 6144) // ILCE-1M2 FF uncompressed (4:3)
           {
-            width = 8640;
-            height = 5760;
+            width = 8660;
+            height = 5784;
           }
-          else if (raw_width == 6144 && raw_height == 4096) // ILCE-1M2 lossless medium (4:3)
+		  else if (raw_width == 6144 && raw_height == 4096) // ILCE-1M2 FF uncompressed/lossy (3:2)
           {
-            width = 5616;
-            height = 3744;
+            width = 5636;
+            height = 3768;
           }
           else if (raw_width == 5664 && raw_height == 3768) // ILCE-1M2 FF uncompressed/lossy (3:2)
           {
-            width = 5616;
-            height = 3744;
+            width = 5636;
+            height = 3768;
           }
           else if (raw_width == 5632 && raw_height == 4096) // ILCE-1M2 FF lossless (4:3)
           {
-            width = 5616;
-            height = 3744;
+            width = 5628;
+            height = 3756;
           }
           else if (raw_width == 4608 && raw_height == 3072) // ILCE-1M2 lossless medium
           {
-            width = 4320;
-            height = 2880;
+            width = 4332;
+            height = 2892;
           }
           else
             imgdata.process_warnings |= LIBRAW_WARN_VENDOR_CROP_SUGGESTED;
