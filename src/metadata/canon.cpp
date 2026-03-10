@@ -131,6 +131,7 @@ void LibRaw::setCanonBodyFeatures(unsigned long long id)
               (id == CanonID_EOS_R7)
            || (id == CanonID_EOS_R10)
            || (id == CanonID_EOS_R50)
+           || (id == CanonID_EOS_R50_V)
            || (id == CanonID_EOS_R100)
           )
   {
@@ -1308,7 +1309,7 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
       break;
 
     case 3973: // R3; ColorDataSubVer: 34
-    case 3778: // R6 Mark II, R7, R8, R10, R50; ColorDataSubVer: 48
+    case 3778: // R6 Mark II, R7, R8, R10, R50, R50 V; ColorDataSubVer: 48
       imCanon.ColorDataVer = 11;
       AsShot_Auto_MeasuredWB(0x0069);
 
