@@ -349,14 +349,28 @@ void LibRaw::deflate_dng_load_raw()
   tiles.init(ifd, imgdata.sizes, libraw_internal_data.unpacker_data, libraw_internal_data.unpacker_data.order,
       libraw_internal_data.internal_data.input);
 
+  if (tiles.tBytes.size() < 1)
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+  // Ensure less then 2GB per compressed tile
+  INT64 maxcomprlen = tiles.tBytes[0];
+  for (int i = 1; i < tiles.tBytes.size(); i++)
+	  maxcomprlen = MAX(maxcomprlen, tiles.tBytes[i]);
+
+  if(maxcomprlen >= (1LL << 31) || maxcomprlen < 0)
+	  throw LIBRAW_EXCEPTION_TOOBIG;
+  
+  // Max bytes: 2^16 raw width * 2^2 bytes/pixel * 2^2 channels = 2^20, so check against 2^22
+  INT64 rowbytes = INT64(MAX(tiles.tileWidth, imgdata.sizes.raw_width)) * 4ULL * INT64(ifd->samples);
+  if (rowbytes > (1LL << 22))
+    throw LIBRAW_EXCEPTION_TOOBIG;
+
   if (ifd->sample_format == 3)
   {
-    INT64 raw_bytes = tiles.tileCnt * tiles.tileWidth * tiles.tileHeight * ifd->samples * sizeof(float);
+    INT64 raw_bytes = INT64(tiles.tileCnt) * INT64(tiles.tileWidth) * INT64(tiles.tileHeight) * INT64(ifd->samples) * sizeof(float);
     if (raw_bytes > INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
       throw LIBRAW_EXCEPTION_TOOBIG;
-    float_raw_image = (float *)calloc(tiles.tileCnt * tiles.tileWidth * tiles.tileHeight * ifd->samples, sizeof(float));
-    if (!float_raw_image)
-      throw LIBRAW_EXCEPTION_ALLOC;
+    float_raw_image = (float *)calloc(raw_bytes, 1);
   }
   else
     throw LIBRAW_EXCEPTION_DECODE_RAW; // Only float deflated supported
@@ -395,7 +409,9 @@ void LibRaw::deflate_dng_load_raw()
       for (size_t x = 0; x < imgdata.sizes.raw_width; x += tiles.tileWidth, ++t)
       {
         libraw_internal_data.internal_data.input->seek(tiles.tOffsets[t], SEEK_SET);
-        libraw_internal_data.internal_data.input->read(cBuffer.data(), 1, tiles.tBytes[t]);
+        int bytesread = libraw_internal_data.internal_data.input->read(cBuffer.data(), 1, tiles.tBytes[t]);
+		if (bytesread < tiles.tBytes[t])
+			derror();
         unsigned long dstLen = tileBytes;
         int err =
             uncompress(uBuffer.data() + tileRowBytes, &dstLen, cBuffer.data(), (unsigned long)tiles.tBytes[t]);
