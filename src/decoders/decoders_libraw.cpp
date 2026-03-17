@@ -298,24 +298,21 @@ void LibRaw::fuji_14bit_load_raw()
 void LibRaw::nikon_load_padded_packed_raw() // 12 bit per pixel, padded to 16
                                             // bytes
 {
-  // libraw_internal_data.unpacker_data.load_flags -> row byte count
-  if (libraw_internal_data.unpacker_data.load_flags < 2000 ||
-      libraw_internal_data.unpacker_data.load_flags > 64000)
-    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+	unsigned bytesperrow = (((unsigned(S.raw_width) * 3u / 2u) + 15u) / 16u) * 16u; // bytes per row
 
-  unsigned required = (unsigned)(S.raw_width / 2) * 3u; // unsigned is OK because raw_width is 16-bit
-  if (required > libraw_internal_data.unpacker_data.load_flags)
+  // libraw_internal_data.unpacker_data.load_flags -> row byte count
+  if (bytesperrow < 2000 || bytesperrow > 64000)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
   unsigned char *buf =
-      (unsigned char *)calloc(libraw_internal_data.unpacker_data.load_flags,1);
+      (unsigned char *)calloc(bytesperrow,1);
   for (int row = 0; row < S.raw_height; row++)
   {
     checkCancel();
     int readed = libraw_internal_data.internal_data.input->read(
-        buf, 1, libraw_internal_data.unpacker_data.load_flags);
+        buf, 1, bytesperrow);
 
-	if (readed < (int)libraw_internal_data.unpacker_data.load_flags)
+	if (readed < (int)bytesperrow)
 		derror();
 
     for (int icol = 0; icol < S.raw_width / 2; icol++)
