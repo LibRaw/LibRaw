@@ -301,14 +301,23 @@ void LibRaw::nikon_load_padded_packed_raw() // 12 bit per pixel, padded to 16
   // libraw_internal_data.unpacker_data.load_flags -> row byte count
   if (libraw_internal_data.unpacker_data.load_flags < 2000 ||
       libraw_internal_data.unpacker_data.load_flags > 64000)
-    return;
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+  unsigned required = (unsigned)(S.raw_width / 2) * 3u; // unsigned is OK because raw_width is 16-bit
+  if (required > libraw_internal_data.unpacker_data.load_flags)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   unsigned char *buf =
       (unsigned char *)calloc(libraw_internal_data.unpacker_data.load_flags,1);
   for (int row = 0; row < S.raw_height; row++)
   {
     checkCancel();
-    libraw_internal_data.internal_data.input->read(
-        buf, libraw_internal_data.unpacker_data.load_flags, 1);
+    int readed = libraw_internal_data.internal_data.input->read(
+        buf, 1, libraw_internal_data.unpacker_data.load_flags);
+
+	if (readed < (int)libraw_internal_data.unpacker_data.load_flags)
+		derror();
+
     for (int icol = 0; icol < S.raw_width / 2; icol++)
     {
       imgdata.rawdata.raw_image[(row)*S.raw_width + (icol * 2)] =
