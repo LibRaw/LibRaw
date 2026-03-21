@@ -277,7 +277,7 @@ void LibRaw::parse_rollei()
   memset(&t, 0, sizeof t);
   do
   {
-    line[0] = 0;
+	memset(line, 0, sizeof(line));
     if (!fgets(line, 128, ifp))
       break;
     line[127] = 0;
