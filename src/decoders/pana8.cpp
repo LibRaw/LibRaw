@@ -112,6 +112,8 @@ void LibRaw::panasonicC8_load_raw()
 	{
 		if (libraw_internal_data.unpacker_data.pana8.stripe_height[i] != imgdata.sizes.raw_height)
 			errs++;
+		if ( unsigned(libraw_internal_data.unpacker_data.pana8.stripe_left[i]) + unsigned(libraw_internal_data.unpacker_data.pana8.stripe_width[i]) > unsigned(imgdata.sizes.raw_width))
+			errs++;
 		if (libraw_internal_data.unpacker_data.pana8.stripe_offsets[i] < 0
 			|| (libraw_internal_data.unpacker_data.pana8.stripe_offsets[i] + INT64((libraw_internal_data.unpacker_data.pana8.stripe_compressed_size[i] + 7u) / 8u)) > fsz)
 			errs++;
