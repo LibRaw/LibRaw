@@ -468,6 +468,7 @@ static const char *static_camera_list[] = {
 	"Hasselblad X1D",
 	"Hasselblad X1D II 50C",
 	"Hasselblad X2D 100C",
+	"Hasselblad X2D II 100C",
 	"HTC UltraPixel",
 	"HTC MyTouch 4G",
 	"HTC One (A9)",

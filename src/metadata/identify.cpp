@@ -2803,6 +2803,13 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
 			top_margin = 92;
 			height = raw_height - top_margin;
         }
+        else if ((imHassy.SensorCode == 22) && imHassy.uncropped)
+        { // Hasselblad X2D II-100c (sensor code from makernotes)
+			left_margin = 124;
+			width = 11664;
+			top_margin = 92;
+			height = raw_height - top_margin;
+        }
 
 		if (tiff_samples > 1)
 		{
