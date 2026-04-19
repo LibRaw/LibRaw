@@ -628,7 +628,11 @@ void LibRaw::identify()
   else if (!memcmp(head + 4, "ftypqt   ", 9))
   {
     fseek(ifp, 0, SEEK_SET);
+	// Use existing variable that definitely not used in parse_qt/parse_jpeg to avoid ABI change
+	short cr3save = libraw_internal_data.unpacker_data.CR3_Version;
+	libraw_internal_data.unpacker_data.CR3_Version = 32;
     parse_qt(fsize);
+	libraw_internal_data.unpacker_data.CR3_Version = cr3save;
     is_raw = 0;
   }
   else if (!memcmp(head, "\0\001\0\001\0@", 6))
