@@ -401,6 +401,10 @@ void LibRaw::parse_mos(INT64 offset)
   };
   float romm_cam[3][3];
 
+  libraw_internal_data.unpacker_data.CR3_Version--;
+  if (libraw_internal_data.unpacker_data.CR3_Version < 1)
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   fseek(ifp, offset, SEEK_SET);
   while (!feof(ifp))
   {
@@ -538,4 +542,6 @@ void LibRaw::parse_mos(INT64 offset)
   if (planes)
     filters = (planes == 1) * 0x01010101U *
               (uchar) "\x94\x61\x16\x49"[(flip / 90 + frot) & 3];
+  libraw_internal_data.unpacker_data.CR3_Version++;
+
 }
