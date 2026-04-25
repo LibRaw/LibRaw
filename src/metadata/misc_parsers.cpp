@@ -167,7 +167,7 @@ void LibRaw::parse_qt(INT64 end)
   INT64 save;
   char tag[4];
   if (libraw_internal_data.unpacker_data.CR3_Version-- < 1)
-	  return;
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
   order = 0x4d4d;
   while (ftell(ifp) + 7 < end)

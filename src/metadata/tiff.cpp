@@ -914,7 +914,14 @@ int LibRaw::parse_tiff_ifd(INT64 base)
       }
       break;
     case 0x8606: /* 34310, Leaf metadata */
-      parse_mos(ftell(ifp));
+	{
+      // libraw_internal_data.unpacker_data.CR3_Version is not used in MOS parser
+		short crs = libraw_internal_data.unpacker_data.CR3_Version;
+		libraw_internal_data.unpacker_data.CR3_Version = 64;  // typical value is 7, so 64 is enough
+        parse_mos(ftell(ifp));
+        libraw_internal_data.unpacker_data.CR3_Version = crs;
+	}
+	// fallthrough
     case 0x85ff: // 34303
       strcpy(make, "Leaf");
       break;
