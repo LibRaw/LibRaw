@@ -1152,14 +1152,21 @@ static int32_t get_simple_diff(x3f_huffman_t *HUF, uint16_t index)
 }
 
 static void simple_decode_row(x3f_info_t * /*I*/, x3f_directory_entry_t *DE,
-                              int bits, int row, int row_stride)
+                              int bits, int row, uint32_t row_stride)
 {
   x3f_directory_entry_header_t *DEH = &DE->header;
   x3f_image_data_t *ID = &DEH->data_subsection.image_data;
   x3f_huffman_t *HUF = ID->huffman;
 
-  if (row*row_stride > (int)(ID->data_size - (ID->columns*sizeof(uint32_t))))
-	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
+  // 64bit compute to avoid 32 bit overflow
+  uint64_t needed = uint64_t(ID->columns) * sizeof(uint32_t);
+  uint64_t offset = uint64_t(row) * uint64_t(row_stride);
+
+  if (row_stride < needed)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+  if (offset > uint64_t(ID->data_size) || needed > uint64_t(ID->data_size) - offset)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   uint32_t *data = (uint32_t *)((unsigned char *)ID->data + row * row_stride);
 
   uint16_t c[3] = {0, 0, 0};
@@ -1223,7 +1230,7 @@ static void simple_decode_row(x3f_info_t * /*I*/, x3f_directory_entry_t *DE,
 }
 
 static void simple_decode(x3f_info_t *I, x3f_directory_entry_t *DE, int bits,
-                          int row_stride)
+                          uint32_t row_stride)
 {
   x3f_directory_entry_header_t *DEH = &DE->header;
   x3f_image_data_t *ID = &DEH->data_subsection.image_data;
@@ -1456,7 +1463,7 @@ static void x3f_load_huffman_compressed(x3f_info_t *I,
 
 static void x3f_load_huffman_not_compressed(x3f_info_t *I,
                                             x3f_directory_entry_t *DE, int bits,
-                                            int /*use_map_table*/, int row_stride)
+                                            int /*use_map_table*/, uint32_t row_stride)
 {
   x3f_directory_entry_header_t *DEH = &DE->header;
   x3f_image_data_t *ID = &DEH->data_subsection.image_data;
@@ -1468,7 +1475,7 @@ static void x3f_load_huffman_not_compressed(x3f_info_t *I,
 }
 
 static void x3f_load_huffman(x3f_info_t *I, x3f_directory_entry_t *DE, int bits,
-                             int use_map_table, int row_stride)
+                             int use_map_table, uint32_t row_stride)
 {
   x3f_directory_entry_header_t *DEH = &DE->header;
   x3f_image_data_t *ID = &DEH->data_subsection.image_data;
