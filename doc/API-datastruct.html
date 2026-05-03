@@ -238,7 +238,7 @@ Depending on post-processing parameters (params.half_size and params.use_fuji_ro
           iwidth/iheight account for the half_mode parameter.
         <li>If you do not use post-processing but call LibRaw::adjust_sizes_info_only(): 
           After this call, the iwidth/iheight fields will be set to correct values.
-        <li>After post-processing: iwidth/iheight remain unchanged, while width/height take on the dimensions of the output buffer imgdata.image:
+        <li>After post-processing: iwidth/iheight remain unchanged, while width/height are set to the dimensions of the output buffer imgdata.image:
           <ul>
               <li>If use_fuji_rotate == 1 (default), these are the dimensions of the output image 
                 rotated back by 45 degrees (to its original orientation) and cropped to the visible area.
