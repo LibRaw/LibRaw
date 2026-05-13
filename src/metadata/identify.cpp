@@ -1227,6 +1227,10 @@ dng_skip:
 	// Prevent incorrect-sized fuji-rotated files
 	if (INT64(width)*INT64(height) > INT64(raw_width) * INT64(raw_height) * 8LL)
 		is_raw = 0;
+
+	// All 'fuji-rotated' images are 6Mpix or less, so 8k x 8k limit is OK
+	if(width > 8192 || height > 8192 || raw_width > 8192 || raw_height > 8192)
+      is_raw = 0;
   }
   else
   {
