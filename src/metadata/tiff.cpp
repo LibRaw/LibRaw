@@ -41,6 +41,9 @@ int LibRaw::parse_tiff_ifd(INT64 base)
     for (i = 0; i < 4; i++)
       cc[j][i] = i == j;
 
+  memset(cm,0,sizeof(cm));
+  memset(fm,0,sizeof(fm));
+
   if (libraw_internal_data.unpacker_data.ifd0_offset == -1LL)
     libraw_internal_data.unpacker_data.ifd0_offset = base;
 
