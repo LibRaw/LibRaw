@@ -1183,6 +1183,7 @@ static const char *static_camera_list[] = {
 	"Sony ILCE-7M2 (A7 II)",
 	"Sony ILCE-7M3 (A7 III)",
 	"Sony ILCE-7M4 (A7 IV)",
+	"Sony ILCE-7M5 (A7 V)",
 	"Sony ILCE-7C (A7C)",
 	"Sony ILCE-7CR (A7CR)",
 	"Sony ILCE-7CM2 (A7C II)",

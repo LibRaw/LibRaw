@@ -399,6 +399,7 @@ void LibRaw::GetNormalizedModel()
       { SonyID_ILX_LR1,        "ILX-LR1"},
       { SonyID_ZV_E10M2,       "ZV-E10M2"},
       { SonyID_ILME_FX2,       "ILME-FX2"},
+      { SonyID_ILCE_7M5,       "ILCE-7M5"},
 };
 
   static const char *orig;
