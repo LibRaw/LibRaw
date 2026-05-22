@@ -1020,7 +1020,9 @@ void LibRaw::sony_arw6_load_raw()
   const uint32_t stream_size = uint32_t(strip.size() - SONY_ARW6_STREAM_OFFSET);
   sony_arw6_require(stream_size >= 0x80);
   sony_arw6_require(!memcmp(stream, "A000", 4));
-  sony_arw6_require(sony_arw6_le32(stream + 4) == 0x02000000);
+  const uint32_t sequence_or_version = sony_arw6_le32(stream + 4);
+  sony_arw6_require(sequence_or_version == 0x01000000 ||
+                    sequence_or_version == 0x02000000);
   sony_arw6_require(sony_arw6_be16(stream + 8) == raw_width);
   sony_arw6_require(sony_arw6_be16(stream + 0x0a) * 2 == raw_height);
   const uint16_t word_c = sony_arw6_be16(stream + 0x0c);
