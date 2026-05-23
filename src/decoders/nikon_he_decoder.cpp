@@ -82,6 +82,20 @@ void LibRaw::nikon_he_load_raw()
         throw LIBRAW_EXCEPTION_DECODE_RAW;
     }
 
+    // Distinguish HE from HE*. The TIFF dispatch (tiff.cpp:2273) routes
+    // both variants here based on the shared JPEG-XS SOC marker, but
+    // HE uses per-precinct Bp ∈ {4, 5} and HE* uses Bp ∈ {1, 2, 3}.
+    // Bp is byte[3] of each precinct's 12-byte prefix. The current
+    // decoder produces tile-localized decode artifacts on HE*; the
+    // gtli table (nikon_he_gtli_table.cpp) and prec-16 reset rule
+    // (nikon_he_predecessor.h) are already extended to cover HE*'s Bp
+    // regime, but additional orchestration changes are still needed
+    // to reach byte-exact HE* output, so we refuse HE* here.
+    const uint8_t first_bp = precinct_bytes[3];
+    if (first_bp != 4 && first_bp != 5) {
+        throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
+    }
+
     // Decode into a scratch bayer buffer, then copy out.
     std::vector<uint16_t> bayer((size_t)img_w * img_h, 0);
     auto result = nikon_he::decode_nikon_he_image(
