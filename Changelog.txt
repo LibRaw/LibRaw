@@ -2,15 +2,16 @@ LibRaw 0.23 (in development; Changelog relative to 0.22)
 
  == Raw format support ==
 
-  * Nikon High-Efficiency (HE) RAW format support for Z 9, Z 8, Z f and
-    Z 6 III. Routed via the existing tiff.cpp JPEG-XS-SOC detection
-    (FF 10 FF 50) at strip_offset for these models; implementation lives
-    in src/decoders/nikon_he/ + src/decoders/nikon_he_decoder.cpp.
+  * Nikon High-Efficiency (HE and HE*) RAW format support for Z 9,
+    Z 8, Z f and Z 6 III. Routed via the existing tiff.cpp JPEG-XS-SOC
+    detection (FF 10 FF 50) at strip_offset for these models;
+    implementation lives in src/decoders/nikon_he/ +
+    src/decoders/nikon_he_decoder.cpp.
 
-    HE* (High-Efficiency Star) is detected and explicitly refused with
-    LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT (it uses a different Bp regime
-    that the current decoder doesn't cover). Camera-list strings updated
-    to "(HE* format not supported yet)".
+    HE uses per-precinct Bp ∈ {4, 5}; HE* uses Bp ∈ {1, 2, 3}. The
+    decoder handles both via shared entropy/IDWT/bayer code plus
+    format-specific gtli table rows and a unified prec-16 LL-precinct
+    reset rule.
 
 2025-12-25  Alex Tutubalin <lexa@lexa.ru>
 

@@ -109,10 +109,17 @@ private:
 
 // Static helper: check if GCLI reset condition is met.
 // p is the 0-based precinct index within the tile (0..17).
+//
+// Prec 16 is structurally the LL precinct in both HE and HE* variants;
+// the reset fires whenever the precinct header's Bp marks the LL band:
+//   HE FF:  Bp == 5
+//   HE DX:  Bp == 4 && Br <= 7 (DX puts LL as low-Br Bp=4)
+//   HE*:    Bp == 1 || Bp == 2 || Bp == 3
 inline bool should_reset_gcli(int precinct_index, int Bp, int Br) {
     if (precinct_index != 16) return false;
-    if (Bp == 5) return true;
-    if (Bp == 4 && Br <= 7) return true;
+    if (Bp == 5) return true;                       // HE FF LL
+    if (Bp == 4 && Br <= 7) return true;            // HE DX LL
+    if (Bp == 1 || Bp == 2 || Bp == 3) return true; // HE* LL
     return false;
 }
 

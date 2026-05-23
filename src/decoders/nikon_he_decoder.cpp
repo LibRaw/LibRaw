@@ -78,18 +78,8 @@ void LibRaw::nikon_he_load_raw()
         throw LIBRAW_EXCEPTION_IO_EOF;
     }
 
-    // Distinguish HE from HE*. The TIFF dispatch (tiff.cpp:2273) routes
-    // both variants here based on the shared JPEG-XS SOC marker, but the
-    // bitstreams differ: HE uses Bp ∈ {4, 5} per precinct; HE* uses Bp ∈
-    // {1, 2}. Bp is byte[3] of each precinct's 12-byte prefix. Only HE is
-    // supported here; HE* would need different gtli tables, ng_lift
-    // formulas, prec-16 reset rule, and cross-band Bp-reset logic.
     if (precinct_size < 12) {
         throw LIBRAW_EXCEPTION_DECODE_RAW;
-    }
-    const uint8_t first_bp = precinct_bytes[3];
-    if (first_bp != 4 && first_bp != 5) {
-        throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
     }
 
     // Decode into a scratch bayer buffer, then copy out.
