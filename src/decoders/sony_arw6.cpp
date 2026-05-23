@@ -24,6 +24,11 @@ namespace
 const int SONY_ARW6_STREAM_OFFSET = 0x200;
 const int SONY_ARW6_INTERNAL_BIAS = 2048;
 
+static inline int sony_arw6_align_up(int value, int multiple)
+{
+  return ((value + multiple - 1) / multiple) * multiple;
+}
+
 static inline uint16_t sony_arw6_be16(const uchar *p)
 {
   return uint16_t((uint16_t(p[0]) << 8) | p[1]);
@@ -364,6 +369,20 @@ struct SonyArw6DirectoryEntry
   uint32_t length;
 };
 
+struct SonyArw6StreamInfo
+{
+  int index;
+  uint32_t offset;
+  uint32_t length;
+  int tile_x;
+  int tile_y;
+  int tile_w;
+  int tile_h;
+  int coded_width;
+  int coded_half_height;
+  int logical_height;
+};
+
 struct SonyArw6PacketRecord
 {
   uint32_t byte_length;
@@ -381,6 +400,128 @@ struct SonyArw6Packet
   uint32_t length;
   std::vector<SonyArw6PacketRecord> records;
 };
+
+static uint32_t sony_arw6_stream_payload_length(const uchar *stream,
+                                                uint32_t stream_size)
+{
+  sony_arw6_require(stream_size >= 0x80);
+  uint32_t payload = 0;
+  const int offs[5] = {0, 3, 6, 9, 12};
+  for (int g = 0; g < 5; g++)
+    payload +=
+        ((sony_arw6_be32(stream + 0x10 + offs[g]) >> 4) & 0x0ffffff0);
+  sony_arw6_require(payload <= stream_size - 0x80);
+  return 0x80 + payload;
+}
+
+static bool sony_arw6_parse_stream_header(const uchar *stream,
+                                          uint32_t stream_size,
+                                          SonyArw6StreamInfo &info)
+{
+  if (stream_size < 0x80 ||
+      (memcmp(stream, "A000", 4) && memcmp(stream, "0000", 4)))
+    return false;
+  const uint32_t sequence_or_version = sony_arw6_le32(stream + 4);
+  if (sequence_or_version < 0x01000000 || sequence_or_version > 0x10000000)
+    return false;
+  const uint16_t word_c = sony_arw6_be16(stream + 0x0c);
+  const uint16_t word_e = sony_arw6_be16(stream + 0x0e);
+  const int decoded_bits = (word_c >> 4) & 0x3f;
+  const int components = word_e >> 13;
+  const int mode = (word_e >> 10) & 0x03;
+  if (decoded_bits != 16 || components != 3 || mode != 3)
+    return false;
+  info.coded_width = sony_arw6_be16(stream + 8);
+  info.coded_half_height = sony_arw6_be16(stream + 0x0a);
+  info.logical_height = info.coded_half_height * 2;
+  if (info.coded_width <= 0 || info.coded_half_height <= 0)
+    return false;
+  return true;
+}
+
+static std::vector<SonyArw6StreamInfo>
+sony_arw6_find_streams(const std::vector<uchar> &strip, int full_width,
+                       int full_height)
+{
+  std::vector<SonyArw6StreamInfo> streams;
+  const uint32_t strip_size = uint32_t(strip.size());
+  const uchar *base = strip_size ? &strip[0] : 0;
+  if (!base || strip_size < SONY_ARW6_STREAM_OFFSET + 0x80)
+    return streams;
+
+  const uint32_t count = sony_arw6_le32(base);
+  if (count >= 1 && count <= 16)
+  {
+    for (uint32_t index = 0; index < count; index++)
+    {
+      const uint32_t entry = 0x08 + index * 0x18;
+      if (entry + 0x18 > strip_size)
+      {
+        streams.clear();
+        break;
+      }
+      const uint32_t table_offset = sony_arw6_le32(base + entry);
+      const int tile_x = int(sony_arw6_le32(base + entry + 0x08));
+      const int tile_y = int(sony_arw6_le32(base + entry + 0x0c));
+      const int entry_tile_w = int(sony_arw6_le32(base + entry + 0x10));
+      const int entry_tile_h = int(sony_arw6_le32(base + entry + 0x14));
+      const uint32_t start = table_offset ? table_offset : SONY_ARW6_STREAM_OFFSET;
+      const uint32_t search_end =
+          std::min(strip_size > 0x80 ? strip_size - 0x80 : 0,
+                   start + uint32_t(0x1000));
+      bool found = false;
+      SonyArw6StreamInfo info;
+      for (uint32_t candidate = start; candidate <= search_end;
+           candidate += 0x10)
+      {
+        if (!sony_arw6_parse_stream_header(base + candidate,
+                                           strip_size - candidate, info))
+          continue;
+        uint32_t length =
+            sony_arw6_stream_payload_length(base + candidate,
+                                            strip_size - candidate);
+        if (length <= 0x80 || candidate + length > strip_size)
+          continue;
+        info.index = int(index);
+        info.offset = candidate;
+        info.length = length;
+        info.tile_x = tile_x;
+        info.tile_y = tile_y;
+        info.tile_w = entry_tile_w ? entry_tile_w : info.coded_width;
+        info.tile_h = entry_tile_h ? entry_tile_h : info.logical_height;
+        streams.push_back(info);
+        found = true;
+        break;
+      }
+      if (!found)
+      {
+        streams.clear();
+        break;
+      }
+    }
+    if (streams.size() == count)
+      return streams;
+  }
+
+  SonyArw6StreamInfo info;
+  if (sony_arw6_parse_stream_header(base + SONY_ARW6_STREAM_OFFSET,
+                                    strip_size - SONY_ARW6_STREAM_OFFSET,
+                                    info))
+  {
+    info.index = 0;
+    info.offset = SONY_ARW6_STREAM_OFFSET;
+    info.length =
+        sony_arw6_stream_payload_length(base + info.offset,
+                                        strip_size - info.offset);
+    info.tile_x = 0;
+    info.tile_y = 0;
+    info.tile_w = info.coded_width;
+    info.tile_h = info.logical_height;
+    if (info.coded_width == full_width && info.logical_height == full_height)
+      streams.push_back(info);
+  }
+  return streams;
+}
 
 class SonyArw6HeaderBits
 {
@@ -846,6 +987,73 @@ static SonyArw6Plane sony_arw6_inv53_axis1(const SonyArw6Plane &low,
   return out;
 }
 
+static SonyArw6Plane sony_arw6_inv53_axis0_high_leading(
+    const SonyArw6Plane &low, const SonyArw6Plane &high)
+{
+  sony_arw6_require(low.cols == high.cols);
+  sony_arw6_require(high.rows == low.rows || high.rows == low.rows + 1);
+  SonyArw6Plane lo2(low.rows, low.cols);
+  SonyArw6Plane hi2(high.rows, high.cols);
+
+  if (high.rows == low.rows + 1)
+  {
+    for (int y = 0; y < low.rows; y++)
+      for (int x = 0; x < low.cols; x++)
+        lo2.at(y, x) =
+            low.at(y, x) -
+            sony_arw6_floor_shift(high.at(y, x) + high.at(y + 1, x) + 2, 2);
+
+    for (int x = 0; x < high.cols; x++)
+    {
+      hi2.at(0, x) = high.at(0, x) + lo2.at(0, x);
+      hi2.at(high.rows - 1, x) = high.at(high.rows - 1, x) +
+                                 lo2.at(low.rows - 1, x);
+    }
+    for (int y = 1; y < high.rows - 1; y++)
+      for (int x = 0; x < high.cols; x++)
+        hi2.at(y, x) = high.at(y, x) +
+                       sony_arw6_floor_shift(lo2.at(y - 1, x) +
+                                                 lo2.at(y, x),
+                                             1);
+
+    SonyArw6Plane out(low.rows * 2 + 1, low.cols);
+    for (int y = 0; y < low.rows; y++)
+    {
+      memcpy(out.row(y * 2), hi2.row(y), sizeof(int32_t) * size_t(low.cols));
+      memcpy(out.row(y * 2 + 1), lo2.row(y),
+             sizeof(int32_t) * size_t(low.cols));
+    }
+    memcpy(out.row(out.rows - 1), hi2.row(hi2.rows - 1),
+           sizeof(int32_t) * size_t(low.cols));
+    return out;
+  }
+
+  for (int y = 0; y < low.rows; y++)
+    for (int x = 0; x < low.cols; x++)
+    {
+      const int next_y = y + 1 < high.rows ? y + 1 : y;
+      lo2.at(y, x) =
+          low.at(y, x) -
+          sony_arw6_floor_shift(high.at(y, x) + high.at(next_y, x) + 2, 2);
+    }
+  for (int x = 0; x < high.cols; x++)
+    hi2.at(0, x) = high.at(0, x) + lo2.at(0, x);
+  for (int y = 1; y < high.rows; y++)
+    for (int x = 0; x < high.cols; x++)
+      hi2.at(y, x) =
+          high.at(y, x) +
+          sony_arw6_floor_shift(lo2.at(y - 1, x) + lo2.at(y, x), 1);
+
+  SonyArw6Plane out(low.rows * 2, low.cols);
+  for (int y = 0; y < low.rows; y++)
+  {
+    memcpy(out.row(y * 2), hi2.row(y), sizeof(int32_t) * size_t(low.cols));
+    memcpy(out.row(y * 2 + 1), lo2.row(y),
+           sizeof(int32_t) * size_t(low.cols));
+  }
+  return out;
+}
+
 static SonyArw6Plane sony_arw6_synthesize_level(const SonyArw6Plane &ll,
                                                 const SonyArw6Plane &sub0,
                                                 const SonyArw6Plane &sub1,
@@ -871,6 +1079,107 @@ static SonyArw6Plane sony_arw6_synthesize_level(const SonyArw6Plane &ll,
   SonyArw6Plane low_horizontal = sony_arw6_inv53_axis0(ll, lh);
   SonyArw6Plane high_horizontal =
       sony_arw6_inv53_axis0(sony_arw6_head_rows(sub0, h), hh);
+  return sony_arw6_inv53_axis1(low_horizontal, high_horizontal);
+}
+
+static SonyArw6Plane sony_arw6_synthesize_guard_group1(
+    const SonyArw6Plane &ll, const SonyArw6Plane &sub0,
+    const SonyArw6Plane &sub1, const SonyArw6Plane &sub2)
+{
+  const int h = ll.rows;
+  const int w = ll.cols;
+  sony_arw6_require(sub0.cols == w && sub1.cols == w && sub2.cols == w);
+  sony_arw6_require(sub0.rows >= h + 2 && sub1.rows >= h + 2 &&
+                    sub2.rows >= h + 2);
+
+  SonyArw6Plane lh(h + 1, w), hh(h + 1, w), hl(h, w);
+  for (int y = 0; y < h; y++)
+    for (int x = 0; x < w; x++)
+    {
+      hl.at(y, x) = sub0.at(y + 1, x);
+      lh.at(y, x) = sub1.at(y + 1, x);
+      hh.at(y, x) = sub2.at(y + 1, x);
+    }
+  for (int x = 0; x < w; x++)
+  {
+    lh.at(h, x) = sub0.at(h + 1, x);
+    hh.at(h, x) = sub1.at(h + 1, x);
+  }
+
+  SonyArw6Plane low_horizontal =
+      sony_arw6_inv53_axis0_high_leading(ll, lh);
+  SonyArw6Plane high_horizontal =
+      sony_arw6_inv53_axis0_high_leading(hl, hh);
+  return sony_arw6_inv53_axis1(low_horizontal, high_horizontal);
+}
+
+static SonyArw6Plane sony_arw6_synthesize_guard_group2(
+    const SonyArw6Plane &ll, const SonyArw6Plane &sub0,
+    const SonyArw6Plane &sub1, const SonyArw6Plane &sub2,
+    bool odd_edge_mode)
+{
+  const int h = ll.rows;
+  const int w = ll.cols;
+  sony_arw6_require(sub0.cols == w && sub1.cols == w && sub2.cols == w);
+  sony_arw6_require(sub0.rows >= h + 3 && sub1.rows >= h + 1 &&
+                    sub2.rows >= h + 1);
+
+  SonyArw6Plane hl(h, w), lh(h, w), hh(h, w);
+  for (int x = 0; x < w; x++)
+  {
+    lh.at(0, x) = sub0.at(0, x);
+    hh.at(0, x) = sony_arw6_edge_detail(sub0.at(1, x), odd_edge_mode);
+  }
+  for (int y = 0; y < h; y++)
+    for (int x = 0; x < w; x++)
+      hl.at(y, x) = sub0.at(y + 2, x);
+  for (int y = 1; y < h; y++)
+    for (int x = 0; x < w; x++)
+    {
+      lh.at(y, x) = sub1.at(y + 1, x);
+      hh.at(y, x) = sub2.at(y + 1, x);
+    }
+
+  SonyArw6Plane low_horizontal =
+      sony_arw6_inv53_axis0_high_leading(ll, lh);
+  SonyArw6Plane high_horizontal =
+      sony_arw6_inv53_axis0_high_leading(hl, hh);
+  return sony_arw6_inv53_axis1(low_horizontal, high_horizontal);
+}
+
+static SonyArw6Plane sony_arw6_synthesize_guard_group3(
+    const SonyArw6Plane &ll, const SonyArw6Plane &sub0,
+    const SonyArw6Plane &sub1, const SonyArw6Plane &sub2,
+    bool odd_edge_mode)
+{
+  const int h = ll.rows;
+  const int w = ll.cols;
+  sony_arw6_require(sub0.cols == w && sub1.cols == w && sub2.cols == w);
+  sony_arw6_require(sub0.rows >= h + 5 && sub1.rows >= h + 2 &&
+                    sub2.rows >= h + 2);
+
+  SonyArw6Plane hl(h, w), lh(h, w), hh(h, w);
+  for (int x = 0; x < w; x++)
+  {
+    hl.at(0, x) = sub0.at(0, x);
+    lh.at(0, x) = sub0.at(1, x);
+    hh.at(0, x) = sony_arw6_edge_detail(sub0.at(2, x), odd_edge_mode);
+    lh.at(h - 1, x) = sub0.at(h + 3, x);
+    hh.at(h - 1, x) =
+        sony_arw6_edge_detail(sub0.at(h + 4, x), odd_edge_mode);
+  }
+  for (int y = 1; y < h; y++)
+    for (int x = 0; x < w; x++)
+      hl.at(y, x) = sub0.at(y + 3, x);
+  for (int y = 1; y < h - 1; y++)
+    for (int x = 0; x < w; x++)
+    {
+      lh.at(y, x) = sub1.at(y + 3, x);
+      hh.at(y, x) = sub2.at(y + 3, x);
+    }
+
+  SonyArw6Plane low_horizontal = sony_arw6_inv53_axis0(ll, lh);
+  SonyArw6Plane high_horizontal = sony_arw6_inv53_axis0(hl, hh);
   return sony_arw6_inv53_axis1(low_horizontal, high_horizontal);
 }
 
@@ -921,16 +1230,19 @@ static SonyArw6Plane sony_arw6_synthesize_level_stride(
 }
 
 static SonyArw6Plane sony_arw6_final_green(const SonyArw6Plane &ll,
-                                           const SonyArw6Plane &detail)
+                                           const SonyArw6Plane &detail,
+                                           int top_rows)
 {
   const int h = ll.rows;
   const int w = ll.cols;
-  sony_arw6_require(detail.cols == w && detail.rows >= h + 4);
+  sony_arw6_require(top_rows >= 0 && top_rows <= 8);
+  sony_arw6_require(detail.cols == w &&
+                    detail.rows >= 8 + std::max(0, h - top_rows));
 
   SonyArw6Plane selected(h, w);
   for (int y = 0; y < h; y++)
   {
-    const int src_y = y < 4 ? y : y + 4;
+    const int src_y = y < top_rows ? y : y + 8 - top_rows;
     for (int x = 0; x < w; x++)
       selected.at(y, x) = detail.at(src_y, x);
   }
@@ -994,6 +1306,151 @@ static inline ushort sony_arw6_sample_from_signed(int32_t x)
   return sony_arw6_llvc3_lut_value(code);
 }
 
+struct SonyArw6DecodedTile
+{
+  SonyArw6Plane green;
+  SonyArw6Plane red_residual;
+  SonyArw6Plane blue_residual;
+  SonyArw6Plane full_green;
+};
+
+static SonyArw6DecodedTile sony_arw6_decode_stream_tile(const uchar *stream,
+                                                        uint32_t stream_size)
+{
+  SonyArw6StreamInfo header;
+  sony_arw6_require(sony_arw6_parse_stream_header(stream, stream_size, header));
+  const uint32_t sequence_or_version = sony_arw6_le32(stream + 4);
+  sony_arw6_require(sequence_or_version >= 0x01000000 &&
+                    sequence_or_version <= 0x10000000);
+
+  const std::vector<SonyArw6DirectoryEntry> dir =
+      sony_arw6_parse_directory(stream, stream_size);
+  const int coded_height = header.logical_height;
+  const int padded_height = sony_arw6_align_up(coded_height, 16);
+  const bool guarded_height = coded_height != padded_height;
+  const int low_rows = padded_height / 16;
+  const int low_start = guarded_height ? 1 : 0;
+  const int low_count = low_rows - low_start;
+
+  std::vector<SonyArw6Plane> g0 =
+      sony_arw6_decode_packet_arrays(stream, stream_size, dir,
+                                     header.coded_width, 0, 0);
+  SonyArw6Plane green =
+      sony_arw6_integrate_type1(g0[0], low_start + low_count, 0);
+  if (low_start)
+  {
+    SonyArw6Plane cropped(low_count, green.cols);
+    for (int y = 0; y < low_count; y++)
+      memcpy(cropped.row(y), green.row(y + low_start),
+             sizeof(int32_t) * size_t(green.cols));
+    green = cropped;
+  }
+
+  std::vector<SonyArw6Plane> r0 =
+      sony_arw6_decode_packet_arrays(stream, stream_size, dir,
+                                     header.coded_width, 0, 1);
+  SonyArw6Plane red_residual =
+      sony_arw6_integrate_type1(r0[0], low_start + low_count, 0);
+  if (low_start)
+  {
+    SonyArw6Plane cropped(low_count, red_residual.cols);
+    for (int y = 0; y < low_count; y++)
+      memcpy(cropped.row(y), red_residual.row(y + low_start),
+             sizeof(int32_t) * size_t(red_residual.cols));
+    red_residual = cropped;
+  }
+
+  std::vector<SonyArw6Plane> b0 =
+      sony_arw6_decode_packet_arrays(stream, stream_size, dir,
+                                     header.coded_width, 0, 2);
+  SonyArw6Plane blue_residual =
+      sony_arw6_integrate_type1(b0[0], low_start + low_count, 0);
+  if (low_start)
+  {
+    SonyArw6Plane cropped(low_count, blue_residual.cols);
+    for (int y = 0; y < low_count; y++)
+      memcpy(cropped.row(y), blue_residual.row(y + low_start),
+             sizeof(int32_t) * size_t(blue_residual.cols));
+    blue_residual = cropped;
+  }
+
+  for (int group = 1; group <= 3; group++)
+  {
+    const int edge_rows = group == 1 ? 0 : (group == 2 ? 1 : 2);
+    const bool color_odd_edge = group == 3;
+
+    std::vector<SonyArw6Plane> planes =
+        sony_arw6_decode_packet_arrays(stream, stream_size, dir,
+                                       header.coded_width, group, 0);
+    if (guarded_height)
+    {
+      if (group == 1)
+        green = sony_arw6_synthesize_guard_group1(green, planes[0],
+                                                  planes[1], planes[2]);
+      else if (group == 2)
+        green = sony_arw6_synthesize_guard_group2(green, planes[0],
+                                                  planes[1], planes[2], false);
+      else
+        green = sony_arw6_synthesize_guard_group3(green, planes[0],
+                                                  planes[1], planes[2], false);
+    }
+    else
+      green = sony_arw6_synthesize_level_stride(green, planes[0], planes[1],
+                                                planes[2], edge_rows, false);
+
+    planes = sony_arw6_decode_packet_arrays(stream, stream_size, dir,
+                                            header.coded_width, group, 1);
+    if (guarded_height)
+    {
+      if (group == 1)
+        red_residual = sony_arw6_synthesize_guard_group1(
+            red_residual, planes[0], planes[1], planes[2]);
+      else if (group == 2)
+        red_residual = sony_arw6_synthesize_guard_group2(
+            red_residual, planes[0], planes[1], planes[2], false);
+      else
+        red_residual = sony_arw6_synthesize_guard_group3(
+            red_residual, planes[0], planes[1], planes[2], color_odd_edge);
+    }
+    else
+      red_residual = sony_arw6_synthesize_level_stride(
+          red_residual, planes[0], planes[1], planes[2], edge_rows,
+          color_odd_edge);
+
+    planes = sony_arw6_decode_packet_arrays(stream, stream_size, dir,
+                                            header.coded_width, group, 2);
+    if (guarded_height)
+    {
+      if (group == 1)
+        blue_residual = sony_arw6_synthesize_guard_group1(
+            blue_residual, planes[0], planes[1], planes[2]);
+      else if (group == 2)
+        blue_residual = sony_arw6_synthesize_guard_group2(
+            blue_residual, planes[0], planes[1], planes[2], false);
+      else
+        blue_residual = sony_arw6_synthesize_guard_group3(
+            blue_residual, planes[0], planes[1], planes[2], color_odd_edge);
+    }
+    else
+      blue_residual = sony_arw6_synthesize_level_stride(
+          blue_residual, planes[0], planes[1], planes[2], edge_rows,
+          color_odd_edge);
+  }
+
+  std::vector<SonyArw6Plane> g4 =
+      sony_arw6_decode_packet_arrays(stream, stream_size, dir,
+                                     header.coded_width, 4, 0);
+  SonyArw6Plane full_green =
+      sony_arw6_final_green(green, g4[0], guarded_height ? 2 : 4);
+
+  SonyArw6DecodedTile out;
+  out.green = green;
+  out.red_residual = red_residual;
+  out.blue_residual = blue_residual;
+  out.full_green = full_green;
+  return out;
+}
+
 } // namespace
 
 void LibRaw::sony_arw6_load_raw()
@@ -1016,99 +1473,56 @@ void LibRaw::sony_arw6_load_raw()
   if (readed != data_size)
     throw LIBRAW_EXCEPTION_IO_EOF;
 
-  const uchar *stream = &strip[SONY_ARW6_STREAM_OFFSET];
-  const uint32_t stream_size = uint32_t(strip.size() - SONY_ARW6_STREAM_OFFSET);
-  sony_arw6_require(stream_size >= 0x80);
-  sony_arw6_require(!memcmp(stream, "A000", 4));
-  const uint32_t sequence_or_version = sony_arw6_le32(stream + 4);
-  sony_arw6_require(sequence_or_version == 0x01000000 ||
-                    sequence_or_version == 0x02000000);
-  sony_arw6_require(sony_arw6_be16(stream + 8) == raw_width);
-  sony_arw6_require(sony_arw6_be16(stream + 0x0a) * 2 == raw_height);
-  const uint16_t word_c = sony_arw6_be16(stream + 0x0c);
-  const uint16_t word_e = sony_arw6_be16(stream + 0x0e);
-  sony_arw6_require(((word_c >> 4) & 0x3f) == 16);
-  sony_arw6_require((word_e >> 13) == 3);
+  const std::vector<SonyArw6StreamInfo> streams =
+      sony_arw6_find_streams(strip, raw_width, raw_height);
+  sony_arw6_require(!streams.empty());
 
-  const std::vector<SonyArw6DirectoryEntry> dir =
-      sony_arw6_parse_directory(stream, stream_size);
-  const int low_rows = raw_height / 16;
-
-  checkCancel();
-  std::vector<SonyArw6Plane> g0 =
-      sony_arw6_decode_packet_arrays(stream, stream_size, dir, raw_width, 0, 0);
-  SonyArw6Plane green = sony_arw6_integrate_type1(g0[0], low_rows, 0);
-
-  checkCancel();
-  std::vector<SonyArw6Plane> r0 =
-      sony_arw6_decode_packet_arrays(stream, stream_size, dir, raw_width, 0, 1);
-  SonyArw6Plane red_residual = sony_arw6_integrate_type1(r0[0], low_rows, 0);
-
-  checkCancel();
-  std::vector<SonyArw6Plane> b0 =
-      sony_arw6_decode_packet_arrays(stream, stream_size, dir, raw_width, 0, 2);
-  SonyArw6Plane blue_residual = sony_arw6_integrate_type1(b0[0], low_rows, 0);
-
-  for (int group = 1; group <= 3; group++)
-  {
-    const int edge_rows = group == 1 ? 0 : (group == 2 ? 1 : 2);
-    const bool color_odd_edge = group == 3;
-
-    checkCancel();
-    std::vector<SonyArw6Plane> planes =
-        sony_arw6_decode_packet_arrays(stream, stream_size, dir, raw_width,
-                                       group, 0);
-    green = sony_arw6_synthesize_level_stride(green, planes[0], planes[1],
-                                              planes[2], edge_rows, false);
-
-    checkCancel();
-    planes = sony_arw6_decode_packet_arrays(stream, stream_size, dir,
-                                            raw_width, group, 1);
-    red_residual = sony_arw6_synthesize_level_stride(
-        red_residual, planes[0], planes[1], planes[2], edge_rows,
-        color_odd_edge);
-
-    checkCancel();
-    planes = sony_arw6_decode_packet_arrays(stream, stream_size, dir,
-                                            raw_width, group, 2);
-    blue_residual = sony_arw6_synthesize_level_stride(
-        blue_residual, planes[0], planes[1], planes[2], edge_rows,
-        color_odd_edge);
-  }
-
-  checkCancel();
-  std::vector<SonyArw6Plane> g4 =
-      sony_arw6_decode_packet_arrays(stream, stream_size, dir, raw_width, 4, 0);
-  SonyArw6Plane full_green = sony_arw6_final_green(green, g4[0]);
-
-  const int half_h = raw_height / 2;
-  const int half_w = raw_width / 2;
-  sony_arw6_require(full_green.rows == half_h && full_green.cols == raw_width);
-  sony_arw6_require(green.rows == half_h && green.cols == half_w);
-  sony_arw6_require(red_residual.rows == half_h &&
-                    red_residual.cols == half_w);
-  sony_arw6_require(blue_residual.rows == half_h &&
-                    blue_residual.cols == half_w);
-
-  for (int y = 0; y < half_h; y++)
+  for (size_t si = 0; si < streams.size(); si++)
   {
     checkCancel();
-    ushort *row0 = raw_image + size_t(y * 2) * raw_width;
-    ushort *row1 = raw_image + size_t(y * 2 + 1) * raw_width;
-    for (int x = 0; x < half_w; x++)
+    const SonyArw6StreamInfo &s = streams[si];
+    sony_arw6_require(s.offset <= strip.size() &&
+                      s.length <= strip.size() - s.offset);
+    sony_arw6_require(s.tile_x >= 0 && s.tile_y >= 0 &&
+                      s.tile_x + s.coded_width <= raw_width &&
+                      s.tile_y + s.logical_height <= raw_height);
+
+    SonyArw6DecodedTile tile =
+        sony_arw6_decode_stream_tile(&strip[s.offset], s.length);
+
+    const int half_h = s.logical_height / 2;
+    const int half_w = s.coded_width / 2;
+    sony_arw6_require(tile.full_green.rows == half_h &&
+                      tile.full_green.cols == s.coded_width);
+    sony_arw6_require(tile.green.rows == half_h &&
+                      tile.green.cols == half_w);
+    sony_arw6_require(tile.red_residual.rows == half_h &&
+                      tile.red_residual.cols == half_w);
+    sony_arw6_require(tile.blue_residual.rows == half_h &&
+                      tile.blue_residual.cols == half_w);
+
+    for (int y = 0; y < half_h; y++)
     {
-      const int32_t gavg =
-          sony_arw6_floor_shift(full_green.at(y, x * 2) +
-                                    full_green.at(y, x * 2 + 1),
-                                1);
-      row0[x * 2] =
-          sony_arw6_sample_from_signed(gavg + 2 * red_residual.at(y, x));
-      row0[x * 2 + 1] =
-          sony_arw6_sample_from_signed(full_green.at(y, x * 2 + 1));
-      row1[x * 2] =
-          sony_arw6_sample_from_signed(full_green.at(y, x * 2));
-      row1[x * 2 + 1] =
-          sony_arw6_sample_from_signed(gavg + 2 * blue_residual.at(y, x));
+      checkCancel();
+      ushort *row0 =
+          raw_image + size_t(s.tile_y + y * 2) * raw_width + s.tile_x;
+      ushort *row1 =
+          raw_image + size_t(s.tile_y + y * 2 + 1) * raw_width + s.tile_x;
+      for (int x = 0; x < half_w; x++)
+      {
+        const int32_t gavg =
+            sony_arw6_floor_shift(tile.full_green.at(y, x * 2) +
+                                      tile.full_green.at(y, x * 2 + 1),
+                                  1);
+        row0[x * 2] = sony_arw6_sample_from_signed(
+            gavg + 2 * tile.red_residual.at(y, x));
+        row0[x * 2 + 1] =
+            sony_arw6_sample_from_signed(tile.full_green.at(y, x * 2 + 1));
+        row1[x * 2] =
+            sony_arw6_sample_from_signed(tile.full_green.at(y, x * 2));
+        row1[x * 2 + 1] = sony_arw6_sample_from_signed(
+            gavg + 2 * tile.blue_residual.at(y, x));
+      }
     }
   }
 }
