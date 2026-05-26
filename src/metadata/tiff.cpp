@@ -2076,10 +2076,22 @@ void LibRaw::apply_tiff()
     case 32766:
       if (!dng_version && !strncasecmp(make, "Sony", 4) &&
           tiff_ifd[raw].phint == 32803 && tiff_ifd[raw].samples == 1 &&
-          tiff_bps == 14 && raw_width > 0 && raw_height > 0)
+          (tiff_bps == 12 || tiff_bps == 14) && raw_width > 0 &&
+          raw_height > 0)
       {
         load_raw = &LibRaw::sony_arw6_load_raw;
+        tiff_bps = 14;
         black = 1024;
+        for (int chan = 0; chan < 4; chan++)
+          cblack[chan] = 0;
+        tiff_ifd[raw].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
+        tiff_ifd[raw].dng_levels.dng_black = 1024;
+        tiff_ifd[raw].dng_levels.dng_fblack = 1024.f;
+        for (int chan = 0; chan < 4; chan++)
+        {
+          tiff_ifd[raw].dng_levels.dng_cblack[chan] = 0;
+          tiff_ifd[raw].dng_levels.dng_fcblack[chan] = 0.f;
+        }
         break;
       }
       break;
