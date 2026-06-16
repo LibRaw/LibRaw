@@ -394,25 +394,60 @@ void LibRaw::x3f_thumb_loader()
   }
 }
 
+// The Foveon Quattro top (blue-sensitive) layer is sampled at twice the
+// linear density of the R/G layers below it — Sigma's 1:1:4 R:G:Y
+// design (sd/dp Quattro: T 5424x3616 vs M/B 2712x1808 each, see
+// https://press.sigmaphoto.com/corporate/02/sigma-dp-quattro/).
+// Bilinearly upscale the color-difference signals (R - B) and (G - B)
+// so R and G inherit the top layer's detail for free; luma cancels in
+// the difference. Plain 2x2 nearest-neighbor replication of the R/G
+// samples instead leaves a visible chroma maze in flat regions.
 void LibRaw::x3f_dpq_interpolate_rg()
 {
-  int w = imgdata.sizes.raw_width / 2;
-  int h = imgdata.sizes.raw_height / 2;
-  unsigned short *image = (ushort *)imgdata.rawdata.color3_image;
+  const int W = imgdata.sizes.raw_width;
+  const int H = imgdata.sizes.raw_height;
+  const int rowStride = W * 3;
+  unsigned short *image = (unsigned short *)imgdata.rawdata.color3_image;
 
-  for (int color = 0; color < 2; color++)
+  for (int Y = 0; Y < H; Y++)
   {
-    for (int y = 2; y < (h - 2); y++)
+    const int Y_lo = Y & ~1;
+    const int Y_hi = (Y_lo + 2 < H) ? (Y_lo + 2) : Y_lo;
+    const float fy = (Y_hi == Y_lo) ? 0.f : 0.5f * float(Y - Y_lo);
+
+    for (int X = 0; X < W; X++)
     {
-      uint16_t *row0 =
-          &image[imgdata.sizes.raw_width * 3 * (y * 2) + color]; // dst[1]
-      uint16_t *row1 =
-          &image[imgdata.sizes.raw_width * 3 * (y * 2 + 1) + color]; // dst1[1]
-      for (int x = 2; x < (w - 2); x++)
+      if (((Y | X) & 1) == 0) continue;
+      const int X_lo = X & ~1;
+      const int X_hi = (X_lo + 2 < W) ? (X_lo + 2) : X_lo;
+      const float fx = (X_hi == X_lo) ? 0.f : 0.5f * float(X - X_lo);
+
+      const int p_TL = Y_lo * rowStride + X_lo * 3;
+      const int p_TR = Y_lo * rowStride + X_hi * 3;
+      const int p_BL = Y_hi * rowStride + X_lo * 3;
+      const int p_BR = Y_hi * rowStride + X_hi * 3;
+      const int p_C  = Y    * rowStride + X    * 3;
+
+      const float wTL = (1.f - fy) * (1.f - fx);
+      const float wTR = (1.f - fy) * fx;
+      const float wBL = fy * (1.f - fx);
+      const float wBR = fy * fx;
+
+      const float B_C  = float(image[p_C  + 2]);
+      const float B_TL = float(image[p_TL + 2]);
+      const float B_TR = float(image[p_TR + 2]);
+      const float B_BL = float(image[p_BL + 2]);
+      const float B_BR = float(image[p_BR + 2]);
+
+      for (int color = 0; color < 2; color++)
       {
-        row1[0] = row1[3] = row0[3] = row0[0];
-        row0 += 6;
-        row1 += 6;
+        const float d = wTL * (float(image[p_TL + color]) - B_TL) +
+                        wTR * (float(image[p_TR + color]) - B_TR) +
+                        wBL * (float(image[p_BL + color]) - B_BL) +
+                        wBR * (float(image[p_BR + color]) - B_BR);
+        const float v = B_C + d;
+        const float vC = v > 16383.f ? 16383.f : (v < 0.f ? 0.f : v);
+        image[p_C + color] = (unsigned short)(vC + 0.5f);
       }
     }
   }
