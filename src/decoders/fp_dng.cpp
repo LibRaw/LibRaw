@@ -345,6 +345,10 @@ void LibRaw::deflate_dng_load_raw()
   if (imgdata.idata.filters && ifd->samples > 1)
     throw LIBRAW_EXCEPTION_DECODE_RAW;
 
+  int _bytesps = ifd->bps >> 3;
+  if (_bytesps < 2 || _bytesps > 4)
+    throw LIBRAW_EXCEPTION_DECODE_RAW; // Only 16, 24 and 32 bits are supported
+
   tile_stripe_data_t tiles;
   tiles.init(ifd, imgdata.sizes, libraw_internal_data.unpacker_data, libraw_internal_data.unpacker_data.order,
       libraw_internal_data.internal_data.input);
