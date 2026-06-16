@@ -937,14 +937,16 @@ sony_arw6_decode_packet_arrays(const uchar *stream, uint32_t stream_size,
   const int expected_rows = sony_arw6_expected_packet_rows(group, coded_height);
   const int groups_per_row = (row_width + 3) / 4;
   sony_arw6_require(row_width > 0 && groups_per_row > 0 && rows > 0);
-  sony_arw6_require(rows == expected_rows);
+  if (rows != expected_rows)
+    sony_arw6_require((coded_height & 15) &&
+                      expected_rows - rows == row_multiplier);
   sony_arw6_require(size_t(p.block_count) <=
                     (stream_size / 16U + 1U)); /* weak corruption guard */
 
   std::vector<SonyArw6Plane> planes;
   planes.reserve(components);
   for (int c = 0; c < components; c++)
-    planes.push_back(SonyArw6Plane(rows, row_width));
+    planes.push_back(SonyArw6Plane(expected_rows, row_width));
 
   for (int ri = 0; ri < p.block_count; ri++)
   {
@@ -1530,7 +1532,7 @@ static SonyArw6DecodedTile sony_arw6_decode_stream_tile(const uchar *stream,
 void LibRaw::sony_arw6_load_raw()
 {
   if (raw_width <= 0 || raw_height <= 0 || (raw_width & 15) ||
-      (raw_height & 15))
+      (raw_height & 1))
     throw LIBRAW_EXCEPTION_IO_BADFILE;
   if (!raw_image)
     throw LIBRAW_EXCEPTION_IO_BADFILE;
@@ -1584,13 +1586,13 @@ void LibRaw::sony_arw6_load_raw()
 
     const int half_h = s.logical_height / 2;
     const int half_w = s.coded_width / 2;
-    sony_arw6_require(tile.full_green.rows == half_h &&
+    sony_arw6_require(tile.full_green.rows >= half_h &&
                       tile.full_green.cols == s.coded_width);
-    sony_arw6_require(tile.green.rows == half_h &&
+    sony_arw6_require(tile.green.rows >= half_h &&
                       tile.green.cols == half_w);
-    sony_arw6_require(tile.red_residual.rows == half_h &&
+    sony_arw6_require(tile.red_residual.rows >= half_h &&
                       tile.red_residual.cols == half_w);
-    sony_arw6_require(tile.blue_residual.rows == half_h &&
+    sony_arw6_require(tile.blue_residual.rows >= half_h &&
                       tile.blue_residual.cols == half_w);
 
     for (int y = 0; y < half_h; y++)
