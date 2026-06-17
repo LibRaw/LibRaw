@@ -1408,7 +1408,12 @@ static void x3f_load_true(x3f_info_t *I, x3f_directory_entry_t *DE)
     TRU->x3rgb16.rows = rows;
     TRU->x3rgb16.channels = channels;
     TRU->x3rgb16.row_stride = columns * channels;
-    TRU->x3rgb16.buf = x3f_limited_malloc(sizeof(uint16_t) * size);
+    TRU->x3rgb16.buf =
+#ifdef LIBRAW_CALLOC_RAWSTORE
+        x3f_limited_calloc(sizeof(uint16_t) * size, 1);
+#else
+		x3f_limited_malloc(sizeof(uint16_t) * size);
+#endif
     TRU->x3rgb16.data = (uint16_t *)TRU->x3rgb16.buf;
 
     columns = Q->plane[2].columns;
@@ -1420,7 +1425,12 @@ static void x3f_load_true(x3f_info_t *I, x3f_directory_entry_t *DE)
     Q->top16.rows = rows;
     Q->top16.channels = channels;
     Q->top16.row_stride = columns * channels;
-    Q->top16.buf = x3f_limited_malloc(sizeof(uint16_t) * size);
+    Q->top16.buf =
+#ifdef LIBRAW_CALLOC_RAWSTORE
+        x3f_limited_calloc(sizeof(uint16_t) * size, 1);
+#else
+        x3f_limited_malloc(sizeof(uint16_t) * size);
+#endif
     Q->top16.data = (uint16_t *)Q->top16.buf;
   }
   else
@@ -1431,7 +1441,12 @@ static void x3f_load_true(x3f_info_t *I, x3f_directory_entry_t *DE)
     TRU->x3rgb16.rows = ID->rows;
     TRU->x3rgb16.channels = 3;
     TRU->x3rgb16.row_stride = ID->columns * 3;
-    TRU->x3rgb16.buf = x3f_limited_malloc(sizeof(uint16_t) * size);
+    TRU->x3rgb16.buf =
+#ifdef LIBRAW_CALLOC_RAWSTORE
+        x3f_limited_calloc(sizeof(uint16_t) * size, 1);
+#else
+        x3f_limited_malloc(sizeof(uint16_t) * size);
+#endif
     TRU->x3rgb16.data = (uint16_t *)TRU->x3rgb16.buf;
   }
 
@@ -1498,7 +1513,12 @@ static void x3f_load_huffman(x3f_info_t *I, x3f_directory_entry_t *DE, int bits,
     HUF->x3rgb16.rows = ID->rows;
     HUF->x3rgb16.channels = 3;
     HUF->x3rgb16.row_stride = ID->columns * 3;
-    HUF->x3rgb16.buf = x3f_limited_malloc(sizeof(uint16_t) * size);
+    HUF->x3rgb16.buf =
+#ifdef LIBRAW_CALLOC_RAWSTORE
+        x3f_limited_calloc(sizeof(uint16_t) * size, 1);
+#else
+        x3f_limited_malloc(sizeof(uint16_t) * size);
+#endif
     HUF->x3rgb16.data = (uint16_t *)HUF->x3rgb16.buf;
     break;
   case X3F_IMAGE_THUMB_HUFFMAN:
@@ -1507,7 +1527,12 @@ static void x3f_load_huffman(x3f_info_t *I, x3f_directory_entry_t *DE, int bits,
     HUF->rgb8.rows = ID->rows;
     HUF->rgb8.channels = 3;
     HUF->rgb8.row_stride = ID->columns * 3;
-    HUF->rgb8.buf = x3f_limited_malloc(sizeof(uint8_t) * size);
+    HUF->rgb8.buf =
+#ifdef LIBRAW_CALLOC_RAWSTORE
+        x3f_limited_calloc(sizeof(uint8_t) * size, 1);
+#else
+		x3f_limited_malloc(sizeof(uint8_t) * size);
+#endif
     HUF->rgb8.data = (uint8_t *)HUF->rgb8.buf;
     break;
   default:
@@ -1607,7 +1632,7 @@ static void x3f_load_camf_decode_type2(x3f_camf_t *CAMF)
   int i;
 
   CAMF->decoded_data_size = CAMF->data_size;
-  CAMF->decoded_data = x3f_limited_malloc(CAMF->decoded_data_size);
+  CAMF->decoded_data = x3f_limited_calloc(CAMF->decoded_data_size, 1);
 
   for (i = 0; i < (int)CAMF->data_size; i++)
   {
@@ -1648,7 +1673,7 @@ static void camf_decode_type4(x3f_camf_t *CAMF)
 
   CAMF->decoded_data_size = dst_size;
 
-  CAMF->decoded_data = x3f_limited_malloc(CAMF->decoded_data_size);
+  CAMF->decoded_data = x3f_limited_calloc(CAMF->decoded_data_size, 1);
   memset(CAMF->decoded_data, 0, CAMF->decoded_data_size);
 
   dst = (uint8_t *)CAMF->decoded_data;
@@ -1768,7 +1793,7 @@ static void camf_decode_type5(x3f_camf_t *CAMF)
   int32_t i;
 
   CAMF->decoded_data_size = CAMF->t5.decoded_data_size;
-  CAMF->decoded_data = x3f_limited_malloc(CAMF->decoded_data_size);
+  CAMF->decoded_data = x3f_limited_calloc(CAMF->decoded_data_size, 1);
 
   dst = (uint8_t *)CAMF->decoded_data;
 
@@ -1835,8 +1860,8 @@ static void x3f_setup_camf_property_entry(camf_entry_t *entry)
   uint32_t num = entry->property_num = *(uint32_t *)v;
   uint32_t off = *(uint32_t *)(v + 4);
 
-  entry->property_name = (char **)x3f_limited_malloc(num * sizeof(uint8_t *));
-  entry->property_value = (uint8_t **)x3f_limited_malloc(num * sizeof(uint8_t *));
+  entry->property_name = (char **)x3f_limited_calloc(num * sizeof(uint8_t *), 1);
+  entry->property_value = (uint8_t **)x3f_limited_calloc(num * sizeof(uint8_t *), 1);
 
   for (i = 0; i < (int)num; i++)
   {
