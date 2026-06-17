@@ -271,6 +271,15 @@ int LibRaw::open_bayer(const unsigned char *buffer, unsigned datalen,
   if (!buffer || buffer == (const void *)-1)
     return LIBRAW_IO_ERROR;
 
+  if (_raw_width < 3 || _raw_height < 3)
+	  return LIBRAW_FILE_UNSUPPORTED;
+
+  if(_left_margin + _right_margin >= _raw_width)
+    return LIBRAW_FILE_UNSUPPORTED;
+
+  if(_top_margin + _bottom_margin >= _raw_height)
+    return LIBRAW_FILE_UNSUPPORTED;
+
   LibRaw_buffer_datastream *stream;
   try
   {
@@ -303,7 +312,7 @@ int LibRaw::open_bayer(const unsigned char *buffer, unsigned datalen,
   S.width = S.raw_width - S.left_margin - _right_margin;
   S.height = S.raw_height - S.top_margin - _bottom_margin;
 
-  imgdata.idata.filters = 0x1010101 * bayer_pattern;
+  imgdata.idata.filters = 0x1010101u * bayer_pattern;
   imgdata.idata.colors =
       4 - !((imgdata.idata.filters & imgdata.idata.filters >> 1) & 0x5555);
   libraw_internal_data.unpacker_data.load_flags = otherflags;
@@ -337,6 +346,9 @@ int LibRaw::open_bayer(const unsigned char *buffer, unsigned datalen,
         libraw_internal_data.unpacker_data.load_flags =
             libraw_internal_data.unpacker_data.load_flags >> 1 & 7;
     load_raw = &LibRaw::unpacked_load_raw;
+	break;
+  default:
+	  return LIBRAW_FILE_UNSUPPORTED;
   }
   C.maximum =
       (1 << libraw_internal_data.unpacker_data.tiff_bps) - (1 << unused_bits);
