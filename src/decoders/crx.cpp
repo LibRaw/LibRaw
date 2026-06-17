@@ -2265,7 +2265,7 @@ int crxReadImageHeaders(crx_data_header_t *hdr, CrxImage *img, uint8_t *mdatPtr,
                        img->memmgr.
 #endif
                    calloc(sizeof(CrxTile) * nTiles + sizeof(CrxPlaneComp) * nTiles * img->nPlanes +
-                              sizeof(CrxSubband) * nTiles * img->nPlanes * img->subbandCount,
+                              sizeof(CrxSubband) * size_t(nTiles) * size_t(img->nPlanes) * size_t(img->subbandCount),
                           1);
     if (!img->tiles)
       return -1;
@@ -2537,7 +2537,7 @@ int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf, in
 #ifdef LIBRAW_CR3_MEMPOOL
                           img->memmgr.
 #endif
-                      malloc(img->planeHeight * img->planeWidth * img->nPlanes * ((img->samplePrecision + 7) >> 3));
+                      malloc(size_t(img->planeHeight) * size_t(img->planeWidth) * size_t(img->nPlanes) * size_t((img->samplePrecision + 7) >> 3));
     if (!img->planeBuf)
       return -1;
   }
