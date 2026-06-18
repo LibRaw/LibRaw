@@ -42,6 +42,14 @@ $(LIBDLL): $(DLL)
 LIB_OBJECTS= object\libraw_datastream_st.obj object\libraw_c_api_st.obj \
   object\cameralist_st.obj object\fuji_compressed_st.obj \
   object\crx_st.obj object\pana8_st.obj object\fp_dng_st.obj object\decoders_libraw_st.obj \
+  object\nikon_he_decoder_st.obj object\nikon_he_bayer_st.obj \
+  object\nikon_he_bit_reader_st.obj object\nikon_he_coefficient_decode_st.obj \
+  object\nikon_he_decode_st.obj object\nikon_he_dequantize_st.obj \
+  object\nikon_he_gcli_decode_st.obj object\nikon_he_gtli_table_st.obj \
+  object\nikon_he_idwt_horizontal_st.obj object\nikon_he_idwt_vertical_st.obj \
+  object\nikon_he_precinct_decode_st.obj object\nikon_he_precinct_header_st.obj \
+  object\nikon_he_predecessor_st.obj object\nikon_he_predict_lut_st.obj \
+  object\nikon_he_subband_config_st.obj object\nikon_he_tile_st.obj \
   object\olympus14_st.obj \
   object\sonycc_st.obj object\losslessjpeg_st.obj \
   object\unpack_st.obj object\unpack_thumb_st.obj \
@@ -77,6 +85,14 @@ LIB_OBJECTS= object\libraw_datastream_st.obj object\libraw_c_api_st.obj \
 DLL_OBJECTS= object\libraw_datastream.obj object\libraw_c_api.obj \
   object\cameralist.obj object\fuji_compressed.obj \
   object\crx.obj object\pana8.obj object\fp_dng.obj object\decoders_libraw.obj \
+  object\nikon_he_decoder.obj object\nikon_he_bayer.obj \
+  object\nikon_he_bit_reader.obj object\nikon_he_coefficient_decode.obj \
+  object\nikon_he_decode.obj object\nikon_he_dequantize.obj \
+  object\nikon_he_gcli_decode.obj object\nikon_he_gtli_table.obj \
+  object\nikon_he_idwt_horizontal.obj object\nikon_he_idwt_vertical.obj \
+  object\nikon_he_precinct_decode.obj object\nikon_he_precinct_header.obj \
+  object\nikon_he_predecessor.obj object\nikon_he_predict_lut.obj \
+  object\nikon_he_subband_config.obj object\nikon_he_tile.obj \
   object\olympus14.obj \
   object\sonycc.obj object\losslessjpeg.obj \
   object\unpack.obj object\unpack_thumb.obj \
@@ -197,6 +213,102 @@ object\pana8_st.obj: src\decoders\pana8.cpp
 
 object\pana8.obj: src\decoders\pana8.cpp
 	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\pana8.obj" /c src\decoders\pana8.cpp
+
+object\nikon_he_decoder_st.obj: src\decoders\nikon_he_decoder.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_decoder_st.obj" /c src\decoders\nikon_he_decoder.cpp
+
+object\nikon_he_decoder.obj: src\decoders\nikon_he_decoder.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_decoder.obj" /c src\decoders\nikon_he_decoder.cpp
+
+object\nikon_he_bayer_st.obj: src\decoders\nikon_he\nikon_he_bayer.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_bayer_st.obj" /c src\decoders\nikon_he\nikon_he_bayer.cpp
+
+object\nikon_he_bayer.obj: src\decoders\nikon_he\nikon_he_bayer.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_bayer.obj" /c src\decoders\nikon_he\nikon_he_bayer.cpp
+
+object\nikon_he_bit_reader_st.obj: src\decoders\nikon_he\nikon_he_bit_reader.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_bit_reader_st.obj" /c src\decoders\nikon_he\nikon_he_bit_reader.cpp
+
+object\nikon_he_bit_reader.obj: src\decoders\nikon_he\nikon_he_bit_reader.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_bit_reader.obj" /c src\decoders\nikon_he\nikon_he_bit_reader.cpp
+
+object\nikon_he_coefficient_decode_st.obj: src\decoders\nikon_he\nikon_he_coefficient_decode.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_coefficient_decode_st.obj" /c src\decoders\nikon_he\nikon_he_coefficient_decode.cpp
+
+object\nikon_he_coefficient_decode.obj: src\decoders\nikon_he\nikon_he_coefficient_decode.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_coefficient_decode.obj" /c src\decoders\nikon_he\nikon_he_coefficient_decode.cpp
+
+object\nikon_he_decode_st.obj: src\decoders\nikon_he\nikon_he_decode.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_decode_st.obj" /c src\decoders\nikon_he\nikon_he_decode.cpp
+
+object\nikon_he_decode.obj: src\decoders\nikon_he\nikon_he_decode.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_decode.obj" /c src\decoders\nikon_he\nikon_he_decode.cpp
+
+object\nikon_he_dequantize_st.obj: src\decoders\nikon_he\nikon_he_dequantize.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_dequantize_st.obj" /c src\decoders\nikon_he\nikon_he_dequantize.cpp
+
+object\nikon_he_dequantize.obj: src\decoders\nikon_he\nikon_he_dequantize.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_dequantize.obj" /c src\decoders\nikon_he\nikon_he_dequantize.cpp
+
+object\nikon_he_gcli_decode_st.obj: src\decoders\nikon_he\nikon_he_gcli_decode.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_gcli_decode_st.obj" /c src\decoders\nikon_he\nikon_he_gcli_decode.cpp
+
+object\nikon_he_gcli_decode.obj: src\decoders\nikon_he\nikon_he_gcli_decode.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_gcli_decode.obj" /c src\decoders\nikon_he\nikon_he_gcli_decode.cpp
+
+object\nikon_he_gtli_table_st.obj: src\decoders\nikon_he\nikon_he_gtli_table.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_gtli_table_st.obj" /c src\decoders\nikon_he\nikon_he_gtli_table.cpp
+
+object\nikon_he_gtli_table.obj: src\decoders\nikon_he\nikon_he_gtli_table.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_gtli_table.obj" /c src\decoders\nikon_he\nikon_he_gtli_table.cpp
+
+object\nikon_he_idwt_horizontal_st.obj: src\decoders\nikon_he\nikon_he_idwt_horizontal.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_idwt_horizontal_st.obj" /c src\decoders\nikon_he\nikon_he_idwt_horizontal.cpp
+
+object\nikon_he_idwt_horizontal.obj: src\decoders\nikon_he\nikon_he_idwt_horizontal.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_idwt_horizontal.obj" /c src\decoders\nikon_he\nikon_he_idwt_horizontal.cpp
+
+object\nikon_he_idwt_vertical_st.obj: src\decoders\nikon_he\nikon_he_idwt_vertical.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_idwt_vertical_st.obj" /c src\decoders\nikon_he\nikon_he_idwt_vertical.cpp
+
+object\nikon_he_idwt_vertical.obj: src\decoders\nikon_he\nikon_he_idwt_vertical.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_idwt_vertical.obj" /c src\decoders\nikon_he\nikon_he_idwt_vertical.cpp
+
+object\nikon_he_precinct_decode_st.obj: src\decoders\nikon_he\nikon_he_precinct_decode.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_precinct_decode_st.obj" /c src\decoders\nikon_he\nikon_he_precinct_decode.cpp
+
+object\nikon_he_precinct_decode.obj: src\decoders\nikon_he\nikon_he_precinct_decode.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_precinct_decode.obj" /c src\decoders\nikon_he\nikon_he_precinct_decode.cpp
+
+object\nikon_he_precinct_header_st.obj: src\decoders\nikon_he\nikon_he_precinct_header.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_precinct_header_st.obj" /c src\decoders\nikon_he\nikon_he_precinct_header.cpp
+
+object\nikon_he_precinct_header.obj: src\decoders\nikon_he\nikon_he_precinct_header.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_precinct_header.obj" /c src\decoders\nikon_he\nikon_he_precinct_header.cpp
+
+object\nikon_he_predecessor_st.obj: src\decoders\nikon_he\nikon_he_predecessor.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_predecessor_st.obj" /c src\decoders\nikon_he\nikon_he_predecessor.cpp
+
+object\nikon_he_predecessor.obj: src\decoders\nikon_he\nikon_he_predecessor.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_predecessor.obj" /c src\decoders\nikon_he\nikon_he_predecessor.cpp
+
+object\nikon_he_predict_lut_st.obj: src\decoders\nikon_he\nikon_he_predict_lut.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_predict_lut_st.obj" /c src\decoders\nikon_he\nikon_he_predict_lut.cpp
+
+object\nikon_he_predict_lut.obj: src\decoders\nikon_he\nikon_he_predict_lut.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_predict_lut.obj" /c src\decoders\nikon_he\nikon_he_predict_lut.cpp
+
+object\nikon_he_subband_config_st.obj: src\decoders\nikon_he\nikon_he_subband_config.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_subband_config_st.obj" /c src\decoders\nikon_he\nikon_he_subband_config.cpp
+
+object\nikon_he_subband_config.obj: src\decoders\nikon_he\nikon_he_subband_config.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_subband_config.obj" /c src\decoders\nikon_he\nikon_he_subband_config.cpp
+
+object\nikon_he_tile_st.obj: src\decoders\nikon_he\nikon_he_tile.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_tile_st.obj" /c src\decoders\nikon_he\nikon_he_tile.cpp
+
+object\nikon_he_tile.obj: src\decoders\nikon_he\nikon_he_tile.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_tile.obj" /c src\decoders\nikon_he\nikon_he_tile.cpp
 
 object\olympus14_st.obj: src\decoders\olympus14.cpp
 	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\olympus14_st.obj" /c src\decoders\olympus14.cpp
