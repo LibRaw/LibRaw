@@ -442,9 +442,6 @@ static bool sony_arw6_parse_stream_header(const uchar *stream,
   if (stream_size < 0x80 ||
       (memcmp(stream, "A000", 4) && memcmp(stream, "0000", 4)))
     return false;
-  const uint32_t sequence_or_version = sony_arw6_le32(stream + 4);
-  if (sequence_or_version < 0x01000000 || sequence_or_version > 0x10000000)
-    return false;
   const uint16_t word_c = sony_arw6_be16(stream + 0x0c);
   const uint16_t word_e = sony_arw6_be16(stream + 0x0e);
   const int decoded_bits = (word_c >> 4) & 0x3f;
@@ -1391,10 +1388,6 @@ static SonyArw6DecodedTile sony_arw6_decode_stream_tile(const uchar *stream,
 {
   SonyArw6StreamInfo header;
   sony_arw6_require(sony_arw6_parse_stream_header(stream, stream_size, header));
-  const uint32_t sequence_or_version = sony_arw6_le32(stream + 4);
-  sony_arw6_require(sequence_or_version >= 0x01000000 &&
-                    sequence_or_version <= 0x10000000);
-
   const std::vector<SonyArw6DirectoryEntry> dir =
       sony_arw6_parse_directory(stream, stream_size);
   const int coded_height = header.logical_height;
