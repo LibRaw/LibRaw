@@ -1,0 +1,47 @@
+# This file defines a collection of pre-commit hooks (https://pre-commit.com/).
+# To have this file executed, please install prek (https://pypi.org/project/prek/) and open a terminal in this folder
+# and run `prek install`. The first commit will install all the hooks, so please be patient.
+#
+# Apply to all files without committing:
+#   prek run --all-files
+# Update this file:
+#   prek autoupdate
+repos:
+-  repo: https://github.com/pre-commit/pre-commit-hooks
+   rev: v6.0.0
+   hooks:
+   -  id: fix-byte-order-marker
+   -  id: check-case-conflict
+   -  id: check-docstring-first
+   -  id: check-executables-have-shebangs
+   -  id: check-yaml
+   -  id: debug-statements
+   -  id: detect-private-key
+   -  id: trailing-whitespace
+   -  id: mixed-line-ending
+
+    # Linters
+-  repo: https://github.com/shellcheck-py/shellcheck-py
+   rev: v0.11.0.1
+   hooks:
+   -  id: shellcheck
+-  repo: https://github.com/checkmake/checkmake.git
+   rev: v0.3.2
+   hooks:
+       # Use this hook to let pre-commit build checkmake in its sandbox
+   -  id: checkmake
+    # Formatters
+-  repo: https://github.com/pocc/pre-commit-hooks
+   rev: v1.3.5
+   hooks:
+   -  id: clang-format
+      args: [-i]
+-  repo: https://github.com/perltidy/perltidy
+   rev: 20260204.06
+   hooks:
+   -  id: perltidy
+-  repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+   rev: v2.16.0
+   hooks:
+   -  id: pretty-format-yaml
+      args: [--autofix, --indent, '3']
