@@ -518,7 +518,14 @@ void LibRaw::kodak_thumb_load_raw()
   if (!image)
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
   int row, col;
-  colors = thumb_misc >> 5;
+  /* colors is used as the per-pixel write count into the 4-channel image[]
+     buffer below. thumb_misc is built from file-controlled metadata
+     (bits | (SamplesPerPixel << 5)), so mask it the same way the other
+     thumb_misc consumers do (>> 5 & 7) and reject counts that would not fit
+     the 4-channel storage, to avoid a heap buffer overflow. */
+  colors = thumb_misc >> 5 & 7;
+  if (colors < 1 || colors > 4)
+    throw LIBRAW_EXCEPTION_IO_CORRUPT;
   for (row = 0; row < height; row++)
     for (col = 0; col < width; col++)
       read_shorts(image[row * width + col], colors);
