@@ -271,13 +271,13 @@ int LibRaw::open_bayer(const unsigned char *buffer, unsigned datalen,
   if (!buffer || buffer == (const void *)-1)
     return LIBRAW_IO_ERROR;
 
-  if (_raw_width < 3 || _raw_height < 3)
+  if (_raw_width < 22 || _raw_height < 22) // 3=> 22 as in open_file/identify
 	  return LIBRAW_FILE_UNSUPPORTED;
 
-  if(_left_margin + _right_margin >= _raw_width)
+  if (int(_left_margin) + int(_right_margin) + 21 >= _raw_width) // limit to 22 as in open_file/identify
     return LIBRAW_FILE_UNSUPPORTED;
 
-  if(_top_margin + _bottom_margin >= _raw_height)
+  if(int(_top_margin) + int(_bottom_margin) + 21 >= _raw_height) // limit to 22 as in open_file/identify
     return LIBRAW_FILE_UNSUPPORTED;
 
   LibRaw_buffer_datastream *stream;
