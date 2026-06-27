@@ -412,6 +412,9 @@ void LibRaw::deflate_dng_load_raw()
     {
       for (size_t x = 0; x < imgdata.sizes.raw_width; x += tiles.tileWidth, ++t)
       {
+		if(t >= tiles.tOffsets.size()) // should not happen but check anyway
+          throw LIBRAW_EXCEPTION_IO_CORRUPT; 
+
         libraw_internal_data.internal_data.input->seek(tiles.tOffsets[t], SEEK_SET);
         int bytesread = libraw_internal_data.internal_data.input->read(cBuffer.data(), 1, tiles.tBytes[t]);
 		if (bytesread < tiles.tBytes[t])
@@ -519,9 +522,18 @@ void LibRaw::convertFloatToInt(float dmin /* =4096.f */,
   else
     return;
 
-  ushort *raw_alloc = (ushort *)malloc(
-      imgdata.sizes.raw_height * imgdata.sizes.raw_width *
-      libraw_internal_data.unpacker_data.tiff_samples * sizeof(ushort));
+  INT64 pixcnt = INT64(imgdata.sizes.raw_height) * INT64(imgdata.sizes.raw_width)
+	  * INT64(libraw_internal_data.unpacker_data.tiff_samples);
+
+  if (pixcnt * sizeof(ushort) > INT64(imgdata.rawparams.max_raw_memory_mb) * 1024LL * 1024LL)
+    throw LIBRAW_EXCEPTION_TOOBIG;
+
+  ushort *raw_alloc =
+#ifdef LIBRAW_CALLOC_RAWSTORE
+		(ushort *)calloc(pixcnt, sizeof(ushort));
+#else
+		(ushort *)malloc(pixcnt * sizeof(ushort));
+#endif
   float tmax = float(MAX(imgdata.color.maximum, 1));
   float datamax = imgdata.color.fmaximum;
 
@@ -545,9 +557,7 @@ void LibRaw::convertFloatToInt(float dmin /* =4096.f */,
   else
     imgdata.rawdata.color.fnorm = imgdata.color.fnorm = 0.f;
 
-  for (size_t i = 0; i < imgdata.sizes.raw_height * imgdata.sizes.raw_width *
-                             libraw_internal_data.unpacker_data.tiff_samples;
-       ++i)
+  for (size_t i = 0; i < pixcnt; ++i)
   {
     float val = MAX(data[i], 0.f);
     raw_alloc[i] = (ushort)(val * multip);
@@ -664,7 +674,9 @@ void LibRaw::uncompressed_fp_dng_load_raw()
     {
         for (unsigned x = 0; x < imgdata.sizes.raw_width  && t < (unsigned)tiles.tileCnt; x += tiles.tileWidth, ++t)
         {
-            libraw_internal_data.internal_data.input->seek(tiles.tOffsets[t], SEEK_SET);
+			if (t >= tiles.tOffsets.size()) // should not happen but check anyway
+				throw LIBRAW_EXCEPTION_IO_CORRUPT;
+			libraw_internal_data.internal_data.input->seek(tiles.tOffsets[t], SEEK_SET);
             size_t rowsInTile = y + tiles.tileHeight > imgdata.sizes.raw_height ? imgdata.sizes.raw_height - y : tiles.tileHeight;
             size_t colsInTile = x + tiles.tileWidth > imgdata.sizes.raw_width ? imgdata.sizes.raw_width - x : tiles.tileWidth;
 
