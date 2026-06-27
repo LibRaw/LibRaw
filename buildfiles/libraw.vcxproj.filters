@@ -208,6 +208,9 @@
     <ClCompile Include="..\src\metadata\sony.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\decoders\sony_arw6.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\preprocessing\subtract_black.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -38,7 +38,7 @@ LIB_OBJECTS= object/libraw_datastream.o \
   object/cameralist.o object/fuji_compressed.o \
   object/crx.o object/pana8.o object/fp_dng.o object/decoders_libraw.o \
   object/olympus14.o \
-  object/sonycc.o object/losslessjpeg.o \
+  object/sonycc.o object/sony_arw6.o object/losslessjpeg.o \
   object/unpack.o object/unpack_thumb.o \
   object/rawspeed_glue.o object/dngsdk_glue.o \
   object/colorconst.o object/utils_libraw.o object/init_close_utils.o \
@@ -104,6 +104,8 @@ object/olympus14.o: src/decoders/olympus14.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/olympus14.o src/decoders/olympus14.cpp
 object/sonycc.o: src/decoders/sonycc.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/sonycc.o src/decoders/sonycc.cpp
+object/sony_arw6.o: src/decoders/sony_arw6.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/sony_arw6.o src/decoders/sony_arw6.cpp
 object/losslessjpeg.o: src/decompressors/losslessjpeg.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/losslessjpeg.o src/decompressors/losslessjpeg.cpp
 object/decoders_dcraw.o: src/decoders/decoders_dcraw.cpp

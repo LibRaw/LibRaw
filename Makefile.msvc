@@ -43,7 +43,7 @@ LIB_OBJECTS= object\libraw_datastream_st.obj object\libraw_c_api_st.obj \
   object\cameralist_st.obj object\fuji_compressed_st.obj \
   object\crx_st.obj object\pana8_st.obj object\fp_dng_st.obj object\decoders_libraw_st.obj \
   object\olympus14_st.obj \
-  object\sonycc_st.obj object\losslessjpeg_st.obj \
+  object\sonycc_st.obj object\sony_arw6_st.obj object\losslessjpeg_st.obj \
   object\unpack_st.obj object\unpack_thumb_st.obj \
   object\rawspeed_glue_st.obj object\dngsdk_glue_st.obj \
   object\colorconst_st.obj object\utils_libraw_st.obj object\init_close_utils_st.obj \
@@ -78,7 +78,7 @@ DLL_OBJECTS= object\libraw_datastream.obj object\libraw_c_api.obj \
   object\cameralist.obj object\fuji_compressed.obj \
   object\crx.obj object\pana8.obj object\fp_dng.obj object\decoders_libraw.obj \
   object\olympus14.obj \
-  object\sonycc.obj object\losslessjpeg.obj \
+  object\sonycc.obj object\sony_arw6.obj object\losslessjpeg.obj \
   object\unpack.obj object\unpack_thumb.obj \
   object\rawspeed_glue.obj object\dngsdk_glue.obj \
   object\colorconst.obj object\utils_libraw.obj \
@@ -209,6 +209,12 @@ object\sonycc_st.obj: src\decoders\sonycc.cpp
 
 object\sonycc.obj: src\decoders\sonycc.cpp
 	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\sonycc.obj" /c src\decoders\sonycc.cpp
+
+object\sony_arw6_st.obj: src\decoders\sony_arw6.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\sony_arw6_st.obj" /c src\decoders\sony_arw6.cpp
+
+object\sony_arw6.obj: src\decoders\sony_arw6.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\sony_arw6.obj" /c src\decoders\sony_arw6.cpp
 
 object\losslessjpeg_st.obj: src\decompressors\losslessjpeg.cpp
 	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\losslessjpeg_st.obj" /c src\decompressors\losslessjpeg.cpp
