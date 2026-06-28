@@ -1533,6 +1533,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
         unsigned MakN_order, m_sorder = order;
         unsigned MakN_length;
         unsigned pos_in_original_raw;
+		memset(mbuf, 0, sizeof(mbuf));
         fread(mbuf, 1, 6, ifp);
 
         if (!strcmp(mbuf, "Adobe"))
