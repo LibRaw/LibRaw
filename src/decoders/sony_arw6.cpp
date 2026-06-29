@@ -1,5 +1,7 @@
 /* -*- C++ -*-
  * Copyright 2026 LibRaw LLC (info@libraw.org)
+ * Copyright (C) 2026 Jiang Yaogeng (Sony ARW6 CRAW HQ decoder;
+ *   code generated with assistance from GLM-5)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
