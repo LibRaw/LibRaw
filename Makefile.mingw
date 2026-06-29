@@ -35,6 +35,12 @@ CSTFLAGS=$(CFLAGS) -DLIBRAW_NOTHREADS
 LIB_OBJECTS= object/libraw_datastream.o object/libraw_c_api.o \
   object/cameralist.o object/fuji_compressed.o \
   object/crx.o object/pana8.o object/fp_dng.o object/decoders_libraw.o \
+  object/nikon_he_decoder.o object/nikon_he_bayer.o object/nikon_he_bit_reader.o \
+  object/nikon_he_coefficient_decode.o object/nikon_he_decode.o object/nikon_he_dequantize.o \
+  object/nikon_he_gcli_decode.o object/nikon_he_gtli_table.o object/nikon_he_idwt_horizontal.o \
+  object/nikon_he_idwt_vertical.o object/nikon_he_precinct_decode.o object/nikon_he_precinct_header.o \
+  object/nikon_he_predecessor.o object/nikon_he_predict_lut.o object/nikon_he_subband_config.o \
+  object/nikon_he_tile.o \
   object/olympus14.o \
   object/losslessjpeg.o object/sonycc.o \
   object/unpack.o object/unpack_thumb.o \
@@ -153,6 +159,38 @@ object/crx.o: src/decoders/crx.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/crx.o src/decoders/crx.cpp
 object/pana8.o: src/decoders/pana8.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/pana8.o src/decoders/pana8.cpp
+object/nikon_he_decoder.o: src/decoders/nikon_he_decoder.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_decoder.o src/decoders/nikon_he_decoder.cpp
+object/nikon_he_bayer.o: src/decoders/nikon_he/nikon_he_bayer.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_bayer.o src/decoders/nikon_he/nikon_he_bayer.cpp
+object/nikon_he_bit_reader.o: src/decoders/nikon_he/nikon_he_bit_reader.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_bit_reader.o src/decoders/nikon_he/nikon_he_bit_reader.cpp
+object/nikon_he_coefficient_decode.o: src/decoders/nikon_he/nikon_he_coefficient_decode.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_coefficient_decode.o src/decoders/nikon_he/nikon_he_coefficient_decode.cpp
+object/nikon_he_decode.o: src/decoders/nikon_he/nikon_he_decode.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_decode.o src/decoders/nikon_he/nikon_he_decode.cpp
+object/nikon_he_dequantize.o: src/decoders/nikon_he/nikon_he_dequantize.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_dequantize.o src/decoders/nikon_he/nikon_he_dequantize.cpp
+object/nikon_he_gcli_decode.o: src/decoders/nikon_he/nikon_he_gcli_decode.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_gcli_decode.o src/decoders/nikon_he/nikon_he_gcli_decode.cpp
+object/nikon_he_gtli_table.o: src/decoders/nikon_he/nikon_he_gtli_table.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_gtli_table.o src/decoders/nikon_he/nikon_he_gtli_table.cpp
+object/nikon_he_idwt_horizontal.o: src/decoders/nikon_he/nikon_he_idwt_horizontal.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_idwt_horizontal.o src/decoders/nikon_he/nikon_he_idwt_horizontal.cpp
+object/nikon_he_idwt_vertical.o: src/decoders/nikon_he/nikon_he_idwt_vertical.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_idwt_vertical.o src/decoders/nikon_he/nikon_he_idwt_vertical.cpp
+object/nikon_he_precinct_decode.o: src/decoders/nikon_he/nikon_he_precinct_decode.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_precinct_decode.o src/decoders/nikon_he/nikon_he_precinct_decode.cpp
+object/nikon_he_precinct_header.o: src/decoders/nikon_he/nikon_he_precinct_header.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_precinct_header.o src/decoders/nikon_he/nikon_he_precinct_header.cpp
+object/nikon_he_predecessor.o: src/decoders/nikon_he/nikon_he_predecessor.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_predecessor.o src/decoders/nikon_he/nikon_he_predecessor.cpp
+object/nikon_he_predict_lut.o: src/decoders/nikon_he/nikon_he_predict_lut.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_predict_lut.o src/decoders/nikon_he/nikon_he_predict_lut.cpp
+object/nikon_he_subband_config.o: src/decoders/nikon_he/nikon_he_subband_config.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_subband_config.o src/decoders/nikon_he/nikon_he_subband_config.cpp
+object/nikon_he_tile.o: src/decoders/nikon_he/nikon_he_tile.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_tile.o src/decoders/nikon_he/nikon_he_tile.cpp
 object/olympus14.o: src/decoders/olympus14.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/olympus14.o src/decoders/olympus14.cpp
 object/sonycc.o: src/decoders/sonycc.cpp
