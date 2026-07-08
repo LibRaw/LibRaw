@@ -139,14 +139,15 @@ void LibRaw::wavelet_denoise()
 
   if (iwidth < 65 || iheight < 65)
     return;
+  if (int64_t(iwidth) * int64_t(iheight) >= 0x15540000LL)
+    return; // ensure pixel count less then 358M so total allocation size is less then 4GB
 
   while (maximum << scale < 0x10000)
     scale++;
   maximum <<= --scale;
   black <<= scale;
   FORC4 cblack[c] <<= scale;
-  if ((size = iheight * iwidth) < 0x15550000)
-    fimg = (float *)malloc((size * 3 + iheight + iwidth) * sizeof *fimg);
+  fimg = (float *)malloc((size * 3 + iheight + iwidth) * sizeof *fimg);
   temp = fimg + size * 3;
   if ((nc = colors) == 3 && filters)
     nc++;

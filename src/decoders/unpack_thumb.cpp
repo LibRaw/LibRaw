@@ -312,9 +312,9 @@ int LibRaw::unpack_thumb(void)
               total_size += tiff_ifd[pifd].strip_byte_counts[i];
             if (total_size != (unsigned)t_length) // recalculate colors
             {
-              if (total_size == T.twidth * T.tlength * 3)
+              if (total_size == T.twidth * T.theight * 3)
                 T.tcolors = 3;
-              else if (total_size == T.twidth * T.tlength)
+              else if (total_size == T.twidth * T.theight)
                 T.tcolors = 1;
             }
             T.tlength = unsigned(total_size);

@@ -45,7 +45,7 @@ float LibRaw::find_green(int bps, int bite, int off0, int off1)
 {
   UINT64 bitbuf = 0;
   int vbits, col, i, c;
-  ushort img[2][2064];
+  ushort img[2][2065];
   float sum[] = {0, 0};
   if (width > 2064)
     return 0.f; // too wide
