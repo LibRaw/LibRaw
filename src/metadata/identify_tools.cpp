@@ -122,6 +122,8 @@ void LibRaw::remove_caseSubstr(char *string, char *subStr) // replace a substrin
 void LibRaw::removeExcessiveSpaces(char *string) // replace repeating spaces with one space
 {
 	int orig_len = int(strlen(string));
+	if (orig_len < 1)
+		return;
 	int i = 0;   // counter for resulting string
 	int j = -1;
 	bool prev_char_is_space = false;
@@ -137,6 +139,8 @@ void LibRaw::removeExcessiveSpaces(char *string) // replace repeating spaces wit
 			}
 		}
 	}
-	if (string[i-1] == ' ')
-    string[i-1] = 0;
+    if (i > 0 && string[i - 1] == ' ')
+		string[i-1] = 0;
+	if(i < orig_len)
+		string[i] = 0; 
 }
