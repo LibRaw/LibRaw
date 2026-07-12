@@ -23,8 +23,8 @@ To participate in development:
 ## Licensing Compliance & Agreements
 
 LibRaw is free, open-source software that is dual-licensed under:
-1. **GNU Lesser General Public License (LGPL) version 2.1** | View the [LibRaw LICENSE.LGPL File](https://github.com)
-2. **Common Development and Distribution License (CDDL) Version 1.0** | View the [LibRaw LICENSE.CDDL File](https://github.com)
+1. **GNU Lesser General Public License (LGPL) version 2.1** | View the [LibRaw LICENSE.LGPL File](https://raw.githubusercontent.com/LibRaw/LibRaw/refs/heads/master/LICENSE.LGPL)
+2. **Common Development and Distribution License (CDDL) Version 1.0** | View the [LibRaw LICENSE.CDDL File](https://raw.githubusercontent.com/LibRaw/LibRaw/refs/heads/master/LICENSE.CDDL)
 
 ### Mandatory Agreement
 By submitting a patch or Pull Request, you explicitly agree that your contributed code can be distributed under **both** of the above licenses. Patches without this compliance cannot be merged into the official source tree.
