@@ -1,7 +1,9 @@
-2026-07-14  Alex Tutubalin <lexa@lexa.ru>
+2026-07-16  Alex Tutubalin <lexa@lexa.ru>
   LibRaw 0.22.2 Release
   This is bugfix-only release with these commits included:
 
+  * 5e37b038 Fixed 6yr old typos in USE_6BY9RPI 8- and 16- bit decoders
+  * e4b18e7a trimSpaces: Improved handling of zero-length strings and strings consisting only of spaces
   * d932fa11 Misc fixups
   * dead45de Fix links to license files in contributing document
   * be519b31 removeExcessiveSpaces: handle zero-length strings the right way
