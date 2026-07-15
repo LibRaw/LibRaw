@@ -14,13 +14,9 @@
 
 #include "../../internal/dcraw_defs.h"
 
-
-void LibRaw::nikon_he_load_raw()
-{
-    if(dng_version)
-    	throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT; // Never reached
-    throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
-}
+// nikon_he_load_raw lives in nikon_he_decoder.cpp (separate TU so the
+// nikon_he/ headers can be included without colliding with
+// LibRaw's macro-defined names).
 
 void LibRaw::packed_tiled_dng_load_raw()
 {
