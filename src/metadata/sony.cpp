@@ -364,6 +364,8 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {SonyID_ZV_E10M2, sbfILCE_DX,
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_ILCE_7M5, sbfILCE_FF,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
   };
   ilm.CamID = id;
   int isPreProductionFW = 0;
@@ -454,6 +456,7 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
   case SonyID_ILCE_7CR:
   case SonyID_ILCE_7CM2:
   case SonyID_ILCE_9M3:
+  case SonyID_ILCE_7M5:
   case SonyID_ZV_E10M2:
     imSony.group9050 = LIBRAW_SONY_Tag9050d;
     break;
@@ -956,7 +959,7 @@ void LibRaw::process_Sony_0x9400(uchar *buf, ushort len, unsigned long long /*id
     FORC4 s[c] = SonySubstitution[buf[0x1a + c]];
     imSony.Sony0x9400_SequenceFileNumber = sget4(s);
 
-    imSony.Sony0x9400_SequenceLength2 = SonySubstitution[buf[0x1e]]; // files
+    imSony.Sony0x9400_SequenceLength2 = SonySubstitution[buf[0x1e]]; // files //ilce-7m5 modifed here
   }
 
   else if ((bufx == 0x0c) && (len >= 0x1f)) // 0x9400 'b' version
