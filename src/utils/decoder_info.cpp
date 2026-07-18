@@ -317,6 +317,11 @@ int LibRaw::get_decoder_info(libraw_decoder_info_t *d_info)
                             LIBRAW_DECODER_TRYRAWSPEED | LIBRAW_DECODER_TRYRAWSPEED3 |
                             LIBRAW_DECODER_SONYARW2;
   }
+  else if (load_raw == &LibRaw::sony_arw6_load_raw)
+  {
+    d_info->decoder_name = "sony_arw6_load_raw()";
+    d_info->decoder_flags = LIBRAW_DECODER_HASCURVE | LIBRAW_DECODER_FIXEDMAXC;
+  }
   else if (load_raw == &LibRaw::sony_arq_load_raw)
   {
     d_info->decoder_name = "sony_arq_load_raw()";
