@@ -2082,17 +2082,6 @@ void LibRaw::apply_tiff()
       {
         load_raw = &LibRaw::sony_arw6_load_raw;
         tiff_bps = 14;
-        black = 1024;
-        for (int chan = 0; chan < 4; chan++)
-          cblack[chan] = 0;
-        tiff_ifd[raw].dng_levels.parsedfields |= LIBRAW_DNGFM_BLACK;
-        tiff_ifd[raw].dng_levels.dng_black = 1024;
-        tiff_ifd[raw].dng_levels.dng_fblack = 1024.f;
-        for (int chan = 0; chan < 4; chan++)
-        {
-          tiff_ifd[raw].dng_levels.dng_cblack[chan] = 0;
-          tiff_ifd[raw].dng_levels.dng_fcblack[chan] = 0.f;
-        }
         break;
       }
       break;

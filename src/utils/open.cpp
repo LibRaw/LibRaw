@@ -1073,6 +1073,17 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
               S.raw_width == 2816) // A7S2=> exact, hope it works for A7S-I too
       )
         S.width = S.raw_width - 32;
+
+      if (load_raw == &LibRaw::sony_arw6_load_raw)
+      {
+        /* it would be great to get it via metadata */
+        C.black = 1024;
+        for (int c = 0; c < 6; c++)
+          C.cblack[c] = 0;
+        C.maximum = 39002; // last curve item
+        for (int c = 0; c < 4; c++)
+          C.linear_max[c] = 32800;
+      }
     }
 
 
