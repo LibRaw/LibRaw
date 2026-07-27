@@ -91,6 +91,9 @@
     <ClCompile Include="..\src\decoders\nikon_he\nikon_he_precinct_header.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\decoders\nikon_he\nikon_he_picture_header.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\decoders\nikon_he\nikon_he_predecessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
