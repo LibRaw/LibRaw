@@ -29,6 +29,7 @@ it under the terms of the one of two licenses as you choose:
 //   sb 24..25: pass B wavelet horizontals, final 2 (LB 7)
 
 #include "nikon_he_gtli_table.h"
+#include "nikon_he_picture_header.h"
 #include <cstring>
 
 namespace nikon_he {
@@ -115,7 +116,38 @@ constexpr int kNumGtliRows = sizeof(kGtliTable) / sizeof(kGtliTable[0]);
 
 }  // namespace
 
+// The decoder indexes 26 sub-bands while WGT declares 25. Sub-band 23 is the
+// pass-B LL band and shares the entry of sub-band 12, the pass-A LL band.
+namespace {
+
+thread_local const nikon_he::PictureHeader* g_picture_header = nullptr;
+
+constexpr int kPassA_LL_Band = 12;
+constexpr int kPassB_LL_Band = 23;
+
+inline int wgt_index_for_band(int b) {
+    if (b < kPassB_LL_Band)  return b;
+    if (b == kPassB_LL_Band) return kPassA_LL_Band;
+    return b - 1;
+}
+
+}  // namespace
+
+void set_active_picture_header(const PictureHeader* ph) {
+    g_picture_header = ph;
+}
+
 const uint8_t* lookup_gtli_table(int Bp, int Br) {
+    const PictureHeader* ph = g_picture_header;
+    if (ph && ph->valid && ph->nbands > 0) {
+        static thread_local uint8_t computed[kSubBandsPerPrecinct];
+        for (int b = 0; b < kSubBandsPerPrecinct; ++b) {
+            const int w = wgt_index_for_band(b);
+            computed[b] = (uint8_t)gtli_from_weights(*ph, w, Bp, Br);
+        }
+        return computed;
+    }
+
     for (int i = 0; i < kNumGtliRows; ++i) {
         if (kGtliTable[i].Bp == Bp && kGtliTable[i].Br == Br) {
             return kGtliTable[i].values;

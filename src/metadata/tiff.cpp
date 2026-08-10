@@ -2259,17 +2259,20 @@ void LibRaw::apply_tiff()
       {
         load_raw = &LibRaw::nikon_load_padded_packed_raw;
       }
-      else if ((!strncmp(model, "NIKON Z 9", 9) || !strncmp(model, "NIKON Z 8", 9) || !strcmp(model, "NIKON Z f")
-		  || !strcmp(model, "NIKON Z6_3")) &&
-               tiff_ifd[raw].offset)
+      else if (tiff_ifd[raw].offset)
       {
           INT64 pos = ftell(ifp);
-          unsigned char cmp[] = {0xff, 0x10, 0xff, 0x50 }; // JpegXS SOC + Cap
-          unsigned char buf[4];
-          fseek(ifp, INT64(tiff_ifd[raw].offset), SEEK_SET);
-          fread(buf, 1, 4, ifp);
+          const unsigned char jxs_signature[] = {0xff, 0x10, 0xff, 0x50};
+          unsigned char marker[sizeof(jxs_signature)] = {};
+          const bool read_marker =
+              fseek(ifp, INT64(tiff_ifd[raw].offset), SEEK_SET) == 0 &&
+              fread(marker, 1, sizeof(marker), ifp) == sizeof(marker);
           fseek(ifp, pos, SEEK_SET);
-          if(!memcmp(buf,cmp,4))
+          const bool is_jxs = read_marker &&
+              !memcmp(marker, jxs_signature, sizeof(marker));
+          const unsigned nef_compression =
+              imgdata.makernotes.nikon.NEFCompression;
+          if (is_jxs && (nef_compression == 13 || nef_compression == 14))
             load_raw = &LibRaw::nikon_he_load_raw;
           else
             load_raw = &LibRaw::nikon_load_raw;

@@ -39,6 +39,7 @@ LIB_OBJECTS= object/libraw_datastream.o object/libraw_c_api.o \
   object/nikon_he_coefficient_decode.o object/nikon_he_decode.o object/nikon_he_dequantize.o \
   object/nikon_he_gcli_decode.o object/nikon_he_gtli_table.o object/nikon_he_idwt_horizontal.o \
   object/nikon_he_idwt_vertical.o object/nikon_he_precinct_decode.o object/nikon_he_precinct_header.o \
+  object/nikon_he_picture_header.o \
   object/nikon_he_predecessor.o object/nikon_he_predict_lut.o object/nikon_he_subband_config.o \
   object/nikon_he_tile.o \
   object/olympus14.o \
@@ -183,6 +184,8 @@ object/nikon_he_precinct_decode.o: src/decoders/nikon_he/nikon_he_precinct_decod
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_precinct_decode.o src/decoders/nikon_he/nikon_he_precinct_decode.cpp
 object/nikon_he_precinct_header.o: src/decoders/nikon_he/nikon_he_precinct_header.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_precinct_header.o src/decoders/nikon_he/nikon_he_precinct_header.cpp
+object/nikon_he_picture_header.o: src/decoders/nikon_he/nikon_he_picture_header.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_picture_header.o src/decoders/nikon_he/nikon_he_picture_header.cpp
 object/nikon_he_predecessor.o: src/decoders/nikon_he/nikon_he_predecessor.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikon_he_predecessor.o src/decoders/nikon_he/nikon_he_predecessor.cpp
 object/nikon_he_predict_lut.o: src/decoders/nikon_he/nikon_he_predict_lut.cpp

@@ -15,34 +15,38 @@ it under the terms of the one of two licenses as you choose:
 
  */
 
-// Nikon High Efficiency RAW decoder — LibRaw integration glue.
-//
-// This translation unit:
-//   1. Forward-declares the decoder's public entry from
-//      nikon_he/nikon_he_decode.h (the rest of nikon_he/*.cpp are
-//      compiled separately via Makefile.am and linked in).
-//   2. Implements LibRaw::nikon_he_load_raw() — reads the precinct
-//      strip from the datastream, dispatches to the decoder, copies
-//      the decoded bayer into raw_image.
-//
-// The decoder takes a contiguous precinct-stream buffer, so we read
-// the entire raw strip upfront. The full strip is small enough (~30 MB
-// for Z9 FF) to keep in memory.
-
-// Decoder headers FIRST — they live in the nikon_he namespace and pull
-// in only <cstdint>, <cstddef>, etc. Including before dcraw_defs.h
-// avoids any collision with LibRaw's macro-defined names
-// (width/height/etc).
+// Keep decoder headers before dcraw_defs.h, which defines width and height as
+// macros.
 #include "nikon_he/nikon_he_decode.h"
 #include "nikon_he/nikon_he_iqx_iqp_lut_data.h"
+#include "nikon_he/nikon_he_gtli_table.h"
+#include "nikon_he/nikon_he_picture_header.h"
 
 #include <vector>
 #include <cstdint>
-#include <cstdio>
 #include <cstring>
 
-// Now bring in LibRaw's macros / definitions.
 #include "../../internal/dcraw_defs.h"
+
+namespace {
+
+constexpr unsigned kNefCompressionHe = 13;
+constexpr unsigned kNefCompressionHeStar = 14;
+
+class ActivePictureHeaderScope {
+public:
+    explicit ActivePictureHeaderScope(const nikon_he::PictureHeader& ph) {
+        nikon_he::set_active_picture_header(&ph);
+    }
+    ~ActivePictureHeaderScope() {
+        nikon_he::set_active_picture_header(nullptr);
+    }
+
+    ActivePictureHeaderScope(const ActivePictureHeaderScope&) = delete;
+    ActivePictureHeaderScope& operator=(const ActivePictureHeaderScope&) = delete;
+};
+
+}  // namespace
 
 void LibRaw::nikon_he_load_raw()
 {
@@ -55,64 +59,50 @@ void LibRaw::nikon_he_load_raw()
         throw LIBRAW_EXCEPTION_DECODE_RAW;
     }
 
-    // TIFF raw-IFD StripOffsets / StripByteCounts — populated by
-    // identify(). `data_offset` and `data_size` are macros from
-    // var_defines.h expanding to the unpacker_data fields.
-    const uint64_t tiff_strip_offset = (uint64_t)data_offset;
-    const uint64_t tiff_strip_size   = (uint64_t)data_size;
-
-    // The Z9 HE precinct stream starts at strip_offset + 0x9B (the
-    // 0x9B-byte prefix is a fixed header we don't currently parse).
-    constexpr uint64_t kPrecinctOffsetFromStrip = 0x9b;
-    if (tiff_strip_size <= kPrecinctOffsetFromStrip) {
-        throw LIBRAW_EXCEPTION_DECODE_RAW;
-    }
-    const uint64_t precinct_off  = tiff_strip_offset + kPrecinctOffsetFromStrip;
-    const size_t   precinct_size = (size_t)(tiff_strip_size - kPrecinctOffsetFromStrip);
-
-    // Slurp the precinct stream from the datastream into memory.
-    std::vector<uint8_t> precinct_bytes(precinct_size);
-    auto* ds = libraw_internal_data.internal_data.input;
-    ds->seek((INT64)precinct_off, SEEK_SET);
-    if (ds->read(precinct_bytes.data(), 1, precinct_size) != precinct_size) {
-        throw LIBRAW_EXCEPTION_IO_EOF;
-    }
-
-    if (precinct_size < 12) {
-        throw LIBRAW_EXCEPTION_DECODE_RAW;
-    }
-
-    // Distinguish HE from HE*. The TIFF dispatch (tiff.cpp:2273) routes
-    // both variants here based on the shared JPEG-XS SOC marker, but
-    // HE uses per-precinct Bp ∈ {4, 5} and HE* uses Bp ∈ {1, 2, 3}.
-    // Bp is byte[3] of each precinct's 12-byte prefix. The current
-    // decoder produces tile-localized decode artifacts on HE*; the
-    // gtli table (nikon_he_gtli_table.cpp) and prec-16 reset rule
-    // (nikon_he_predecessor.h) are already extended to cover HE*'s Bp
-    // regime, but additional orchestration changes are still needed
-    // to reach byte-exact HE* output, so we refuse HE* here.
-    const uint8_t first_bp = precinct_bytes[3];
-    if (first_bp != 4 && first_bp != 5) {
+    const unsigned nef_compression = imgdata.makernotes.nikon.NEFCompression;
+    if (nef_compression != kNefCompressionHe &&
+        nef_compression != kNefCompressionHeStar) {
         throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
     }
 
-    // Decode into a scratch bayer buffer, then copy out.
+    const uint64_t tiff_strip_offset = (uint64_t)data_offset;
+    const uint64_t tiff_strip_size   = (uint64_t)data_size;
+    if (tiff_strip_size < 64 || tiff_strip_size > (uint64_t)INT32_MAX) {
+        throw LIBRAW_EXCEPTION_DECODE_RAW;
+    }
+    if (tiff_strip_size >
+        (uint64_t)imgdata.rawparams.max_raw_memory_mb * 1024ULL * 1024ULL) {
+        throw LIBRAW_EXCEPTION_ALLOC;
+    }
+
+    std::vector<uint8_t> strip((size_t)tiff_strip_size);
+    auto* ds = libraw_internal_data.internal_data.input;
+    ds->seek((INT64)tiff_strip_offset, SEEK_SET);
+    if (ds->read(strip.data(), 1, strip.size()) != strip.size()) {
+        throw LIBRAW_EXCEPTION_IO_EOF;
+    }
+
+    nikon_he::PictureHeader ph;
+    if (!nikon_he::parse_picture_header(strip.data(), strip.size(), ph) ||
+        !nikon_he::is_supported_picture_header(ph, strip.size()) ||
+        ph.precinct_offset >= strip.size()) {
+        throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
+    }
+    if ((int)ph.hdr_width != img_w || (int)ph.hdr_height != img_h) {
+        throw LIBRAW_EXCEPTION_DECODE_RAW;
+    }
+
     std::vector<uint16_t> bayer((size_t)img_w * img_h, 0);
-    auto result = nikon_he::decode_nikon_he_image(
-        precinct_bytes.data(),
-        precinct_size,
+    ActivePictureHeaderScope active_header(ph);
+    const nikon_he::HeDecodeResult result = nikon_he::decode_nikon_he_image(
+        strip.data() + ph.precinct_offset,
+        strip.size() - ph.precinct_offset,
         img_w, img_h,
         nikon_he::iqx_iqp_lut(),
         bayer.data());
 
     if (!result.success) {
-        std::fprintf(stderr,
-            "[nikon_he_load_raw] decode failed (image %dx%d).\n",
-            img_w, img_h);
-        std::memset(raw_image, 0,
-                    (size_t)img_w * img_h * sizeof(unsigned short));
-        maximum = 16383;
-        return;
+        throw LIBRAW_EXCEPTION_DECODE_RAW;
     }
 
     std::memcpy(raw_image, bayer.data(),

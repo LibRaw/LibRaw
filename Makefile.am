@@ -45,6 +45,7 @@ lib_libraw_a_SOURCES = src/libraw_c_api.cpp \
 	src/decoders/nikon_he/nikon_he_idwt_vertical.cpp \
 	src/decoders/nikon_he/nikon_he_precinct_decode.cpp \
 	src/decoders/nikon_he/nikon_he_precinct_header.cpp \
+	src/decoders/nikon_he/nikon_he_picture_header.cpp \
 	src/decoders/nikon_he/nikon_he_predecessor.cpp \
 	src/decoders/nikon_he/nikon_he_predict_lut.cpp \
 	src/decoders/nikon_he/nikon_he_subband_config.cpp \

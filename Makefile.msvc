@@ -48,6 +48,7 @@ LIB_OBJECTS= object\libraw_datastream_st.obj object\libraw_c_api_st.obj \
   object\nikon_he_gcli_decode_st.obj object\nikon_he_gtli_table_st.obj \
   object\nikon_he_idwt_horizontal_st.obj object\nikon_he_idwt_vertical_st.obj \
   object\nikon_he_precinct_decode_st.obj object\nikon_he_precinct_header_st.obj \
+  object\nikon_he_picture_header_st.obj \
   object\nikon_he_predecessor_st.obj object\nikon_he_predict_lut_st.obj \
   object\nikon_he_subband_config_st.obj object\nikon_he_tile_st.obj \
   object\olympus14_st.obj \
@@ -91,6 +92,7 @@ DLL_OBJECTS= object\libraw_datastream.obj object\libraw_c_api.obj \
   object\nikon_he_gcli_decode.obj object\nikon_he_gtli_table.obj \
   object\nikon_he_idwt_horizontal.obj object\nikon_he_idwt_vertical.obj \
   object\nikon_he_precinct_decode.obj object\nikon_he_precinct_header.obj \
+  object\nikon_he_picture_header.obj \
   object\nikon_he_predecessor.obj object\nikon_he_predict_lut.obj \
   object\nikon_he_subband_config.obj object\nikon_he_tile.obj \
   object\olympus14.obj \
@@ -285,6 +287,12 @@ object\nikon_he_precinct_header_st.obj: src\decoders\nikon_he\nikon_he_precinct_
 
 object\nikon_he_precinct_header.obj: src\decoders\nikon_he\nikon_he_precinct_header.cpp
 	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_precinct_header.obj" /c src\decoders\nikon_he\nikon_he_precinct_header.cpp
+
+object\nikon_he_picture_header_st.obj: src\decoders\nikon_he\nikon_he_picture_header.cpp
+	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_picture_header_st.obj" /c src\decoders\nikon_he\nikon_he_picture_header.cpp
+
+object\nikon_he_picture_header.obj: src\decoders\nikon_he\nikon_he_picture_header.cpp
+	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_picture_header.obj" /c src\decoders\nikon_he\nikon_he_picture_header.cpp
 
 object\nikon_he_predecessor_st.obj: src\decoders\nikon_he\nikon_he_predecessor.cpp
 	$(CC) $(COPT) /DLIBRAW_NODLL /DLIBRAW_BUILDLIB /Fo"object\\nikon_he_predecessor_st.obj" /c src\decoders\nikon_he\nikon_he_predecessor.cpp
@@ -765,4 +773,3 @@ object\libraw_datastream_st.obj: src\libraw_datastream.cpp
 
 object\libraw_datastream.obj: src\libraw_datastream.cpp
 	$(CC) $(COPT) /DLIBRAW_BUILDLIB /Fo"object\\libraw_datastream.obj" /c src\libraw_datastream.cpp
-

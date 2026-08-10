@@ -35,8 +35,11 @@ it under the terms of the one of two licenses as you choose:
 
 namespace nikon_he {
 
-// Number of sub-bands per precinct.
 constexpr int kSubBandsPerPrecinct = 26;
+
+struct PictureHeader;
+
+void set_active_picture_header(const PictureHeader* ph);
 
 // Look up the 26-entry GTLI array for the given (Bp, Br) combination.
 // Returns a pointer to 26 uint8_t values (each in 0..15), or nullptr if
