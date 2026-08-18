@@ -104,6 +104,47 @@ static void *lr_memmem(const void *l, size_t l_len, const void *s, size_t s_len)
   return NULL;
 }
 
+/* Look up `key` inside the named CAMF PROP block and return its value,
+   or NULL if either the block or the key is not present. */
+static const char *x3f_camf_find_prop(camf_entry_t *entries, int n_entries,
+                                      const char *block, const char *key)
+{
+  for (int i = 0; i < n_entries; i++)
+  {
+    if (entries[i].id != X3F_CMbP || !entries[i].name_address)
+      continue;
+    if (strcmp(entries[i].name_address, block))
+      continue;
+    for (uint32_t j = 0; j < entries[i].property_num; j++)
+    {
+      if (entries[i].property_name[j] &&
+          !strcmp(entries[i].property_name[j], key))
+        return (const char *)entries[i].property_value[j];
+    }
+  }
+  return NULL;
+}
+
+/* Return the decoded payload of the named CAMF M_FLOAT matrix, or NULL
+   if no matrix with that name and type exists. M_FLOAT matrices are
+   stored as double[] (see get_matrix_copy). */
+static const double *x3f_camf_find_float_matrix(camf_entry_t *entries,
+                                                int n_entries,
+                                                const char *name)
+{
+  for (int i = 0; i < n_entries; i++)
+  {
+    if (entries[i].id != X3F_CMbM || !entries[i].name_address)
+      continue;
+    if (strcmp(entries[i].name_address, name))
+      continue;
+    if (entries[i].matrix_decoded_type != M_FLOAT)
+      continue;
+    return (const double *)entries[i].matrix_decoded;
+  }
+  return NULL;
+}
+
 void LibRaw::parse_x3f()
 {
   x3f_t *x3f = x3f_new_from_file(libraw_internal_data.internal_data.input);
@@ -305,6 +346,86 @@ void LibRaw::parse_x3f()
   {
     libraw_internal_data.unpacker_data.meta_offset = DE->input.offset + 8;
     libraw_internal_data.unpacker_data.meta_length = DE->input.size - 28;
+
+    // Decode CAMF and read the camera-recorded WB gains into cam_mul[],
+    // so the as-shot multipliers are available instead of the
+    // matrix-derived neutral default. Sigma CAMF stores per-preset
+    // R/G/B gains as 3-element M_FLOAT matrices (e.g. SunlightWBGain,
+    // AutoWBGain) named by the WhiteBalanceGains property block. CAMF
+    // is reverse-engineered; the bundled X3F decoder is derived from
+    // the Kalpanika x3f_tools project (https://github.com/Kalpanika/x3f),
+    // which is the de facto reference for the format.
+    try
+    {
+      if (x3f_load_data(x3f, DE) == X3F_OK)
+      {
+        x3f_camf_t *CAMF = &DE->header.data_subsection.camf;
+        camf_entry_t *entries = CAMF->entry_table.element;
+        const int n_entries = (int)CAMF->entry_table.size;
+
+        // The WhiteBalance entry is the camera-menu enum (0=Auto,
+        // 1=AutoLSP, 2=Daylight, ...) — NOT an index into the
+        // WhiteBalanceGains PROP block (whose own order does not match
+        // the menu). Map the enum to the CAMF preset name, then look
+        // that name up to find the gain matrix (e.g. "AutoLSP" ->
+        // "AutoLSPWBGain", 3 R/G/B multipliers).
+        static const char *const kSigmaWBPresets[] = {
+            "Auto",         // 0
+            "AutoLSP",      // 1
+            "Sunlight",     // 2  (camera UI label: "Daylight")
+            "Shade",        // 3
+            "Overcast",     // 4
+            "Incandescent", // 5
+            "Fluorescent",  // 6
+            NULL,           // 7  Color Temperature — manual K, no preset
+            "Flash",        // 8
+            // All three Custom slots share the single "Custom" entry in
+            // WhiteBalanceGains, which points at a single CustomWBGain
+            // matrix holding the as-shot gain for whichever slot was
+            // active at capture. There is no Custom1/2/3 distinction in
+            // CAMF (verified on sd Quattro and DP Merrill samples).
+            "Custom",       // 9  Custom 1
+            "Custom",       // 10 Custom 2
+            "Custom",       // 11 Custom 3
+        };
+        const int n_presets = (int)(sizeof(kSigmaWBPresets) /
+                                    sizeof(kSigmaWBPresets[0]));
+        const char *gain_name = NULL;
+        for (int i = 0; i < n_entries && !gain_name; i++)
+        {
+          if (entries[i].id != X3F_CMbM || !entries[i].name_address)
+            continue;
+          if (strcmp(entries[i].name_address, "WhiteBalance"))
+            continue;
+          if (entries[i].matrix_decoded_type != M_UINT)
+            continue;
+          if (entries[i].matrix_elements < 1)
+            continue;
+          const uint32_t idx = ((uint32_t *)entries[i].matrix_decoded)[0];
+          const char *preset = ((int)idx < n_presets) ? kSigmaWBPresets[idx]
+                                                      : NULL;
+          if (preset)
+            gain_name = x3f_camf_find_prop(entries, n_entries,
+                                           "WhiteBalanceGains", preset);
+        }
+        const double *gains =
+            gain_name ? x3f_camf_find_float_matrix(entries, n_entries, gain_name)
+                      : NULL;
+
+        if (gains && gains[0] > 0.0 && gains[1] > 0.0 && gains[2] > 0.0)
+        {
+          imgdata.color.cam_mul[0] = (float)gains[0];
+          imgdata.color.cam_mul[1] = (float)gains[1];
+          imgdata.color.cam_mul[2] = (float)gains[2];
+          imgdata.color.cam_mul[3] = (float)gains[1];
+        }
+      }
+    }
+    catch (...)
+    {
+      // CAMF WB extraction is best-effort; on any error, leave
+      // cam_mul at its previous value.
+    }
   }
 }
 
@@ -394,25 +515,60 @@ void LibRaw::x3f_thumb_loader()
   }
 }
 
+// The Foveon Quattro top (blue-sensitive) layer is sampled at twice the
+// linear density of the R/G layers below it — Sigma's 1:1:4 R:G:Y
+// design (sd/dp Quattro: T 5424x3616 vs M/B 2712x1808 each, see
+// https://press.sigmaphoto.com/corporate/02/sigma-dp-quattro/).
+// Bilinearly upscale the color-difference signals (R - B) and (G - B)
+// so R and G inherit the top layer's detail for free; luma cancels in
+// the difference. Plain 2x2 nearest-neighbor replication of the R/G
+// samples instead leaves a visible chroma maze in flat regions.
 void LibRaw::x3f_dpq_interpolate_rg()
 {
-  int w = imgdata.sizes.raw_width / 2;
-  int h = imgdata.sizes.raw_height / 2;
-  unsigned short *image = (ushort *)imgdata.rawdata.color3_image;
+  const int W = imgdata.sizes.raw_width;
+  const int H = imgdata.sizes.raw_height;
+  const int rowStride = W * 3;
+  unsigned short *image = (unsigned short *)imgdata.rawdata.color3_image;
 
-  for (int color = 0; color < 2; color++)
+  for (int Y = 0; Y < H; Y++)
   {
-    for (int y = 2; y < (h - 2); y++)
+    const int Y_lo = Y & ~1;
+    const int Y_hi = (Y_lo + 2 < H) ? (Y_lo + 2) : Y_lo;
+    const float fy = (Y_hi == Y_lo) ? 0.f : 0.5f * float(Y - Y_lo);
+
+    for (int X = 0; X < W; X++)
     {
-      uint16_t *row0 =
-          &image[imgdata.sizes.raw_width * 3 * (y * 2) + color]; // dst[1]
-      uint16_t *row1 =
-          &image[imgdata.sizes.raw_width * 3 * (y * 2 + 1) + color]; // dst1[1]
-      for (int x = 2; x < (w - 2); x++)
+      if (((Y | X) & 1) == 0) continue;
+      const int X_lo = X & ~1;
+      const int X_hi = (X_lo + 2 < W) ? (X_lo + 2) : X_lo;
+      const float fx = (X_hi == X_lo) ? 0.f : 0.5f * float(X - X_lo);
+
+      const int p_TL = Y_lo * rowStride + X_lo * 3;
+      const int p_TR = Y_lo * rowStride + X_hi * 3;
+      const int p_BL = Y_hi * rowStride + X_lo * 3;
+      const int p_BR = Y_hi * rowStride + X_hi * 3;
+      const int p_C  = Y    * rowStride + X    * 3;
+
+      const float wTL = (1.f - fy) * (1.f - fx);
+      const float wTR = (1.f - fy) * fx;
+      const float wBL = fy * (1.f - fx);
+      const float wBR = fy * fx;
+
+      const float B_C  = float(image[p_C  + 2]);
+      const float B_TL = float(image[p_TL + 2]);
+      const float B_TR = float(image[p_TR + 2]);
+      const float B_BL = float(image[p_BL + 2]);
+      const float B_BR = float(image[p_BR + 2]);
+
+      for (int color = 0; color < 2; color++)
       {
-        row1[0] = row1[3] = row0[3] = row0[0];
-        row0 += 6;
-        row1 += 6;
+        const float d = wTL * (float(image[p_TL + color]) - B_TL) +
+                        wTR * (float(image[p_TR + color]) - B_TR) +
+                        wBL * (float(image[p_BL + color]) - B_BL) +
+                        wBR * (float(image[p_BR + color]) - B_BR);
+        const float v = B_C + d;
+        const float vC = v > 16383.f ? 16383.f : (v < 0.f ? 0.f : v);
+        image[p_C + color] = (unsigned short)(vC + 0.5f);
       }
     }
   }
