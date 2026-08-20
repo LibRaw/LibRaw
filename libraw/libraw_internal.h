@@ -246,7 +246,7 @@ struct tiff_ifd_t
   int lineartable_len;
   libraw_dng_color_t dng_color[2];
   libraw_dng_levels_t dng_levels;
-  int newsubfiletype;
+  unsigned int newsubfiletype;
 };
 
 struct jhead
