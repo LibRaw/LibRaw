@@ -1291,7 +1291,7 @@ void LibRaw::parseSonyMakernotes(
     free(table_buf);
   }
   else if ((tag == 0x0004) && // Minolta CameraSettings7D, big endian
-           (len >= 227))
+           (len >= 228))
   {
     table_buf = (uchar *)calloc(len,1);
     fread(table_buf, len, 1, ifp);
