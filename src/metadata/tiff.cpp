@@ -569,7 +569,8 @@ int LibRaw::parse_tiff_ifd(INT64 base)
       parse_tiff_ifd(base);
       break;
     case 0x00fe: /* NewSubfileType */
-      tiff_ifd[ifd].newsubfiletype = int(getreal(type));
+		if((type != LIBRAW_EXIFTAG_TYPE_FLOAT) && (type != LIBRAW_EXIFTAG_TYPE_DOUBLE))
+			tiff_ifd[ifd].newsubfiletype = int(getreal(type));
       break;
     case 0x0100: /* 256, ImageWidth */
     case 0xf001: /* 61441, Fuji RAF RawImageFullWidth */
