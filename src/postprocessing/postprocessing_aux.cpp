@@ -147,6 +147,7 @@ void LibRaw::wavelet_denoise()
   maximum <<= --scale;
   black <<= scale;
   FORC4 cblack[c] <<= scale;
+  size = iheight * iwidth;
   fimg = (float *)malloc((size * 3 + iheight + iwidth) * sizeof *fimg);
   temp = fimg + size * 3;
   if ((nc = colors) == 3 && filters)
