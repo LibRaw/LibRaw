@@ -17,6 +17,7 @@
  */
 
 #include "../../internal/dcraw_defs.h"
+#include <math.h>
 
 ushort LibRaw::sget2Rev(uchar *s) // specific to some Canon Makernotes fields,
                                   // where they have endian in reverse
@@ -79,6 +80,8 @@ float libraw_int_to_float(int i)
     float f;
   } u;
   u.i = i;
+  if (isnan(u.f) || isinf(u.f))
+	  return 0.f;
   return u.f;
 }
 
@@ -116,6 +119,8 @@ double LibRaw::getreal(int type)
     rev = 7 * ((order == 0x4949) == (ntohs(0x1234) == 0x1234));
     for (i = 0; i < 8; i++)
       u.c[i ^ rev] = fgetc(ifp);
+    if (isnan(u.d) || isinf(u.d))
+      return 0.f;
     return u.d;
   default:
     return fgetc(ifp);
