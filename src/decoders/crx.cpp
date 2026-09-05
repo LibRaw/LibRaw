@@ -2035,7 +2035,7 @@ int crxMakeQStep(CrxImage *img, CrxTile *tile, int32_t *qpTable, uint32_t /*tota
         if (quantVal / 6 >= 6)
           *qStepTbl = q_step_tbl[quantVal % 6] << ((quantVal / 6 - 6 ) & 0x1f);
         else
-          *qStepTbl = q_step_tbl[quantVal % 6] >> (6 - quantVal / 6);
+          *qStepTbl = q_step_tbl[MAX(0,quantVal % 6)] >> (6 - quantVal / 6);
       }
     }
     // continue to the next level - we always decode all levels
@@ -2055,7 +2055,7 @@ int crxMakeQStep(CrxImage *img, CrxTile *tile, int32_t *qpTable, uint32_t /*tota
         if (quantVal / 6 >= 6)
           *qStepTbl = q_step_tbl[quantVal % 6] << ((quantVal / 6 - 6) & 0x1f);
         else
-          *qStepTbl = q_step_tbl[quantVal % 6] >> (6 - quantVal / 6);
+          *qStepTbl = q_step_tbl[MAX(0,quantVal % 6)] >> (6 - quantVal / 6);
       }
     }
     // continue to the next level - we always decode all levels
@@ -2069,7 +2069,7 @@ int crxMakeQStep(CrxImage *img, CrxTile *tile, int32_t *qpTable, uint32_t /*tota
         if (*qpTable / 6 >= 6)
           *qStepTbl = q_step_tbl[*qpTable % 6] << ((*qpTable / 6 - 6) & 0x1f);
         else
-          *qStepTbl = q_step_tbl[*qpTable % 6] >> (6 - *qpTable / 6);
+          *qStepTbl = q_step_tbl[MAX(0,(*qpTable % 6))] >> (6 - *qpTable / 6);
 
     break;
   }
