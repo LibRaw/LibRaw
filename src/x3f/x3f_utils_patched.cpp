@@ -879,13 +879,15 @@ static void print_huffman_tree(x3f_huffnode_t *t, int length, uint32_t code)
 typedef struct bit_state_s
 {
   uint8_t *next_address;
+  uint8_t *last_address;
   uint8_t bit_offset;
   uint8_t bits[8];
 } bit_state_t;
 
-static void set_bit_state(bit_state_t *BS, uint8_t *address)
+static void set_bit_state(bit_state_t *BS, uint8_t *address, uint8_t* last_addr)
 {
   BS->next_address = address;
+  BS->last_address = last_addr;
   BS->bit_offset = 8;
 }
 
@@ -902,6 +904,8 @@ static uint8_t get_bit(bit_state_t *BS)
       byte = byte >> 1;
     }
     BS->next_address++;
+	if (BS->next_address > BS->last_address) 
+		throw LIBRAW_EXCEPTION_IO_CORRUPT;
     BS->bit_offset = 0;
   }
 
@@ -977,7 +981,7 @@ static void true_decode_one_color(x3f_image_data_t *ID, int color)
   x3f_area16_t *area = &TRU->x3rgb16;
   uint16_t *dst = area->data + color;
 
-  set_bit_state(&BS, TRU->plane_address[color]);
+  set_bit_state(&BS, TRU->plane_address[color],(uint8_t*)ID->data+ID->data_size);
 
   row_start_acc[0][0] = seed;
   row_start_acc[0][1] = seed;
@@ -1083,7 +1087,7 @@ static void huffman_decode_row(x3f_info_t * /*I*/, x3f_directory_entry_t *DE,
 
   if (HUF->row_offsets.element[row] > ID->data_size - 1)
 	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
-  set_bit_state(&BS, (uint8_t *)ID->data + HUF->row_offsets.element[row]);
+  set_bit_state(&BS, (uint8_t *)ID->data + HUF->row_offsets.element[row], (uint8_t*)ID->data+ID->data_size);
 
   for (col = 0; col < (int)ID->columns; col++)
   {
@@ -1389,6 +1393,14 @@ static void x3f_load_true(x3f_info_t *I, x3f_directory_entry_t *DE)
 #endif
 
   TRU->plane_address[0] = (uint8_t *)ID->data;
+  // Check for total plane size
+  uint64_t psz = 0;
+  for (i = 0; i < TRUE_PLANES; i++)
+	  psz += (((TRU->plane_size.element[i] + 15) / 16) * 16);
+
+  if (psz > ID->data_size)
+	  throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
   for (i = 1; i < TRUE_PLANES; i++)
     TRU->plane_address[i] = TRU->plane_address[i - 1] +
                             (((TRU->plane_size.element[i - 1] + 15) / 16) * 16);
@@ -1679,7 +1691,7 @@ static void camf_decode_type4(x3f_camf_t *CAMF)
   dst = (uint8_t *)CAMF->decoded_data;
   dst_end = dst + dst_size;
 
-  set_bit_state(&BS, CAMF->decoding_start);
+  set_bit_state(&BS, CAMF->decoding_start,(uint8_t*)CAMF->data+CAMF->data_size);
 
   row_start_acc[0][0] = seed;
   row_start_acc[0][1] = seed;
@@ -1797,7 +1809,7 @@ static void camf_decode_type5(x3f_camf_t *CAMF)
 
   dst = (uint8_t *)CAMF->decoded_data;
 
-  set_bit_state(&BS, CAMF->decoding_start);
+  set_bit_state(&BS, CAMF->decoding_start,(uint8_t*)CAMF->data+CAMF->data_size);
 
   for (i = 0; i < (int)CAMF->decoded_data_size; i++)
   {
