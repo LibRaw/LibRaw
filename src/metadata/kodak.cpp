@@ -168,7 +168,8 @@ void LibRaw::parse_kodak_ifd(INT64 base)
             {
               c++;
             }
-            strcpy(ilm.body, pkti + c);
+            strncpy(ilm.body, pkti + c, sizeof(ilm.body) - 1);
+            ilm.body[sizeof(ilm.body) - 1] = 0;
           }
           c = 5;
           if (((int)strlen(pkti) > c) && (!strncasecmp(pkti, "Lens:", c)))
