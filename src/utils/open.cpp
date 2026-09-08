@@ -148,6 +148,7 @@ int LibRaw::libraw_openfile_tail(LibRaw_abstract_datastream *stream)
     {
         delete stream;
         ID.input_internal = 0;
+		imgdata.progress_flags = LIBRAW_PROGRESS_START;
     }
     return ret;
 }
