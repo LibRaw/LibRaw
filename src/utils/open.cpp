@@ -169,6 +169,11 @@ int LibRaw::open_file(const char *fname)
         recycle();
         return LIBRAW_UNSUFFICIENT_MEMORY;
     }
+    if (!stream->valid())
+    {
+      delete stream;
+      return LIBRAW_IO_ERROR;
+    }
     if ((stream->size() > (INT64)LIBRAW_MAX_NONDNG_RAW_FILE_SIZE) 
 		&& (stream->size() > (INT64)LIBRAW_MAX_DNG_RAW_FILE_SIZE)
 		&& (stream->size() > (INT64)LIBRAW_MAX_CR3_RAW_FILE_SIZE)
@@ -202,6 +207,11 @@ int LibRaw::open_file(const wchar_t *fname)
     {
         recycle();
         return LIBRAW_UNSUFFICIENT_MEMORY;
+    }
+    if (!stream->valid())
+    {
+      delete stream;
+      return LIBRAW_IO_ERROR;
     }
     if ((stream->size() > (INT64)LIBRAW_MAX_DNG_RAW_FILE_SIZE) 
 		&& (stream->size() > (INT64)LIBRAW_MAX_NONDNG_RAW_FILE_SIZE) &&
