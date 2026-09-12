@@ -103,6 +103,8 @@ static const char *Hasselblad_SensorEnclosures[] = {
   int add_MP_toName = 1;
   int norm_model_isSet = 0;
 
+  memset(tmp_model, 0, sizeof(tmp_model));
+
   if (model[0] == ' ')
     memmove(model, model+1, MIN(sizeof(model)-1,strlen(model)));
 
@@ -187,7 +189,8 @@ static const char *Hasselblad_SensorEnclosures[] = {
   FORC(int(sizeof Hasselblad_Ctrl / sizeof *Hasselblad_Ctrl)) {
     if (strcasestr(model, Hasselblad_Ctrl[c])) {
 // yes, fill 'model' with sensor unit data
-      strncpy(model, tmp_model,63);
+	  if(strlen(tmp_model))
+		strncpy(model, tmp_model,63);
       model[63] = 0;
       break;
     }
@@ -208,7 +211,8 @@ static const char *Hasselblad_SensorEnclosures[] = {
       strncpy(imHassy.HostBody, model,63);
       imHassy.HostBody[63] = 0;
   // fill 'model' with sensor unit data
-      strncpy(model, tmp_model,63);
+      if (strlen(tmp_model))
+        strncpy(model, tmp_model, 63);
       model[63] = 0;
     }
   }
