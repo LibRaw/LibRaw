@@ -464,7 +464,7 @@ int LibRaw_buffer_datastream::jpeg_src(void *jpegdata)
 
 // == LibRaw_bigfile_datastream
 LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname)
-    : filename(fname)
+    : filename(fname),_fsize(0)
 #ifdef LIBRAW_WIN32_UNICODEPATHS
       ,
       wfilename()
@@ -498,7 +498,7 @@ LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const char *fname)
 
 #ifdef LIBRAW_WIN32_UNICODEPATHS
 LibRaw_bigfile_datastream::LibRaw_bigfile_datastream(const wchar_t *fname)
-    : filename(), wfilename(fname)
+    : filename(), _fsize(0), wfilename(fname)
 {
   if (wfilename.size() > 0)
   {
