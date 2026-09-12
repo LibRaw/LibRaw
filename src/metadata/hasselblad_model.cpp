@@ -193,8 +193,8 @@ static const char *Hasselblad_SensorEnclosures[] = {
     }
   }
 
-  if (!imHassy.HostBody[0]) {
-    ps = strchr(model, '-');
+  if (!imHassy.HostBody[0] && strlen(model) > 2 ) {
+    ps = strchr(model+2, '-');
     if (ps) {                  // check if model contains both host body and sensor version, resolution, MS info
       strncpy(imHassy.SensorUnit, model,63);
       memcpy(imHassy.HostBody, model, ps-model);
