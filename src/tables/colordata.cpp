@@ -1697,6 +1697,8 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
     { LIBRAW_CAMERAMAKER_Sony, "DSC-RX10",0, 0, // same CMs: DSC-RX10, DSC-RX10M2, DSC-RX10M3
       { 6679,-1825,-745,-5047,13256,1953,-1580,2422,5183 } },
 
+    { LIBRAW_CAMERAMAKER_Sony, "DSC-RX1RM3", 0, 0,
+      { 9034,-3490,-777,-4004,11841,2448,-484,1352,5552 } },
     { LIBRAW_CAMERAMAKER_Sony, "DSC-RX1RM2", 0, 0,
       { 6629,-1900,-483,-4618,12349,2550,-622,1381,6514 } },
     { LIBRAW_CAMERAMAKER_Sony, "DSC-RX1R", 0, 0,

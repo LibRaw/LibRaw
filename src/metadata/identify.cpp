@@ -3013,7 +3013,35 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
 
           }
         }
-		else if (raw_width == 3984) 
+        else if (unique_id == SonyID_DSC_RX1RM3)
+        {
+          if (raw_width == 9600) // FF, Uncompressed / Compressed
+          {
+            width -= 32;
+          }
+          else if (raw_width == 9728) // FF, Lossless compressed, L; same true readout as Uncompressed/Compressed
+          {
+            width = 9568;
+            height = 6376;
+          }
+          else if (raw_width == 7168) // FF, Lossless compressed, M
+          {
+            width = 6684;
+            height = 4460;
+          }
+          else if (raw_width == 5120) // FF, Lossless compressed, S
+          {
+            width = 4784;
+            height = 3188;
+          }
+          else
+          {
+            width = raw_width - 32; // fallback
+			imgdata.process_warnings |= LIBRAW_WARN_VENDOR_CROP_SUGGESTED;
+
+          }
+        }
+		else if (raw_width == 3984)
 		{ // Sony DSC-R1;
 			width = 3925;
 			order = 0x4d4d;
