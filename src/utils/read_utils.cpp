@@ -19,6 +19,13 @@
 #include "../../internal/dcraw_defs.h"
 #include <math.h>
 
+#if defined(_MSC_VER) && (_MSC_VER <= 1600) 
+#include <float.h>
+#define isnan(a) _isnan(a)
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#endif
+
+
 ushort LibRaw::sget2Rev(uchar *s) // specific to some Canon Makernotes fields,
                                   // where they have endian in reverse
 {
