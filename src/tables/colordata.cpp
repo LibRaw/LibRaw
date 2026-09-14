@@ -357,6 +357,9 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 	{ LIBRAW_CAMERAMAKER_Canon, "PowerShot SX710 HS", 0, 0,
 	  { 13161,-5451,-1344,-1989,10654,1531,-47,1271,4955 } },
 
+  { LIBRAW_CAMERAMAKER_Canon, "PowerShot V1", 0, 0,
+    { 12600,-4747,-2027,-6110,15868,-29,110,479,6011 } },
+
 	{ LIBRAW_CAMERAMAKER_Canon, "PowerShot Pro1", 0, 0,
 	  { 10062,-3522,-1000,-7643,15117,2730,-765,817,7322 } },
 	{ LIBRAW_CAMERAMAKER_Canon, "PowerShot Pro70", 34, 0,
