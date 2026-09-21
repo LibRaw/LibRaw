@@ -197,6 +197,9 @@ void LibRaw::lossy_dng_load_raw()
   ushort cur[4][256];
   double coeff[9], tot;
 
+  gamma_curve(1 / 2.4, 12.92, 1, 255);
+  FORC4 memcpy(cur[c], curve, sizeof cur[0]);
+
   if (meta_offset)
   {
     fseek(ifp, meta_offset, SEEK_SET);
@@ -228,11 +231,6 @@ void LibRaw::lossy_dng_load_raw()
       }
     }
     order = sorder;
-  }
-  else
-  {
-    gamma_curve(1 / 2.4, 12.92, 1, 255);
-    FORC4 memcpy(cur[c], curve, sizeof cur[0]);
   }
 
   struct jpeg_error_mgr pub;
