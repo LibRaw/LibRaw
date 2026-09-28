@@ -618,7 +618,11 @@ void LibRaw::x3f_load_raw()
       goto end;
     }
 
-    size_t datasize = S.raw_height * S.raw_width * 3 * sizeof(unsigned short);
+    INT64 datasize = INT64(S.raw_height) * INT64(S.raw_width) * 3LL * sizeof(unsigned short);
+
+	if (datasize > LIBRAW_X3F_ALLOC_LIMIT_MB * 1024ULL * 1024ULL)
+      throw LIBRAW_EXCEPTION_TOOBIG;
+
     S.raw_pitch = S.raw_width * 3 * sizeof(unsigned short);
     if (!(imgdata.rawdata.raw_alloc = malloc(datasize)))
       throw LIBRAW_EXCEPTION_ALLOC;
