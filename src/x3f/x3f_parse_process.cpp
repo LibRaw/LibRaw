@@ -377,7 +377,7 @@ void LibRaw::x3f_thumb_loader()
       for (int row = 0; row < (int)ID->rows; row++)
       {
         int offset = row * ID->row_stride;
-        if (offset + ID->columns * 3 > ID->data_size)
+        if (offset + ID->columns * 3 > ID->data_size || offset < 0)
           break;
         char *dest = &imgdata.thumbnail.thumb[row * ID->columns * 3];
         char *src = &src0[offset];
