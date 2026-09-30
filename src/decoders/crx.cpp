@@ -1112,7 +1112,7 @@ int crxDecodeLineWithIQuantization(CrxSubband *band, CrxQStep *qStep)
   else
   {
     // prev. version
-    int32_t qScale = q_step_tbl[band->qParam % 6] >> (6 - band->qParam / 6);
+    int32_t qScale = q_step_tbl[MAX(0, band->qParam % 6)] >> (6 - band->qParam / 6);
     if (band->qParam / 6 >= 6)
       qScale = q_step_tbl[band->qParam % 6] * (1 << (band->qParam / 6 + 26));
 
