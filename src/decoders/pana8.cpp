@@ -253,7 +253,7 @@ bool pana8_param_t::DecodeC8(pana8_bufio_t &bufio, unsigned int width, unsigned 
 			  uint32_t hc = huff_coeff[huff_index];
 			  int64_t v38 = pixbits << (((hc >> 16) & 0xffffu) & 0x1F);
 			  uint64_t v90 = (uint32_t)(huff_index - v37);
-			  int32_t v39 = (uint16_t)((uint64_t)v38 >> ((uint8_t)v37 - (uint8_t)huff_index)) << ((huff_coeff[huff_index] >> 24) & 0xffu);
+			  int32_t v39 = (uint16_t)((uint64_t)v38 >> (((uint8_t)v37 - (uint8_t)huff_index)&63)) << ((huff_coeff[huff_index] >> 24) & 63);
 
 			  if (huff_index - v37 <= 0)
 				  v39 &= 0xffff0000u;
