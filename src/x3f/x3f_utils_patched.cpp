@@ -1989,7 +1989,7 @@ static void get_matrix_copy(camf_entry_t *entry)
 static void x3f_setup_camf_matrix_entry(camf_entry_t *entry)
 {
   int i;
-  int totalsize = 1;
+  INT64 totalsize = 1LL;
 
   uint8_t *e = (uint8_t *)entry->entry;
   uint8_t *v = (uint8_t *)entry->value_address;
@@ -2010,12 +2010,16 @@ static void x3f_setup_camf_matrix_entry(camf_entry_t *entry)
     {
     }
 
-    totalsize *= size;
+    totalsize *=  INT64(size);
   }
 
   set_matrix_element_info(type, &entry->matrix_element_size,
                           &entry->matrix_decoded_type);
   entry->matrix_data = (void *)(e + off);
+
+  INT64 alloc_size = (entry->matrix_decoded_type == M_FLOAT ? sizeof(double) : sizeof(uint32_t)) * totalsize;
+  if (alloc_size > LIBRAW_X3F_ALLOC_LIMIT_MB * 1024ULL * 1024ULL)
+    throw LIBRAW_EXCEPTION_TOOBIG;
 
   entry->matrix_elements = totalsize;
   entry->matrix_used_space = entry->entry_size - off;
