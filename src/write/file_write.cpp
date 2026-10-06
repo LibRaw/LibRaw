@@ -101,7 +101,7 @@ void LibRaw::tiff_head(struct tiff_hdr *th, int full)
     tiff_set(th, &th->ntag, 277, 3, 1, colors);
     tiff_set(th, &th->ntag, 278, 4, 1, height);
     tiff_set(th, &th->ntag, 279, 4, 1,
-             height * width * colors * output_bps / 8);
+             int(INT64(height) * INT64(width) * colors * output_bps / 8));
   }
   else
     tiff_set(th, &th->ntag, 274, 3, 1, "12435867"[flip] - '0');
