@@ -55,6 +55,19 @@ void LibRaw::tiff_set(struct tiff_hdr *th, ushort *ntag, ushort tag,
 
 #define TOFF(ptr) int((char *)(&(ptr)) - (char *)th)
 
+// An ASCII tag holding one character: the character and its NUL fit in the
+// entry itself (as tiff_set stores ASCII values of up to 4 bytes), so no
+// storage in tiff_hdr is needed.
+static void tiff_set_char(ushort *ntag, ushort tag, uchar ch)
+{
+  struct libraw_tiff_tag *tt = (struct libraw_tiff_tag *)(ntag + 1) + (*ntag)++;
+  tt->val.i = 0;
+  tt->val.c[0] = (char)ch;
+  tt->count = ch ? 2 : 1;
+  tt->type = 2;
+  tt->tag = tag;
+}
+
 void LibRaw::tiff_head(struct tiff_hdr *th, int full)
 {
   int c, psize = 0;
@@ -124,13 +137,11 @@ void LibRaw::tiff_head(struct tiff_hdr *th, int full)
   tiff_set(th, &th->nexif, 37386, 5, 1, TOFF(th->rat[8]));
   if (gpsdata[1])
   {
-    uchar latref[4] = { (uchar)(gpsdata[29]),0,0,0 },
-          lonref[4] = { (uchar)(gpsdata[30]),0,0,0 };
     tiff_set(th, &th->ntag, 34853, 4, 1, TOFF(th->ngps));
     tiff_set(th, &th->ngps, 0, 1, 4, 0x202);
-    tiff_set(th, &th->ngps, 1, 2, 2, TOFF(latref));
+    tiff_set_char(&th->ngps, 1, (uchar)(gpsdata[29]));
     tiff_set(th, &th->ngps, 2, 5, 3, TOFF(th->gps[0]));
-    tiff_set(th, &th->ngps, 3, 2, 2, TOFF(lonref));
+    tiff_set_char(&th->ngps, 3, (uchar)(gpsdata[30]));
     tiff_set(th, &th->ngps, 4, 5, 3, TOFF(th->gps[6]));
     tiff_set(th, &th->ngps, 5, 1, 1, gpsdata[31]);
     tiff_set(th, &th->ngps, 6, 5, 1, TOFF(th->gps[18]));
