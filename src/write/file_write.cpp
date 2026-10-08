@@ -100,8 +100,11 @@ void LibRaw::tiff_head(struct tiff_hdr *th, int full)
     tiff_set(th, &th->ntag, 273, 4, 1, sizeof *th + psize);
     tiff_set(th, &th->ntag, 277, 3, 1, colors);
     tiff_set(th, &th->ntag, 278, 4, 1, height);
-    tiff_set(th, &th->ntag, 279, 4, 1,
-             height * width * colors * output_bps / 8);
+	INT64 strip_bytes = INT64(height) * INT64(width) * INT64(colors) * INT64(output_bps) / 8LL;
+	if (strip_bytes >= 2147483647LL)
+		throw LIBRAW_EXCEPTION_TOOBIG; // bigtiff is not supported...
+	int strip_bytes_32 = strip_bytes;
+	tiff_set(th, &th->ntag, 279, 4, 1, strip_bytes_32);
   }
   else
     tiff_set(th, &th->ntag, 274, 3, 1, "12435867"[flip] - '0');
