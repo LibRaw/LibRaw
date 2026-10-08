@@ -82,6 +82,8 @@ void LibRaw::lossless_dng_load_raw()
       switch (jh.algo)
       {
       case 0xc1:
+		if (tiff_samples > 1)
+			throw LIBRAW_EXCEPTION_IO_CORRUPT;
         jh.vpred[0] = 16384;
         getbits(-1);
         for (jrow = 0; jrow + 7 < (unsigned)jh.high; jrow += 8)
