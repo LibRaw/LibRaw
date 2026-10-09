@@ -1064,7 +1064,7 @@ libraw_inline int getSubbandRow(CrxSubband *band, int row)
 {
   return row < band->rowStartAddOn
              ? 0
-             : (row < band->height - band->rowEndAddOn ? row - band->rowEndAddOn
+             : (row < band->height - band->rowEndAddOn ? row - band->rowStartAddOn
                                                        : band->height - band->rowEndAddOn - band->rowStartAddOn - 1);
 }
 int crxDecodeLineWithIQuantization(CrxSubband *band, CrxQStep *qStep)
