@@ -53,6 +53,18 @@ void LibRaw::tiff_set(struct tiff_hdr *th, ushort *ntag, ushort tag,
   tt->tag = tag;
 }
 
+static void tiff_set_str4(struct tiff_hdr *th, ushort *ntag, ushort tag, ushort type, int count, const uchar* val)
+{
+  struct libraw_tiff_tag *tt;
+  int c;
+  tt = (struct libraw_tiff_tag *)(ntag + 1) + (*ntag)++;
+  count = int(strnlen((const char*)val, count-1)) + 1;
+  FORC(4) tt->val.c[c] = val[c];
+  tt->count = count;
+  tt->type = type;
+  tt->tag = tag;
+}
+
 #define TOFF(ptr) int((char *)(&(ptr)) - (char *)th)
 
 void LibRaw::tiff_head(struct tiff_hdr *th, int full)
@@ -128,9 +140,9 @@ void LibRaw::tiff_head(struct tiff_hdr *th, int full)
           lonref[4] = { (uchar)(gpsdata[30]),0,0,0 };
     tiff_set(th, &th->ntag, 34853, 4, 1, TOFF(th->ngps));
     tiff_set(th, &th->ngps, 0, 1, 4, 0x202);
-    tiff_set(th, &th->ngps, 1, 2, 2, TOFF(latref));
+    tiff_set_str4(th, &th->ngps, 1, 2, 2, latref);
     tiff_set(th, &th->ngps, 2, 5, 3, TOFF(th->gps[0]));
-    tiff_set(th, &th->ngps, 3, 2, 2, TOFF(lonref));
+    tiff_set_str4(th, &th->ngps, 3, 2, 2, lonref);
     tiff_set(th, &th->ngps, 4, 5, 3, TOFF(th->gps[6]));
     tiff_set(th, &th->ngps, 5, 1, 1, gpsdata[31]);
     tiff_set(th, &th->ngps, 6, 5, 1, TOFF(th->gps[18]));
