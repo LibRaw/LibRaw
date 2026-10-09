@@ -148,6 +148,7 @@ static const char *static_camera_list[] = {
 	"Canon PowerShot SX10 IS (CHDK hack)",
 	"Canon PowerShot SX20 IS (CHDK hack)",
 	"Canon PowerShot SX30 IS (CHDK hack)",
+	"Canon PowerShot V1",
 	"Canon EOS R",
 	"Canon EOS Ra",
 	"Canon EOS RP",
