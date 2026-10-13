@@ -53,12 +53,24 @@ void LibRaw::tiff_set(struct tiff_hdr *th, ushort *ntag, ushort tag,
   tt->tag = tag;
 }
 
+// local strnlen: we cannot use LibRaw::strnlen b/c it is protected
+static size_t local_static_strnlen(const char *s, size_t n)
+{
+#if !defined(__FreeBSD__) && !defined(__OpenBSD__)
+  const char *p = (const char *)memchr(s, 0, n);
+  return (p ? p - s : n);
+#else
+  return strnlen(s, n);
+#endif
+}
+
+
 static void tiff_set_str4(struct tiff_hdr *th, ushort *ntag, ushort tag, ushort type, int count, const uchar* val)
 {
   struct libraw_tiff_tag *tt;
   int c;
   tt = (struct libraw_tiff_tag *)(ntag + 1) + (*ntag)++;
-  count = int(strnlen((const char*)val, count-1)) + 1;
+  count = int(local_static_strnlen((const char*)val, count-1)) + 1;
   FORC(4) tt->val.c[c] = val[c];
   tt->count = count;
   tt->type = type;
