@@ -133,6 +133,7 @@ struct BitPumpJpeg : public BitPump
 
 
 const uint32_t LIBRAW_DECODE_CACHE_BITS = 13;
+const uint32_t LIBRAW_DECODE_CACHE_MASK = (1<< LIBRAW_DECODE_CACHE_BITS)-1;
 const uint64_t LIBRAW_CACHE_PRESENT_FLAG = 0x100000000L;
 
 struct HuffTable
@@ -151,7 +152,7 @@ struct HuffTable
 
 	int32_t decode(BitPump& pump)
     {
-      uint64_t cached = disable_cache ? 0 : decodecache[pump.peek(LIBRAW_DECODE_CACHE_BITS)];
+      uint64_t cached = disable_cache ? 0 : decodecache[pump.peek(LIBRAW_DECODE_CACHE_BITS) & LIBRAW_DECODE_CACHE_MASK];
       if (cached & LIBRAW_CACHE_PRESENT_FLAG)
       {
         uint32_t _bits = (cached >> 16) & 0xff;
