@@ -31,6 +31,24 @@ void LibRaw::pre_interpolate()
       width = iwidth;
       if (filters == 9)
       {
+        /* Find the all-green half-size phase from the CFA layout: scanning
+           pixel values for R == B == 0 picks a wrong phase when the top-left
+           corner is dark and noisy. */
+        int grow = -1, gcol = -1;
+        for (int r = 0; r < 3 && grow < 0; r++)
+          for (int k = 0; k < 3 && grow < 0; k++)
+            if (fcol(2 * r, 2 * k) == 1 && fcol(2 * r, 2 * k + 1) == 1 &&
+                fcol(2 * r + 1, 2 * k) == 1 && fcol(2 * r + 1, 2 * k + 1) == 1)
+            {
+              grow = r;
+              gcol = k ? k : 3; /* the fill below reads img[-1] */
+            }
+        if (grow >= 0)
+        {
+          row = grow;
+          col = gcol;
+          goto break2;
+        }
         for (row = 0; row < 3; row++)
           for (col = 1; col < 4; col++)
             if (!(image[row * width + col][0] | image[row * width + col][2]))
