@@ -173,8 +173,8 @@ void LibRaw::xtrans_interpolate(int passes)
 
   size_t buffer_size = LIBRAW_AHD_TILE * LIBRAW_AHD_TILE * (ndir * 11 + 6);
   char** buffers = malloc_omp_buffers(buffer_count, buffer_size);
-  INT64 allocate_sz = (INT64(iheight) + 6) * (INT64(iwidth) + 6);
-  ushort (*destimage)[4] = (ushort(*)[4])calloc(allocate_sz, sizeof(ushort)*4);
+  INT64 allocate_sz = (INT64(iheight) + 6) * (INT64(iwidth) + 6) * sizeof(ushort)*4LL;
+    ushort (*destimage)[4] = (ushort(*)[4])calloc(allocate_sz, 1);
   // For border interpolate: keep original pixels
   memmove(destimage,image,allocate_sz);
 
