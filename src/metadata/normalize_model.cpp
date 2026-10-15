@@ -400,7 +400,7 @@ void LibRaw::GetNormalizedModel()
       { SonyID_ILME_FX2,       "ILME-FX2"},
 };
 
-  static const char *orig;
+   const char *orig = NULL;
 
   static const char fujialias[][16] = {
     "@DBP for GX680", "DX-2000",
