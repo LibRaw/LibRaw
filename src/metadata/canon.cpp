@@ -1309,17 +1309,32 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
       break;
 
     case 3973: // R3; ColorDataSubVer: 34
-    case 3778: // R6 Mark II, R7, R8, R10, R50, R50 V; ColorDataSubVer: 48
-      imCanon.ColorDataVer = 11;
-      AsShot_Auto_MeasuredWB(0x0069);
+    case 3778: // R6 Mark II, R7, R8, R10, R50 ColorDataSubVer: 48
+               // R50 V: ColorDataSubVer: 65
+    			if (imCanon.ColorDataSubVer == 65) 
+			    {
+						imCanon.ColorDataVer = 12;
+						fseek(ifp, save1 + ((0x006d+0x0001) << 1), SEEK_SET);
+						Canon_WBpresets(2, 2);
+						fseek(ifp, save1 + ((0x0069+0x00d7) << 1), SEEK_SET);
+						Canon_WBCTpresets(0);
+						offsetChannelBlackLevel2 = save1 + ((0x0069+0x0116) << 1);
+						offsetChannelBlackLevel  = save1 + ((0x0069+0x0227) << 1);
+						offsetWhiteLevels        = save1 + ((0x0069+0x022b) << 1);
+			    }
+			    else
+          {
+            imCanon.ColorDataVer = 11;
+            AsShot_Auto_MeasuredWB(0x0069);
 
-      fseek(ifp, save1 + ((0x0069+0x0064) << 1), SEEK_SET);
-      Canon_WBpresets(2, 12);
-      fseek(ifp, save1 + ((0x0069+0x00c3) << 1), SEEK_SET);
-      Canon_WBCTpresets(0);
-      offsetChannelBlackLevel2 = save1 + ((0x0069+0x0102) << 1);
-      offsetChannelBlackLevel  = save1 + ((0x0069+0x0213) << 1);
-      offsetWhiteLevels        = save1 + ((0x0069+0x0217) << 1);
+            fseek(ifp, save1 + ((0x0069+0x0064) << 1), SEEK_SET);
+            Canon_WBpresets(2, 12);
+            fseek(ifp, save1 + ((0x0069+0x00c3) << 1), SEEK_SET);
+            Canon_WBCTpresets(0);
+            offsetChannelBlackLevel2 = save1 + ((0x0069+0x0102) << 1);
+            offsetChannelBlackLevel  = save1 + ((0x0069+0x0213) << 1);
+            offsetWhiteLevels        = save1 + ((0x0069+0x0217) << 1);
+          }
       break;
 
     case 4528: // R1, R5 Mark II; ColorDataSubVer: 64
