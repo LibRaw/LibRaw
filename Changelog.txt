@@ -1,3 +1,54 @@
+2026-10-24  Alex Tutubalin <lexa@lexa.ru>
+  LibRaw 0.22.3 Release
+  This is bugfix-only release, see included commits list below.
+
+  * Special notes on CVE-2026-111272:
+    - (as described on author's page): This CVE report is based "only on 
+      static analysis" without attempting to reproduce the issue at runtime.
+    - In fact, "static analysis" failed: it assumes system calloc() use 
+      for memory allocation while LibRaw::calloc() is used in reality.
+    - So, "discovered" OOB-heap accesses by fixed offset(s) are not OOB,
+      all accesses occur within the allocated buffer
+    - The author made no attempts to contact our team.
+    - Our attempts to contact him also went unanswered.
+
+  Summary: this is false positive and a very bad example of reporting 
+  a non-existent vulnerability without trying to contact the vendor.
+
+ Commits included in this release:
+
+  * e8de2d60 destimage var added to omp parallel statement
+  * 11a5f842 changed (wrong) static to stack in normalize_model
+  * b55eef9a xtrans interpolate: incorrect memmove data size
+  * 37ee3956 X-Trans/half interpolation: find green  pixel based on CFA pattern, not pixel values
+  * b5b68d15 xtrans_interpolate: fix logic error, interpolation should use original pixel values, not ones adjusted on previous tile. Note: 2x image memory needed
+  * d7e09495 mask decodecache index in Sony YCbCr decoder
+  * 42c66b63 use local static strnlen version b/c global may be missing
+  * a97291bf Better gps ref recording
+  * 90cea585 tiff_head: perform strip bytes calculation in 64 bit, check against 2^31-1
+  * e1be11e2 CRX decoder: use 64 bit offsets in data
+  * a0462027 lossless DNG/SOF1-IDCT case: refuse images with tiff_samples > 1
+  * 1432e690 x3f camf matrix setup: size check
+  * fb2a2e94 implement explicit 6-bit mask on shift argument in pana8 decoder
+  * 4747dab4 CRX decoder: clamp qParam table index in legacy quantization path
+  * a624a732 allocated image size data check implemented in x3f loaded
+  * de356b1b additional offset check in x3f thumbnail loader
+  * 171848ad fixed wrong 32=>64 bit conversion in CIFF parser
+  * fd254378 dng: initialize tone-curve table before OpcodeList2 parsing
+  * d1ea9fe6 Fix: there is no isnan/isinf in MSVC 2010 and older
+  * f6606c19 Initi hassy's tmp_model w/ zeroes
+  * f67f8426 better Hasselblad model parsing
+  * b3ed417d explicitly initialize _fsize for bigfile datastream
+  * a403b25e add stream validity check before cr3 size checking
+  * 8f0ba465 Revert "check TIFF tag type for NewSubfileType"
+  * eaacd850 parse_kodak_ifd: fixed possible body name overrun
+  * 844de590 unset progress bit if open stage failed
+  * 3e4ba1d5 X3F utils: data size check added
+  * 121882f5 wavelet denoise/OpenMP case: add missed size initialization
+  * d48495b6 Check for valid float/double in getreal
+  * 764ace01 check TIFF tag type for NewSubfileType
+  * c9f2931a CRX decoder: prevent possible index overrun on damaged files
+
 2026-07-16  Alex Tutubalin <lexa@lexa.ru>
   LibRaw 0.22.2 Release
   This is bugfix-only release with these commits included:
