@@ -1311,7 +1311,9 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
     case 3973: // R3; ColorDataSubVer: 34
     case 3778: // R6 Mark II, R7, R8, R10, R50 ColorDataSubVer: 48
                // R50 V: ColorDataSubVer: 65
-    			if (imCanon.ColorDataSubVer == 65) 
+               // R6 Mark III: ColorDataSubVer: 66
+      AsShot_Auto_MeasuredWB(0x0069); // also reads ColorDataSubVer
+    			if ((imCanon.ColorDataSubVer == 65) || (imCanon.ColorDataSubVer == 66))
 			    {
 						imCanon.ColorDataVer = 12;
 						fseek(ifp, save1 + ((0x006d+0x0001) << 1), SEEK_SET);
@@ -1325,8 +1327,6 @@ void LibRaw::parseCanonMakernotes(unsigned tag, unsigned type, unsigned len, uns
 			    else
           {
             imCanon.ColorDataVer = 11;
-            AsShot_Auto_MeasuredWB(0x0069);
-
             fseek(ifp, save1 + ((0x0069+0x0064) << 1), SEEK_SET);
             Canon_WBpresets(2, 12);
             fseek(ifp, save1 + ((0x0069+0x00c3) << 1), SEEK_SET);
