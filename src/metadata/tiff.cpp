@@ -2271,9 +2271,7 @@ void LibRaw::apply_tiff()
       {
         load_raw = &LibRaw::nikon_load_padded_packed_raw;
       }
-      else if ((!strncmp(model, "NIKON Z 9", 9) || !strncmp(model, "NIKON Z 8", 9) || !strcmp(model, "NIKON Z f")
-		  || !strcmp(model, "NIKON Z6_3")) &&
-               tiff_ifd[raw].offset)
+      else if (tiff_ifd[raw].offset) // any Nikon: detect HE/HE* (JPEG XS) by signature, not model list
       {
           INT64 pos = ftell(ifp);
           unsigned char cmp[] = {0xff, 0x10, 0xff, 0x50 }; // JpegXS SOC + Cap

@@ -1035,6 +1035,8 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
       { 11640,-4829,-1079,-5107,13006,2325,-972,1711,7380 } },
     { LIBRAW_CAMERAMAKER_Nikon, "Z 5", 0, 0,
       { 8695,-2558,-648,-5015,12711,2575,-1279,2215,7514 } },
+    { LIBRAW_CAMERAMAKER_Nikon, "Z5_2", 0, 0, // no space after 'Z' ! (matrix: Adobe, via rawspeed cameras.xml)
+      { 13133, -5542, -1280, -4325, 12543,  1972,    34,   792,  7662 } },
     { LIBRAW_CAMERAMAKER_Nikon, "Z6_3", 0, 0, // no space after 'Z' !
       { 11206, -4286,  -941, -4879, 12847,  2251,  -745,  1654,  7374 } },
     { LIBRAW_CAMERAMAKER_Nikon, "Z 6", 0, 0,
