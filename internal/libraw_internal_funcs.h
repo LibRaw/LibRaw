@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_internal_funcs.h
- * Copyright 2008-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2026 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  14, 2008
 
 LibRaw is free software; you can redistribute it and/or modify
@@ -244,7 +244,7 @@ it under the terms of the one of two licenses as you choose:
 	unsigned    pana_data (int nb, unsigned *bytes);
 	void        panasonic_load_raw();
 //	void        panasonic_16x10_load_raw();
-	void        olympus_load_raw();
+	void        olympus14_load_raw();
 //	void        olympus_cseries_load_raw();
 	void        minolta_rd175_load_raw();
 	void        quicktake_100_load_raw();
@@ -281,14 +281,15 @@ it under the terms of the one of two licenses as you choose:
 	void        sony_decrypt (unsigned *data, int len, int start, int key);
 	void        sony_load_raw();
 	void        sony_arw_load_raw();
-	void        sony_arw2_load_raw();
 	void        sony_arw6_load_raw();
+	void        sony_arw2_load_raw();
 	void        sony_arq_load_raw();
 	void        sony_ljpeg_load_raw();
 	void        sony_ycbcr_load_raw();
 	void        samsung_load_raw();
 	void        samsung2_load_raw();
 	void        samsung3_load_raw();
+	void        samsung3v2_load_raw();
 	void        parse_minolta (INT64 base);
 
 #ifdef USE_X3FTOOLS
@@ -317,7 +318,11 @@ it under the terms of the one of two licenses as you choose:
     void x3f_thumb_loader();
     int x3f_thumb_size();
 #endif
-	
+
+	/* helper functions to get LibRaw-related call stack*/
+    int nikonhe_decode_loop(void *);
+
+
 // CAM/RGB
 	void        pseudoinverse (double (*in)[3], double (*out)[3], int size);
 	void        simple_coeff (int index);

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -23,7 +23,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
 {
   unsigned entries, tag, type, len, plen = 16, utmp;
   INT64 save;
-  int ifd, use_cm = 0, cfa, i, j, c, ima_len = 0;
+  int ifd, use_cm = 0, cfa, i, j, c, ima_len = 0, idx;
   char *cbuf, *cp;
   uchar cfa_pat[16], cfa_pc[] = {0, 1, 2, 3}, tab[256];
   double fm[3][4], cc[4][4], cm[4][3], cam_xyz[4][3], num;
@@ -209,23 +209,27 @@ int LibRaw::parse_tiff_ifd(INT64 base)
                         5 - RW2 DC-GH5s; G9 in "pixel shift on" mode
                         6 - RW2 DC-S1, DC-S1R in "pixel shift off" mode
                         7 - RW2 DC-S1R (probably DC-S1 too) in "pixel shift on" mode
-                        8 - RW2 DC-GH6, DC-S5M2
+                        8 - RW2 DC-GH6, DC-S5M2 and newer Panasonic cameras
                    */
         pana_encoding = get2();
         break;
       case 0x002f: /*  47, CropTop */
-        imgdata.sizes.raw_inset_crops[0].ctop = get2();
+		idx = imgdata.rawparams.options & LIBRAW_RAWOPTIONS_PANASONIC_CROP_TO_USER_CROP ? 1 : 0;
+        imgdata.sizes.raw_inset_crops[idx].ctop = get2();
         break;
       case 0x0030: /*  48, CropLeft */
-        imgdata.sizes.raw_inset_crops[0].cleft = get2();
+        idx = imgdata.rawparams.options & LIBRAW_RAWOPTIONS_PANASONIC_CROP_TO_USER_CROP ? 1 : 0;
+        imgdata.sizes.raw_inset_crops[idx].cleft = get2();
         break;
       case 0x0031: /*  49, CropBottom */
-        imgdata.sizes.raw_inset_crops[0].cheight =
-            get2() - imgdata.sizes.raw_inset_crops[0].ctop;
+        idx = imgdata.rawparams.options & LIBRAW_RAWOPTIONS_PANASONIC_CROP_TO_USER_CROP ? 1 : 0;
+        imgdata.sizes.raw_inset_crops[idx].cheight =
+            get2() - imgdata.sizes.raw_inset_crops[idx].ctop;
         break;
       case 0x0032: /*  50, CropRight */
-        imgdata.sizes.raw_inset_crops[0].cwidth =
-            get2() - imgdata.sizes.raw_inset_crops[0].cleft;
+        idx = imgdata.rawparams.options & LIBRAW_RAWOPTIONS_PANASONIC_CROP_TO_USER_CROP ? 1 : 0;
+        imgdata.sizes.raw_inset_crops[idx].cwidth =
+            get2() - imgdata.sizes.raw_inset_crops[idx].cleft;
         break;
       case 0x0037: /*  55, ISO if  ISO in 0x8827 & ISO in 0x0017 == 65535 */
         if (iso_speed == 65535)
@@ -302,7 +306,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
           ushort val = get2();
           if (val > 5)
             val = 5;
-          pana8.stripe_count = val;
+          pana8.tile_c = val;
         }
         break;
       case 0x0043:
@@ -311,57 +315,57 @@ int LibRaw::parse_tiff_ifd(INT64 base)
           ushort val = get2();
           if (val > 5)
             val = 5;
-          pana8.tag43 = val;
+          pana8.tile_r = val;
         }
         break;
       case 0x0044:
         if (type == LIBRAW_EXIFTAG_TYPE_UNDEFINED && len == 50)
         {
           ushort count = get2();
-          if (count > 5)
-            count = 5;
+          if (count > 12)
+            count = 12;
           for (i = 0; i < count; i++)
-            pana8.stripe_offsets[i] = get4();
+            pana8.tile_offs[i] = get4();
         }
         break;
       case 0x0045:
         if (type == LIBRAW_EXIFTAG_TYPE_UNDEFINED && len == 50)
         {
           ushort count = get2();
-          if (count > 5)
-            count = 5;
+          if (count > 12)
+            count = 12;
           for (i = 0; i < count; i++)
-            pana8.stripe_left[i] = get4();
+            pana8.tile_left[i] = get4();
         }
         break;
       case 0x0046:
         if (type == LIBRAW_EXIFTAG_TYPE_UNDEFINED && len == 50)
         {
           ushort count = get2();
-          if (count > 5)
-            count = 5;
+          if (count > 12)
+            count = 12;
           for (i = 0; i < count; i++)
-            pana8.stripe_compressed_size[i] = get4();
+            pana8.tile_csize[i] = get4();
         }
         break;
       case 0x0047:
         if (type == LIBRAW_EXIFTAG_TYPE_UNDEFINED && len == 26)
         {
           ushort count = get2();
-          if (count > 5)
-            count = 5;
+          if (count > 12)
+            count = 12;
           for (i = 0; i < count; i++)
-            pana8.stripe_width[i] = get2();
+            pana8.tile_wi[i] = get2();
         }
         break;
       case 0x0048:
         if (type == LIBRAW_EXIFTAG_TYPE_UNDEFINED && len == 26)
         {
           ushort count = get2();
-          if (count > 5)
-            count = 5;
+          if (count > 12)
+            count = 12;
           for (i = 0; i < count; i++)
-            pana8.stripe_height[i] = get2();
+            pana8.tile_he[i] = get2();
         }
         break;
 	  case 0x011c: /* 284, Gamma */
@@ -747,6 +751,22 @@ int LibRaw::parse_tiff_ifd(INT64 base)
         for (j = sony_curve[i] + 1; j <= (int)sony_curve[i + 1]; j++)
           curve[j] = curve[j - 1] + (1 << i);
       break;
+	case 0x7039:
+		if ((tagtypeIs(LIBRAW_EXIFTAG_TYPE_RATIONAL) || tagtypeIs(LIBRAW_EXIFTAG_TYPE_SRATIONAL)) && len > 2 && len < 5)
+		{
+			FORC(len)imgdata.color.as_shot_wb_corr[c] = getrealf(type);
+			if (len < 4)
+				imgdata.color.as_shot_wb_corr[3] = imgdata.color.as_shot_wb_corr[1];
+			float amin = imgdata.color.as_shot_wb_corr[0], amax = imgdata.color.as_shot_wb_corr[0];
+			FORC4
+			{
+				amin = MIN(amin,imgdata.color.as_shot_wb_corr[c]);
+				amax = MAX(amax, imgdata.color.as_shot_wb_corr[c]);
+			}
+			if(amin > 0.001 && amax < 1000.f)
+				FORC4 imgdata.color.as_shot_wb_corr[c]/=amin;
+		}
+	  break;
     case 0x7200: // 29184, Sony SR2Private
       sony_offset = get4();
       break;
@@ -1175,25 +1195,29 @@ int LibRaw::parse_tiff_ifd(INT64 base)
                 (imFuji.RAFDataVersion == 0x0265) || // X-E4, X-T5
                 (imFuji.RAFDataVersion == 0x0266) || // X-T30 II, X-S20
                 (imFuji.RAFDataVersion == 0x0267) || // GFX 100 II
+                (imFuji.RAFDataVersion == 0x026c) || // GFX 100RF, X-E5
                 (imFuji.RAFDataVersion == 0x0368) || // GFX 100S II
                 (imFuji.RAFDataVersion == 0x0369) || // X100VI
                 (imFuji.RAFDataVersion == 0x036a) || // X-T50
                 (imFuji.RAFDataVersion == 0x036b) || // X-M5
+                (imFuji.RAFDataVersion == 0x036d) || // X-T30 III
                 !strcmp(model, "X-Pro3")     ||
+                !strcmp(model, "GFX100RF")   || !strcmp(model, "GFX 100RF")   ||
                 !strcmp(model, "GFX100S II") || !strcmp(model, "GFX 100S II") ||
                 !strcmp(model, "GFX100S")    || !strcmp(model, "GFX 100S")    ||
                 !strcmp(model, "GFX100 II")  || !strcmp(model, "GFX 100 II")  ||
                 !strcmp(model, "GFX50S II")  || !strcmp(model, "GFX 50S II")  ||
                 !strcmp(model, "X100VI")     ||
                 !strcmp(model, "X100V")      ||
-                !strcmp(model, "X-T4")       ||
                 !strcmp(model, "X-H2S")      ||
                 !strcmp(model, "X-H2")       ||
                 !strcmp(model, "X-E4")       ||
+                !strcmp(model, "X-E5")       ||
+                !strcmp(model, "X-T30 II")   || !strcmp(model, "X-T30 III")   ||
                 !strcmp(model, "X-T50")      ||
+                !strcmp(model, "X-T4")       ||
                 !strcmp(model, "X-T5")       ||
                 !strcmp(model, "X-M5")       ||
-                !strcmp(model, "X-T30 II")   ||
                 !strcmp(model, "X-S10")      ||
                 !strcmp(model, "X-S20"))
 // is34 cameras have 34 CCT values instead of 31, manual still claims 2500 to 10000 K
@@ -1234,7 +1258,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
                     fj -= 93;
                     if (is34)
                       fj -= 9;
-//printf ("wb start in DNG: 0x%04x\n", fj*2-0x4e);
+// printf ("wb start in DNG: 0x%04x\n", fj*2-0x4e);
                     for (int iCCT = 0, ofst = fj; iCCT < 31 
 						&& ofst < libraw_internal_data.unpacker_data.lenRAFData - 3;
                          iCCT++, ofst += 3)
@@ -1999,10 +2023,10 @@ void LibRaw::apply_tiff()
         ns *= tiff_ifd[i].bps;
       }
       /* too complex if below, so separate if to skip RGB+Alpha TIFFs*/
-      if (tiff_ifd[i].phint == 2 && tiff_ifd[i].extrasamples > 0 && tiff_ifd[i].samples > 3)
+     if (tiff_ifd[i].phint == 2 && tiff_ifd[i].extrasamples > 0 && tiff_ifd[i].samples > 3)
           continue; // SKIP RGB+Alpha IFDs
 
-	  if (!strncasecmp(make, "Sony", 4) && tiff_ifd[i].bps == 8 && tiff_ifd[i].phint == 6 && tiff_ifd[i].comp == 7 &&
+      if (!strncasecmp(make, "Sony", 4) && tiff_ifd[i].bps == 8 && tiff_ifd[i].phint == 6 && tiff_ifd[i].comp == 7 &&
           tiff_ifd[i].samples == 3 && tiff_ifd[i].newsubfiletype == 1)
         continue; // Sony RGB preview
 
@@ -2074,17 +2098,17 @@ void LibRaw::apply_tiff()
   if (raw >= 0 && !load_raw)
     switch (tiff_compress)
     {
-    case 32766:
-      if (!dng_version && !strncasecmp(make, "Sony", 4) &&
-          tiff_ifd[raw].phint == 32803 && tiff_ifd[raw].samples == 1 &&
-          (tiff_bps == 12 || tiff_bps == 14) && raw_width > 0 &&
-          raw_height > 0)
-      {
-        load_raw = &LibRaw::sony_arw6_load_raw;
-        tiff_bps = 14;
-        break;
-      }
-      break;
+  	case 32766: /* Sony lighweight compression*/
+	  	if (!dng_version && !strncasecmp(make, "Sony", 4) 
+		  	&& tiff_ifd[raw].phint == 32803 && tiff_ifd[raw].samples == 1 &&
+          /* tiff_bps == 14 && */ raw_width > 0 && raw_height > 0
+			  )
+		  {
+          load_raw = &LibRaw::sony_arw6_load_raw;
+		  }
+		  else
+			  is_raw = 0;
+		  break;
     case 32767:
       if (!dng_version &&
           tiff_ifd[raw].bytes == INT64(raw_width) * INT64(raw_height))
@@ -2184,7 +2208,7 @@ void LibRaw::apply_tiff()
 			(!strncasecmp(make, "CLAUSS", 6) && !strncasecmp(model, "piX 5oo", 7))) && // 0x5330303539 works here
 			(tiff_ifd[raw].bytes * 7LL > INT64(raw_width) * INT64(raw_height)))
 		{
-				load_raw = &LibRaw::olympus_load_raw;
+			load_raw = &LibRaw::olympus14_load_raw;
 		}
       }
       break;
@@ -2272,7 +2296,8 @@ void LibRaw::apply_tiff()
         load_raw = &LibRaw::nikon_load_padded_packed_raw;
       }
       else if ((!strncmp(model, "NIKON Z 9", 9) || !strncmp(model, "NIKON Z 8", 9) || !strcmp(model, "NIKON Z f")
-		  || !strcmp(model, "NIKON Z6_3")) &&
+		  || !strcmp(model, "NIKON Z6_3") || !strcmp(model, "NIKON Z50_2") || !strcmp(model, "NIKON Z5_2")
+		  || !strcmp(model, "NIKON ZR")) &&
                tiff_ifd[raw].offset)
       {
           INT64 pos = ftell(ifp);

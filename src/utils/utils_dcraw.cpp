@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -241,6 +241,47 @@ mask_set:
   {
     FORC4 cblack[c] = mblack[c] / MAX(1, mblack[4 + c]);
     black = cblack[4] = cblack[5] = cblack[6] = 0;
+  }
+  if (zero > 1024 && maker_index == LIBRAW_CAMERAMAKER_Hasselblad)
+  {
+	  // find active IFD
+	  int ifd = -1;
+	  for(int i = 0; i < tiff_nifds && i < LIBRAW_IFD_MAXCOUNT; i++)
+		  if (data_offset == tiff_ifd[i].offset)
+		  {
+			  ifd = i;
+			  break;
+		  }
+	  if (ifd >= 0)
+	  {
+		  int ablack = 0,qblack = 0, oblack;
+		  oblack = black + (cblack[0] + cblack[1] + cblack[2] + cblack[3]) / 4;
+		  if (cblack[4] * cblack[5] > 0 && cblack[4] * cblack[5] < LIBRAW_CBLACK_SIZE - 6)
+		  {
+			  int sum = 0;
+			  for (int i = 0; i < cblack[4] * cblack[5]; i++)
+				  sum += cblack[6 + i];
+			  oblack += sum / (cblack[4] * cblack[5]);
+		  }
+
+		  for (int i = 0; i < 4; i++)
+			  ablack = tiff_ifd[ifd].dng_levels.dng_cblack[i];
+		  ablack /= 4;
+		  if (tiff_ifd[ifd].dng_levels.dng_cblack[4] * tiff_ifd[ifd].dng_levels.dng_cblack[5] > 0
+			  && tiff_ifd[ifd].dng_levels.dng_cblack[4] * tiff_ifd[ifd].dng_levels.dng_cblack[5] <= LIBRAW_CBLACK_SIZE - 6)
+		  {
+			  for (int i = 0; i < tiff_ifd[ifd].dng_levels.dng_cblack[4] * tiff_ifd[ifd].dng_levels.dng_cblack[5]; i++)
+				  qblack += tiff_ifd[ifd].dng_levels.dng_cblack[6 + i];
+			  qblack /= (tiff_ifd[ifd].dng_levels.dng_cblack[4] * tiff_ifd[ifd].dng_levels.dng_cblack[5]);
+		  }
+		  int rblack = tiff_ifd[ifd].dng_levels.dng_black + ablack + qblack;
+		  if (rblack / 16 > oblack) // Wrong black calculated from masked pixels area
+		  {
+			  black = tiff_ifd[ifd].dng_levels.dng_black;
+			  for (int i = 0; i < LIBRAW_CBLACK_SIZE; i++)
+				  cblack[i] = tiff_ifd[ifd].dng_levels.dng_cblack[i];
+		  }
+	  }
   }
 }
 #undef mblack

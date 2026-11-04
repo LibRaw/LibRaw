@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -332,11 +332,7 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {SonyID_ILCE_1, sbfILCE_FF,
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_ILCE_1M2, sbfILCE_FF,
-       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {SonyID_ILME_FX3, sbfILCE_FF,
-       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-      {SonyID_ILME_FX2, sbfILCE_FF,
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {SonyID_ILCE_7RM3A, sbfILCE_FF,
        LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
@@ -364,9 +360,24 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {SonyID_ZV_E10M2, sbfILCE_DX,
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_ILCE_1M2, sbfILCE_FF,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+
+      {SonyID_DSC_RX1RM3, sbfDSC_FF,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+      {SonyID_ILCE_6400A, sbfILCE_DX,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILCE_6100A, sbfILCE_DX,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0x019f, 0x024b, 0x024c, 0x0208},
+      {SonyID_DSC_RX100M7A, sbfDSC_1in,
+       LIBRAW_SONY_Tag2010i, 0x0320, 0xffff, 0x024b, 0x024c, 0x0208},
+      {SonyID_ILME_FX2, sbfILCE_FF,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
       {SonyID_ILCE_7M5, sbfILCE_FF,
        LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
-  };
+      {SonyID_ILCE_7RM6, sbfILCE_FF,
+       LIBRAW_SONY_Tag2010None, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff},
+};
   ilm.CamID = id;
   int isPreProductionFW = 0;
   if (
@@ -407,8 +418,10 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
 
   switch (id) {
   case SonyID_ILCE_6100:
+  case SonyID_ILCE_6100A:
   case SonyID_ILCE_6300:
   case SonyID_ILCE_6400:
+  case SonyID_ILCE_6400A:
   case SonyID_ILCE_6500:
   case SonyID_ILCE_6600:
   case SonyID_ILCE_7C:
@@ -449,15 +462,15 @@ void LibRaw::setSonyBodyFeatures(unsigned long long id) {
       imSony.ImageCount3_offset = 0xffff; // not valid
     }
     break;
-  case SonyID_ILME_FX2:
-  case SonyID_ILCE_1M2:
   case SonyID_ZV_E1:
   case SonyID_ILCE_6700:
   case SonyID_ILCE_7CR:
   case SonyID_ILCE_7CM2:
   case SonyID_ILCE_9M3:
-  case SonyID_ILCE_7M5:
+  case SonyID_ILCE_1M2:
+  case SonyID_DSC_RX1RM3:
   case SonyID_ZV_E10M2:
+  case SonyID_ILME_FX2:
     imSony.group9050 = LIBRAW_SONY_Tag9050d;
     break;
   default: // see also process_Sony_0x9050
@@ -959,7 +972,7 @@ void LibRaw::process_Sony_0x9400(uchar *buf, ushort len, unsigned long long /*id
     FORC4 s[c] = SonySubstitution[buf[0x1a + c]];
     imSony.Sony0x9400_SequenceFileNumber = sget4(s);
 
-    imSony.Sony0x9400_SequenceLength2 = SonySubstitution[buf[0x1e]]; // files //ilce-7m5 modifed here
+    imSony.Sony0x9400_SequenceLength2 = SonySubstitution[buf[0x1e]]; // files
   }
 
   else if ((bufx == 0x0c) && (len >= 0x1f)) // 0x9400 'b' version

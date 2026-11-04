@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: halt_mt.c
- * Copyright 2008-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2026 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8, 2008
  *
  * LibRaw  C API mutithreaded sample: emulates call to "dcraw  -h [-w] [-a]

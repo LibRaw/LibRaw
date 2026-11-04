@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_internal.h
- * Copyright 2008-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2026 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  *
  * LibRaw internal data structures (not visible outside)
@@ -157,13 +157,14 @@ typedef struct
 	uint16_t tag3B;
 	uint16_t initial[4];
 	uint16_t tag40a[17], tag40b[17], tag41[17];
-	uint16_t stripe_count; // 0x42
-	uint16_t tag43;
-	INT64	 stripe_offsets[5]; //0x44
-	uint16_t stripe_left[5]; // 0x45
-	uint32_t stripe_compressed_size[5]; //0x46
-	uint16_t stripe_width[5]; //0x47
-	uint16_t stripe_height[5];
+	uint16_t tile_c; // 0x42
+	uint16_t tile_r;
+	INT64	 tile_offs[12]; //0x44
+	uint16_t tile_left[12]; // 0x45
+	uint32_t tile_csize[12]; //0x46
+	uint16_t tile_wi[12]; //0x47
+	uint16_t tile_he[12]; // 0x48
+    uint16_t tile_top[12];   // no tag?
 } pana8_tags_t;
 
 typedef struct

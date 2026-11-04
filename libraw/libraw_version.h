@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_version.h
- * Copyright 2008-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2026 LibRaw LLC (info@libraw.org)
  * Created: Mon Sept  8, 2008
  *
  * LibRaw C++ interface
@@ -21,13 +21,15 @@ it under the terms of the one of two licenses as you choose:
 #define __VERSION_H
 
 #define LIBRAW_MAJOR_VERSION 0
-#define LIBRAW_MINOR_VERSION 22
+#define LIBRAW_MINOR_VERSION 23
 #define LIBRAW_PATCH_VERSION 0
-#define LIBRAW_VERSION_TAIL Release
+#define LIBRAW_VERSION_TAIL WorkInProgress
 
-#define LIBRAW_SHLIB_CURRENT 26
+#define LIBRAW_SHLIB_CURRENT 27
 #define LIBRAW_SHLIB_REVISION 0
 #define LIBRAW_SHLIB_AGE 0
+
+#define LIBRAW_ABI_VERSION 0x23000001
 
 #define _LIBRAW_VERSION_MAKE(a, b, c, d) #a "." #b "." #c "-" #d
 #define LIBRAW_VERSION_MAKE(a, b, c, d) _LIBRAW_VERSION_MAKE(a, b, c, d)

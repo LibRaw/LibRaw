@@ -53,6 +53,17 @@ make
     To build via provided Makefile: edit it to adjust compilation flag and use
     make/gmake/nmake -f Makefile
     <h3>Build time defines</h3>
+    <p>External libraries use and/or built-in code disabled by default are controlled via these compile-time defines:
+<ul>
+<li>USE_JPEG - compile with JPEG support: decoding of JPEG-compressed RAWs, etc. libjpeg8-compatible library assumed
+ <li>USE_ZLIB - compile with libz (deflate decompression)
+ <li>USE_RAWSPEED, USE_RAWSPEED3 - compile with RawSpeed/RawSpeed3 library support, see README.RawSpeed.txt for details
+ <li>USE_RAWSPEED_BITS - control RawSpeed/RawSpeed3 behaviour via bit field
+ <li>USE_DNGSDK - compile with Adobe DNG SDK, see README.DNGSDK.txt for details
+ <li>USE_GPRSDK - compile with GoPro SDK, see README.GoPro.txt for details
+ <li>USE_6BY9RPI - use extended Rapsberry Pi camera support
+ <li>USE_X3FTOOLS - use Sigma/Foveon X3F files support
+</ul>
     <p>File size/memory limits:</p>
     <ul>
       <li>LIBRAW_MAX_ALLOC_MB_DEFAULT - memory use for main RAW image in
@@ -75,6 +86,7 @@ make
       <li>LIBRAW_NO_IOSTREAMS_DATASTREAM - do not build iostreams-based LibRaw
         datastream</li>
       <li>LIBRAW_USE_AUTOPTR - use std::auto_ptr for iostreams based datastream</li>
+      <li>LIBRAW_ADJUST_IWIDTH_ON_POSTPROCESSING - fixes inconsistency in iwidth/iheight and width/height fields, see Changelog.txt for details</li>
     </ul>
     <h3>Build parameters</h3>
     <p> ./configure script have some non-standard parameters: </p>

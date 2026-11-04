@@ -31,6 +31,8 @@
               <li><a href="#versionNumber">int LibRaw::versionNumber()</a></li>
               <li><a href="#LIBRAW_CHECK_VERSION">bool
                   LIBRAW_CHECK_VERSION(major,minor,patch)</a></li>
+              <li><a href="#capabilities">static unsigned capabilities()</a></li>
+              <li><a href="#versioncheck">static unsigned LibRaw::abi_version() and unsigned LibRaw::caller_abi_version()</a></li>
             </ul>
           </li>
           <li>List of supported cameras
@@ -140,13 +142,20 @@
     <h2>LibRaw Objects</h2>
     <p>The main LibRaw object (class) is created either without parameters or
       with flags determining the object behavior.</p>
-    <pre>#include "libraw/libraw.h"<br>...<br><br>   LibRaw ImageProcessor(unsigned int flags=0);<br>...<br>    </pre>
+    <pre>#include "libraw/libraw.h"<br>...<br><br>   LibRaw ImageProcessor(unsigned int flags=0,unsigned caller_abi = LIBRAW_ABI_VERSION);<br>...<br>    </pre>
     <p>Flags (several flags are combined via operator |, i.e., bitwise OR):</p>
     <ul>
       <li><strong>LIBRAW_OPTIONS_NO_DATAERR_CALLBACK</strong>: do not set the
         standard <a href="#callbacks">file read error handler</a> (standard
         handler outputs the error report in stderr).</li>
     </ul>
+    <p>caller_abi - default parameter (substituted by the compiler) equal to the value of the LIBRAW_ABI_VERSION macro taken from the library header files.</p>
+    <p>This option is introduced to prevent mixing of header files from one version of the library and the compiled library of another version (since they may be incompatible).</p>
+    <p>Unless explicitly specified, the caller_abi parameter is automatically set to LIBRAW_ABI_VERSION, which is defined in libraw_version.h and incremented whenever the LibRaw class interface changes.</p>
+    <p>When LibRaw::open_file() or LibRaw::open_datastream() is called, the library validates the caller_abi value passed to the constructor against the ABI version used during library compilation. If the two versions do
+    not match, the function returns the error code LIBRAW_VERSION_MISMATCH.
+</p>
+
     <p>Three groups of methods are used for image processing</p>
     <ul>
       <li><a href="#dataload">Data loading from the RAW file</a></li>
@@ -306,6 +315,27 @@
       library version is greater or equal to set in macro parameters. This macro
       executes at runtime (not at compile time) and may be used for checking
       version of dynamically loaded LibRaw (from DLL/shared library).</p>
+      <a name="capabilities"></a>
+    <h4>static unsigned LibRaw::capabilities</h4>
+    <p>Returns a bit field containing the library compilation flags (supported features):</p>
+    <ul>
+<li>LIBRAW_CAPS_RAWSPEED - compiled with RawSpeed (version 1) support
+<li>LIBRAW_CAPS_DNGSDK - compiled with Adobe DNG SDK
+<li>LIBRAW_CAPS_GPRSDK - compiled with GoPro SDK
+<li>LIBRAW_CAPS_UNICODEPATHS - has unicode paths support (Windows)
+<li>LIBRAW_CAPS_X3FTOOLS - compiled with X3F tools enabled
+<li>LIBRAW_CAPS_RPI6BY9 - compiled with enhanced Rapsberry Pi camera support
+<li>LIBRAW_CAPS_ZLIB - compiled with Zlib (deflate decompression support)
+<li>LIBRAW_CAPS_JPEG - compiled with libjpeg (JPEG decompression support)
+<li>LIBRAW_CAPS_RAWSPEED3 - compiled with RawSpeed v3
+<li>LIBRAW_CAPS_RAWSPEED_BITS - compiled with RawSpeed control via use_rawspeed bit-field
+    </ul>
+      <a name="versioncheck"></a>
+      <h4>static unsigned LibRaw::abi_version()</h4>
+      <p>returns library compile-time LIBRAW_ABI_VERSION value.</p>
+      <h4>unsigned LibRaw::caller_abi_version()</h4>
+      <p>returns caller_abi value passed to LibRaw class instance on creation</p>
+
     <h3>List of supported RAW formats (cameras)</h3>
     <p><a name="cameraCount"></a></p>
     <h4>int LibRaw::cameraCount()</h4>
@@ -717,7 +747,7 @@
     <p>unpack_thumb() should be called before dcraw_make_mem_thumb();</p>
     <p>Returns NULL in case of an error. If caller has passed not-NULL value as
       errorcode parameter, than *errorcode will be set to error code according
-      to ñ <a href="API-notes.html#errors">error code convention</a>.</p>
+      to ï¿½ <a href="API-notes.html#errors">error code convention</a>.</p>
     <p><strong>NOTE!</strong> Memory, allocated for return value will not be
       fried at destructor or <strong>LibRaw::recycle</strong> calls. Caller of
       dcraw_make_mem_image should free this memory by call to <a href="#dcraw_clear_mem">LibRaw::dcraw_clear_mem()</a>.</p>

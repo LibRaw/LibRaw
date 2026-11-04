@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@ static void cleargps(libraw_gps_info_t *q)
   q->altref = q->latref = q->longref = q->gpsstatus = q->gpsparsed = 0;
 }
 
-LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
+LibRaw::LibRaw(unsigned int flags, unsigned cabi) : memmgr(1024), _caller_abi_passed(cabi)
 {
   double aber[4] = {1, 1, 1, 1};
   double gamm[6] = {0.45, 4.5, 0, 0, 0, 0};
@@ -87,6 +87,7 @@ LibRaw::LibRaw(unsigned int flags) : memmgr(1024)
   imgdata.params.no_interpolation = 0;
   imgdata.rawparams.specials = 0; /* was inverted : LIBRAW_PROCESSING_DP2Q_INTERPOLATERG |      LIBRAW_PROCESSING_DP2Q_INTERPOLATEAF; */
   imgdata.rawparams.options = LIBRAW_RAWOPTIONS_CONVERTFLOAT_TO_INT;
+  imgdata.rawparams.cr3_maxframes = 256;
   imgdata.rawparams.sony_arw2_posterization_thr = 0;
   imgdata.rawparams.max_raw_memory_mb = LIBRAW_MAX_ALLOC_MB_DEFAULT;
   imgdata.params.green_matching = 0;

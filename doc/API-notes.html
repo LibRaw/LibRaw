@@ -106,11 +106,6 @@
       fname() call. This name will be used in <a href="API-CXX.html#callbacks">error
         callbacks</a> and in guessing name of JPEG file with metadata (for RAW
       files with external metadata).</p>
-    <p>For external metadata support input class should implement <strong>subfile_open()/subfile_close()</strong>
-      methods. возврашают код ошибки. <br>
-      Sample of these methods implementation may be found in <a href="API-CXX.html#file_datastream">LibRaw_file_datastream</a>
-      class (look into <strong>libraw/libraw_datastream.h</strong> file for
-      details).</p>
     <p><a name="threads"></a></p>
     <h2>Thread safety</h2>
     <p>Thread safety is ensured if a LibRaw object is created and used within
@@ -154,8 +149,8 @@
         at the stage of file opening.</dd>
       <dt><strong>imgdata.params.user_flip</strong></dt>
       <dd>If this parameter is greater than or equal to zero, assignment <code>imgdata.sizes.flip
-          = imgdata.params.user_flip</code> is performed at the <a href="API-CXX.html#open_file">open_file()</a>
-        stage.</dd>
+          = imgdata.params.user_flip</code> is performed at the <a href="API-CXX.html#dcraw_process">dcraw_process()</a>
+        stage (practically: at <a href="API-CXX.html#raw2image">raw2image()</a> so this assignment will be performed if raw2image is used separately).</dd>
       <dt><strong>imgdata.params.shot_select</strong></dt>
       <dd>This parameter makes it possible to select the number of the extracted
         image for data formats in which storage of several RAW images in one
@@ -246,7 +241,8 @@
     <p><a name="mempostproces"></a></p>
     <h4>Memory for Postprocessing</h4>
     <p>During image postprocessing (inherited from dcraw), memory for the
-      histogram (128 Kb) is allocated. This memory is allocated upon calling <a
+      histogram (128 Kb) is allocated. This memory is allocated upon calling <a
+
         href="API-CXX.html#dcraw_process">dcraw_process()</a> and freed upon
       calling <a href="API-CXX.html#recycle">recycle()</a>.</p>
     <p>In addition, during the work of <a href="API-CXX.html#dcraw_process">dcraw_process()</a>

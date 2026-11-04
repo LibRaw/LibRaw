@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: pana8.cpp
- * Copyright (C) 2022 Alex Tutubalin, LibRaw LLC
+ * Copyright (C) 2022-2026 Alex Tutubalin, LibRaw LLC
  *
    Panasonic RawFormat=8 file decoder
 
@@ -67,7 +67,7 @@ struct pana8_param_t
 	bool DecodeC8(
 		pana8_bufio_t& bufio,
 		unsigned int width, unsigned int height,
-		LibRaw *libraw, uint16_t left_margin);
+		LibRaw *libraw, uint16_t left_margin, uint16_t top_margin);
 	uint32_t GetDBit(uint64_t a2);
 };
 
@@ -105,23 +105,63 @@ void pana8_bufio_t::refill(uint32_t newoffset)
 void LibRaw::panasonicC8_load_raw()
 {
 	int errs = 0;
-	unsigned totalw = 0;
+
+	uint16_t row_w[5] = { 0,0,0,0,0 }, col_h[5] = { 0,0,0,0,0 };
+
 	INT64 fsz = libraw_internal_data.internal_data.input->size();
-	if (libraw_internal_data.unpacker_data.pana8.stripe_count > 5) errs++;
-	for (int i = 0; i < libraw_internal_data.unpacker_data.pana8.stripe_count && i < 5; i++)
+	if (libraw_internal_data.unpacker_data.pana8.tile_c > 5  
+		|| libraw_internal_data.unpacker_data.pana8.tile_r >5)
+      throw LIBRAW_EXCEPTION_IO_CORRUPT;
+
+	int tiles = libraw_internal_data.unpacker_data.pana8.tile_c * libraw_internal_data.unpacker_data.pana8.tile_r;
+
+	if (tiles < 1 || tiles > 12)
+		errs++;
+
+	for (int tile = 0; tile < tiles && tile < 12; tile++)
 	{
-		if (libraw_internal_data.unpacker_data.pana8.stripe_height[i] != imgdata.sizes.raw_height)
+		int row = tile / libraw_internal_data.unpacker_data.pana8.tile_c;
+		int col = tile % libraw_internal_data.unpacker_data.pana8.tile_c;
+		row_w[row] += libraw_internal_data.unpacker_data.pana8.tile_wi[tile];
+		col_h[col] += libraw_internal_data.unpacker_data.pana8.tile_he[tile];
+
+		libraw_internal_data.unpacker_data.pana8.tile_top[tile] = 0; // is dual run possible?
+		if (row > 0) // adjust tile_top
+		{
+			for (int xtile = tile - libraw_internal_data.unpacker_data.pana8.tile_c; xtile >= 0; xtile -= libraw_internal_data.unpacker_data.pana8.tile_c)
+				libraw_internal_data.unpacker_data.pana8.tile_top[tile] += libraw_internal_data.unpacker_data.pana8.tile_he[xtile];
+		}
+
+		if (libraw_internal_data.unpacker_data.pana8.tile_offs[tile] < 0
+			|| (libraw_internal_data.unpacker_data.pana8.tile_offs[tile] + INT64((libraw_internal_data.unpacker_data.pana8.tile_csize[tile] + 7u) / 8u)) > fsz)
 			errs++;
-		if ( unsigned(libraw_internal_data.unpacker_data.pana8.stripe_left[i]) + unsigned(libraw_internal_data.unpacker_data.pana8.stripe_width[i]) > unsigned(imgdata.sizes.raw_width))
-			errs++;
-		if (libraw_internal_data.unpacker_data.pana8.stripe_offsets[i] < 0
-			|| (libraw_internal_data.unpacker_data.pana8.stripe_offsets[i] + INT64((libraw_internal_data.unpacker_data.pana8.stripe_compressed_size[i] + 7u) / 8u)) > fsz)
-			errs++;
-		totalw += libraw_internal_data.unpacker_data.pana8.stripe_width[i];
 	}
-	if (totalw != imgdata.sizes.raw_width) errs++;
-	if (errs)
-		throw LIBRAW_EXCEPTION_IO_CORRUPT;
+	for (int tile = 0; tile < tiles && tile < 12; tile++)
+	{
+		int top = libraw_internal_data.unpacker_data.pana8.tile_top[tile];
+		int bottom = top + libraw_internal_data.unpacker_data.pana8.tile_he[tile];
+		int left = libraw_internal_data.unpacker_data.pana8.tile_left[tile];
+		int right = left + libraw_internal_data.unpacker_data.pana8.tile_wi[tile];
+        if (top < 0 || top >= imgdata.sizes.raw_height)
+          errs++;
+        if (bottom <= 0 || bottom > imgdata.sizes.raw_height)
+          errs++;
+        if (left < 0 || left >= imgdata.sizes.raw_width)
+          errs++;
+        if (right <= 0 || right > imgdata.sizes.raw_width)
+          errs++;
+	}
+
+	for (int row = 0; row < libraw_internal_data.unpacker_data.pana8.tile_r; row++)
+		if (row_w[row] != imgdata.sizes.raw_width)
+			errs++;
+
+    for (int col = 0; col < libraw_internal_data.unpacker_data.pana8.tile_c; col++)
+      if (col_h[col] != imgdata.sizes.raw_height)
+          errs++;
+
+    if (errs)
+      throw LIBRAW_EXCEPTION_IO_CORRUPT;
 
 	pana8_param_t pana8_param(libraw_internal_data.unpacker_data.pana8);
 	pana8_decode_loop(&pana8_param);
@@ -129,8 +169,9 @@ void LibRaw::panasonicC8_load_raw()
 
 void LibRaw::pana8_decode_loop(void *data)
 {
+  int tiles = libraw_internal_data.unpacker_data.pana8.tile_c * libraw_internal_data.unpacker_data.pana8.tile_r;
 #ifdef LIBRAW_USE_OPENMP
-	int errs = 0, scount = MIN(5,libraw_internal_data.unpacker_data.pana8.stripe_count);
+	int errs = 0, scount = MIN(12,tiles);
 #pragma omp parallel for 
   for (int stream = 0; stream < scount; stream++)
   {
@@ -140,7 +181,7 @@ void LibRaw::pana8_decode_loop(void *data)
 	if(errs)
       throw LIBRAW_EXCEPTION_IO_CORRUPT;
 #else
-  for (int stream = 0; stream < libraw_internal_data.unpacker_data.pana8.stripe_count && stream < 5; stream++)
+  for (int stream = 0; stream < tiles && stream < 12; stream++)
     if (pana8_decode_strip(data, stream))
       throw LIBRAW_EXCEPTION_IO_CORRUPT;
 #endif
@@ -149,14 +190,17 @@ void LibRaw::pana8_decode_loop(void *data)
 int LibRaw::pana8_decode_strip(void* data, int stream)
 {
 	pana8_param_t *pana8_param = (pana8_param_t*)data;
-	if (!data || stream < 0 || stream > 4 || stream > libraw_internal_data.unpacker_data.pana8.stripe_count) return 1; // error
+  int tiles = libraw_internal_data.unpacker_data.pana8.tile_c * libraw_internal_data.unpacker_data.pana8.tile_r;
+	if (!data || stream < 0 || stream > 12 || stream >= tiles)
+		return 1; // error
 
-	unsigned exactbytes = (libraw_internal_data.unpacker_data.pana8.stripe_compressed_size[stream] + 7u) / 8u;
+	unsigned exactbytes = (libraw_internal_data.unpacker_data.pana8.tile_csize[stream] + 7u) / 8u;
     pana8_bufio_t bufio(libraw_internal_data.internal_data.input,
-                        libraw_internal_data.unpacker_data.pana8.stripe_offsets[stream], exactbytes);
-    return !pana8_param->DecodeC8(bufio, libraw_internal_data.unpacker_data.pana8.stripe_width[stream],
-                                  libraw_internal_data.unpacker_data.pana8.stripe_height[stream], this,
-                                  libraw_internal_data.unpacker_data.pana8.stripe_left[stream]);
+                        libraw_internal_data.unpacker_data.pana8.tile_offs[stream], exactbytes);
+    return !pana8_param->DecodeC8(bufio, libraw_internal_data.unpacker_data.pana8.tile_wi[stream],
+                                  libraw_internal_data.unpacker_data.pana8.tile_he[stream], this,
+                                  libraw_internal_data.unpacker_data.pana8.tile_left[stream],
+								  libraw_internal_data.unpacker_data.pana8.tile_top[stream]);
 }
 
 struct pana8_base_t
@@ -174,7 +218,7 @@ struct pana8_base_t
 };
 
 bool pana8_param_t::DecodeC8(pana8_bufio_t &bufio, unsigned int width, unsigned int height, LibRaw *libraw,
-                             uint16_t left_margin)
+                             uint16_t left_margin, uint16_t top_margin)
 {
   unsigned halfwidth = width >> 1;
   unsigned halfheight = height >> 1;
@@ -312,9 +356,10 @@ bool pana8_param_t::DecodeC8(pana8_bufio_t &bufio, unsigned int width, unsigned 
 		  }
 
 		  int destrow = current_row * 2;
-		  uint16_t *destrow0 = libraw->imgdata.rawdata.raw_image + (destrow * libraw->imgdata.sizes.raw_width) + left_margin;
-		  uint16_t *destrow1 =
-			  libraw->imgdata.rawdata.raw_image + (destrow + 1) * libraw->imgdata.sizes.raw_width + left_margin;
+          uint16_t *destrow0 = libraw->imgdata.rawdata.raw_image +
+                               ((top_margin + destrow) * libraw->imgdata.sizes.raw_width) + left_margin;
+		  uint16_t *destrow1 = libraw->imgdata.rawdata.raw_image +
+                               (top_margin + destrow + 1) * libraw->imgdata.sizes.raw_width + left_margin;
 		  uint16_t *srcrow = (uint16_t *)(outrowp);
 		  if (gammatable)
 		  {

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -174,7 +174,18 @@ int LibRaw::open_file(const char *fname)
       delete stream;
       return LIBRAW_IO_ERROR;
     }
-    if ((stream->size() > (INT64)LIBRAW_MAX_NONDNG_RAW_FILE_SIZE) 
+    bool checkcr3 = true;
+    if (stream->size() > 12ULL && imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CR3_DYNAMIC_FRAME_LIMIT)
+    {
+      unsigned char buffer[12];
+      INT64 pos = stream->tell();
+      stream->read(buffer, 12, 1);
+      stream->seek(pos, SEEK_SET);
+      if (!memcmp((unsigned char *)buffer + 4, "ftypcrx ", 8))
+        checkcr3 = false;
+    }
+
+    if (checkcr3 && (stream->size() > (INT64)LIBRAW_MAX_NONDNG_RAW_FILE_SIZE) 
 		&& (stream->size() > (INT64)LIBRAW_MAX_DNG_RAW_FILE_SIZE)
 		&& (stream->size() > (INT64)LIBRAW_MAX_CR3_RAW_FILE_SIZE)
 		)
@@ -213,7 +224,18 @@ int LibRaw::open_file(const wchar_t *fname)
       delete stream;
       return LIBRAW_IO_ERROR;
     }
-    if ((stream->size() > (INT64)LIBRAW_MAX_DNG_RAW_FILE_SIZE) 
+    bool checkcr3 = true;
+    if (stream->size() > 12ULL && imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CR3_DYNAMIC_FRAME_LIMIT)
+    {
+      unsigned char buffer[12];
+      INT64 pos = stream->tell();
+      stream->read(buffer, 12, 1);
+      stream->seek(pos, SEEK_SET);
+      if (!memcmp((unsigned char *)buffer + 4, "ftypcrx ", 8))
+        checkcr3 = false;
+    }
+
+    if (checkcr3 && (stream->size() > (INT64)LIBRAW_MAX_DNG_RAW_FILE_SIZE) 
 		&& (stream->size() > (INT64)LIBRAW_MAX_NONDNG_RAW_FILE_SIZE) &&
         (stream->size() > (INT64)LIBRAW_MAX_CR3_RAW_FILE_SIZE)
 		)
@@ -235,7 +257,14 @@ int LibRaw::open_buffer(const void *buffer, size_t size)
   if (!buffer || buffer == (const void *)-1)
     return LIBRAW_IO_ERROR;
 
-  if ((size > (INT64)LIBRAW_MAX_DNG_RAW_FILE_SIZE) 
+  bool checkcr3 = true;
+  if (size > 12ULL && imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CR3_DYNAMIC_FRAME_LIMIT)
+  {
+	  if (!memcmp((unsigned char*)buffer + 4, "ftypcrx ", 8))
+		  checkcr3 = false;
+  }
+
+  if (checkcr3 && (size > (INT64)LIBRAW_MAX_DNG_RAW_FILE_SIZE) 
 	  && (size > (INT64)LIBRAW_MAX_NONDNG_RAW_FILE_SIZE)
 	  	  && (size > (INT64)LIBRAW_MAX_CR3_RAW_FILE_SIZE)
 	  )
@@ -484,16 +513,29 @@ struct foveon_data_t
     {"Sigma", "sd Quattro H", 5504, 3680, 4000, 0, 4, 5496, 3668}, // full size
     {"Sigma", "sd Quattro H", 2752, 1840, 4000, 0, 2, 2748, 1834}, // half size
 };
-const int foveon_count = sizeof(foveon_data) / sizeof(foveon_data[0]);
 
 int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 {
+  if(caller_abi_version() > 0 && caller_abi_version() != LIBRAW_ABI_VERSION)
+    return LIBRAW_VERSION_MISMATCH;
 
   if (!stream)
     return ENOENT;
   if (!stream->valid())
     return LIBRAW_IO_ERROR;
-  if ((stream->size() > (INT64)LIBRAW_MAX_DNG_RAW_FILE_SIZE) 
+
+  bool checkcr3 = true;
+  if (stream->size() > 12ULL && imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CR3_DYNAMIC_FRAME_LIMIT)
+  {
+    unsigned char buffer[12];
+    INT64 pos = stream->tell();
+    stream->read(buffer, 12, 1);
+    stream->seek(pos,SEEK_SET);
+    if (!memcmp((unsigned char *)buffer + 4, "ftypcrx ", 8))
+      checkcr3 = false;
+  }
+
+  if (checkcr3 && (stream->size() > (INT64)LIBRAW_MAX_DNG_RAW_FILE_SIZE) 
 	  && (stream->size() > (INT64)LIBRAW_MAX_NONDNG_RAW_FILE_SIZE) &&
       (stream->size() > (INT64)LIBRAW_MAX_CR3_RAW_FILE_SIZE)
 	  )
@@ -703,7 +745,8 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 		  }
 		  else if (libraw_internal_data.unpacker_data.pana_encoding == 8)
 		  {
-			  if (libraw_internal_data.unpacker_data.pana8.stripe_count > 0)
+			  int tiles = libraw_internal_data.unpacker_data.pana8.tile_c * libraw_internal_data.unpacker_data.pana8.tile_r;
+            if (tiles > 0 && tiles <= 12)
 				  load_raw = &LibRaw::panasonicC8_load_raw;
 			  else
 				  imgdata.idata.raw_count = 0; // incorrect stripes count
@@ -1084,19 +1127,17 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
               S.raw_width == 2816) // A7S2=> exact, hope it works for A7S-I too
       )
         S.width = S.raw_width - 32;
-
-      if (load_raw == &LibRaw::sony_arw6_load_raw)
-      {
-        /* it would be great to get it via metadata */
-        C.black = 1024;
-        for (int c = 0; c < 6; c++)
-          C.cblack[c] = 0;
-        C.maximum = 39002; // last curve item
-        for (int c = 0; c < 4; c++)
-          C.linear_max[c] = 32800;
-      }
     }
-
+	  if (load_raw == &LibRaw::sony_arw6_load_raw)
+	  {
+		  /* it would be great to get it via metadata */
+			C.black = 1024;
+			for (int c = 0; c < 6; c++)
+			  C.cblack[c] = 0;
+			C.maximum = 39002; // last curve item
+			for (int c = 0; c < 4; c++)
+				C.linear_max[c] = 32800;
+	  }
 
     // FIXME: it is possible that DNG contains 4x main frames + some previews; in this case imgdata.idata.raw_count will be greater than 4
 	if (makeIs(LIBRAW_CAMERAMAKER_Pentax) &&
@@ -1208,6 +1249,10 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
              MN.canon.multishot[1] > 0)
       imgdata.color.as_shot_wb_applied =
           LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_CANON;
+	else if (makeIs(LIBRAW_CAMERAMAKER_Canon) &&
+			(imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CANON_CHECK_ASSHOT_CCT)
+			&& !MN.canon.AsShotCT)
+      imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_CANON;
     else if (makeIs(LIBRAW_CAMERAMAKER_Nikon) &&
              MN.nikon.ExposureMode == 1)
       imgdata.color.as_shot_wb_applied =
@@ -1217,7 +1262,14 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
       imgdata.color.as_shot_wb_applied =
           LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_PENTAX;
 	else if (makeIs(LIBRAW_CAMERAMAKER_Sony) && load_raw == &LibRaw::sony_ycbcr_load_raw)
+	{
 		imgdata.color.as_shot_wb_applied = LIBRAW_ASWB_APPLIED | LIBRAW_ASWB_SONY;
+		float amax = imgdata.color.as_shot_wb_corr[0];
+		for (int c = 1; c < 4; c++)
+			amax = MAX(amax, imgdata.color.as_shot_wb_corr[c]);
+		if (amax > 1.0001f && amax < 100.f)
+			imgdata.color.as_shot_wb_applied |= LIBRAW_ASWB_USE_CORRECTION;
+	}
     else
       imgdata.color.as_shot_wb_applied = 0;
 
@@ -1338,7 +1390,7 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 	  if (profile_sz > 0LL && profile_sz < LIBRAW_MAX_PROFILE_SIZE_MB * 1024LL * 1024LL)
 	  {
         C.profile = calloc(size_t(profile_sz),1);
-        C.profile_length = unsigned(profile_sz);
+	C.profile_length = unsigned(profile_sz);
         ID.input->seek(ID.profile_offset, SEEK_SET);
         ID.input->read(C.profile, size_t(profile_sz), 1);
 	  }

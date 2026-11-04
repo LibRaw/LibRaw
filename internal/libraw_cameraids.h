@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: internal/libraw_cameraids.h
- * Copyright 2008-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2026 LibRaw LLC (info@libraw.org)
  * Created: Sat Aug  17, 2020
 
 LibRaw is free software; you can redistribute it and/or modify
@@ -29,6 +29,7 @@ it under the terms of the one of two licenses as you choose:
 #define CanonID_EOS_M6             0x04070000ULL
 
 #define CanonID_EOS_R5_C          (0x40000000ULL + 0x218ULL)
+#define CanonID_EOS_C50           (0x40000000ULL + 0x227ULL)
 
 #define CanonID_EOS_1D            (0x80000000ULL + 0x001ULL)
 #define CanonID_EOS_1Ds           (0x80000000ULL + 0x167ULL)
@@ -94,13 +95,15 @@ it under the terms of the one of two licenses as you choose:
 #define CanonID_EOS_R7            (0x80000000ULL + 0x464ULL)
 #define CanonID_EOS_R10           (0x80000000ULL + 0x465ULL)
 #define CanonID_EOS_M50_Mark_II   (0x80000000ULL + 0x468ULL)
-#define CanonID_EOS_R50_V         (0x80000000ULL + 0x516ULL)
 #define CanonID_EOS_R50           (0x80000000ULL + 0x480ULL)
 #define CanonID_EOS_R6m2          (0x80000000ULL + 0x481ULL)
 #define CanonID_EOS_R8            (0x80000000ULL + 0x487ULL)
 #define CanonID_EOS_R1            (0x80000000ULL + 0x495ULL)
 #define CanonID_EOS_R5_Mark_II    (0x80000000ULL + 0x496ULL)
+#define CanonID_PS_V1             (0x80000000ULL + 0x497ULL)
 #define CanonID_EOS_R100          (0x80000000ULL + 0x498ULL)
+#define CanonID_EOS_R50_V         (0x80000000ULL + 0x516ULL)
+#define CanonID_EOS_R6_Mark_III   (0x80000000ULL + 0x518ULL)
 
 // CanonID_EOS_D2000C after Canon's TIFF2CR2 convertor:
 #define CanonID_EOS_D2000C        (0x80000000ULL + 0x520ULL)
@@ -173,6 +176,8 @@ it under the terms of the one of two licenses as you choose:
 #define OlyID_OM_1            OlyID_str2hex("S0095")
 #define OlyID_OM_5            OlyID_str2hex("S0101")
 #define OlyID_OM_1_Mark_II    OlyID_str2hex("S0121")
+#define OlyID_OM_3            OlyID_str2hex("S0123")
+#define OlyID_OM_5_Mark_II    OlyID_str2hex("S0130")
 #define OlyID_C_3030Z         OlyID_str2hex("SX351")
 #define OlyID_C_5050Z         OlyID_str2hex("SX558")
 #define OlyID_C_350Z          OlyID_str2hex("SX751")
@@ -237,7 +242,7 @@ it under the terms of the one of two licenses as you choose:
 #define PentaxID_K_1_Mark_II  0x13240ULL
 #define PentaxID_K_3_III      0x13254ULL
 #define PentaxID_GR_IIIx      0x1329aULL
-#define PentaxID_KF			  0x132b8ULL
+#define PentaxID_KF           0x132b8ULL
 #define PentaxID_K_3_III_Mono 0x132d6ULL
 
 #define SonyID_DSC_R1           0x002ULL
@@ -343,7 +348,12 @@ it under the terms of the one of two licenses as you choose:
 #define SonyID_ILCE_7CM2        0x18dULL
 #define SonyID_ILX_LR1          0x18eULL
 #define SonyID_ZV_E10M2         0x18fULL
-#define SonyID_ILME_FX2         0x196ULL
 #define SonyID_ILCE_1M2         0x190ULL
+#define SonyID_DSC_RX1RM3       0x191ULL
+#define SonyID_ILCE_6400A       0x192ULL
+#define SonyID_ILCE_6100A       0x193ULL
+#define SonyID_DSC_RX100M7A     0x194ULL
+#define SonyID_ILME_FX2         0x196ULL
 #define SonyID_ILCE_7M5         0x197ULL
+#define SonyID_ILCE_7RM6        0x19AULL
 #endif

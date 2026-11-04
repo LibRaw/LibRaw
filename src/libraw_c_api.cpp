@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_c_api.cpp
- * Copyright 2008-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2026 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  *
  * LibRaw C interface
@@ -32,7 +32,8 @@ extern "C"
     LibRaw *ret;
     try
     {
-      ret = new LibRaw(flags);
+      // extern C, so clang wants both args 
+      ret = new LibRaw(flags,LIBRAW_ABI_VERSION);
     }
     catch (const std::bad_alloc& )
     {

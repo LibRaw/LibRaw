@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -309,6 +309,7 @@ int LibRaw::parseCR3_CTMD(short trackNum)
           }
           if (callbacks.exif_cb)
           {
+            fseek(ifp, -8L, SEEK_CUR); // unwind order + bad_hdr() check
             INT64 savepos = ifp->tell();
             callbacks.exif_cb(callbacks.exifparser_data, (tItem << 20) | 0x80000 | 0x927c, 7, lTag-8, order, ifp, 
 				track.MediaOffset + relpos_inBox + 8);
@@ -575,6 +576,7 @@ int LibRaw::parseCR3(UINT64 oAtomList,
 			{
 				thumb_length = unsigned(szAtom - 56);
 				thumb_offset = ftell(ifp);
+				imgdata.thumbnail.tcolors = 3;
 				if (imgdata.thumbs_list.thumbcount < LIBRAW_THUMBNAIL_MAXCOUNT)
 				{
 					bool do_add = true;
@@ -587,13 +589,28 @@ int LibRaw::parseCR3(UINT64 oAtomList,
 					if (do_add)
 					{
 						int idx = imgdata.thumbs_list.thumbcount;
+						unsigned ww = (xdata[22] << 8) + xdata[23];
+						unsigned hh = (xdata[24] << 8) + xdata[25];
+						if (ww < 1 || ww > 16383 || hh < 1 || hh > 16383)
+						{
+							INT64 off = ifp->tell();
+							ifp->seek(thumb_offset, SEEK_SET);
+							struct jhead jh;
+							ljpeg_start(&jh, 1);
+							ifp->seek(off, SEEK_SET);
+							if (jh.wide && jh.high)
+							{
+								ww = jh.wide;
+								hh = jh.high;
+							}
+						}
 						imgdata.thumbs_list.thumblist[idx].tformat = LIBRAW_INTERNAL_THUMBNAIL_JPEG;
 						imgdata.thumbs_list.thumblist[idx].toffset = thumb_offset;
 						imgdata.thumbs_list.thumblist[idx].tlength = thumb_length;
 						imgdata.thumbs_list.thumblist[idx].tflip = 0xffff;
 						imgdata.thumbs_list.thumblist[idx].tmisc = (3 << 5) | 8; // 3 samples/8 bps
-						imgdata.thumbs_list.thumblist[idx].twidth = (xdata[22] << 8) + xdata[23];
-                        imgdata.thumbs_list.thumblist[idx].theight = (xdata[24] << 8) + xdata[25];
+						imgdata.thumbs_list.thumblist[idx].twidth = ww;
+                        imgdata.thumbs_list.thumblist[idx].theight = hh;
 						imgdata.thumbs_list.thumbcount++;
 					}
 				}
@@ -806,7 +823,17 @@ int LibRaw::parseCR3(UINT64 oAtomList,
       if (szAtomContent >= 12) {
         fseek(ifp, 4L, SEEK_CUR);
         int entries = get4();
-        if (entries < 1 || entries > 1000000)
+		if ((imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CR3_DYNAMIC_FRAME_LIMIT) && imgdata.rawparams.cr3_maxframes > 0)
+		{
+			if (entries < 1)
+			{
+				err = -9;
+				goto fin;
+			}
+			else if (entries > imgdata.rawparams.cr3_maxframes)
+				entries = imgdata.rawparams.cr3_maxframes;
+		}
+        else if (entries < 1 || entries > 1000000) /* No dynamic limit or maxframes not set */
         {
           err =  -9;
           goto fin;
@@ -834,6 +861,12 @@ int LibRaw::parseCR3(UINT64 oAtomList,
         fseek(ifp, 4L, SEEK_CUR);
         int sample_size = get4();
         int entries = get4();
+
+		// Limit at upper
+		if ((imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CR3_DYNAMIC_FRAME_LIMIT)
+			&& imgdata.rawparams.cr3_maxframes > 0 && entries > imgdata.rawparams.cr3_maxframes)
+			entries = imgdata.rawparams.cr3_maxframes;
+
         current_track.sample_count = entries;
 
         // if sample size is zero sample size is fixed
@@ -845,7 +878,17 @@ int LibRaw::parseCR3(UINT64 oAtomList,
         else
         {
           current_track.sample_size = 0;
-          if (entries < 1 || entries > 1000000) {
+
+		  if ((imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CR3_DYNAMIC_FRAME_LIMIT)
+			  && imgdata.rawparams.cr3_maxframes > 0)
+		  {
+			  if (entries < 1)
+			  {
+                err = -10;
+                goto fin;
+			  }
+		  }
+          else if (entries < 1 || entries > 1000000) { // Std limit
             err = -10;
             goto fin;
           }

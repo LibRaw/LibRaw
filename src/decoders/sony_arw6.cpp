@@ -1,8 +1,12 @@
 /* -*- C++ -*-
  * Copyright 2026 LibRaw LLC (info@libraw.org)
- * Copyright (C) 2026 Jiang Yaogeng (Sony ARW6 CRAW HQ decoder;
- *   code generated with assistance from GLM-5)
- *
+ * Copyright 2026 Jiang Yaogeng ( https://github.com/y-g-jiang )
+ 
+  Sony Compressed/Compressed HQ file decoder
+  Kindly provided by Jiang Yaogeng  for inclusion in the library 
+  via this pull request: https://github.com/LibRaw/LibRaw/pull/824
+  code generated with assistance from GLM-5
+
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
 

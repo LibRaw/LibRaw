@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -69,6 +69,8 @@ extern "C"
       return "Bad crop box";
     case LIBRAW_TOO_BIG:
       return "Image too big for processing";
+    case LIBRAW_VERSION_MISMATCH:
+      return "Caller/library version mismatch";
     default:
       return "Unknown error code";
     }
@@ -190,6 +192,8 @@ void LibRaw::derror()
 const char *LibRaw::version() { return LIBRAW_VERSION_STR; }
 int LibRaw::versionNumber() { return LIBRAW_VERSION; }
 const char *LibRaw::strerror(int p) { return libraw_strerror(p); }
+unsigned LibRaw::abi_version(){ return LIBRAW_ABI_VERSION;}
+unsigned LibRaw::caller_abi_version() { return _caller_abi_passed;}
 
 unsigned LibRaw::capabilities()
 {

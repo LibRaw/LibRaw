@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -169,10 +169,13 @@ void LibRaw::scale_colors()
           sum[c] += val;
         sum[c + 4]++;
       }
-    if (imgdata.color.as_shot_wb_applied)
+    if (imgdata.color.as_shot_wb_applied & LIBRAW_ASWB_APPLIED)
     {
-      // Nikon sRAW: camera WB already applied:
-      pre_mul[0] = pre_mul[1] = pre_mul[2] = pre_mul[3] = 1.0;
+      // sRAW with baked WB:
+		if (imgdata.color.as_shot_wb_applied & LIBRAW_ASWB_USE_CORRECTION)
+			FORC4 pre_mul[c] = imgdata.color.as_shot_wb_corr[c];
+		else
+			pre_mul[0] = pre_mul[1] = pre_mul[2] = pre_mul[3] = 1.0;
     }
     else if (sum[0] && sum[1] && sum[2] && sum[3])
       FORC4 pre_mul[c] = (float)sum[c + 4] / sum[c];
@@ -183,12 +186,20 @@ void LibRaw::scale_colors()
       imgdata.process_warnings |= LIBRAW_WARN_BAD_CAMERA_WB;
     }
   }
-  // Nikon sRAW, daylight
-  if (imgdata.color.as_shot_wb_applied && !use_camera_wb && !use_auto_wb &&
+  // sRAW with baked WB, daylight
+  if ((imgdata.color.as_shot_wb_applied & LIBRAW_ASWB_APPLIED) && !use_camera_wb && !use_auto_wb &&
       cam_mul[0] > 0.00001f && cam_mul[1] > 0.00001f && cam_mul[2] > 0.00001f)
   {
-    for (c = 0; c < 3; c++)
-      pre_mul[c] /= cam_mul[c];
+	  if (imgdata.color.as_shot_wb_applied & LIBRAW_ASWB_USE_CORRECTION)
+	  {
+        for (c = 0; c < 3; c++)
+			pre_mul[c] = pre_mul[c] / cam_mul[c] * imgdata.color.as_shot_wb_corr[c];
+	  }
+	  else
+	  {
+		  for (c = 0; c < 3; c++)
+			  pre_mul[c] /= cam_mul[c];
+	  }
   }
   if (pre_mul[1] == 0)
     pre_mul[1] = 1;

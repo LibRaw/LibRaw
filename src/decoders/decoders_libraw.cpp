@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2022 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
  * PhaseOne IIQ-Sv2 decoder is inspired by code provided by Daniel Vogelbacher <daniel@chaospixel.com>
  *
@@ -934,7 +934,7 @@ void LibRaw::phase_one_load_raw_s()
 #endif
 #define RAW(row, col) imgdata.rawdata.raw_image[(row)*imgdata.sizes.raw_width + (col)]
 
-void LibRaw::samsung3_load_raw()
+void LibRaw::samsung3v2_load_raw()
 {
   if(imgdata.sizes.raw_height < 436 || imgdata.sizes.raw_width < 646)
     throw LIBRAW_EXCEPTION_IO_CORRUPT; // From Samsung opensource decoder: too small image

@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -107,13 +107,15 @@ void LibRaw::GetNormalizedModel()
       { CanonID_EOS_R7,            "EOS R7"},
       { CanonID_EOS_R10,           "EOS R10"},
       { CanonID_EOS_M50_Mark_II,   "EOS M50 Mark II"}, // M50m2, Kiss M2
-      { CanonID_EOS_R50_V,         "EOS R50 V"},
       { CanonID_EOS_R50,           "EOS R50"},
       { CanonID_EOS_R6m2,          "EOS R6 Mark II"},
       { CanonID_EOS_R8,            "EOS R8"},
       { CanonID_EOS_R1,            "EOS R1"},
       { CanonID_EOS_R5_Mark_II,    "EOS R5 Mark II"}, // EOS R5m2
-      { CanonID_EOS_R100,          "EOS R100"}
+      { CanonID_PS_V1,             "PowerShot V1"},
+      { CanonID_EOS_R100,          "EOS R100"},
+      { CanonID_EOS_R50_V,         "EOS R50 V"},
+      {CanonID_EOS_R6_Mark_III,    "EOS R6 Mark III"} // EOS R6m3
     },
 #if 0
     olyque[] = {
@@ -380,7 +382,6 @@ void LibRaw::GetNormalizedModel()
       { SonyID_ZV_E10,         "ZV-E10"},
       { SonyID_ILCE_7SM3,      "ILCE-7SM3"},
       { SonyID_ILCE_1,         "ILCE-1"},
-      { SonyID_ILCE_1M2,       "ILCE-1M2"},
       { SonyID_ILME_FX3,       "ILME-FX3"},
       { SonyID_ILCE_7RM3A,     "ILCE-7RM3A"},
       { SonyID_ILCE_7RM4A,     "ILCE-7RM4A"},
@@ -399,9 +400,15 @@ void LibRaw::GetNormalizedModel()
       { SonyID_ILCE_7CM2,      "ILCE-7CM2"},
       { SonyID_ILX_LR1,        "ILX-LR1"},
       { SonyID_ZV_E10M2,       "ZV-E10M2"},
+      { SonyID_ILCE_1M2,       "ILCE-1M2"},
+      { SonyID_DSC_RX1RM3,     "DSC-RX1RM3"},
+      { SonyID_ILCE_6400A,     "ILCE-6400A"},
+      { SonyID_ILCE_6100A,     "ILCE-6100A"},
+      { SonyID_DSC_RX100M7A,   "DSC-RX100M7A"},
       { SonyID_ILME_FX2,       "ILME-FX2"},
       { SonyID_ILCE_7M5,       "ILCE-7M5"},
-};
+      { SonyID_ILCE_7RM6,      "ILCE-7RM6"},
+    };
 
    const char *orig = NULL;
 
@@ -420,6 +427,7 @@ void LibRaw::GetNormalizedModel()
     "@S9100", "S9600",
     "@S200EXR", "S205EXR",
     "@X-T1 IR", "X-T1IR",
+    "@GFX 100RF", "GFX100RF",
     "@GFX 100 II", "GFX100 II",
     "@GFX 100S II", "GFX100S II",
     "@GFX 100S", "GFX100S",
@@ -491,6 +499,7 @@ void LibRaw::GetNormalizedModel()
       "@COOLPIX 950",   "E950",          "@COOLPIX 990",   "E990",
       "@COOLPIX 995",   "E995",          "@COOLPIX P7700", "COOLPIX Deneb",
       "@COOLPIX P7800", "COOLPIX Kalon",
+	  "@COOLPIX P1000", "COOLPIX P1100",
   };
 
   static const char olyalias[][32] = { // Olympus
@@ -513,6 +522,7 @@ void LibRaw::GetNormalizedModel()
     "@E-M5 Mark II", "E-M5MarkII", "E-M5_M2",
     "@E-M5 Mark III", "E-M5MarkIII", "E-M5_M3",
     "@OM-1 Mark II", "OM-1MarkII", "OM-1_M2",
+    "@OM-5 Mark II", "OM-5MarkII", "OM-5_M2",
     "@SH-2", "SH-3",
     "@SP-310", "SP310",
     "@SP-320", "SP320",
@@ -556,12 +566,12 @@ void LibRaw::GetNormalizedModel()
     "@DMC-ZS40", "DMC-TZ60", "DMC-TZ61",
     "@DMC-ZS50", "DMC-TZ70", "DMC-TZ71",
     "@DMC-ZS60", "DMC-TZ80", "DMC-TZ81", "DMC-TZ82", "DMC-TZ85",
-    "@DC-ZS70", "DC-TZ90", "DC-TZ91", "DC-TZ92", "DC-TZ93",
-    "@DC-ZS80", "DC-TZ95", "DC-TZ96", "DC-TZ97",
+    "@DC-ZS70",  "DC-TZ90",  "DC-TZ91",  "DC-TZ92",  "DC-TZ93",
+    "@DC-ZS80",  "DC-TZ95",  "DC-TZ96",  "DC-TZ97",  "DC-ZS80D", "DC-TZ95D", "DC-TZ96D", "DC-ZS99", "DC-TZ99",
 
 // interchangeable lens
-    "@DC-G100",  "DC-G110",
-    "@DC-G99",   "DC-G90",   "DC-G91",  "DC-G95",
+    "@DC-G100",  "DC-G110",  "DC-G100D",
+    "@DC-G99",   "DC-G90",   "DC-G91",   "DC-G95",   "DC-G97",   "DC-G95D",  "DC-G99D",  "DC-G99M2",
     "@DMC-G7",   "DMC-G70",
     "@DMC-G8",   "DMC-G80",  "DMC-G81", "DMC-G85",
     "@DMC-GH4",  "AG-GH4",   "CGO4",
@@ -1258,7 +1268,13 @@ printf("catchme\t%s\t%s\t%s\t9050%c\t%d\t%d\n",
     }
     else if (makeIs(LIBRAW_CAMERAMAKER_Fujifilm))
     {
-      if (!strncmp(normalized_model, "GFX ", 4))
+      if (!strncmp(normalized_model, "GFX 100RF", 9))
+      {
+        ilm.CameraFormat = LIBRAW_FORMAT_CROP645;
+        ilm.CameraMount  = LIBRAW_MOUNT_FixedLens;
+        ilm.FocalType    = LIBRAW_FT_PRIME_LENS;
+      }
+      else if (!strncmp(normalized_model, "GFX ", 4))
       {
         ilm.CameraFormat = LIBRAW_FORMAT_CROP645;
         ilm.CameraMount = LIBRAW_MOUNT_Fuji_GF;

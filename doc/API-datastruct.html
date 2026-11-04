@@ -66,6 +66,9 @@
               LibRaw_processing_options - flags that affects extracted RAW data</a></li>
           <li><a href="#LibRaw_rawspecial_t">enum LibRaw_rawspecial_t - special
               raw extraction modes</a></li>
+          <li><a href="#LibRaw_aswb_applied">enum
+              LibRaw_As_Shot_WB_Applied_codes - white balance adjustment for RAW
+              files with in-camera WB applied</a></li>
         </ol>
       </li>
     </ol>
@@ -257,6 +260,7 @@ Depending on post-processing parameters (params.half_size and params.use_fuji_ro
   </ul>
 </ol>
 TODO: For Fuji Super-CCD and images with non-square pixels, correct iwidth/iheight values should be set after post-processing.
+
 <dl>
       <dt><strong> unsigned raw_pitch; </strong></dt>
       <dd>Full size of raw data row <strong> in bytes </strong> .</dd>
@@ -333,6 +337,15 @@ TODO: For Fuji Super-CCD and images with non-square pixels, correct iwidth/iheig
       <dd>White balance coefficients for daylight (daylight balance). Either
         read from file, or calculated on the basis of file data, or taken from
         hardcoded constants.</dd>
+      <dt><strong> float as_shot_wb_corr[4]; </strong></dt>
+      <dd>Adjustments for White Balance coefficients for filew with WB applied
+        in camera (see the <b>as_shot_wb_applied</b> field below and <a href="#LibRaw_aswb_applied">enum
+          LibRaw_As_Shot_WB_Applied_codes</a> for <b>as_shot_wb_applied</b>
+        bits meaning. </dd>
+      <dt><strong> unsigned as_shot_wb_applied; </strong></dt>
+      <dd>A bit field indicating that white balance has already been applied in
+        the camera to the data. See <a href="#LibRaw_aswb_applied">enum
+          LibRaw_As_Shot_WB_Applied_codes</a> for bits meaning. </dd>
       <dt><strong> float cmatrix[3][4]; </strong></dt>
       <dd>Camera color data read from RAW file (if any)</dd>
       <dt><strong> float rgb_cam[3][4]; </strong></dt>
@@ -790,7 +803,8 @@ TODO: For Fuji Super-CCD and images with non-square pixels, correct iwidth/iheig
         shots).</dd>
       <dt><strong> int use_fuji_rotate; </strong></dt>
       <dd><strong> dcraw keys: </strong> -j <br>
-        Default -1 (use), 0 - don't use rotation for cameras on a Fuji sensor.</dd>
+        Default 1: use fuji-rotate and/or aspect ratio adjustments for non-square pixel images<br/>
+        0 - don't use rotation for cameras on a Fuji sensor and do not adjust aspect ratio for non-square pixel images.</dd>
       <dt><strong> int green_matching; </strong></dt>
       <dd>Turns on fixing of green channels disbalance. <strong> dcraw keys: </strong>
         none <br>
@@ -1055,11 +1069,12 @@ TODO: For Fuji Super-CCD and images with non-square pixels, correct iwidth/iheig
       <dt><strong> LIBRAW_BAD_CROP </strong></dt>
       <dd>The incorrect cropping coordinates are set via params.cropbox[]: the
         left-top corner of cropping rectangle is outside the image. The
-        processing will be cancelled, all allocated resources will be freed, </dd>
       <dt><strong> LIBRAW_TOO_BIG</strong></dt>
       <dd>Raw data size exceeds data limit.</dd>
       <dt><strong> LIBRAW_MEMPOOL_OVERFLOW</strong></dt>
       <dd>Too much data allocation calls to fit into LibRaw's mempool</dd>
+<dt><strong>LIBRAW_VERSION_MISMATCH = -100014</strong></dt>
+<dl>LibRaw ABI version from libraw.h does not match compiled-in library version</dl>
     </dl>
     <p><strong> Non-Fatal Errors </strong></p>
     <dl>
@@ -1458,6 +1473,34 @@ TODO: For Fuji Super-CCD and images with non-square pixels, correct iwidth/iheig
       <li><b>LIBRAW_RAWSPECIAL_SRAW_NO_RGB</b> - disable YCC to RGB conversion</li>
       <li><b>LIBRAW_RAWSPECIAL_SRAW_NO_INTERPOLATE</b> - disable missing color
         values interpolation</li>
+    </ul>
+    <p> <a name="LibRaw_aswb_applied"></a></p>
+    <h3>enum LibRaw_As_Shot_WB_Applied_codes - as shot WB already applied
+      indication</h3>
+    <p>These bits are used in imgdata.color.as_shot_wb_applied bit field:</p>
+    <ul>
+      <li><b>LIBRAW_ASWB_APPLIED</b> -White Balance is already applied, so
+        uniform WB coefficients should be used for As Shot balance,all presets
+        should be divided by imgdata.color.cam_mul[] values (see below: <i><b>_USE_CORRECTION</b></i>
+        option adjusts this behaviour).</li>
+      <li><b>LIBRAW_ASWB_CANON</b> - this is Canon file with As shot already set
+        (Canon multi-exposure)</li>
+      <li><b>LIBRAW_ASWB_NIKON</b> -Nikon Multi-Exposure indication.</li>
+      <li><b>LIBRAW_ASWB_NIKON_SRAW</b> - Nikon Small RAW</li>
+      <li><b>LIBRAW_ASWB_PENTAX</b> -Pentax Multi-Exposure</li>
+      <li><b>LIBRAW_ASWB_SONY</b> - Sony Small/Medium RAW.</li>
+      <li><b>LIBRAW_ASWB_USE_CORRECTION</b> - this bit indicates, that applied
+        As Shot balance is not exactly the same as imgdata.color.cam_mul[]
+        balance, so additional correction is needed:</li>
+      <ul>
+        <li>For <b>As Shot</b> balance: use imgdata.color.as_shot_wb_corr[] WB
+          coefficients.</li>
+        <li>For presets (D65 preset from imgdata.color.pre_mul, or in-camera
+          presets from imgdata.color.WB_Coeffs/WBCT_coeffs, or any external
+          preset):&nbsp; WB coefficients should be divided by
+          imgdata.color.cam_mul[] and multiplied to
+          imgdata.color.as_shot_wb_corr[]</li>
+      </ul>
     </ul>
     <a href="index.html">[back to Index] </a>
   </body>

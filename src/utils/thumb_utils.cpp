@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -269,7 +269,7 @@ int LibRaw::thumbOK(INT64 maxsz)
   )
     return 0;
   INT64 fsize = ID.input->size();
-  if (fsize > 0xffffffffU)
+  if (fsize > 0xffffffffU && load_raw != &LibRaw::crxLoadRaw)
     return 0; // No thumb for raw > 4Gb-1
   int tsize = 0;
   int tcol = (T.tcolors > 0 && T.tcolors < 4) ? T.tcolors : 3;

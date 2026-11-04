@@ -1,7 +1,7 @@
 /* -*- C++ -*-
  * File: crx.cpp
  * Copyright (C) 2018-2019 Alexey Danilchenko
- * Copyright (C) 2019 Alex Tutubalin, LibRaw LLC
+ * Copyright (C) 2019-2026 Alex Tutubalin, LibRaw LLC
  *
    Canon CR3 file decoder
 

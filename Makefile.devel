@@ -8,7 +8,6 @@ CXX=clang++
 
 LDADD+=-lz
 
-CFLAGS=-DLIBRAW_USE_AUTOPTR
 CFLAGS+= -g -I. -pedantic -Wno-long-long -Wno-overflow -O3 -Wall
 
 # macOS dual arch
@@ -55,7 +54,7 @@ HEADERS=libraw/libraw.h libraw/libraw_alloc.h libraw/libraw_const.h \
 LIB_OBJECTS= object/libraw_datastream.o object/libraw_c_api.o \
   object/cameralist.o object/fuji_compressed.o \
   object/crx.o object/pana8.o object/olympus14.o \
-  object/fp_dng.o object/decoders_libraw.o \
+  object/nikonhe.o object/fp_dng.o object/decoders_libraw.o \
   object/sonycc.o object/sony_arw6.o object/losslessjpeg.o \
   object/unpack.o object/unpack_thumb.o \
   object/rawspeed_glue.o object/dngsdk_glue.o \
@@ -89,7 +88,7 @@ LIB_OBJECTS= object/libraw_datastream.o object/libraw_c_api.o \
 
 LIB_MT_OBJECTS= object/libraw_datastream.mt.o object/libraw_c_api.mt.o \
   object/cameralist.mt.o object/fuji_compressed.mt.o \
-  object/crx.mt.o object/pana8.mt.o \
+  object/crx.mt.o object/pana8.mt.o object/nikonhe.mt.o\
   object/olympus14.mt.o object/fp_dng.mt.o \
   object/sonycc.mt.o object/sony_arw6.mt.o object/losslessjpeg.mt.o \
   object/decoders_libraw.mt.o \
@@ -215,6 +214,10 @@ object/olympus14.o: src/decoders/olympus14.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/olympus14.o src/decoders/olympus14.cpp
 object/olympus14.mt.o: src/decoders/olympus14.cpp $(HEADERS)
 	${CXX} -c ${CFLAGS} -o object/olympus14.mt.o src/decoders/olympus14.cpp
+object/nikonhe.o: src/decoders/nikonhe.cpp
+	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/nikonhe.o src/decoders/nikonhe.cpp
+object/nikonhe.mt.o: src/decoders/nikonhe.cpp $(HEADERS)
+	${CXX} -c ${CFLAGS} -o object/nikonhe.mt.o src/decoders/nikonhe.cpp
 object/pana8.o: src/decoders/pana8.cpp
 	${CXX} -c -DLIBRAW_NOTHREADS  ${CFLAGS} -o object/pana8.o src/decoders/pana8.cpp
 object/pana8.mt.o: src/decoders/pana8.cpp $(HEADERS)

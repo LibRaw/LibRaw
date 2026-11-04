@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: libraw_types.h
- * Copyright 2008-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2008-2026 LibRaw LLC (info@libraw.org)
  * Created: Sat Mar  8 , 2008
  *
  * LibRaw C data structures
@@ -326,7 +326,7 @@ typedef unsigned long long UINT64;
     /* data compression curve
         0 = OFF  1 = CLogV1 2 = CLogV2? 3 = CLogV3 */
     int CanonLog;
-
+	int AsShotCT;
    libraw_area_t DefaultCropAbsolute;
    libraw_area_t RecommendedImageArea;   // contains the image in proper aspect ratio?
    libraw_area_t LeftOpticalBlack;       // use this, when present, to estimate black levels?
@@ -841,6 +841,7 @@ typedef unsigned long long UINT64;
                       8    "IIQ L16" (IIQ L16EX / IIQ L16)
                       */
 	int ExifColorSpace;
+	float as_shot_wb_corr[4];
   } libraw_colordata_t;
 
   typedef struct
@@ -988,6 +989,7 @@ typedef unsigned long long UINT64;
       char p4shot_order[5];
       /* Custom camera list */
       char **custom_camera_strings;
+	  int cr3_maxframes;
   }libraw_raw_unpack_params_t;
 
   typedef struct

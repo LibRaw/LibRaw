@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
 
  LibRaw is free software; you can redistribute it and/or modify
@@ -468,14 +468,19 @@ static const char *Hasselblad_SensorEnclosures[] = {
     if (!imHassy.SensorCode) imHassy.SensorCode = 17;
     if (!imHassy.CoatingCode) imHassy.CoatingCode = 5;
 
-  } else if (((raw_width == 11904) && (raw_height == 8842)) || // X2D 100C, CFV 100C
+  } else if (((raw_width == 11904) && (raw_height == 8842)) || // X2D 100C, CFV 100C, X2D II 100C
              ((raw_width == 11664) && (raw_height == 8750)) || // Adobe crop
              ((raw_width == 11656) && (raw_height == 8742))) { // Phocus crop
     strcpy(imHassy.Sensor, "-100c");
-    cpynorm("100-20-Coated6");
-    if (!imHassy.SensorCode) imHassy.SensorCode = 20;
-    if (!imHassy.CoatingCode) imHassy.CoatingCode = 6;
-
+		if (!strncmp(model, "X2D II 100C", 11)) {
+		  cpynorm("100-22-Coated6");
+    	if (!imHassy.SensorCode) imHassy.SensorCode = 22;
+    	if (!imHassy.CoatingCode) imHassy.CoatingCode = 6;
+		} else {
+    	cpynorm("100-20-Coated6");
+    	if (!imHassy.SensorCode) imHassy.SensorCode = 20;
+    	if (!imHassy.CoatingCode) imHassy.CoatingCode = 6;
+		}
   }
 
   if (raw_width == 4090)

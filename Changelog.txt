@@ -1,3 +1,231 @@
+2026-11-04   Alex Tutubalin <lexa@lexa.ru>
+
+ == LibRaw snapshot 202611 ==
+
+  === Camera format support:
+    Nikon HE/HE* format (Z6-III, Z8, Z9, Zf cameras)
+    Notes:
+
+    1) Memory usage: 
+      a) The RAW image section of the file being decoded is read directly into the intermediate memory buffer.
+      b) The decoder implements 3-pass processing (same as in camera vendor software).
+        Intermediate data for requires additional 8 bytes per final RAW image pixel.
+        So for 45Mpix Nikon Z9 image the size of the intermediate buffers is about 400 Mbytes (360 for intermediate buffers and about 40 for source RAW data).
+        Allocated buffers are freed after data decoding.
+    2) Parallel (multithreaded) decoding:
+       The decoding algorithm allows parallel processing with a very high degree of parallelism (several dozen independent tasks on each decoding sub-step).
+       For parallel decoding:
+        a) either use OpenMP
+	      b) or subclass LibRaw and re-implement/override internal decoding calls (LibRaw::nikonhe_decode_loop1..3) using threading tools you prefer.
+
+   === Camera support
+     Canon PowerShot V1, EOS R6 Mark III, EOS C50
+  	 FujiFilm GFX 100RF, X-E5, X-M5, X-T30 III
+     Nikon Z6 III, Z8, Z8, Z f: HE/HE* format support 
+     Nikon Z 5 II, ZR, Coolpix P1100
+     OM Digital Solutions OM-3, OM-5 Mark II
+     Panasonic DC-S1 II (DC-S1M2), DC-S1 IIE (DC-S1M2ES)
+  	 Ricoh GR IV
+     Sigma BF
+     Sony ILCE-7RM6 (A7R VI), ILCE-7M5 (A7 V), ILCE-6100A, ILCE-6400A, ILME-FX2, DSC-RX1R III, DSC-RX100 VIIA
+     Several smartfones w/ DNG recording (supported means 'tested' in DNG-format case)
+
+   === Special notes on CVE-2026-111272:
+    - (as described on author's page): This CVE report is based "only on static analysis" without attempting to reproduce the issue at runtime.
+    - In fact, "static analysis" failed: it assumes system calloc() use for memory allocation while LibRaw::calloc() is used in reality.
+    - So, "discovered" OOB-heap accesses by fixed offset(s) are not OOB, all accesses occur within the allocated buffer
+    - The author made no attempts to contact our team.
+    - Our attempts to contact him also went unanswered.
+    Summary: this is false positive and a very bad example of reporting a non-existent vulnerability without trying to contact the vendor.
+
+  === API/ABI change
+    * ABI/API change to ensure caller library version is the same as compiled
+      library version.
+      LibRaw constructor signature changed to:
+      LibRaw::LibRaw(unsigned int flags = LIBRAW_OPTIONS_NONE, unsigned caller_abi = LIBRAW_ABI_VERSION);
+      from:
+      LibRaw::LibRaw(unsigned int flags = LIBRAW_OPTIONS_NONE)
+
+      Unless explicitly specified, the caller_abi parameter is automatically set
+      to LIBRAW_ABI_VERSION, which is defined in libraw_version.h and
+      incremented whenever the LibRaw class interface changes.
+
+      When LibRaw::open_file() or LibRaw::open_datastream() is called, the
+      library validates the caller_abi value passed to the constructor against
+      the ABI version used during library compilation. If the two versions do
+      not match, the function returns the error code LIBRAW_VERSION_MISMATCH.
+
+      To enable this compatibility check, no changes to caller code are required.
+      Whether the default flags are used or the flags field is explicitly set,
+      the second parameter (caller_abi) defaults to LIBRAW_ABI_VERSION
+      automatically.
+
+      To disable this check: call LibRaw::LibRaw(LIBRAW_OPTIONS_NONE,0) (or use
+      different flags value if you need it).
+
+      static unsigned LibRaw::abi_version() returns library compile-time LIBRAW_ABI_VERSION value.
+      unsigned LibRaw::caller_abi_version() returns caller_abi value passed to LibRaw class instance.
+
+    * Panasonic decoder updated to new multi-tile layout
+      Note: internal variable naming has changed. If one implements own overrided 
+      (multi-threaded) pana8_decode_loop(), please use this tile count:
+      int ntiles = libraw_internal_data.unpacker_data.pana8.tile_c * libraw_internal_data.unpacker_data.pana8.tile_r;
+      instead of the old one:
+      int ntiles = libraw_internal_data.unpacker_data.pana8.stripe_count;
+
+    * LIBRAW_OWN_SWAB is now default for non-Windows/non-Mac systems.
+      To force use system-provided swab() call: define LIBRAW_SYSTEM_SWAB on build.
+      Motivation: there are several reports that Linux/Android swab() implementations
+      works incorrectly if input and output buffer(s) are the same.
+
+    * New/experimental implementation for Samsung V3 decoder (NX1, NX500, etc)
+      Use LIBRAW_RAWOPTIONS_LEGACY_SAMSUNG3_DECODER bit in imgdata.rawparams.options
+      to fallback to previous/legacy implementation.
+
+    * New bit in imgdata.rawparams.options: LIBRAW_RAWOPTIONS_PANASONIC_CROP_TO_USER_CROP
+  
+      If this bit is set: in-camera crop metadata is parsed into imgdata.sizes.raw_inset_crops[1]
+      (User crop) instead of 0th item (basic vendor crop). 
+      Recording in-camera crop into vendor crop duplicates behavior of Adobe tools.
+
+      Default: bit is not set, so in-camera crop data is parsed into imgdata.sizes.raw_inset_crops[0].
+      In this case, the processing of data from Panasonic cameras repeats the camera crop processing 
+      of other vendors' cameras.
+     New bit in imgdata.rawparams.options: LIBRAW_RAWOPTIONS_CANON_CHECK_ASSHOT_CCT
+ 
+     If this bit is set: LibRaw will analyze CR2/CR3/CRM file metadata to check if 
+     white balance was already applied and will set imgdata.color.as_shot_wb_applied
+     accordingly.
+     Note: tested with very small amount of files, should not be used as default.
+
+    * (Old) olympus_load_raw() decoder has been removed: the new 14-bit capable one 
+      handles 12-bit case too 
+
+    * Experimental/optional feature:
+      New bit in imgdata.rawparams.options: LIBRAW_RAWOPTIONS_CR3_DYNAMIC_FRAME_LIMIT
+      and additional parameters: imgdata.rawparams.cr3_maxframes
+  
+      If this bit is set and imgdata.rawparams.cr3_maxframes is set to positive value:
+        - file size check for CR3/CRM files is turned off, any file size allowed;
+        - number of image frames (per track) is limited by cr3_maxframes value.
+        imgdata.rawparams.cr3_maxframes is initialized 256, library user may adjust it
+        before LibRaw::open_file() call.
+
+      If this bit is not set (default): file size is limited to compile-time defined 
+        LIBRAW_MAX_CR3_RAW_FILE_SIZE (default: 2GB), frame track count is limited to 1000000.
+
+    * Improved support for files with white balance applied in the camera
+    (different small-RAW flavours, multi-shot frames, etc):
+      a) For such files imgdata.color.as_shot_wb_corr[4] contains adjusted 'As shot'
+        balance that should be applied in 'As shot WB' rendeding mode
+        (these multipliers are different from camera-recorded 'As shot'
+        balance in imgdata.color.cam_mul which refers to
+        unprocessed/unaltered RAW data)
+
+      b) new bit in imgdata.color.as_shot_wb_applied: LIBRAW_ASWB_USE_CORRECTION
+        indicates that correction to WB should be applied.
+
+      How to use it:
+        a) For 'As shot' balance:
+          if LIBRAW_ASWB_APPLIED bit is set in imgdata.color.as_shot_wb_applied:
+              if LIBRAW_ASWB_USE_CORRECTION is set in this datafield
+                => use imgdata.color.as_shot_wb_corr[4] as WB coefficients
+              else
+                => use 1.0-1.0-1.0 white balance
+          else (LIBRAW_ASWB_APPLIED is not set)
+            => use imgdata.color.cam_mul[]  coefficients
+        b) For any preset balance (D65 as in imgdata.color.pre_mul, or any
+          preset in imgdata.color.WB_Coeffs/WBCT_coeffs, or any external preset:
+
+          if LIBRAW_ASWB_APPLIED bit is set in imgdata.color.as_shot_wb_applied:
+              if LIBRAW_ASWB_USE_CORRECTION is set in this datafield
+                => preset_coeff[c] = preset_coeff[c]/imgdata.color.cam_mul[c] * imgdata.color.as_shot_wb_corr[c]
+              else
+                => preset_coeff[c] = preset_coeff[c]/imgdata.color.cam_mul[c]
+          else (LIBRAW_ASWB_APPLIED is not set)
+            => use preset as is
+
+        c) For 'Auto' white balance: no changes needed, Auto is calculated from
+          real frame data.
+
+
+   ===  Fixes included to this snapshot:
+   * X-Trans/half interpolation: find green  pixel based on CFA pattern, not pixel values
+   * xtrans_interpolate: fix logic error, interpolation should use original pixel values, not ones adjusted on previous tile. Note: 2x image memory needed
+   * mask decodecache index in Sony YCbCr decoder
+   * Better gps ref recording
+   * tiff_head: perform strip bytes calculation in 64 bit, check against 2^31-1
+   * CRX decoder: use 64 bit offsets in data
+   * lossless DNG/SOF1-IDCT case: refuse images with tiff_samples > 1
+   * x3f camf matrix setup: size check
+   * implement explicit 6-bit mask on shift argument in pana8 decoder
+   * CRX decoder: clamp qParam table index in legacy quantization path
+   * allocated image size data check implemented in x3f loaded
+   * additional offset check in x3f thumbnail loader
+   * fixed wrong 32=>64 bit conversion in CIFF parser
+   * dng: initialize tone-curve table before OpcodeList2 parsing
+   * Init hassy's tmp_model w/ zeroes
+   * better Hasselblad model parsing
+   * explicitly initialize _fsize for bigfile datastream
+   * add stream validity check before cr3 size checking
+   * parse_kodak_ifd: fixed possible body name overrun
+   * unset progress bit if open stage failed
+   * X3F utils: data size check added
+   * wavelet denoise/OpenMP case: add missed size initialization
+   * Check for valid float/double in getreal
+   * CRX decoder: prevent possible index overrun on damaged files
+   * Fixed 6yr old typos in USE_6BY9RPI 8- and 16-bit decoders
+   * trimSpaces: Improved handling of zero-length strings and strings consisting only of spaces
+   * Fix links to license files in contributing document
+   * removeExcessiveSpaces: handle zero-length strings the right way
+   * Zero read buffers before fread
+   * FP DNG loader: check for tile index; convertFloatToInt: avoid possible integer overflow
+   * open_bayer(): reject images with raw size/visible size less than 22 (as in open_file/identify); vng_interpolate: do not interpolate images less than 8x8
+   * PPM16 thumb: check against LIBRAW_MAX_THUMBNAIL_MB
+   * open_bayer(): additional input data checks
+   * Olympus/14bit: refuse incorrect wbits metadata
+   * X3F decoder: initialise raw storage if LIBRAW_CALLOC_RAWSTORE defined
+   * crx decoder: check plane size agains imgdata.rawparams.max_raw_memory_mb
+   * Crx decoder: avoid possible int32 overflow on allocation size calculations
+   * check for ifd->bps values in FP DNG decoder
+   * fixed stack memory/previous image metadata exposure (reported by DMSAN)
+   * LibRaw_memmgr: allow malloc to fail on local pointer array small allocation. It will definitely fall later on large-buffer allocation
+   * rotated fuji: stricter image size limits; raw2image(ex): avoid possible 32-bit overflow on alloc size calculations
+   * wavelet denoise: ensure allocation size not exceed 4GB
+   * unpack_thumb:  check JPEG thumbnail size before performing allocation;  Remove all allocation test results because LibRaw::calloc/malloc will raise exception if allocation fails
+   * removed row_stride signed/unsigned mix; check row_stride value against buffer size
+   * fixed possible next struct item override in x3f_parse
+   * parse_phase_one: prevent buffer overrun if incorrect flat field data provided
+   * Limit parse_mos recursion depth; parse_qt: raise exception, do not hide too depth nesting error
+   * parse_qt: avoid too deep recursion
+   * Limit strcat space in hassy model manipulation
+   * CR3 parser: zero all buffers before fread
+   * skip memory allocation checks for OWN_ALLOC decoders
+   * DNG SDK glue: check for memory limits
+   * raw2image()/dcraw_process(): check for int16 source data present
+   * Check for correct bayer pattern, pass incorect ones to vng_interpolate
+   * parse_rollei: zero input string before fgets
+   * Nikon padded/12bit: no need to calculate padded row size before final raw_width adjustment
+   * TALOS-2026-2364: Fix for data size calculation integer overflow in float/deflated DNG loader; Check for read results
+   * Fix for TALOS-2026-2363: avoid integer overflow in allocation size calculation. Also: check for EOF in read loop
+   * X3F decoder: implemented hard single allocation limit via LIBRAW_X3F_ALLOC_LIMIT_MB define; 
+    allocation size calculation converted to 64 bit arithm; fix for TALOS-2026-2359
+   * Fix for TALOS-2026-2358
+   * Fix for TALOS-2026-2331
+   * Fix for TALOS-2026-2330
+   * Sony YCC decoder: check tile size; add +3 bytes to input buffer to avoid possible overrun in huffman decoder
+   * FP DNG data limit: perform calculations in 64 bit
+   * Add extra huff_coeff item to handle huff_index==17 with known (zero) value, not externally provided tag value
+   * use %lld format for timestamp parse/print where appropriate
+   * nikon coolscan loader: check for EOF
+   * Initialize olympus lensID bits
+   * CR3 parser: all file offsets are unsigned/64bit; check current offset against file size
+   * Check real color count against filters; do not pass really 4-color images to fbdd or advanced demosaic
+   * Use LIBRAW_EXCEPTION instead of own internal in losslessjpeg.h
+   * zero input string to avoid compare random stack garbage with tag names
+   * Check for eof in Pentax tag search loop
+   * Fuji decoder: initialize allocated buffers
+
 2025-12-25  Alex Tutubalin <lexa@lexa.ru>
 
   LibRaw 0.22 Release (Changelog relative to 0.21-release)

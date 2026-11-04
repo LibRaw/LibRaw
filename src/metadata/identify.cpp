@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
  LibRaw uses code from dcraw.c -- Dave Coffin's raw photo decoder,
  dcraw.c is copyright 1997-2018 by Dave Coffin, dcoffin a cybercom o net.
@@ -269,11 +269,16 @@ void LibRaw::identify()
 	  { 7128, 4732, 144, 72, 0, 0 }, // 49 "EOS M6 II", "EOS 90D"
 	  { 8896, 5920, 160, 64, 0, 0 }, // 50 "EOS 5DS", "EOS 5DS R"
 	  { 6192, 4152, 160, 120, 0, 0}, // EOS R3
-	  { 6192, 4060, 168, 52, 24, 8, 16,48,32,0}, // EOS R10
+	  { 6192, 4060, 144, 40, 0,0}, // EOS R10, R50, R50V
+	  //{ 6192, 4060, 168, 52, 24, 8, 16,48,32,0}, // EOS R10
 	  { 6188, 4120, 154, 96, 12, 0, 16, 48, 32, 0}, // EOS R6mk2
+	  { 3936, 2612, 154, 96, 0, 0}, // EOS R6mk2 APS
 	  { 8480, 5650, 258, 162, 0, 0, 128, 2, 128, 0}, // EOS R5mk2, FF
 	  { 5376, 3574, 258, 162, 0, 0, 128, 2, 128, 0}, // EOS R5mk2, APS
 	  { 6160, 4144, 128, 120, 0, 0}, // EOS R1, FF
+	  { 5928, 3944, 144, 80, 0, 0}, // PowerShot V1
+	  { 7144, 4760, 158, 96, 0, 0}, // EOS C50 && EOS R6mk3
+	  { 4512, 2994, 160, 96, 0, 0}, // EOS R6mk3 crop
   };
 
   static const libraw_custom_camera_t const_table[] = {
@@ -483,8 +488,10 @@ void LibRaw::identify()
               imCommon.exifAmbientTemperature = -1000.0f;
 
   imCanon.AutoRotateMode = 1; // Camera+Computer
+  imCanon.AsShotCT = 5200; // 
 
   libraw_internal_data.unpacker_data.ifd0_offset = -1LL;
+  FORC4 imgdata.color.as_shot_wb_corr[c] = 1.0f;
 
   imgdata.color.ExifColorSpace = LIBRAW_COLORSPACE_Unknown;
   for (i = 0; i < LIBRAW_IFD_MAXCOUNT; i++)
@@ -532,7 +539,15 @@ void LibRaw::identify()
 
   fseek(ifp, 0, SEEK_END);
   flen = fsize = ftell(ifp);
-  if(fsize > LIBRAW_MAX_NONDNG_RAW_FILE_SIZE && fsize > LIBRAW_MAX_DNG_RAW_FILE_SIZE 
+
+  bool checkcr3 = true;
+  if (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_CR3_DYNAMIC_FRAME_LIMIT)
+  {
+    if (!memcmp((unsigned char *)head + 4, "ftypcrx ", 8))
+      checkcr3 = false;
+  }
+
+  if(checkcr3 && fsize > LIBRAW_MAX_NONDNG_RAW_FILE_SIZE && fsize > LIBRAW_MAX_DNG_RAW_FILE_SIZE 
 	  && fsize > LIBRAW_MAX_CR3_RAW_FILE_SIZE)
       throw LIBRAW_EXCEPTION_TOOBIG;
 
@@ -724,7 +739,7 @@ void LibRaw::identify()
   }
   else if (load_raw == &LibRaw::crxLoadRaw)
   {
-    if (fsize > LIBRAW_MAX_CR3_RAW_FILE_SIZE)
+    if (checkcr3 && fsize > LIBRAW_MAX_CR3_RAW_FILE_SIZE)
       throw LIBRAW_EXCEPTION_TOOBIG;
   }
   else
@@ -2289,7 +2304,7 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
 				black *= 4;
 				FORC(4) cblack[c] *= 4;
 				FORC(4) imgdata.color.linear_max[c] *= 4;
-				FORC(MIN(cblack[4] * cblack[5], LIBRAW_CBLACK_SIZE - 6)) cblack[c] *= 4;
+				FORC(MIN(cblack[4] * cblack[5], LIBRAW_CBLACK_SIZE - 6)) cblack[c+6] *= 4;
 			}
 
 
@@ -2412,13 +2427,13 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
             break;
 		  }
 		  break;
-      case 6336: // X-H2S
+      case 6336: // X-H2S, XT30-III
 		  switch (FujiCropMode)
 		  {
           case 0: // no crop
             top_margin = 6;
             left_margin = 0;
-			if(!strcasecmp(model,"X-S20"))
+			if(!strcasecmp(model,"X-S20") || !strcasecmp(model, "X-T30 III"))
               width = 6252;
 			else
 				width = 6264;
@@ -2800,20 +2815,12 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
 			top_margin = 108;
 			height = raw_height - top_margin;
 		}
-        else if ((imHassy.SensorCode == 20) && imHassy.uncropped)
-        { // Hasselblad X2D-100c, CFV-100c
+		else if (((imHassy.SensorCode == 20)|| (imHassy.SensorCode == 22)) && imHassy.uncropped) { // Hasselblad X2D-100c, 100c-II CFV-100c
 			left_margin = 124;
 			width = 11664;
 			top_margin = 92;
 			height = raw_height - top_margin;
-        }
-        else if ((imHassy.SensorCode == 22) && imHassy.uncropped)
-        { // Hasselblad X2D II-100c (sensor code from makernotes)
-			left_margin = 124;
-			width = 11664;
-			top_margin = 92;
-			height = raw_height - top_margin;
-        }
+		}
 
 		if (tiff_samples > 1)
 		{
@@ -2981,6 +2988,7 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
 		}
         else if ((unique_id == SonyID_ILCE_7RM5) ||
                  (unique_id == SonyID_ILCE_7CR)  ||
+				(unique_id == SonyID_DSC_RX1RM3) || // only Lossless/FF samples for now
                  (unique_id == SonyID_ILX_LR1))
         {
           if (raw_width == 6304)
@@ -3104,7 +3112,7 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
             height = 2846;
           }
         }
-        else if((unique_id == SonyID_ILCE_1) || (unique_id == SonyID_ILCE_1M2) )
+        else if((unique_id == SonyID_ILCE_1) || (unique_id == SonyID_ILCE_1M2))
         {
           if (raw_width == 8704 && raw_height == 6144) // ILCE-1 FF@Compressed
           {
@@ -3139,7 +3147,55 @@ void LibRaw::identify_finetune_dcr(char head[64], INT64 fsize, INT64 flen)
 
 		  /* need samples for lossy small/medium w/ APC crop*/
         }
-        else if ((unique_id == SonyID_ILCE_7M4) || (unique_id == SonyID_ILCE_7CM2) || (unique_id == SonyID_ILME_FX2) || (unique_id == SonyID_ILCE_7M5))
+        else if (unique_id == SonyID_ILCE_7M5)
+		{
+			if (raw_width == 7168 && raw_height == 5120) // FF, lossless
+			{
+              width = 7028;
+              height = 4688;
+			}
+            else if (raw_width == 7040) // FF compressed/compressedHQ
+            {
+              width -= 12;
+            }
+			else if (raw_width == 5120 && raw_height == 3584) // APS-C, lossless
+			{
+              width = 4628;
+              height = 3088;
+			}
+			else if (raw_width == 4640) // APS-C Compressed/CompressedHQ
+			{
+              width -= 12;
+			}
+			else
+              imgdata.process_warnings |= LIBRAW_WARN_VENDOR_CROP_SUGGESTED;
+		}
+		else if (unique_id == SonyID_ILCE_7RM6)
+		{
+          if (raw_width == 10240 && raw_height == 7168) // FF, lossless
+          {
+            width = 10002;
+            height = 6668; // ensure 2:3
+          }
+          else if (raw_width == 10016 && raw_height == 6672) // FF, Compressed
+          {
+            width = 10002;
+            height = 6668; // ensure 2:3
+          }
+          else if (raw_width == 6656 && raw_height == 4608) // APS, Lossless
+          {
+            width = 6540;
+            height = 4360; // ensure 2:3
+          }
+          else if (raw_width == 6592 && raw_height == 4372) // APS, Compressed
+          {
+            width = 6540;
+            height = 4360; // ensure 2:3
+          }
+          else
+            imgdata.process_warnings |= LIBRAW_WARN_VENDOR_CROP_SUGGESTED;
+		}
+		else if ((unique_id == SonyID_ILCE_7M4)|| (unique_id == SonyID_ILCE_7CM2) || (unique_id == SonyID_ILME_FX2))
         {
           if (raw_width == 7168 && raw_height == 5120) 
           {

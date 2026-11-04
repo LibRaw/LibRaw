@@ -31,7 +31,7 @@ SOURCES+= ../src/libraw_datastream.cpp ../src/decoders/canon_600.cpp \
 	../src/decoders/decoders_libraw_dcrdefs.cpp ../src/decoders/pana8.cpp \
 	../src/decompressors/losslessjpeg.cpp ../src/decoders/sonycc.cpp \
 	../src/decoders/sony_arw6.cpp \
-	../src/decoders/olympus14.cpp \
+	../src/decoders/olympus14.cpp ../src/decoders/nikonhe.cpp \
 	../src/decoders/decoders_libraw.cpp ../src/decoders/dng.cpp \
 	../src/decoders/fp_dng.cpp ../src/decoders/fuji_compressed.cpp \
 	../src/decoders/generic.cpp ../src/decoders/kodak_decoders.cpp \

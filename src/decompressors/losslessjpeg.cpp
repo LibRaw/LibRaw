@@ -1,6 +1,6 @@
 /* -*- C++ -*-
  * File: huffmandec.cpp
- * Copyright (C) 2024-2025 Alex Tutubalin, LibRaw LLC
+ * Copyright (C) 2024-2026 Alex Tutubalin, LibRaw LLC
  *
    Lossless JPEG decoder
 
@@ -21,7 +21,7 @@ it under the terms of the one of two licenses as you choose:
 #include "../../internal/losslessjpeg.h"
 #include <string.h>
 
-#define ZERO(a) do { memset(a,0,sizeof(a));} while(0)
+#define _ZERO(a) do { memset(a,0,sizeof(a));} while(0)
 
 bool ByteStreamBE::skip_to_marker() // true: success, false - no marker
 {
@@ -55,8 +55,8 @@ void LibRaw_LjpegDecompressor::initialize(bool dngbug, bool csfix)
 	bool dht_init[4] = { false,false,false,false };
 	uint32_t dht_bits[4][17];
 	uint32_t dht_huffval[4][256];
-	ZERO(dht_bits);
-    ZERO(dht_huffval);
+	_ZERO(dht_bits);
+    _ZERO(dht_huffval);
     if (next_marker(false) != Marker::SOI)
     {
       state = State::NoSOI;
@@ -313,9 +313,9 @@ uint32_t LibRaw_SOFInfo::parse_sos(ByteStreamBE& input)
 
 HuffTable::HuffTable()
 {
-	ZERO(bits);
-	ZERO(huffval);
-	ZERO(shiftval);
+	_ZERO(bits);
+	_ZERO(huffval);
+	_ZERO(shiftval);
 	dng_bug = false;
 	disable_cache = false;
 	nbits = 0;

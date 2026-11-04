@@ -1,5 +1,5 @@
 /* -*- C++ -*-
- * Copyright 2019-2025 LibRaw LLC (info@libraw.org)
+ * Copyright 2019-2026 LibRaw LLC (info@libraw.org)
  *
  LibRaw is free software; you can redistribute it and/or modify
  it under the terms of the one of two licenses as you choose:
@@ -563,7 +563,8 @@ uchar *cj_block, *ck_block;
       }
       stmread (imNikon.PictureControlName, 20, ifp);
       stmread (imNikon.PictureControlBase, 20, ifp);
-      if (!strncmp(imNikon.PictureControlBase, "STANDARD(HLG)", 13))
+      if (strstr(imNikon.PictureControlBase, "(HLG)"))
+      // if (!strncmp(imNikon.PictureControlBase, "STANDARD(HLG)", 13))
       {
         imCommon.ExposureCalibrationShift -= 2;
       }

@@ -151,6 +151,7 @@
     <ClCompile Include="..\src\decoders\crx.cpp" />
     <ClCompile Include="..\src\decoders\pana8.cpp" />
     <ClCompile Include="..\src\decoders\olympus14.cpp" />
+    <ClCompile Include="..\src\decoders\nikonhe.cpp" />
     <ClCompile Include="..\src\decoders\sonycc.cpp" />
     <ClCompile Include="..\src\decoders\sony_arw6.cpp" />
     <ClCompile Include="..\src\decompressors\losslessjpeg.cpp" />
