@@ -23,7 +23,7 @@ it under the terms of the one of two licenses as you choose:
 #define LIBRAW_MAJOR_VERSION 0
 #define LIBRAW_MINOR_VERSION 23
 #define LIBRAW_PATCH_VERSION 0
-#define LIBRAW_VERSION_TAIL WorkInProgress
+#define LIBRAW_VERSION_TAIL Snapshot202611
 
 #define LIBRAW_SHLIB_CURRENT 27
 #define LIBRAW_SHLIB_REVISION 0
