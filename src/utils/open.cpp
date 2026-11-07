@@ -411,6 +411,8 @@ int LibRaw::open_bayer(const unsigned char *buffer, unsigned datalen,
   return LIBRAW_SUCCESS;
 }
 
+#ifdef USE_X3FTOOLS
+
 struct foveon_data_t
 {
   const char *make;
@@ -513,6 +515,8 @@ struct foveon_data_t
     {"Sigma", "sd Quattro H", 5504, 3680, 4000, 0, 4, 5496, 3668}, // full size
     {"Sigma", "sd Quattro H", 2752, 1840, 4000, 0, 2, 2748, 1834}, // half size
 };
+const int foveon_count = sizeof(foveon_data) / sizeof(foveon_data[0]);
+#endif
 
 int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
 {
