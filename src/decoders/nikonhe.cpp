@@ -1029,7 +1029,7 @@ err_code_t nikonhe_init_image_data(nikonhe_image *img)
                 width[comp][v_lvl][0] = (w + 3) >> 2;
                 img->odd_ofs[comp][v_lvl][h_lvl_max_per_v_lvl[v_lvl]] = 32 * ((width[comp][v_lvl][0] + 7) >> 3);
                 for (int h_lvl = h_lvl_max_per_v_lvl[v_lvl]; h_lvl > 0; --h_lvl)
-                    img->skip_decomp[18 * comp + 3 + 6 * v_lvl + h_lvl] =
+		    img->odd_ofs[comp][v_lvl][h_lvl - 1] =
                         32 * ((width[comp][v_lvl][h_lvl_max_per_v_lvl[v_lvl] - h_lvl + 1]
                                + 7) >> 3)
                         + img->odd_ofs[comp][v_lvl][h_lvl];
