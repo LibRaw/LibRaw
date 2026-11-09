@@ -13,6 +13,10 @@
  */
 
 #include "../../internal/dcraw_defs.h"
+#include "../../internal/losslessjpeg_lut.h"
+#include <algorithm>
+#include <deque>
+#include <vector>
 
 
 void LibRaw::packed_tiled_dng_load_raw()
@@ -72,11 +76,241 @@ void LibRaw::packed_tiled_dng_load_raw()
 }
 
 
+/*
+   Sony compressed (tiled lossless JPEG) ARW: tile-parallel decoder.
+
+   Tile headers and Huffman tables are read serially with ljpeg_start(). The
+   entropy-coded data of each tile is then read into memory and decoded
+   without the shared input stream and getbits() state, in parallel with
+   OpenMP. Only streams that ljpeg_row() decodes without any warning are
+   accepted (4 components, no subsampling, no restart markers, predictor
+   1..7, valid codes, no value overflow, no bitstream overrun); otherwise
+   sony_ljpeg_load_raw() runs the original serial decoder, so output and
+   error reporting are unchanged.
+*/
+
+namespace
+{
+// LibRaw_ljpeg_lut::build() input from a make_decoder() table
+struct sony_lj_dcraw_code
+{
+  const ushort *huff;
+  unsigned operator()(unsigned prefix, int nb) const
+  {
+    const int max = huff[0];
+    return nb >= max ? huff[1 + (prefix >> (nb - max))] : huff[1 + (prefix << (max - nb))];
+  }
+};
+
+// Lookup tables for the distinct Huffman tables of a file (Sony uses one)
+struct sony_lj_tables
+{
+  std::deque<LibRaw_ljpeg_lut> luts; // deque: addresses stay valid
+  std::deque<std::vector<ushort>> src;
+  const LibRaw_ljpeg_lut *get(const ushort *huff)
+  {
+    const size_t n = 1 + (size_t(1) << huff[0]);
+    for (size_t i = 0; i < src.size(); i++)
+      if (src[i].size() == n && !memcmp(src[i].data(), huff, n * sizeof(ushort)))
+        return &luts[i];
+    if (src.size() >= 64)
+      return 0;
+    sony_lj_dcraw_code code = {huff};
+    luts.push_back(LibRaw_ljpeg_lut());
+    luts.back().build(code);
+    src.push_back(std::vector<ushort>(huff, huff + n));
+    return &luts.back();
+  }
+};
+
+struct sony_lj_tile
+{
+  INT64 data, size; // entropy-coded data in the file
+  unsigned row, col;
+  int bits, high, wide, psv;
+  const LibRaw_ljpeg_lut *lut[4];
+};
+
+// Decode one tile into raw_image (same arithmetic as ljpeg_row_unrolled());
+// returns 0 on success
+static int sony_lj_decode_tile(const sony_lj_tile &t, const uchar *d, size_t size, std::vector<ushort> &rows,
+                               ushort *raw, size_t pitch, unsigned rwidth, unsigned rheight)
+{
+  const int W = t.wide * 4;
+  rows.resize(size_t(W) * 2);
+  LibRaw_ljpeg_bits b(d, d + size);
+  int vpred[4], err = 0, c;
+  FORC4 vpred[c] = 1 << (t.bits - 1);
+  for (unsigned jrow = 0, row = 0; jrow < (unsigned)t.high && t.row + row < rheight - 1; jrow++, row += 2)
+  {
+    ushort *cur = &rows[(jrow & 1) * W], *prev = &rows[((jrow + 1) & 1) * W];
+    unsigned ovf = 0;
+    FORC4
+    {
+      int diff = t.lut[c]->decode(b, err);
+      int pred = (vpred[c] += diff) - diff;
+      cur[c] = ushort(pred + diff);
+      ovf |= cur[c];
+    }
+    if (!jrow || t.psv == 1)
+    {
+      for (int i = 4; i < W; i++)
+      {
+        cur[i] = ushort(cur[i - 4] + t.lut[i & 3]->decode(b, err));
+        ovf |= cur[i];
+      }
+    }
+    else
+    {
+      for (int i = 4; i < W; i++)
+      {
+        int diff = t.lut[i & 3]->decode(b, err);
+        int pred = cur[i - 4], up = prev[i], ul = prev[i - 4];
+        switch (t.psv)
+        {
+        case 2:
+          pred = up;
+          break;
+        case 3:
+          pred = ul;
+          break;
+        case 4:
+          pred = pred + up - ul;
+          break;
+        case 5:
+          pred = pred + ((up - ul) >> 1);
+          break;
+        case 6:
+          pred = up + ((pred - ul) >> 1);
+          break;
+        case 7:
+          pred = (pred + up) >> 1;
+          break;
+        }
+        cur[i] = ushort(pred + diff);
+        ovf |= cur[i];
+      }
+    }
+    // invalid code, value overflow (derror() in ljpeg_row) or bitstream
+    // overrun: leave it to the original decoder
+    if (err || (ovf >> t.bits) || b.overrun())
+      return 1;
+    ushort(*rowp)[4] = (ushort(*)[4])cur;
+    for (unsigned col = 0, jcol = 0; jcol < (unsigned)t.wide && t.col + col < rwidth - 1; jcol++, col += 2)
+    {
+      ushort *r0 = raw + size_t(t.row + row) * pitch + t.col + col;
+      r0[0] = rowp[jcol][0];
+      r0[1] = rowp[jcol][1];
+      r0[pitch] = rowp[jcol][2];
+      r0[pitch + 1] = rowp[jcol][3];
+    }
+  }
+  return 0;
+}
+} // namespace
+
+bool LibRaw::sony_ljpeg_load_raw_tiles()
+{
+  if (tile_width < 16 || tile_length < 16 || tile_width > 0x10000 || tile_length > 0x10000 || !raw_image ||
+      raw_width < 2 || raw_height < 2)
+    return false;
+  const unsigned tiles_x = (raw_width + tile_width - 1) / tile_width;
+  const unsigned tiles_y = (raw_height + tile_length - 1) / tile_length;
+  if (INT64(tiles_x) * INT64(tiles_y) > 0x10000)
+    return false;
+  const int ntiles = int(tiles_x * tiles_y);
+  const INT64 fsize = ifp->size();
+  std::vector<INT64> offs(ntiles);
+  for (int i = 0; i < ntiles; i++)
+  {
+    offs[i] = get4();
+    if (offs[i] <= 0 || offs[i] >= fsize)
+      return false;
+  }
+  std::vector<INT64> sorted(offs);
+  std::sort(sorted.begin(), sorted.end());
+
+  // Serial: tile headers and Huffman tables
+  std::vector<sony_lj_tile> tiles(ntiles);
+  sony_lj_tables tables;
+  for (int i = 0; i < ntiles; i++)
+  {
+    sony_lj_tile &t = tiles[i];
+    struct jhead jh;
+    fseek(ifp, offs[i], SEEK_SET);
+    if (!ljpeg_start(&jh, 0))
+      return false;
+    bool ok = jh.algo == 0xc3 && jh.clrs == 4 && !jh.sraw && jh.restart == INT_MAX && jh.bits >= 1 && jh.psv >= 1 &&
+              jh.psv <= 7 && INT64(jh.high) * jh.wide < INT_MAX;
+    try
+    {
+      for (int c = 0; ok && c < 4; c++)
+        ok = (t.lut[c] = (c && jh.huff[c] == jh.huff[c - 1]) ? t.lut[c - 1] : tables.get(jh.huff[c])) != 0;
+    }
+    catch (...)
+    {
+      ok = false;
+    }
+    t.data = ftell(ifp);
+    t.row = (i / tiles_x) * tile_length;
+    t.col = (i % tiles_x) * tile_width;
+    t.bits = jh.bits;
+    t.high = jh.high;
+    t.wide = jh.wide;
+    t.psv = jh.psv;
+    ljpeg_end(&jh);
+    // Data ends at the next tile, capped at 4 bytes per pixel (more than any
+    // real tile needs); a tile that does not fit is left to the original decoder
+    std::vector<INT64>::iterator nx = std::upper_bound(sorted.begin(), sorted.end(), offs[i]);
+    INT64 end = MIN(fsize, offs[i] + INT64(tile_width) * INT64(tile_length) * 4 + 0x10000);
+    if (nx != sorted.end() && *nx < end)
+      end = *nx;
+    t.size = end - t.data;
+    if (!ok || t.size <= 0)
+      return false;
+  }
+
+  // Parallel: entropy-coded data
+  checkCancel();
+  std::vector<char> bad(ntiles, 0);
+  const size_t pitch = raw_pitch / 2;
+#ifdef LIBRAW_USE_OPENMP
+#pragma omp parallel
+#endif
+  {
+    std::vector<uchar> buf;
+    std::vector<ushort> rows;
+#ifdef LIBRAW_USE_OPENMP
+#pragma omp for schedule(dynamic)
+#endif
+    for (int i = 0; i < ntiles; i++)
+    {
+      try
+      {
+        buf.resize(size_t(tiles[i].size));
+        bad[i] = read_at(tiles[i].data, buf.data(), buf.size()) != int(buf.size()) ||
+                 sony_lj_decode_tile(tiles[i], buf.data(), buf.size(), rows, raw_image, pitch, raw_width, raw_height);
+      }
+      catch (...)
+      {
+        bad[i] = 1;
+      }
+    }
+  }
+  checkCancel();
+  return std::find(bad.begin(), bad.end(), 1) == bad.end();
+}
+
 void LibRaw::sony_ljpeg_load_raw()
 {
   unsigned trow = 0, tcol = 0, jrow, jcol, row, col;
   INT64 save;
   struct jhead jh;
+
+  const INT64 start = ftell(ifp);
+  if (sony_ljpeg_load_raw_tiles())
+    return;
+  fseek(ifp, start, SEEK_SET);
 
   while (trow < raw_height)
   {
