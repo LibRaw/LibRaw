@@ -170,6 +170,8 @@ struct CrxImage
   uint64_t mdatSize;
   int16_t *outBufs[4]; // one per plane
   int16_t *planeBuf;
+  uint64_t outBuf_lim;
+  uint64_t planeBuf_lim;
   LibRaw_abstract_datastream *input;
 #ifdef LIBRAW_CR3_MEMPOOL
   libraw_memmgr memmgr;
@@ -1656,7 +1658,7 @@ void crxFreeSubbandData(CrxImage *image, CrxPlaneComp *comp)
   }
 }
 
-void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plane = 0, int32_t *lineData = 0,
+int crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plane = 0, int32_t *lineData = 0,
                          int lineLength = 0)
 {
   if (lineData)
@@ -1664,6 +1666,8 @@ void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plan
     uint64_t rawOffset = 4ULL * uint64_t(img->planeWidth) * uint64_t(imageRow) + 2ULL * uint64_t(imageCol);
     if (img->encType == 1)
     {
+	  if (rawOffset + lineLength > img->outBuf_lim)
+		return -1;
       int32_t maxVal = 1 << (img->nBits - 1);
       int32_t minVal = -maxVal;
       --maxVal;
@@ -1674,6 +1678,8 @@ void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plan
     {
       // copy to intermediate planeBuf
       rawOffset = plane * img->planeWidth * img->planeHeight + img->planeWidth * imageRow + imageCol;
+      if (rawOffset + lineLength > img->planeBuf_lim)
+        return -1;
       for (int i = 0; i < lineLength; i++)
         img->planeBuf[rawOffset + i] = lineData[i];
     }
@@ -1681,6 +1687,8 @@ void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plan
     {
       int32_t median = 1 << (img->nBits - 1);
       int32_t maxVal = (1 << img->nBits) - 1;
+      if (rawOffset + lineLength > img->outBuf_lim)
+        return -1;
       for (int i = 0; i < lineLength; i++)
         img->outBufs[plane][rawOffset + 2 * i] = _constrain(median + lineData[i], 0, maxVal);
     }
@@ -1689,6 +1697,8 @@ void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plan
       int32_t maxVal = (1 << img->nBits) - 1;
       int32_t median = 1 << (img->nBits - 1);
       rawOffset = img->planeWidth * imageRow + imageCol;
+      if (rawOffset + lineLength > img->outBuf_lim)
+        return -1;
       for (int i = 0; i < lineLength; i++)
         img->outBufs[0][rawOffset + i] = _constrain(median + lineData[i], 0, maxVal);
     }
@@ -1700,6 +1710,10 @@ void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plan
     int16_t *plane1 = plane0 + planeSize;
     int16_t *plane2 = plane1 + planeSize;
     int16_t *plane3 = plane2 + planeSize;
+
+	int64_t planemaxoffset = int64_t(imageRow * img->planeWidth) + 3 * planeSize + img->planeWidth;
+	if (planemaxoffset > img->planeBuf_lim)
+		return -1;
 
     int32_t median = (1 << (img->medianBits - 1)) << 10;
     int32_t maxVal = (1 << img->medianBits) - 1;
@@ -1729,6 +1743,7 @@ void crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plan
       img->outBufs[3][rawLineOffset + 2 * i] = _constrain(val, 0, maxVal);
     }
   }
+  return 0;
 }
 
 int crxParamInit(CrxImage *img, CrxBandParam **param, uint64_t subbandMdatOffset, uint64_t subbandDataSize,
@@ -1915,7 +1930,8 @@ int LibRaw::crxDecodePlane(void *p, uint32_t planeNumber)
               crxIdwt53FilterTransform(planeComp, img->levels - 1))
             return -1;
           int32_t *lineData = crxIdwt53FilterGetLine(planeComp, img->levels - 1);
-          crxConvertPlaneLine(img, imageRow + i, imageCol, planeNumber, lineData, tile->width);
+		  if (crxConvertPlaneLine(img, imageRow + i, imageCol, planeNumber, lineData, tile->width))
+			  return -1;
         }
       }
       else
@@ -1932,7 +1948,8 @@ int LibRaw::crxDecodePlane(void *p, uint32_t planeNumber)
           if (crxDecodeLine(planeComp->subBands->bandParam, planeComp->subBands->bandBuf))
             return -1;
           int32_t *lineData = (int32_t *)planeComp->subBands->bandBuf;
-          crxConvertPlaneLine(img, imageRow + i, imageCol, planeNumber, lineData, tile->width);
+		  if (crxConvertPlaneLine(img, imageRow + i, imageCol, planeNumber, lineData, tile->width))
+			  return -1;
         }
       }
       imageCol += tile->width;
@@ -2494,8 +2511,10 @@ int crxReadImageHeaders(crx_data_header_t *hdr, CrxImage *img, uint8_t *mdatPtr,
   return 0;
 }
 
-int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf, int64_t mdatOffset, int64_t mdatSize,
-                      uint8_t *mdatHdrPtr, int32_t mdatHdrSize, unsigned max_raw_mb)
+int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf, 
+					 uint64_t outbufsz,  int32_t raw_width,
+					 int64_t mdatOffset, int64_t mdatSize,
+                     uint8_t *mdatHdrPtr, int32_t mdatHdrSize, unsigned max_raw_mb)
 {
   int IncrBitTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0};
 
@@ -2522,6 +2541,7 @@ int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf, in
   img->mdatOffset = mdatOffset + hdr->mdatHdrSize;
   img->mdatSize = mdatSize;
   img->planeBuf = 0;
+  img->planeBuf_lim = 0ULL;
   img->outBufs[0] = img->outBufs[1] = img->outBufs[2] = img->outBufs[3] = 0;
   img->medianBits = hdr->medianBits;
 
@@ -2543,9 +2563,12 @@ int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf, in
                       malloc(alloc_sz);
     if (!img->planeBuf)
       return -1;
+	img->planeBuf_lim = alloc_sz;
   }
 
-  int32_t rowSize = 2 * img->planeWidth;
+  int32_t rowSize = 2 * img->planeWidth; // in 16-bit words
+  if (rowSize > raw_width * 4)
+	  return -1;
 
   if (img->nPlanes == 1)
     img->outBufs[0] = outBuf;
@@ -2585,7 +2608,7 @@ int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf, in
       img->outBufs[0] = img->outBufs[1] + 1;
       break;
     }
-
+  img->outBuf_lim = outbufsz;
   // read header
   return crxReadImageHeaders(hdr, img, mdatHdrPtr, mdatHdrSize);
 }
@@ -2625,7 +2648,7 @@ void LibRaw::crxLoadDecodeLoop(void *img, int nPlanes)
 #ifdef LIBRAW_USE_OPENMP
   int results[4] ={0,0,0,0}; // nPlanes is always <= 4
 #pragma omp parallel for
-  for (int32_t plane = 0; plane < nPlanes; ++plane)
+  for (int32_t plane = 0; plane < nPlanes && plane < 4; ++plane)
    try {
     results[plane] = crxDecodePlane(img, plane);
    } catch (...) {
@@ -2636,7 +2659,7 @@ void LibRaw::crxLoadDecodeLoop(void *img, int nPlanes)
     if (results[plane])
       derror();
 #else
-  for (int32_t plane = 0; plane < nPlanes; ++plane)
+  for (int32_t plane = 0; plane < nPlanes && plane < 4; ++plane)
     if (crxDecodePlane(img, plane))
       derror();
 #endif
@@ -2701,7 +2724,9 @@ void LibRaw::crxLoadRaw()
     throw LIBRAW_EXCEPTION_IO_EOF;
 
   // parse and setup the image data
-  if (crxSetupImageData(&hdr, &img, (int16_t *)imgdata.rawdata.raw_image,
+  if (crxSetupImageData(&hdr, &img, (int16_t *)imgdata.rawdata.raw_image, 
+	  uint64_t(imgdata.sizes.raw_width)*(uint64_t(imgdata.sizes.raw_height)+8ULL), // extra 8 rows allocated at unpack() plus extra at malloc/calloc, so 8 is OK
+	  int32_t(imgdata.sizes.raw_width),
 	  libraw_internal_data.unpacker_data.data_offset, libraw_internal_data.unpacker_data.data_size,
 	  hdrBuf.data(), hdr.mdatHdrSize, imgdata.rawparams.max_raw_memory_mb))
     throw LIBRAW_EXCEPTION_IO_CORRUPT;
@@ -2721,7 +2746,9 @@ int LibRaw::crxParseImageHeader(uchar *cmp1TagData, int nTrack, INT64 size)
   if (!cmp1TagData)
     return -1;
 
-  crx_data_header_t *hdr = &libraw_internal_data.unpacker_data.crx_header[nTrack];
+  crx_data_header_t header;
+  memset(&header, 0, sizeof(header));
+  crx_data_header_t *hdr = &header;// = &libraw_internal_data.unpacker_data.crx_header[nTrack];
 
   hdr->version = sgetn(2, cmp1TagData + 4);
   hdr->f_width = sgetn(4, cmp1TagData + 8);
@@ -2776,6 +2803,8 @@ int LibRaw::crxParseImageHeader(uchar *cmp1TagData, int nTrack, INT64 size)
 
   if (hdr->imageLevels > 3 || hdr->hasTileCols > 1 || hdr->hasTileRows > 1)
     return -1;
+
+  memcpy(&libraw_internal_data.unpacker_data.crx_header[nTrack], &header, sizeof(header));
   return 0;
 }
 
