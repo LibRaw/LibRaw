@@ -1687,7 +1687,7 @@ int crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plane
     {
       int32_t median = 1 << (img->nBits - 1);
       int32_t maxVal = (1 << img->nBits) - 1;
-      if (rawOffset + lineLength > img->outBuf_lim)
+      if (rawOffset + lineLength*2ULL > img->outBuf_lim)
         return -1;
       for (int i = 0; i < lineLength; i++)
         img->outBufs[plane][rawOffset + 2 * i] = _constrain(median + lineData[i], 0, maxVal);
@@ -1718,6 +1718,9 @@ int crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plane
     int32_t median = (1 << (img->medianBits - 1)) << 10;
     int32_t maxVal = (1 << img->medianBits) - 1;
     uint64_t rawLineOffset = 4ULL * uint64_t(img->planeWidth) * uint64_t(imageRow);
+
+	if(rawLineOffset + img->planeWidth*2ULL > img->outBuf_lim)
+      return -1;
 
     // for this stage - all except imageRow is ignored
     for (int i = 0; i < img->planeWidth; i++)
@@ -2563,7 +2566,7 @@ int crxSetupImageData(crx_data_header_t *hdr, CrxImage *img, int16_t *outBuf,
                       malloc(alloc_sz);
     if (!img->planeBuf)
       return -1;
-	img->planeBuf_lim = alloc_sz;
+	img->planeBuf_lim = alloc_sz/sizeof(int16_t);
   }
 
   int32_t rowSize = 2 * img->planeWidth; // in 16-bit words
@@ -2647,8 +2650,9 @@ void LibRaw::crxLoadDecodeLoop(void *img, int nPlanes)
 {
 #ifdef LIBRAW_USE_OPENMP
   int results[4] ={0,0,0,0}; // nPlanes is always <= 4
+  int nLimit = _min(nPlanes, 4);
 #pragma omp parallel for
-  for (int32_t plane = 0; plane < nPlanes && plane < 4; ++plane)
+  for (int32_t plane = 0; plane < nLimit; ++plane)
    try {
     results[plane] = crxDecodePlane(img, plane);
    } catch (...) {
@@ -2725,7 +2729,7 @@ void LibRaw::crxLoadRaw()
 
   // parse and setup the image data
   if (crxSetupImageData(&hdr, &img, (int16_t *)imgdata.rawdata.raw_image, 
-	  uint64_t(imgdata.sizes.raw_width)*(uint64_t(imgdata.sizes.raw_height)+8ULL), // extra 8 rows allocated at unpack() plus extra at malloc/calloc, so 8 is OK
+	  uint64_t(imgdata.sizes.raw_width)*(uint64_t(imgdata.sizes.raw_height)+4ULL), // extra 8 rows allocated at unpack() plus extra at malloc/calloc, so 4 is OK
 	  int32_t(imgdata.sizes.raw_width),
 	  libraw_internal_data.unpacker_data.data_offset, libraw_internal_data.unpacker_data.data_size,
 	  hdrBuf.data(), hdr.mdatHdrSize, imgdata.rawparams.max_raw_memory_mb))
