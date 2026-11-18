@@ -360,6 +360,7 @@ void HuffTable::initval(uint32_t _bits[17], uint32_t _huffval[256], bool _dng_bu
 			break;
 		nbits--;
       }
+	mask = (1U << nbits)-1;
 	hufftable.resize( size_t(1ULL << nbits));
 	uint32_t tsize = 1 << nbits;
 	for (unsigned i = 0; i < hufftable.size(); i++) hufftable[i] = 0;

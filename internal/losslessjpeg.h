@@ -144,6 +144,7 @@ struct HuffTable
 	bool dng_bug;
 	bool disable_cache;
 	uint32_t nbits;
+	uint32_t mask;
     std::vector<uint32_t> hufftable; // len:8 << 16| huffval:8  << 8 | shift:8
 	std::vector<uint64_t> decodecache;
 	bool initialized;
@@ -189,7 +190,7 @@ struct HuffTable
     uint32_t len(BitPump & pump) //bits:8, len:8, shift:8
     {
       uint32_t code = pump.peek(nbits);
-      uint32_t huffdata = hufftable[code];
+      uint32_t huffdata = hufftable[code & mask];
       uint32_t _bits = (huffdata >> 16) & 0xff;
       pump.consume(_bits);
       return huffdata;
