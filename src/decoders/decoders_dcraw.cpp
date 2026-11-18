@@ -785,7 +785,7 @@ void LibRaw::ljpeg_idct(struct jhead *jh)
     coef = getbits(len);
     if ((coef & (1 << (len - 1))) == 0)
       coef -= (1 << len) - 1;
-    ((float *)work)[zigzag[i]] =  float(coef * jh->quant[i]);
+    ((float *)work)[zigzag[i]] =  float(coef * jh->quant[i & 63]);
   }
   FORC(8) work[0][0][c] *= float(M_SQRT1_2);
   FORC(8) work[0][c][0] *= float(M_SQRT1_2);
