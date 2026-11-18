@@ -1666,7 +1666,7 @@ int crxConvertPlaneLine(CrxImage *img, int imageRow, int imageCol = 0, int plane
     uint64_t rawOffset = 4ULL * uint64_t(img->planeWidth) * uint64_t(imageRow) + 2ULL * uint64_t(imageCol);
     if (img->encType == 1)
     {
-	  if (rawOffset + lineLength > img->outBuf_lim)
+	  if (rawOffset + lineLength*2ULL > img->outBuf_lim)
 		return -1;
       int32_t maxVal = 1 << (img->nBits - 1);
       int32_t minVal = -maxVal;
