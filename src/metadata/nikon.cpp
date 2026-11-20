@@ -238,7 +238,7 @@ void LibRaw::Nikon_NRW_WBtag(int wb, int skip)
   return;
 }
 
-void LibRaw::parseNikonMakernote(INT64 base, int uptag, unsigned /*dng_writer */)
+void LibRaw::parseNikonMakernote(INT64 base, int uptag, unsigned dng_writer)
 {
 
   unsigned offset = 0, entries, tag, type, len;
@@ -685,7 +685,7 @@ photo shooting menu -> [Pixel shift shooting] :
         ilm.LensFStops = (float)imgdata.lens.nikon.LensFStops / 12.0f;
       }
     }
-    else if ((tag == 0x008c) || (tag == 0x0096))
+    else if (((tag == 0x008c) || (tag == 0x0096)) && (dng_writer == nonDNG))
     {
       meta_offset = ftell(ifp);
     }
