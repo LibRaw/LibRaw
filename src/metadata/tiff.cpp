@@ -1732,7 +1732,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
       break;
     case 0xc741: /* 51009, OpcodeList2 */
       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_OPCODE2;
-      tiff_ifd[ifd].opcode2_offset = meta_offset = ftell(ifp);
+      tiff_ifd[ifd].opcode2_offset = ftell(ifp);
       if (len < 4 * 1024 * 1024) // 4M per opcode list limit
       {
         tiff_ifd[ifd].dng_levels.rawopcodes[1].len = len;

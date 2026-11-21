@@ -1587,9 +1587,9 @@ void LibRaw::identify_process_dng_fields()
 					imgdata.color.dng_levels.preview_colorspace =
 					tiff_ifd[sidx].dng_levels.preview_colorspace;
 			}
-			sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_OPCODE2);
-			if (sidx >= 0)
-				meta_offset = tiff_ifd[sidx].opcode2_offset;
+
+			// Do not use meta offset from top level IFD if it is not present in current IFD
+			meta_offset = tiff_ifd[sidx].opcode2_offset;
 
 			sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_LINTABLE);
 			INT64 linoff = -1;
