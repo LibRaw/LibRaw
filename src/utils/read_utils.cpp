@@ -186,3 +186,24 @@ void LibRaw::read_shorts(ushort *pixel, unsigned count)
   if ((order == 0x4949) == (ntohs(0x1234) == 0x1234))
     libraw_swab(pixel, count * 2);
 }
+
+// Reads size bytes at offset. Can be called from several OpenMP threads at
+// once (as in the tile-parallel decoders); returns the number of bytes read.
+int LibRaw::read_at(INT64 offset, void *buf, size_t size)
+{
+  int got;
+#ifdef LIBRAW_USE_OPENMP
+#pragma omp critical
+#endif
+  {
+#ifndef LIBRAW_USE_OPENMP
+    ifp->lock();
+#endif
+    ifp->seek(offset, SEEK_SET);
+    got = ifp->read(buf, 1, size);
+#ifndef LIBRAW_USE_OPENMP
+    ifp->unlock();
+#endif
+  }
+  return got;
+}
