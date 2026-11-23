@@ -1589,7 +1589,7 @@ void LibRaw::identify_process_dng_fields()
 			}
 
 			// Do not use meta offset from top level IFD if it is not present in current IFD
-			meta_offset = tiff_ifd[sidx].opcode2_offset;
+			meta_offset = tiff_ifd[iifd].opcode2_offset;
 
 			sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_LINTABLE);
 			INT64 linoff = -1;
