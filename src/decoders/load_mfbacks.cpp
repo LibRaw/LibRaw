@@ -220,8 +220,13 @@ int LibRaw::phase_one_correct()
   fseek(ifp, 6, SEEK_CUR);
   fseek(ifp, meta_offset + get4(), SEEK_SET);
   entries = get4();
+  if (entries > 2048) // typically 12 or so, 2048 is a large reserve
+	  return LIBRAW_SUCCESS; // silently ignore it, just skip correction
   get4();
   INT64 fsize = ifp->size();
+  INT64 foff = ifp->tell();
+  if ((fsize - foff) / 12LL < INT64(entries)) // not enough file space for all TIFF-style entries reported
+	  return LIBRAW_SUCCESS; // silently ignore it, just skip correction
 
   try
   {
