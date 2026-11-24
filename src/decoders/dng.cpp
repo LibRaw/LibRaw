@@ -208,9 +208,22 @@ void LibRaw::lossy_dng_load_raw()
 
   if (meta_offset)
   {
+	int ifdindex = find_ifd_by_offset(data_offset);
     fseek(ifp, meta_offset, SEEK_SET);
     order = 0x4d4d;
     ntags = get4();
+	if (ifdindex >= 0 && tiff_ifd[ifdindex].dng_levels.rawopcodes[1].len > 0)
+	{
+		if (ntags > tiff_ifd[ifdindex].dng_levels.rawopcodes[1].len / 16) // Each opcode is 16 bytes or more
+			ntags = tiff_ifd[ifdindex].dng_levels.rawopcodes[1].len / 16;
+	}
+	else
+	{
+		if (ntags > 1024 * 256) // Opcode data limited tp 4M per opcode at tiff parser
+			ntags = 1024 * 256;
+	}
+    if (INT64(ntags) * 16 > ifp->size() - ftell(ifp)) // There can be no valid tags beyond the end of the file, 
+      ntags = 0;                                      // and an incomplete list is no better than no list at all.
     while (ntags--)
     {
       opcode = get4();
