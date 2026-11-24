@@ -101,12 +101,12 @@ void LibRaw::pentax_4shot_load_raw()
       move_row = _move[i].row;
       move_col = _move[i].col;
     }
-    for (; tidx < 16; tidx++)
+    for (; tidx < LIBRAW_IFD_MAXCOUNT; tidx++)
       if (tiff_ifd[tidx].t_width == imgdata.sizes.raw_width &&
           tiff_ifd[tidx].t_height == imgdata.sizes.raw_height &&
           tiff_ifd[tidx].bps > 8 && tiff_ifd[tidx].samples == 1)
         break;
-    if (tidx >= 16)
+    if (tidx >= LIBRAW_IFD_MAXCOUNT)
       break;
     imgdata.rawdata.raw_image = plane;
     ID.input->seek(tiff_ifd[tidx].offset, SEEK_SET);
