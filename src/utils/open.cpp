@@ -1149,16 +1149,24 @@ int LibRaw::open_datastream(LibRaw_abstract_datastream *stream)
             imgdata.idata.raw_count == 4 &&
         (imgdata.rawparams.options & LIBRAW_RAWOPTIONS_PENTAX_PS_ALLFRAMES))
     {
-      imgdata.idata.raw_count = 1;
-      imgdata.idata.filters = 0;
-      imgdata.idata.colors = 4;
-      imgdata.sizes.top_margin+=2;
-      imgdata.sizes.left_margin+=2;
-      imgdata.sizes.width-=4;
-      imgdata.sizes.height-=4;
-      IO.mix_green = 1;
-      pentax_component_load_raw = load_raw;
-      load_raw = &LibRaw::pentax_4shot_load_raw;
+		int tcount = 0;
+      for (int i = 0; i < libraw_internal_data.identify_data.tiff_nifds && i < LIBRAW_IFD_MAXCOUNT; i++)
+        if (tiff_ifd[i].t_width == imgdata.sizes.raw_width && tiff_ifd[i].t_height == imgdata.sizes.raw_height &&
+            tiff_ifd[i].bps > 8 && tiff_ifd[i].samples == 1)
+          tcount++;
+	  if (tcount >= 4)
+	  {
+		  imgdata.idata.raw_count = 1;
+		  imgdata.idata.filters = 0;
+		  imgdata.idata.colors = 4;
+		  imgdata.sizes.top_margin += 2;
+		  imgdata.sizes.left_margin += 2;
+		  imgdata.sizes.width -= 4;
+		  imgdata.sizes.height -= 4;
+		  IO.mix_green = 1;
+		  pentax_component_load_raw = load_raw;
+		  load_raw = &LibRaw::pentax_4shot_load_raw;
+	  }
     }
 
 	if (!imgdata.idata.dng_version && makeIs(LIBRAW_CAMERAMAKER_Leaf) &&

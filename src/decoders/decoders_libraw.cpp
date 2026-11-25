@@ -54,6 +54,15 @@ void LibRaw::sony_arq_load_raw()
 
 void LibRaw::pentax_4shot_load_raw()
 {
+  // check for 4 IFD present
+  int tcount = 0;
+  for (int i = 0; i < libraw_internal_data.identify_data.tiff_nifds && i < LIBRAW_IFD_MAXCOUNT; i++)
+    if (tiff_ifd[i].t_width == imgdata.sizes.raw_width && tiff_ifd[i].t_height == imgdata.sizes.raw_height &&
+        tiff_ifd[i].bps > 8 && tiff_ifd[i].samples == 1)
+      tcount++;
+  if (tcount < 4)
+	  throw LIBRAW_EXCEPTION_UNSUPPORTED_FORMAT;
+  
   size_t alloc_sz = size_t(imgdata.sizes.raw_width) * (size_t(imgdata.sizes.raw_height) + 16) * 4 * sizeof(ushort);
   if (INT64(alloc_sz) > INT64(imgdata.rawparams.max_raw_memory_mb) * INT64(1024 * 1024))
     throw LIBRAW_EXCEPTION_TOOBIG;
@@ -86,6 +95,7 @@ void LibRaw::pentax_4shot_load_raw()
       {1, 0},
   };
 
+  
   int tidx = 0;
   for (int i = 0; i < 4; i++)
   {
@@ -101,12 +111,12 @@ void LibRaw::pentax_4shot_load_raw()
       move_row = _move[i].row;
       move_col = _move[i].col;
     }
-    for (; tidx < 16; tidx++)
+    for (; tidx < libraw_internal_data.identify_data.tiff_nifds && tidx < LIBRAW_IFD_MAXCOUNT; tidx++)
       if (tiff_ifd[tidx].t_width == imgdata.sizes.raw_width &&
           tiff_ifd[tidx].t_height == imgdata.sizes.raw_height &&
           tiff_ifd[tidx].bps > 8 && tiff_ifd[tidx].samples == 1)
         break;
-    if (tidx >= 16)
+    if (tidx >= LIBRAW_IFD_MAXCOUNT)
       break;
     imgdata.rawdata.raw_image = plane;
     ID.input->seek(tiff_ifd[tidx].offset, SEEK_SET);
