@@ -32,6 +32,9 @@ int LibRaw::selectCRXFrame(short trackNum, unsigned frameIndex)
   uint32_t current_sample = 0;
   crx_data_header_t *hdr = &libraw_internal_data.unpacker_data.crx_header[trackNum];
 
+  if (!hdr->stsc_count || !hdr->stsc_data)
+	  return -1;
+
   if (frameIndex >= hdr->sample_count)
     return -1;
 
