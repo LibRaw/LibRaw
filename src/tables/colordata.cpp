@@ -672,8 +672,10 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 	{ LIBRAW_CAMERAMAKER_Hasselblad, "60-Coated", 0, 0,
 		{  9662,  -684,  -279, -4903, 12293,  2950,  -344,  1669,  6024}},
 
-	{ LIBRAW_CAMERAMAKER_Hasselblad, "100-17-Coated5", 0, 0,
+	{ LIBRAW_CAMERAMAKER_Hasselblad, "100-17-Coated5-FFF", 0, 0,
 	  {  5110, -1357,  -308, -5573, 12835,  3077, -1279,  2025,  7010}},
+	{ LIBRAW_CAMERAMAKER_Hasselblad, "100-17-Coated5", 0, 0,
+	  {  5656, -659, -346, -3923, 12306, 1791, -1602, 3509, 5442 } },
 
   { LIBRAW_CAMERAMAKER_Hasselblad, "100-20-Coated6", 0, 0,
 	  { 6468,-1899,-545,-4526,12267,2542,-388,1276,6096 } },
