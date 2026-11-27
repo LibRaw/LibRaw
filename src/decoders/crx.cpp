@@ -135,6 +135,7 @@ struct CrxQStep
   uint32_t *qStepTbl;
   int width;
   int height;
+  INT64 maxidx;
 };
 
 struct CrxTile
@@ -1069,6 +1070,12 @@ libraw_inline int getSubbandRow(CrxSubband *band, int row)
              : (row < band->height - band->rowEndAddOn ? row - band->rowEndAddOn
                                                        : band->height - band->rowEndAddOn - band->rowStartAddOn - 1);
 }
+
+static libraw_inline INT64 _limit64(INT64 idx, INT64 limit)
+{
+	return idx < 0 ? 0 : (idx > limit ? limit : idx);
+}
+
 int crxDecodeLineWithIQuantization(CrxSubband *band, CrxQStep *qStep)
 {
   if (!band->dataSize)
@@ -1089,25 +1096,24 @@ int crxDecodeLineWithIQuantization(CrxSubband *band, CrxQStep *qStep)
   int32_t *bandBuf = (int32_t *)band->bandBuf;
   if (qStep)
   {
-    // new version
-    uint32_t *qStepTblPtr = &qStep->qStepTbl[qStep->width * getSubbandRow(band, band->bandParam->curLine - 1)];
+	INT64 baseoff = INT64(qStep->width) * INT64(getSubbandRow(band, band->bandParam->curLine - 1));
 
     for (int i = 0; i < band->colStartAddOn; ++i)
     {
-      int32_t quantVal = band->qStepBase + ((qStepTblPtr[0] * band->qStepMult) >> 3);
+      int32_t quantVal = band->qStepBase + ((qStep->qStepTbl[_limit64(baseoff,qStep->maxidx)] * band->qStepMult) >> 3);
       bandBuf[i] *= _constrain(quantVal, 1, 0x168000);
     }
 
     for (int i = band->colStartAddOn; i < band->width - band->colEndAddOn; ++i)
     {
       int32_t quantVal =
-          band->qStepBase + ((qStepTblPtr[(i - band->colStartAddOn) >> band->levelShift] * band->qStepMult) >> 3);
+          band->qStepBase + ((qStep->qStepTbl[_limit64(baseoff+((i - band->colStartAddOn) >> band->levelShift),qStep->maxidx)] * band->qStepMult) >> 3);
       bandBuf[i] *= _constrain(quantVal, 1, 0x168000);
     }
     int lastIdx = (band->width - band->colEndAddOn - band->colStartAddOn - 1) >> band->levelShift;
     for (int i = band->width - band->colEndAddOn; i < band->width; ++i)
     {
-      int32_t quantVal = band->qStepBase + ((qStepTblPtr[lastIdx] * band->qStepMult) >> 3);
+      int32_t quantVal = band->qStepBase + ((qStep->qStepTbl[_limit64(baseoff+lastIdx,qStep->maxidx)] * band->qStepMult) >> 3);
       bandBuf[i] *= _constrain(quantVal, 1, 0x168000);
     }
   }
@@ -2028,10 +2034,13 @@ int crxMakeQStep(CrxImage *img, CrxTile *tile, int32_t *qpTable, uint32_t /*tota
 #ifdef LIBRAW_CR3_MEMPOOL
                       img->memmgr.
 #endif
-                  malloc(totalHeight * qpWidth * sizeof(uint32_t) + img->levels * sizeof(CrxQStep));
+                malloc((INT64(totalHeight) * INT64(qpWidth) + 1LL) * sizeof(uint32_t) + img->levels * sizeof(CrxQStep));
 
   if (!tile->qStep)
     return -1;
+
+  INT64 maxidx = size_t(totalHeight)*size_t(qpWidth); 
+
   uint32_t *qStepTbl = (uint32_t *)(tile->qStep + img->levels);
   CrxQStep *qStep = tile->qStep;
   switch (img->levels)
@@ -2040,6 +2049,7 @@ int crxMakeQStep(CrxImage *img, CrxTile *tile, int32_t *qpTable, uint32_t /*tota
     qStep->qStepTbl = qStepTbl;
     qStep->width = qpWidth;
     qStep->height = qpHeight8;
+	qStep->maxidx = maxidx;
     for (int qpRow = 0; qpRow < qpHeight8; ++qpRow)
     {
       int row0Idx = qpWidth * _min(4 * qpRow, qpHeight - 1);
@@ -2064,6 +2074,7 @@ int crxMakeQStep(CrxImage *img, CrxTile *tile, int32_t *qpTable, uint32_t /*tota
     qStep->qStepTbl = qStepTbl;
     qStep->width = qpWidth;
     qStep->height = qpHeight4;
+    qStep->maxidx = maxidx;
     for (int qpRow = 0; qpRow < qpHeight4; ++qpRow)
     {
       int row0Idx = qpWidth * _min(2 * qpRow, qpHeight - 1);
@@ -2084,6 +2095,7 @@ int crxMakeQStep(CrxImage *img, CrxTile *tile, int32_t *qpTable, uint32_t /*tota
     qStep->qStepTbl = qStepTbl;
     qStep->width = qpWidth;
     qStep->height = qpHeight;
+    qStep->maxidx = maxidx;
     for (int qpRow = 0; qpRow < qpHeight; ++qpRow)
       for (int qpCol = 0; qpCol < qpWidth; ++qpCol, ++qStepTbl, ++qpTable)
         if (*qpTable / 6 >= 6)
