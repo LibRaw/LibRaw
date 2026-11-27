@@ -516,6 +516,7 @@ int LibRaw::parse_tiff_ifd(INT64 base)
         }
         break;
       case 0x002e: /*  46, JpgFromRaw */
+      case 0x0127: /* 295, JpgFromRaw2: full-size preview, e.g. DC-G9 II / DC-S5M2 / DC-GH7 */
         if ((type != LIBRAW_EXIFTAG_TYPE_UNDEFINED) || (fgetc(ifp) != 0xff) || (fgetc(ifp) != 0xd8))
           break;
         thumb_offset = ftell(ifp) - 2;
