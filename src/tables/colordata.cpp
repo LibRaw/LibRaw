@@ -1373,7 +1373,7 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
     { LIBRAW_CAMERAMAKER_Panasonic, "DMC-FZ70", -15, 0,
       { 11532,-4324,-1066,-2375,10847,1749,-564,1699,4351 } },
     { LIBRAW_CAMERAMAKER_Panasonic, "DC-FZ80", -15, 0,
-      { 8550,-2908,-842,-3195,11529,1881,-338,1603,4631 } },
+      { 11532,-4324,-1066,-2375,10847,1749,-564,1699,4351 } },
 
     { LIBRAW_CAMERAMAKER_Panasonic, "DMC-FZ8", 0, 0xf7f,
       { 8986,-2755,-802,-6341,13575,3077,-1476,2144,6379 } },
