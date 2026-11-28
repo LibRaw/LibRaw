@@ -274,14 +274,21 @@ void LibRaw::copy_bayer(unsigned short cblack[4], unsigned short *dmaxp)
 {
   // Both cropped and uncropped
   int maxHeight = MIN(int(S.height),int(S.raw_height)-int(S.top_margin));
+  // With IO.shrink, rows 2k and 2k+1 are written into the same row of the
+  // shrunk image. For a CFA whose 2x2 cell repeats a colour (X-Trans) both rows
+  // write the same sample, so they must be handled by one iteration, in order:
+  // the result is then the single-threaded one whatever the thread count.
+  int rowsPerBlock = 1 << IO.shrink;
+  int blocks = (maxHeight + rowsPerBlock - 1) / rowsPerBlock;
 #if defined(LIBRAW_USE_OPENMP)
-#pragma omp parallel for schedule(dynamic) default(none) shared(dmaxp) firstprivate(cblack, maxHeight)
+#pragma omp parallel for schedule(dynamic) default(none) shared(dmaxp) firstprivate(cblack, maxHeight, rowsPerBlock, blocks)
 #endif
-  for (int row = 0; row < maxHeight ; row++)
+  for (int block = 0; block < blocks; block++)
   {
-    int col;
     unsigned short ldmax = 0;
-    for (col = 0; col < S.width && col + S.left_margin < S.raw_width; col++)
+    const int rowEnd = MIN(maxHeight, (block + 1) * rowsPerBlock);
+    for (int row = block * rowsPerBlock; row < rowEnd; row++)
+    for (int col = 0; col < S.width && col + S.left_margin < S.raw_width; col++)
     {
       unsigned short val =
           imgdata.rawdata.raw_image[(row + S.top_margin) * S.raw_pitch / 2 +
