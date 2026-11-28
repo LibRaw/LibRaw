@@ -665,15 +665,17 @@ int LibRaw::adobe_coeff(unsigned make_idx, const char *t_model,
 	  {  8737, -4937,   830, -2860,  9961,  3390,    51,   502,  8124}},
 
 	{ LIBRAW_CAMERAMAKER_Hasselblad, "50-15-Coated5", 0, 0,
-		{ 4932,-835,141,-4878,11868,3437,-1138,1961,7067 } },
+		{ 5002, -878, 111, -4856, 11929, 3338, -1183, 2041, 7022 } },
 
 	{ LIBRAW_CAMERAMAKER_Hasselblad, "60-Coated-3FR", 0, 0,
 	  {  9296,   336, -1088, -6442, 14323,  2289, -1433,  2942,  5756}},
 	{ LIBRAW_CAMERAMAKER_Hasselblad, "60-Coated", 0, 0,
 		{  9662,  -684,  -279, -4903, 12293,  2950,  -344,  1669,  6024}},
 
-	{ LIBRAW_CAMERAMAKER_Hasselblad, "100-17-Coated5", 0, 0,
+	{ LIBRAW_CAMERAMAKER_Hasselblad, "100-17-Coated5-FFF", 0, 0,
 	  {  5110, -1357,  -308, -5573, 12835,  3077, -1279,  2025,  7010}},
+	{ LIBRAW_CAMERAMAKER_Hasselblad, "100-17-Coated5", 0, 0,
+	  {  5656, -659, -346, -3923, 12306, 1791, -1602, 3509, 5442 } },
 
   { LIBRAW_CAMERAMAKER_Hasselblad, "100-20-Coated6", 0, 0,
 	  { 6468,-1899,-545,-4526,12267,2542,-388,1276,6096 } },
