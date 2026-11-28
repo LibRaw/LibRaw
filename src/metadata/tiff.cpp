@@ -2349,7 +2349,7 @@ void LibRaw::apply_tiff()
     }
   if (!dng_version)
   {
-      if (((tiff_samples == 3 && tiff_ifd[raw].bytes &&
+      if (((tiff_samples == 3 && raw >= 0 && tiff_ifd[raw].bytes &&
           !(tiff_bps == 16 &&
               !strncmp(make, "Leaf", 4)) && // Allow Leaf/16bit/3color files
 		  !(tiff_ifd[raw].comp == 6 && tiff_ifd[raw].phint == 6 && tiff_bps >= 12 && !strncasecmp(make,"Sony",4)) && // Sony YCbCr
