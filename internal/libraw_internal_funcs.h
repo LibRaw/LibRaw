@@ -135,6 +135,7 @@ it under the terms of the one of two licenses as you choose:
 	float		getrealf(int type) { return float(getreal(type)); }
 	double      sgetreal(int type, uchar *s);
 	void        read_shorts (ushort *pixel, unsigned count);
+	int         read_at (INT64 offset, void *buf, size_t size); // safe in OpenMP parallel regions
 
 /* Canon P&S cameras */
 	void        canon_600_fixed_wb (int temp);
@@ -285,6 +286,7 @@ it under the terms of the one of two licenses as you choose:
 	void        sony_arw2_load_raw();
 	void        sony_arq_load_raw();
 	void        sony_ljpeg_load_raw();
+	bool        sony_ljpeg_load_raw_tiles();
 	void        sony_ycbcr_load_raw();
 	void        samsung_load_raw();
 	void        samsung2_load_raw();
